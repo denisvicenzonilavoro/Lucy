@@ -155,3 +155,34 @@ Resta:
     tutti, «420-posizioni-portafoglio», «116-portafoglio-seguito»…) e quelle di Analisi 360 e della Sala senza pillole.
   - Da guardare: che il pannello stia allineato alla pillola e che il nome lungo si tagli entro 230.
 - iPhone e iPad restano com'erano.
+
+## 4. Una riga sola in testa alla finestra
+
+Fatto (solo sul Mac, `#if os(macOS)`): `FinestraInterna.rigaTesta` è la riga unica alta 60 con `ChiusuraFinestra` (cerchio
+28 `chip`, ✕ 12, rosso #FF5F57 e segno bianco al passaggio, scala 0,9 premuta, aiuto «Chiudi (esc)»), `IconaApp` 26,
+titolo `titoloIntestazione` 17 bold, sottotitolo 12 maiuscolo, testo a destra (`AppPrisma.testoDestro`, oggi solo Vera:
+«Tutto resta su questo Mac») e le azioni dell'app (`PulsanteComeSiUsa` e la nuova vista `AzioniApp`, in `TestaFinestra`,
+che non legge lo stato dei gesti). La riga cede spazio con `ViewThatFits`: occhiello, testo a destra, poi pulsanti con la
+sola icona. Trascinare sposta, doppio clic ingrandisce o rimette, menu contestuale con «Riduci nel dock», «Ingrandisci» /
+«Rimetti a posto», «Affianca a sinistra» e «Chiudi». `ContenutoApp` sul Mac non disegna più `IntestazioneApp` (iPhone e
+iPad sì). Token in `Tema.Apple.RigaTesta` (Tema.Apple+DockFinestre.swift). Esc chiude la finestra davanti
+(`MonitorEscFinestra`, Shell/EscFinestra.swift): prima prova i pulsanti con Esc della finestra (`performKeyEquivalent`),
+e non chiude con testo in scrittura, pannelli della shell, sovrapposizioni, nota dall'iPhone, Territorio e palestra
+mentre Vera scrive.
+
+Resta:
+- **Esc da verificare sul Mac vero**: che `NSWindow.performKeyEquivalent` faccia scattare i `.keyboardShortcut(.cancelAction)`
+  di SwiftUI dentro le finestre (dettagli, schede, palco della Sala, presentazione) prima della chiusura. Se non lo fa,
+  Esc chiuderebbe la finestra con un dettaglio aperto: allora aggiungere le condizioni a `nienteSopra` o togliere «(esc)»
+  dall'aiuto e il monitor (vedi 4.6). Da guardare anche gli `onExitCommand` che non sono nei campi di testo (Territorio e
+  palestra esclusi apposta; `PannelloSpazi` e il pannello del cliente sono coperti dalle loro bandierine).
+- **Istantanee**: rigenerare tutte le scene con una finestra aperta (chiare e scure) e aggiornare la pagina delle
+  anteprime; per prime «413-scrivania-apple-finestra», «430-clienti-dossier», «420-posizioni-portafoglio» e le
+  «finestra-stretta» (234, 235, 236, 238), dove la riga cede spazio. Il passaggio sulla chiusura richiede uno screenshot.
+- **Tele fisse** (Territorio, Radar, Campagne, Passaparola): guadagnano circa 26 punti in altezza; controllare nelle
+  istantanee che si adattino.
+- **Dettaglio**: `Tema.Apple.Misura.DettaglioAperto.areaFinestra` si centra ancora a 92 dall'alto della finestra (38 + 54
+  del template di prima): se nelle istantanee il dettaglio sembra basso, passarlo a 60 + 12.
+- `--prova-fluidita`: guardare che trascinare e ridimensionare non facciano crescere i corpi contati (le azioni sono in
+  `TestaFinestra`, che riceve solo app e «attiva»).
+- Le azioni senza nome quando lo spazio manca sono materia della miglioria 12.

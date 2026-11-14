@@ -165,6 +165,17 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         }
     }
 
+    #if os(macOS)
+    /// Il testo a destra nella riga in testa alla finestra (migliorie d'uso 4, `#wRight` del template): facoltativo,
+    /// dopo il sottotitolo e prima delle azioni. Nel template lo ha solo Vera.
+    var testoDestro: String? {
+        switch self {
+        case .vera: return "Tutto resta su questo Mac"
+        default: return nil
+        }
+    }
+    #endif
+
     /// Titolo dell'intestazione dentro la finestra.
     var titoloIntestazione: String {
         switch self {

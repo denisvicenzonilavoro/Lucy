@@ -28,6 +28,8 @@ struct ShellView: View {
             .environment(stato.sistema)
             // Due dita sul trackpad ed Esc per la Vera della scrivania (solo Mac, mai nelle istantanee)
             .gestoVeraScrivania()
+            // Esc chiude la finestra interna davanti quando sopra non c'è niente (migliorie d'uso 4, solo Mac)
+            .escChiudeFinestra()
             // «Riduci movimento» di Prisma (in OR con quello del Mac) e «Dimensione del testo» del tema Apple per tutto
             // l'albero delle viste; `Movimenti.calmo` lo legge anche chi anima fuori dalle viste (finestre, blocco)
             .prismaCalmo(stato.dati.impostazioni.riduciMovimento)

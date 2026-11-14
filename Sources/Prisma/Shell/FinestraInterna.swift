@@ -1,7 +1,8 @@
 import SwiftUI
 
 /// Finestra interna di un'app (.win del tema): vetro chiaro o scuro con raggio 24 (18 se ingrandita),
-/// semafori piatti, titolo con l'icona, contesto della finestra e ridimensionamento.
+/// semafori piatti, titolo con l'icona, contesto della finestra e ridimensionamento. Sul Mac (migliorie d'uso 4) una
+/// riga sola in testa: chiusura, icona, titolo e azioni dell'app (`rigaTesta`); semafori e contesto restano per iOS.
 /// Esce dall'icona del dock e vi rientra (VoloDallIcona, messo da ShellView sopra la sua cornice).
 /// Trascinare e ridimensionare non toccano lo stato finché non si rilascia: si muove (o si reimpagina)
 /// solo questa finestra, come sul Mac, e lo stato si scrive una volta sola.
@@ -22,7 +23,12 @@ struct FinestraInterna: View {
         let forma = FormaVetro.arrotondata(finestra.ingrandita ? Tema.Raggio.finestraIngrandita : Tema.Raggio.finestra)
         let dimensione = allungamento == .zero ? cornice.size : misuraAllungata(allungamento)
         VStack(spacing: 0) {
+            #if os(macOS)
+            // Migliorie d'uso 4: una riga sola con chiusura, icona, titolo, sottotitolo e azioni dell'app
+            rigaTesta
+            #else
             barraTitolo
+            #endif
             // In una finestra più piccola del suo contenuto l'app parte dall'angolo in alto a sinistra
             // e si taglia in basso e a destra:
             // la barra del titolo resta sempre al suo posto
@@ -116,23 +122,57 @@ struct FinestraInterna: View {
         )
         .contentShape(Rectangle())
         .onTapGesture(count: 2) { stato.alternaIngrandimento(finestra.app) }
-        .gesture(
-            DragGesture(minimumDistance: 2, coordinateSpace: .named(ShellView.spazioFinestre))
-                .updating($spostamento) { g, s, _ in
-                    if !finestra.ingrandita { s = g.translation }
-                }
-                // Davanti al primo movimento (poi primoPiano non cambia più niente)
-                .onChanged { _ in
-                    if !finestra.ingrandita { stato.primoPiano(finestra.app) }
-                }
-                .onEnded { g in
-                    guard !finestra.ingrandita else { return }
-                    let c = cornice
-                    let d = limitato(g.translation)
-                    alRilascio { stato.sposta(finestra.app, origine: CGPoint(x: c.minX + d.width, y: c.minY + d.height)) }
-                }
-        )
+        .gesture(trascinamento)
     }
+
+    /// Trascinare la parte vuota della barra (o della riga in testa) sposta la finestra: lo stato si scrive al rilascio.
+    private var trascinamento: some Gesture {
+        DragGesture(minimumDistance: 2, coordinateSpace: .named(ShellView.spazioFinestre))
+            .updating($spostamento) { g, s, _ in
+                if !finestra.ingrandita { s = g.translation }
+            }
+            // Davanti al primo movimento (poi primoPiano non cambia più niente)
+            .onChanged { _ in
+                if !finestra.ingrandita { stato.primoPiano(finestra.app) }
+            }
+            .onEnded { g in
+                guard !finestra.ingrandita else { return }
+                let c = cornice
+                let d = limitato(g.translation)
+                alRilascio { stato.sposta(finestra.app, origine: CGPoint(x: c.minX + d.width, y: c.minY + d.height)) }
+            }
+    }
+
+    #if os(macOS)
+    /// La riga unica in testa alla finestra (migliorie d'uso 4, `#win .hd` del template): una chiusura sola al posto dei
+    /// tre pallini, l'icona, poi titolo, sottotitolo, testo a destra e azioni dell'app in `TestaFinestra`, una vista a sé
+    /// che non legge lo stato dei gesti (trascinare o ridimensionare non rifà le azioni). Come la barra di prima:
+    /// trascinare la parte vuota sposta, doppio clic ingrandisce o rimette, il clic porta davanti. Ridurre, ingrandire e
+    /// affiancare stanno nel menu contestuale della riga (e ridurre anche nel dock).
+    private var rigaTesta: some View {
+        HStack(spacing: RigaTestaTema.spazio) {
+            ChiusuraFinestra { stato.chiudi(finestra.app) }
+            IconaApp(app: finestra.app, lato: RigaTestaTema.icona)
+                .padding(.leading, RigaTestaTema.margineIcona)
+            TestaFinestra(app: finestra.app, attiva: attiva)
+        }
+        .padding(RigaTestaTema.padding)
+        .frame(height: RigaTestaTema.altezza)
+        .frame(maxWidth: .infinity)
+        .background(Gradienti.intestazioneApp)
+        .bordoBasso(Colori.IntestazioneApp.bordo)
+        .contentShape(Rectangle())
+        .onTapGesture(count: 2) { stato.alternaIngrandimento(finestra.app) }
+        .gesture(trascinamento)
+        .contextMenu {
+            Button("Riduci nel dock") { stato.riduci(finestra.app) }
+            Button(finestra.ingrandita ? "Rimetti a posto" : "Ingrandisci") { stato.alternaIngrandimento(finestra.app) }
+            Button("Affianca a sinistra") { stato.affianca(finestra.app) }
+            Divider()
+            Button("Chiudi") { stato.chiudi(finestra.app) }
+        }
+    }
+    #endif
 
     /// A destra: di chi parla la finestra (il suo cliente o il suo contesto) e il pulsante per affiancarla.
     private var strumenti: some View {
@@ -175,6 +215,122 @@ struct FinestraInterna: View {
         .help("Ridimensiona")
     }
 }
+
+// MARK: - La riga in testa (migliorie d'uso 4, solo Mac)
+
+#if os(macOS)
+private typealias RigaTestaTema = Tema.Apple.RigaTesta
+
+/// Titolo, sottotitolo, testo a destra e azioni dell'app nella riga in testa. Se lo spazio manca la riga cede come
+/// l'intestazione di prima: prima l'occhiello, poi il testo a destra, poi i pulsanti di vetro restano con la sola
+/// icona (mai una parola tagliata dentro un pulsante). Titolo e sottotitolo non vanno a capo.
+private struct TestaFinestra: View {
+    let app: AppPrisma
+    let attiva: Bool
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            riga(occhiello: true, destro: true, soloIcona: false)
+            riga(occhiello: false, destro: true, soloIcona: false)
+            riga(occhiello: false, destro: false, soloIcona: false)
+            riga(occhiello: false, destro: false, soloIcona: true)
+        }
+    }
+
+    /// Una delle versioni della riga. Le azioni si costruiscono più volte: non hanno stato proprio (né fogli né
+    /// importazioni: li apre `stato`), quindi si può, come nell'intestazione di prima.
+    private func riga(occhiello: Bool, destro: Bool, soloIcona: Bool) -> some View {
+        HStack(alignment: .center, spacing: RigaTestaTema.spazio) {
+            Text(app.titoloIntestazione)
+                .carattereApple(RigaTestaTema.titolo)
+                .foregroundColor(attiva ? RigaTestaTema.coloreTitolo : RigaTestaTema.coloreTitoloSpento)
+                .lineLimit(1)
+            if occhiello {
+                if app == .mercato {
+                    // L'occhiello lo scrive il motore del mercato: «Aggiornato oggi alle 18:00» (AppMercato.swift)
+                    OcchielloMercato()
+                } else {
+                    Text(app.occhiello)
+                        .carattereApple(RigaTestaTema.sottotitolo)
+                        .foregroundColor(RigaTestaTema.coloreSottotitolo)
+                        .lineLimit(1)
+                }
+            }
+            if destro, let testo = app.testoDestro {
+                HStack(spacing: RigaTestaTema.spazioTestoDestro) {
+                    Rectangle()
+                        .fill(RigaTestaTema.filoTestoDestro)
+                        .frame(width: RigaTestaTema.spessoreFilo, height: RigaTestaTema.altezzaFilo)
+                    Text(testo)
+                        .carattereApple(RigaTestaTema.testoDestro)
+                        .foregroundColor(RigaTestaTema.coloreTestoDestro)
+                        .lineLimit(1)
+                }
+                .padding(.leading, RigaTestaTema.margineTestoDestro)
+            }
+            Spacer(minLength: RigaTestaTema.spazio)
+            Group {
+                PulsanteComeSiUsa(app: app)
+                AzioniApp(app: app)
+            }
+            .environment(\.pulsantiSoloIcona, soloIcona)
+        }
+    }
+}
+
+/// La chiusura della finestra (`.wx`): cerchio da 28 con il ✕ da 12; al passaggio del puntatore rosso con il segno
+/// bianco, premuta si stringe a 0,9. I pulsanti veri della finestra del Mac (in alto a sinistra di Prisma) restano.
+private struct ChiusuraFinestra: View {
+    let chiudi: () -> Void
+    @Environment(\.prismaCalmo) private var calmo
+    @State private var sopra = false
+
+    var body: some View {
+        Button(action: chiudi) {
+            ZStack {
+                Circle()
+                    .fill(sopra ? RigaTestaTema.fondoChiusuraSopra : RigaTestaTema.fondoChiusura)
+                CroceChiusura()
+                    .stroke(sopra ? RigaTestaTema.segnoChiusuraSopra : RigaTestaTema.segnoChiusura,
+                            style: StrokeStyle(lineWidth: RigaTestaTema.trattoChiusura, lineCap: .round))
+                    .frame(width: RigaTestaTema.glifoChiusura, height: RigaTestaTema.glifoChiusura)
+            }
+            .frame(width: RigaTestaTema.chiusura, height: RigaTestaTema.chiusura)
+            .contentShape(Circle())
+        }
+        .buttonStyle(StileChiusuraFinestra(calmo: calmo))
+        .onHover { dentro in sopra = dentro }
+        .animation(Tema.Apple.Moto.animazione(Tema.Apple.Moto.Curva.ease.animazione(RigaTestaTema.durataPassaggio),
+                                              calmo: calmo), value: sopra)
+        .help("Chiudi (esc)")
+        .accessibilityLabel(Text("Chiudi"))
+    }
+}
+
+/// Premuta, la chiusura si stringe con la molla del tema (`transform .25s var(--spring)`); con calma niente scala.
+private struct StileChiusuraFinestra: ButtonStyle {
+    let calmo: Bool
+
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .scaleEffect(configuration.isPressed && !calmo ? RigaTestaTema.scalaPremuta : 1)
+            .animation(Tema.Apple.Moto.Curva.molla.animazione(RigaTestaTema.durataPressione), value: configuration.isPressed)
+    }
+}
+
+/// Il ✕ della chiusura (`M5 5l14 14M19 5L5 19` su 24), centrato nel riquadro.
+private struct CroceChiusura: Shape {
+    func path(in rect: CGRect) -> Path {
+        let e = RigaTestaTema.estremoChiusura
+        var p = Path()
+        p.move(to: CGPoint(x: rect.minX + rect.width * e, y: rect.minY + rect.height * e))
+        p.addLine(to: CGPoint(x: rect.maxX - rect.width * e, y: rect.maxY - rect.height * e))
+        p.move(to: CGPoint(x: rect.maxX - rect.width * e, y: rect.minY + rect.height * e))
+        p.addLine(to: CGPoint(x: rect.minX + rect.width * e, y: rect.maxY - rect.height * e))
+        return p
+    }
+}
+#endif
 
 // MARK: - Contesto
 

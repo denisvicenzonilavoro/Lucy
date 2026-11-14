@@ -15,7 +15,11 @@ struct ContenutoApp: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            #if !os(macOS)
             IntestazioneApp(app: app) { azioni }
+            #endif
+            // Sul Mac titolo, occhiello e azioni stanno nella riga in testa alla finestra (migliorie d'uso 4,
+            // RigaTestaFinestra in FinestraInterna.swift): qui solo il contenuto
             Group {
                 if montato || subito {
                     corpo
@@ -94,7 +98,16 @@ extension ContenutoApp {
     }
 
     /// Pulsanti a destra nell'intestazione dell'app.
-    @ViewBuilder var azioni: some View {
+    var azioni: some View { AzioniApp(app: app) }
+}
+
+/// I pulsanti dell'app, in una vista a sé: sul Mac stanno nella riga in testa alla finestra (migliorie d'uso 4) e non
+/// leggono lo stato dei gesti della cornice (trascinare la finestra non rifà le azioni); su iPhone e iPad
+/// nell'intestazione dell'app.
+struct AzioniApp: View {
+    let app: AppPrisma
+
+    var body: some View {
         switch app {
         case .clienti: AzioniClienti()
         case .posizioni: AzioniPosizioni()
