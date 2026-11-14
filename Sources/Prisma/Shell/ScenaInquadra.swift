@@ -521,7 +521,7 @@ private struct ZonaInquadra: View {
 
 // MARK: - Il pulsante della testata di Posizioni
 
-/// «◎ Inquadra con l’iPhone» accanto ai segmenti del Portafoglio (§9.1.1).
+/// «◎ Inquadra con l’iPhone»: nello Smontaggio vuoto. In Posizioni è una voce del menu «Aggiungi» (migliorie d'uso 6).
 struct PulsanteInquadra: View {
     @Environment(StatoShell.self) var stato
 

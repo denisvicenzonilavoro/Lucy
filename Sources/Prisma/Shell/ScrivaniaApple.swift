@@ -2,7 +2,7 @@ import SwiftUI
 
 // I riquadri della scrivania del tema Apple (Design/template-apple-specifica.md §3.6).
 //
-//   Buonasera, Denis.                              [▶︎ La tua settimana] [Cerca ovunque]
+//   Buonasera, Denis.                              [▶︎ La tua settimana] ([Cerca ovunque] solo su iPhone e iPad)
 //   ┌──────────────────────── La mossa del giorno ────────────────────────┐
 //   ┌──── Agenda di oggi ────┐┌─ Portafoglio clienti ─┐┌──────── Vera ────────┐
 //   ┌── Il tuo studio (Mac) ───┐┌──────── In scadenza entro 90 giorni ────────┐
@@ -318,8 +318,8 @@ private struct TestataScrivania: View {
     }
 
     /// «☾ Stanotte» con il pallino delle carte da decidere (giro 14, solo sul Mac, mai in modalità cliente), «▶︎ La tua
-    /// settimana» (con l'invito del lunedì, giro 5) e «⌕ Cerca ovunque» (versione «Luce», §1.2.1). «Nuovo cliente» è nella
-    /// testata di Clienti.
+    /// settimana» (con l'invito del lunedì, giro 5) e, su iPhone e iPad, «⌕ Cerca ovunque» (versione «Luce», §1.2.1; sul Mac
+    /// un solo «Cerca», la lente della barra: migliorie d'uso 6). «Nuovo cliente» è nella testata di Clienti.
     private var pulsanti: some View {
         HStack(spacing: Tema.Apple.Scrivania.Saluto.spazioPulsanti) {
             #if os(macOS)
@@ -352,12 +352,15 @@ private struct TestataScrivania: View {
             }
             .disabled(stato.inModoCliente)
             .help("La tua settimana in trenta secondi: incontri, incassi, chi chiamare e i traguardi")
+            #if !os(macOS)
+            // Sul Mac un solo «Cerca»: la lente della barra (migliorie d'uso 6)
             Button {
                 stato.cercaOvunque()
             } label: {
                 Label("Cerca ovunque", systemImage: "magnifyingglass")
             }
             .help("Cerca clienti, posizioni, documenti e comandi (⌘K)")
+            #endif
         }
         .buttonStyle(.appleVetro)
         .fixedSize()

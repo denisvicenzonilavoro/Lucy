@@ -242,11 +242,13 @@ struct VoceMenuAzioni {
     let titolo: String
     var spuntata = false
     var attiva = true
+    /// Il suggerimento della voce (sul Mac, al passaggio del puntatore).
+    var aiuto: String? = nil
     let genere: Genere
 
-    static func azione(_ titolo: String, spuntata: Bool = false, attiva: Bool = true,
+    static func azione(_ titolo: String, spuntata: Bool = false, attiva: Bool = true, aiuto: String? = nil,
                        _ fai: @escaping () -> Void) -> VoceMenuAzioni {
-        VoceMenuAzioni(titolo: titolo, spuntata: spuntata, attiva: attiva, genere: .azione(fai))
+        VoceMenuAzioni(titolo: titolo, spuntata: spuntata, attiva: attiva, aiuto: aiuto, genere: .azione(fai))
     }
 
     static func sezione(_ titolo: String) -> VoceMenuAzioni {
@@ -308,40 +310,45 @@ struct MenuAzioni<Etichetta: View>: View {
     #endif
 
     #if os(macOS)
-    /// Il menu del Mac: modale finché non si sceglie, quindi il bersaglio delle voci vive abbastanza.
-    private func apri() {
-        let elenco = voci()
-        let menu = NSMenu()
-        menu.autoenablesItems = false
-        let bersaglio = BersaglioMenuAzioni { i in
-            guard i >= 0, i < elenco.count, case .azione(let fai) = elenco[i].genere else { return }
-            fai()
-        }
-        for (i, v) in elenco.enumerated() {
-            switch v.genere {
-            case .separatore:
-                menu.addItem(NSMenuItem.separator())
-            case .titolo:
-                let voce = NSMenuItem(title: v.titolo, action: nil, keyEquivalent: "")
-                voce.isEnabled = false
-                menu.addItem(voce)
-            case .azione:
-                let voce = NSMenuItem(title: v.titolo, action: #selector(BersaglioMenuAzioni.scegli(_:)), keyEquivalent: "")
-                voce.target = bersaglio
-                voce.tag = i
-                voce.state = v.spuntata ? .on : .off
-                voce.isEnabled = v.attiva
-                menu.addItem(voce)
-            }
-        }
-        _ = withExtendedLifetime(bersaglio) {
-            menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
-        }
-    }
+    private func apri() { apriMenuAzioni(voci()) }
     #endif
 }
 
 #if os(macOS)
+/// Il menu del Mac con le voci date, sotto il puntatore: modale finché non si sceglie, quindi il bersaglio delle voci
+/// vive abbastanza. Lo usano `MenuAzioni` e i pulsanti blu con il menu («Aggiungi» di Posizioni, la freccia di
+/// «Nuovo cliente»: migliorie d'uso 6).
+@MainActor
+func apriMenuAzioni(_ elenco: [VoceMenuAzioni]) {
+    let menu = NSMenu()
+    menu.autoenablesItems = false
+    let bersaglio = BersaglioMenuAzioni { i in
+        guard i >= 0, i < elenco.count, case .azione(let fai) = elenco[i].genere else { return }
+        fai()
+    }
+    for (i, v) in elenco.enumerated() {
+        switch v.genere {
+        case .separatore:
+            menu.addItem(NSMenuItem.separator())
+        case .titolo:
+            let voce = NSMenuItem(title: v.titolo, action: nil, keyEquivalent: "")
+            voce.isEnabled = false
+            menu.addItem(voce)
+        case .azione:
+            let voce = NSMenuItem(title: v.titolo, action: #selector(BersaglioMenuAzioni.scegli(_:)), keyEquivalent: "")
+            voce.target = bersaglio
+            voce.tag = i
+            voce.state = v.spuntata ? .on : .off
+            voce.isEnabled = v.attiva
+            voce.toolTip = v.aiuto
+            menu.addItem(voce)
+        }
+    }
+    _ = withExtendedLifetime(bersaglio) {
+        menu.popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
+    }
+}
+
 private final class BersaglioMenuAzioni: NSObject {
     let scelto: (Int) -> Void
     init(_ scelto: @escaping (Int) -> Void) { self.scelto = scelto }

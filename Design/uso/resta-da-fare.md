@@ -186,3 +186,36 @@ Resta:
 - `--prova-fluidita`: guardare che trascinare e ridimensionare non facciano crescere i corpi contati (le azioni sono in
   `TestaFinestra`, che riceve solo app e «attiva»).
 - Le azioni senza nome quando lo spazio manca sono materia della miglioria 12.
+
+## 6. Barre più corte: «Aggiungi» raccoglie cinque pulsanti, un solo «Cerca»
+
+Fatto (solo sul Mac, `#if os(macOS)`; iPhone e iPad restano come prima):
+- Posizioni: nella riga in testa solo «Aggiorna valori» (fuori dalla modalità cliente, come prima) e il blu «Aggiungi ⌄»,
+  che apre il menu del Mac (`apriMenuAzioni`, ComponentiAppDocumenti.swift) con Posizione, Proposta, Dal catalogo, filo,
+  Importa…, Incolla da Excel e Inquadra con l’iPhone (non in modalità cliente). Ogni voce tiene il suo aiuto (suggerimento
+  della voce) e il blocco in sola lettura di prima. Il pulsante «◎ Inquadra» accanto ai segmenti del Portafoglio è tolto
+  (`PulsanteInquadra` resta nello Smontaggio vuoto).
+- Clienti: pulsante diviso «Nuovo cliente | ⌄», la freccia apre Importa… e Incolla da Excel (al posto del menu «…»).
+- «Come si usa» non sta più nella riga in testa: il «?» della barra (e il menu Aiuto › Guida di Prisma) apre la guida
+  dell'app davanti (`StatoShell.paginaGuidaDavanti`) o, con la scrivania, la pagina nuova `PaginaGuida.scrivania` («La
+  scrivania» in cima all'elenco delle app, con il logo). La scheda in grande ha in fondo la riga del template e «Le parole
+  di Prisma». Testi aggiornati: passo 2 di Posizioni («Aggiungi»), passo 1 della ricerca (la lente), il punto dell'introduzione
+  su «Come si usa».
+- Scrivania senza «Cerca ovunque»; nella barra «Cerca» è un tasto tondo con la lente (aiuto «Cerca in Prisma (⌘K)»).
+- Istantanea nuova «1060-guida-scrivania» (chiara e scura, IstantaneeBarreCorte.swift).
+
+Resta:
+- **Istantanee**: rigenerare sul Mac «420-posizioni-portafoglio», «600…» (Inquadra), «225-guida-posizioni»,
+  «226-guida-clienti», «410-scrivania-apple», «616-scrivania-luce», le scene «-finestra-stretta» e guardare la nuova
+  «1060-guida-scrivania»; aggiornare la pagina delle anteprime.
+- **Il menu «Aggiungi» aperto** non si vede nelle istantanee (è un `NSMenu`, sotto il puntatore e non sotto il pulsante
+  come nel template: larghezza almeno 236, voci alte 36 semibold): chiedere uno screenshot all'utente; se serve la
+  posizione esatta del template, un menu disegnato in SwiftUI sotto il pulsante.
+- **Pulsante diviso**: oggi sono due capsule blu accostate (1 pt); il template le unisce (metà sinistra arrotondata a
+  sinistra, filo bianco al 40% fra le due). Serve una forma del tema per le due metà.
+- **Inquadra senza iPhone collegato**: la voce apre la scena di oggi (con il ponte spento si trascina una foto o un PDF);
+  il rimando a Impostazioni › iPhone e iPad arriva con la miglioria 39.
+- **Testi della guida delle altre app** (`GUIDA` del template, righe 3014-3029): non riscritti in questo giro; vanno
+  aggiornati app per app solo dove descrivono ciò che l'app fa già (indice del dossier, settimana a sette giorni, «Da
+  fare» unico… arrivano con le loro migliorie). Il passo 2 della scrivania del template («Spunta le cose da fare:
+  spariscono da tutta Prisma») è stato scritto senza la seconda parte: va ripreso con la miglioria 3.

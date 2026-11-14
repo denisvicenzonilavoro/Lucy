@@ -171,6 +171,13 @@ struct BarraSuperiore: View {
             } else {
                 // La pillola «✦ Novità» non c'è più (scelta dell'utente, 10 novembre 2026): le novità non si mostrano nell'app
 
+                #if os(macOS)
+                // Migliorie d'uso 6: «Cerca» è un tasto tondo con la lente, come gli altri strumenti (⌘K nell'aiuto)
+                PulsanteBarra(aiuto: "Cerca in Prisma (⌘K)", azione: { stato.alternaRicerca() }) {
+                    simbolo("magnifyingglass")
+                }
+                .accessibilityLabel(Text("Cerca"))
+                #else
                 PulsanteBarra(aiuto: "Cerca in Prisma (⌘K)", forma: .pillola, azione: { stato.alternaRicerca() }) {
                     HStack(spacing: B.spazioCerca) {
                         Image(systemName: "magnifyingglass")
@@ -182,6 +189,7 @@ struct BarraSuperiore: View {
                             .opacity(B.opacitaScorciatoia)
                     }
                 }
+                #endif
 
                 #if os(macOS)
                 // La sfera di Vera: apre la mini finestra (anche ⌥ Spazio, da qualsiasi app)
@@ -205,7 +213,7 @@ struct BarraSuperiore: View {
 
             // La guida di Prisma (anche in modalità cliente): come funziona, le app, le parole
             PulsanteBarra(aiuto: "Guida di Prisma: come funziona, le app, le parole (⌘?)",
-                          azione: { stato.apriGuida(.app(stato.appAttiva ?? .clienti)) }) {
+                          azione: { stato.apriGuida(stato.paginaGuidaDavanti) }) {
                 simbolo("questionmark")
             }
 

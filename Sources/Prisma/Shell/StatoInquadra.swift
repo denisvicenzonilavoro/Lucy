@@ -9,7 +9,7 @@ import UIKit
 #endif
 
 // Inquadra e capisci (Design/template-novita-specifica.md §9, Orizzonte giro 5): lo stato della scena.
-// - Sul Mac il pulsante «◎ Inquadra con l’iPhone» (testata di Posizioni › Portafoglio) o la voce 6 delle Novità aprono
+// - Sul Mac la voce «Inquadra con l’iPhone» di «Aggiungi» (Posizioni, migliorie d’uso 6) o la voce 6 delle Novità aprono
 //   la scena: con il ponte acceso (Impostazioni › Vera › iPhone e iPad) si aspetta il testo dall'iPhone, altrimenti si
 //   trascina una foto o un PDF, letti sul Mac con LetturaDocumenti (Vision, sul dispositivo).
 // - I campi trovati (MotoreInquadra) si illuminano sul foglio uno alla volta e compaiono nella scheda «Prisma sul Mac».

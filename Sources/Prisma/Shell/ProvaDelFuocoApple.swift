@@ -152,10 +152,7 @@ private struct TestataVistePortafoglio: View {
                 .foregroundColor(t.coloreOcchiello)
                 .lineLimit(1)
             Spacer(minLength: 0)
-            #if os(macOS)
-            // Inquadra e capisci (giro 5, ScenaInquadra.swift): accanto ai segmenti, come nel template
-            PulsanteInquadra()
-            #endif
+            // «Inquadra con l’iPhone» non sta più qui: è una voce di «Aggiungi» nella riga in testa (migliorie d'uso 6)
             SegmentatoPillola(selezione: $vista, voci: VistaPosizioni.segmenti)
         }
         .padding(.horizontal, d.margine)

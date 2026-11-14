@@ -163,7 +163,7 @@ struct ComandiPrisma: Commands {
         // Con la schermata di benvenuto davanti le voci restano attive: apriGuida sblocca e poi apre.
         CommandGroup(replacing: .help) {
             Group {
-                Button("Guida di Prisma") { stato.apriGuida(.app(stato.appAttiva ?? .clienti)) }
+                Button("Guida di Prisma") { stato.apriGuida(stato.paginaGuidaDavanti) }
                     .keyboardShortcut("?", modifiers: .command)
                 Button("Come funziona Prisma (introduzione)") { stato.apriGuida(.introduzione(0)) }
                 Button("Le parole della finanza") { stato.apriGuida(.glossario(nil)) }

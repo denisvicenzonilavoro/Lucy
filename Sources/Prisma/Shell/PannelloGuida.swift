@@ -73,7 +73,7 @@ struct PannelloGuida: View {
                 guard nuova != si.guida?.scheda else { return }
                 switch nuova {
                 case .comeFunziona: st.guida = .introduzione(0)
-                case .app: st.guida = .app(st.appAttiva ?? .clienti)
+                case .app: st.guida = st.paginaGuidaDavanti
                 case .parole: st.guida = .glossario(nil)
                 }
             })
@@ -85,6 +85,8 @@ struct PannelloGuida: View {
             IntroduzionePrisma(pagina: pagina)
         case .some(.app(let app)):
             GuidaApp(app: app)
+        case .some(.scrivania):
+            GuidaApp(app: nil)
         case .some(.glossario(let chiave)):
             GlossarioVista(chiave: chiave)
         case .none:
@@ -256,7 +258,8 @@ private struct PaginaIntroduzioneVista: View {
 
 struct GuidaApp: View {
     @Environment(StatoShell.self) var stato
-    let app: AppPrisma
+    /// L'app di cui parla la scheda; nil: la scrivania (migliorie d'uso 6, solo sul Mac).
+    let app: AppPrisma?
 
     var body: some View {
         let _ = ContaCorpi.segna()
@@ -264,6 +267,10 @@ struct GuidaApp: View {
         HStack(alignment: .top, spacing: m.spazio) {
             ScrollView {
                 VStack(alignment: .leading, spacing: m.spazioElenco) {
+                    #if os(macOS)
+                    // In cima la scrivania: il «?» della barra ne parla quando non c'è un'app davanti
+                    rigaScrivania
+                    #endif
                     ForEach(AppPrisma.aSe) { a in
                         riga(a)
                     }
@@ -276,23 +283,70 @@ struct GuidaApp: View {
                     SchedaAiutoApp(app: app, nelPopover: false)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                HStack {
+                HStack(alignment: .center, spacing: m.spazio) {
+                    #if os(macOS)
+                    // La riga in fondo del template e «Le parole di Prisma» (migliorie d'uso 6)
+                    Text(GuidaTesti.rigaInFondo)
+                        .font(Tema.Testo.Guida.breveElenco)
+                        .foregroundColor(Tema.Colore.inchiostroSecondario)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    Button(GuidaTesti.paroleDiPrisma) { stato.guida = .glossario(nil) }
+                        .buttonStyle(StileVetro())
+                        .fixedSize()
+                    #else
                     Spacer()
-                    Button {
-                        let st = stato
-                        let scelta = app
-                        st.chiudiGuida()
-                        DispatchQueue.main.async { st.apriApp(scelta) }
-                    } label: {
-                        Label("Apri \(app.titolo)", systemImage: "arrow.up.forward.app")
+                    #endif
+                    if let app {
+                        Button {
+                            let st = stato
+                            let scelta = app
+                            st.chiudiGuida()
+                            DispatchQueue.main.async { st.apriApp(scelta) }
+                        } label: {
+                            Label("Apri \(app.titolo)", systemImage: "arrow.up.forward.app")
+                        }
+                        .buttonStyle(StileBlu(taglia: .grande))
+                        .disabled(!stato.appConsentita(app))
+                        .fixedSize()
                     }
-                    .buttonStyle(StileBlu(taglia: .grande))
-                    .disabled(!stato.appConsentita(app))
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
+
+    #if os(macOS)
+    /// «La scrivania» in cima all'elenco, con il logo al posto dell'icona.
+    private var rigaScrivania: some View {
+        let m = Tema.Misura.Guida.self
+        let scelta = app == nil
+        return Button { stato.guida = .scrivania } label: {
+            HStack(spacing: m.spazioRigaElenco) {
+                LogoPrisma(colore: Tema.Colore.logo)
+                    .frame(width: m.iconaElencoApp, height: m.iconaElencoApp)
+                VStack(alignment: .leading, spacing: m.spazioTermine) {
+                    Text(GuidaTesti.titoloScrivania)
+                        .font(Tema.Testo.Guida.voceElenco)
+                        .foregroundColor(Tema.Colore.inchiostro)
+                    Text(GuidaTesti.scrivania.inBreve)
+                        .font(Tema.Testo.Guida.breveElenco)
+                        .foregroundColor(Tema.Colore.inchiostroSecondario)
+                }
+                .lineLimit(1)
+                Spacer(minLength: 0)
+            }
+            .padding(m.rigaElenco)
+            .background {
+                RoundedRectangle(cornerRadius: Tema.Raggio.Guida.rigaElenco, style: .continuous)
+                    .fill(scelta ? Tema.Colore.Guida.selezioneElenco : Color.clear)
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(StileSemplice())
+        .accessibilityAddTraits(scelta ? .isSelected : [])
+    }
+    #endif
 
     private func riga(_ a: AppPrisma) -> some View {
         let m = Tema.Misura.Guida.self
@@ -327,7 +381,8 @@ struct GuidaApp: View {
 /// «Come si usa» e, più grande, nella scheda «Le app» della guida.
 struct SchedaAiutoApp: View {
     @Environment(StatoShell.self) var stato
-    let app: AppPrisma
+    /// L'app; nil: la scrivania (migliorie d'uso 6, sul Mac), con il logo al posto dell'icona.
+    let app: AppPrisma?
     /// Nel popover: in fondo il collegamento «Tutta la guida di Prisma».
     let nelPopover: Bool
     /// Chiude il popover (nil fuori dal popover).
@@ -336,11 +391,17 @@ struct SchedaAiutoApp: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         let m = Tema.Misura.Guida.self
-        let aiuto = app.aiuto
+        let aiuto = app?.aiuto ?? GuidaTesti.scrivania
+        let latoIcona = nelPopover ? m.iconaElencoApp : m.iconaPercorso
         VStack(alignment: .leading, spacing: m.spazioBlocchi) {
             HStack(spacing: m.spazioRigaElenco) {
-                IconaApp(app: app, lato: nelPopover ? m.iconaElencoApp : m.iconaPercorso)
-                Text(app.titolo)
+                if let app {
+                    IconaApp(app: app, lato: latoIcona)
+                } else {
+                    LogoPrisma(colore: Tema.Colore.logo)
+                        .frame(width: latoIcona, height: latoIcona)
+                }
+                Text(app?.titolo ?? GuidaTesti.titoloScrivania)
                     .font(nelPopover ? Tema.Testo.Guida.titoloApp : Tema.Testo.Guida.titoloPannello)
                     .foregroundColor(Tema.Colore.inchiostro)
             }
@@ -378,7 +439,7 @@ struct SchedaAiutoApp: View {
             if nelPopover {
                 Button {
                     chiudi?()
-                    stato.apriGuida(.app(app))
+                    stato.apriGuida(app.map { PaginaGuida.app($0) } ?? .scrivania)
                 } label: {
                     Label("Tutta la guida di Prisma", systemImage: "book")
                 }
