@@ -132,7 +132,13 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
     var occhiello: String {
         switch self {
         case .clienti: return "Rubrica Prisma"
-        case .analisi360: return "Il centro della consulenza"
+        case .analisi360:
+            #if os(macOS)
+            // Migliorie d'uso 10: il centro è Posizioni; Analisi 360 dice il suo lavoro
+            return Parole.occhielloAnalisi360
+            #else
+            return "Il centro della consulenza"
+            #endif
         case .incontri: return "Il tempo della relazione"
         case .posizioni: return "Il cuore della consulenza"
         case .obiettivi: return "Il quaderno dei progetti"

@@ -15,6 +15,10 @@ struct VoceGlossario: Identifiable, Equatable {
         case ruoliPolizza, capitaleMorte
         case recesso, idd, adeguatezza, coerenza, profiloRischio, antiriciclaggio, mifid
         case inEssere, canale, dossier, riesame, prospettoReport, patrimonioNetto, riservaLiquidita
+        #if os(macOS)
+        // Migliorie d'uso 10: le parole di Prisma che mancavano (Shell/ParolePrisma.swift)
+        case daFare, mostraAlCliente, tuttiIClienti, ilQuadro
+        #endif
     }
 
     enum Categoria: String, CaseIterable, Hashable {
@@ -51,7 +55,9 @@ struct VoceGlossario: Identifiable, Equatable {
 
 enum Glossario {
     /// Le voci, nell'ordine di `VoceGlossario.Chiave`.
-    static let voci: [VoceGlossario] = [
+    static let voci: [VoceGlossario] = vociComuni + vociSoloMac
+
+    private static let vociComuni: [VoceGlossario] = [
         // MARK: Prodotti
         v(.polizzaVita, "Polizza vita", nil, .prodotti,
           "Un contratto con una compagnia per risparmiare o investire, con una tutela in caso di morte.",
@@ -260,7 +266,7 @@ enum Glossario {
           nil, [.posizioni, .prodotti]),
         v(.dossier, "Dossier", nil, .prisma,
           "Tutto quello che Prisma sa di un cliente, in un posto.",
-          "Scheda personale, famiglia, posizioni, documenti, incontri, note e attività. Ogni app lavora sul dossier del cliente scelto.",
+          spiegazioneDossier,
           nil, [.clienti]),
         v(.riesame, "Riesame", nil, .prisma,
           "Il controllo periodico (di solito annuale) della situazione del cliente.",
@@ -279,6 +285,41 @@ enum Glossario {
           "Di solito si calcolano da 3 a 6 mesi di spese, sul conto o su strumenti senza vincoli. Prima di investire a lungo, Prisma controlla che ci siano.",
           "Spese di 2.000 € al mese: una riserva da 6.000 a 12.000 €.", [.analisi360]),
     ]
+
+    /// Sul Mac il dossier non si chiama «scheda» e le cose da fare non sono «attività» (Migliorie d'uso 10).
+    private static var spiegazioneDossier: String {
+        #if os(macOS)
+        return "Dati personali, famiglia, posizioni, documenti, incontri, note e cose da fare. Ogni app lavora sul dossier del cliente scelto."
+        #else
+        return "Scheda personale, famiglia, posizioni, documenti, incontri, note e attività. Ogni app lavora sul dossier del cliente scelto."
+        #endif
+    }
+
+    /// Le parole di Prisma che valgono per ora solo sul Mac (Migliorie d'uso 10, `Parole`).
+    private static var vociSoloMac: [VoceGlossario] {
+        #if os(macOS)
+        return [
+            v(.daFare, Parole.daFare, nil, .prisma,
+              "L'unico elenco delle cose da fare: scadenze, richiami e ciò che hai scritto a mano.",
+              "Prisma mette in un posto solo ciò che chiede la tua attenzione: le scadenze delle polizze, i clienti da richiamare, i riesami e le cose da fare scritte da te. Ogni voce porta dove si sistema.",
+              nil, [.agenda, .clienti]),
+            v(.mostraAlCliente, Parole.mostraAlCliente, nil, .prisma,
+              "La vista da mostrare al cliente: solo il suo dossier, senza note interne né altri clienti.",
+              "Con un pulsante Prisma si prepara per il cliente seduto accanto a te: resta sul suo dossier e nasconde note interne, altri clienti e ciò che è solo tuo.",
+              nil, [.clienti, .posizioni, .analisi360]),
+            v(.tuttiIClienti, Parole.tuttiIClienti, nil, .prisma,
+              "La scelta di nessun cliente in particolare: le app mostrano l'intero portafoglio.",
+              "Quando non lavori su una persona, scegli «Tutti i clienti»: Posizioni, Agenda e le altre app mostrano le cifre e le scadenze di tutto il portafoglio, divise per canale.",
+              nil, [.clienti, .posizioni]),
+            v(.ilQuadro, Parole.ilQuadro, nil, .prisma,
+              "Le quattro aree del cliente lette insieme: previdenza, protezione, investimenti e risparmio.",
+              "Il quadro mostra dove il cliente è coperto e dove no, con le cifre di Prisma, partendo dalle posizioni in essere. È il primo sguardo sul dossier e la base delle proposte.",
+              nil, [.analisi360, .clienti]),
+        ]
+        #else
+        return []
+        #endif
+    }
 
     static let perChiave: [VoceGlossario.Chiave: VoceGlossario] =
         Dictionary(voci.map { ($0.chiave, $0) }, uniquingKeysWith: { a, _ in a })

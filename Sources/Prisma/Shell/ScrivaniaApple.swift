@@ -639,7 +639,7 @@ private struct CorpoMossaScrivania: View, Equatable {
                 Button {
                     stato.preparaMossa(mossa)
                 } label: {
-                    Label("Preparami l'incontro", systemImage: m.simboloPrepara)
+                    Label(Parole.preparamiIncontro, systemImage: m.simboloPrepara)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(StilePulsanteApple(.principale, grande: true))

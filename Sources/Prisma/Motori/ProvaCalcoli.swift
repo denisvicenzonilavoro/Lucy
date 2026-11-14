@@ -1342,6 +1342,14 @@ enum ProvaCalcoli {
         verifica("Glossario: «SRI» trovato cercando «sri»", Glossario.cerca("sri", categoria: nil).first?.chiave == .sri ? 1 : 0, 1)
         verifica("Glossario: ricerca senza accenti («liquidita» trova «Riserva di liquidità»)",
                  Glossario.cerca("liquidita", categoria: nil).contains { $0.chiave == .riservaLiquidita } ? 1 : 0, 1)
+        #if os(macOS)
+        // Migliorie d'uso 10: le parole che restano hanno la loro voce, e solo Posizioni è il centro
+        verifica("Parole: «Da fare», «Mostra al cliente», «Tutti i clienti», «Il quadro» nel glossario",
+                 Double([VoceGlossario.Chiave.daFare, .mostraAlCliente, .tuttiIClienti, .ilQuadro]
+                    .filter { Glossario.voce($0)?.categoria != .prisma }.count), 0)
+        verifica("Parole: nessun'altra app si dice «il centro della consulenza»",
+                 Double(AppPrisma.allCases.filter { $0.occhiello.lowercased().contains("centro della consulenza") }.count), 0)
+        #endif
         verifica("Guida: app senza 3 passi", Double(AppPrisma.allCases.filter { $0.aiuto.passi.count != 3 }.count), 0)
         verifica("Guida: riga del dock entro 60 caratteri", Double(AppPrisma.allCases.filter { $0.aiuto.inBreve.count > 60 }.count), 0)
         verifica("Guida: nessun glifo nei passi",

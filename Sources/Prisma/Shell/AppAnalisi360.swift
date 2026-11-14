@@ -1,6 +1,6 @@
 import SwiftUI
 
-/// App Analisi 360 (.os-app-planning): il centro della consulenza.
+/// App Analisi 360 (.os-app-planning): previdenza, protezione, investimenti e risparmio di una persona.
 /// Quattro aree (previdenza, protezione, investimenti, risparmio) lette insieme per lo stesso
 /// cliente. Le ipotesi partono dalle posizioni in essere e si correggono con il cliente;
 /// le coperture e i piani sono sempre quelli registrati in Posizioni, sui due canali.

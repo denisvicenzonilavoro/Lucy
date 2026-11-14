@@ -11,7 +11,7 @@ import SwiftUI
 //   ┌─ ◎ 92%  INVESTIMENTI ────────────┐┌─ ◎ 3,5 mesi  RISPARMIO E LIQ. ──┐
 //   └───────────────────────────────────┘└─────────────────────────────────┘
 //   STRUMENTI [Simulatore] [Scenari] [Confronto] [TFR]
-//   Le quattro aree leggono ipotesi dedicate…                         [Prepara l'incontro]
+//   Le quattro aree leggono ipotesi dedicate…                       [Preparami l'incontro]
 //
 // - Le cifre vengono dai motori dei pannelli di sempre (MotoreAree360, in cache per cliente e dati).
 // - Le card si inclinano verso il puntatore (5 gradi, solo quella sotto il puntatore) e il dettaglio nasce dalla
@@ -481,7 +481,11 @@ struct Analisi360Apple: View {
                     stato.filtroClienteAgenda = id
                     stato.apri(.agenda)
                 } label: {
+                    #if os(macOS)
+                    Label(Parole.preparamiIncontro, systemImage: "list.bullet.rectangle")
+                    #else
                     Label("Prepara l'incontro", systemImage: "list.bullet.rectangle")
+                    #endif
                 }
                 .buttonStyle(.applePrimario)
                 .fixedSize()

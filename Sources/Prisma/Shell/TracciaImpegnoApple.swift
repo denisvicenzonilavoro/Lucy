@@ -251,7 +251,7 @@ struct TracciaImpegnoApple: View {
     private func piede(_ e: Appuntamento, cliente: Cliente?) -> some View {
         let t = Tema.Apple.Agenda.Traccia.self
         return HStack(spacing: t.spazioPulsanti) {
-            Button { preparando = true } label: { Text("Preparami l'incontro") }
+            Button { preparando = true } label: { Text(Parole.preparamiIncontro) }
                 .buttonStyle(.applePrimarioGrande)
                 .disabled(preparando)
             if cliente != nil {
