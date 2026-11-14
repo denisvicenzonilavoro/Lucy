@@ -199,6 +199,18 @@ struct BarraSuperiore: View {
                     .puntoAcqua(.sferaVeraBarra)
                 #endif
 
+                #if os(macOS)
+                // Migliorie d'uso 3: al posto della campanella la pillola «Da fare» con il numero delle voci aperte
+                // (rosso, verde a zero); apre il pannello «Da fare» su «Tutti». La goccia dell'acqua arriva qui
+                PulsanteBarra(aiuto: TestiDaFare.aiutoPillola, forma: .pillola, azione: {
+                    if stato.pannelloNotifiche { stato.alternaNotifiche() } else { stato.apriDaFare() }
+                }) {
+                    EtichettaPillolaDaFare()
+                }
+                .accessibilityLabel(Text(TestiDaFare.titolo))
+                .puntoAcqua(.campanella)
+                .segnaCampanella()
+                #else
                 PulsanteBarra(aiuto: "Notifiche", azione: { stato.alternaNotifiche() }) {
                     simbolo("bell")
                 }
@@ -209,6 +221,7 @@ struct BarraSuperiore: View {
                 // nell'evento «notifica nuova» (EventiShell.swift)
                 .puntoAcqua(.campanella)
                 .segnaCampanella()
+                #endif
             }
 
             // La guida di Prisma (anche in modalità cliente): come funziona, le app, le parole

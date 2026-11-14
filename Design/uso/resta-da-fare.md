@@ -219,3 +219,59 @@ Resta:
   aggiornati app per app solo dove descrivono ciò che l'app fa già (indice del dossier, settimana a sette giorni, «Da
   fare» unico… arrivano con le loro migliorie). Il passo 2 della scrivania del template («Spunta le cose da fare:
   spariscono da tutta Prisma») è stato scritto senza la seconda parte: va ripreso con la miglioria 3.
+
+## 3. Un solo «Da fare» al posto di notifiche, scadenze e promemoria
+
+Fatto (solo sul Mac, `#if os(macOS)`; iPhone e iPad tengono campanella, notifiche e scadenze):
+- **Una fonte sola**: `MotoreDaFare` con due ingressi nuovi, accesi solo sul Mac in `ingressiDaFare`: `conScadenze`
+  (posizioni in essere in scadenza entro 90 giorni o scadute da meno, `Tipo.scadenza`; compleanni dei prossimi 7 giorni in
+  «Questa settimana», `Tipo.ricorrenza`; tutti con `Fatto.segna`) e `perTe` (le attività senza cliente diventano voci «Per
+  te» con le iniziali dell'utente; in modalità cliente no). `nastro(_:massimo:)` per il nastro intero. Prove in
+  `ProvaDaFare` (`--prova-calcoli`).
+- **Stato** (Shell/StatoDaFare.swift): `numeroDaFare` (= totale del nastro in cache), `nastroDaFareCompleto(cliente:)`
+  (in `ricavato`, chiave con l'ora), `fattoDaFare` con la traccia `FattoDaFare` in memoria e `annullaUltimoFattoDaFare`
+  (attività riaperta, segno tolto, incontro di riesame tolto e fotografie rimesse, conformità e consensi di prima),
+  `aggiungiDaFare` (attività di oggi del cliente della barra o «Per te», 70 caratteri), `apriDaFare(soloCliente:)`,
+  `apriVoceDaFare`. Anche «Segna come fatto» delle schede di Posizioni passa da `fattoDaFare` (si annulla dal pannello).
+  Prova `ProvaDaFareShell` in `--prova-vera`.
+- **Barra**: la pillola «◎ Da fare» con il numero (rosso, verde a zero) al posto della campanella; la goccia dell'acqua va
+  sulla pillola. **Pannello** `PannelloDaFare` (al posto di `PannelloNotifiche`, stesso `pannelloNotifiche`): «Da fare» con il
+  numero, «Tutti | Solo <Nome>» con un cliente scelto (o «in ordine di tempo»), i gruppi con tutte le voci («OGGI · 3»),
+  «Tutto fatto.», in fondo «+ Aggiungi» (campo con Invio/Esc) e «Fatte oggi: N · Annulla l’ultima».
+- **Riga comune** `RigaDaFare` (cerchio da spuntare con il passaggio verde, pallino del tono, titolo, «<Cliente> · <quando>»,
+  canali; esce scivolando di 16 in 0,32 s), parametri `conNome`, `conCanali`, `titoloACapo`, `filoAgenda`. Token in
+  `Tema.Apple.ElencoDaFare` (Tema.Apple+BloccoBarraNotifiche.swift), testi in `TestiDaFare`.
+- **Dettaglio al centro** fuori da Posizioni (`StratoDettaglioDaFare` nella shell, con il presentatore del tema):
+  `DettaglioDaFareApple` di Posizioni (reso interno) o, per le attività, la scheda semplice «<quando> · scritta da te». Esc
+  non chiude la finestra sotto mentre è aperto.
+- **Scrivania**: «In scadenza entro 90 giorni» diventa `RiquadroDaFareScrivania` («Da fare» con il numero, «[altre N · ]Apri
+  tutto ›», tre voci con la riga comune). Guida della scrivania: «Spunta le cose da fare: spariscono da tutta Prisma.»
+- **Istantanee nuove** (chiare e scure, IstantaneeDaFare.swift): 1030 da-fare-pannello, 1031 da-fare-solo-cliente, 1032
+  da-fare-aggiungi, 1033 da-fare-annulla, 1034 da-fare-dettaglio, 1035 da-fare-scritta-da-te.
+
+Resta:
+- **Gli arrivi e gli avvisi**: le notifiche che il nastro non ha ancora (appuntamenti di oggi, impegni passati senza esito,
+  dati da confermare nei documenti, valori da registrare, schede prodotto, clienti da ricontattare, beneficiari, proposte
+  fuori esperienza, adeguatezza incompleta, pratiche e sinistri fermi, carta e note dall'iPhone, carte della notte, capsule,
+  traguardi, fine anno, mercato, backup) stanno in testa al pannello come «Arrivati e avvisi» (si aprono come prima, non si
+  spuntano). La tabella di 3.3 punto 1 va completata: impegni senza esito → miglioria 19; pratiche e sinistri fermi → 33;
+  backup e impostazioni → Impostazioni › Da sistemare (31); le voci per cliente (ricontattare, beneficiari, esperienza,
+  adeguatezza) e le voci «Per te» dei documenti come voci del nastro; poi «Arrivati» solo per carta, note, notte e capsule.
+- **La mossa del giorno** resta di `MotoreMossaDelGiorno` e il riquadro «Da fare» parte dalla prima voce del nastro (senza
+  «dopo la mossa del giorno»): da fare l'allineamento proposto in 3.6 (la voce della mossa prima, il riquadro dalla seconda,
+  «✓ Fatto» nella mossa).
+- **Rubrica** con «Tutti i clienti» (cinque voci, miglioria 11), **dossier** «Da fare per <Nome>» con «Apri tutto ›» su «Solo
+  <Nome>» (miglioria 5), **Agenda** «Da fare oggi» al posto di «Da fare e da ricordare» e via «Da non dimenticare» (miglioria
+  18, `RigaDaFare(filoAgenda: true, conCanali: false)` è pronta), **Vera** senza «Da non dimenticare» (miglioria 27), il
+  collegamento «<N> da fare per <Nome> ›» di Posizioni.
+- **Notifiche viste**: `notificheViste` e il numero delle «nuove» restano nel codice comune (le usano iPhone, iPad e le
+  prove); sul Mac non si vedono più. I promemoria del Mac (notifiche di sistema) leggono ancora `MotoreNotifiche.promemoria`:
+  da far leggere al nastro.
+- Annullare un riesame non toglie le promesse raccolte alla chiusura dell'incontro (di solito nessuna: l'incontro nasce vuoto).
+- **Prove da guardare in CI**: `--prova-fluidita` («apri il centro notifiche» ora apre il pannello «Da fare») e
+  `--prova-carico` (nastro intero con 200 clienti nel pannello); il Territorio ora conta anche scadenze e compleanni fra le
+  cose da fare dei clienti.
+- **Istantanee**: rigenerare sul Mac «412-scrivania-apple-notifiche» (ora il pannello «Da fare»), «410-scrivania-apple»,
+  «616-scrivania-luce», «118-scrivania-seguito», «117-notifiche-seguito», «133-notifiche-occasioni», «153-notifiche-conformita»,
+  «738-notifiche-traguardo» e le nuove 1030-1035; aggiornare la pagina delle anteprime. Il passaggio sul cerchio e l'uscita
+  della riga chiedono uno screenshot.

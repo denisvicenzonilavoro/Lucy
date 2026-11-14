@@ -320,14 +320,28 @@ struct CorpoShell: View {
 
             ZStack {
                 if sistema.pannelloNotifiche {
+                    #if os(macOS)
+                    // Migliorie d'uso 3: sul Mac la pillola «Da fare» apre il «Da fare» unico al posto delle notifiche
+                    PannelloDaFare()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                    #else
                     PannelloNotifiche()
                         .frame(width: misura.width, height: misura.height)
                         .transition(transizionePannello)
+                    #endif
                 }
             }
             .animation(curvaPannello(sistema.pannelloNotifiche, Tema.Moto.Pannelli.notifiche, Tema.Moto.Pannelli.notificheUscita),
                        value: sistema.pannelloNotifiche)
             .opacity(nascosti ? 0 : 1)
+
+            #if os(macOS)
+            // Il dettaglio di una voce del «Da fare» aperto fuori da Posizioni (pannello, scrivania): al centro, sopra il velo
+            StratoDettaglioDaFare(stato: stato)
+                .frame(width: misura.width, height: misura.height)
+                .opacity(nascosti ? 0 : 1)
+            #endif
 
             // «Le novità» (✦ Novità nella barra): sopra le notifiche, sotto la barra (la pillola resta cliccabile).
             // Entra con il velo del contenitore e la molla della scheda; si chiude di colpo, come nel template

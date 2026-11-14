@@ -82,7 +82,9 @@ final class MonitorEscFinestra {
         let sistema = s.sistema
         guard !s.bloccato, s.presentazione == nil, sistema.sovrapposizione == nil, sistema.guida == nil,
               !s.pannelloRicerca, !s.pannelloSpazi, !s.pannelloNotifiche, !s.pannelloAppAperte, !s.pannelloCliente,
-              !sistema.pannelloNovita, s.notaVocale.mostrata == nil, s.notaVocale.inModifica == nil
+              !sistema.pannelloNovita, s.notaVocale.mostrata == nil, s.notaVocale.inModifica == nil,
+              // Migliorie d'uso 3: il dettaglio di una voce del «Da fare» al centro chiude da sé (✕, velo, Esc)
+              s.voceDaFareAperta == nil
         else { return false }
         switch app {
         // Territorio chiude da sé una cosa alla volta (`onExitCommand`, AppTerritorio.swift)

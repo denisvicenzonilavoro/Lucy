@@ -252,7 +252,7 @@ enum GuidaTesti {
         aCosaServe: "La tua giornata in una schermata: la mossa del giorno, le cose da fare, i prossimi incontri, il portafoglio.",
         inBreve: "La tua giornata in una schermata",
         passi: ["Parti dalla mossa del giorno.",
-                "Guarda le cose da fare e i prossimi incontri: un clic e ci vai.",
+                "Spunta le cose da fare: spariscono da tutta Prisma.",
                 "Apri un’app dal dock, scegli un cliente in alto, o cerca con la lente (⌘K)."],
         parole: [])
 

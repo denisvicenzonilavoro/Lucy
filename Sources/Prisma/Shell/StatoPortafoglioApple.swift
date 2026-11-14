@@ -46,11 +46,18 @@ extension StatoShell {
         let inizio = cal.startOfDay(for: adesso)
         let fine = cal.date(byAdding: .day, value: MotoreDaFare.giorniOccasioni + 1, to: inizio) ?? inizio
         let comune = portafoglioComune()
-        return MotoreDaFare.Ingressi(clienti: clienti, posizioni: posizioni, attivita: attivita,
-                                     proposte: proposteInSospeso, riesami: comune.dovuti,
-                                     conformita: conformitaClienti(oggi: adesso),
-                                     occasioni: occasioni(da: inizio, a: fine), attenzioni: comune.attenzioni,
-                                     oggi: adesso)
+        var x = MotoreDaFare.Ingressi(clienti: clienti, posizioni: posizioni, attivita: attivita,
+                                      proposte: proposteInSospeso, riesami: comune.dovuti,
+                                      conformita: conformitaClienti(oggi: adesso),
+                                      occasioni: occasioni(da: inizio, a: fine), attenzioni: comune.attenzioni,
+                                      oggi: adesso)
+        #if os(macOS)
+        // Migliorie d'uso 3: sul Mac il «Da fare» è l'elenco unico (barra, scrivania, Posizioni), con le scadenze delle
+        // posizioni, i compleanni e le attività scritte senza cliente («Per te»; in modalità cliente no)
+        x.conScadenze = true
+        x.perTe = inModoCliente ? nil : TestiDaFare.clientePerTe(iniziali: inizialiUtente)
+        #endif
+        return x
     }
 
     // MARK: - Le azioni delle schede

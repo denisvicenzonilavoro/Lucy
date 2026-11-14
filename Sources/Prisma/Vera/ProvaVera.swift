@@ -1119,6 +1119,10 @@ enum ProvaVera {
         ProvaCollegaPassi.esegui(controlla)
         // Migliorie d'uso 2: un solo posto per scegliere il cliente (ProvaSceltaCliente.swift, solo sul Mac)
         ProvaSceltaCliente.esegui(controlla)
+        #if os(macOS)
+        // Migliorie d'uso 3: un solo «Da fare» (StatoDaFare.swift, solo sul Mac): numero, fatto, «Annulla l’ultima», «+ Aggiungi»
+        ProvaDaFareShell.esegui(controlla)
+        #endif
         // Le domande dei passi con il loro seguito, «Rifai i calcoli», il piano vuoto evitato
         StatoShell.provaPassiSeguito(controlla)
         // La fase 5: su misura (anonimizzazione, pacchetto, importazione, esame e sostituzione con il server finto) (ProvaSuMisuraVera.swift)

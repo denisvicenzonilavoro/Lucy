@@ -387,6 +387,15 @@ enum VoceConfronto: Hashable {
     /// Gli ultimi clienti scelti (al più tre, il più recente prima), anche quelli scelti in silenzio: il pannello della
     /// barra li mostra in «Recenti». Solo in memoria: si azzerano alla chiusura (migliorie d'uso 2). Sul Mac.
     var clientiRecenti: [String] = []
+    #if os(macOS)
+    /// Migliorie d'uso 3 «Un solo Da fare» (StatoDaFare.swift), tutto in memoria: il pannello mostra solo il cliente della
+    /// barra («Solo <Nome>»), il campo «+ Aggiungi» è aperto, le cose segnate come fatte dal «Da fare» (l'ultima in fondo,
+    /// per «Annulla l’ultima»), la voce aperta al centro fuori da Posizioni.
+    var daFareSoloCliente = false
+    var daFareScrivo = false
+    var fatteDaFare: [FattoDaFare] = []
+    var voceDaFareAperta: VoceDaFare? = nil
+    #endif
     /// «Le routine» di Vera (fase 4, CollegaRoutineShell.swift): la pagina delle routine aperta sopra Vera e la routine scelta.
     var paginaRoutineVera = false
     var routineSelezionataVera: String?

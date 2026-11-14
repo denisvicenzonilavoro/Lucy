@@ -151,10 +151,18 @@ struct PortafoglioApple<Sotto: View>: View {
         let animazione = Tema.Apple.Moto.animazione(Tema.Apple.Moto.Nastro.animazione, calmo: calmo, istantanea: istantanea)
         n.trattieni(v)
         n.anello = v.anello
+        #if os(macOS)
+        // Migliorie d'uso 3: sul Mac la cosa fatta entra fra le «Fatte oggi» del pannello «Da fare» (e si annulla da lì)
+        sequenza.segna(v.id, calmo: calmo, istantanea: istantanea,
+                       anello: { if registra { s.fattoDaFare(v) } },
+                       stringi: { if !registra { s.mostraAvviso("\(v.cliente.nome): fatto") } },
+                       togli: { withAnimation(animazione) { n.lascia(v.id) } })
+        #else
         sequenza.segna(v.id, calmo: calmo, istantanea: istantanea,
                        anello: { if registra { s.segnaFatto(v) } },
                        stringi: { s.mostraAvviso("\(v.cliente.nome): fatto") },
                        togli: { withAnimation(animazione) { n.lascia(v.id) } })
+        #endif
     }
 
 }
@@ -739,7 +747,8 @@ private struct SchedaDaFareApple: View {
 
 // MARK: - Dettaglio di una scheda (880×520)
 
-private struct DettaglioDaFareApple: View {
+/// Il dettaglio di una scheda «Da fare» (anche al centro della scena fuori da Posizioni: StratoDettaglioDaFare, migliorie d'uso 3).
+struct DettaglioDaFareApple: View {
     let voce: VoceDaFare
     @ObservedObject var nastro: StatoNastroDaFare
     let prepara: () -> Void

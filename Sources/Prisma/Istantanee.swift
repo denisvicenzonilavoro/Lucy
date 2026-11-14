@@ -1640,6 +1640,8 @@ enum Istantanee {
         tutteLeScene += sceneSceltaCliente
         // Migliorie d'uso 6: la guida della scrivania (IstantaneeBarreCorte.swift)
         tutteLeScene += sceneBarreCorte
+        // Migliorie d'uso 3: il «Da fare» unico (IstantaneeDaFare.swift)
+        tutteLeScene += sceneDaFare
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu
