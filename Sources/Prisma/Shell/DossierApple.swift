@@ -177,7 +177,14 @@ struct RubricaApple: View {
 
             ScrollView(.vertical, showsIndicators: false) {
                 ElencoRubricaApple(clienti: elenco, attivo: stato.clienteAttivoId, ricercaVuota: ricerca.isEmpty,
-                                   scegli: { stato.clienteAttivoId = $0 })
+                                   scegli: { id in
+                                       #if os(macOS)
+                                       // Migliorie d'uso 2: la persona toccata vale per tutta Prisma (in silenzio)
+                                       stato.scegliCliente(id)
+                                       #else
+                                       stato.clienteAttivoId = id
+                                       #endif
+                                   })
                     .equatable()
             }
 

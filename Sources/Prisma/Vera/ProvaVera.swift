@@ -1117,6 +1117,8 @@ enum ProvaVera {
         ProvaNovitaVera.esegui(controlla)
         // «Ragiona a passi» collegato all'app: smistamento, messaggio con il piano, scheda «Conferma» (ProvaCollegaPassi.swift)
         ProvaCollegaPassi.esegui(controlla)
+        // Migliorie d'uso 2: un solo posto per scegliere il cliente (ProvaSceltaCliente.swift, solo sul Mac)
+        ProvaSceltaCliente.esegui(controlla)
         // Le domande dei passi con il loro seguito, «Rifai i calcoli», il piano vuoto evitato
         StatoShell.provaPassiSeguito(controlla)
         // La fase 5: su misura (anonimizzazione, pacchetto, importazione, esame e sostituzione con il server finto) (ProvaSuMisuraVera.swift)

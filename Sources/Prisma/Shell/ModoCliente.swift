@@ -17,6 +17,12 @@ extension StatoShell {
 
     /// `avviso`: falso quando la accende la presentazione, per non coprire la pagina davanti al cliente.
     func entraModoCliente(avviso: Bool = true) {
+        #if os(macOS)
+        // Con «Tutti i clienti» si mostra il cliente scelto per ultimo (migliorie d'uso 2)
+        if tuttiIClienti, modoCliente == nil, let id = clientiRecenti.first(where: { cliente($0) != nil }) {
+            clienteAttivoId = id
+        }
+        #endif
         guard let c = dati.clienti.first(where: { $0.id == clienteAttivoId }) else {
             mostraAvviso("Scegli prima il cliente in Clienti: la modalità cliente mostra solo il suo dossier.")
             return
@@ -26,6 +32,7 @@ extension StatoShell {
         // Il prospetto del portafoglio parla di tutti i clienti
         if case .portafoglio? = prospetto { prospetto = nil }
         pannelloNotifiche = false
+        pannelloCliente = false
         if sistema.pannelloNovita { sistema.pannelloNovita = false }
         pannelloSpazi = false
         pannelloAppAperte = false

@@ -49,6 +49,12 @@ extension StatoShell {
         set { sistema.pannelloNotifiche = newValue }
     }
 
+    /// Il pannello «Di chi parliamo?» della barra è aperto (migliorie d'uso 2, solo sul Mac).
+    var pannelloCliente: Bool {
+        get { sistema.pannelloCliente }
+        set { sistema.pannelloCliente = newValue }
+    }
+
     var finestreVisibili: [Finestra] { sistema.visibili }
 
     /// App in primo piano (nil = scrivania).
@@ -463,6 +469,7 @@ extension StatoShell {
         Movimenti.anima(Tema.Moto.Blocco.scrivania, durata: Tema.Moto.Blocco.durata, animato: movimento) {
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if pannelloCliente { pannelloCliente = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
             // La guida si chiude senza segnare l'introduzione come vista: riparte al prossimo sblocco

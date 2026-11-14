@@ -207,6 +207,20 @@ struct AppPosizioni: View {
             // sotto il bordo (le due colonne finiscono con lo stesso margine di Clienti)
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 6) {
+                    #if os(macOS)
+                    // Migliorie d'uso 2: il cliente si sceglie nella barra; con un cliente scelto, in cima
+                    // «‹ Tutto il portafoglio» riporta a «Tutti i clienti»
+                    if stato.portafoglio {
+                        TestataPortafoglioRail(clienti: stato.clienti.count)
+                    } else if !stato.inModoCliente {
+                        Button { stato.scegliCliente(nil, avviso: true) } label: {
+                            Text("‹ " + TestiSceltaCliente.tuttoIlPortafoglio)
+                        }
+                        .buttonStyle(.appleSobrio)
+                        .help(TestiSceltaCliente.aiutoTuttoIlPortafoglio)
+                        .padding(.top, 2)
+                    }
+                    #else
                     if !stato.inModoCliente {
                         SegmentiAnalisi(opzioni: [(false, "Cliente"), (true, "Portafoglio")], selezione: Bindable(stato).portafoglio)
                             .padding(.top, 2)
@@ -217,6 +231,7 @@ struct AppPosizioni: View {
                     } else {
                         DossierRail()
                     }
+                    #endif
 
                     EtichettaRail(testo: "Stato")
                     SegmentiAnalisi(opzioni: Self.opzioniStato, selezione: $filtroStato)

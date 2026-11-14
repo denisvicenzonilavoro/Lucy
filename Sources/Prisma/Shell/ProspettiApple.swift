@@ -555,6 +555,19 @@ private struct RigaClienteProspettiApple: View {
         let _ = ContaCorpi.segna()
         let l = Tema.Apple.Prospetti.Laterale.self
         let cliente = stato.clienteAttivo
+        #if os(macOS)
+        // Migliorie d'uso 2: il cliente si sceglie nella barra in alto; qui resta chi è, senza tendina
+        return HStack(spacing: l.spazioCliente) {
+            if let c = cliente {
+                AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: l.avatar)
+            }
+            Text(cliente?.nome ?? TestiSceltaCliente.tuttiIClienti)
+                .carattereApple(l.nomeCliente)
+                .foregroundColor(l.coloreNome)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        #else
         return Button { aperto = true } label: {
             HStack(spacing: l.spazioCliente) {
                 if let c = cliente {
@@ -574,6 +587,7 @@ private struct RigaClienteProspettiApple: View {
         .buttonStyle(StileSemplice())
         .popover(isPresented: $aperto, arrowEdge: .trailing) { ElencoClienti(aperto: $aperto) }
         .help("Scegli il cliente: prospetti e report valgono per lui")
+        #endif
     }
 }
 

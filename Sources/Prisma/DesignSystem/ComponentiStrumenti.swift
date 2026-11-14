@@ -174,6 +174,13 @@ struct DossierRail: View {
                 .tracking(apple ? l.occhielloDossier.tracking : 0)
                 .textCase(apple ? .uppercase : nil)
                 .foregroundColor(apple ? Tema.Apple.Colore.inchiostro2 : Tema.Colore.inchiostroTerziario)
+            #if os(macOS)
+            // Migliorie d'uso 2: il cliente si sceglie solo nella barra in alto; qui resta il nome, senza tendina
+            Text(stato.clienteAttivo?.nome ?? TestiSceltaCliente.tuttiIClienti)
+                .font(apple ? l.nomeDossier.fontLeggibile : Tema.Testo.titolo)
+                .foregroundColor(apple ? Tema.Apple.Colore.inchiostro : Tema.Colore.inchiostro)
+                .lineLimit(1)
+            #else
             Button { scelta = true } label: {
                 HStack(spacing: 5) {
                     Text(stato.clienteAttivo?.nome ?? "Nessun cliente")
@@ -184,6 +191,7 @@ struct DossierRail: View {
             }
             .buttonStyle(StileSemplice())
             .popover(isPresented: $scelta, arrowEdge: .trailing) { ElencoClienti(aperto: $scelta) }
+            #endif
             Text(stato.clienteAttivo?.tema ?? "")
                 .font(apple ? l.notaDossier.fontLeggibile : Tema.Testo.didascalia)
                 .foregroundColor(apple ? Tema.Apple.Colore.inchiostro2 : Tema.Colore.inchiostroSecondario)

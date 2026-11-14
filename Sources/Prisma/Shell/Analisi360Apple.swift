@@ -166,6 +166,13 @@ struct Analisi360Apple: View {
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
 
+    /// Sul Mac il cliente si sceglie nella barra (migliorie d'uso 2): niente pillole nella testata.
+    #if os(macOS)
+    static let sceltaNellaBarra = true
+    #else
+    static let sceltaNellaBarra = false
+    #endif
+
     /// Il cliente della griglia: resta quello di prima finché la griglia non è uscita.
     @State private var clienteMostrato: String?
     @State private var esce = false
@@ -329,7 +336,8 @@ struct Analisi360Apple: View {
     /// cliente scelto, non a ogni giro del body della griglia.
     @ViewBuilder private var pillole: some View {
         let t = Tema.Apple.Aree360.Testata.self
-        if stato.clienti.count > 1 {
+        // Migliorie d'uso 2: sul Mac il cliente si sceglie solo nella barra in alto
+        if stato.clienti.count > 1 && !Self.sceltaNellaBarra {
             let attivo = stato.clienteAttivoId
             let varianti = PilloleClienti.varianti(stato.clienti, attivo: stato.clienteAttivo,
                                                    numeri: [t.pilloleMassime, t.pilloleMassime - 1, t.pilloleMinime])

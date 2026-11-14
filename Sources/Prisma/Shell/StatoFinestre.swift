@@ -34,6 +34,8 @@ import SwiftUI
     /// Il pannello degli spazi di lavoro è aperto.
     var pannelloSpazi = false { didSet { avvisi &+= 1 } }
     var pannelloNotifiche = false { didSet { avvisi &+= 1 } }
+    /// Il pannello «Di chi parliamo?» della pillola del cliente nella barra (migliorie d'uso 2, solo sul Mac).
+    var pannelloCliente = false { didSet { avvisi &+= 1 } }
     /// Il pannello «Le novità» (✦ Novità nella barra, versione «Orizzonte»): sopra le notifiche, sotto il blocco.
     var pannelloNovita = false { didSet { avvisi &+= 1 } }
     /// La sovrapposizione a tutto palco della versione «Luce» (SovrapposizioneLuce.swift): una sola alla volta.

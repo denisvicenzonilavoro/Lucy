@@ -549,7 +549,10 @@ enum SincroniaOvunque {
         imp.ovunque.modificheDaiDispositivi = ist.modificheAmmesse
         imp.ovunque.ultimaIstantanea = ist.scrittaIl
         nuovo.impostazioni = imp
-        if nuovo.clienti.contains(where: { $0.id == locale.clienteAttivoId }) { nuovo.clienteAttivoId = locale.clienteAttivoId }
+        // Il cliente scelto sul dispositivo resta, anche «Tutti i clienti» (il valore vuoto, migliorie d'uso 2)
+        if locale.clienteAttivoId.isEmpty || nuovo.clienti.contains(where: { $0.id == locale.clienteAttivoId }) {
+            nuovo.clienteAttivoId = locale.clienteAttivoId
+        }
 
         var riapplicate = 0
         for op in inSospeso {

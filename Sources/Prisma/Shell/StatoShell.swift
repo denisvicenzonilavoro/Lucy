@@ -157,8 +157,28 @@ enum VoceConfronto: Hashable {
     /// DerivatiDati: questa resta come segno per la prova di Vera.
     @ObservationIgnored var cacheDossier: (chiave: Int, valore: AnalisiDossier)?
     /// Posizioni mostra il portafoglio di tutti i clienti invece del dossier del cliente attivo.
+    /// Sul Mac (migliorie d'uso 2, «Un solo posto per scegliere il cliente») non è più una scelta a sé: vale
+    /// «Tutti i clienti» della barra (`tuttiIClienti`); scriverlo sceglie «Tutti» (true) o torna al cliente di prima
+    /// (false). Su iPhone e iPad resta il campo di sempre (`portafoglioProprio`).
     // Il portafoglio parla di tutti i clienti: in modalità cliente resta chiuso
-    var portafoglio = false { didSet { if portafoglio && modoCliente != nil { portafoglio = false } } }
+    var portafoglio: Bool {
+        get {
+            #if os(macOS)
+            return tuttiIClienti
+            #else
+            return portafoglioProprio
+            #endif
+        }
+        set {
+            #if os(macOS)
+            impostaTuttiIClienti(newValue)
+            #else
+            portafoglioProprio = newValue && modoCliente == nil
+            #endif
+        }
+    }
+    /// Il portafoglio di Posizioni su iPhone e iPad (sul Mac non si usa: vale la scelta della barra).
+    var portafoglioProprio = false
     /// Posizioni › Portafoglio: la vista (Portafoglio o Prova del fuoco), lo scenario e i cursori della prova del fuoco
     /// (StatoProvaFuoco.swift). Un oggetto a parte: trascinare il cursore non pubblica StatoShell. Non si salva.
     let provaFuoco = StatoProvaFuoco()
@@ -344,8 +364,29 @@ enum VoceConfronto: Hashable {
     /// Promemoria del Mac: il permesso di macOS (nil finché non si sa, e sempre nelle istantanee e nelle prove).
     var permessoPromemoria: PermessoPromemoria?
 
-    /// Vera parla del portafoglio (tutti i clienti) invece che del cliente attivo.
-    var veraPortafoglio = false { didSet { if veraPortafoglio && modoCliente != nil { veraPortafoglio = false } } }
+    /// Vera parla del portafoglio (tutti i clienti) invece che del cliente attivo. Sul Mac segue la barra, come
+    /// `portafoglio`; su iPhone e iPad resta il campo di sempre (`veraPortafoglioProprio`).
+    var veraPortafoglio: Bool {
+        get {
+            #if os(macOS)
+            return tuttiIClienti
+            #else
+            return veraPortafoglioProprio
+            #endif
+        }
+        set {
+            #if os(macOS)
+            impostaTuttiIClienti(newValue)
+            #else
+            veraPortafoglioProprio = newValue && modoCliente == nil
+            #endif
+        }
+    }
+    /// Vera sul portafoglio su iPhone e iPad (sul Mac non si usa: vale la scelta della barra).
+    var veraPortafoglioProprio = false
+    /// Gli ultimi clienti scelti (al più tre, il più recente prima), anche quelli scelti in silenzio: il pannello della
+    /// barra li mostra in «Recenti». Solo in memoria: si azzerano alla chiusura (migliorie d'uso 2). Sul Mac.
+    var clientiRecenti: [String] = []
     /// «Le routine» di Vera (fase 4, CollegaRoutineShell.swift): la pagina delle routine aperta sopra Vera e la routine scelta.
     var paginaRoutineVera = false
     var routineSelezionataVera: String?
@@ -845,6 +886,9 @@ enum VoceConfronto: Hashable {
                 scenarioInSospeso = nil
             }
             dati.clienteAttivoId = newValue
+            #if os(macOS)
+            ricordaRecente(newValue)
+            #endif
         }
     }
 

@@ -228,8 +228,15 @@ struct AppClienti: View {
         } else {
             VStack(spacing: 10) {
                 IconaApp(app: .clienti, lato: Misure.Scrivania.icona)
+                #if os(macOS)
+                // «Tutti i clienti» (migliorie d'uso 2): la rubrica; le cifre e il «Da fare» arrivano con la miglioria 11
+                Text(TestiSceltaCliente.tuaRubrica).font(Tipo.pannelloTitolo).foregroundColor(Colori.Rubrica.testo)
+                Text(TestiSceltaCliente.tuaRubricaTesto).font(Tipo.pannelloTesto).foregroundColor(Colori.Rubrica.secondario)
+                    .multilineTextAlignment(.center)
+                #else
                 Text("Nessun cliente scelto.").font(Tipo.pannelloTitolo).foregroundColor(Colori.Rubrica.testo)
                 Text("Scegli un cliente nella rubrica a sinistra.").font(Tipo.pannelloTesto).foregroundColor(Colori.Rubrica.secondario)
+                #endif
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .fondoSuperficie(superficie)

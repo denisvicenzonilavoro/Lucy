@@ -273,6 +273,13 @@ private struct ColonnaAppVera: View {
             Text("Parliamo di")
                 .carattereApple(col.etichetta)
                 .foregroundColor(col.coloreEtichetta)
+            #if os(macOS)
+            // Migliorie d'uso 2: Vera parla del cliente della barra (o di tutti i clienti); niente scelta qui
+            Text(stato.veraPortafoglio ? TestiSceltaCliente.tuttiIClienti : (stato.clienteAttivo?.nome ?? TestiSceltaCliente.tuttiIClienti))
+                .carattereApple(col.oggi)
+                .foregroundColor(col.coloreTesto)
+                .lineLimit(1)
+            #else
             if !stato.inModoCliente {
                 SegmentatoPillola(selezione: Bindable(stato).veraPortafoglio, voci: [(false, "Cliente"), (true, "Portafoglio")],
                                   larghezzaPiena: true)
@@ -287,6 +294,7 @@ private struct ColonnaAppVera: View {
                 MenuTendina(selezione: Bindable(stato).clienteAttivoId, opzioni: stato.clienti.map { ($0.id, $0.nome) },
                             stile: .vetro, larghezza: max(0, larghezza))
             }
+            #endif
         }
         .multilineTextAlignment(.leading)
         .padding(col.paddingScheda)

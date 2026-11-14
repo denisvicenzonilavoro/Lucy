@@ -42,7 +42,8 @@ struct AzioniSala: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         let t = Tema.Apple.Aree360.Testata.self
-        if stato.clienti.count > 0 {
+        // Migliorie d'uso 2: sul Mac il cliente si sceglie nella barra; le pillole restano solo in modalità cliente
+        if stato.clienti.count > 0 && (!Analisi360Apple.sceltaNellaBarra || stato.inModoCliente) {
             let varianti = PilloleClienti.varianti(stato.clienti, attivo: stato.clienteAttivo,
                                                    numeri: [t.pilloleMassime, t.pilloleMassime - 1, t.pilloleMinime])
             PilloleClienti(lunga: varianti[0], media: varianti[1], corta: varianti[2],
@@ -66,6 +67,9 @@ private struct CorpoSala: View {
             if let e = sala.esperienza, let cliente {
                 PalcoSala(esperienza: e, cliente: cliente, spazio: spazio, torna: torna)
                     .transition(.opacity)
+            } else if Analisi360Apple.sceltaNellaBarra && cliente == nil {
+                // Migliorie d'uso 2: con «Tutti i clienti» la Sala chiede la persona
+                vuotoSala
             } else {
                 GrigliaSala(cliente: cliente, spazio: spazio, apri: apri)
                     .transition(.opacity)
@@ -121,6 +125,18 @@ private struct CorpoSala: View {
 
 /// Esc nella Sala: dal palco torna alla griglia, dalla griglia chiude la finestra. Solo con la Sala davanti e nessun
 /// pannello o sovrapposizione sopra (che hanno il loro Esc). Osserva le finestre a parte: la Sala non si ridisegna.
+extension CorpoSala {
+    /// Il vuoto della Sala senza cliente (sul Mac, con «Tutti i clienti»).
+    @ViewBuilder var vuotoSala: some View {
+        #if os(macOS)
+        VuotoCliente(titolo: TestiSceltaCliente.salaTitolo, testo: TestiSceltaCliente.salaTesto)
+            .transition(.opacity)
+        #else
+        EmptyView()
+        #endif
+    }
+}
+
 private struct EscSala: View {
     @Environment(StatoShell.self) var stato
     let sistema: StatoFinestre

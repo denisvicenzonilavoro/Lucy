@@ -78,8 +78,17 @@ struct AppProspetti: View {
     }
 
     /// L'app nel tema Apple (ProspettiApple.swift), sul Mac e sull'iPad (la cornice di prima non si mostra più).
-    private var contenuto: some View {
+    @ViewBuilder private var contenuto: some View {
+        #if os(macOS)
+        // Migliorie d'uso 2: con «Tutti i clienti» i prospetti chiedono la persona (il prospetto del portafoglio resta)
+        if stato.clienteAttivo == nil && scelta.tipo != .portafoglio {
+            VuotoCliente(titolo: TestiSceltaCliente.prospettiTitolo, testo: TestiSceltaCliente.prospettiTesto)
+        } else {
+            corpoProspettiApple
+        }
+        #else
         corpoProspettiApple
+        #endif
     }
 
     private var cornice: some View {

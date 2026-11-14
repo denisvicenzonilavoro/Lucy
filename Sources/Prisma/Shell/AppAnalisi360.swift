@@ -23,7 +23,16 @@ struct AppAnalisi360: View {
         let _ = ContaCorpi.segna()
         // Il dettaglio che nasce da una card delle aree si apre sopra tutta l'app (Analisi360Apple.swift)
         PresentatoreAree360(stato: stato) {
+            #if os(macOS)
+            // Migliorie d'uso 2: con «Tutti i clienti» Analisi 360 chiede la persona (gli strumenti restano)
+            if stato.clienteAttivo == nil && stato.strumentoAnalisi == nil {
+                VuotoCliente(titolo: TestiSceltaCliente.analisiTitolo, testo: TestiSceltaCliente.analisiTesto)
+            } else {
+                cornice
+            }
+            #else
             cornice
+            #endif
         }
         .onChange(of: stato.areaAnalisi) { nuova in
             scheda = .sintesi

@@ -1636,6 +1636,7 @@ enum Istantanee {
         var tutteLeScene = scene
         tutteLeScene += sceneMiniVera
         tutteLeScene += sceneVeraScrivania
+        tutteLeScene += sceneSceltaCliente
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu

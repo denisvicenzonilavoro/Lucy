@@ -274,7 +274,7 @@ struct CorpoShell: View {
         let nascosti = sistema.bloccato
         // Durante un genio il dock si vede sempre (come macOS con il dock nascosto): la finestra va nella sua icona
         let dockGiu = dockNascosto && !dockRichiamato && sistema.dockPerEffetti.isEmpty
-        return ZStack(alignment: .topLeading) {
+        let livelli = ZStack(alignment: .topLeading) {
             // La scrivania con i widget e, scorrendo a sinistra, Vera (VeraScrivania.swift): sotto le finestre e il dock
             PagineScrivania(sistema: sistema, gesto: sistema.gestoVera, misura: misura)
                 .frame(width: misura.width, height: misura.height, alignment: .topLeading)
@@ -400,6 +400,29 @@ struct CorpoShell: View {
                        value: sistema.guida != nil)
             .opacity(nascosti ? 0 : 1)
         }
+        return stratoSceltaCliente(livelli, misura: misura, nascosti: nascosti)
+    }
+
+    /// Il pannello «Di chi parliamo?» della pillola del cliente (migliorie d'uso 2, solo sul Mac): sopra la scrivania,
+    /// allineato alla pillola della barra, con il velo e le curve del centro notifiche.
+    private func stratoSceltaCliente(_ contenuto: some View, misura: CGSize, nascosti: Bool) -> some View {
+        #if os(macOS)
+        return contenuto.overlayPreferenceValue(AncoraPillolaCliente.self) { ancora in
+            GeometryReader { geo in
+                ZStack(alignment: .topLeading) {
+                    if sistema.pannelloCliente && !nascosti {
+                        PannelloSceltaCliente(sinistra: ancora.map { geo[$0].minX } ?? 0)
+                            .frame(width: misura.width, height: misura.height)
+                            .transition(transizionePannello)
+                    }
+                }
+                .animation(curvaPannello(sistema.pannelloCliente, Tema.Moto.Pannelli.notifiche, Tema.Moto.Pannelli.notificheUscita),
+                           value: sistema.pannelloCliente)
+            }
+        }
+        #else
+        return contenuto
+        #endif
     }
 
     /// Velo e contenitore dei pannelli: solo opacità (la scheda dentro entra con la sua scala, `entrataScheda`).

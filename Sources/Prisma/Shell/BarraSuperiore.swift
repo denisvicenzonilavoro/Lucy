@@ -27,6 +27,11 @@ struct BarraSuperiore: View {
                     .offset(y: y)
                 appCorrente
                     .offset(y: y)
+                #if os(macOS)
+                // Migliorie d'uso 2: il cliente di tutta Prisma, scelto qui
+                pillolaCliente
+                    .offset(y: y)
+                #endif
                 Spacer(minLength: 20)
                 // I vetri sono quasi alti quanto la barra: seguono i pulsanti finché resta un punto dal bordo
                 strumenti
@@ -107,6 +112,39 @@ struct BarraSuperiore: View {
             TitoloAppAttiva()
         }
     }
+
+    #if os(macOS)
+    /// La pillola del cliente (migliorie d'uso 2, template #bCli): avatar 20 e nome del cliente, oppure il glifo delle
+    /// persone e «Tutti i clienti», con la freccia in giù; apre il pannello «Di chi parliamo?» (mai in modalità cliente).
+    private var pillolaCliente: some View {
+        let P = Tema.Apple.SceltaCliente.Pillola.self
+        let c = stato.clienteAttivo
+        return PulsanteBarra(aiuto: TestiSceltaCliente.aiutoPillola, forma: .pillola, azione: {
+            if stato.pannelloCliente { stato.pannelloCliente = false } else { stato.apriSceltaCliente() }
+        }) {
+            HStack(spacing: P.spazio) {
+                if let c {
+                    AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: P.avatar)
+                } else {
+                    Image(systemName: "person.2.fill")
+                        .carattereApple(P.glifo)
+                }
+                Text(c?.nome ?? TestiSceltaCliente.tuttiIClienti)
+                    .carattereApple(Tema.Apple.Carattere.barra)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: P.larghezzaMassimaNome, alignment: .leading)
+                    .fixedSize(horizontal: true, vertical: false)
+                if !stato.inModoCliente {
+                    Image(systemName: "chevron.down")
+                        .carattereApple(P.freccia)
+                        .opacity(P.opacitaFreccia)
+                }
+            }
+        }
+        .anchorPreference(key: AncoraPillolaCliente.self, value: .bounds) { $0 }
+    }
+    #endif
 
     /// «lun 2 nov 23:09», 13 medium con le cifre tabellari.
     private var orologio: some View {

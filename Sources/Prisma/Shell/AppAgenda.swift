@@ -235,8 +235,15 @@ struct AppAgenda: View {
             Spacer(minLength: 0)
             SegmentatoPillola(selezione: Bindable(stato).vistaAgenda, voci: viste)
                 .fixedSize()
+            #if os(macOS)
+            // Migliorie d'uso 2: il cliente si sceglie nella barra; qui solo «Solo <Nome> ✕» per tornare a tutti
+            if let id = stato.filtroClienteAgenda, let c = stato.cliente(id), !stato.inModoCliente {
+                PillolaSoloCliente(nome: StatoShell.nomeBreve(c)) { stato.scegliCliente(nil, avviso: true) }
+            }
+            #else
             MenuTendina(selezione: Bindable(stato).filtroClienteAgenda, opzioni: clienti,
                         larghezza: compatta ? b.menuClientiCompatto : b.menuClienti)
+            #endif
             if compatta {
                 Button { nuovaAttivita() } label: { Image(systemName: "checklist") }
                     .buttonStyle(.apple)
