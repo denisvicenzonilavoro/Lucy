@@ -123,8 +123,6 @@ private struct CorpoSala: View {
     }
 }
 
-/// Esc nella Sala: dal palco torna alla griglia, dalla griglia chiude la finestra. Solo con la Sala davanti e nessun
-/// pannello o sovrapposizione sopra (che hanno il loro Esc). Osserva le finestre a parte: la Sala non si ridisegna.
 extension CorpoSala {
     /// Il vuoto della Sala senza cliente (sul Mac, con «Tutti i clienti»).
     @ViewBuilder var vuotoSala: some View {
@@ -137,6 +135,8 @@ extension CorpoSala {
     }
 }
 
+/// Esc nella Sala: dal palco torna alla griglia, dalla griglia chiude la finestra. Solo con la Sala davanti e nessun
+/// pannello o sovrapposizione sopra (che hanno il loro Esc). Osserva le finestre a parte: la Sala non si ridisegna.
 private struct EscSala: View {
     @Environment(StatoShell.self) var stato
     let sistema: StatoFinestre

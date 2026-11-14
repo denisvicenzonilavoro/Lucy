@@ -176,6 +176,7 @@ private struct ColonnaAppVera: View {
     /// Impostazioni › Vera.
     private var schedaMotore: some View {
         let col = Tema.Apple.Vera.Colonna.self
+        #if os(macOS)
         let pronto = stato.qwen.disponibilita.pronto
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: col.spazioSpia) {
@@ -215,6 +216,53 @@ private struct ColonnaAppVera: View {
         .padding(col.paddingScheda)
         .frame(maxWidth: .infinity, alignment: .leading)
         .superficieApple(col.superficieScheda, raggio: col.raggioScheda)
+        #else
+        // iPhone e iPad tengono i testi di prima: il nome del motore, il motivo e la pagina dei motori
+        let q = stato.qwen
+        let pronto = q.disponibilita.pronto
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(spacing: col.spazioSpia) {
+                Circle()
+                    .fill(pronto ? col.pronto : col.nonPronto)
+                    .frame(width: col.spia, height: col.spia)
+                Text("\(q.nome) · \(pronto ? "pronto" : "non pronto")")
+                    .carattereApple(col.statoMotore)
+                    .foregroundColor(col.coloreTesto)
+                    .lineLimit(1)
+            }
+            Text(pronto ? "I numeri li calcola Prisma, io li racconto." : (q.disponibilita.motivo ?? q.descrizione))
+                .carattereApple(col.notaMotore)
+                .foregroundColor(col.coloreNota)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, col.notaSopra)
+            if !pronto {
+                Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
+                    .buttonStyle(.apple)
+                    .fixedSize()
+                    .help("Chiede di nuovo a Ollama se Qwen è pronto")
+                    .padding(.top, col.verificaSopra)
+            }
+            // Fase 5: come smista Vera, e la pagina dei motori (Due velocità, Il cervello grande); mai in modalità cliente
+            if !stato.inModoCliente {
+                HStack(spacing: col.spazioSpia) {
+                    Text("Smista: regole e Qwen · Apple spento")
+                        .carattereApple(col.notaMotore)
+                        .foregroundColor(col.coloreNota)
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                    Button("Motori") { stato.apriPaginaMotori() }
+                        .buttonStyle(.appleSobrio)
+                        .fixedSize()
+                        .help("Due velocità e il cervello grande")
+                }
+                .padding(.top, col.verificaSopra)
+            }
+        }
+        .multilineTextAlignment(.leading)
+        .padding(col.paddingScheda)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(col.superficieScheda, raggio: col.raggioScheda)
+        #endif
     }
 
     /// Gli impegni di oggi, come nel template: «09:30 · Giulia Rossi». Un clic apre l'impegno in Agenda.

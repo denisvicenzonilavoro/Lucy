@@ -485,7 +485,8 @@ enum Istantanee {
         }),
         ("64-app-aperte", { s in
             // Ogni scheda con il suo contesto: Agenda filtrata su Marco, Note su Sofia, Posizioni sul
-            // portafoglio, Prodotti senza cliente, Clienti sul cliente attivo
+            // portafoglio, Prodotti senza cliente, Clienti sul cliente attivo. Sul Mac (migliorie d'uso 2) portafoglio
+            // e cliente attivo si escludono: il portafoglio è «Tutti i clienti», e Clienti mostra la rubrica
             s.filtroClienteAgenda = "marco"
             s.filtroClienteNote = "sofia"
             s.apri(.agenda)

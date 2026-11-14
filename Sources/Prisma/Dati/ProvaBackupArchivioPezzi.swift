@@ -263,7 +263,6 @@ extension ProvaBackup {
         return r
     }
 
-    /// Una modifica a un cliente riscrive solo il suo file, l'indice solo se cambia (ordine, nomi, impostazioni).
     /// Migliorie d'uso 2: il cliente attivo vuoto è «Tutti i clienti». Si salva, si rilegge e, con l'indice mancante,
     /// si ricostruisce dalla riserva restando vuoto (prima la ricostruzione lo sostituiva con il primo cliente).
     private static func provaTuttiIClienti(_ base: URL) throws -> String? {
@@ -288,6 +287,7 @@ extension ProvaBackup {
         return nil
     }
 
+    /// Una modifica a un cliente riscrive solo il suo file, l'indice solo se cambia (ordine, nomi, impostazioni).
     private static func provaSoloCambiati(_ base: URL) throws -> String? {
         let cartella = base.appendingPathComponent("Prisma", isDirectory: true)
         let pezzi = ArchivioPezzi.cartellaPezzi(in: cartella)
