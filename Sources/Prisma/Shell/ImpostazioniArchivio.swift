@@ -65,7 +65,7 @@ extension AppImpostazioni {
             }
             // «Luce» giro 15 (decisione 42): la chiave delle capsule del tempo entra solo nei backup protetti
             if !b.cifrato && !stato.dati.capsule.isEmpty {
-                NotaImpostazioni(TestiCapsule.avvisoBackup, colore: Tema.Apple.Colore.arancio)
+                NotaImpostazioni(TestiCapsule.avvisoBackup, colore: Tema.Apple.Colore.arancioTesto)
                     .cascataImpostazioni(6)
             }
 

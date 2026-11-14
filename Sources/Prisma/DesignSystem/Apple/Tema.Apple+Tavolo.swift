@@ -33,7 +33,7 @@ extension Tema.Apple {
         static let statoPannello = Carattere.secondario
         static let coloreStatoPannello = Colore.inchiostro2
         static let avviso = Carattere.secondario
-        static let coloreAvviso = Colore.arancio
+        static let coloreAvviso = Colore.arancioTesto
         static let codice = Carattere(dimensione: 13, peso: .semibold, tabellare: true)
         static let coloreCodice = Colore.inchiostro
         /// I limiti del cursore lasciato al cliente («da 50 a 1.000 € al mese»).

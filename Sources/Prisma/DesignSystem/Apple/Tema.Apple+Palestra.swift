@@ -46,7 +46,7 @@ extension Tema.Apple {
         static let tile = Superficie.tile
         static let paddingTile = Tema.Apple.Misura.Padding.tile
         /// «Di … Prisma sa poco»: la nota del profilo scarno, arancio come le altre etichette di attenzione.
-        static let coloreScarno = K.arancio
+        static let coloreScarno = K.arancioTesto
         /// «DIFFICOLTÀ»: 16 sopra, 8 sotto.
         static let sopraDifficolta: CGFloat = 16
         static let sottoDifficolta: CGFloat = 8

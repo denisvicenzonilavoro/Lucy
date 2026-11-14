@@ -68,7 +68,7 @@ extension Tema.Apple {
             /// «Da non dimenticare»: fondo arancio al 10% con il bordo al 25%; testo 14 con interlinea 1,45.
             static let fondoAvviso = Colore.avvisoFondo
             static let bordoAvviso = Colore.avvisoBordo
-            static let coloreEtichettaAvviso = Colore.arancio
+            static let coloreEtichettaAvviso = Colore.arancioTesto
             static let avviso = Carattere(dimensione: 14, peso: .regular, interlinea: 1.45)
             static let coloreAvviso = Colore.inchiostro
             static let avvisoSopra: CGFloat = 6

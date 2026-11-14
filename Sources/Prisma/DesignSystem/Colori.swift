@@ -939,10 +939,10 @@ enum Colori {
         static let rigaTitoloFatto = A.inchiostro3
         static let rigaSotto = A.inchiostro2
         static let scadenza = A.inchiostro2
-        static let scadenzaOggi = A.arancio
+        static let scadenzaOggi = A.arancioTesto
         static let scadenzaPassata = A.rosso
         static let scadenzaFatta = A.verde
-        static let prioritaAlta = A.arancio
+        static let prioritaAlta = A.arancioTesto
         static let prioritaBassa = A.inchiostro3
         static let spuntaAlto = A.cardPiena
         static let spuntaBordo = A.binario

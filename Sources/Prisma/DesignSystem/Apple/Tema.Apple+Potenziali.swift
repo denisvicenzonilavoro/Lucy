@@ -128,7 +128,7 @@ extension Tema.Apple {
         static let rigaAmbasciatore = Tema.Apple.Carattere(dimensione: 13, peso: .semibold)
         static let cifraAmbasciatore = Tema.Apple.Carattere(dimensione: 12, peso: .regular, tabellare: true)
         static let avvisoCiclo = Tema.Apple.Carattere(dimensione: 11.5, peso: .regular)
-        static let coloreCiclo = Tema.Apple.Colore.arancio
+        static let coloreCiclo = Tema.Apple.Colore.arancioTesto
         /// Oltre tanti nodi visibili, il resto va nei «+ N» (M1 8 GB).
         static let nodiMassimi = 80
         static let spazioMinimo: CGFloat = 1
@@ -188,7 +188,7 @@ extension Tema.Apple {
         static let nomeRiga = Tema.Apple.Carattere(dimensione: 13, peso: .semibold)
         static let statoRiga = Tema.Apple.Carattere(dimensione: 11.5, peso: .regular)
         static let coloreStato = Tema.Apple.Colore.inchiostro2
-        static let pillolaConsenso = Tema.Apple.Colore.arancio
+        static let pillolaConsenso = Tema.Apple.Colore.arancioTesto
         static let fondoPillola = Tema.Apple.Colore.arancio.opacity(0.12)
         static let pillola = Tema.Apple.Carattere(dimensione: 10.5, peso: .semibold)
         static let lampo = Tema.Apple.Colore.verde.opacity(0.12)

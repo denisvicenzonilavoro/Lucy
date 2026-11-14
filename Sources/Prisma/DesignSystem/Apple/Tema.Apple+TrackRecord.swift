@@ -36,7 +36,7 @@ extension Tema.Apple.Studio {
         static let fondoAccettata = Color(r: 47, g: 163, b: 90, a: 0.13)
         static let testoRifiutata = Tema.Apple.Colore.rosso
         static let fondoRifiutata = Color(r: 229, g: 72, b: 77, a: 0.12)
-        static let testoRimandata = Tema.Apple.Colore.arancio
+        static let testoRimandata = Tema.Apple.Colore.arancioTesto
         static let fondoRimandata = Color(r: 224, g: 138, b: 0, a: 0.13)
         static let testoInAttesa = Tema.Apple.Colore.inchiostro2
         static let fondoInAttesa = Tema.Apple.Colore.inchiostro3.opacity(0.14)
@@ -87,7 +87,7 @@ extension Tema.Apple.Studio {
             static let coloreTitolo = Tema.Apple.Colore.inchiostro
             static let nota = Tema.Apple.Carattere.secondario
             static let coloreNota = Tema.Apple.Colore.inchiostro2
-            static let coloreProva = Tema.Apple.Colore.arancio
+            static let coloreProva = Tema.Apple.Colore.arancioTesto
         }
 
         // MARK: Card di una raccomandazione

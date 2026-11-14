@@ -102,7 +102,7 @@ extension Tema.Apple.SalaRacconti {
         static let coloreNomeRiga = Tema.Apple.Colore.inchiostro
         static let dettaglioRiga = Tema.Apple.Carattere.secondario
         static let coloreDettaglioRiga = Tema.Apple.Colore.inchiostro2
-        static let coloreAvvisoRiga = Tema.Apple.Colore.arancio
+        static let coloreAvvisoRiga = Tema.Apple.Colore.arancioTesto
         static let lucchetto: CGFloat = 18
         static let coloreLucchetto = Tema.Apple.Colore.inchiostro2
         static let filetto = Tema.Apple.Colore.separatore

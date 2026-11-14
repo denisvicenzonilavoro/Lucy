@@ -186,7 +186,7 @@ extension Tema.Apple {
             static let spazioSuggerimenti: CGFloat = 6
             /// Un clic su un suggerimento apre Vera e manda la domanda dopo 0,7 s.
             static let attesaDomanda: Double = 0.7
-            static let coloreNonPronto = Colore.arancio
+            static let coloreNonPronto = Colore.arancioTesto
         }
 
         // MARK: Da fare oggi

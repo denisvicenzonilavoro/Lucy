@@ -86,7 +86,7 @@ extension Tema.Apple {
             /// Le righe: 12 sopra, etichetta larga 140 (Inquadra 150), spunta verde, «—» grigio, «!» arancio.
             static let righeSopra: CGFloat = 12
             static let larghezzaEtichetta: CGFloat = 140
-            static let coloreDaGuardare = K.arancio
+            static let coloreDaGuardare = K.arancioTesto
             static let coloreMancante = Tema.Apple.Inquadra.Scheda.coloreMancante
             static let coloreScrittoDaTe = K.inchiostro3
             static let segnoScrittoDaTe = "pencil"

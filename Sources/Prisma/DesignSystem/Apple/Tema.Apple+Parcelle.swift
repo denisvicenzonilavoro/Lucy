@@ -38,12 +38,12 @@ extension Tema.Apple {
             static let valore = Carattere.valore
             static let coloreValore = Colore.inchiostro
             /// «Da incassare» in arancio quando c'è qualcosa da incassare.
-            static let coloreDaIncassare = Colore.arancio
+            static let coloreDaIncassare = Colore.arancioTesto
             static let riduzioneValore: CGFloat = 0.6
             static let spazioValore: CGFloat = 2
             /// «dati di prova» o «provvisorio» sotto il valore.
             static let nota = Carattere(dimensione: 11.5, peso: .regular)
-            static let coloreNota = Colore.arancio
+            static let coloreNota = Colore.arancioTesto
         }
 
         // MARK: Elenco (§1.2.2)
@@ -82,7 +82,7 @@ extension Tema.Apple {
             static func colore(_ s: StatoParcella, scaduta: Bool) -> Color {
                 switch s {
                 case .bozza, .annullata: return Colore.inchiostro3
-                case .emessa: return scaduta ? Colore.rosso : Colore.arancio
+                case .emessa: return scaduta ? Colore.rosso : Colore.arancioTesto
                 case .pagata: return Colore.verde
                 }
             }
@@ -140,7 +140,7 @@ extension Tema.Apple {
             static let pronto = Carattere(dimensione: 14, peso: .bold)
             static let colorePronto = Colore.verde
             static let titoloMancano = Carattere(dimensione: 13, peso: .bold)
-            static let coloreTitoloMancano = Colore.arancio
+            static let coloreTitoloMancano = Colore.arancioTesto
             static let dettaglio = Carattere(dimensione: 12, peso: .regular, interlinea: 1.4)
             static let coloreDettaglio = Colore.inchiostro2
             static let sottoTitolo: CGFloat = 4
@@ -186,7 +186,7 @@ extension Tema.Apple {
             static let fraVoci: CGFloat = 4
             static let notaVoci = Carattere(dimensione: 12, peso: .regular, interlinea: 1.4)
             static let coloreNotaVoci = Colore.inchiostro2
-            static let coloreAvviso = Colore.arancio
+            static let coloreAvviso = Colore.arancioTesto
             /// Il segno ✕ per togliere una riga.
             static let togli = Carattere(dimensione: 12, peso: .semibold)
             static let coloreTogli = Colore.inchiostro3

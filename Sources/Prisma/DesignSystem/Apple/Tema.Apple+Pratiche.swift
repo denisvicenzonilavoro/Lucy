@@ -81,7 +81,7 @@ extension Tema.Apple {
             /// Fermo (arancio): fondo e bordo dell'avviso, frase e «Rimedia».
             static let fondoFermo = C.avvisoFondo
             static let bordoFermo = C.avvisoBordo
-            static let coloreFermo = C.arancio
+            static let coloreFermo = C.arancioTesto
             /// Non adeguata (rosso).
             static let fondoRosso = C.rosso.opacity(0.06)
             static let bordoRosso = C.rosso.opacity(0.4)
@@ -300,7 +300,7 @@ extension Tema.Apple {
             static let fondoRigaScelta = C.selezioneVoce
             static let etichettaRiga = K(dimensione: 13, peso: .semibold)
             static let origineRiga = K(dimensione: 11.5, peso: .regular)
-            static let coloreDaConfermare = C.arancio
+            static let coloreDaConfermare = C.arancioTesto
             /// La casella aggiunta a mano (in punti della pagina).
             static let casellaAMano = CGSize(width: 160, height: 20)
             /// Impostazioni › Moduli: il tassello delle righe.

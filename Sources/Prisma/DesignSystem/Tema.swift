@@ -112,8 +112,14 @@ enum Tema {
 
         // Inchiostri
         static let inchiostro = d(nero(0.86), bianco(0.94))
+        #if os(macOS)
+        // Migliorie d'uso 7: gli stessi toni più leggibili del tema Apple (`inchiostro2`, `inchiostro3`).
+        static let inchiostroSecondario = d(nero(0.62), bianco(0.64))
+        static let inchiostroTerziario = d(nero(0.54), bianco(0.52))
+        #else
         static let inchiostroSecondario = d(nero(0.56), bianco(0.64))
         static let inchiostroTerziario = d(nero(0.36), bianco(0.42))
+        #endif
         /// Testi secondari e terziari dentro i widget della scrivania: un po' più netti, perché il vetro è trasparente.
         static let inchiostroWidgetSecondario = d(nero(0.68), bianco(0.78))
         static let inchiostroWidgetTerziario = d(nero(0.5), bianco(0.58))

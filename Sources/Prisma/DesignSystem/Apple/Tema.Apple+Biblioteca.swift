@@ -38,7 +38,7 @@ extension Tema.Apple {
         static let dettaglioDocumento = K(dimensione: 12, peso: .regular)
         static let coloreTitolo = C.inchiostro
         static let coloreDettaglio = C.inchiostro2
-        static let coloreAvviso = C.arancio
+        static let coloreAvviso = C.arancioTesto
         static let didascalia = K(dimensione: 12.5, peso: .regular, interlinea: 1.45)
         static let coloreDidascalia = C.inchiostro2
         static let anelloLettura: CGFloat = 14

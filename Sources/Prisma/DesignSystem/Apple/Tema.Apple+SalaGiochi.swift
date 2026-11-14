@@ -85,7 +85,7 @@ extension Tema.Apple.SalaEsperienze {
         static let filo = K.separatore
         /// Il confronto con il profilo dichiarato: 14 sopra, arancio se diversi.
         static let confronto = C(dimensione: 13.5, peso: .semibold)
-        static let confrontoDiverso = K.arancio
+        static let confrontoDiverso = K.arancioTesto
         static let confrontoUguale = K.inchiostro2
         static let sopraConfronto: CGFloat = 14
         /// L'avvertenza finale: 13,5 interlinea 1,5, 14 sopra.

@@ -164,7 +164,7 @@ extension Tema.Apple {
             static let attesa = Carattere(dimensione: 24, peso: .regular)
             static let coloreAttesa = Colore.inchiostro2
             /// Errore: il punto esclamativo arancio.
-            static let coloreErrore = Colore.arancio
+            static let coloreErrore = Colore.arancioTesto
             /// Titolo 17 bold e `.k` 4 sotto.
             static let titolo = Carattere(dimensione: 17, peso: .bold, tracking: -0.2)
             static let coloreTitolo = Colore.inchiostro

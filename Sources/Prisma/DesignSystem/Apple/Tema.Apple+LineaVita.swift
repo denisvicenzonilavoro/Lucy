@@ -111,7 +111,7 @@ extension Tema.Apple.Clienti {
         static let spazioNote: CGFloat = 4
         static let nota = Carattere(dimensione: 12, peso: .regular, interlinea: 1.4)
         static let coloreNota = Colore.inchiostro2
-        static let coloreAvviso = Colore.arancio
+        static let coloreAvviso = Colore.arancioTesto
         /// Il vuoto (senza data di nascita, senza eventi): 13,5 con il pulsante sotto.
         static let vuoto = Carattere(dimensione: 13.5, peso: .regular, interlinea: 1.45)
         static let coloreVuoto = Colore.inchiostro2

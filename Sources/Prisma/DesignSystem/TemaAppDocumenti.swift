@@ -150,7 +150,7 @@ extension Tema.Colore {
         static let daControllare = Tema.Apple.Colore.accento
         static let confermato = Tema.Apple.Colore.inchiostro3
         /// Valore che non torna (arancio del tema).
-        static let diverso = Tema.Apple.Colore.arancio
+        static let diverso = Tema.Apple.Colore.arancioTesto
         static let daAggiungere = Tema.Apple.Colore.accento
         /// Riga della fonte (scheda, testo, foglio ricostruito).
         static let evidenzia: Color = Tema.Apple.Colore.selezioneGiorno

@@ -34,9 +34,9 @@ extension Tema.Apple.Studio {
             static let nota = Carattere.secondario
             static let coloreNota = Colore.inchiostro2
             /// La nota arancio («3 visite senza chilometri: aggiungili», «da controllare»).
-            static let coloreAvviso = Colore.arancio
+            static let coloreAvviso = Colore.arancioTesto
             static let prova = Carattere.secondario
-            static let coloreProva = Colore.arancio
+            static let coloreProva = Colore.arancioTesto
             static let spazioProva: CGFloat = 8
             /// La frase di uno stato vuoto e il suo pulsante.
             static let vuotoSopra: CGFloat = 12
@@ -164,7 +164,7 @@ extension Tema.Apple.Studio {
             static let riga = Carattere(dimensione: 12, peso: .regular)
             static let coloreRiga = Colore.inchiostro2
             /// Una scadenza passata e non segnata fatta: la riga in arancio.
-            static let colorePassata = Colore.arancio
+            static let colorePassata = Colore.arancioTesto
             /// Il cerchio per segnarla fatta.
             static let spunta: CGFloat = 18
             static let coloreSpunta = Colore.inchiostro3
@@ -240,7 +240,7 @@ extension Tema.Apple.Studio {
             static let coloreRiga = Colore.inchiostro
             static let rigaSotto = Carattere(dimensione: 11.5, peso: .regular)
             static let coloreRigaSotto = Colore.inchiostro2
-            static let coloreAvviso = Colore.arancio
+            static let coloreAvviso = Colore.arancioTesto
             static let titoloGruppo = Carattere(dimensione: 12, peso: .semibold, tracking: 0.6, maiuscolo: true)
             static let coloreTitoloGruppo = Colore.inchiostro2
             static let filo = Colore.separatore

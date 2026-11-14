@@ -33,7 +33,7 @@ extension Colori {
         static let contatore = A.chip
         static let contatoreBordo = Color.clear
         static let stato = A.inchiostro2
-        static let statoModificato = A.arancio
+        static let statoModificato = A.arancioTesto
         // Pulsanti (capsule del tema Apple)
         static let pulsanteAlto = A.cardPiena
         static let pulsanteMezzoAlto = A.cardPiena
@@ -41,7 +41,7 @@ extension Colori {
         static let pulsanteBasso = A.cardPiena
         static let pulsanteBordo = A.separatore
         static let pulsanteTesto = A.inchiostro
-        static let pulsanteFissato = A.arancio
+        static let pulsanteFissato = A.arancioTesto
         // Indice: il fondo è il pannello
         static let indiceSinistra = Color.clear
         static let indiceCentro = Color.clear

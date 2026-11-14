@@ -63,7 +63,7 @@ extension Tema.Apple {
             /// Riga della completezza dei dati: `.k` nel tono (verde da 85% in su, altrimenti arancio).
             static let completezza = Carattere.secondario
             static let coloreCompleti = Colore.verde
-            static let coloreIncompleti = Colore.arancio
+            static let coloreIncompleti = Colore.arancioTesto
             static let completezzaSopra: CGFloat = 6
             /// Fra la riga della completezza e «Completa nella scheda del cliente ›».
             static let spazioCompletezza: CGFloat = 10
@@ -97,7 +97,7 @@ extension Tema.Apple {
             /// `.lbl` nel colore dell'area, con la priorità del cliente accanto.
             static let etichetta = Carattere.etichetta
             static let priorita = Carattere(dimensione: 11.5, peso: .semibold)
-            static let colorePriorita = Colore.arancio
+            static let colorePriorita = Colore.arancioTesto
             static let spazioEtichetta: CGFloat = 8
             /// Titolo 26 bold «{grande} {testo}», 4 sotto l'etichetta.
             static let titolo = Carattere(dimensione: 26, peso: .bold, tracking: -0.5)
@@ -113,7 +113,7 @@ extension Tema.Apple {
             static let righeDescrizione = 4
             /// Stato delle ipotesi e canali in essere: `.k` 12,5, 10 sopra.
             static let stato = Carattere.secondario
-            static let coloreStimate = Colore.arancio
+            static let coloreStimate = Colore.arancioTesto
             static let coloreConfermate = Colore.verde
             static let coloreDaVerificare = Colore.inchiostro2
             static let statoSopra: CGFloat = 10

@@ -277,7 +277,7 @@ extension Tema.Apple {
             static let codice = Carattere(dimensione: 11, peso: .regular, tabellare: true)
             static let coloreCodice = Colore.inchiostro3
             static let errore = Carattere(dimensione: 12, peso: .regular)
-            static let coloreErrore = Colore.arancio
+            static let coloreErrore = Colore.arancioTesto
             static let spazio: CGFloat = 6
             static let larghezzaScelta: CGFloat = 220
         }

@@ -158,7 +158,7 @@ struct ModuloSinistro: View {
     private func contatore(_ n: Int, _ massimo: Int) -> some View {
         Text("\(n)/\(massimo)")
             .carattereApple(M.contatore)
-            .foregroundColor(n > massimo ? Tema.Apple.Colore.arancio : M.coloreContatore)
+            .foregroundColor(n > massimo ? Tema.Apple.Colore.arancioTesto : M.coloreContatore)
             .fixedSize()
     }
 

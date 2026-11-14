@@ -31,7 +31,7 @@ extension Tema.Apple.Clienti {
         static let percentuale = Tema.Apple.Carattere(dimensione: 22, peso: .bold, tabellare: true)
         static let sogliaVerde = 85
         static let testoCompleto = Tema.Apple.Colore.verde
-        static let testoParziale = Tema.Apple.Colore.arancio
+        static let testoParziale = Tema.Apple.Colore.arancioTesto
         static let anelloCompleto = Tema.Apple.Colore.anello1
         static let anelloParziale = Tema.Apple.Colore.arancio
         /// Anello 120/13 con «completi» 11,5 al centro, a 12 sotto il titolo e a 22 dall'elenco.

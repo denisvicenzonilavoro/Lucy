@@ -150,7 +150,7 @@ extension Tema.Apple {
         static let etichettaSezione = Carattere.secondario
         static let coloreTesto = Colore.inchiostro
         static let coloreNota = Colore.inchiostro2
-        static let avviso = Colore.arancio
+        static let avviso = Colore.arancioTesto
         static let positivo = Colore.verde
         static let negativo = Colore.rosso
         // Barre affiancate delle strade

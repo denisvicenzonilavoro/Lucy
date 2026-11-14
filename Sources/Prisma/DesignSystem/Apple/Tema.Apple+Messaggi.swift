@@ -90,7 +90,7 @@ extension Tema.Apple {
             static let destinatario = Carattere.secondario
             static let coloreDestinatario = Colore.inchiostro2
             /// «manca l'indirizzo email nel dossier»: arancio come gli avvisi.
-            static let coloreRecapitoMancante = Colore.arancio
+            static let coloreRecapitoMancante = Colore.arancioTesto
             static let titolo = Carattere(dimensione: 23, peso: .bold, tracking: -0.4)
             static let coloreTitolo = Colore.inchiostro
             static let spazioTitolo: CGFloat = 2
@@ -103,7 +103,7 @@ extension Tema.Apple {
             static let testoPerche = Colore.accento
             /// «Senza consenso commerciale»: fondo e testo arancio degli avvisi.
             static let fondoConsenso = Colore.avvisoFondo
-            static let testoConsenso = Colore.arancio
+            static let testoConsenso = Colore.arancioTesto
             /// Riga dei controlli: gap 10, `margin:18px 0 14px`.
             static let controlliSopra: CGFloat = 18
             static let controlliSotto: CGFloat = 14
@@ -128,7 +128,7 @@ extension Tema.Apple {
             static let sopraAvviso: CGFloat = 14
             /// «Dati di prova: …»: arancio, 11,5.
             static let prova = Carattere(dimensione: 11.5, peso: .semibold)
-            static let coloreProva = Colore.arancio
+            static let coloreProva = Colore.arancioTesto
             static let sopraProva: CGFloat = 6
         }
 

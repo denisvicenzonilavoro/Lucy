@@ -36,7 +36,7 @@ extension Tema.Apple {
         static let coloreIntestazione = Colore.inchiostro2
         static let coloreTitolo = Colore.inchiostro
         static let coloreDettaglio = Colore.inchiostro2
-        static let coloreAvviso = Colore.arancio
+        static let coloreAvviso = Colore.arancioTesto
         static let fatto = Colore.verde
         static let nonFatto = Colore.rosso
         static let coloreTolta = Colore.inchiostro3

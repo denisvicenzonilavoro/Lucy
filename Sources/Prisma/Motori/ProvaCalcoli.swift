@@ -1329,6 +1329,10 @@ enum ProvaCalcoli {
         ProvaCalcoliCapsule.esegui(verificaEsterna)
         ProvaCalcoliBiglietto.esegui(verificaEsterna)
         ProvaCalcoliSinistri.esegui(verificaEsterna)
+        #if os(macOS)
+        // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
+        MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }
+        #endif
 
         // Giro 7: glossario e guida. Ogni chiave ha la sua voce, le etichette puntano a voci vere, ogni app ha 3 passi
         verifica("Glossario: voci per ogni chiave", Double(VoceGlossario.Chiave.allCases.filter { Glossario.voce($0) == nil }.count), 0)

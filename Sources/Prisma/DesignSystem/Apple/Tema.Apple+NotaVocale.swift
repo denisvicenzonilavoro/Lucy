@@ -184,7 +184,7 @@ extension Tema.Apple {
             static let stato = C(dimensione: 13, peso: .regular, interlinea: 1.35)
             static let coloreStato = K.inchiostro2
             static let avviso = C(dimensione: 13, peso: .regular, interlinea: 1.35)
-            static let coloreAvviso = K.arancio
+            static let coloreAvviso = K.arancioTesto
             static let titoloCoda = C(dimensione: 15, peso: .semibold)
             static let voceCoda = C(dimensione: 14, peso: .regular)
             static let coloreVoceCoda = K.inchiostro

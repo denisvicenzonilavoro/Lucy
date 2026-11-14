@@ -109,7 +109,7 @@ extension Tema.Apple {
             static let titolo = Carattere(dimensione: 13.5, peso: .bold)
             static let coloreTitolo = Colore.inchiostro
             static let coloreSegnoDato = Colore.verde
-            static let coloreSegnoMancante = Colore.arancio
+            static let coloreSegnoMancante = Colore.arancioTesto
             static let testo = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
             static let coloreTesto = Colore.inchiostro2
             static let sottoTitolo: CGFloat = 4
@@ -262,7 +262,7 @@ extension Tema.Apple {
             /// «Vera non è pronta: Prisma riconosce con le sue regole.» sotto l'occhiello; l'iPad in attesa del Mac in arancio.
             static let nota = Carattere(dimensione: 12, peso: .regular, interlinea: 1.4)
             static let coloreNota = Colore.inchiostro2
-            static let coloreAttesa = Colore.arancio
+            static let coloreAttesa = Colore.arancioTesto
             static let sottoNota: CGFloat = 8
         }
 
