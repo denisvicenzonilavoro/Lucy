@@ -203,7 +203,7 @@ extension StatoShell {
         let elenco = conversazione(mini.chiave)
         guard !veraInCorso, elenco.count > mini.messaggiPrima, let m = elenco.last, m.autore == .vera else { return false }
         mini.abbonamenti.removeAll()
-        if m.titolo == "Qwen non è pronto" {
+        if TestiStatoVera.eTitoloNonPronta(m.titolo) {
             mini.pendente = DomandaMiniVera(testo: mini.domanda)
             mini.nonPronta(motivo: disponibilitaLocale.motivo)
             return true

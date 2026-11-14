@@ -51,7 +51,12 @@ enum TestiCopilota {
     static let nienteNelDossier = "Niente da aggiungere."
     static let nienteRiconosciuto = "Prisma non ha riconosciuto obiettivi, polizze, timori o eventi."
     static let nessunaAttivita = "Nessuna attività."
+    #if os(macOS)
+    /// Migliorie d'uso 9: niente nome del motore in vista.
+    static let firmaVera = "Scritto da Vera, con le cifre delle schede"
+    #else
     static let firmaVera = "Scritto da Vera con Qwen, con le cifre delle schede"
+    #endif
     static let firmaPrisma = "Composto da Prisma dalle schede"
     static let conservaTrascrizione = "Conserva la trascrizione"
 

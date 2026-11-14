@@ -1091,10 +1091,23 @@ private struct CorpoVeraScrivaniaApple: View, Equatable {
                     Text("Vera")
                         .carattereApple(e.nome)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
+                    #if os(macOS)
+                    // Migliorie d'uso 9: solo se Vera è pronta, niente nome del motore (sta in Impostazioni › Vera)
+                    HStack(spacing: e.spazioStato) {
+                        Circle()
+                            .fill(pronta ? e.pallinoPronta : e.pallinoNonPronta)
+                            .frame(width: e.pallinoStato, height: e.pallinoStato)
+                        Text(pronta ? TestiStatoVera.pronta : TestiStatoVera.nonPronta)
+                            .carattereApple(e.stato)
+                            .foregroundColor(pronta ? Tema.Apple.Colore.inchiostro2 : e.coloreNonPronto)
+                            .lineLimit(1)
+                    }
+                    #else
                     Text(pronta ? "\(nomeMotore) · pronto" : "\(nomeMotore) · non pronto")
                         .carattereApple(e.stato)
                         .foregroundColor(pronta ? Tema.Apple.Colore.inchiostro2 : e.coloreNonPronto)
                         .lineLimit(1)
+                    #endif
                 }
             }
             // Sugli schermi bassi la frase cede righe alle domande (niente altezza fissa: resta nel riquadro)

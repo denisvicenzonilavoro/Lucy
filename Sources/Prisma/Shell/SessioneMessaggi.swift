@@ -272,7 +272,12 @@ enum TestiMessaggi {
     /// Chi ha scritto il testo, accanto alla nota sulle cifre.
     static func autore(_ s: TestoScrittoMessaggio) -> String {
         switch s.autore {
+        #if os(macOS)
+        // Migliorie d'uso 9: senza il modello (il nome del motore sta in Impostazioni › Vera)
+        case .vera: return "Scritto da Vera"
+        #else
         case .vera: return "Scritto da Vera" + (s.modello.map { " con \($0)" } ?? "")
+        #endif
         case .modelloFisso: return "Testo di Prisma"
         }
     }

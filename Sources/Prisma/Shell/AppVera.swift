@@ -170,46 +170,43 @@ private struct ColonnaAppVera: View {
         .sfumaturaBordiScorrimento(sotto: col.sfumatura)
     }
 
-    /// Lo stato vero di Qwen: pronto («I numeri li calcola Prisma, io li racconto.») o non pronto, e allora Vera non
-    /// risponde e lo dice, con «Verifica».
+    /// Lo stato di Vera: pronta («I numeri li calcola Prisma, io li racconto.») o non pronta, e allora Vera non
+    /// risponde e lo dice, con «Verifica» e «Apri Impostazioni › Vera». Migliorie d'uso 9: niente nomi tecnici in vista;
+    /// il nome del motore, il motivo (Ollama, modello mancante), «Due velocità» e il cervello grande stanno in
+    /// Impostazioni › Vera.
     private var schedaMotore: some View {
         let col = Tema.Apple.Vera.Colonna.self
-        let q = stato.qwen
-        let pronto = q.disponibilita.pronto
+        let pronto = stato.qwen.disponibilita.pronto
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: col.spazioSpia) {
                 Circle()
                     .fill(pronto ? col.pronto : col.nonPronto)
                     .frame(width: col.spia, height: col.spia)
-                Text("\(q.nome) · \(pronto ? "pronto" : "non pronto")")
+                Text(pronto ? TestiStatoVera.veraPronta : TestiStatoVera.veraNonPronta)
                     .carattereApple(col.statoMotore)
                     .foregroundColor(col.coloreTesto)
                     .lineLimit(1)
             }
-            Text(pronto ? "I numeri li calcola Prisma, io li racconto." : (q.disponibilita.motivo ?? q.descrizione))
+            Text(pronto ? "I numeri li calcola Prisma, io li racconto." : TestiStatoVera.spiegazione)
                 .carattereApple(col.notaMotore)
                 .foregroundColor(col.coloreNota)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, col.notaSopra)
             if !pronto {
-                Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
-                    .buttonStyle(.apple)
-                    .fixedSize()
-                    .help("Chiede di nuovo a Ollama se Qwen è pronto")
-                    .padding(.top, col.verificaSopra)
-            }
-            // Fase 5: come smista Vera, e la pagina dei motori (Due velocità, Il cervello grande); mai in modalità cliente
-            if !stato.inModoCliente {
                 HStack(spacing: col.spazioSpia) {
-                    Text("Smista: regole e Qwen · Apple spento")
-                        .carattereApple(col.notaMotore)
-                        .foregroundColor(col.coloreNota)
-                        .lineLimit(1)
-                    Spacer(minLength: 0)
-                    Button("Motori") { stato.apriPaginaMotori() }
+                    Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
+                        .buttonStyle(.apple)
+                        .fixedSize()
+                        .help(TestiStatoVera.aiutoVerifica)
+                    if !stato.inModoCliente {
+                        Button(TestiStatoVera.apriImpostazioni) {
+                            stato.ancoraImpostazioni = nil
+                            stato.schedaImpostazioni = .vera
+                            stato.apri(.impostazioni)
+                        }
                         .buttonStyle(.appleSobrio)
                         .fixedSize()
-                        .help("Due velocità e il cervello grande")
+                    }
                 }
                 .padding(.top, col.verificaSopra)
             }

@@ -57,7 +57,7 @@ extension StatoShell {
         inizioRichiestaVera = nil
         // Una domanda rimasta senza risposta (conversazione nuova, risposta fermata) non si attacca a un messaggio di dopo
         guard Date().timeIntervalSince(inizio.quando) < Self.attesaMassimaRichiesta else { return }
-        let avviso = m.titolo == "Qwen non è pronto" || m.titolo == "Vera non ha potuto rispondere"
+        let avviso = TestiStatoVera.eTitoloNonPronta(m.titolo) || m.titolo == "Vera non ha potuto rispondere"
             || (m.motore == "Prisma" && m.titolo == Self.titoloSuMisura)
         guard !avviso else { return }
         dueVelocita.registra(inizio.testo, corsia: CorsiaVera.da(motore: m.motore), secondi: Date().timeIntervalSince(inizio.quando))

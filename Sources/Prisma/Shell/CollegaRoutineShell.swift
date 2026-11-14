@@ -335,7 +335,12 @@ extension StatoShell {
             return
         }
         guard let motore = qwenPerRoutine else {
-            aggiungiMessaggio(MessaggioVera(autore: .vera, testo: "Con le regole non trovo passi che so fare, e Qwen non è pronto per capire la routine a parole. " + Self.catalogoRoutine,
+            #if os(macOS)
+            let chi = "non sono ancora pronta"   // Migliorie d'uso 9: niente nomi tecnici in vista
+            #else
+            let chi = "Qwen non è pronto"
+            #endif
+            aggiungiMessaggio(MessaggioVera(autore: .vera, testo: "Con le regole non trovo passi che so fare, e \(chi) per capire la routine a parole. " + Self.catalogoRoutine,
                                             titolo: "Una routine nuova", motore: MotoriVera.sintesi.nome), cliente: chiave)
             return
         }

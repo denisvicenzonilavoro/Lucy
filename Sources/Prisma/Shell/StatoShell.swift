@@ -2349,9 +2349,14 @@ enum VoceConfronto: Hashable {
 
     /// Il messaggio di Vera quando Qwen non c'è: il motivo e cosa fare.
     func qwenNonPronto(cliente id: String) {
-        let motivo = disponibilitaLocale.motivo ?? "Qwen non risponde."
-        aggiungiMessaggio(MessaggioVera(autore: .vera, testo: motivo + " Vera risponde solo con Qwen: quando è pronto, rifai la domanda.",
-                                       titolo: "Qwen non è pronto", motore: "Prisma"), cliente: id)
+        #if os(macOS)
+        // Migliorie d'uso 9: niente nomi tecnici in vista; il motivo (Ollama, modello) sta in Impostazioni › Vera
+        let testo = TestiStatoVera.spiegazione + " Quando è pronta, rifai la domanda."
+        #else
+        let testo = (disponibilitaLocale.motivo ?? "Qwen non risponde.") + " Vera risponde solo con Qwen: quando è pronto, rifai la domanda."
+        #endif
+        aggiungiMessaggio(MessaggioVera(autore: .vera, testo: testo,
+                                       titolo: TestiStatoVera.titoloNonPronta, motore: "Prisma"), cliente: id)
     }
 
     /// Chiede a Ollama, sul Mac, se Qwen è pronto (all'avvio, aprendo Vera e dalle impostazioni).

@@ -282,7 +282,22 @@ enum ProvaNucleoVera {
         spento.disponibilitaLocale = .nonDisponibile("Ollama non è aperto.")
         spento.qwenNonPronto(cliente: spento.clienteAttivoId)
         let avviso = spento.conversazione(spento.clienteAttivoId).last
-        controlla(avviso?.titolo == "Qwen non è pronto" && (avviso?.testo ?? "").hasPrefix("Ollama non è aperto."), "Vera: modello spento, Vera lo dice con il motivo")
+        #if os(macOS)
+        // Migliorie d'uso 9: sul Mac niente nomi tecnici nel messaggio; il motivo sta in Impostazioni › Vera
+        controlla(avviso?.titolo == TestiStatoVera.titoloNonPronta && (avviso?.testo ?? "").hasPrefix(TestiStatoVera.spiegazione)
+                  && !(avviso?.testo ?? "").contains("Qwen") && !(avviso?.testo ?? "").contains("Ollama"),
+                  "Vera: modello spento, Vera lo dice senza nomi tecnici e rimanda a Impostazioni › Vera")
+        controlla(TestiStatoVera.eTitoloNonPronta(TestiStatoVera.titoloDiPrima) && TestiStatoVera.eTitoloNonPronta(TestiStatoVera.titoloNonPronta)
+                  && !TestiStatoVera.eTitoloNonPronta("Vera non ha potuto rispondere") && !TestiStatoVera.eTitoloNonPronta(nil),
+                  "Vera: il titolo «non pronta» di oggi e quello salvato prima si riconoscono entrambi")
+        let testiStato = [TestiStatoVera.pronta, TestiStatoVera.nonPronta, TestiStatoVera.veraPronta, TestiStatoVera.veraNonPronta,
+                          TestiStatoVera.titoloNonPronta, TestiStatoVera.spiegazione, TestiStatoVera.aiutoVerifica,
+                          TestiMessaggi.autore(TestoScrittoMessaggio(testo: "", autore: .vera, modello: "qwen3.5:4b"))]
+        controlla(!testiStato.contains { $0.contains("Qwen") || $0.contains("qwen") || $0.contains("Ollama") },
+                  "Vera: lo stato e la firma dei messaggi non mostrano nomi tecnici (Migliorie d'uso 9)")
+        #else
+        controlla(avviso?.titolo == TestiStatoVera.titoloNonPronta && (avviso?.testo ?? "").hasPrefix("Ollama non è aperto."), "Vera: modello spento, Vera lo dice con il motivo")
+        #endif
         // Un messaggio con la modalità si salva e si rilegge; uno di prima si legge senza
         var m = MessaggioVera(autore: .vera, testo: "ok")
         m.modalita = .conversazione

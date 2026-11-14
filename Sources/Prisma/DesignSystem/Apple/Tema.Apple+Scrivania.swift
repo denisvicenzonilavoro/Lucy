@@ -187,6 +187,12 @@ extension Tema.Apple {
             /// Un clic su un suggerimento apre Vera e manda la domanda dopo 0,7 s.
             static let attesaDomanda: Double = 0.7
             static let coloreNonPronto = Colore.arancioTesto
+            /// Migliorie d'uso 9 (sul Mac): sotto «Vera» un pallino di 7 (verde pronta, arancio non pronta) e «Pronta» /
+            /// «Non pronta», a 6 di distanza; il nome del motore sta in Impostazioni › Vera.
+            static let pallinoStato: CGFloat = 7
+            static let spazioStato: CGFloat = 6
+            static let pallinoPronta = Colore.verde
+            static let pallinoNonPronta = Colore.arancio
         }
 
         // MARK: Da fare oggi

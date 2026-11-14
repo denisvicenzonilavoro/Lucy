@@ -21,6 +21,12 @@ enum Parole {
     static let vera = "Vera"
     /// Il pulsante che prepara un incontro (spariscono: «Prepara con Eve», «Prepara l'incontro»).
     static let preparamiIncontro = "Preparami l'incontro"
+    /// Lo spunto di Vera per l'incontro (miglioria 9): sul Mac «Preparami l'incontro», su iPhone e iPad come prima.
+    #if os(macOS)
+    static let spuntoIncontro = preparamiIncontro
+    #else
+    static let spuntoIncontro = "Prepara l'incontro"
+    #endif
     /// La scelta di nessun cliente in particolare (sparisce «Portafoglio» come scelta del cliente).
     static let tuttiIClienti = "Tutti i clienti"
     /// Le quattro aree lette insieme (spariscono: «Panoramica delle aree», «Check-up» a schermo).
