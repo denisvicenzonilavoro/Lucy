@@ -111,6 +111,14 @@ extension Tema.Apple {
         static let anello3 = Color(hex: "#8B5CF6")
         /// Stime e proposte nei grafici.
         static let stima = Color(hex: "#8B5CF6")
+        #if os(macOS)
+        /// La linea del totale (--tot, Migliorie d'uso 8): portafoglio e patrimonio nel blu scuro del logo, #0F2433 in
+        /// chiaro e #E3ECF2 in scuro, perché il blu pieno resta ad Alleanza e ai comandi. Linee spesse almeno 2,6.
+        static let totale = Color.dinamico(chiaro: Color(hex: "#0F2433"), scuro: Color(hex: "#E3ECF2"))
+        #else
+        /// La linea del totale: su iPhone e iPad resta il blu degli anelli fino al loro aggiornamento.
+        static let totale = anello2
+        #endif
         /// Fondo dell'etichetta Alleanza (non cambia in scuro).
         static let fondoAlleanza = Color(r: 37, g: 99, b: 235, a: 0.13)
         /// Fondo dell'etichetta indipendente (non cambia in scuro).

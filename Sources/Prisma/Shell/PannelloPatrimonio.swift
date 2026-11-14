@@ -36,7 +36,7 @@ struct PannelloPatrimonio: View {
                         GraficoProiezione(serie: serie)
                             .frame(height: Misure.Analisi.grafico)
                         HStack(spacing: 14) {
-                            legenda("Com'è oggi", Colori.Analisi.lineaAtteso)
+                            legenda("Com'è oggi", Colori.Analisi.lineaPatrimonio)
                             if p.conProposte != nil { legenda("Con le proposte", Colori.Analisi.linea) }
                             legenda("Patrimonio di oggi più i versamenti", Colori.Analisi.lineaTratteggiata)
                         }
@@ -70,7 +70,7 @@ struct PannelloPatrimonio: View {
     }
 
     private var serie: [GraficoProiezione.Serie] {
-        var s = [GraficoProiezione.Serie(id: "oggi", punti: p.oggi, colore: Colori.Analisi.lineaAtteso, principale: p.conProposte == nil)]
+        var s = [GraficoProiezione.Serie(id: "oggi", punti: p.oggi, colore: Colori.Analisi.lineaPatrimonio, principale: p.conProposte == nil)]
         if let c = p.conProposte { s.append(.init(id: "proposte", punti: c, colore: Colori.Analisi.linea, principale: true)) }
         return s
     }

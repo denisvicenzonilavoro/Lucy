@@ -218,6 +218,13 @@ enum Colori {
         static let favorevole = Color(hex: "#6e9f9b")
         /// Andamento: dove sarebbe la posizione all'atteso netto.
         static let lineaAtteso = Color(hex: "#c5ab7e")
+        #if os(macOS)
+        /// «Il patrimonio nel tempo» di Posizioni, «Com'è oggi»: la linea del totale (Migliorie d'uso 8).
+        static let lineaPatrimonio = Tema.Apple.Colore.totale
+        #else
+        /// «Il patrimonio nel tempo» di Posizioni, «Com'è oggi»: su iPhone e iPad resta com'era.
+        static let lineaPatrimonio = lineaAtteso
+        #endif
         static let canaleAlleanza = TC.canaleAlleanza
         static let canaleIndipendente = TC.canaleIndipendente
         // Barra di stato in basso: trasparente, con la spia verde

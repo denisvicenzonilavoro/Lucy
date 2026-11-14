@@ -24,3 +24,19 @@ Resta:
   qualche tratteggio pesa troppo nelle istantanee, un token a parte per i segni.
 - I file `Tema.Apple+Telefono.swift`, `Tema.Apple+TavoloiPad.swift` e `Tema.Apple+Luce.swift` (iPhone, iPad e glifi)
   non sono passati in rassegna: arriveranno con l'aggiornamento di iPhone e iPad.
+
+## 8. Il totale non è più blu Alleanza
+
+Fatto: il token `Tema.Apple.Colore.totale` (#0F2433 / #E3ECF2, solo sul Mac; su iPhone e iPad vale `anello2`), la linea,
+l'area e il punto di oggi del grafico del portafoglio in Posizioni (`Grafico.Portafoglio.coloreStoria`), Clienti › Nel
+tempo (`Clienti.NelTempo.colorePassato` e la stima senza proposte, con il «━» della legenda) e «Il patrimonio nel tempo»
+di Posizioni (`Colori.Analisi.lineaPatrimonio`, linea «Com'è oggi» e legenda, prima color sabbia). Spessori invariati
+(2,6 e più). Anelli, aree, Studio, Mercato, Radar e la carta dei PDF non cambiano.
+
+Resta:
+- **Istantanee**: rigenerare sul Mac «420-posizioni-portafoglio» (chiara e scura), «421-posizioni-con-proposte»,
+  «434-clienti-nel-tempo», «435-clienti-nel-tempo-passato» e guardare «298-scrivania-vera-portafoglio-canali»; aggiornare
+  la pagina delle anteprime. In chiaro controllare che la linea del totale non si confonda con il testo.
+- Il capitolo «Nel tempo» della vista del cliente del template (righe 3300-3302) non ha oggi una vista corrispondente
+  nell'app: quando nascerà, userà `Colore.totale`.
+- iPhone e iPad (anche il tavolo dell'iPad, che legge `Clienti.NelTempo`) prendono il colore con il loro aggiornamento.
