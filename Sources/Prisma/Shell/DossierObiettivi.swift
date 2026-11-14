@@ -626,6 +626,12 @@ struct PresentatoreDettaglioDossier<Contenuto: View>: View {
 
     private static func dettaglioIniziale(_ stato: StatoShell) -> StatoDettaglio {
         guard let id = RichiestaIstantaneaDossier.per(stato)?.dettaglio else { return StatoDettaglio() }
+        #if os(macOS)
+        // Migliorie d'uso 5: l'elenco dei dati da completare nato dalla riga del quadro
+        if id == QuadroDossier.idDati {
+            return StatoDettaglio(aperto: id, misura: QuadroDossier.misuraDati(stato.completezzaCliente(stato.clienteAttivoId)))
+        }
+        #endif
         let misura = DettaglioAziendaId(id) != nil ? Tema.Apple.Azienda.misuraDettaglio : Tema.Apple.Clienti.DettaglioObiettivo.misura
         return StatoDettaglio(aperto: id, misura: misura)
     }
@@ -648,6 +654,19 @@ struct DettaglioDossierApple: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
+        #if os(macOS)
+        if id == QuadroDossier.idDati {
+            // Migliorie d'uso 5: «Dati per l'analisi · <Nome>», nato dalla riga del quadro (DossierQuadro.swift)
+            DettaglioDatiAnalisiApple()
+        } else {
+            dettaglioComune
+        }
+        #else
+        dettaglioComune
+        #endif
+    }
+
+    @ViewBuilder private var dettaglioComune: some View {
         if let o = stato.dati.obiettivi.first(where: { $0.id == id }) {
             DettaglioObiettivoApple(obiettivo: o, posizioni: stato.posizioniCliente(o.clienteId))
                 // Un altro obiettivo: il cursore riparte dal suo versamento

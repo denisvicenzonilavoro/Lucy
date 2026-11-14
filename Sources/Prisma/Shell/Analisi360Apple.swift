@@ -106,7 +106,24 @@ struct PresentatoreAree360<Contenuto: View>: View {
             .onChange(of: stato.areaAnalisi) { _ in dettaglio.chiudi(subito: true) }
             .onChange(of: stato.strumentoAnalisi) { _ in dettaglio.chiudi(subito: true) }
             .onDisappear { dettaglio.chiudi(subito: true) }
+            #if os(macOS)
+            // Migliorie d'uso 5: un riquadro del quadro del cliente apre Analisi 360 con il dettaglio dell'area già aperto
+            .onAppear(perform: apriDettaglioChiesto)
+            .onChange(of: stato.dettaglioArea360DaAprire) { _ in apriDettaglioChiesto() }
+            #endif
     }
+
+    #if os(macOS)
+    /// Apre il dettaglio dell'area chiesta dal dossier, un giro dopo: prima passano le chiusure dovute al cambio d'area.
+    private func apriDettaglioChiesto() {
+        guard let a = stato.dettaglioArea360DaAprire else { return }
+        stato.dettaglioArea360DaAprire = nil
+        let d = dettaglio
+        DispatchQueue.main.async {
+            d.apri(DettagliAree360.id(a), misura: DettagliAree360.misura(a))
+        }
+    }
+    #endif
 }
 
 /// Il contenuto del dettaglio aperto, secondo l'id della card da cui è nato.

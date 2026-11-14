@@ -395,6 +395,9 @@ enum VoceConfronto: Hashable {
     var daFareScrivo = false
     var fatteDaFare: [FattoDaFare] = []
     var voceDaFareAperta: VoceDaFare? = nil
+    /// Migliorie d'uso 5 «Il dossier parte dal quadro» (DossierQuadro.swift): l'area di cui Analisi 360 apre il dettaglio
+    /// appena c'è (un clic su un riquadro del quadro del cliente). Solo in memoria; la consuma PresentatoreAree360.
+    var dettaglioArea360DaAprire: AreaAnalisi? = nil
     #endif
     /// «Le routine» di Vera (fase 4, CollegaRoutineShell.swift): la pagina delle routine aperta sopra Vera e la routine scelta.
     var paginaRoutineVera = false

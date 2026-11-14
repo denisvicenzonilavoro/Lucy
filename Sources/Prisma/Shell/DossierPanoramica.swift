@@ -15,6 +15,8 @@ import SwiftUI
 ///   pertinente». Strumento del consulente: in modalità cliente la card non c'è.
 /// - «Da ricordare» è la nota del cliente; il prossimo incontro viene dall'agenda e la card apre l'Agenda sul giorno.
 /// - I blocchi entrano con `.entrataDossier(i)`, la percentuale si conta, l'anello parte a 0,15 s.
+/// - Sul Mac (migliorie d'uso 5, DossierQuadro.swift) a sinistra c'è «Il quadro di <Nome>» con le quattro aree e i dati
+///   da completare in una riga in fondo; l'elenco nasce dalla riga. iPhone e iPad restano come sopra.
 struct PanoramicaDossierApple: View {
     @Environment(StatoShell.self) var stato
     let cliente: Cliente
@@ -33,6 +35,53 @@ struct PanoramicaDossierApple: View {
     }
 
     @ViewBuilder private func griglia(completezza: CompletezzaCliente?, prossimo: Appuntamento?) -> some View {
+        #if os(macOS)
+        grigliaQuadro(completezza: completezza, prossimo: prossimo)
+        #else
+        grigliaDati(completezza: completezza, prossimo: prossimo)
+        #endif
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 5 (DossierQuadro.swift): a sinistra «Il quadro di <Nome>» con le quattro aree e la riga dei dati
+    /// da completare (non in modalità cliente); a destra il sussurro, «Da fare per <Nome>» (non in modalità cliente),
+    /// «Prossimo incontro» e «Da ricordare», poi «Da festeggiare» e i sinistri. «Il cliente in 30 secondi» è un
+    /// collegamento nella testata del quadro.
+    @ViewBuilder private func grigliaQuadro(completezza: CompletezzaCliente?, prossimo: Appuntamento?) -> some View {
+        let p = Tema.Apple.Clienti.Panoramica.self
+        let destra = VStack(alignment: .leading, spacing: p.spazio) {
+            SussurroDossierVista(cliente: cliente)
+                .entrataDossier(1)
+            if !stato.inModoCliente {
+                DaFareDossierApple(cliente: cliente)
+                    .entrataDossier(1)
+            }
+            ProssimoIncontroApple(cliente: cliente, appuntamento: prossimo)
+                .entrataDossier(2)
+            DaRicordareApple(cliente: cliente)
+                .entrataDossier(2)
+            if !stato.inModoCliente {
+                let daFesteggiare = stato.traguardiDaFesteggiareDossier(cliente.id)
+                if !daFesteggiare.isEmpty {
+                    DaFesteggiareApple(traguardi: daFesteggiare)
+                        .entrataDossier(2)
+                }
+                if stato.dati.sinistri.contains(where: { $0.clienteId == cliente.id }) {
+                    SinistriDossierApple(cliente: cliente)
+                        .entrataDossier(2)
+                }
+            }
+        }
+        ColonneProporzionaliDossier(proporzione: p.proporzione, spazio: p.spazio, larghezzaMinima: p.larghezzaDueColonne) {
+            QuadroDossierApple(cliente: cliente, completezza: completezza)
+                .entrataDossier(0)
+            destra
+        }
+    }
+    #endif
+
+    /// La griglia di prima (iPhone e iPad): «Dati per l'analisi» a sinistra, il resto a destra.
+    @ViewBuilder private func grigliaDati(completezza: CompletezzaCliente?, prossimo: Appuntamento?) -> some View {
         let p = Tema.Apple.Clienti.Panoramica.self
         let laterali = VStack(alignment: .leading, spacing: p.spazio) {
             // Vera, fase 4: «Il sussurro» (VisteSussurroVera.swift); senza voci, in modalità cliente o spento non c'è

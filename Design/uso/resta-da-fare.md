@@ -275,3 +275,23 @@ Resta:
   «616-scrivania-luce», «118-scrivania-seguito», «117-notifiche-seguito», «133-notifiche-occasioni», «153-notifiche-conformita»,
   «738-notifiche-traguardo» e le nuove 1030-1035; aggiornare la pagina delle anteprime. Il passaggio sul cerchio e l'uscita
   della riga chiedono uno screenshot.
+
+## 5. Il dossier parte dal quadro del cliente
+
+Fatto (solo sul Mac, `#if os(macOS)`): `QuadroDossierApple` in Shell/DossierQuadro.swift con «Il quadro di <Nome>»,
+«Il cliente in 30 secondi ›» (non in modalità cliente) e «Apri Analisi 360 ›» nella testata, i quattro riquadri delle
+aree da `stato.aree360` (anello 76/9, cifra al centro, i mesi su due righe, inclinazione 4°; un clic apre Analisi 360
+con il dettaglio dell'area già aperto, `StatoShell.dettaglioArea360DaAprire` consumato da `PresentatoreAree360`), la riga
+`RigaDatiAnalisi` (barra al più 200, percentuale che si conta, «N da completare ›» o «Dati completi») che apre l'elenco
+`DettaglioDatiAnalisiApple` nel presentatore del dossier (con «Completa», la croce e «Ripristina»); a destra il sussurro,
+«Da fare per <Nome>» (righe `RigaDaFare`, «Apri tutto ›» su «Solo <Nome>»), «Prossimo incontro», «Da ricordare», poi
+«Da festeggiare» e i sinistri. In modalità cliente niente riga dei dati né «Da fare». Token in
+`Tema.Apple.Clienti.Panoramica.Quadro`, `proporzione` 1,32 sul Mac. Istantanee nuove 1050-1052 (chiare e scure).
+
+Resta:
+- **Istantanee**: rigenerare sul Mac 430, 431, 152 e le nuove 1050-1052; controllare che la colonna di destra non
+  allunghi troppo la griglia (nel template «Da ricordare» si taglia con `overflow:hidden`; qui va a capo per intero).
+- **Il dettaglio dell'area in Analisi 360** nasce al centro e non dalla card: all'apertura della finestra la griglia
+  non è ancora montata. Se si vuole l'origine sulla card, aprirlo dopo la prima comparsa della griglia.
+- **La guida del template** (il giro guidato «Il dossier parte dal quadro» con `indica('#quadroC')`) non è riportata.
+- `DatiAnalisiApple` e la card «Il cliente in 30 secondi» restano per iPhone e iPad; sul Mac non si usano più.
