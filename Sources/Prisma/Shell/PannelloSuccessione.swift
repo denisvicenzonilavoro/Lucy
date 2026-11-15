@@ -98,6 +98,7 @@ struct PannelloSuccessione: View {
                 .buttonStyle(StileSemplice())
                 .background(i % 2 == 1 ? Colori.Analisi.tabellaAlternata : Colori.Analisi.principale)
                 .bordoBasso(Colori.Analisi.tabellaRiga)
+                .id(RientroPosizione.id(v.posizione.id))
             }
         }
         .contornoTabella()

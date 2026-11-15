@@ -68,6 +68,17 @@ struct AzioniSala: View {
 }
 
 #if os(macOS)
+/// Migliorie d'uso 58: la griglia della Sala ferma, senza indicazioni di lavoro, per l'immagine mandata all'iPad sul tavolo
+/// (capitolo «La Sala» senza un'esperienza sul palco) e per la pagina della presa visione.
+struct GrigliaSalaFerma: View {
+    let cliente: Cliente
+    @Namespace private var spazio
+
+    var body: some View {
+        GrigliaSala(cliente: cliente, spazio: spazio, apri: { _ in })
+    }
+}
+
 /// Migliorie d'uso 34: «Tutte · Per aprire · Per spiegare · Per chiudere · Dopo l’incontro» nella testata della Sala.
 /// Osserva da solo l'esperienza sul palco e il momento scelto: la testata non si iscrive al resto di `StatoSala`.
 private struct FiltroMomentiSala: View {
@@ -110,7 +121,9 @@ private struct CorpoSala: View {
                 GrigliaSala(cliente: cliente, spazio: spazio, apri: apri,
                             indicazioni: indicazioni,
                             consigliate: indicazioni ? (cliente.map { stato.esperienzeConsigliate($0.id) } ?? []) : [],
-                            momento: indicazioni ? sala.momento : nil)
+                            momento: indicazioni ? sala.momento : nil,
+                            // Migliorie d'uso 60: le esperienze fatte oggi, lette una volta (ricavato in cache)
+                            fatte: indicazioni ? (cliente.map { stato.esperienzeFatteOggi(cliente: $0.id) } ?? []) : [])
                     .transition(.opacity)
             }
             EscSala(sistema: stato.sistema, palco: sala.esperienza != nil)
@@ -189,6 +202,11 @@ private struct EscSala: View {
         if libera {
             Button(palco ? "Torna alla Sala" : "Chiudi la Sala") {
                 if palco {
+                    // Migliorie d'uso 59: con il copione aperto, Esc chiude prima il copione
+                    if stato.sala.copioneAperto {
+                        stato.sala.copioneAperto = false
+                        return
+                    }
                     // A metà del gioco del rischio chiede conferma (§4.1.4)
                     guard stato.puoTornareAllaSala() else { return }
                     withAnimation(Tema.Apple.Moto.SalaEsperienze.ritorno) { stato.tornaAllaSala() }
@@ -215,6 +233,8 @@ private struct GrigliaSala: View {
     var indicazioni = false
     var consigliate: [EsperienzaSala] = []
     var momento: MomentoSala?
+    /// Migliorie d'uso 60: le esperienze fatte oggi con il cliente («✓ Fatta oggi» sulle schede).
+    var fatte: Set<EsperienzaSala> = []
 
     private typealias G = Tema.Apple.SalaEsperienze.Griglia
 
@@ -226,7 +246,7 @@ private struct GrigliaSala: View {
             let righe = stride(from: 0, to: piccole.count, by: G.colonne).map { Array(piccole[$0..<min($0 + G.colonne, piccole.count)]) }
             HStack(alignment: .top, spacing: G.spazio) {
                 SchedaGrandeSala(cliente: cliente, spazio: spazio, apri: apri, indicazioni: indicazioni,
-                                 attenuata: attenuata(.prismaCliente))
+                                 attenuata: attenuata(.prismaCliente), fattaOggi: fatte.contains(.prismaCliente))
                     .frame(width: unita * G.quotaPrima)
                     .entrataCascata(0)
                 VStack(spacing: G.spazio) {
@@ -236,7 +256,7 @@ private struct GrigliaSala: View {
                                 SchedaPiccolaSala(esperienza: e, spenta: cliente == nil, spazio: spazio, apri: apri,
                                                   indicazioni: indicazioni,
                                                   consigliata: consigliate.contains(e) ? cliente.map { StatoShell.nomeBreve($0) } : nil,
-                                                  attenuata: attenuata(e))
+                                                  attenuata: attenuata(e), fattaOggi: fatte.contains(e))
                                     .frame(width: unita)
                                     .entrataCascata(1 + r * G.colonne + c)
                             }
@@ -305,6 +325,21 @@ private struct EtichettaConsigliataSala: View {
     }
 }
 
+/// Migliorie d'uso 60: «✓ Fatta oggi» in alto a destra della scheda, 44 dall'alto e 14 da destra (`.saOk`), sotto
+/// l'etichetta del momento. VoiceOver lo legge con il nome della scheda.
+private struct EtichettaFattaSala: View {
+    static let accessibilita = ". Fatta oggi"
+
+    private typealias F = Tema.Apple.SalaEsperienze.Fatte
+
+    var body: some View {
+        CapsulaStatoApple(testo: TestiEsperienzeFatte.fattaOggi, tono: .ok)
+            .padding(.top, F.dallAlto)
+            .padding(.trailing, F.daDestra)
+            .accessibilityHidden(true)
+    }
+}
+
 /// La scheda grande «Il Prisma del cliente»: il saluto e gli anelli dei primi tre obiettivi del cliente attivo.
 private struct SchedaGrandeSala: View {
     @Environment(StatoShell.self) var stato
@@ -314,6 +349,8 @@ private struct SchedaGrandeSala: View {
     /// Migliorie d'uso 34: l'etichetta «Dopo l’incontro» e l'attenuazione del filtro.
     var indicazioni = false
     var attenuata = false
+    /// Migliorie d'uso 60: «✓ Fatta oggi» sotto l'etichetta del momento.
+    var fattaOggi = false
 
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
@@ -360,6 +397,9 @@ private struct SchedaGrandeSala: View {
                     EtichettaMomentoSala(esperienza: e, rientro: S.paddingGrande + S.tasselloGrande)
                 }
             }
+            .overlay(alignment: .topTrailing) {
+                if indicazioni && fattaOggi { EtichettaFattaSala() }
+            }
             .matchedGeometryEffect(id: e.id, in: spazio, isSource: true)
             .superficieApple(S.superficie, raggio: S.raggio)
             .clipShape(RoundedRectangle(cornerRadius: S.raggio, style: .continuous))
@@ -370,7 +410,7 @@ private struct SchedaGrandeSala: View {
         .buttonStyle(StileSemplice())
         .inclinazione(massimo: Tema.Apple.Moto.Inclinazione.massimoSalaGrande, raggio: S.raggio)
         .help(cliente == nil ? "Scegli prima un cliente in Clienti" : "Apri «\(e.titolo)»")
-        .accessibilityLabel(Text(indicazioni ? "\(e.titolo): \(e.frase). \(TestiSala.accessibilita(e, consigliata: nil))"
+        .accessibilityLabel(Text(indicazioni ? "\(e.titolo): \(e.frase). \(TestiSala.accessibilita(e, consigliata: nil))\(fattaOggi ? EtichettaFattaSala.accessibilita : "")"
                                               : "\(e.titolo): \(e.frase)"))
     }
 
@@ -418,6 +458,8 @@ private struct SchedaPiccolaSala: View {
     var indicazioni = false
     var consigliata: String?
     var attenuata = false
+    /// Migliorie d'uso 60: «✓ Fatta oggi» sotto l'etichetta del momento.
+    var fattaOggi = false
 
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
@@ -453,6 +495,9 @@ private struct SchedaPiccolaSala: View {
                     EtichettaMomentoSala(esperienza: esperienza, rientro: S.paddingPiccola + S.tassello)
                 }
             }
+            .overlay(alignment: .topTrailing) {
+                if indicazioni && fattaOggi { EtichettaFattaSala() }
+            }
             .matchedGeometryEffect(id: esperienza.id, in: spazio, isSource: true)
             .superficieApple(S.superficie, raggio: S.raggio)
             .clipShape(RoundedRectangle(cornerRadius: S.raggio, style: .continuous))
@@ -465,7 +510,7 @@ private struct SchedaPiccolaSala: View {
         .inclinazione(massimo: Tema.Apple.Moto.Inclinazione.massimoSala, raggio: S.raggio, attiva: !spenta)
         .help(spenta ? "Scegli prima un cliente in Clienti" : "Apri «\(esperienza.titolo)»")
         .accessibilityLabel(Text(indicazioni
-                                 ? "\(esperienza.titolo): \(esperienza.frase). \(TestiSala.accessibilita(esperienza, consigliata: consigliata))"
+                                 ? "\(esperienza.titolo): \(esperienza.frase). \(TestiSala.accessibilita(esperienza, consigliata: consigliata))\(fattaOggi ? EtichettaFattaSala.accessibilita : "")"
                                  : "\(esperienza.titolo): \(esperienza.frase)"))
     }
 }
@@ -500,9 +545,35 @@ private struct PalcoSala: View {
                 .superficieApple(Tema.Apple.SalaEsperienze.Scheda.superficie, raggio: Tema.Apple.SalaEsperienze.Scheda.raggio)
                 .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.SalaEsperienze.Scheda.raggio, style: .continuous))
         }
+        // Migliorie d'uso 59: il copione «Cosa dire» in alto a destra, 48 sotto la testata, sopra il palco (e sopra la
+        // riga di conferma delle cifre, che resta leggibile a sinistra). Fuori dalla card: non è mai nella presentazione
+        // né nelle immagini mandate all'iPad. Solo sul Mac
+        .overlay(alignment: .topTrailing) {
+            #if os(macOS)
+            if stato.consulenteVede {
+                RiquadroCopione(sala: stato.sala, esperienza: esperienza)
+                    .padding(.top, Tema.Apple.SalaEsperienze.Copione.dallAlto)
+            }
+            #endif
+        }
     }
 
-    private var testata: some View {
+    @ViewBuilder private var testata: some View {
+        #if os(macOS)
+        // Rifinitura 59/60: con la finestra stretta i pulsanti passano dai testi alle icone (prima «Prossima» e «Aggiungi
+        // al Prisma», poi tutti), così il nome dell'esperienza resta intero; solo all'ultimo passo il nome si taglia
+        ViewThatFits(in: .horizontal) {
+            rigaTestata(.piena, titoloIntero: true)
+            rigaTestata(.breve, titoloIntero: true)
+            rigaTestata(.icone, titoloIntero: true)
+            rigaTestata(.icone, titoloIntero: false)
+        }
+        #else
+        rigaTestata(.piena, titoloIntero: false)
+        #endif
+    }
+
+    private func rigaTestata(_ livello: LivelloTestataPalco, titoloIntero: Bool) -> some View {
         let nome = StatoShell.nomeBreve(cliente)
         return HStack(spacing: P.spazioTestata) {
             Button { torna() } label: { Text("‹ Sala") }
@@ -518,35 +589,59 @@ private struct PalcoSala: View {
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
             }
             .lineLimit(1)
+            .fixedSize(horizontal: titoloIntero, vertical: false)
             Spacer(minLength: P.spazioTestata)
             HStack(spacing: P.spazioPulsanti) {
-                // «▣ Mostra sul tavolo» (giro 16, decisioni 48 e 111): sul Mac osserva il tavolo; su iPhone e iPad il
-                // tavolo lato Mac non c'è. «✦ Aggiungi al Prisma» si accende con il giro 15 (decisione 7)
                 #if os(macOS)
-                if esperienza.mostraSulTavolo {
-                    PulsanteMostraSulTavolo(tavolo: stato.tavolo, esperienza: esperienza, cliente: cliente)
+                // Migliorie d'uso 59: i pulsanti del consulente («Cosa dire»), solo quando il cliente non guarda il Mac
+                if stato.consulenteVede {
+                    AzioniPalco(sala: stato.sala, compatta: livello == .icone)
+                    // Migliorie d'uso 60: «Segna come fatta» o «✓ Fatta oggi» e «Prossima: … ›»
+                    AzioniFattaPalco(esperienza: esperienza, cliente: cliente, prossimaBreve: livello != .piena,
+                                     compatta: livello == .icone)
                 }
                 #endif
+                // Migliorie d'uso 58: «▣ Mostra sul tavolo» non c'è più, sul Mac l'iPad lo sceglie l'etichetta del luogo
+                // nella vista del cliente. «✦ Aggiungi al Prisma» si accende con il giro 15 (decisione 7)
                 if esperienza.aggiungeAlPrisma {
                     // Giro 15: accende la voce nel file del cliente (Shell/StatoPrismaCliente.swift); il disegno entra
                     // nel file solo come obiettivo salvato (decisione 7)
                     let aggiunta = stato.voceAggiunta(esperienza, cliente: cliente)
+                    let intero = aggiunta ? "✓ Nel Prisma di \(nome)" : "✦ Aggiungi al Prisma di \(nome)"
                     Button { stato.aggiungiAlPrismaCliente(esperienza, cliente: cliente) } label: {
-                        Text(aggiunta ? "✓ Nel Prisma di \(nome)" : "✦ Aggiungi al Prisma di \(nome)")
+                        // Rifinitura 59/60: nelle finestre strette solo il segno (il testo intero resta nell'aiuto e
+                        // nell'etichetta di accessibilità)
+                        Text(livello == .piena ? intero : (aggiunta ? "✓" : "✦"))
                     }
                     .buttonStyle(.apple)
                     .disabled(esperienza == .disegna || !esperienza.disponibile || !EsperienzaSala.prismaCliente.disponibile)
-                    .help(esperienza == .disegna
-                          ? "Il disegno entra nel file quando lo salvi come obiettivo"
-                          : "Nel file personale del cliente (Il Prisma del cliente). Prisma non manda nulla da solo")
+                    .help(aiutoAggiungi(intero: intero, breve: livello != .piena))
+                    .accessibilityLabel(Text(intero))
                 }
+                // Migliorie d'uso 58: sul Mac «▶︎ Presenta» lo sostituisce «Mostra al cliente» nella testata della Sala (la vista
+                // del cliente sul capitolo «La Sala», con il palco aperto); su iPhone e iPad resta
+                #if !os(macOS)
                 Button { stato.presentaEsperienza(esperienza) } label: { Text("▶︎ Presenta") }
                     .buttonStyle(.applePrimario)
                     .help("Mostra l'esperienza a tutto schermo, in modalità cliente")
+                #endif
             }
             .fixedSize()
         }
     }
+
+    /// L'aiuto di «✦ Aggiungi al Prisma»: con il solo segno comincia con il testo intero del pulsante.
+    private func aiutoAggiungi(intero: String, breve: Bool) -> String {
+        if esperienza == .disegna { return "Il disegno entra nel file quando lo salvi come obiettivo" }
+        let spiegazione = "Nel file personale del cliente (Il Prisma del cliente). Prisma non manda nulla da solo"
+        return breve ? intero + ". " + spiegazione : spiegazione
+    }
+}
+
+/// Rifinitura 59/60: quanto testo mettono i pulsanti della testata del palco. `piena`: tutti i testi; `breve`: «Prossima»
+/// e «Aggiungi al Prisma» con il solo segno; `icone`: anche «Cosa dire» e «Segna come fatta» con la sola icona.
+private enum LivelloTestataPalco {
+    case piena, breve, icone
 }
 
 /// Dentro la card del palco: la vista dell'esperienza. Finché un'esperienza non c'è, lo stato «in arrivo».

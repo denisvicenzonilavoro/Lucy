@@ -145,6 +145,16 @@ enum ProvaCalcoliRadar {
         verifica.vero("Radar: punti con la virgola", TestiRadar.puntiConNome(9.5) == "9,5 punti" && TestiRadar.puntiConNome(1) == "1 punto")
         verifica.vero("Radar: pesi in fila come nel template", TestiRadar.pesi(P.prudente.pesi) == "20 · 55 · 20 · 5")
         verifica.vero("Radar: importi della frase alle migliaia", TestiRadar.circa(19_620) == Formati.euro(20_000))
+        // Migliorie d'uso 40: il pulsante prepara proposte, «punti» spiegato con la tolleranza delle impostazioni
+        verifica.vero("Radar: il pulsante dice che prepara proposte",
+                      TestiRadar.pulsanteRiequilibra(9) == "Prepara le 9 proposte di riequilibrio"
+                        && TestiRadar.pulsanteRiequilibra(1) == "Prepara la proposta di riequilibrio")
+        verifica.vero("Radar: «punti» spiegato con la tolleranza scelta, mai 5 fisso",
+                      TestiRadar.cosaSonoIPunti(5)?.hasSuffix("Fino a 5 punti va bene.") == true
+                        && TestiRadar.cosaSonoIPunti(3.5)?.hasSuffix("Fino a 3,5 punti va bene.") == true
+                        && TestiRadar.cosaSonoIPunti(nil) == nil)
+        verifica.vero("Radar: «Apri le posizioni di» con il nome breve",
+                      TestiRadar.apriPosizioni("Laura Moretti") == "Apri le posizioni di Laura")
         let (c, pos) = clienteDiProva()
         if let v = MotoreRadar.voce(cliente: c, modello: P.equilibrato, posizioni: pos, tolleranzaGenerale: 5) {
             let f = TestiRadar.riequilibrio(v)

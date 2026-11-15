@@ -65,7 +65,13 @@ extension SchedaCliente {
     var titoloAltro: String { self == .azienda ? "Azienda" : titolo }
 
     /// Le schede del template (e «L'azienda» di Luce) disegnano da sé le loro card; le altre entrano nella cornice del tema.
-    var delTemplate: Bool { Self.delSegmentato.contains(self) || self == .azienda }
+    /// Sul Mac anche «Note» (migliorie d'uso 65): l'elenco e la nota sono due card affiancate.
+    var delTemplate: Bool {
+        #if os(macOS)
+        if self == .note { return true }
+        #endif
+        return Self.delSegmentato.contains(self) || self == .azienda
+    }
 
     /// La scheda scorre dentro il dossier. Documenti (elenco e dettaglio scorrono da soli), Nel tempo e la linea
     /// della vita (il grafico prende tutta l'altezza) no.

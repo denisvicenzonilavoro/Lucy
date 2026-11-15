@@ -9,7 +9,9 @@ import SwiftUI
 
 extension Tema.Apple {
     enum SimulatoriAnalisi {
-        static let misura = Tema.Apple.Misura.DettaglioAperto.previdenzaProtezione
+        /// Previdenza 940×560 sul Mac (940×540 su iPhone e iPad), Protezione 940×540.
+        static let misuraPrevidenza = Tema.Apple.Misura.DettaglioAperto.previdenza
+        static let misuraProtezione = Tema.Apple.Misura.DettaglioAperto.protezione
 
         // MARK: Testata: `.lbl` nel colore e titolo 28 bold (−0,6)
 
@@ -22,11 +24,20 @@ extension Tema.Apple {
 
         // MARK: Corpo: anello e colonna a 34, a 20 sotto il titolo
 
+        // Sul Mac (migliorie d'uso 45) il corpo sale a 14 e l'anello scende a 190/19 con la percentuale 40, per fare
+        // posto alla frase prima e dopo e alle ipotesi da scegliere; iPhone e iPad restano come prima.
+        #if os(macOS)
+        static let sopraCorpo: CGFloat = 14
+        static let anello: CGFloat = 190
+        static let spessoreAnello: CGFloat = 19
+        static let centroAnello = Tema.Apple.Carattere.centroAnello(40)
+        #else
         static let sopraCorpo: CGFloat = 20
-        static let spazioAnello: CGFloat = 34
         static let anello: CGFloat = 210
         static let spessoreAnello: CGFloat = 20
         static let centroAnello = Tema.Apple.Carattere.centroAnello(42)
+        #endif
+        static let spazioAnello: CGFloat = 34
         static let coloreCentro = Tema.Apple.Colore.inchiostro
         /// «del divario», «protetto» sotto la percentuale (`.k`).
         static let sottoCentro = Tema.Apple.Carattere.secondario
@@ -54,14 +65,59 @@ extension Tema.Apple {
 
         // MARK: Cursore: etichetta 14 a 20, valore 44 bold nel colore, binario a 8
 
-        static let sopraCursore: CGFloat = 20
         static let etichettaCursore = Tema.Apple.Carattere(dimensione: 14, peso: .regular)
+        #if os(macOS)
+        static let sopraCursore: CGFloat = 14
+        /// Il valore del cursore 40 bold (−1,4): un carattere proprio, quello da 44 serve anche alla Sala dei giochi.
+        static let valoreCursore = Tema.Apple.Carattere(dimensione: 40, peso: .bold, tracking: -1.4, tabellare: true)
+        #else
+        static let sopraCursore: CGFloat = 20
         static let valoreCursore = Tema.Apple.Carattere.valoreCursoreAnalisi
+        #endif
         static let larghezzaCursore: CGFloat = 460
         static let spazioEtichettaCursore: CGFloat = 2
         static let margineCursore: CGFloat = 8
         /// I risultati a 8 sotto il cursore.
         static let sopraRisultati: CGFloat = 8
+
+        // MARK: Migliorie d'uso 45 (solo Mac): lo scarto, il segno «oggi», la frase, le ipotesi da scegliere, l'avviso
+
+        /// «+150 € al mese rispetto a oggi» a destra del valore (`#pDelta`: 13,5, `inchiostro2`, 6 sopra il fondo).
+        static let scarto = Tema.Apple.Carattere(dimensione: 13.5, peso: .regular)
+        static let coloreScarto = Tema.Apple.Colore.inchiostro2
+        static let scartoSopraFondo: CGFloat = 6
+        static let spazioScarto: CGFloat = 12
+        /// Fra il valore scritto e il binario.
+        static let sottoValoreCursore: CGFloat = 4
+        /// Il segno «oggi» sotto il binario (`.simOggi`): tacca 2×6 `inchiostro3`, la parola 11 semibold `inchiostro2`,
+        /// nella posizione del valore di partenza corretta per metà manopola.
+        static let segnoOggiTacca = CGSize(width: 2, height: 6)
+        static let segnoOggiRaggioTacca: CGFloat = 1
+        static let segnoOggiSotto: CGFloat = 22
+        static let segnoOggiSpazio: CGFloat = 1
+        static let segnoOggiCarattere = Tema.Apple.Carattere(dimensione: 11, peso: .semibold)
+        static let coloreSegnoOggi = Tema.Apple.Colore.inchiostro2
+        static let coloreTaccaOggi = Tema.Apple.Colore.inchiostro3
+        static let manopolaCursore = Tema.Apple.Misura.Controllo.manopolaCursore
+        /// La frase prima e dopo (`.simFr`): tile a tutta larghezza, 14,5 con interlinea 1,5, margini 12×16.
+        static let frase = Tema.Apple.Carattere.corpoGrande
+        static let coloreFrase = Tema.Apple.Colore.inchiostro
+        static let paddingFrase = Tema.Apple.Misura.padding(12, 16)
+        static let superficieFrase = Tema.Apple.Superficie.tile
+        static let righeFrase = 3
+        static let sopraFrase: CGFloat = 14
+        /// «LE IPOTESI» e i segmentati piccoli, a 10 sotto la frase e 10 fra le voci.
+        static let sopraScelte: CGFloat = 10
+        static let spazioScelte: CGFloat = 10
+        static let spazioGruppoScelte: CGFloat = 6
+        static let etichettaScelte = Tema.Apple.Carattere.etichetta
+        static let testoScelte = Tema.Apple.Carattere.secondario
+        static let coloreScelte = Tema.Apple.Colore.inchiostro2
+        static let riduzioneScelte: CGFloat = 0.8
+        /// «Sono stime, non garanzie.» accanto ai pulsanti, a 10 dopo «Chiedi a Vera».
+        static let avviso = Tema.Apple.Carattere.secondario
+        static let coloreAvviso = Tema.Apple.Colore.inchiostro2
+        static let spazioAvviso: CGFloat = 2
 
         // MARK: Ipotesi (sempre scritte sotto i risultati) e piede
 

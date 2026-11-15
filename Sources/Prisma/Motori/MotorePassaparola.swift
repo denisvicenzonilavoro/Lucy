@@ -76,6 +76,34 @@ struct Ambasciatore: Identifiable, Equatable {
     let inArrivo: Double
 }
 
+/// Una persona presentata, nella card «Il ramo di» (Migliorie d'uso 48).
+struct PresentatoRamo: Identifiable, Equatable {
+    /// "c-\(clienteId)" o "p-\(potenzialeId)", come i nodi dell'albero.
+    let id: String
+    let nome: String
+    /// Già cliente (capsula «Cliente») o ancora potenziale (capsula «Potenziale» con la fase).
+    let giaCliente: Bool
+    let fase: FasePotenziale?
+    /// Il patrimonio netto per i clienti, la stima per i potenziali; nil = non noto («—»).
+    let cifra: Double?
+}
+
+/// Il ramo di una persona scelta nell'albero del passaparola (Migliorie d'uso 48): chi ha presentato, con il valore dei
+/// già clienti separato dalle stime dei potenziali (decisione 95: mai sommati).
+struct RamoPassaparola: Equatable {
+    let clienteId: String
+    let nome: String
+    let iniziali: String
+    let tinta: TintaAvatar
+    /// Prima i già clienti, poi i potenziali, ognuno dal più vecchio.
+    let presentati: [PresentatoRamo]
+
+    var clienti: Int { presentati.filter(\.giaCliente).count }
+    var potenziali: Int { presentati.count - clienti }
+    /// Σ dei patrimoni netti dei già clienti (lo stesso `portato` di `Ambasciatore`).
+    var valoreClienti: Double { presentati.filter(\.giaCliente).reduce(0) { $0 + max(0, $1.cifra ?? 0) } }
+}
+
 /// Il momento giusto per chiedere una presentazione (decisione 17).
 struct MomentoPerChiedere: Identifiable, Equatable {
     /// "\(clienteId)-\(riferimento)".
@@ -115,6 +143,28 @@ enum RegolePassaparola {
     static let anniColonne = 5
     /// Oltre tanti clienti al primo livello, restano solo quelli che hanno presentato qualcuno.
     static let massimoPrimoLivelloPieno = 12
+    /// Migliorie d'uso 47: un potenziale è «fermo» oltre tanti giorni nella stessa fase.
+    static let giorniFermo = 14
+}
+
+/// L'azione del prossimo passo di un potenziale (Migliorie d'uso 47): il primo pulsante del dettaglio.
+enum AzionePotenziale: Equatable {
+    case chiama
+    case scrivi
+    case fissaIncontro
+    case preparaIncontro(appuntamentoId: String)
+}
+
+/// Il prossimo passo di un potenziale, ricavato dal codice (decisione 47-a: nessun campo nuovo) da fase, storia, fonte,
+/// recapiti e agenda, con i giorni passati nella fase di oggi.
+struct PassoPotenziale: Equatable {
+    /// Vuoto per i non interessati (nessun passo).
+    let testo: String
+    let azione: AzionePotenziale?
+    /// Giorni di calendario dall'ultimo cambio di fase (o dall'inserimento).
+    let giorniFermo: Int
+    /// Oltre `RegolePassaparola.giorniFermo`, solo nelle prime quattro colonne.
+    let fermo: Bool
 }
 
 enum MotorePassaparola {
@@ -166,6 +216,97 @@ enum MotorePassaparola {
         }
         return TotaliPotenziali(conteggio: aperti.count, patrimonioStimato: stimato, senzaStima: senza, dalPassaparola: passaparola,
                                 probabileEntroAnno: probabile, esclusiDalProbabile: esclusi)
+    }
+
+    // MARK: - Il prossimo passo (Migliorie d'uso 47)
+
+    /// Giorni di calendario da `storia.last?.il ?? creatoIl` a oggi (mai negativi).
+    static func giorniFermo(_ p: PotenzialeCliente, oggi: Date, cal: Calendar = .current) -> Int {
+        let da = cal.startOfDay(for: p.storia.last?.il ?? p.creatoIl)
+        let a = cal.startOfDay(for: oggi)
+        return max(0, cal.dateComponents([.day], from: da, to: a).day ?? 0)
+    }
+
+    /// Come si contatta: con il telefono si chiama; senza, si scrive se informativa e consenso ci sono; altrimenti nulla.
+    static func azioneContatto(_ p: PotenzialeCliente) -> AzionePotenziale? {
+        if !p.telefono.trimmingCharacters(in: .whitespaces).isEmpty { return .chiama }
+        if p.contattabile { return .scrivi }
+        return nil
+    }
+
+    /// Il prossimo passo di un potenziale (regole in Design/uso/gruppo-08.md §47.3 punto 1, testi in TestiPassaparola).
+    /// `presentatore`: il nome del cliente che l'ha presentato (nil = nessuno); `primoIncontro`: l'appuntamento futuro
+    /// del primo incontro (`primiIncontri`).
+    static func prossimoPasso(_ p: PotenzialeCliente, presentatore: String?, primoIncontro: Appuntamento?, oggi: Date,
+                              cal: Calendar = .current) -> PassoPotenziale {
+        let giorni = giorniFermo(p, oggi: oggi, cal: cal)
+        let aperto = p.fase != .cliente && p.fase != .nonInteressato
+        let fermo = aperto && giorni > RegolePassaparola.giorniFermo
+        let contatto = azioneContatto(p)
+        let testo: String
+        let azione: AzionePotenziale?
+        switch p.fase {
+        case .daContattare:
+            azione = contatto
+            testo = TestiPassaparola.passoDaContattare(p, presentatore: presentatore, azione: contatto)
+        case .primoIncontro:
+            if let a = primoIncontro, a.inizio >= oggi {
+                azione = .preparaIncontro(appuntamentoId: a.id)
+                testo = TestiPassaparola.passoIncontroFissato(a.inizio)
+            } else {
+                azione = .fissaIncontro
+                testo = TestiPassaparola.passoFissaIncontro
+            }
+        case .analisi:
+            azione = contatto
+            testo = TestiPassaparola.passoAnalisi
+        case .proposta:
+            azione = contatto
+            testo = TestiPassaparola.passoProposta
+        case .cliente:
+            azione = nil
+            testo = TestiPassaparola.passoCliente
+        case .nonInteressato:
+            azione = nil
+            testo = ""
+        }
+        return PassoPotenziale(testo: testo, azione: azione, giorniFermo: giorni, fermo: fermo)
+    }
+
+    /// Gli appuntamenti futuri del primo incontro, per potenziale (decisione 47-d: riconosciuti dal tipo e dal titolo
+    /// «Primo incontro · {nome}» che scrive `fissaPrimoIncontro`, nessun campo nuovo). Il più vicino per ciascuno.
+    static func primiIncontri(_ potenziali: [PotenzialeCliente], appuntamenti: [Appuntamento],
+                              oggi: Date) -> [String: Appuntamento] {
+        var perTitolo: [String: Appuntamento] = [:]
+        for a in appuntamenti where a.tipo == .primoIncontro && a.stato == .pianificato && a.inizio >= oggi {
+            if let b = perTitolo[a.titolo], b.inizio <= a.inizio { continue }
+            perTitolo[a.titolo] = a
+        }
+        guard !perTitolo.isEmpty else { return [:] }
+        var r: [String: Appuntamento] = [:]
+        for p in potenziali where p.fase == .primoIncontro {
+            if let a = perTitolo[TestiPassaparola.titoloPrimoIncontro(p.nome)] { r[p.id] = a }
+        }
+        return r
+    }
+
+    /// I passi di tutti i potenziali (id → passo), in una volta sola: la vista lo tiene con `stato.ricavato`.
+    static func passi(_ potenziali: [PotenzialeCliente], clienti: [Cliente], appuntamenti: [Appuntamento], oggi: Date,
+                      cal: Calendar = .current) -> [String: PassoPotenziale] {
+        var nomi: [String: String] = [:]
+        for c in clienti where nomi[c.id] == nil { nomi[c.id] = c.nome }
+        let incontri = primiIncontri(potenziali, appuntamenti: appuntamenti, oggi: oggi)
+        var r: [String: PassoPotenziale] = [:]
+        for p in potenziali {
+            r[p.id] = prossimoPasso(p, presentatore: p.presentatoDa.flatMap { nomi[$0] }, primoIncontro: incontri[p.id],
+                                    oggi: oggi, cal: cal)
+        }
+        return r
+    }
+
+    /// Quanti potenziali delle prime quattro colonne sono fermi (la quarta tile).
+    static func fermi(_ potenziali: [PotenzialeCliente], passi: [String: PassoPotenziale]) -> Int {
+        potenziali.filter { $0.fase != .cliente && $0.fase != .nonInteressato && passi[$0.id]?.fermo == true }.count
     }
 
     // MARK: - Albero
@@ -359,6 +500,33 @@ enum MotorePassaparola {
         }
     }
 
+    /// Il ramo di un cliente (Migliorie d'uso 48): tutte le persone che ha presentato (non solo quelle disegnate
+    /// nell'albero, che si ferma a otto per persona e a tre generazioni), con le stesse regole di `ambasciatori`: i
+    /// clienti con «Presentato da», i potenziali non «Non interessato» e non già diventati clienti dell'archivio. nil se
+    /// il cliente non c'è.
+    static func ramo(di clienteId: String, clienti: [Cliente], potenziali: [PotenzialeCliente],
+                     netti: [String: Double]) -> RamoPassaparola? {
+        guard let c = clienti.first(where: { $0.id == clienteId }) else { return nil }
+        let ids = Set(clienti.map(\.id))
+        let presentatiClienti = clienti
+            .filter { x in x.presentatoDa == clienteId && x.id != clienteId }
+            .sorted { a, b in
+                let da = a.presentatoIl ?? a.creatoIl, db = b.presentatoIl ?? b.creatoIl
+                return da != db ? da < db : a.id < b.id
+            }
+            .map { x in PresentatoRamo(id: "c-\(x.id)", nome: x.nome, giaCliente: true, fase: nil, cifra: netti[x.id]) }
+        let presentatiPotenziali = potenziali
+            .filter { p in
+                guard p.presentatoDa == clienteId, p.fase != .nonInteressato else { return false }
+                if let cid = p.clienteId, ids.contains(cid) { return false }
+                return true
+            }
+            .sorted { a, b in a.creatoIl != b.creatoIl ? a.creatoIl < b.creatoIl : a.id < b.id }
+            .map { p in PresentatoRamo(id: "p-\(p.id)", nome: p.nome, giaCliente: false, fase: p.fase, cifra: p.patrimonioStimato) }
+        return RamoPassaparola(clienteId: c.id, nome: c.nome, iniziali: c.iniziali, tinta: c.tinta,
+                               presentati: presentatiClienti + presentatiPotenziali)
+    }
+
     /// La data d'inizio del cliente: «Cliente dal» se scritta, altrimenti la data della scheda.
     static func inizio(_ c: Cliente) -> Date { c.clienteDal ?? c.creatoIl }
 
@@ -504,6 +672,20 @@ enum MotorePassaparola {
         q.clienteId = clienteId
         q.storia.append(CambioFase(fase: .cliente, il: il))
         return q
+    }
+
+    /// L'occasione del grazie per le presentazioni (Migliorie d'uso 48, non commerciale): nessuna cifra, nessun nome delle
+    /// persone presentate. Una al giorno per cliente (il riferimento è il giorno).
+    static func occasioneRingraziamento(cliente: Cliente, posizioni: [Posizione], oggi: Date,
+                                        cal: Calendar = .current) -> OccasioneMessaggio {
+        let giorno = cal.startOfDay(for: oggi)
+        let riferimento = "grazie-\(Int(giorno.timeIntervalSinceReferenceDate))"
+        return OccasioneMessaggio(origine: OrigineMessaggio(tipo: .ringraziamentoPresentazione, riferimento: riferimento),
+                                  clienteId: cliente.id,
+                                  canale: MotoreOccasioniMessaggi.canaleComune(cliente, posizioni.filter { $0.clienteId == cliente.id }),
+                                  gruppo: .oggi, titolo: TestiPassaparola.titoloRingraziamento(cliente.nome),
+                                  perche: TestiPassaparola.percheRingraziamento, oggetto: TestiPassaparola.oggettoRingraziamento,
+                                  cifre: [], priorita: .media, data: oggi)
     }
 
     /// L'occasione «richiesta di presentazione» per Messaggi (commerciale): il fatto come sola cifra.

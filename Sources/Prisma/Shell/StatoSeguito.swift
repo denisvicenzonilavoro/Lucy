@@ -130,6 +130,39 @@ extension StatoShell {
         return a
     }
 
+    /// Migliorie d'uso 54, «Riproponi» nel track record: la proposta rimandata torna fra le bozze di Posizioni (i motori la
+    /// ricalcolano con i numeri di oggi), la ripresa programmata non serve più (data tolta, attività completata) e il
+    /// registro riceve una nota datata. Le scelte registrate non si toccano: la scelta resta «in attesa» e, quando la
+    /// proposta si ripresenta, non nasce una raccomandazione nuova (c'è già quella della sua posizione).
+    /// Non fa nulla in sola lettura (lo dice l'avviso), senza posizione o se la proposta non è rimandata.
+    @discardableResult
+    func riproponiRaccomandazione(_ id: String, il data: Date = Posizione.oggiArrotondato) -> Bool {
+        guard !solaLettura else {
+            mostraAvviso(TestiSeguito.solaLettura)
+            return false
+        }
+        guard let r = dati.raccomandazioni.first(where: { $0.id == id }), r.scelta == .inAttesa,
+              let pid = r.posizioneId, let i = dati.posizioni.firstIndex(where: { $0.id == pid }),
+              dati.posizioni[i].esito == .rimandata else { return false }
+        var p = dati.posizioni[i]
+        let ripresa = p.seguito?.attivitaId
+        p.esito = .bozza
+        if var seguito = p.seguito {
+            seguito.riprendereIl = nil
+            seguito.attivitaId = nil
+            p.seguito = seguito.vuoto ? nil : seguito
+        }
+        // Scritta direttamente, come in `chiudiProposta`: `salvaPosizione` rifarebbe `registraCambio`. Con «bozza»
+        // `registraRaccomandazioneSeServe` non registra nulla, quindi non serve chiamarla.
+        dati.posizioni[i] = p
+        if let t = ripresa { completaRipresa(t) }
+        aggiungiNota(TestiTrackRecord.notaRiproposta(data), aRaccomandazione: id, il: data)
+        let nome = cliente(p.clienteId).map { StatoShell.nomeBreve($0) } ?? TestiTrackRecord.clienteAssente
+        let proposta = r.proposta.trimmingCharacters(in: .whitespacesAndNewlines)
+        mostraAvviso(TestiTrackRecord.riproposta(proposta.isEmpty ? p.nome : proposta, nome: nome))
+        return true
+    }
+
     /// Segna completata l'attività di ripresa, se è ancora aperta.
     private func completaRipresa(_ id: String) {
         guard let j = dati.attivita.firstIndex(where: { $0.id == id && !$0.completata }) else { return }

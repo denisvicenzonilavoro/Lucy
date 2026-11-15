@@ -496,7 +496,7 @@ struct CorpoShell: View {
                        value: sistema.guida != nil)
             .opacity(nascosti ? 0 : 1)
         }
-        return stratoSceltaCliente(livelli, misura: misura, nascosti: nascosti)
+        return stratoMenuApp(stratoSceltaCliente(livelli, misura: misura, nascosti: nascosti), misura: misura, nascosti: nascosti)
     }
 
     /// Il pannello «Di chi parliamo?» della pillola del cliente (migliorie d'uso 2, solo sul Mac): sopra la scrivania,
@@ -514,6 +514,28 @@ struct CorpoShell: View {
                 }
                 .animation(curvaPannello(sistema.pannelloCliente, Tema.Moto.Pannelli.notifiche, Tema.Moto.Pannelli.notificheUscita),
                            value: sistema.pannelloCliente)
+            }
+        }
+        #else
+        return contenuto
+        #endif
+    }
+
+    /// Il menu della pillola dell'app (migliorie d'uso 67, solo sul Mac): 8 punti sotto la pillola, letta dal layout perché
+    /// cambia larghezza con il nome dell'app; un clic fuori lo chiude.
+    private func stratoMenuApp(_ contenuto: some View, misura: CGSize, nascosti: Bool) -> some View {
+        #if os(macOS)
+        return contenuto.overlayPreferenceValue(AncoraPillolaApp.self) { ancora in
+            GeometryReader { geo in
+                ZStack(alignment: .topLeading) {
+                    if sistema.menuApp && !nascosti {
+                        MenuAppBarra(pillola: ancora.map { geo[$0] })
+                            .frame(width: misura.width, height: misura.height)
+                            .transition(transizionePannello)
+                    }
+                }
+                .animation(curvaPannello(sistema.menuApp, Tema.Moto.Pannelli.notifiche, Tema.Moto.Pannelli.notificheUscita),
+                           value: sistema.menuApp)
             }
         }
         #else

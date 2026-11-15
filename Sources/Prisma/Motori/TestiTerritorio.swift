@@ -27,4 +27,37 @@ enum TestiTerritorio {
     static let apriDaFare = "Apri «Da fare» ›"
     static func nonSullaMappa(_ nome: String) -> String { "\(nome) non è sulla mappa: manca l’indirizzo." }
     static let mettiAMano = "Metti la posizione a mano"
+
+    // MARK: Migliorie d'uso 51 · il giro si porta in tasca, la crescita dice chi è arrivato
+
+    static let preparaIncontro = "Prepara l'incontro"
+    static let confermaInAgenda = "✓ Conferma in Agenda"
+    static let togli = "Togli"
+    static let apriInAgenda = "Apri in Agenda"
+    /// «Sofia tolto dal giro»: Prisma non conosce il genere (come per «Aggiungi … al giro»).
+    static func toltoDalGiro(_ nome: String) -> String { "\(nome) tolto dal giro" }
+    static let mandaGiro = "Manda il giro all'iPhone"
+    static let giroSulliPhone = "✓ Il giro è sull'iPhone"
+    /// Niente Mappe (privacy del Territorio): il giro arriva con «Prisma ovunque» e sull'iPhone sta in Agenda.
+    static let notaGiroIPhone = "Sull'iPhone lo trovi in Agenda. Tocca una tappa per prepararla."
+    static let accendiOvunque = "Per averlo sull'iPhone accendi «Prisma ovunque» in Impostazioni."
+    static let apriOvunque = "Impostazioni › iPhone e iPad"
+    static let giroInDimostrazione = "Durante la dimostrazione il giro non va all'iPhone."
+
+    /// «Hanno cominciato nel 2021»; il primo anno comprende anche quelli di prima: «… nel 2016 o prima».
+    static func cominciatoNel(_ anno: Int, primo: Bool) -> String {
+        "Hanno cominciato nel \(anno)" + (primo ? " o prima" : "")
+    }
+
+    /// Chi ha cominciato nell'anno: la parte in neretto («3 famiglie», «Nessuna famiglia nuova») e il resto
+    /// («: Giulia Bianchi, Marco Rossi e un'altra»). Al più `massimo` nomi, poi « e un'altra» / « e altre n».
+    static func famiglieNuove(_ nomi: [String], massimo: Int) -> (forte: String, resto: String) {
+        guard !nomi.isEmpty else { return ("Nessuna famiglia nuova", "") }
+        let forte = nomi.count == 1 ? "1 famiglia" : "\(nomi.count) famiglie"
+        let visti = Array(nomi.prefix(max(1, massimo)))
+        let altri = nomi.count - visti.count
+        var resto = ": " + visti.joined(separator: ", ")
+        if altri == 1 { resto += " e un'altra" } else if altri > 1 { resto += " e altre \(altri)" }
+        return (forte, resto)
+    }
 }

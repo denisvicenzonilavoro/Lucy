@@ -29,6 +29,7 @@ enum ProvaCalcoliTerritorio {
         vociDaFare(verifica)
         partenza(verifica, tabella)
         vicini(verifica)
+        nomiCrescita(verifica)
     }
 
     private static let cal = Calendar(identifier: .gregorian)
@@ -525,5 +526,25 @@ enum ProvaCalcoliTerritorio {
         verifica.vero("Territorio · scheda: «In Prisma dal» se l'anno viene dalla scheda",
                       TestiTerritorio.clienteDal(2019, stimato: true) == "In Prisma dal 2019"
                       && TestiTerritorio.clienteDal(2019, stimato: false) == "Cliente dal 2019")
+    }
+
+    /// Migliorie d'uso 51: chi ha cominciato nell'anno della crescita (primo anno «o prima», «e un'altra», «e altre n»).
+    private static func nomiCrescita(_ verifica: VerificaCalcoli) {
+        verifica.vero("Territorio · crescita: il primo anno comprende quelli di prima",
+                      TestiTerritorio.cominciatoNel(2016, primo: true) == "Hanno cominciato nel 2016 o prima"
+                      && TestiTerritorio.cominciatoNel(2021, primo: false) == "Hanno cominciato nel 2021")
+        let zero = TestiTerritorio.famiglieNuove([], massimo: 4)
+        verifica.vero("Territorio · crescita: nessuna famiglia nuova", zero.forte == "Nessuna famiglia nuova" && zero.resto.isEmpty)
+        let una = TestiTerritorio.famiglieNuove(["Giulia Prova"], massimo: 4)
+        verifica.vero("Territorio · crescita: una famiglia al singolare", una.forte == "1 famiglia" && una.resto == ": Giulia Prova")
+        let cinque = TestiTerritorio.famiglieNuove(["A", "B", "C", "D", "E"], massimo: 4)
+        verifica.vero("Territorio · crescita: oltre i quattro nomi «e un'altra»",
+                      cinque.forte == "5 famiglie" && cinque.resto == ": A, B, C, D e un'altra")
+        let sette = TestiTerritorio.famiglieNuove(["A", "B", "C", "D", "E", "F", "G"], massimo: 4)
+        verifica.vero("Territorio · crescita: oltre i quattro nomi «e altre n»", sette.resto == ": A, B, C, D e altre 3")
+        verifica.vero("Territorio · giro: «tolto dal giro» con il nome di battesimo",
+                      TestiTerritorio.toltoDalGiro("Sofia") == "Sofia tolto dal giro")
+        verifica.vero("Territorio · giro: niente Mappe nel testo del pulsante",
+                      !TestiTerritorio.notaGiroIPhone.contains("Mappe") && TestiTerritorio.notaGiroIPhone.contains("Agenda"))
     }
 }

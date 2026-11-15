@@ -28,6 +28,15 @@ enum TestiSceltaCliente {
     static let prospettiTesto = "Scegli il cliente in alto: trovi i suoi report per l’incontro."
     static let tuaRubrica = "La tua rubrica"
     static let tuaRubricaTesto = "Scegli una persona a sinistra, oppure nella barra in alto: vale per tutta Prisma."
+    /// Le quattro cifre della rubrica con «Tutti i clienti» (migliorie d'uso 2, template riga 3124).
+    static let personeSeguite = "Persone seguite"
+    static let inRegola = "In regola"
+    static let riesamiAnno = "Riesami dell’anno"
+    static let patrimonioSeguito = "Patrimonio seguito"
+    static func suTotale(_ n: Int) -> String { " su \(n)" }
+    /// Il «Da fare» della rubrica: in fondo «altre N ›», vuoto «Niente da fare.».
+    static func altreVoci(_ n: Int) -> String { "altre \(n) ›" }
+    static let nienteDaFare = "Niente da fare."
     // Le app con un cliente scelto
     static func solo(_ nome: String) -> String { "Solo \(nome)" }
     static let aiutoSolo = "Mostra gli impegni di tutti"
@@ -115,6 +124,7 @@ extension StatoShell {
         guard !inModoCliente else { return }
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }
+        if menuApp { menuApp = false }
         pannelloCliente = true
     }
 }

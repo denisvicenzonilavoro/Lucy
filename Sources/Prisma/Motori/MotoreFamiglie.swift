@@ -548,3 +548,93 @@ enum MotoreFamiglie {
         confronta(dati(cliente: cliente, posizioni: posizioni, oggi: oggi), tabelle: tabelle)
     }
 }
+
+// MARK: - Il punto debole (migliorie d'uso 46)
+
+/// La voce in cui il cliente resta più indietro rispetto alle famiglie come la sua, con l'area di Analisi 360 che se ne
+/// occupa (migliorie d'uso 46, Design/uso/gruppo-08.md §46). Patrimonio finanziario e ricchezza netta sono una voce sola
+/// per l'area (Investimenti).
+struct PuntoDeboleFamiglie: Equatable {
+    let voce: VoceFamiglie
+    let area: AreaAnalisi
+    /// Il percentile del confronto più severo (solo con i quantili): nessun percentile inventato.
+    let percentile: Int?
+    /// Con mediana, media, rapporto o quota: sopra (qui sempre false). nil con i quantili.
+    let sopra: Bool?
+    /// Come si è fatto il confronto più severo (decide la frase).
+    let metodo: MetodoConfrontoFamiglie
+}
+
+/// L'esito della ricerca del punto debole: una voce sotto la metà, tutte sopra, o nessuna cifra del cliente da
+/// confrontare (allora la riga in fondo alla card principale non compare).
+enum EsitoPuntoDeboleFamiglie: Equatable {
+    case indietro(PuntoDeboleFamiglie)
+    case sopraLaMeta
+    case senzaCifre
+}
+
+extension MotoreFamiglie {
+    /// L'area di Analisi 360 di una voce.
+    static func area(_ v: VoceFamiglie) -> AreaAnalisi {
+        switch v {
+        case .tassoRisparmio: return .risparmio
+        case .ricchezzaFinanziaria, .ricchezzaNetta: return .investimenti
+        case .protezione: return .protezione
+        case .previdenzaComplementare: return .previdenza
+        }
+    }
+
+    /// Un confronto con la cifra del cliente che lo mette sotto la metà delle famiglie: percentile sotto 50 con i
+    /// quantili; sotto la mediana, la media o il rapporto; con la quota, senza la cosa quando più di metà delle famiglie
+    /// ce l'ha (se ce l'ha una minoranza, chi non ce l'ha sta con i più: non è un punto debole).
+    static func sottoLaMeta(_ c: ConfrontoVoceFamiglie) -> Bool {
+        switch c.metodo {
+        case .quantili: return (c.percentile ?? 50) < 50
+        case .mediana, .media, .rapportoMedie: return c.sopra == false
+        case .quota: return c.sopra == false && (c.riferimento ?? 0) > 50
+        case .nessuno: return false
+        }
+    }
+
+    /// true se un confronto della voce (in un gruppo qualsiasi) la mette sotto la metà: la card ha «Apri l'area ›».
+    static func voceSottoLaMeta(_ v: VoceFamiglie, in c: ConfrontoFamiglie) -> Bool {
+        c.confronti(v).contains(where: sottoLaMeta)
+    }
+
+    /// Il confronto più severo tra quelli sotto la metà: il percentile più basso, altrimenti il primo (età, poi reddito).
+    private static func piuSevero(_ confronti: [ConfrontoVoceFamiglie]) -> ConfrontoVoceFamiglie? {
+        let sotto = confronti.filter(sottoLaMeta)
+        if let conPercentile = sotto.filter({ $0.percentile != nil }).min(by: { ($0.percentile ?? 0) < ($1.percentile ?? 0) }) {
+            return conPercentile
+        }
+        return sotto.first
+    }
+
+    /// Il punto debole del cliente: per ogni voce il confronto più severo dei gruppi; vince la voce con il percentile
+    /// più basso; a parità, o senza percentile, l'ordine risparmio, patrimonio, protezione, previdenza (le voci con un
+    /// percentile sotto la metà vengono prima di quelle con la sola mediana, media o quota).
+    static func esitoPuntoDebole(_ c: ConfrontoFamiglie) -> EsitoPuntoDeboleFamiglie {
+        var candidati: [(ordine: Int, punto: PuntoDeboleFamiglie)] = []
+        var conCifre = false
+        for (i, v) in VoceFamiglie.allCases.enumerated() {
+            let confronti = c.confronti(v)
+            if confronti.contains(where: { $0.metodo != .nessuno }) { conCifre = true }
+            guard let s = piuSevero(confronti) else { continue }
+            candidati.append((i, PuntoDeboleFamiglie(voce: v, area: area(v), percentile: s.metodo == .quantili ? s.percentile : nil,
+                                                     sopra: s.metodo == .quantili ? nil : s.sopra, metodo: s.metodo)))
+        }
+        guard conCifre else { return .senzaCifre }
+        let migliore = candidati.min { a, b in
+            let pa = a.punto.percentile ?? 50
+            let pb = b.punto.percentile ?? 50
+            return pa != pb ? pa < pb : a.ordine < b.ordine
+        }
+        return migliore.map { .indietro($0.punto) } ?? .sopraLaMeta
+    }
+
+    /// La voce in cui resta più indietro (nil se nessuna è sotto la metà o mancano le cifre del cliente).
+    static func puntoDebole(_ c: ConfrontoFamiglie) -> PuntoDeboleFamiglie? {
+        if case .indietro(let p) = esitoPuntoDebole(c) { return p }
+        return nil
+    }
+}

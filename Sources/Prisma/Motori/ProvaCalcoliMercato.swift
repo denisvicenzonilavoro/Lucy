@@ -49,6 +49,29 @@ enum ProvaCalcoliMercato {
         let fraseSu = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: 1.2, toccati: [guadagna]), toccato: guadagna,
                                                    tipoSerie: .indiceAzionario, nome: "Marco Bianchi")
         verifica.vero("Mercato uso: con un canale solo niente parentesi", fraseSu.contains("guadagna circa") && !fraseSu.contains("("))
+        // La quota in azioni del cliente per gli indici azionari (rifinitura 25-31): «…: ha il 38% in azioni.»
+        var conQuota = guadagna
+        conQuota.impatto = -1_150
+        conQuota.perCanale = [.indipendente: -1_150]
+        conQuota.quotaAzioni = 0.38
+        let fraseQuota = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: -1.8, toccati: [conQuota]), toccato: conQuota,
+                                                      tipoSerie: .indiceAzionario, nome: "Marco Bianchi")
+        verifica.vero("Mercato uso: sugli indici azionari la frase dice la quota in azioni",
+                      fraseQuota.hasPrefix("Il portafoglio di Marco perde circa ") && fraseQuota.hasSuffix(": ha il 38% in azioni."))
+        let fraseQuotaTassi = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: -1.8, toccati: [conQuota]), toccato: conQuota,
+                                                           tipoSerie: .rendimentoStato, nome: "Marco Bianchi")
+        verifica.vero("Mercato uso: fuori dagli indici azionari niente quota in azioni", !fraseQuotaTassi.contains("in azioni"))
+        verifica.vero("Mercato uso: tutto in azioni", TestiAppMercato.quotaInAzioni(1) == "ha tutto in azioni")
+        // Il motore: la quota pesata per valore su tutte le posizioni del cliente di cui si conosce la composizione
+        let etf = posizione("prova-etf", cliente: "marco", valore: 38_000) { $0.quotaAzionaria = 100 }
+        let obbl = posizione("prova-obbl", cliente: "marco", valore: 62_000) { $0.quotaAzionaria = 0 }
+        let indice = SerieMercato(id: "prova-indice", nome: "Azioni mondo", origine: .csv, fonte: "File di prova", unita: .punti,
+                                  tipo: .indiceAzionario, frequenza: .mensile, punti: [], aggiornataIl: oggi)
+        let esposti = MotoreMercato.esposti(a: indice, variazione: -1.8, posizioni: [etf, obbl], obiettivi: [],
+                                            nomi: ["marco": "Marco Bianchi"], oggi: oggi, cal: cal)
+        verifica.vero("Mercato uso: la quota in azioni del cliente è pesata per valore sulle sue posizioni (38%)",
+                      esposti.count == 1 && esposti.first.map { abs(($0.quotaAzioni ?? 0) - 0.38) < 0.001 } == true
+                        && esposti.first?.posizioni == ["prova-etf"])
         // Senza cifra: la frase qualitativa del tipo di serie, detta di lui
         let senza = ClienteToccato(clienteId: "marco", posizioni: [], impatto: nil, perCanale: [:], canali: [])
         let fraseTassi = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: 0.15, toccati: [senza]), toccato: senza,

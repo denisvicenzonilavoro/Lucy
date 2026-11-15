@@ -366,11 +366,48 @@ enum TestiRadar {
         return "clienti fuori tolleranza (oltre \(puntiConNome(t)))"
     }
 
+    /// Il pulsante della card «chi» (migliorie d'uso 40): dice che prepara proposte, non che sposta soldi.
     static func pulsanteRiequilibra(_ n: Int) -> String {
+        n == 1 ? "Prepara la proposta di riequilibrio" : "Prepara le \(n) proposte di riequilibrio"
+    }
+
+    static let spiegaRiequilibra = "Una per cliente, con costi e tasse. Restano proposte: niente parte senza di te."
+    static let proposteFatte = "✓ Proposte pronte, una per cliente"
+    static let propostaPronta = "Proposta pronta"
+    static let tuttiDentro = "Tutti entro la tolleranza"
+
+    /// La testa della card «chi»: «fuori tolleranza», e dopo le proposte «fuori tolleranza, se le accetti tutte».
+    static func etichettaFuori(conProposte: Bool) -> String {
+        conProposte ? "fuori tolleranza, se le accetti tutte" : "fuori tolleranza"
+    }
+
+    /// «su 18 seguiti con un modello».
+    static func suSeguiti(_ n: Int) -> String { "su \(n) seguiti con un modello" }
+
+    /// «punti» spiegato una volta, con la tolleranza delle impostazioni (nil senza tolleranza).
+    static func cosaSonoIPunti(_ tolleranza: Double?) -> String? {
+        guard let t = tolleranza, t > 0 else { return nil }
+        return "Un punto è un centesimo del portafoglio finito fuori posto rispetto al modello scelto. Fino a \(puntiConNome(t)) va bene."
+    }
+
+    static let dopoLeProposte = "Con le proposte accettate tornerebbero tutti dentro la tolleranza: sulla tela vedi dove andrebbero."
+
+    /// «Apri le posizioni di Laura» (il nome breve: il primo).
+    static func apriPosizioni(_ nome: String) -> String {
+        "Apri le posizioni di \(nome.split(separator: " ").first.map(String.init) ?? nome)"
+    }
+
+    /// L'aiuto della riga di un modello: i pesi scritti, che nella card non ci sono più.
+    static func aiutoModello(_ m: PortafoglioModello) -> String {
+        "\(m.nome): \(pesi(m.pesi)) · apri in Impostazioni › Portafogli modello"
+    }
+
+    /// Il pulsante e la spiegazione di prima (iPhone e iPad, fino al loro aggiornamento).
+    static func riequilibraClienti(_ n: Int) -> String {
         n == 1 ? "Riequilibra il cliente" : "Riequilibra i \(n) clienti"
     }
 
-    static let spiegaRiequilibra = "Prepara le proposte di riequilibrio, una per cliente, con i costi e le tasse di ogni spostamento."
+    static let spiegaRiequilibraClienti = "Prepara le proposte di riequilibrio, una per cliente, con i costi e le tasse di ogni spostamento."
     static let piede = "Più un cliente è lontano dal centro, più il suo portafoglio si è allontanato dal modello scelto. Tocca un punto per il dettaglio."
     static let barraLinea = "La barra è oggi, la linea è il modello."
     static let senzaModelli = "Definisci i tuoi portafogli modello per vedere chi se ne allontana."

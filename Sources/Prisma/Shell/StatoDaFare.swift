@@ -31,6 +31,8 @@ enum TestiDaFare {
     static let perTe = "Per te"
     static let niente = "Nient’altro da fare."
     static let dopoMossa = "dopo la mossa del giorno"
+    /// «✓ Fatto» nella mossa del giorno della scrivania (proposta di 3.6).
+    static let fattoMossa = "Fatto"
     static let aiutoPillola = "Da fare: le cose aperte con i clienti, in ordine di tempo"
     static let aiutoCerchio = "Segna come fatto"
     static let massimoCaratteri = Tema.Apple.ElencoDaFare.caratteriCampo
@@ -135,6 +137,33 @@ extension StatoShell {
         if !pannelloNotifiche { alternaNotifiche() }
     }
 
+    // MARK: - La mossa del giorno come prima voce (proposta di 3.6)
+
+    /// La voce del nastro che è la mossa del giorno: sulla scrivania la mossa è la prima cosa da fare, il riquadro «Da
+    /// fare» parte dalla seconda («dopo la mossa del giorno») e «✓ Fatto» sta nella mossa. nil se la mossa non ha una
+    /// voce nel nastro (per esempio i dati incompleti) o se non c'è una mossa.
+    func voceDellaMossa(in voci: [VoceDaFare]) -> VoceDaFare? {
+        guard let m = mossaDelGiorno().mossa else { return nil }
+        return Self.voceDellaMossa(m, in: voci)
+    }
+
+    /// Il motivo principale della mossa nel nastro: la stessa posizione del cliente, altrimenti lo stesso tipo di voce.
+    static func voceDellaMossa(_ m: MossaDelGiorno, in voci: [VoceDaFare]) -> VoceDaFare? {
+        guard let principale = m.segnali.first else { return nil }
+        let delCliente = voci.filter { $0.cliente.id == m.cliente.id }
+        if let p = principale.posizione, let v = delCliente.first(where: { $0.posizioneId == p.id }) { return v }
+        let tipo: VoceDaFare.Tipo?
+        switch principale.tipo {
+        case .propostaFerma: tipo = .proposta
+        case .riesame: tipo = .riesame
+        case .scadenza: tipo = .scadenza
+        case .occasione: tipo = .occasione
+        case .datiIncompleti: tipo = nil
+        }
+        guard let tipo else { return nil }
+        return delCliente.first { $0.tipo == tipo }
+    }
+
     // MARK: - Segna come fatto e Annulla l'ultima
 
     /// «Segna come fatto» fuori dalle schede di Posizioni: scrive come `segnaFatto` e tiene la traccia per «Annulla
@@ -179,6 +208,23 @@ extension StatoShell {
         fatteDaFare.append(FattoDaFare(voce: v, annulla: annulla, quando: Date()))
         if voceDaFareAperta?.id == v.id { chiudiVoceDaFare() }
         mostraAvviso(TestiDaFare.fatto(v))
+    }
+
+    /// Rifinitura 50: la voce del nastro di un'attività aperta (nil se è completata, se è la ripresa di una proposta,
+    /// già sul nastro con la proposta, o se il suo cliente non c'è più).
+    func voceDaFare(attivitaId id: String) -> VoceDaFare? {
+        vociDaFareTutte().voci.first { $0.fatto == .attivita(id: id) }
+    }
+
+    /// Rifinitura 50: la spunta delle attività nella colonna dell'Agenda. Un'attività aperta che è una voce del nastro si
+    /// segna con «Segna come fatto» del «Da fare» unico (vale in tutta Prisma e si annulla dal pannello con «Annulla
+    /// l’ultima»); le altre, e una già fatta da riaprire, si alternano come prima.
+    func spuntaAttivitaAgenda(_ id: String) {
+        if let a = dati.attivita.first(where: { $0.id == id }), !a.completata, let v = voceDaFare(attivitaId: id) {
+            fattoDaFare(v)
+        } else {
+            alternaCompletata(id)
+        }
     }
 
     /// «Annulla l’ultima»: rimette da fare l'ultima cosa segnata dal «Da fare».
@@ -307,6 +353,26 @@ enum ProvaDaFareShell {
             controlla(dopo?.conformita == cliente.conformita && dopo?.consensi == cliente.consensi,
                       "Da fare: «Annulla l’ultima» rimette la conformità di prima")
         }
+
+        // Rifinitura 50: le attività dell'Agenda sono le voci del nastro; la spunta dell'Agenda si annulla dal pannello
+        s.salvaAttivita(Attivita(id: "prova-agenda", clienteId: primoCliente, titolo: "Mandare il KID", scadenza: oggi,
+                                 priorita: .normale, completata: false))
+        let aperte = Set(s.dati.attivita.filter { !$0.completata }.map(\.id))
+        let vociAttivita = s.vociDaFareTutte().voci.compactMap { v -> String? in
+            if case .attivita(let id) = v.fatto { return id } else { return nil }
+        }
+        controlla(vociAttivita.contains("prova-agenda") && vociAttivita.allSatisfy { aperte.contains($0) },
+                  "Da fare: le voci delle attività sono le attività aperte dell'Agenda")
+        s.fatteDaFare.removeAll()
+        s.spuntaAttivitaAgenda("prova-agenda")
+        controlla(s.dati.attivita.first { $0.id == "prova-agenda" }?.completata == true && s.fatteDaFare.count == 1
+                  && s.voceDaFare(attivitaId: "prova-agenda") == nil,
+                  "Da fare: la spunta dell'Agenda segna la voce come fatta in tutta Prisma")
+        s.annullaUltimoFattoDaFare()
+        controlla(s.dati.attivita.first { $0.id == "prova-agenda" }?.completata == false
+                  && s.voceDaFare(attivitaId: "prova-agenda") != nil,
+                  "Da fare: «Annulla l’ultima» riapre l'attività spuntata nell'Agenda")
+        s.eliminaAttivita("prova-agenda")
 
         // «+ Aggiungi»: con «Tutti i clienti» è «Per te», con un cliente scelto è sua
         s.aggiungiDaFare("  Rinnovare l'iscrizione all'albo  ")

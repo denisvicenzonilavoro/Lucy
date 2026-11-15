@@ -258,6 +258,9 @@ enum ProvaTavolo {
             controlla(false, "Tavolo: il tratto di prova in PNG")
         }
 
+        // Migliorie d'uso 58: l'iPad segue la vista del cliente dall'etichetta del luogo
+        luogo(stato: stato, tavolo: tavolo, ipad: ipad, controlla)
+
         // Un altro cliente sul Mac: l'iPad torna subito neutro
         tavolo.mandaFamiglia(contesto)
         _ = attendi(5) { mostrato(ipad)?.genere == .famiglia }
@@ -308,6 +311,112 @@ enum ProvaTavolo {
         } else {
             controlla(false, "Tavolo: un terzo iPad si collega")
         }
+    }
+
+    /// Migliorie d'uso 58, con lo stesso iPad collegato: fuori dalla vista del cliente non si manda niente; dentro,
+    /// «Manda sull’iPad» e ogni cambio di capitolo danno una sola immagine; con «può toccare: no» il gioco del rischio va
+    /// come immagine (mai il genere vivo); la presa visione di un'immagine (sull'iPad e sul Mac) dà un PDF di due pagine
+    /// nei Documenti; «Fine: torna al lavoro» rimette l'iPad sulla schermata neutra e il tavolo resta in ascolto.
+    private static func luogo(stato: StatoShell, tavolo: TavoloMac, ipad: ClienteTavolo, _ controlla: (Bool, String) -> Void) {
+        tavolo.schermataNeutra()
+        _ = attendi(5) { ipad.schermo == .neutra }
+        stato.mandaAlTavolo()
+        controlla(stato.luogoCliente == .schermo && ipad.schermo == .neutra,
+                  "Tavolo: fuori dalla vista del cliente «Manda sull’iPad» non fa niente")
+        stato.avvisoVistaVisto = true
+        stato.mostra(.quadro)
+        guard stato.inVistaCliente else { return controlla(false, "Tavolo: si entra nella vista del cliente") }
+        controlla(stato.luogoCliente == .schermo && !stato.consulenteVede, "Tavolo: si entra sempre con il cliente davanti allo schermo")
+        stato.mandaAlTavolo()
+        controlla(stato.luogoCliente == .tavolo && !stato.tavoloTocca && stato.consulenteVede,
+                  "Tavolo: «Manda sull’iPad sul tavolo» porta il cliente sull'iPad (può toccare: no) e il consulente rivede i suoi pulsanti")
+        stato.seguiSulTavolo()
+        if stato.cifreLuogoDaConfermare {
+            // Decisione 49: senza la conferma del consulente l'iPad resta neutro
+            controlla(ipad.schermo == .neutra, "Tavolo: con le cifre da confermare l'iPad resta sulla schermata neutra")
+            stato.confermaCifreLuogo()
+        }
+        let quadro = attendi(10) { mostrato(ipad)?.genere == .pagina && mostrato(ipad)?.titolo == CapitoloCliente.quadro.titolo }
+        controlla(quadro && mostrato(ipad)?.pagine.count == 1 && tavolo.cursore == nil,
+                  "Tavolo: l'iPad mostra l'immagine ferma del quadro (una pagina, nessun cursore)")
+        controlla(tavolo.puoChiederePresaVisione(presente), "Tavolo: dopo l'immagine del capitolo si può chiedere la presa visione")
+        stato.cambiaCapitolo(.posizioni)
+        stato.seguiSulTavolo()
+        controlla(attendi(10) { mostrato(ipad)?.titolo == CapitoloCliente.posizioni.titolo },
+                  "Tavolo: cambiato il capitolo, l'iPad mostra «Le posizioni»")
+        // Il gioco del rischio con «può toccare: no»: l'immagine del palco, mai il genere vivo
+        stato.cambiaCapitolo(.sala)
+        stato.sala.esperienza = .giocoRischio
+        stato.seguiSulTavolo()
+        let rischio = attendi(10) { mostrato(ipad)?.titolo == EsperienzaSala.giocoRischio.titolo }
+        controlla(rischio && mostrato(ipad)?.genere == .pagina && stato.sala.tavoloEsperienza == nil,
+                  "Tavolo: con «può toccare: no» il gioco del rischio va sull'iPad come immagine ferma")
+        stato.cambiaTocco()
+        stato.seguiSulTavolo()
+        controlla(stato.sala.tavoloEsperienza == .giocoRischio, "Tavolo: con «può toccare: sì» il gioco del rischio è vivo sull'iPad")
+        stato.cambiaTocco()
+        stato.sala.esperienza = nil
+        stato.seguiSulTavolo()
+        controlla(attendi(10) { mostrato(ipad)?.titolo == CapitoloCliente.sala.titolo } && stato.sala.tavoloEsperienza == nil,
+                  "Tavolo: tornati alla griglia della Sala, l'iPad mostra la griglia")
+        // Rifinitura 58: «Nel tempo» con «può toccare: sì» lascia al cliente il cursore del versamento (dal vivo), una volta
+        // sola; con «può toccare: no» torna l'immagine ferma
+        stato.cambiaCapitolo(.tempo)
+        stato.cambiaTocco()
+        stato.seguiSulTavolo()
+        let cursoreTempo = attendi(5) { cursore(ipad)?.risultato != nil }
+        let idCursore = tavolo.cursore?.id
+        controlla(cursoreTempo && idCursore != nil, "Tavolo: «Nel tempo» con «può toccare: sì» manda il cursore del versamento all'iPad")
+        stato.seguiSulTavolo()
+        controlla(tavolo.cursore?.id == idCursore, "Tavolo: il cursore di «Nel tempo» non si rimanda a ogni cambio")
+        stato.cambiaTocco()
+        stato.seguiSulTavolo()
+        controlla(attendi(10) { mostrato(ipad)?.titolo == CapitoloCliente.tempo.titolo && mostrato(ipad)?.genere == .pagina }
+                  && tavolo.cursore == nil,
+                  "Tavolo: «Nel tempo» con «può toccare: no» torna l'immagine ferma, senza cursore")
+        stato.cambiaCapitolo(.sala)
+        stato.seguiSulTavolo()
+        _ = attendi(10) { mostrato(ipad)?.titolo == CapitoloCliente.sala.titolo }
+        // La presa visione dell'immagine sull'iPad: la pagina su carta e la pagina della presa visione
+        if let tratto = TrattoProvaTavolo.immagine(), let png = ProtocolloTavolo.png(tratto) {
+            let prima = stato.dati.documenti.count
+            let archiviate = tavolo.presaVisioneArchiviate
+            stato.apriPresaVisione()
+            let richiesta = attendi(5) { presaVisione(ipad) != nil }
+            if richiesta, let r = presaVisione(ipad) {
+                ipad.mandaPresaVisione(richiesta: r.id, tratto: png)
+                let arrivata = attendi(15) { tavolo.presaVisioneArchiviate == archiviate + 1 }
+                let doc = tavolo.ultimaPresaVisione.flatMap { id in stato.dati.documenti.first { $0.id == id } }
+                let pagine = doc.map { stato.testoDocumento($0, memorizza: false) } ?? []
+                controlla(arrivata && stato.dati.documenti.count == prima + 1 && pagine.count == 2
+                          && normalizza(pagine.last ?? "").contains(ProtocolloTavolo.testoPresaVisione),
+                          "Tavolo: la presa visione dell'immagine sull'iPad è un PDF di 2 pagine nei Documenti")
+                stato.chiudiPresaVisioneArrivata()
+            } else {
+                controlla(false, "Tavolo: l'iPad riceve la richiesta di presa visione dell'immagine")
+            }
+            // Sul Mac: il segno fatto con il mouse, sulla pagina di ciò che si vede
+            stato.tornaSulloSchermo(avviso: false)
+            controlla(stato.luogoCliente == .schermo && attendi(5) { ipad.schermo == .neutra },
+                      "Tavolo: «Torna su questo schermo» rimette l'iPad sulla schermata neutra")
+            stato.cambiaCapitolo(.obiettivi)
+            let primaMac = stato.dati.documenti.count
+            let id = stato.registraPresaVisioneMac(tratto: tratto)
+            let doc = id.flatMap { i in stato.dati.documenti.first { $0.id == i } }
+            let pagine = doc.map { stato.testoDocumento($0, memorizza: false) } ?? []
+            controlla(doc?.clienteId == presente && stato.dati.documenti.count == primaMac + 1 && pagine.count == 2
+                      && normalizza(pagine.last ?? "").contains("su questo schermo"),
+                      "Tavolo: la presa visione sul Mac è un PDF di 2 pagine con «su questo schermo»")
+        } else {
+            controlla(false, "Tavolo: il tratto di prova in PNG")
+        }
+        // «Fine: torna al lavoro» con il cliente sull'iPad: schermata neutra, il tavolo resta in ascolto
+        stato.mandaAlTavolo()
+        stato.seguiSulTavolo()
+        _ = attendi(10) { mostrato(ipad) != nil }
+        stato.fineMostra()
+        controlla(!stato.inVistaCliente && stato.luogoCliente == .schermo && attendi(5) { ipad.schermo == .neutra } && tavolo.collegato,
+                  "Tavolo: «Fine: torna al lavoro» rimette l'iPad sulla schermata neutra e il tavolo resta aperto")
     }
 
     /// Il doppio senso in rete, con lo stesso iPad collegato (giro 16, decisioni 27, 48, 49, 111, 113).

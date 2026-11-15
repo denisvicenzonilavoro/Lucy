@@ -134,11 +134,20 @@ struct IconaRisultatoRicerca: View {
     var cliente: Cliente?
     var lato: CGFloat = Misure.Spotlight.icona
 
+    /// Una voce del glossario (migliorie d'uso 61).
+    private var eParola: Bool {
+        if case .parola = risultato.destinazione { return true }
+        return false
+    }
+
     var body: some View {
         if let c = cliente {
             AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: lato)
         } else if let a = risultato.azione {
             TesseraAzioneRicerca(simbolo: a.simbolo, lato: lato)
+        } else if eParola {
+            // Migliorie d'uso 61: le parole del glossario hanno la tessera con il libro
+            TesseraAzioneRicerca(simbolo: "text.book.closed", lato: lato)
         } else {
             IconaApp(app: risultato.app, lato: lato)
         }
@@ -280,3 +289,42 @@ struct CifraAnteprimaRicerca: View {
         .bordoBasso(ultima ? Color.clear : Colori.Spotlight.separatore)
     }
 }
+
+#if os(macOS)
+// MARK: - I filtri da toccare (migliorie d'uso 61)
+
+/// Il pallino colorato del canale (Alleanza blu, indipendente cuoio), come nelle righe dei risultati.
+struct PallinoCanale: View {
+    let canale: Canale
+    var lato: CGFloat = Tema.Apple.AltreApp.Ricerca.Mac.pallinoCanale
+
+    var body: some View {
+        Circle()
+            .fill(Tema.Apple.AltreApp.canale(canale))
+            .frame(width: lato, height: lato)
+    }
+}
+
+/// Un'etichetta della fila dei filtri del pannello di ricerca: accesa con il fondo accento al 14% e il testo accento,
+/// spenta nel `chip`. Con un canale, il suo pallino davanti al nome.
+struct EtichettaFiltroRicerca: View {
+    private typealias R = Tema.Apple.AltreApp.Ricerca.Mac
+    let testo: String
+    let acceso: Bool
+    var canale: Canale? = nil
+
+    var body: some View {
+        HStack(spacing: R.spazioPallino) {
+            if let canale { PallinoCanale(canale: canale) }
+            Text(testo)
+                .font(R.carattereFiltro.fontLeggibile)
+                .foregroundColor(acceso ? R.testoFiltroAcceso : R.testoFiltro)
+        }
+        .lineLimit(1)
+        .padding(R.etichettaFiltro)
+        .background(Capsule(style: .continuous).fill(acceso ? R.fondoFiltroAcceso : R.fondoFiltro))
+        .fixedSize()
+        .contentShape(Capsule(style: .continuous))
+    }
+}
+#endif

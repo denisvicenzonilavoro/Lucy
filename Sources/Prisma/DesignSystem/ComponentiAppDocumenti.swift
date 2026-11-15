@@ -166,7 +166,7 @@ struct FonteDato: View {
 
     private var testo: String {
         guard campo.pagina > 0 else { return "a mano" }
-        return campo.origine.contains("Qwen") ? "p. \(campo.pagina) · Qwen" : "p. \(campo.pagina)"
+        return campo.origine.contains("Qwen") ? "p. \(campo.pagina) · " + TestiStatoVera.inVista(mac: "Vera", altrove: "Qwen") : "p. \(campo.pagina)"
     }
 
     var body: some View {

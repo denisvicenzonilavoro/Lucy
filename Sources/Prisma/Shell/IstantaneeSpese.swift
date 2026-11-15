@@ -9,6 +9,9 @@ import Foundation
 ///   aggiornato; 784: uno scontrino letto da controllare; 785: il pacchetto pronto, chiaro e scuro;
 /// - 786: il dettaglio di una spesa con lo scontrino; 787: Impostazioni › Studio sui chilometri e le spese;
 /// - 788: la finestra stretta, le tre card in colonna. (789, l'iPhone, non c'è: decisione 34, niente iPhone in questo giro.)
+/// - Migliorie d'uso 57: 1095-uso-spese-mese-prima (chiara e scura: il mese scelto a metà della serie ferma, › attiva),
+///   1095-uso-spese-mese-di-oggi (› spenta) e 1095-uso-spese-senza-scontrino (l'avviso arancio nella tessera del
+///   pacchetto). Le scene 780-788 mostrano già «I chilometri» con il mese a destra e la tessera «Nel pacchetto di …».
 ///
 /// DATI DI PROVA DICHIARATI: le visite (appuntamenti con id «prova-»), i km di andata e ritorno dei cinque clienti di
 /// prova, la partenza e le ore richieste (30, il valore dimostrativo del template) esistono SOLO dentro queste scene: lo
@@ -84,6 +87,24 @@ extension Istantanee {
         }
         una("788-studio-spese-stretta") { s in
             speseDiProvaScena(s)
+            s.apriStudio(.spese)
+        }
+        // Migliorie d'uso 57
+        coppia("1095-uso-spese-mese-prima") { s in
+            speseDiProvaScena(s)
+            s.studioSpese.sposta(-4, impostazioni: s.dati.impostazioni.studio.spese)
+            s.apriStudio(.spese)
+        }
+        una("1095-uso-spese-mese-di-oggi") { s in
+            speseDiProvaScena(s)
+            s.studioSpese.scegli(StatoSpese.ultimoMese())
+            s.apriStudio(.spese)
+        }
+        una("1095-uso-spese-senza-scontrino") { s in
+            speseDiProvaScena(s)
+            let senza = SpesaStudio(id: SpeseDiProva.prefisso + "spesa-senza-scontrino", data: giornoScena(s, 14),
+                                    descrizione: "Parcheggio", importo: 6.5, categoria: .parcheggio, nota: SpeseDiProva.nota)
+            s.dati.speseStudio.spese.append(senza)
             s.apriStudio(.spese)
         }
         return scene

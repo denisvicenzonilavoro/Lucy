@@ -116,6 +116,8 @@ extension AggiornaValori {
         var posizioni: [String] = []
         var totale = Totale()
         var perCanale: [Canale: Totale] = [:]
+        /// Migliorie d'uso 44: le posizioni nuove aggiunte con «È nuova» (righe non trovate).
+        var nuove = 0
     }
 
     /// Lo stato del pannello in Posizioni (in `StatoShell.aggiornaValori`).
@@ -141,6 +143,30 @@ extension AggiornaValori {
         var scelte: [Int: String] = [:]
         var esclusi: Set<Int>?
         var canale: Canale?
+        /// Migliorie d'uso 44: le decisioni sulle righe in dubbio e il cliente scelto per le righe «È nuova» (solo
+        /// memoria, come le scelte).
+        var decisioni: [Int: DecisioneValore] = [:]
+        var clientiNuove: [Int: String] = [:]
+    }
+
+    /// Migliorie d'uso 44: la decisione su una riga in dubbio.
+    enum DecisioneValore: String, Equatable {
+        /// Il valore insolito è giusto: si registra.
+        case giusto
+        /// La polizza non trovata è nuova: diventa una posizione.
+        case nuova
+        /// La riga non si registra.
+        case salta
+    }
+
+    /// Migliorie d'uso 44: perché una riga chiede una decisione.
+    enum Dubbio: Equatable {
+        /// Il valore nuovo è molto più basso (o più alto) di quello di prima (oltre `sogliaInsolita`).
+        case calo, aumento
+        /// Nessuna posizione con quel numero o quel nome: è una polizza nuova?
+        case nuova
+        /// Più posizioni possibili, o il numero è di un altro cliente: si sceglie la posizione.
+        case scegli
     }
 }
 
@@ -484,6 +510,111 @@ extension AggiornaValori {
     /// Le righe da registrare adesso: applicabili, non escluse e non già nello storico (il numero del pulsante).
     static func daRegistrare(_ esiti: [Esito], esclusi: Set<Int>) -> Int {
         esiti.filter { $0.stato.applicabile && !esclusi.contains($0.id) }.count
+    }
+}
+
+// MARK: - Prima i dubbi (migliorie d'uso 44)
+
+extension AggiornaValori {
+    /// Il valore a zero su una posizione che valeva qualcosa: non è una domanda «È giusto?», parte esclusa
+    /// (`esclusiIniziali`) e va tra le righe che non si registrano.
+    static func zero(_ e: Esito) -> Bool {
+        e.stato == .aggiorna && e.riga.valore == 0 && (e.precedente ?? 0) > 0
+    }
+
+    /// Il dubbio della riga, nil se la riga non chiede una decisione. Le righe già scelte a mano restano tra i dubbi
+    /// (decise, con «Cambia»).
+    static func dubbio(_ e: Esito) -> Dubbio? {
+        if e.stato == .daScegliere || e.abbinamento == .scelta { return .scegli }
+        if e.stato == .nonTrovata { return .nuova }
+        if e.stato == .aggiorna && e.insolita && !zero(e) {
+            let pct = e.risultatoPct ?? e.variazionePct ?? e.variazione ?? 0
+            return pct < 0 ? .calo : .aumento
+        }
+        return nil
+    }
+
+    /// Le righe che chiedono una decisione e non l'hanno ancora, nell'ordine del file. «Scegli la posizione» è decisa
+    /// con una scelta o con «Salta»; le altre con la loro decisione.
+    static func daDecidere(_ esiti: [Esito], decisioni: [Int: DecisioneValore], scelte: [Int: String]) -> [Int] {
+        esiti.compactMap { e -> Int? in
+            guard let d = dubbio(e) else { return nil }
+            switch d {
+            case .scegli: return scelte[e.id] == nil && decisioni[e.id] != .salta ? e.id : nil
+            case .calo, .aumento, .nuova: return decisioni[e.id] == nil ? e.id : nil
+            }
+        }
+    }
+
+    /// Le righe che non entrano nella registrazione: quelle tolte a mano, le saltate, le insolite non ancora dette
+    /// giuste e i valori a zero.
+    static func esclusiPerRegistrare(_ esiti: [Esito], decisioni: [Int: DecisioneValore], esclusi: Set<Int>) -> Set<Int> {
+        var fuori = esclusi
+        for e in esiti {
+            if decisioni[e.id] == .salta || zero(e) {
+                fuori.insert(e.id)
+            } else if let d = dubbio(e), d == .calo || d == .aumento, decisioni[e.id] != .giusto {
+                fuori.insert(e.id)
+            }
+        }
+        return fuori
+    }
+
+    /// I valori attuali che si registrano (il numero dei «Pronti» e del pulsante): righe da aggiornare non escluse.
+    /// Con `esclusi` vuoto: anche quelle tolte a mano (le righe della tabella dei «Pronti», con la spunta).
+    static func pronte(_ esiti: [Esito], decisioni: [Int: DecisioneValore], esclusi: Set<Int>) -> [Int] {
+        let fuori = esclusiPerRegistrare(esiti, decisioni: decisioni, esclusi: esclusi)
+        return esiti.filter { $0.stato == .aggiorna && !fuori.contains($0.id) }.map(\.id)
+    }
+
+    /// I valori più vecchi di quello attuale: vanno solo nello storico (non entrano nel numero del pulsante).
+    static func soloStorico(_ esiti: [Esito], esclusi: Set<Int>) -> [Int] {
+        esiti.filter { $0.stato == .storico && !esclusi.contains($0.id) }.map(\.id)
+    }
+
+    /// Le righe che non si registrano: già registrate, chiuse, coperture, senza valore, date future, ripetute e i
+    /// valori a zero.
+    static func nonSiRegistrano(_ esiti: [Esito]) -> [Int] {
+        esiti.filter { e in
+            switch e.stato {
+            case .giaRegistrato, .nonInEssere, .copertura, .senzaValore, .dataFutura, .ripetuta: return true
+            case .aggiorna: return zero(e)
+            case .storico, .daScegliere, .nonTrovata: return false
+            }
+        }.map(\.id)
+    }
+
+    /// Le righe non trovate dette «È nuova», con il loro cliente: diventano posizioni alla registrazione.
+    static func nuove(_ esiti: [Esito], decisioni: [Int: DecisioneValore], clienti: [Int: String]) -> [Int: String] {
+        var elenco: [Int: String] = [:]
+        for e in esiti where e.stato == .nonTrovata && decisioni[e.id] == .nuova {
+            if let c = clienti[e.id], !c.isEmpty { elenco[e.id] = c }
+        }
+        return elenco
+    }
+
+    /// Le posizioni nuove dalle righe del file (id = posto nella tabella, sotto l'intestazione), con la lettura
+    /// dell'importazione (`ImportaPosizioni.daRighe`: canale, area e prodotto riconosciuti) e il cliente dato.
+    static func posizioniNuove(tabella: [[String]], righe: [Int: String], clienti: [Cliente], posizioni: [Posizione],
+                               prodotti: [Prodotto], oggi: Date = Date()) -> [Posizione] {
+        guard let testa = tabella.first else { return [] }
+        var nuove: [Posizione] = []
+        for id in righe.keys.sorted() {
+            guard id > 0, id < tabella.count, let clienteId = righe[id], !clienteId.isEmpty else { continue }
+            let letto = ImportaPosizioni.daRighe([testa, tabella[id]], clienti: clienti, posizioni: posizioni + nuove,
+                                                 prodotti: prodotti, oggi: oggi)
+            guard var p = letto.posizioni.first?.posizione else { continue }
+            p.clienteId = clienteId
+            nuove.append(p)
+        }
+        return nuove
+    }
+
+    /// Il canale che la riga avrebbe come posizione nuova (mostrato nella riga del dubbio «È nuova»).
+    static func canaleNuova(tabella: [[String]], riga id: Int, prodotti: [Prodotto]) -> Canale? {
+        guard let testa = tabella.first, id > 0, id < tabella.count else { return nil }
+        return ImportaPosizioni.daRighe([testa, tabella[id]], clienti: [], posizioni: [], prodotti: prodotti)
+            .posizioni.first?.posizione.canale
     }
 }
 

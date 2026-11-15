@@ -101,6 +101,9 @@ enum TestiAppMercato {
                 }
                 frase += " (" + parti.joined(separator: ", ") + ")"
             }
+            if tipoSerie == .indiceAzionario, let quota = primo.quotaAzioni, quota > 0 {
+                frase += ": " + quotaInAzioni(quota)
+            }
             return frase + "."
         }
         let quanti = clienti(n)
@@ -345,7 +348,8 @@ extension TestiAppMercato {
     static func nessunAvvisoPer(_ nome: String) -> String { "Nessun avviso per \(primoNome(nome))." }
 
     /// La frase della scheda per un cliente solo: con la cifra «Il portafoglio di Marco perde circa 1.150 €» (con i
-    /// canali separati se sono due); senza cifra la frase qualitativa del tipo di serie, detta di lui.
+    /// canali separati se sono due) e, per gli indici azionari, la sua quota in azioni («…: ha il 38% in azioni.», come
+    /// nel template); senza cifra la frase qualitativa del tipo di serie, detta di lui.
     static func fraseToccato(_ e: EventoMercato, toccato: ClienteToccato, tipoSerie: TipoSerieMercato?, nome: String) -> String {
         let n = primoNome(nome)
         if let impatto = toccato.impatto, abs(impatto) >= 1 {
@@ -358,6 +362,9 @@ extension TestiAppMercato {
                     return "\(k.nomeBreve) " + Formati.euro(abs(MotoreMercato.circa(v)))
                 }
                 frase += " (" + parti.joined(separator: ", ") + ")"
+            }
+            if tipoSerie == .indiceAzionario, let quota = toccato.quotaAzioni, quota > 0 {
+                frase += ": " + quotaInAzioni(quota)
             }
             return frase + "."
         }
@@ -382,6 +389,12 @@ extension TestiAppMercato {
         case .cedolaInArrivo:
             return "Per \(n): la cedola arriva sul conto."
         }
+    }
+
+    /// «ha il 38% in azioni», o «ha tutto in azioni» (quota intera, arrotondata a 100).
+    static func quotaInAzioni(_ quota: Double) -> String {
+        let percento = Int((min(max(quota, 0), 1) * 100).rounded())
+        return percento >= 100 ? "ha tutto in azioni" : "ha il \(percento)% in azioni"
     }
 
     // MARK: Le azioni degli avvisi

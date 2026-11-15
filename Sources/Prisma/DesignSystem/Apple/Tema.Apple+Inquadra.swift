@@ -141,6 +141,45 @@ extension Tema.Apple {
             static let paddingConferma = Tema.Apple.Misura.Padding.tile
             static let superficieConferma = Tema.Apple.Superficie.tile
             static let fraseConferma = C(dimensione: 13, peso: .regular, interlinea: 1.4)
+
+            // Migliorie d'uso 43 («Prima di aggiungere, si controlla», solo Mac)
+            /// Il valore che si corregge: fondo `chip` al passaggio (`.scVal:hover`), raggio 6, padding 1×5.
+            static let fondoValoreSopra = K.chip
+            static let raggioValore: CGFloat = 6
+            static let paddingValore = Tema.Apple.Misura.padding(1, 5)
+            /// Il campo sul posto: 14 semibold, largo quanto resta della riga.
+            static let campoCorrezione = C(dimensione: 14, peso: .semibold)
+            /// La matita «scritto da te» dopo una correzione.
+            static let segnoScrittoDaTe = "pencil"
+            static let coloreScrittoDaTe = K.inchiostro3
+            /// La riga in dubbio (`.scDub`): fondo arancio al 10%, raggio 10, 8 ai lati; «?» nell'arancio del testo.
+            static let fondoDubbio = K.arancio.opacity(0.1)
+            static let raggioDubbio: CGFloat = 10
+            static let paddingDubbio: CGFloat = 8
+            static let coloreDubbio = K.arancioTesto
+            /// «Di chi è · letto dal documento»: avatar 34, 10 fra le parti, 8 sopra e 10 sotto, filo sotto.
+            static let avatarDiChi: CGFloat = 34
+            static let spazioDiChi: CGFloat = 10
+            static let paddingDiChi = EdgeInsets(top: 8, leading: 0, bottom: 10, trailing: 0)
+            static let etichettaDiChi = C.secondario
+            static let coloreEtichettaDiChi = K.inchiostro2
+            static let nomeDiChi = C(dimensione: 14, peso: .bold)
+            static let coloreNomeDiChi = K.inchiostro
+            static let fondoAvatarVuoto = K.chip
+            static let cambia = Tema.Apple.Carattere.pulsante
+            static let coloreCambia = K.accento
+            /// L'avviso del cliente diverso, in arancio, 8 sopra e sotto, filo sotto.
+            static let avvisoAltroCliente = C.secondario
+            static let coloreAvvisoAltroCliente = K.arancioTesto
+            static let paddingAvvisoAltroCliente: CGFloat = 8
+            /// «Senza iPhone? Scegli un file dal Mac» in fondo, sopra un filo: 12 sopra, 10 dal filo.
+            static let filoSenzaIPhoneSopra: CGFloat = 12
+            static let senzaIPhoneDalFilo: CGFloat = 10
+            static let senzaIPhone = C.secondario
+            static let coloreSenzaIPhone = K.inchiostro2
+            static let linkSenzaIPhone = C(dimensione: 12.5, peso: .semibold)
+            static let spazioSenzaIPhone: CGFloat = 4
+            static let coloreLinkSenzaIPhone = K.accento
         }
 
         // MARK: Tabella del confronto (§2.6)
@@ -261,6 +300,11 @@ extension Tema.Apple.Moto {
         /// Dal pannello Novità: lo scanner si apre 0,5 s dopo se Posizioni era già davanti, 0,9 s se no.
         static let aperturaDaNovita = 0.50
         static let aperturaDaNovitaFinestra = 0.90
+        /// Migliorie d'uso 43: le righe in dubbio tremano (0 → −6 → 6 → 0) in 0,3 s; niente con «Riduci movimento».
+        static let durataScossa = 0.30
+        static var scossa: Animation { .linear(duration: durataScossa * Tema.Apple.Moto.ritmo) }
+        static let ampiezzaScossa: CGFloat = 6
+        static let volteScossa: CGFloat = 1
     }
 }
 

@@ -1,30 +1,21 @@
 import SwiftUI
 
 /// La pillola dell'esito di una raccomandazione nel tema Apple (Studio › Track record, §4.2.1): «Accettata» verde,
-/// «Rifiutata» rossa, «Rimandata» arancio, «In attesa» neutra; capsula 12 bold con padding 4×10. Colori fissi,
-/// uguali in chiaro e in scuro (`Tema.Apple.Studio.Track`).
+/// «Rifiutata» rossa, «Rimandata» arancio, «In attesa» neutra. Dalle migliorie d'uso 55 è un involucro di
+/// `PillolaStatoApple` (stessa capsula, stessi colori, ora in `Tema.Apple.PillolaStato`).
 struct PillolaEsitoApple: View {
     let esito: PresentazioneTrackRecord.Esito
 
     var body: some View {
-        let t = Tema.Apple.Studio.Track.self
-        Text(esito.nome)
-            .carattereApple(t.pillola)
-            .foregroundColor(colori.testo)
-            .lineLimit(1)
-            .fixedSize()
-            .padding(t.paddingPillola)
-            .background { Capsule(style: .continuous).fill(colori.fondo) }
-            .accessibilityLabel(Text("Esito: \(esito.nome)"))
+        PillolaStatoApple(testo: esito.nome, tono: tono, etichettaAccessibile: "Esito: \(esito.nome)")
     }
 
-    private var colori: (testo: Color, fondo: Color) {
-        let t = Tema.Apple.Studio.Track.self
+    private var tono: TonoPillola {
         switch esito {
-        case .accettata: return (t.testoAccettata, t.fondoAccettata)
-        case .rifiutata: return (t.testoRifiutata, t.fondoRifiutata)
-        case .rimandata: return (t.testoRimandata, t.fondoRimandata)
-        case .inAttesa: return (t.testoInAttesa, t.fondoInAttesa)
+        case .accettata: return .ok
+        case .rifiutata: return .errore
+        case .rimandata: return .avviso
+        case .inAttesa: return .neutro
         }
     }
 }

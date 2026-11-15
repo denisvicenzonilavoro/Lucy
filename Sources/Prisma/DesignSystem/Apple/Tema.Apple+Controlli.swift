@@ -25,6 +25,36 @@ extension Tema.Apple {
             static let numero = Carattere(dimensione: 11, peso: .bold, tabellare: true)
             static let paddingNumero = Misura.padding(1, 7)
             static let spazioNumero: CGFloat = 2
+            /// La variante piccola (`.segP`, migliorie d'uso 45: le ipotesi dei simulatori): voci 4×11, testo 12,5.
+            static let paddingVoceCompatta = Misura.padding(4, 11)
+            static let testoCompatto = Carattere(dimensione: 12.5, peso: .semibold)
+            /// Il filo fra due gruppi di voci (`.seg .sgS`, Migliorie d'uso 52): largo 1, 6 di margine sopra, sotto e
+            /// ai lati, `--ink3` all'opacità 0,5. Non si sceglie e non ha pillola.
+            static let filo: CGFloat = 1
+            static let marginiFilo: CGFloat = 6
+            static let opacitaFilo: Double = 0.5
+            /// L'altezza del filo: quella di una voce (riga del carattere della barra più il padding) meno i margini.
+            /// Esplicita perché il segmentato sta spesso in `.fixedSize()`, dove un `Rectangle` prenderebbe 10 punti.
+            static var altezzaFilo: CGFloat {
+                let voce = Tema.Apple.Carattere.barra.dimensione * Tema.Apple.Carattere.interlineaSistema
+                    + Tema.Apple.Misura.Padding.voceSegmentato.top + Tema.Apple.Misura.Padding.voceSegmentato.bottom
+                return max(0, voce - 2 * marginiFilo)
+            }
+        }
+
+        /// I filtri a chip (`.fch`, Migliorie d'uso 54): capsula alta 30, padding 0×11, 12,5 semibold; spenta fondo
+        /// `chip` con il testo `inchiostro2`, accesa fondo `cardPiena` con il testo `inchiostro` e l'ombra della pillola.
+        enum ChipFiltro {
+            static let altezza: CGFloat = 30
+            static let paddingOrizzontale: CGFloat = 11
+            static let carattere = Carattere(dimensione: 12.5, peso: .semibold)
+            static let testo = Colore.inchiostro2
+            static let testoAcceso = Colore.inchiostro
+            static let fondo = Colore.chip
+            static let fondoAcceso = Colore.cardPiena
+            /// Fondo e colore cambiano in 0,2 s.
+            static let durata = 0.2
+            static var animazione: Animation { Moto.Curva.ease.animazione(durata) }
         }
 
         /// `.sw` (§2.9).

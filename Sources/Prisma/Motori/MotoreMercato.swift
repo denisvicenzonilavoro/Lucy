@@ -33,6 +33,9 @@ struct ClienteToccato: Equatable {
     var impatto: Double?
     var perCanale: [Canale: Double]
     var canali: [Canale]
+    /// Rifinitura 25-31 (migliorie d'uso 29): per gli indici azionari, la quota in azioni del portafoglio del cliente
+    /// (0–1, pesata per valore sulle posizioni di cui Prisma conosce la composizione); nil per gli altri eventi.
+    var quotaAzioni: Double? = nil
 
     /// Il canale quando le posizioni toccate sono di uno solo.
     var canaleUnico: Canale? { canali.count == 1 ? canali.first : nil }
@@ -340,9 +343,22 @@ enum MotoreMercato {
         var voci: [(posizione: Posizione, impatto: Double?)] = []
         switch s.tipo {
         case .indiceAzionario:
+            // La quota in azioni di ogni cliente (per la frase «ha il 38% in azioni»): su tutte le sue posizioni di cui
+            // si conosce la composizione (gli immobili no), non solo su quelle toccate, pesata per valore
+            var pesi: [String: (azioni: Double, valore: Double)] = [:]
             for p in posizioni {
-                guard let c = MotoreResistenza.composizione(p), c.azioni > 0 else { continue }
+                guard let c = MotoreResistenza.composizione(p) else { continue }
+                if p.valore > 0, p.area != .immobili {
+                    pesi[p.clienteId, default: (azioni: 0, valore: 0)].azioni += p.valore * c.azioni
+                    pesi[p.clienteId, default: (azioni: 0, valore: 0)].valore += p.valore
+                }
+                guard c.azioni > 0 else { continue }
                 voci.append((posizione: p, impatto: p.valore * c.azioni * variazione / 100))
+            }
+            return raggruppa(voci, nomi: nomi).map { t -> ClienteToccato in
+                var x = t
+                if let w = pesi[t.clienteId], w.valore > 0 { x.quotaAzioni = w.azioni / w.valore }
+                return x
             }
         case .rendimentoStato, .spread:
             for p in posizioni {

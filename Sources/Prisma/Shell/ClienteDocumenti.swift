@@ -16,6 +16,10 @@ struct DocumentiCliente: View {
     @State private var sceltaFile = false
     /// Voci, gruppi e testo piegato delle pagine, tenuti tra un disegno e l'altro (IndiceTestiDocumenti.swift).
     @State private var memoria = MemoriaElencoDocumenti()
+    #if os(macOS)
+    /// Migliorie d'uso 62: il dettaglio di Clienti, da cui nasce il lettore del documento toccato.
+    @Environment(\.statoDettaglioApple) private var dettaglioClienti
+    #endif
 
     private var filtro: MotoreDocumenti.Filtro {
         var f = MotoreDocumenti.Filtro()
@@ -76,7 +80,7 @@ struct DocumentiCliente: View {
                     VStack(spacing: 0) {
                         fascia(voci)
                             .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
-                        colonne(gruppi: gruppi, scelta: scelta, totale: voci.count)
+                        corpo(gruppi: gruppi, scelta: scelta, totale: voci.count)
                             .entrataCascata(1, base: Tema.Apple.Moto.Cascata.baseDentroApp, sfocatura: false)
                     }
                 }
@@ -127,6 +131,33 @@ struct DocumentiCliente: View {
     }
 
     // MARK: - Elenco e dettaglio
+
+    /// Sul Mac (migliorie d'uso 62) l'elenco prende tutta la larghezza e il documento toccato si apre in grande nel
+    /// lettore; su iPhone e iPad l'elenco e il documento affiancati, come prima.
+    @ViewBuilder private func corpo(gruppi: [MotoreDocumenti.Gruppo], scelta: MotoreDocumenti.Voce?, totale: Int) -> some View {
+        #if os(macOS)
+        ElencoDocumenti(gruppi: gruppi, scelta: scelta?.id, totale: totale, ricerca: $ricerca,
+                        filtrato: filtroAttivo, importa: importa, mostraTutti: mostraTutti, elimina: chiedi,
+                        comprimi: nil, apriLettore: apriLettore)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        #else
+        colonne(gruppi: gruppi, scelta: scelta, totale: totale)
+        #endif
+    }
+
+    #if os(macOS)
+    /// Apre il documento nel lettore, nato dalla sua riga; senza il presentatore (non dovrebbe capitare) lo chiede a
+    /// Clienti come farebbe la ricerca.
+    private func apriLettore(_ id: String) {
+        stato.vistaDocumenti.pagina = 1
+        stato.vistaDocumenti.evidenzia = nil
+        if let dettaglioClienti {
+            dettaglioClienti.apri(LettoreDocumento.idDettaglio(id), misura: Tema.Apple.Lettore.misura)
+        } else {
+            stato.vistaDocumenti.lettore = id
+        }
+    }
+    #endif
 
     /// L'elenco e il documento. Con un documento aperto l'elenco resta stretto (le sole tessere) e il foglio prende
     /// lo spazio; si apre con il suo pulsante e da solo (scheda molto larga o filtro attivo) solo se alla pagina resta

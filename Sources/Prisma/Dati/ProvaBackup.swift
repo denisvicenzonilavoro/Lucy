@@ -754,6 +754,11 @@ enum ProvaBackup {
                 print("ERRORE: \(errore)")
                 return 1
             }
+            // Migliorie d'uso 60: le esperienze della Sala fatte, nel file del cliente (ProvaBackupEsperienzeFatte.swift)
+            if let errore = try provaEsperienzeFatte(radice: radice) {
+                print("ERRORE: \(errore)")
+                return 1
+            }
             // L'archivio a pezzi su disco: conversione, backup, file rovinati, soli file cambiati, interruzioni (ProvaBackupArchivioPezzi.swift)
             if let errore = try provaArchivioPezzi(radice: radice, originale: originale) {
                 print("ERRORE: \(errore)")

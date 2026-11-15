@@ -8,11 +8,11 @@ import UniformTypeIdentifiers
 //   ┌ velo scuro sfocato sopra barra, finestre e dock ─────────────────────────────────────────────┐
 //   │      ┌──────────┐                                                                            │
 //   │      │ ▬▬ tacca │        ┌ ● PRISMA SUL MAC ─────────────────────── ✕ ┐                     │
-//   │      │ ┌──────┐ │        │ Polizza riconosciuta                         │                     │
+//   │      │ ┌──────┐ │        │ Letta: un dato da controllare                │                     │
 //   │      │ │foglio│ │        │ ✓ Contraente          Giulia Rossi           │                     │
 //   │      │ │ ──── │ │        │ ✓ Premio              90 € al mese           │                     │
 //   │      │ └──────┘ │        │ …                                             │                     │
-//   │      │ ✓ Fatto  │        │ [Aggiungi a Posizioni di Giulia] [Confronta] │                     │
+//   │      │ ✓ Fatto  │        │ [Controlla il dato in arancione] [Confronta] │                     │
 //   │      └──────────┘        └──────────────────────────────────────────────┘                     │
 //   └──────────────────────────────────────────────────────────────────────────────────────────────┘
 //
@@ -22,7 +22,11 @@ import UniformTypeIdentifiers
 // - Movimento: velo in 0,3 s; iPhone da y +60 e −4° con la molla leggera in 0,7 s; linea della scansione giù e su in
 //   2 × 1,1 s (si ferma in alto); righe a cascata (StatoInquadra); tabella da y +10 in 0,45 s; chiusura in 0,22 s.
 //   «Riduci movimento»: tutto fermo con la dissolvenza di 0,15 s, niente linea. Istantanee: stato finale, linea in alto.
-// - Esc chiude la scena (prima di tutto il resto); Invio è il pulsante principale. Un clic sul velo non fa nulla.
+// - Esc chiude la scena (prima di tutto il resto; mentre si corregge una riga annulla la modifica); Invio è il pulsante
+//   principale. Un clic sul velo non fa nulla.
+// - Migliorie d'uso 43 («Prima di aggiungere, si controlla»): «Di chi è» in testa alle righe, ogni valore si corregge con
+//   un clic, i dati incerti (regole di `MotoreInquadra.daControllare`) sono in arancione con «Va bene», e finché ce n'è
+//   uno il pulsante principale è «Controlla il dato in arancione»; poi la conferma di sempre. In fondo «Senza iPhone?».
 
 /// Lo strato della scena nella shell (sopra barra, finestre e dock): vuoto quando la scena è chiusa.
 struct StratoInquadra: View {
@@ -67,12 +71,14 @@ struct ScenaInquadra: View {
                         .padding(.top, D.scartoScheda)
                 }
                 .scaleEffect(scala(geo.size))
-                // Esc chiude la scena, prima di Novità, dettaglio, notifiche e finestra
+                // Esc chiude la scena, prima di Novità, dettaglio, notifiche e finestra (non mentre si corregge una
+                // riga: lì Esc annulla la modifica, migliorie d'uso 43)
                 Button("Chiudi Inquadra e capisci") { stato.chiudiInquadra() }
                     .keyboardShortcut(.cancelAction)
                     .buttonStyle(StileSemplice())
                     .opacity(0)
                     .frame(width: 0, height: 0)
+                    .disabled(inquadra.inModifica != nil)
                     .accessibilityHidden(true)
             }
             .frame(width: geo.size.width, height: geo.size.height)
@@ -280,8 +286,12 @@ private struct SchedaInquadraMac: View {
         case .lettura: return "Sto leggendo…"
         case .illeggibile: return "Non riesco a leggere il documento"
         case .letto:
-            guard inquadra.finito, let d = inquadra.dati else { return "Sto leggendo…" }
-            return inquadra.pochiDati ? "Ho letto solo una parte" : MotoreInquadra.titoloRiconosciuto(d.tipoDocumento)
+            guard inquadra.finito, inquadra.dati != nil else { return "Sto leggendo…" }
+            // Migliorie d'uso 43: il titolo dice se c'è ancora un dato da controllare
+            let n = inquadra.dubbi(canale: stato.canaleEAreaInquadra.canale).count
+            if n == 1 { return "Letta: un dato da controllare" }
+            if n > 1 { return "Letta: \(n) dati da controllare" }
+            return inquadra.pochiDati ? "Ho letto solo una parte" : "Letta e controllata"
         }
     }
 
@@ -301,8 +311,8 @@ private struct SchedaInquadraMac: View {
                 : "In «\(inquadra.origine)» non trovo i dati di una polizza: riprova con più luce, con il foglio intero e dritto."
         case .letto:
             guard inquadra.finito else { return nil }
-            if inquadra.pochiDati { return "Le righe in grigio non sono sul foglio: completale nella posizione." }
-            return inquadra.origine.isEmpty ? nil : "Letto da \(inquadra.origine). Controlla i dati prima di aggiungerli."
+            if inquadra.pochiDati { return "Le righe in grigio non sono sul foglio: toccale per scriverle, o completale nella posizione." }
+            return inquadra.origine.isEmpty ? "Tocca un valore per correggerlo." : "Letto da \(inquadra.origine). Tocca un valore per correggerlo."
         }
     }
 
@@ -337,68 +347,115 @@ private struct SchedaInquadraMac: View {
 
     @ViewBuilder private var letto: some View {
         let canale = stato.canaleEAreaInquadra.canale
-        let righe = inquadra.righeScheda(canale: canale)
+        let righe = inquadra.righeCorrette(canale: canale)
+        let dubbi: Set<String> = inquadra.finito ? inquadra.dubbi(canale: canale) : []
         VStack(alignment: .leading, spacing: 0) {
+            // Migliorie d'uso 43: «Di chi è» in testa alle righe, con l'avviso se il documento è di un altro cliente
+            if inquadra.finito {
+                diChi(canale: canale)
+                if let avviso = stato.avvisoClienteInquadra {
+                    Text(avviso)
+                        .carattereApple(S.avvisoAltroCliente)
+                        .foregroundColor(S.coloreAvvisoAltroCliente)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.vertical, S.paddingAvvisoAltroCliente)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .overlay(alignment: .bottom) { Rectangle().fill(S.filo).frame(height: Tema.Apple.Misura.bordo) }
+                }
+            }
             ForEach(Array(righe.prefix(inquadra.mostrate).enumerated()), id: \.element.id) { _, r in
-                RigaSchedaInquadra(riga: r)
+                RigaSchedaInquadraMac(inquadra: inquadra, riga: r, dubbio: dubbi.contains(r.id),
+                                      correggibile: inquadra.finito && !stato.solaLettura && !inquadra.conferma)
                     .entrataStile(.rigaInquadra)
             }
         }
         .padding(.top, S.righeSopra)
         if inquadra.finito {
-            cliente(canale: canale)
             if let c = inquadra.confronto {
-                TabellaConfrontoInquadra(confronto: c, tipo: inquadra.dati?.tipo)
+                TabellaConfrontoInquadra(confronto: c, tipo: inquadra.datiCorretti?.tipo)
                     .entrataStile(.tabellaInquadra)
             }
-            if inquadra.conferma {
+            if inquadra.conferma && dubbi.isEmpty {
                 conferma(canale: canale)
             } else {
-                pulsanti
+                pulsanti(dubbi: dubbi.count)
             }
+            senzaIPhone
         }
     }
 
-    /// Il cliente a cui va la polizza (scelto dal contraente, si può cambiare) e il canale proposto.
-    private func cliente(canale: Canale) -> some View {
+    /// «Di chi è · letto dal documento»: l'avatar, il nome, il canale proposto e «Cambia» (il menu dei clienti).
+    private func diChi(canale: Canale) -> some View {
         let c = stato.clienteInquadra
-        return HStack(spacing: S.spazioCliente) {
-            Text("Cliente")
-                .carattereApple(S.carattereCliente)
-                .foregroundColor(S.coloreCliente)
+        let etichetta: String
+        switch stato.origineClienteInquadra {
+        case .scelto: etichetta = "Di chi è · scelto da te"
+        case .letto: etichetta = "Di chi è · letto dal documento"
+        case .attivo: etichetta = "Di chi è · il cliente su cui lavori · il documento non dice di chi è"
+        case .daScegliere: etichetta = "Di chi è · da scegliere"
+        }
+        return HStack(spacing: S.spazioDiChi) {
+            if let c {
+                AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: S.avatarDiChi)
+            } else {
+                Circle().fill(S.fondoAvatarVuoto).frame(width: S.avatarDiChi, height: S.avatarDiChi)
+            }
+            VStack(alignment: .leading, spacing: 0) {
+                Text(etichetta)
+                    .carattereApple(S.etichettaDiChi)
+                    .foregroundColor(S.coloreEtichettaDiChi)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(c?.nome ?? "Scegli il cliente")
+                    .carattereApple(S.nomeDiChi)
+                    .foregroundColor(c == nil ? S.coloreMancante : S.coloreNomeDiChi)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: 0)
+            EtichettaCanaleApple(canale: canale, compatta: true)
             Menu {
                 ForEach(stato.clienti) { x in
                     Button(x.nome) { inquadra.clienteScelto = x.id }
                 }
             } label: {
-                Text(c?.nome ?? "Scegli il cliente")
-                    .carattereApple(Tema.Apple.Carattere.pulsante)
+                Text("Cambia")
+                    .carattereApple(S.cambia)
+                    .foregroundColor(S.coloreCambia)
             }
             .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
             .fixedSize()
             .disabled(stato.solaLettura)
-            Spacer(minLength: 0)
-            EtichettaCanaleApple(canale: canale, compatta: true)
+            .help("Scegli un altro cliente per questo documento")
         }
-        .padding(.top, S.clienteSopra)
+        .padding(S.paddingDiChi)
+        .overlay(alignment: .bottom) { Rectangle().fill(S.filo).frame(height: Tema.Apple.Misura.bordo) }
+        .accessibilityElement(children: .contain)
     }
 
-    private var pulsanti: some View {
+    /// Con un dato in dubbio il pulsante principale dice «Controlla il dato in arancione» (non blu): premuto, le righe
+    /// in dubbio tremano. Senza dubbi «Aggiungi alle posizioni di …» (o «Aggiorna la posizione»), poi la conferma.
+    private func pulsanti(dubbi: Int) -> some View {
         let c = stato.clienteInquadra
         let giaPresente = stato.posizioneGiaInquadrata != nil
         let nome = c.map { StatoShell.nomeBreveInquadra($0) } ?? "…"
         return HStack(spacing: S.spazioPulsanti) {
-            if giaPresente {
+            if dubbi > 0 {
+                Button(dubbi == 1 ? "Controlla il dato in arancione" : "Controlla i dati in arancione") { stato.scuotiDubbiInquadra() }
+                    .buttonStyle(.appleGrande)
+                    .keyboardShortcut(.defaultAction)
+                    .help("Conferma con «Va bene» o correggi il dato in arancione prima di aggiungere")
+                    .disabled(inquadra.inModifica != nil)
+            } else if giaPresente {
                 Button("Aggiorna la posizione") { stato.confrontaInquadrataConPosizione() }
                     .buttonStyle(.applePrimarioGrande)
                     .keyboardShortcut(.defaultAction)
                     .help("La polizza è già nelle posizioni del cliente: confronta i dati letti con quelli in Prisma")
-                    .disabled(stato.solaLettura)
+                    .disabled(stato.solaLettura || inquadra.inModifica != nil)
             } else {
-                Button("Aggiungi a Posizioni di \(nome)") { inquadra.conferma = true }
+                Button("Aggiungi alle posizioni di \(nome)") { inquadra.conferma = true }
                     .buttonStyle(.applePrimarioGrande)
                     .keyboardShortcut(.defaultAction)
-                    .disabled(c == nil || stato.solaLettura)
+                    .disabled(c == nil || stato.solaLettura || inquadra.inModifica != nil)
                     .help(stato.solaLettura ? "Archivio in sola lettura: aggiorna Prisma per creare posizioni." : "Aggiungi la polizza alle posizioni del cliente, dopo la conferma")
             }
             if inquadra.confronto == nil && !giaPresente {
@@ -411,6 +468,25 @@ private struct SchedaInquadraMac: View {
             }
         }
         .padding(.top, S.pulsantiSopra)
+    }
+
+    /// «Senza iPhone? Scegli un file dal Mac» in fondo alla scheda, sopra un filo: ricomincia con il file scelto.
+    private var senzaIPhone: some View {
+        HStack(spacing: S.spazioSenzaIPhone) {
+            Text("Senza iPhone?")
+                .carattereApple(S.senzaIPhone)
+                .foregroundColor(S.coloreSenzaIPhone)
+            Button("Scegli un file dal Mac") { stato.scegliFileInquadra() }
+                .buttonStyle(StileSemplice())
+                .carattereApple(S.linkSenzaIPhone)
+                .foregroundColor(S.coloreLinkSenzaIPhone)
+                .disabled(stato.solaLettura)
+                .help("Si sceglie un PDF o una foto dal Mac, come con «Importa»")
+            Spacer(minLength: 0)
+        }
+        .padding(.top, S.senzaIPhoneDalFilo)
+        .overlay(alignment: .top) { Rectangle().fill(S.filo).frame(height: Tema.Apple.Misura.bordo) }
+        .padding(.top, S.filoSenzaIPhoneSopra)
     }
 
     /// Niente entra nel dossier senza conferma: la frase dice cosa succede, poi «Conferma e aggiungi».
@@ -436,6 +512,130 @@ private struct SchedaInquadraMac: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .superficieApple(S.superficieConferma)
         .padding(.top, S.confermaSopra)
+    }
+}
+
+// MARK: - Una riga della scheda, correggibile (solo Mac)
+
+/// Migliorie d'uso 43: la riga della scheda del Mac (la `RigaSchedaInquadra` comune resta all'iPhone). Stessa grafica,
+/// in più: il valore si corregge con un clic (aiuto «Tocca per correggere», fondo `chip` al passaggio; Invio conferma,
+/// Esc annulla), la matita «scritto da te» dopo una correzione e, per il dato in dubbio, il fondo arancio tenue, il «?»
+/// arancio e «Va bene». Le righe in dubbio tremano con `scosse` (niente con «Riduci movimento»).
+private struct RigaSchedaInquadraMac: View {
+    let inquadra: StatoInquadra
+    let riga: RigaInquadra
+    let dubbio: Bool
+    let correggibile: Bool
+    @Environment(\.prismaCalmo) private var calmo
+    @State private var testo = ""
+    @State private var sopra = false
+    @FocusState private var fuoco: Bool
+
+    private typealias S = Tema.Apple.Inquadra.Scheda
+    private typealias M = Tema.Apple.Moto.Inquadra
+
+    private var inModifica: Bool { inquadra.inModifica == riga.id }
+    private var corretta: Bool { inquadra.corretta(riga.id) }
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 0) {
+            segno
+                .frame(width: S.larghezzaSpunta, alignment: .leading)
+            Text(riga.etichetta)
+                .carattereApple(S.etichettaRiga)
+                .foregroundColor(riga.trovata ? S.coloreEtichettaRiga : S.coloreMancante)
+                .frame(width: S.larghezzaEtichetta, alignment: .leading)
+            if inModifica {
+                TextField(riga.etichetta, text: $testo)
+                    .textFieldStyle(.roundedBorder)
+                    .font(S.campoCorrezione.font)
+                    .focused($fuoco)
+                    .onSubmit(conferma)
+                    .onExitCommand(perform: annulla)
+                    .onAppear {
+                        if testo.isEmpty { testo = inquadra.correzioni[riga.id] ?? riga.valore ?? "" }
+                        fuoco = true
+                    }
+            } else {
+                valore
+                Spacer(minLength: 0)
+                if dubbio {
+                    Button("Va bene") { _ = inquadra.confermate.insert(riga.id) }
+                        .buttonStyle(.apple)
+                        .disabled(!correggibile)
+                        .help("Il dato è giusto così")
+                }
+            }
+        }
+        .padding(.vertical, S.paddingRiga)
+        .padding(.horizontal, dubbio ? S.paddingDubbio : 0)
+        .background {
+            if dubbio {
+                RoundedRectangle(cornerRadius: S.raggioDubbio, style: .continuous).fill(S.fondoDubbio)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if !dubbio { Rectangle().fill(S.filo).frame(height: Tema.Apple.Misura.bordo) }
+        }
+        .modifier(ScuotiEffetto(ampiezza: dubbio && !calmo ? M.ampiezzaScossa : 0, volte: M.volteScossa,
+                                animatableData: inquadra.scosse))
+        .accessibilityElement(children: inModifica ? .contain : .combine)
+        .accessibilityHint(correggibile && !inModifica ? Text("Tocca per correggere") : Text(""))
+    }
+
+    /// Il valore (o «non letto»): un clic apre il campo sul posto.
+    private var valore: some View {
+        Text(riga.valore ?? "non letto")
+            .carattereApple(riga.trovata ? S.valore : S.etichettaRiga)
+            .foregroundColor(riga.trovata ? S.coloreValore : S.coloreMancante)
+            .lineLimit(2)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(S.paddingValore)
+            .background {
+                RoundedRectangle(cornerRadius: S.raggioValore, style: .continuous)
+                    .fill(sopra && correggibile ? S.fondoValoreSopra : Color.clear)
+            }
+            .padding(.horizontal, -S.paddingValore.leading)
+            .contentShape(Rectangle())
+            .onHover { sopra = $0 }
+            .onTapGesture { if correggibile { apri() } }
+            .help(correggibile ? "Tocca per correggere" : "")
+            .accessibilityAddTraits(correggibile ? .isButton : [])
+            .accessibilityAction { if correggibile { apri() } }
+    }
+
+    @ViewBuilder private var segno: some View {
+        if dubbio {
+            Text("?").carattereApple(S.spunta).foregroundColor(S.coloreDubbio)
+        } else if corretta {
+            Image(systemName: S.segnoScrittoDaTe).foregroundColor(S.coloreScrittoDaTe)
+                .accessibilityLabel(Text("scritto da te"))
+        } else {
+            Text(riga.trovata ? "✓" : "").carattereApple(S.spunta).foregroundColor(S.coloreSpunta)
+        }
+    }
+
+    private func apri() {
+        testo = inquadra.correzioni[riga.id] ?? riga.valore ?? ""
+        inquadra.inModifica = riga.id
+    }
+
+    /// Invio: la correzione entra (uguale al valore di prima non è una correzione) ed esce da «Va bene».
+    private func conferma() {
+        let t = testo.trimmingCharacters(in: .whitespacesAndNewlines)
+        if t == riga.valore || (t.isEmpty && inquadra.correzioni[riga.id] == nil) {
+            // niente di cambiato
+        } else if t.isEmpty {
+            inquadra.correzioni[riga.id] = nil
+        } else {
+            inquadra.correzioni[riga.id] = t
+            inquadra.confermate.remove(riga.id)
+        }
+        inquadra.inModifica = nil
+    }
+
+    private func annulla() {
+        inquadra.inModifica = nil
     }
 }
 

@@ -15,7 +15,11 @@ enum TestiNotte {
     static let piuTardi = "Più tardi"
     static let timbroApprova = "APPROVA"
     static let timbroPiuTardi = "PIÙ TARDI"
-    static let registro = "FATTO ADESSO"
+    /// Migliorie d'uso 68: la colonna delle decisioni (l'occhiello è maiuscolo) e la parola sotto il ✓.
+    static let registro = "COSA HAI DECISO"
+    static let vaBene = "Va bene"
+    /// Il registro vuoto, prima della prima decisione: le rimandate vanno nella riga «Arrivati» del «Da fare».
+    static let registroVuoto = "Qui compare ogni decisione, una riga per volta. Quelle rimandate finiscono nel «Da fare» di oggi."
     static let daIeri = "DA IERI"
     static let preparaAdesso = "Prepara adesso"
     static let vaiAllaScrivania = "Vai alla scrivania"
@@ -67,6 +71,15 @@ enum TestiNotte {
     }
 
     static let tuttoFatto = "Tutto fatto."
+
+    /// Migliorie d'uso 68, sopra «Vai alla scrivania» (solo con n > 0): «La cosa rimandata è nel «Da fare» di oggi.» /
+    /// «Le 2 cose rimandate sono nel «Da fare» di oggi.».
+    static func rimandateNelDaFare(_ n: Int) -> String {
+        n == 1 ? "La cosa rimandata è nel «Da fare» di oggi." : "Le \(n) cose rimandate sono nel «Da fare» di oggi."
+    }
+
+    /// La voce «Arrivati» del «Da fare» quando restano solo carte rimandate: «Stanotte: 2 cose rimandate» (senza nomi).
+    static func voceRimandate(_ n: Int) -> String { "Stanotte: " + (n == 1 ? "1 cosa rimandata" : "\(n) cose rimandate") }
 
     /// L'occhiello del tipo.
     static func occhiello(_ t: TipoCartaNotte) -> String {

@@ -110,6 +110,10 @@ extension Tema.Apple {
             static let bordo = Colore.separatore
             static let piuTardi = Colore.arancio
             static let approva = Colore.verde
+            /// Migliorie d'uso 68: le parole sotto ✕ e ✓ (`.nCap`: 12,5 semibold secondario, larghe come il pulsante).
+            static let didascalia = Carattere(dimensione: 12.5, peso: .semibold)
+            static let coloreDidascalia = Carta.testo2
+            static let sottoPulsanti: CGFloat = 8
         }
 
         enum Registro {
@@ -129,6 +133,9 @@ extension Tema.Apple {
             /// Stretta: largo come la pila, alto al più 200.
             static let altezzaStretta: CGFloat = 200
             static let sottoComandi: CGFloat = 24
+            /// Migliorie d'uso 68: la frase del registro vuoto, 10 sotto l'occhiello, interlinea 1,5.
+            static let vuoto = Carattere(dimensione: 13, peso: .regular, interlinea: 1.5)
+            static let sopraVuoto: CGFloat = 10
         }
 
         enum Fine {

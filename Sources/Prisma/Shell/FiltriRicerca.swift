@@ -689,3 +689,51 @@ enum FiltriRicerca {
         return errori
     }
 }
+
+// MARK: - I filtri da toccare (migliorie d'uso 61)
+
+extension FiltriRicerca {
+    /// Il codice del tipo nelle ricerche salvate: «tipo:clienti», «tipo:posizioni», «tipo:documenti». Così una ricerca
+    /// salvata con i filtri da toccare resta un testo (`RicercaSalvata` non cambia forma).
+    static let tipiCodice: [GruppoRicerca] = [.clienti, .posizioni, .documenti]
+
+    static func codiceTipo(_ g: GruppoRicerca) -> String { "tipo:" + g.rawValue }
+    static func codiceCanale(_ c: Canale) -> String { "canale:" + c.rawValue }
+
+    /// Toglie dal testo i codici «tipo:» (sempre) e, con `canali`, i codici «canale:» completi, e li restituisce come
+    /// filtri da toccare; il resto del testo (parole e altri codici) resta com'è, con gli spazi ridotti a uno.
+    static func etichette(_ testo: String, canali: Bool) -> (tipo: GruppoRicerca?, canale: Canale?, resto: String) {
+        var tipo: GruppoRicerca?
+        var canale: Canale?
+        var resto: [String] = []
+        let sorgente = canali ? normalizza(testo) : testo
+        for pezzo in sorgente.split(whereSeparator: { $0.isWhitespace }).map(String.init) {
+            let p = piega(pezzo)
+            if p.hasPrefix("tipo:") || p.hasPrefix("tipo=") {
+                let v = String(p.dropFirst(5))
+                let trovati = tipiCodice.filter { !v.isEmpty && $0.rawValue.hasPrefix(v) }
+                if trovati.count == 1 {
+                    if tipo == nil { tipo = trovati[0] }
+                    continue
+                }
+            } else if canali, p.hasPrefix("canale:") || p.hasPrefix("canale=") {
+                let v = String(p.dropFirst(7))
+                let trovati = Canale.allCases.filter { !v.isEmpty && $0.rawValue.hasPrefix(v) }
+                if trovati.count == 1 {
+                    if canale == nil { canale = trovati[0] }
+                    continue
+                }
+            }
+            resto.append(pezzo)
+        }
+        return (tipo, canale, resto.joined(separator: " "))
+    }
+
+    /// Il testo da salvare: il testo scritto più i codici dei filtri da toccare accesi.
+    static func conCodici(_ testo: String, tipo: GruppoRicerca?, canale: Canale?) -> String {
+        var pezzi = [testo.trimmingCharacters(in: .whitespacesAndNewlines)].filter { !$0.isEmpty }
+        if let tipo { pezzi.append(codiceTipo(tipo)) }
+        if let canale { pezzi.append(codiceCanale(canale)) }
+        return pezzi.joined(separator: " ")
+    }
+}

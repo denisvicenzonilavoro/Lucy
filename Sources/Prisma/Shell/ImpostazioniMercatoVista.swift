@@ -28,6 +28,13 @@ struct PaginaImpostazioniMercato: View {
         let k = Tema.Apple.Mercato.Impostazioni.self
         let pagina = Tema.Apple.Impostazioni.Pagina.self
         let riga = Tema.Apple.Impostazioni.Riga.self
+        // Sul Mac, con «Dati di mercato» spento, serie, soglie e riferimenti si attenuano (migliorie d'uso 31):
+        // restano leggibili ma non sembrano attivi. Su iPhone e iPad la pagina si legge soltanto, come prima.
+        #if os(macOS)
+        let spento = !m.attivo
+        #else
+        let spento = false
+        #endif
         return VStack(alignment: .leading, spacing: pagina.spazioGruppi) {
             NotaImpostazioni(TestiAppMercato.notaPagina)
             VStack(alignment: .leading, spacing: riga.fraRighe) {
@@ -74,6 +81,7 @@ struct PaginaImpostazioniMercato: View {
                 }
                 NotaImpostazioni(TestiAppMercato.serieNota)
             }
+            .attenuatoSeSpento(spento)
             .cascataImpostazioni(2)
             VStack(alignment: .leading, spacing: riga.fraRighe) {
                 GruppoImpostazioni(titolo: TestiAppMercato.soglieGruppo) {
@@ -86,6 +94,7 @@ struct PaginaImpostazioniMercato: View {
                 }
                 NotaImpostazioni(TestiAppMercato.soglieNota)
             }
+            .attenuatoSeSpento(spento)
             .cascataImpostazioni(3)
             VStack(alignment: .leading, spacing: riga.fraRighe) {
                 GruppoImpostazioni(titolo: TestiAppMercato.riferimentiGruppo) {
@@ -109,6 +118,7 @@ struct PaginaImpostazioniMercato: View {
                 }
                 NotaImpostazioni(TestiAppMercato.riferimentiNota)
             }
+            .attenuatoSeSpento(spento)
             .cascataImpostazioni(4)
             #if os(macOS)
             VStack(alignment: .leading, spacing: riga.fraRighe) {

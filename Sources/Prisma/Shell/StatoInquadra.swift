@@ -13,7 +13,7 @@ import UIKit
 //   la scena: con il ponte acceso (Impostazioni › Vera › iPhone e iPad) si aspetta il testo dall'iPhone, altrimenti si
 //   trascina una foto o un PDF, letti sul Mac con LetturaDocumenti (Vision, sul dispositivo).
 // - I campi trovati (MotoreInquadra) si illuminano sul foglio uno alla volta e compaiono nella scheda «Prisma sul Mac».
-// - Niente entra nel dossier senza conferma: «Aggiungi a Posizioni di …» chiede di confermare i dati letti, poi crea il
+// - Niente entra nel dossier senza conferma: «Aggiungi alle posizioni di …» chiede di confermare i dati letti, poi crea il
 //   documento (senza file: la foto non si salva) e la posizione in essere con `creaDaDocumento`.
 // - «Confronta»: se la polizza è già in Prisma, il confronto «Nel documento / In Prisma» di Documenti; altrimenti la
 //   tabella con una temporanea caso morte (tariffa delle temporanee in archivio, fabbisogno della famiglia).
@@ -33,6 +33,12 @@ enum FaseInquadra: Equatable {
     case letto
     /// Il riconoscimento non ha trovato niente.
     case illeggibile
+}
+
+/// Di chi è il documento nella scheda (migliorie d'uso 43): scelto con «Cambia» (o sull'iPhone), letto dal contraente,
+/// il cliente su cui si lavora (il documento non dice di chi è) o da scegliere.
+enum OrigineClienteInquadra: Equatable {
+    case scelto, letto, attivo, daScegliere
 }
 
 /// Lo stato della scena (un oggetto a parte: la cascata non pubblica StatoShell e le altre app non si ridisegnano).
@@ -67,6 +73,43 @@ enum FaseInquadra: Equatable {
     /// Aperta dallo Smontaggio («Luce» §8.2.4): la scena chiede l'estratto conto o il rendiconto e le righe lette vanno a
     /// MotoreSmontaggio, non a MotoreInquadra.
     private(set) var perSmontaggio = false
+    /// Migliorie d'uso 43 («Prima di aggiungere, si controlla», solo Mac): le correzioni scritte nella scheda (per id di
+    /// riga), le righe confermate con «Va bene», la riga in modifica e il contatore della scossa delle righe in dubbio.
+    /// Solo in memoria: si scartano con la scena (chiusura, blocco, riposo), come la carta d'identità.
+    var correzioni: [String: String] = [:]
+    var confermate: Set<String> = []
+    var inModifica: String?
+    var scosse: CGFloat = 0
+
+    /// I dati letti con le correzioni scritte a mano (senza correzioni, quelli letti).
+    var datiCorretti: DatiInquadrati? {
+        dati.map { MotoreInquadra.applica($0, correzioni: correzioni) }
+    }
+
+    /// Le righe della scheda con le correzioni: una correzione che non si legge resta com'è scritta.
+    func righeCorrette(canale: Canale) -> [RigaInquadra] {
+        guard let d = datiCorretti else { return [] }
+        return MotoreInquadra.righe(d, canale: canale).map { (r: RigaInquadra) -> RigaInquadra in
+            guard let t = correzioni[r.id], !MotoreInquadra.correzioneLeggibile(id: r.id, testo: t) else { return r }
+            let scritto = t.trimmingCharacters(in: .whitespacesAndNewlines)
+            return RigaInquadra(id: r.id, etichetta: r.etichetta, valore: scritto.isEmpty ? r.valore : scritto, campi: r.campi)
+        }
+    }
+
+    /// Le righe ancora da controllare: le regole del motore sui dati corretti, meno quelle corrette a mano (che si
+    /// leggono) e quelle confermate con «Va bene»; una correzione che non si legge torna da controllare.
+    func dubbi(canale: Canale, oggi: Date = Date()) -> Set<String> {
+        guard let d = datiCorretti else { return [] }
+        var s = MotoreInquadra.daControllare(d, canale: canale, oggi: oggi)
+        for (id, t) in correzioni {
+            if MotoreInquadra.correzioneLeggibile(id: id, testo: t) { s.remove(id) } else if !t.trimmingCharacters(in: .whitespaces).isEmpty { s.insert(id) }
+        }
+        s.subtract(confermate)
+        return s
+    }
+
+    /// La riga corretta a mano (la matita «scritto da te»).
+    func corretta(_ id: String) -> Bool { correzioni[id] != nil }
 
     /// Le righe della scheda (cinque per le polizze), con il canale proposto.
     func righeScheda(canale: Canale) -> [RigaInquadra] {
@@ -75,7 +118,7 @@ enum FaseInquadra: Equatable {
 
     /// Solo una parte dei dati: meno di quattro righe trovate.
     var pochiDati: Bool {
-        guard let d = dati else { return false }
+        guard let d = datiCorretti else { return false }
         return MotoreInquadra.righe(d, canale: .indipendente).filter(\.trovata).count < MotoreInquadra.righeMinime
     }
 
@@ -116,6 +159,9 @@ enum FaseInquadra: Equatable {
         fileSopra = false
         ricevuta = nil
         inInvio = false
+        correzioni = [:]
+        confermate = []
+        inModifica = nil
     }
 
     /// Il Mac comincia a leggere un file: il giro nuovo, da passare a `mostra`.
@@ -145,6 +191,9 @@ enum FaseInquadra: Equatable {
         confronto = nil
         conferma = false
         ricevuta = nil
+        correzioni = [:]
+        confermate = []
+        inModifica = nil
         guard !letti.campi.isEmpty else {
             fase = .illeggibile
             mostrate = 0
@@ -382,19 +431,43 @@ extension StatoShell {
     /// la scena non si è aperta dal Portafoglio di tutti i clienti. nil = da scegliere.
     var clienteInquadra: Cliente? {
         if let id = inquadra.clienteScelto, let c = cliente(id) { return c }
-        if let c = MotoreInquadra.clienteProbabile(contraente: inquadra.dati?.contraente, clienti: clienti) { return c }
+        if let c = MotoreInquadra.clienteProbabile(contraente: inquadra.datiCorretti?.contraente, clienti: clienti) { return c }
         return portafoglio ? nil : clienteAttivo
     }
 
+    #if os(macOS)
+    /// Da dove viene il cliente della scheda (migliorie d'uso 43): gli stessi tre casi di `clienteInquadra`.
+    var origineClienteInquadra: OrigineClienteInquadra {
+        if let id = inquadra.clienteScelto, cliente(id) != nil { return .scelto }
+        if MotoreInquadra.clienteProbabile(contraente: inquadra.datiCorretti?.contraente, clienti: clienti) != nil { return .letto }
+        return !portafoglio && clienteAttivo != nil ? .attivo : .daScegliere
+    }
+
+    /// «Stai lavorando su Marco Bianchi: questo documento è intestato a Giulia.»: solo se il cliente è letto dal
+    /// documento ed è diverso dal cliente su cui si lavora (non con «Tutti i clienti»). Sparisce scegliendo con «Cambia».
+    var avvisoClienteInquadra: String? {
+        guard origineClienteInquadra == .letto, !portafoglio, let a = clienteAttivo, let c = clienteInquadra, a.id != c.id else { return nil }
+        return "Stai lavorando su \(a.nome): questo documento è intestato a \(Self.nomeBreveInquadra(c))."
+    }
+
+    /// Il pulsante principale con dubbi: le righe in dubbio tremano (niente con «Riduci movimento») e l'avviso.
+    func scuotiDubbiInquadra() {
+        if !Movimenti.calmo {
+            withAnimation(Tema.Apple.Moto.Inquadra.scossa) { inquadra.scosse += 1 }
+        }
+        mostraAvviso("Prima conferma o correggi il dato in arancione")
+    }
+    #endif
+
     /// Canale e area proposti per la posizione.
     var canaleEAreaInquadra: (canale: Canale, area: AreaPosizione) {
-        guard let d = inquadra.dati else { return (.indipendente, .protezione) }
+        guard let d = inquadra.datiCorretti else { return (.indipendente, .protezione) }
         return MotoreInquadra.canaleEArea(d)
     }
 
     /// La posizione del cliente che è già questa polizza (numero di contratto, nome): «Aggiorna la posizione».
     var posizioneGiaInquadrata: Posizione? {
-        guard let d = inquadra.dati, let c = clienteInquadra else { return nil }
+        guard let d = inquadra.datiCorretti, let c = clienteInquadra else { return nil }
         return MotoreConfrontoDossier.posizioneProbabile(MotoreInquadra.documentoProvvisorio(d, clienteId: c.id), tra: dati.posizioni)?.0
     }
 
@@ -410,7 +483,13 @@ extension StatoShell {
     private func documentoInquadrato(cliente c: Cliente, dati d: DatiInquadrati) -> Documento? {
         let titolo = MotoreInquadra.titoloDocumento(d)
         let doc: Documento
-        if let id = inquadra.inquadraturaId, let arrivato = documentoDaInquadratura(id, clienteId: c.id, titolo: titolo) {
+        if let id = inquadra.inquadraturaId, var arrivato = documentoDaInquadratura(id, clienteId: c.id, titolo: titolo) {
+            // Le correzioni della scheda valgono anche per il documento nato dal testo dell'iPhone
+            if !inquadra.correzioni.isEmpty {
+                let campi = MotoreInquadra.documento(d, clienteId: c.id, titolo: titolo).campi
+                arrivato.campi = campi
+                aggiornaDocumento(arrivato.id) { $0.campi = campi }
+            }
             doc = arrivato
         } else {
             doc = MotoreInquadra.documento(d, clienteId: c.id, titolo: titolo, quando: Appuntamento.alMinuto(Date()))
@@ -427,7 +506,7 @@ extension StatoShell {
             mostraAvviso("Archivio in sola lettura: aggiorna Prisma per creare schede e posizioni.")
             return
         }
-        guard let d = inquadra.dati, !d.campi.isEmpty else { return }
+        guard let d = inquadra.datiCorretti, !d.campi.isEmpty else { return }
         guard let c = clienteInquadra else {
             mostraAvviso("Scegli prima il cliente a cui va la polizza.")
             return
@@ -447,7 +526,7 @@ extension StatoShell {
             mostraAvviso("Archivio in sola lettura: aggiorna Prisma per confrontare e aggiornare.")
             return
         }
-        guard let d = inquadra.dati, let c = clienteInquadra, let p = posizioneGiaInquadrata,
+        guard let d = inquadra.datiCorretti, let c = clienteInquadra, let p = posizioneGiaInquadrata,
               let doc = documentoInquadrato(cliente: c, dati: d) else { return }
         aggiornaDocumento(doc.id) { $0.posizioneId = p.id }
         inquadra.chiudi()
@@ -461,7 +540,7 @@ extension StatoShell {
     /// «Confronta»: la polizza già in Prisma va al confronto di Documenti; altrimenti la tabella con una temporanea
     /// (fabbisogno della famiglia del cliente, tariffa delle temporanee del cliente o dell'archivio).
     func confrontaInquadrata() {
-        guard let d = inquadra.dati else { return }
+        guard let d = inquadra.datiCorretti else { return }
         if posizioneGiaInquadrata != nil {
             confrontaInquadrataConPosizione()
             return

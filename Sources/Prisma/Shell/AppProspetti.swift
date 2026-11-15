@@ -88,7 +88,8 @@ struct AppProspetti: View {
         if stato.clienteAttivo == nil && scelta.tipo != .portafoglio {
             VuotoCliente(titolo: TestiSceltaCliente.prospettiTitolo, testo: TestiSceltaCliente.prospettiTesto)
         } else {
-            corpoProspettiApple
+            // Migliorie d'uso 70: con la scheda del fascicolo che nasce dalla card
+            corpoProspettiConFascicolo
         }
         #else
         corpoProspettiApple

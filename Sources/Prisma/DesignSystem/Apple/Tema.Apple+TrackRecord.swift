@@ -27,19 +27,20 @@ extension Tema.Apple.Studio {
 
         // MARK: Pillola dell'esito
 
-        /// Capsula, 12 bold, padding 4×10.
-        static let pillola = Tema.Apple.Carattere(dimensione: 12, peso: .bold)
-        static let paddingPillola = Tema.Apple.Misura.padding(4, 10)
+        /// Capsula, 12 bold, padding 4×10. Dalle migliorie d'uso 55 i valori stanno in `Tema.Apple.PillolaStato`
+        /// (la pillola di stato comune): qui restano i nomi dell'esito.
+        static let pillola = Tema.Apple.PillolaStato.carattere
+        static let paddingPillola = Tema.Apple.PillolaStato.padding
         /// Accettata: verde su verde al 13%; Rifiutata: rosso su rosso al 12%; Rimandata: arancio su arancio al 13%;
         /// In attesa: `inchiostro2` su `inchiostro3` al 14% (neutra).
-        static let testoAccettata = Tema.Apple.Colore.verde
-        static let fondoAccettata = Color(r: 47, g: 163, b: 90, a: 0.13)
-        static let testoRifiutata = Tema.Apple.Colore.rosso
-        static let fondoRifiutata = Color(r: 229, g: 72, b: 77, a: 0.12)
-        static let testoRimandata = Tema.Apple.Colore.arancioTesto
-        static let fondoRimandata = Color(r: 224, g: 138, b: 0, a: 0.13)
-        static let testoInAttesa = Tema.Apple.Colore.inchiostro2
-        static let fondoInAttesa = Tema.Apple.Colore.inchiostro3.opacity(0.14)
+        static let testoAccettata = Tema.Apple.PillolaStato.testoOk
+        static let fondoAccettata = Tema.Apple.PillolaStato.fondoOk
+        static let testoRifiutata = Tema.Apple.PillolaStato.testoErrore
+        static let fondoRifiutata = Tema.Apple.PillolaStato.fondoErrore
+        static let testoRimandata = Tema.Apple.PillolaStato.testoAvviso
+        static let fondoRimandata = Tema.Apple.PillolaStato.fondoAvviso
+        static let testoInAttesa = Tema.Apple.PillolaStato.testoNeutro
+        static let fondoInAttesa = Tema.Apple.PillolaStato.fondoNeutro
 
         // MARK: Disposizione della scheda
 
@@ -62,6 +63,16 @@ extension Tema.Apple.Studio {
             /// Cascata: tile 0-3, titolo 4, card da 5; oltre la quindicesima le card entrano insieme.
             static let primaCard = 5
             static let indiceMassimoCascata = 16
+            /// Migliorie d'uso 54: i filtri a chip a destra del titolo, a 6 fra loro.
+            static let spazioFiltri: CGFloat = 6
+            /// L'elenco vuoto (un filtro senza voci, un cliente senza raccomandazioni): 44 sopra e sotto, centrato, 14,5.
+            static let vuotoSopra: CGFloat = 44
+            static let vuoto = Tema.Apple.Carattere(dimensione: 14.5, peso: .regular)
+            static let coloreVuoto = Tema.Apple.Colore.inchiostro2
+            /// La nota sulle stime in fondo all'elenco, 12 sotto l'ultima card, `.k`.
+            static let notaStimeSopra: CGFloat = 12
+            static let notaStime = Tema.Apple.Carattere.secondario
+            static let coloreNotaStime = Tema.Apple.Colore.inchiostro2
         }
 
         // MARK: Tile
@@ -109,8 +120,16 @@ extension Tema.Apple.Studio {
             static let spazioTesti: CGFloat = 3
             /// Il mini-grafico 300×44.
             static let grafico = CGSize(width: 300, height: 44)
-            /// La colonna destra, larga 120: risultato `.v` a 20, sotto la didascalia `.k`.
+            /// La colonna destra: risultato `.v` a 20, sotto la didascalia `.k`. Sul Mac larga 132 perché contenga
+            /// «Riproponi» (Migliorie d'uso 54); iPhone e iPad restano a 120 fino al loro aggiornamento.
+            #if os(macOS)
+            static let larghezzaDestra: CGFloat = 132
+            #else
             static let larghezzaDestra: CGFloat = 120
+            #endif
+            /// «✓ Tra le proposte» (Migliorie d'uso 54): 12,5 semibold verde, come una scelta fatta.
+            static let traLeProposte = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold)
+            static let coloreTraLeProposte = Tema.Apple.Colore.verde
             static let risultato = Tema.Apple.Carattere(dimensione: 20, peso: .bold, tracking: -0.4, tabellare: true)
             /// «da misurare»: più sobrio della cifra.
             static let daMisurare = Tema.Apple.Carattere(dimensione: 15, peso: .semibold)

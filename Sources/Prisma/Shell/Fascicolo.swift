@@ -9,6 +9,16 @@ extension TipoProspetto {
     static let inFascicolo: [TipoProspetto] = [.checkUp, .annoInsieme, .resoconto, .patrimonio, .resistenza, .costi, .successione, .previdenza, .protezione, .liquidita]
     /// Quelli spuntati all'inizio: il quadro e le tre analisi nuove.
     static let fascicoloPredefinito: Set<TipoProspetto> = [.resoconto, .patrimonio, .resistenza, .costi, .successione]
+    /// L'ordine di partenza del fascicolo: sul Mac (migliorie d'uso 70) quello dei gruppi dell'elenco dei Prospetti
+    /// (miglioria 23: «Primo incontro», «Le analisi», «Fine anno»), altrove quello di `inFascicolo`.
+    static let ordineFascicolo: [TipoProspetto] = {
+        #if os(macOS)
+        let perGruppi = ElencoProspetti.ordine.filter { TipoProspetto.inFascicolo.contains($0) }
+        return perGruppi + TipoProspetto.inFascicolo.filter { !perGruppi.contains($0) }
+        #else
+        return TipoProspetto.inFascicolo
+        #endif
+    }()
 
     /// I report adatti a un appuntamento: dal tipo d'incontro e dalla posizione di cui si parla.
     static func perIncontro(_ a: Appuntamento, posizione: Posizione?, oggi: Date = Date()) -> Set<TipoProspetto> {
@@ -67,40 +77,131 @@ private struct ParteFascicolo {
     let documento: DocumentoStampabile?
 }
 
+/// La scelta del fascicolo di un cliente (migliorie d'uso 70): i report spuntati, il loro ordine e l'appuntamento per
+/// cui si prepara. Resta in memoria fino alla chiusura di Prisma (decisione 70-a); la copertina c'è sempre.
+struct SceltaFascicolo: Equatable {
+    var ordine: [TipoProspetto]
+    var scelti: Set<TipoProspetto>
+    var appuntamento: String?
+
+    /// Quella di partenza: l'ordine dei gruppi e i report predefiniti, senza appuntamento.
+    static var nuova: SceltaFascicolo {
+        SceltaFascicolo(ordine: TipoProspetto.ordineFascicolo, scelti: TipoProspetto.fascicoloPredefinito, appuntamento: nil)
+    }
+
+    /// I report spuntati, nell'ordine scelto.
+    var inOrdine: [TipoProspetto] { ordine.filter { scelti.contains($0) } }
+
+    /// Sposta un report di un posto (−1 su, +1 giù) fra quelli dell'elenco `visibili` (i report che il cliente ha):
+    /// lo scambio avviene con il vicino visibile, gli altri restano dove sono.
+    mutating func sposta(_ t: TipoProspetto, di passo: Int, visibili: [TipoProspetto]) {
+        let elenco = ordine.filter { visibili.contains($0) }
+        guard let i = elenco.firstIndex(of: t), elenco.indices.contains(i + passo),
+              let a = ordine.firstIndex(of: t), let b = ordine.firstIndex(of: elenco[i + passo]) else { return }
+        ordine.swapAt(a, b)
+    }
+
+    /// Mette o toglie un report.
+    mutating func alterna(_ t: TipoProspetto) {
+        if scelti.contains(t) { scelti.remove(t) } else { scelti.insert(t) }
+    }
+}
+
 extension StatoShell {
-    /// Il fascicolo del cliente attivo con i report spuntati (con il commento di ciascuno, se c'è).
+    /// Quante volte un report del fascicolo è stato impaginato (`parteFascicolo`): lo legge `--prova-carico` per
+    /// verificare che spuntare una riga rifaccia solo la copertina. Solo un contatore, nessun dato.
+    nonisolated(unsafe) private(set) static var partiFascicoloImpaginate = 0
+
+    /// Di chi è il fascicolo: sul Mac del cliente attivo, altrove uno solo per tutti.
+    private var chiaveFascicolo: String {
+        #if os(macOS)
+        return clienteAttivoId
+        #else
+        return ""
+        #endif
+    }
+
+    /// La scelta del fascicolo del cliente attivo (o quella di partenza).
+    var sceltaFascicoloCompleta: SceltaFascicolo {
+        get { fascicoli[chiaveFascicolo] ?? .nuova }
+        set { fascicoli[chiaveFascicolo] = newValue }
+    }
+
+    /// I report spuntati per il fascicolo dell'incontro (per la sessione).
+    var sceltaFascicolo: Set<TipoProspetto> {
+        get { sceltaFascicoloCompleta.scelti }
+        set { sceltaFascicoloCompleta.scelti = newValue }
+    }
+
+    /// L'appuntamento per cui si prepara il fascicolo (dà la data e il tipo d'incontro alla copertina).
+    var fascicoloAppuntamento: String? {
+        get { sceltaFascicoloCompleta.appuntamento }
+        set { sceltaFascicoloCompleta.appuntamento = newValue }
+    }
+
+    /// L'ordine dei report del fascicolo (tutti, spuntati e no).
+    var ordineFascicolo: [TipoProspetto] {
+        get { sceltaFascicoloCompleta.ordine }
+        set { sceltaFascicoloCompleta.ordine = newValue }
+    }
+
+    /// I report spuntati nell'ordine scelto: quelli che entrano nel fascicolo (se il cliente li ha).
+    var reportFascicolo: [TipoProspetto] { sceltaFascicoloCompleta.inOrdine }
+
+    /// Il report `t` del cliente attivo già impaginato (nil se non ce l'ha). Ogni report si impagina una volta per dati
+    /// dei calcoli (commenti compresi), cliente e ora, come il documento di Prospetti: spuntare una casella rifà solo
+    /// la copertina. I report del fascicolo non leggono le note né lo stato delle viste.
+    private func parteFascicolo(_ t: TipoProspetto, cliente idCliente: String, ora: Int) -> DocumentoStampabile? {
+        guard let scelta = t.report else { return nil }
+        let parte: ParteFascicolo = ricavato("fascicolo|\(t.rawValue)|\(idCliente)|\(ora)") { () -> ParteFascicolo in
+            StatoShell.partiFascicoloImpaginate += 1
+            return ParteFascicolo(documento: documentoProspetto(scelta))
+        }
+        return parte.documento
+    }
+
+    /// Migliorie d'uso 70: le pagine del report `t` del cliente attivo (nil se il cliente non ha quel report). Usa la
+    /// stessa impaginazione tenuta da parte per la composizione.
+    func pagineFascicolo(_ t: TipoProspetto) -> Int? {
+        parteFascicolo(t, cliente: clienteAttivoId, ora: DerivatiDati.ora())?.pagine.count
+    }
+
+    /// L'indice va sulla copertina (niente pagina dell'indice) sul Mac, fino a `vociIndiceCopertina` report
+    /// (decisione 70-b); altrove e oltre resta la pagina «Cosa trovi in questo fascicolo».
+    static func indiceInCopertina(_ voci: Int) -> Bool {
+        #if os(macOS)
+        return voci <= Misure.Documento.vociIndiceCopertina
+        #else
+        return false
+        #endif
+    }
+
+    /// Le pagine prima del primo report: la copertina e, se serve, la pagina dell'indice.
+    static func pagineAperturaFascicolo(_ voci: Int) -> Int {
+        indiceInCopertina(voci) ? 1 : 2
+    }
+
+    /// Il fascicolo del cliente attivo con i report spuntati, nell'ordine scelto (con il commento di ciascuno, se c'è).
     func documentoFascicolo() -> DocumentoStampabile? {
         let idCliente = clienteAttivoId
         let ora = DerivatiDati.ora()
-        let parti = TipoProspetto.inFascicolo.filter { sceltaFascicolo.contains($0) }.compactMap { t -> (String, DocumentoStampabile)? in
-            guard let scelta = t.report else { return nil }
-            // Ogni report si impagina una volta per dati dei calcoli (commenti compresi), cliente e ora, come il documento
-            // di Prospetti: spuntare una casella rifà solo il report aggiunto, la copertina e l'indice. I report del
-            // fascicolo non leggono le note né lo stato delle viste
-            let parte: ParteFascicolo = ricavato("fascicolo|\(t.rawValue)|\(idCliente)|\(ora)") {
-                ParteFascicolo(documento: documentoProspetto(scelta))
-            }
-            guard let d = parte.documento else { return nil }
+        let parti = reportFascicolo.compactMap { t -> (String, DocumentoStampabile)? in
+            guard let d = parteFascicolo(t, cliente: idCliente, ora: ora) else { return nil }
             return (d.titolo, d)
         }
         guard !parti.isEmpty, let c = clienteAttivo else { return nil }
+        let inCopertina = Self.indiceInCopertina(parti.count)
         var voci: [(String, Int)] = []
-        var pagina = 3
+        var pagina = Self.pagineAperturaFascicolo(parti.count) + 1
         for (titolo, d) in parti {
             voci.append((titolo, pagina))
             pagina += d.pagine.count
         }
-        let canali = Canale.allCases.filter { k in posizioniCliente(c.id).contains { $0.canale == k && $0.stato != .chiusa } }
-        let ruolo = canali == [.alleanza] ? "Consulente Alleanza Assicurazioni" : (canali == [.indipendente] ? "Consulenza finanziaria" : "Alleanza Assicurazioni · consulenza finanziaria")
-        // Per un appuntamento: la data e il tipo d'incontro
-        let incontro = fascicoloAppuntamento.flatMap { id in appuntamenti.first { $0.id == id && $0.clienteId == c.id } }
+        let incontro = incontroDelFascicolo(c)
         let data = incontro?.inizio ?? Date()
-        let copertina = CopertinaReport(occhiello: "Fascicolo dell'incontro", titolo: "Il punto insieme",
-                                        sottotitolo: incontro.map { "\($0.tipo.nome) del \(CifreDoc.data($0.inizio)): i documenti che abbiamo visto insieme" }
-                                            ?? "I documenti che abbiamo visto oggi, in un solo fascicolo",
-                                        nomi: c.nome, ruolo: ruolo, data: data, canali: canali.isEmpty ? [.indipendente] : canali,
-                                        cartellini: [("Documenti", ["\(parti.count)"]), ("Pagine", ["\(pagina - 1)"])])
-        let apertura = ImpaginaReport.pagine(copertina: AnyView(copertina), interne: [AnyView(IndiceFascicolo(voci: voci))],
+        let copertina = copertinaFascicolo(c, voci: voci, pagine: pagina - 1, indiceInCopertina: inCopertina)
+        let apertura = ImpaginaReport.pagine(copertina: AnyView(copertina),
+                                             interne: inCopertina ? [] : [AnyView(IndiceFascicolo(voci: voci))],
                                              intestazione: "Fascicolo dell'incontro · \(c.nome)")
         // Il piede di ogni pagina conta dall'inizio del fascicolo, come l'indice
         let totalePagine = pagina - 1
@@ -113,6 +214,60 @@ extension StatoShell {
         }
         return DocumentoStampabile(report: Self.titoloFascicolo(data, conOra: incontro != nil), cliente: c.nome, pagine: tutte)
     }
+
+    /// L'appuntamento del fascicolo, se è proprio di questo cliente.
+    private func incontroDelFascicolo(_ c: Cliente) -> Appuntamento? {
+        fascicoloAppuntamento.flatMap { id in appuntamenti.first { $0.id == id && $0.clienteId == c.id } }
+    }
+
+    /// La copertina del fascicolo: il ruolo e le etichette dai canali delle posizioni del cliente, la data e il tipo
+    /// d'incontro dall'appuntamento; con `indiceInCopertina` il riquadro «Dentro» al posto dei cartellini.
+    func copertinaFascicolo(_ c: Cliente, voci: [(String, Int)], pagine: Int, indiceInCopertina: Bool) -> CopertinaReport {
+        let canali = Canale.allCases.filter { k in posizioniCliente(c.id).contains { $0.canale == k && $0.stato != .chiusa } }
+        let ruolo = canali == [.alleanza] ? "Consulente Alleanza Assicurazioni" : (canali == [.indipendente] ? "Consulenza finanziaria" : "Alleanza Assicurazioni · consulenza finanziaria")
+        // Per un appuntamento: la data e il tipo d'incontro
+        let incontro = incontroDelFascicolo(c)
+        let data = incontro?.inizio ?? Date()
+        return CopertinaReport(occhiello: "Fascicolo dell'incontro", titolo: "Il punto insieme",
+                               sottotitolo: incontro.map { "\($0.tipo.nome) del \(CifreDoc.data($0.inizio)): i documenti che abbiamo visto insieme" }
+                                   ?? "I documenti che abbiamo visto oggi, in un solo fascicolo",
+                               nomi: c.nome, ruolo: ruolo, data: data, canali: canali.isEmpty ? [.indipendente] : canali,
+                               cartellini: [("Documenti", ["\(voci.count)"]), ("Pagine", ["\(pagine)"])],
+                               indice: indiceInCopertina ? voci : nil)
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 70: i report spuntati che il cliente ha davvero, nell'ordine scelto (quelli del fascicolo).
+    var reportPresentiFascicolo: [TipoProspetto] {
+        reportFascicolo.filter { pagineFascicolo($0) != nil }
+    }
+
+    /// Migliorie d'uso 70: l'incontro scritto nell'occhiello della scheda («incontro di oggi, 2 novembre» o «Revisione
+    /// del 20 novembre»), e se il fascicolo è legato a un appuntamento.
+    func incontroScheda(oggi: Date = Date()) -> (testo: String?, legato: Bool) {
+        let cal = Calendar.current
+        if let c = clienteAttivo, let a = incontroDelFascicolo(c) {
+            let giorno = Formati.giornoMese.string(from: a.inizio)
+            return (cal.isDate(a.inizio, inSameDayAs: oggi) ? TestiFascicolo.incontroDiOggi(giorno)
+                                                            : TestiFascicolo.incontroDel(a.tipo.nome, giorno), true)
+        }
+        let diOggi = appuntamentiCliente(clienteAttivoId).contains {
+            cal.isDate($0.inizio, inSameDayAs: oggi) && $0.stato != .concluso && $0.tipo != .nonDisponibile
+        }
+        return (diOggi ? TestiFascicolo.incontroDiOggi(Formati.giornoMese.string(from: oggi)) : nil, false)
+    }
+
+    /// Migliorie d'uso 70: «Mostra al cliente» dalla scheda: il fascicolo dalla copertina (decisione 70-c), nella vista
+    /// pulita, con il contatore «1 di 3 · fascicolo» e le annotazioni all'appuntamento del fascicolo.
+    func mostraFascicolo() {
+        guard let d = documentoFascicolo(), let c = clienteAttivo else { return }
+        let appuntamento = incontroDelFascicolo(c)?.id
+        mostraProspetto(d, daPagina: 0)
+        guard presentazione != nil else { return }
+        presentazione?.etichettaContatore = TestiFascicolo.etichettaContatore
+        if let id = appuntamento, presentazione?.clienteId == c.id { presentazione?.appuntamentoId = id }
+    }
+    #endif
 
     /// «Fascicolo dell'incontro del 28/10/2026 ore 10:00»: con data e ora dell'appuntamento l'archivio in Documenti
     /// tiene un fascicolo per incontro, anche con due incontri nello stesso giorno.

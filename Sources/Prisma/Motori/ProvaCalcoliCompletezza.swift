@@ -221,5 +221,17 @@ enum ProvaCalcoliCompletezza {
                       voce(c1, "fabbisogno")?.destinazione == .analisi360(.protezione, campo: "Fabbisogno della famiglia"))
         verifica.vero("C18 Completezza: i costi si completano sul costo annuo della posizione",
                       voce(c3, "costi:\(etf.id)")?.destinazione == .posizione(etf.id, campo: "Costo annuo"))
+
+        // C19. Il vuoto di un'analisi delle posizioni (migliorie d'uso 14): «Completa» apre la voce che la tocca
+        verifica.vero("C19 Completezza: il vuoto dei costi completa i costi dell'ETF",
+                      MotoreCompletezza.voceDaCompletare(c3, schermataPosizioni: "costi")?.id == "costi:\(etf.id)")
+        verifica.vero("C19 Completezza: la resistenza sceglie la voce più pesante sugli investimenti",
+                      MotoreCompletezza.voceDaCompletare(c3, schermataPosizioni: "resistenza").map { v in
+                          c3.daCompletare.filter { $0.analisi.contains(.investimenti) }.allSatisfy { $0.peso <= v.peso }
+                      } ?? false)
+        verifica.vero("C19 Completezza: il quadro non ha una voce da completare",
+                      MotoreCompletezza.voceDaCompletare(c3, schermataPosizioni: "quadro") == nil)
+        verifica.vero("C19 Completezza: con tutto completo non c'è «Completa»",
+                      MotoreCompletezza.voceDaCompletare(c4, schermataPosizioni: "costi") == nil)
     }
 }

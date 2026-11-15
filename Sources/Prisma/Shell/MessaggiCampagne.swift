@@ -20,6 +20,11 @@ import SwiftUI
 // - «Avvia la campagna» crea le bozze (decisione 15): niente si apre da solo; «Apri la prossima», «Apri tutte» con
 //   conferma oltre 5, «Annulla la campagna» finché nessuna bozza è aperta, «Fai riscrivere a Vera» uno alla volta.
 // - iPad (`solaLettura`): mappa e gruppi da guardare, niente avvio.
+// - Migliorie d'uso 49 (solo Mac, Design/uso/gruppo-08.md §49): il pannello in tre passi numerati, «1 · Chi» (la
+//   casella quadrata, tutta la riga include o esclude, le prime otto righe e «Mostra tutti»), «2 · Cosa scrivi» (Tono,
+//   Invia con, «Anteprima per …»), «3 · Quando» (capsule accese o spente); sotto, fermo, il pulsante a tutta larghezza
+//   che dice quanti messaggi prepara o perché è spento, e «Niente parte da solo…». Dopo: «✓ pronto in Messaggi» riga
+//   per riga e «Apri i messaggi preparati» (Messaggi sulla prima bozza). Con un cliente nella barra si apre il suo gruppo.
 
 /// Il segmentato «Messaggi · Campagne» nella testata di Messaggi.
 struct AzioniMessaggi: View {
@@ -74,7 +79,22 @@ struct VistaCampagne: View {
         }
         .padding(C.padding)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        #if os(macOS)
+        .onAppear { scegliGruppoDelCliente() }
+        #endif
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 49: con un cliente scelto nella barra e nessun gruppo ancora scelto, la campagna che si apre è
+    /// quella del primo gruppo che lo contiene. La mappa continua a mostrare tutti i clienti (decisione 50 di «Luce»).
+    private func scegliGruppoDelCliente() {
+        guard stato.campagne.gruppo == nil, !stato.tuttiIClienti else { return }
+        let id = stato.clienteAttivoId
+        if let g = stato.gruppiCampagne().first(where: { g in g.membri.contains { $0.clienteId == id } }) {
+            stato.campagne.scegli(g.id)
+        }
+    }
+    #endif
 
     @ViewBuilder private func piede(gruppi: [GruppoCampagna], nonValutate: Int) -> some View {
         let altri = MotoreCampagne.disposizione(gruppi).altri
@@ -307,6 +327,12 @@ struct PannelloCampagna: View {
 
     private var modificabile: Bool { !stato.solaLettura }
 
+    #if os(macOS)
+    /// «Mostra tutti» nel passo «Chi», oltre le prime `C.righeVisibili` righe (si azzera cambiando gruppo: la vista ha
+    /// l'id del gruppo).
+    @State private var tutti = false
+    #endif
+
     var body: some View {
         let c = stato.campagne
         let g = gruppo
@@ -317,10 +343,19 @@ struct PannelloCampagna: View {
         let spazi = stato.spaziCampagna()
         let orari = spazi.map(\.inizio).filter { !c.chipTolti.contains($0) }
         let misti = inclusi.contains { $0.canaleLavoro == nil }
+        let fittizi = g.membri.contains { $0.clienteId.hasPrefix(ClientiFittizi.prefisso) || StatoShell.clientiDiProva.contains($0.clienteId) }
+        #if os(macOS)
+        // Migliorie d'uso 49: la campagna in tre passi, con il pulsante sempre in vista sotto
+        // L'anteprima è del cliente scelto con «Vedi il messaggio» o del primo incluso; senza inclusi lo dice il passo 2
+        // (dopo l'avvio quello della prima bozza)
+        let primaBozza = bozze.first.flatMap { b in g.membri.first { $0.clienteId == b.clienteId } }
+        let anteprimaMac = g.membri.first { $0.clienteId == c.anteprima } ?? inclusi.first ?? primaBozza
+        return cornice(corpoMac(g, inclusi: inclusi, spazi: spazi, orari: orari, misti: misti, anteprimaMembro: anteprimaMac,
+                                avviata: campagnaAvviata, bozze: bozze, fittizi: fittizi))
+        #else
         let anteprimaMembro = g.membri.first { $0.clienteId == c.anteprima } ?? inclusi.first ?? g.membri.first
         let nomi = g.membri.compactMap { m in stato.cliente(m.clienteId)?.nome }
-        let fittizi = g.membri.contains { $0.clienteId.hasPrefix(ClientiFittizi.prefisso) || StatoShell.clientiDiProva.contains($0.clienteId) }
-        return ScrollView(.vertical, showsIndicators: false) {
+        return cornice(ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: C.spazio) {
                 VStack(alignment: .leading, spacing: C.spazio / 3) {
                     Text(TestiCampagne.campagna).carattereApple(C.etichetta).foregroundColor(C.coloreEtichetta)
@@ -367,13 +402,20 @@ struct PannelloCampagna: View {
             }
             .padding(C.padding)
             .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .superficieApple(Tema.Apple.Superficie.cardPiatta)
-        .confirmationDialog(testoConferma(c.conferma), isPresented: Binding(get: { c.conferma != nil }, set: { if !$0 { c.conferma = nil } }),
-                            titleVisibility: .visible) {
-            Button("Conferma") { conferma(c.conferma) }
-            Button("Annulla", role: .cancel) { c.conferma = nil }
-        }
+        })
+        #endif
+    }
+
+    /// La superficie del pannello e la richiesta di conferma (uguali sul Mac e sull'iPad).
+    private func cornice<V: View>(_ contenuto: V) -> some View {
+        let c = stato.campagne
+        return contenuto
+            .superficieApple(Tema.Apple.Superficie.cardPiatta)
+            .confirmationDialog(testoConferma(c.conferma), isPresented: Binding(get: { c.conferma != nil }, set: { if !$0 { c.conferma = nil } }),
+                                titleVisibility: .visible) {
+                Button("Conferma") { conferma(c.conferma) }
+                Button("Annulla", role: .cancel) { c.conferma = nil }
+            }
     }
 
     // MARK: Parti
@@ -475,6 +517,267 @@ struct PannelloCampagna: View {
         .padding(.top, C.marginePulsante.top / 2)
     }
 
+    #if os(macOS)
+    // MARK: Migliorie d'uso 49 (solo Mac): la campagna in tre passi
+
+    /// Testata, «1 · Chi», «2 · Cosa scrivi», «3 · Quando» che scorrono; sotto, fermo, il pulsante a tutta larghezza.
+    private func corpoMac(_ g: GruppoCampagna, inclusi: [MembroCampagna], spazi: [SpazioLibero], orari: [Date], misti: Bool,
+                          anteprimaMembro: MembroCampagna?, avviata: Campagna?, bozze: [MessaggioCliente], fittizi: Bool) -> some View {
+        let tinta = C.tinta(g.tipo)
+        let aperto = modificabile && avviata == nil
+        return VStack(alignment: .leading, spacing: 0) {
+            ScrollView(.vertical, showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    VStack(alignment: .leading, spacing: C.spazio / 3) {
+                        Text(TestiCampagne.campagna).carattereApple(C.etichetta).foregroundColor(tinta)
+                        Text(g.titolo).carattereApple(C.titolo).foregroundColor(Tema.Apple.Colore.inchiostro)
+                            .fixedSize(horizontal: false, vertical: true)
+                        if let nota = g.notaNonValutati {
+                            Text(nota).carattereApple(C.nota).foregroundColor(C.coloreNota)
+                        }
+                    }
+                    PassoCampagna(numero: 1, titolo: TestiCampagne.passoChi,
+                                  sottotitolo: TestiCampagne.contoChi(q: bozze.isEmpty ? inclusi.count : bozze.count, n: g.membri.count)
+                                    + (fittizi ? " " + TestiCampagne.tra : ""),
+                                  tinta: tinta)
+                        .padding(.top, C.spazioPassi)
+                    righeChi(g, avviata: avviata, bozze: bozze)
+                        .padding(.top, C.sottoPasso)
+                    PassoCampagna(numero: 2, titolo: TestiCampagne.passoCosa, sottotitolo: TestiCampagne.sottoCosa, tinta: tinta)
+                        .padding(.top, C.spazioPassi)
+                    cosaScrivi(g, anteprimaMembro: anteprimaMembro, orari: orari, aperto: aperto)
+                        .padding(.top, C.sottoPasso)
+                    PassoCampagna(numero: 3, titolo: TestiCampagne.passoQuando, sottotitolo: TestiCampagne.sottoQuando, tinta: tinta)
+                        .padding(.top, C.spazioPassi)
+                    quando(spazi: spazi, aperto: aperto)
+                        .padding(.top, C.sottoPasso)
+                    if !stato.disponibilitaLocale.pronto {
+                        Text(TestiCampagne.veraNonPronta).carattereApple(C.nota).foregroundColor(C.coloreNota)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, C.spazioPassi)
+                    }
+                }
+                .padding(C.padding)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            if modificabile {
+                piedeMac(g, inclusi: inclusi, spazi: spazi, orari: orari, misti: misti, avviata: avviata, bozze: bozze)
+            }
+        }
+    }
+
+    /// Le righe dei clienti del gruppo: le prime otto, poi «e altri N clienti» con «Mostra tutti».
+    @ViewBuilder private func righeChi(_ g: GruppoCampagna, avviata: Campagna?, bozze: [MessaggioCliente]) -> some View {
+        let c = stato.campagne
+        let canale = c.canale
+        let visibili = tutti ? g.membri : Array(g.membri.prefix(C.righeVisibili))
+        VStack(alignment: .leading, spacing: 0) {
+            ForEach(Array(visibili.enumerated()), id: \.element.id) { i, m in
+                let bozza = bozze.first { $0.clienteId == m.clienteId }
+                // Il lampo segue l'ordine delle bozze: una riga dopo l'altra, solo fra quelle preparate
+                let ordine = bozze.firstIndex { $0.clienteId == m.clienteId } ?? i
+                RigaMembroCampagna(membro: m, cliente: stato.cliente(m.clienteId), incluso: incluso(m, canale: canale),
+                                   canale: canale, bozza: bozza,
+                                   indice: ordine, modificabile: modificabile && avviata == nil,
+                                   inScrittura: bozza.map { c.inScrittura.contains($0.id) } ?? false,
+                                   veraPronta: stato.disponibilitaLocale.pronto,
+                                   cambia: { cambia(m, canale: canale) },
+                                   vedi: { c.anteprima = m.clienteId },
+                                   apri: { id in _ = stato.apriBozzaCampagna(id) },
+                                   riscrivi: { id in stato.riscriviConVera(id) },
+                                   ferma: { stato.fermaVeraCampagna() })
+            }
+            if g.membri.count > visibili.count {
+                HStack(spacing: C.spazioRigaPasso) {
+                    Text(TestiCampagne.altriClienti(g.membri.count - visibili.count))
+                        .carattereApple(C.nomeRigaPasso)
+                        .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                    Spacer(minLength: C.spazio / 2)
+                    Button(TestiCampagne.mostraTutti) { tutti = true }
+                        .buttonStyle(.appleSobrio)
+                }
+                .padding(C.paddingRigaPasso)
+            }
+        }
+    }
+
+    /// Tono e canale con il loro nome (migliorie d'uso 26), poi l'anteprima del primo cliente scelto.
+    @ViewBuilder private func cosaScrivi(_ g: GruppoCampagna, anteprimaMembro: MembroCampagna?, orari: [Date], aperto: Bool) -> some View {
+        let c = stato.campagne
+        VStack(alignment: .leading, spacing: C.spazio) {
+            if aperto {
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .center, spacing: Tema.Apple.Messaggi.Pannello.fraGruppiControlli) {
+                        controlloCampagna(Parole.tono) {
+                            SegmentatoPillola(selezione: Bindable(c).tono, valori: TonoMessaggio.allCases, titolo: { $0.nome })
+                                .fixedSize()
+                        }
+                        controlloCampagna(Parole.inviaCon) {
+                            SegmentatoPillola(selezione: Bindable(c).canale, valori: CanaleMessaggio.allCases, titolo: { $0.nome })
+                                .fixedSize()
+                        }
+                    }
+                    .fixedSize()
+                    VStack(alignment: .leading, spacing: C.spazio / 2) {
+                        controlloCampagna(Parole.tono) {
+                            SegmentatoPillola(selezione: Bindable(c).tono, valori: TonoMessaggio.allCases, titolo: { $0.nome })
+                                .fixedSize()
+                        }
+                        controlloCampagna(Parole.inviaCon) {
+                            SegmentatoPillola(selezione: Bindable(c).canale, valori: CanaleMessaggio.allCases, titolo: { $0.nome })
+                                .fixedSize()
+                        }
+                    }
+                }
+            }
+            if let m = anteprimaMembro,
+               let pronto = stato.testoCampagna(g, membro: m, campagnaId: "anteprima", appuntamenti: orari, tono: c.tono,
+                                                canale: c.canale, firmaCanale: c.firmaCanale) {
+                VStack(alignment: .leading, spacing: C.spazioRiga) {
+                    Text(TestiCampagne.anteprimaPer(stato.cliente(m.clienteId)?.nome ?? ""))
+                        .carattereApple(C.passoSottotitolo)
+                        .foregroundColor(C.coloreSottotitoloPasso)
+                    if let o = pronto.1.oggetto, c.canale == .mail {
+                        Text(o).carattereApple(C.nomeRiga).foregroundColor(Tema.Apple.Colore.inchiostro)
+                    }
+                    Text(pronto.1.completo)
+                        .carattereApple(C.anteprima)
+                        .foregroundColor(Tema.Apple.Colore.inchiostro)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .textSelection(.enabled)
+                }
+                .padding(C.paddingAnteprimaPasso)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background(RoundedRectangle(cornerRadius: C.raggioAnteprima, style: .continuous).fill(C.fondoAnteprima))
+                .accessibilityElement(children: .combine)
+            } else {
+                Text(TestiCampagne.anteprimaVuota)
+                    .carattereApple(C.passoSottotitolo)
+                    .foregroundColor(C.coloreSottotitoloPasso)
+                    .padding(C.paddingAnteprimaPasso)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(RoundedRectangle(cornerRadius: C.raggioAnteprima, style: .continuous).fill(C.fondoAnteprima))
+            }
+        }
+    }
+
+    /// L'etichetta davanti al segmentato, come nel pannello del messaggio.
+    private func controlloCampagna<V: View>(_ etichetta: String, @ViewBuilder _ controllo: () -> V) -> some View {
+        HStack(alignment: .center, spacing: Tema.Apple.Messaggi.Pannello.spazioEtichetta) {
+            Text(etichetta)
+                .carattereApple(Tema.Apple.Messaggi.Pannello.etichettaControllo)
+                .foregroundColor(Tema.Apple.Messaggi.Pannello.coloreEtichettaControllo)
+                .lineLimit(1)
+                .fixedSize()
+                .accessibilityHidden(true)
+            controllo()
+                .accessibilityLabel(Text(etichetta))
+        }
+    }
+
+    /// Le capsule degli orari: accese (accento, testo bianco) o spente; con l'agenda piena la frase di oggi.
+    @ViewBuilder private func quando(spazi: [SpazioLibero], aperto: Bool) -> some View {
+        if spazi.isEmpty {
+            Text(TestiCampagne.agendaPiena).carattereApple(C.nota).foregroundColor(C.coloreNota)
+        } else {
+            FlussoEtichette(spazio: C.spazioChip) {
+                ForEach(spazi, id: \.inizio) { s in
+                    let acceso = !stato.campagne.chipTolti.contains(s.inizio)
+                    Button {
+                        if acceso { stato.campagne.chipTolti.insert(s.inizio) } else { stato.campagne.chipTolti.remove(s.inizio) }
+                    } label: {
+                        Text(TestiCampagne.chip(s.inizio))
+                            .carattereApple(C.chipPasso)
+                            .foregroundColor(acceso ? C.testoChipScelto : C.testoChip)
+                            .padding(C.paddingChipPasso)
+                            .background(Capsule().fill(acceso ? C.fondoChipScelto : C.fondoChip))
+                            .contentShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!aperto)
+                    .help(acceso ? "Toglilo dagli orari proposti (l'Agenda non si blocca)" : "Rimettilo fra gli orari proposti")
+                    .accessibilityAddTraits(acceso ? .isSelected : [])
+                }
+            }
+        }
+    }
+
+    /// Il piede fermo sotto i passi: la firma per i canali misti, chi resta fuori, il pulsante a tutta larghezza e
+    /// «Niente parte da solo…». Dopo l'avvio: «Apri i messaggi preparati» e, sobri, le aperture di sempre.
+    private func piedeMac(_ g: GruppoCampagna, inclusi: [MembroCampagna], spazi: [SpazioLibero], orari: [Date], misti: Bool,
+                          avviata: Campagna?, bozze: [MessaggioCliente]) -> some View {
+        let c = stato.campagne
+        return VStack(alignment: .center, spacing: C.sottoPulsante) {
+            if let a = avviata {
+                let daAprire = bozze.filter { $0.stato == .bozza }
+                Button {
+                    if let prima = daAprire.first ?? bozze.first {
+                        stato.preparaMessaggio(clienteId: prima.clienteId, messaggioId: prima.id)
+                    }
+                } label: {
+                    Text(TestiCampagne.apriPreparati).frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.applePrimarioGrande)
+                .disabled(bozze.isEmpty)
+                HStack(spacing: C.spazio / 2) {
+                    Button(TestiCampagne.apriProssimaIn(a.canale.nome)) { _ = stato.apriProssimaBozza(a.id) }
+                        .buttonStyle(.appleSobrio)
+                        .disabled(daAprire.isEmpty)
+                    Button(TestiCampagne.apriTutte) {
+                        if daAprire.count > RegoleCampagne.aperturaSenzaConferma {
+                            c.conferma = .apriTutte(campagna: a.id, quante: daAprire.count)
+                        } else {
+                            stato.apriTutteLeBozze(a.id)
+                        }
+                    }
+                    .buttonStyle(.appleSobrio)
+                    .disabled(daAprire.isEmpty)
+                    if daAprire.count == bozze.count {
+                        Button(TestiCampagne.annulla) { _ = stato.annullaCampagna(a.id) }
+                            .buttonStyle(.appleSobrio)
+                    }
+                }
+            } else {
+                let senzaConsenso = g.membri.filter { !$0.consenso && !incluso($0, canale: c.canale) }.count
+                let senzaRecapito = g.membri.filter { !$0.recapito(c.canale) }.count
+                let p = TestiCampagne.pulsante(inclusi: inclusi.count, orariDisponibili: spazi.count, orariScelti: orari.count,
+                                               firmaMancante: misti && c.firmaCanale == nil)
+                if misti {
+                    HStack(spacing: C.spazio / 2) {
+                        Text(TestiCampagne.sceltaFirma).carattereApple(C.nota).foregroundColor(C.coloreNota)
+                        MenuTendina(selezione: Bindable(c).firmaCanale,
+                                    opzioni: [(Canale?.none, "Da scegliere")] + Canale.allCases.map { (Optional($0), "Firma " + $0.nomeBreve) },
+                                    larghezza: C.larghezzaPannello / 2)
+                    }
+                }
+                if let nota = TestiCampagne.notaFuori(senzaConsenso: senzaConsenso, senzaRecapito: senzaRecapito) {
+                    Text(nota).carattereApple(C.nota).foregroundColor(C.coloreNota)
+                        .multilineTextAlignment(.center)
+                }
+                Button {
+                    if let nuova = stato.avviaCampagna(g, inclusi: inclusi.map(\.clienteId), appuntamenti: orari, tono: c.tono,
+                                                       canale: c.canale, firmaCanale: c.firmaCanale) {
+                        c.avviata = nuova.id
+                        stato.mostraAvviso(TestiCampagne.toastPronte(nuova.messaggi.count))
+                    }
+                } label: {
+                    Text(p.testo).frame(maxWidth: .infinity)
+                }
+                .buttonStyle(StilePulsanteApple(p.attivo ? .principale : .secondaria, grande: true))
+                .disabled(!p.attivo)
+            }
+            Text(TestiCampagne.nienteParte)
+                .carattereApple(C.nota)
+                .foregroundColor(C.coloreNota)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(C.paddingPiede)
+        .frame(maxWidth: .infinity)
+    }
+    #endif
+
     // MARK: Scelte
 
     /// Incluso nell'invio: con il recapito del canale, non tolto a mano, e incluso di base o a mano.
@@ -525,6 +828,39 @@ struct PannelloCampagna: View {
     }
 }
 
+#if os(macOS)
+// MARK: - Passo numerato (migliorie d'uso 49)
+
+/// La testa di un passo della campagna: tondino numerato 20 nel colore del gruppo con la cifra bianca, il titolo in
+/// neretto e, accanto, il sottotitolo grigio («1 · Chi  5 di 7 clienti con questo bisogno»).
+struct PassoCampagna: View {
+    let numero: Int
+    let titolo: String
+    let sottotitolo: String
+    let tinta: Color
+
+    private typealias C = Tema.Apple.Campagne
+
+    var body: some View {
+        HStack(alignment: .center, spacing: C.spazioPasso) {
+            Text("\(numero)")
+                .carattereApple(C.passoCifra)
+                .foregroundColor(C.coloreCifraPasso)
+                .frame(width: C.passoTondino, height: C.passoTondino)
+                .background(Circle().fill(tinta))
+                .accessibilityHidden(true)
+            Text(titolo).carattereApple(C.passoTitolo).foregroundColor(Tema.Apple.Colore.inchiostro)
+            Text(sottotitolo)
+                .carattereApple(C.passoSottotitolo)
+                .foregroundColor(C.coloreSottotitoloPasso)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Passo \(numero), \(titolo): \(sottotitolo)")
+    }
+}
+#endif
+
 // MARK: - Riga di un membro
 
 private struct RigaMembroCampagna: View {
@@ -550,8 +886,102 @@ private struct RigaMembroCampagna: View {
     private typealias C = Tema.Apple.Campagne
 
     var body: some View {
+        #if os(macOS)
+        rigaMac
+        #else
+        rigaComune
+        #endif
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 49: la casella quadrata in testa e tutta la riga che include o esclude; dopo l'avvio «✓ pronto in
+    /// Messaggi» in verde con il lampo, una riga dopo l'altra ogni 320 ms (al ritmo; con «Riduci movimento» e nelle
+    /// istantanee tutte subito). Consenso, recapito, stato e azioni di Vera restano come prima.
+    private var rigaMac: some View {
         let m = membro
-        HStack(alignment: .center, spacing: C.spazio / 1.5) {
+        let pronta = bozza?.stato == .bozza
+        return HStack(alignment: .center, spacing: C.spazioRigaPasso) {
+            Button(action: cambia) {
+                CasellaSceltaApple(scelta: bozza != nil || incluso)
+            }
+            .buttonStyle(.plain)
+            .disabled(!modificabile)
+            .accessibilityLabel(cliente?.nome ?? "")
+            .accessibilityValue(incluso ? "Incluso" : "Escluso")
+            AvatarCliente(iniziali: cliente?.iniziali ?? "", tinta: (cliente?.tinta ?? .blu).colori, lato: C.avatar)
+            VStack(alignment: .leading, spacing: C.spazioRiga) {
+                HStack(spacing: C.spazio / 2) {
+                    Text(cliente?.nome ?? "").carattereApple(C.nomeRigaPasso).foregroundColor(Tema.Apple.Colore.inchiostro).lineLimit(1)
+                    if !m.consenso {
+                        Text(TestiCampagne.senzaConsenso)
+                            .carattereApple(C.pillola)
+                            .foregroundColor(C.pillolaConsenso)
+                            .padding(C.paddingPillola)
+                            .background(Capsule().fill(C.fondoPillola))
+                    }
+                }
+                Text(statoMac(m))
+                    .carattereApple(C.statoRiga)
+                    .foregroundColor(pronta && (mostrata || statoFinale) ? C.pronta : C.coloreStato)
+                    .lineLimit(1)
+            }
+            Spacer(minLength: C.spazio / 2)
+            if let b = bozza {
+                if b.stato == .bozza {
+                    if inScrittura {
+                        Button(TestiCampagne.fermaVera, action: ferma).buttonStyle(.appleSobrio)
+                    } else if veraPronta {
+                        Button(TestiCampagne.riscriviVera) { riscrivi(b.id) }.buttonStyle(.appleSobrio)
+                    }
+                    Button("Apri in " + b.canale.nome) { apri(b.id) }.buttonStyle(.apple)
+                }
+            } else {
+                Button(TestiCampagne.vediMessaggio, action: vedi).buttonStyle(.appleSobrio)
+            }
+        }
+        .padding(C.paddingRigaPasso)
+        .background {
+            if bozza != nil && !(mostrata || statoFinale) {
+                RoundedRectangle(cornerRadius: Tema.Apple.Raggio.voce, style: .continuous).fill(C.lampo)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(C.filoRiga).frame(height: Tema.Apple.Misura.bordo)
+        }
+        .opacity(bozza == nil && !incluso ? C.opacitaEscluso : 1)
+        .contentShape(Rectangle())
+        .onTapGesture { if modificabile { cambia() } }
+        .onAppear {
+            // Una campagna già avviata (dallo storico): le righe sono già pronte, senza lampo
+            if bozza != nil { mostrata = true }
+        }
+        .onChange(of: bozza?.id) { _ in
+            mostrata = false
+            guard bozza != nil else { return }
+            // Niente Timer: animazione con ritardo, una riga dopo l'altra come le prepara Prisma
+            withAnimation(Tema.Apple.Moto.animazione(Tema.Apple.Moto.Curva.easeOut.animazione(Tema.Apple.Moto.Campagne.lampo), calmo: calmo)
+                .ritardoPrisma(calmo ? 0 : Double(indice) * Tema.Apple.Moto.Campagne.pronta)) {
+                mostrata = true
+            }
+        }
+        .help(m.motivo + (m.anchein.isEmpty ? "" : " · " + TestiCampagne.ancheIn(m.anchein)))
+    }
+
+    /// Lo stato sotto il nome: «✓ pronto in Messaggi» quando la sua riga si è accesa; prima, il motivo.
+    private func statoMac(_ m: MembroCampagna) -> String {
+        if let b = bozza {
+            switch b.stato {
+            case .bozza: return mostrata || statoFinale ? TestiCampagne.prontoInMessaggi : m.motivo
+            case .apertoInMail, .apertoInMessaggi, .salvato: return b.nomeStato
+            }
+        }
+        return stato(m)
+    }
+    #endif
+
+    private var rigaComune: some View {
+        let m = membro
+        return HStack(alignment: .center, spacing: C.spazio / 1.5) {
             if modificabile {
                 Button(action: cambia) {
                     Image(systemName: incluso ? "checkmark.square.fill" : "square")

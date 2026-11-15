@@ -19,6 +19,8 @@ import CoreGraphics
 ///   nella Biblioteca» sotto una risposta su condizioni, chiaro e scuro;
 /// - 1120-1122 (migliorie d'uso 35): Giulia scelta con un documento dei suoi prodotti, la colonna in due gruppi (chiaro e
 ///   scuro); il piano rivalutabile aperto con le sue domande e il campo «Chiedi qualcosa su …»; il KID aperto, «Chiedi tu».
+/// - 1400-1402 (migliorie d'uso 63): il catalogo «Prodotti» senza cliente (la scheda con «È per / Non è per»), una
+///   scheda di protezione, e Andrea (prudente) con l'ETF che rischia più del suo profilo, ultimo nell'elenco.
 /// 870-878 scelgono «Tutti i clienti» in modo esplicito: restano come prima.
 /// DATI DI PROVA DICHIARATI: i documenti sono i sei fac-simile scritti per Prisma (Risorse/Biblioteca); le risposte di
 /// Vera sono JSON di prova passati dalla stessa verifica di Prisma che vale per Qwen.
@@ -88,6 +90,29 @@ extension Istantanee {
                 s.filtroAreaProdotti = nil
                 s.prodottoSelezionato = prodotto
             }
+            s.apri(.prodotti)
+        }
+        // Migliorie d'uso 63 «I prodotti parlano chiaro»: il catalogo nella Biblioteca
+        coppia("1400-uso-biblioteca-prodotti") { s in
+            s.scegliCliente(nil)
+            s.filtroCanaleProdotti = nil
+            s.filtroAreaProdotti = nil
+            s.prodottoSelezionato = "prodotto-risparmio-rivalutabile"
+            s.apri(.prodotti)
+        }
+        coppia("1401-uso-biblioteca-prodotto-protezione") { s in
+            s.scegliCliente(nil)
+            s.filtroCanaleProdotti = nil
+            s.filtroAreaProdotti = nil
+            s.prodottoSelezionato = "prodotto-tcm"
+            s.apri(.prodotti)
+        }
+        coppia("1402-uso-biblioteca-prodotto-oltre-profilo") { s in
+            // Andrea è prudente (SRI fino a 2): l'ETF (SRI 4) rischia più del suo profilo ed è in fondo all'elenco
+            s.scegliCliente("andrea")
+            s.filtroCanaleProdotti = nil
+            s.filtroAreaProdotti = nil
+            s.prodottoSelezionato = "prodotto-etf-globale"
             s.apri(.prodotti)
         }
         coppia("879-biblioteca-cerca-ovunque") { s in

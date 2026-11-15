@@ -52,3 +52,31 @@ struct Nota: Identifiable, Codable, Hashable {
         a.fissata != b.fissata ? a.fissata : a.aggiornataIl > b.aggiornataIl
     }
 }
+
+/// Migliorie d'uso 65: la nota in evidenza di un cliente, quella che si ritrova in Panoramica, in «Prima
+/// dell'incontro» e nella scheda di Vera. È una nota del taccuino fissata (`id`) oppure «Da ricordare» (`Cliente.nota`,
+/// `id` nil): mai una copia dell'una nell'altra (decisione 65-a).
+struct NotaInEvidenza: Equatable {
+    /// L'id della nota del taccuino; nil per «Da ricordare».
+    let id: String?
+    let titolo: String
+    let testo: String
+
+    var daRicordare: Bool { id == nil }
+}
+
+extension Nota {
+    /// La nota in evidenza del cliente: la nota fissata più recente (non vuota) fra `note`, altrimenti «Da ricordare»
+    /// se non è vuota; nil se non c'è nulla. Negli archivi di prima un cliente può avere più note fissate: vale la più
+    /// recente, le altre si mostrano come note normali.
+    static func inEvidenza(_ note: [Nota], cliente: Cliente, titoloDaRicordare: String = "Da ricordare") -> NotaInEvidenza? {
+        let fissata = note.filter { $0.clienteId == cliente.id && $0.fissata && !$0.vuota }
+            .max { $0.aggiornataIl < $1.aggiornataIl }
+        if let n = fissata {
+            return NotaInEvidenza(id: n.id, titolo: n.titolo.trimmingCharacters(in: .whitespacesAndNewlines),
+                                  testo: n.testo.trimmingCharacters(in: .whitespacesAndNewlines))
+        }
+        let t = cliente.nota.trimmingCharacters(in: .whitespacesAndNewlines)
+        return t.isEmpty ? nil : NotaInEvidenza(id: nil, titolo: titoloDaRicordare, testo: t)
+    }
+}

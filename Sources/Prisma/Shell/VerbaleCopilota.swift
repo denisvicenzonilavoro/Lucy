@@ -142,7 +142,7 @@ struct CorpoVerbaleCopilota: View {
         if !punti.isEmpty {
             let testo: String = {
                 if copilota.verbaleVera != nil { return TestiCopilota.firmaVera }
-                if copilota.verbaleVeraInCorso { return TestiCopilota.firmaPrisma + " · Vera lo sta riscrivendo con Qwen…" }
+                if copilota.verbaleVeraInCorso { return TestiCopilota.firmaPrisma + TestiStatoVera.inVista(mac: " · Vera lo sta riscrivendo…", altrove: " · Vera lo sta riscrivendo con Qwen…") }
                 if !copilota.qwenPronto(stato) { return TestiCopilota.firmaPrisma + " · " + TestiCopilota.veraNonPronta }
                 return TestiCopilota.firmaPrisma
             }()
@@ -294,3 +294,82 @@ struct VoceVerbaleCopilota: View {
         .animation(animazione, value: fatta)
     }
 }
+
+#if os(macOS)
+// MARK: - Il verbale confermato, da rileggere (rifinitura 18-24, miglioria 20)
+
+/// Le regole del verbale da rileggere in «Dopo» di un incontro concluso: solo il verbale confermato, con qualcosa dentro.
+enum RegoleVerbaleLettura {
+    static let titolo = "Il verbale"
+    static let attivita = "Le attività"
+    static let dossier = "Cosa è entrato nel dossier"
+
+    /// Il verbale della sessione, se è confermato e ha almeno una voce; altrimenti nil (niente da rileggere).
+    static func daRileggere(_ s: SessioneCopilota?) -> VerbaleCopilota? {
+        guard let v = s?.verbale, v.confermatoIl != nil,
+              !(v.punti.isEmpty && v.attivita.isEmpty && v.dossier.isEmpty) else { return nil }
+        return v
+    }
+
+    /// «Confermato il 12 novembre».
+    static func confermato(_ d: Date) -> String { "Confermato il " + Formati.giornoMese.string(from: d) }
+}
+
+/// «Il verbale» in sola lettura, sotto l'archivio di un incontro concluso: i punti confermati, le attività e cosa è
+/// entrato nel dossier, senza pulsanti né spunte (come nel template).
+struct VerbaleConfermatoLettura: View {
+    let verbale: VerbaleCopilota
+
+    private typealias V = Tema.Apple.Copilota.Verbale
+    private typealias D = Tema.Apple.Copilota.Dopo
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline, spacing: D.spazioNota) {
+                occhiello(RegoleVerbaleLettura.titolo)
+                Spacer(minLength: 0)
+                if let d = verbale.confermatoIl {
+                    Text(RegoleVerbaleLettura.confermato(d))
+                        .carattereApple(V.firma)
+                        .foregroundColor(V.coloreFirma)
+                        .lineLimit(1)
+                }
+            }
+            .padding(.bottom, V.sottoOcchiello)
+            if !verbale.punti.isEmpty {
+                righe(verbale.punti)
+            }
+            if !verbale.attivita.isEmpty {
+                occhiello(RegoleVerbaleLettura.attivita)
+                    .padding(.top, V.sopraAttivita)
+                    .padding(.bottom, V.sottoOcchiello)
+                righe(verbale.attivita)
+            }
+            if !verbale.dossier.isEmpty {
+                occhiello(RegoleVerbaleLettura.dossier)
+                    .padding(.top, V.sopraAttivita)
+                    .padding(.bottom, V.sottoOcchiello)
+                righe(verbale.dossier)
+            }
+        }
+        .padding(D.padding)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .superficieApple(D.superficie, raggio: D.raggio)
+    }
+
+    private func occhiello(_ t: String) -> some View {
+        Text(t)
+            .carattereApple(Tema.Apple.Carattere.etichetta)
+            .foregroundColor(Tema.Apple.Colore.inchiostro2)
+            .accessibilityAddTraits(.isHeader)
+    }
+
+    private func righe(_ voci: [String]) -> some View {
+        Text(voci.map { "• " + $0 }.joined(separator: "\n"))
+            .carattereApple(V.testo)
+            .foregroundColor(V.coloreTesto)
+            .fixedSize(horizontal: false, vertical: true)
+            .textSelection(.enabled)
+    }
+}
+#endif

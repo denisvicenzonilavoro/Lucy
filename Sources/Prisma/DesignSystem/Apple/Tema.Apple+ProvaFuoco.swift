@@ -101,6 +101,23 @@ extension Tema.Apple.Posizioni {
             static let nota = C.secondario
             static let coloreNota = K.inchiostro2
             static let spazioNota: CGFloat = 16
+            /// Migliorie d'uso 41 (Mac): le barrette della legenda, 22×8 con raggio 5, e lo spazio fra barretta e parola.
+            static let barretta = CGSize(width: 22, height: 8)
+            static let raggioBarretta: CGFloat = 5
+            static let spazioBarretta: CGFloat = 6
+        }
+
+        // MARK: Gruppi della lista (migliorie d'uso 41, Mac: `.fGr` del template)
+
+        enum Gruppo {
+            /// Fra capsula, frase e pulsante della testata.
+            static let spazio: CGFloat = 10
+            /// Padding della testata: 10 sopra (il primo gruppo 0), 4 ai lati, 7 sotto.
+            static let sopra: CGFloat = 10
+            static let lati: CGFloat = 4
+            static let sotto: CGFloat = 7
+            static let frase = C.secondario
+            static let coloreFrase = K.inchiostro2
         }
 
         // MARK: Righe della lista (§2.3)
@@ -112,11 +129,29 @@ extension Tema.Apple.Posizioni {
             static let passo: CGFloat = 8
             static let superficie = Tema.Apple.Superficie.cardPiatta
             static let raggio = Tema.Apple.Raggio.card
+            #if os(macOS)
+            /// Migliorie d'uso 41: avatar 34 come il template (l'iPad resta a 36).
+            static let avatar: CGFloat = 34
+            #else
             static let avatar: CGFloat = 36
+            #endif
             /// Blocchi: nome 200, «dopo/oggi» 150, perdita 110 (stretti: 130, 96, 92).
             static let larghezzaNome: CGFloat = 200
             static let larghezzaPercento: CGFloat = 150
+            #if os(macOS)
+            /// Migliorie d'uso 41: la perdita larga 104 (l'iPad resta a 110).
+            static let larghezzaPerdita: CGFloat = 104
+            #else
             static let larghezzaPerdita: CGFloat = 110
+            #endif
+            /// Migliorie d'uso 41 (Mac): la cifra «oggi → dopo» larga 118 (piena e stretta; minima come oggi).
+            static let larghezzaOggiDopo: CGFloat = 118
+            /// Il fondo della riga sotto il puntatore (tutta la riga apre il dettaglio).
+            static let fondoSopra = K.chip
+            /// La «›» in fondo alla riga.
+            static let freccia = C(dimensione: 16, peso: .regular)
+            static let coloreFreccia = K.inchiostro3
+            static let larghezzaFreccia: CGFloat = 10
             static let larghezzaNomeStretta: CGFloat = 130
             static let larghezzaPercentoStretta: CGFloat = 96
             static let larghezzaPerditaStretta: CGFloat = 92
@@ -169,6 +204,41 @@ extension Tema.Apple.Posizioni {
             static let fondoLista: CGFloat = 12
             /// Il margine a destra della lista (la barra di scorrimento non copre i pulsanti).
             static let margineScorrimento: CGFloat = 4
+        }
+
+        // MARK: Dettaglio della riga (migliorie d'uso 41, Mac: `fuocoScheda` del template)
+
+        enum Dettaglio {
+            static let misura = CGSize(width: 840, height: 440)
+            static let avatar: CGFloat = 54
+            static let spazioTesta: CGFloat = 14
+            static let nome = C(dimensione: 26, peso: .bold, tracking: -0.5)
+            static let occhiello = C.etichetta
+            static let obiettivo = C.secondario
+            /// 56 dal bordo destro per lasciare il ✕.
+            static let margineChiudi: CGFloat = 56
+            /// I tre riquadri: 20 sotto la testa, 12 fra l'uno e l'altro.
+            static let sopraRiquadri: CGFloat = 20
+            static let spazioRiquadri: CGFloat = 12
+            static let etichettaRiquadro = C.etichetta
+            static let valoreRiquadro = C.valore
+            static let sottoRiquadro = C.secondario
+            static let spazioRiquadro: CGFloat = 4
+            /// Il riquadro «Perché»: 14 sotto i riquadri.
+            static let sopraPerche: CGFloat = 14
+            static let perche = C(dimensione: 14, peso: .regular, interlinea: 1.6)
+            static let sopraPulsanti: CGFloat = 18
+            static let spazioPulsanti: CGFloat = 8
+
+            /// Il colore dell'occhiello e delle cifre forti, dal gruppo (rosso, arancio, blu; grigio senza obiettivo).
+            static func colore(_ g: GruppoProvaFuoco) -> Color {
+                switch g {
+                case .daChiamare: return K.rosso
+                case .daTenereDOcchio: return K.arancioTesto
+                case .reggono: return K.accento
+                case .senzaObiettivo: return K.inchiostro2
+                }
+            }
         }
 
         // MARK: Barra oggi/dopo (§2.3, `BarraOggiDopo`)

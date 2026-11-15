@@ -36,6 +36,8 @@ extension StatoShell {
     /// `avviso`: falso quando la accende la presentazione, per non coprire la pagina davanti al cliente.
     func entraModoCliente(avviso: Bool = true) {
         #if os(macOS)
+        // Il menu delle app (migliorie d'uso 67) si chiude comunque, anche se manca il cliente da mostrare
+        if menuApp { menuApp = false }
         // Con «Tutti i clienti» si mostra il cliente scelto per ultimo (migliorie d'uso 2)
         if tuttiIClienti, modoCliente == nil, let id = clientiRecenti.first(where: { cliente($0) != nil }) {
             clienteAttivoId = id
@@ -53,6 +55,7 @@ extension StatoShell {
         pannelloCliente = false
         if sistema.pannelloNovita { sistema.pannelloNovita = false }
         pannelloSpazi = false
+        menuApp = false
         pannelloAppAperte = false
         portafoglio = false
         veraPortafoglio = false

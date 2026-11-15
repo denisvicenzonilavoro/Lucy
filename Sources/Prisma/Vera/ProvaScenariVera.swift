@@ -269,8 +269,17 @@ enum ProvaScenariVera {
             controlla(s.simulazioniCliente("marco").count == prima + 1, "Scenari: salvato una volta sola")
             s.clienteAttivoId = "giulia"
             s.apriScenarioVera(scheda)
+            #if os(macOS)
+            // Migliorie d'uso 64: sul Mac la bozza entra in «Simula e confronta» come strada, con i suoi soldi
+            let sim = scheda.simulazione
+            controlla(s.bozzaSimulazione == nil && s.strumentoAnalisi == .simulaConfronta && s.modoSimula == .una
+                      && s.clienteSimula == "marco" && s.clienteAttivoId == "marco"
+                      && (sim.map { s.soldiSimula.capitale == $0.capitale && s.soldiSimula.anni == max(1, $0.anni) } ?? true),
+                      "Scenari: «Apri in Simulazioni» porta in «Simula e confronta» con i parametri dello scenario")
+            #else
             controlla(s.bozzaSimulazione == scheda.simulazione && s.schedaSimulazioni == .simulatore && s.clienteAttivoId == "marco",
                       "Scenari: «Apri in Simulazioni» porta nel simulatore con i parametri dello scenario")
+            #endif
         }
         // In protezione: la nota del taccuino
         s.clienteAttivoId = "marco"

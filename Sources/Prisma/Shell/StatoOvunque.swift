@@ -513,7 +513,7 @@ extension StatoShell {
             if !e.unite.isEmpty { ovunque.ultimeUnite = e.unite }
             ovunque.giri += 1
             if !automatica || !e.unite.isEmpty || !e.conflitti.isEmpty {
-                mostraAvviso(TestiOvunque.avviso(unite: e.unite.count, conflitti: e.conflitti.count))
+                mostraAvviso(TestiOvunque.avviso(unite: e.unite.count, conflitti: e.conflitti.count), riservato: automatica)
             }
         case .success(.dispositivo(let e)):
             dati.carica(accogliGiroOvunque(e, partenza: partenza, versione: versione))
@@ -846,3 +846,34 @@ extension StatoShell {
         }
     }
 }
+
+#if os(macOS)
+// MARK: - Migliorie d'uso 51 · «Manda il giro all'iPhone»
+
+extension StatoShell {
+    /// Decisione 51-a: il giro arriva sull'iPhone solo attraverso «Prisma ovunque», e solo con lo spazio acceso. Gli
+    /// appuntamenti del giro (con `presso` e `daConfermare`) sono già nell'istantanea cifrata che il Mac scrive: il
+    /// pulsante chiede di scriverla subito (la stessa chiamata di «Unisci ora»), nessun dato nuovo esce. Niente Mappe né
+    /// indirizzi passati ad altre app (privacy del Territorio). Sta qui, fuori dai file del Territorio.
+    func mandaGiroAlliPhone(_ giorno: Date) {
+        let o = dati.impostazioni.ovunque
+        guard persistente, !solaLettura, o.acceso, o.ruolo == .mac else { return }
+        guard !inDimostrazione else {
+            mostraAvviso(TestiTerritorio.giroInDimostrazione)
+            return
+        }
+        // Con un giro già in corso la scrittura che porta le tappe è quella di recupero (`ancoraUnGiro`): il giro partito
+        // prima del tocco non le contiene, quindi conta solo quello dopo
+        territorio.giroIPhone = GiroInviatoIPhone(giorno: Calendar.current.startOfDay(for: giorno),
+                                                  giri: ovunque.giri + (ovunque.inCorso ? 1 : 0))
+        sincronizzaOvunque()
+    }
+
+    /// Il giro di quel giorno è nello spazio cifrato: dopo il pulsante una scrittura è riuscita (stato in memoria). Se la
+    /// scrittura non riesce resta l'avviso d'errore di «Prisma ovunque» e il pulsante torna a chiedere.
+    func giroSulliPhone(_ giorno: Date) -> Bool {
+        guard dati.impostazioni.ovunque.acceso, let g = territorio.giroIPhone else { return false }
+        return Calendar.current.isDate(g.giorno, inSameDayAs: giorno) && ovunque.giri > g.giri
+    }
+}
+#endif

@@ -130,6 +130,44 @@ enum EstrattoreDocumento {
         return CampoDocumento.allCases.compactMap { trovati[$0] }
     }
 
+    /// I campi che, se compaiono nel testo con due valori diversi, rendono il dato incerto (migliorie d'uso 62, §62.3
+    /// punto 1). Solo codici, classi, anni e la data di rilascio: premi, importi, date di contratto e nomi compaiono
+    /// spesso più volte con valori diversi per natura (saldo iniziale e finale, premio annuo e rata, decorrenza e firma).
+    static let campiAValoreUnico: [CampoDocumento] = [.sri, .periodoDetenzione, .isin, .codiceFiscale, .numeroDocumento,
+                                                       .dataRilascio, .orizzonte]
+
+    /// I campi di `campiAValoreUnico` che le regole trovano nel testo con almeno due valori diversi (tutte le occorrenze
+    /// di tutte le pagine, non solo la prima). I valori si confrontano normalizzati: le date come giorno, i numeri come
+    /// numero, il resto solo lettere e cifre in maiuscolo.
+    static func valoriDiversi(_ pagine: [String]) -> Set<CampoDocumento> {
+        var valori: [CampoDocumento: Set<String>] = [:]
+        let testi = pagine.map { $0.replacingOccurrences(of: "\u{2212}", with: "-") }
+        for r in regole where campiAValoreUnico.contains(r.campo) {
+            guard let regex = try? NSRegularExpression(pattern: r.schema, options: [.caseInsensitive]) else { continue }
+            for testo in testi {
+                for m in regex.matches(in: testo, range: NSRange(testo.startIndex..., in: testo)) {
+                    guard m.numberOfRanges > 1, let rv = Range(m.range(at: 1), in: testo) else { continue }
+                    let grezzo = r.ultimoPercento ? (ultimaPercentuale(String(testo[rv])) ?? "") : String(testo[rv])
+                    let valore = pulisci(grezzo, campo: r.campo)
+                    guard !valore.isEmpty else { continue }
+                    valori[r.campo, default: []].insert(normalizzato(valore, campo: r.campo))
+                }
+            }
+        }
+        return Set(valori.filter { $0.value.count > 1 }.keys)
+    }
+
+    /// Un valore nella forma con cui si confronta con gli altri dello stesso campo.
+    private static func normalizzato(_ v: String, campo: CampoDocumento) -> String {
+        if campo.data, let giorno = data(v) {
+            return String(Int(Calendar.current.startOfDay(for: giorno).timeIntervalSince1970))
+        }
+        if campo == .sri || campo == .periodoDetenzione || campo == .orizzonte, let n = numero(v) {
+            return String(format: "%.2f", n)
+        }
+        return v.uppercased().filter { $0.isLetter || $0.isNumber }
+    }
+
     /// I caratteri della riga del premio, dopo la cifra, che restano nell'estratto (per la frequenza).
     static let codaPremio = 40
 

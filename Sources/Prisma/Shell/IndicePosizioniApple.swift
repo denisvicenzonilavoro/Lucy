@@ -28,9 +28,10 @@ import SwiftUI
 
 // MARK: - Le schermate
 
-/// Le sei schermate della vista del cliente in Posizioni: il quadro con l'elenco e le cinque analisi.
+/// Le schermate della vista del cliente in Posizioni: il quadro con l'elenco, le cinque analisi e lo smontaggio dei
+/// documenti del cliente (migliorie d'uso 42).
 enum VistaPosizioniCliente: Hashable, CaseIterable {
-    case quadro, patrimonio, resistenza, coerenza, costi, successione
+    case quadro, patrimonio, resistenza, coerenza, costi, smontaggio, successione
 
     /// Le ancore di sempre (colonna di prima, dossier, notifiche, istantanee) aprono la schermata dell'analisi.
     init?(ancora: String) {
@@ -40,7 +41,23 @@ enum VistaPosizioniCliente: Hashable, CaseIterable {
         case "coerenza": self = .coerenza
         case "costi": self = .costi
         case "successione": self = .successione
+        case "smontaggio": self = .smontaggio
+        // Migliorie d'uso 45: «Vedi dove sono i suoi soldi» dalla liquidità di Analisi 360 torna al quadro
+        case "quadro": self = .quadro
         default: return nil
+        }
+    }
+
+    /// L'ancora che apre questa schermata da fuori (`stato.ancoraPosizioni`).
+    var ancora: String {
+        switch self {
+        case .quadro: return "quadro"
+        case .patrimonio: return "patrimonio"
+        case .resistenza: return "resistenza"
+        case .coerenza: return "coerenza"
+        case .costi: return "costi"
+        case .smontaggio: return "smontaggio"
+        case .successione: return "successione"
         }
     }
 
@@ -51,12 +68,27 @@ enum VistaPosizioniCliente: Hashable, CaseIterable {
         case .resistenza: return "Prova di resistenza"
         case .coerenza: return "Coerenza con il profilo"
         case .costi: return "Peso dei costi"
+        case .smontaggio: return TestiSmontaggio.voceIndice
         case .successione: return "Passaggio generazionale"
         }
     }
 
-    /// Le cinque analisi, nell'ordine dell'indice.
-    static let analisi: [VistaPosizioniCliente] = [.patrimonio, .resistenza, .coerenza, .costi, .successione]
+    /// Le analisi, nell'ordine dell'indice: lo smontaggio di un documento prima del passaggio generazionale.
+    static let analisi: [VistaPosizioniCliente] = [.patrimonio, .resistenza, .coerenza, .costi, .smontaggio, .successione]
+}
+
+// MARK: - Da fuori
+
+extension StatoShell {
+    /// Migliorie d'uso 45: apre Posizioni del cliente sulla schermata chiesta (il passo di Investimenti e Liquidità in
+    /// Analisi 360). Sceglie il cliente in silenzio se non è già quello scelto; la schermata arriva con l'ancora di sempre,
+    /// che `AppPosizioni` consuma.
+    func apriPosizioniCliente(_ id: String, vista: VistaPosizioniCliente) {
+        posizioneInDettaglio = nil
+        ancoraPosizioni = vista.ancora
+        if clienteAttivoId != id { scegliCliente(id) }
+        apri(.posizioni)
+    }
 }
 
 // MARK: - Indice
@@ -97,7 +129,8 @@ struct IndicePosizioniApple: View {
                     voce(.quadro, numero: inEssere)
                     etichetta("Le analisi")
                     ForEach(VistaPosizioniCliente.analisi, id: \.self) { v in
-                        voce(v, numero: 0)
+                        // Lo smontaggio porta il numero dei documenti smontati del cliente (dato ricavato)
+                        voce(v, numero: v == .smontaggio ? stato.documentiSmontati(clienteId: cliente.id).count : 0)
                     }
                     etichetta("Collegati")
                     collegamento("Il dossier") { stato.apri(.clienti) }

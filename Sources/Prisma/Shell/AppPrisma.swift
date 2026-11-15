@@ -31,6 +31,14 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .obiettivi, .documenti: return .clienti
         case .confronti, .simulazioni: return .analisi360
         case .attivita: return .agenda
+        #if os(macOS)
+        // Migliorie d'uso 63: sul Mac il catalogo dei prodotti sta nella Biblioteca (sezione «Prodotti»); su iPhone e
+        // iPad Prodotti resta l'app di sempre, fuori dal dock
+        case .prodotti: return .biblioteca
+        // Migliorie d'uso 65: sul Mac le note stanno con il cliente, nella sezione Note del dossier (l'app Note a
+        // parte non serve più); su iPhone e iPad resta l'app di sempre
+        case .note: return .clienti
+        #endif
         default: return nil
         }
     }

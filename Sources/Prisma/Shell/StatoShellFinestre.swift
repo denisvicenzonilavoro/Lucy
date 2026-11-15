@@ -55,6 +55,16 @@ extension StatoShell {
         set { sistema.pannelloCliente = newValue }
     }
 
+    /// Il menu delle app aperte e degli spazi sotto la pillola dell'app (migliorie d'uso 67, solo sul Mac). Chiudendolo
+    /// si chiude anche il suo modulo per salvare lo spazio.
+    var menuApp: Bool {
+        get { sistema.menuApp }
+        set {
+            sistema.menuApp = newValue
+            if !newValue && sistema.menuAppSalva { sistema.menuAppSalva = false }
+        }
+    }
+
     var finestreVisibili: [Finestra] { sistema.visibili }
 
     /// App in primo piano (nil = scrivania).
@@ -314,6 +324,12 @@ extension StatoShell {
         if app == .vera { spegniVoceSeVeraSparisce() }
         // Migliorie d'uso 34: il momento scelto nel filtro della Sala non si ricorda fra un'apertura e l'altra
         if app == .sala, sala.momento != nil { sala.momento = nil }
+        // Migliorie d'uso 59: neanche il copione aperto
+        if app == .sala, sala.copioneAperto { sala.copioneAperto = false }
+        #if os(macOS)
+        // Migliorie d'uso 39: la scheda con il codice di abbinamento si chiude con Impostazioni (il codice è un segreto)
+        if app == .impostazioni, dispositivi.schedaCodice { dispositivi.schedaCodice = false }
+        #endif
     }
 
     /// La finestra rientra nella sua icona del dock; resta nell'elenco finché il volo non finisce (`rientrano`:
@@ -473,6 +489,7 @@ extension StatoShell {
         Movimenti.anima(Tema.Moto.Blocco.scrivania, durata: Tema.Moto.Blocco.durata, animato: movimento) {
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             if pannelloCliente { pannelloCliente = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
@@ -480,6 +497,10 @@ extension StatoShell {
             // Migliorie d'uso 1: il pannello di «Mostra al cliente» e la schermata neutra si chiudono
             if sceltaMostra { sceltaMostra = false }
             if schermataNeutraMac { schermataNeutraMac = false }
+            // e gli avvisi trattenuti mentre si mostrava si scartano (portano nomi di altri clienti)
+            avvisiTrattenuti.removeAll()
+            // Migliorie d'uso 39: la scheda con il codice di abbinamento non sopravvive al blocco
+            if dispositivi.schedaCodice { dispositivi.schedaCodice = false }
             #endif
             // La guida si chiude senza segnare l'introduzione come vista: riparte al prossimo sblocco
             if sistema.guida != nil { sistema.guida = nil }
@@ -497,6 +518,8 @@ extension StatoShell {
         // Le carte d'identità arrivate dall'iPhone si scartano sempre, anche senza la scena aperta («Luce» giro 13,
         // decisione 25); il riposo del Mac passa da qui
         scartaCarteInArrivo()
+        // Il ricordo per annullare la registrazione dei valori non sopravvive al blocco (migliorie d'uso 44)
+        annullaValori = nil
         // Le copie da spedire delle cose date al cliente si tolgono al blocco («Luce» giro 15)
         CartellaUscite.svuota()
         guard movimento else {
@@ -751,6 +774,7 @@ extension StatoShell {
         guard persistente else {
             diColpo(implicite: false) {
                 if pannelloSpazi { pannelloSpazi = false }
+                if menuApp { menuApp = false }
                 finestre = nuove
                 sistema.spente.removeAll()
             }
@@ -764,6 +788,7 @@ extension StatoShell {
             // Nessuna finestra resta in vista: le vecchie si chiudono e quelle dello spazio si aprono insieme
             Movimenti.anima(Tema.Moto.Finestre.chiusura, durata: Tema.Moto.Finestre.durataChiusura) {
                 if pannelloSpazi { pannelloSpazi = false }
+                if menuApp { menuApp = false }
                 finestre = nuove
                 sistema.inArrivo.formUnion(restano)
                 if !sistema.spente.isEmpty { sistema.spente.removeAll() }
@@ -777,6 +802,7 @@ extension StatoShell {
         }
         Movimenti.anima(Tema.Moto.Finestre.chiusura, durata: Tema.Moto.Finestre.durataChiusura) {
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             finestre.removeAll { !restano.contains($0.app) }
             // Le finestre dello spazio tornano tutte in vista: i loro controlli si riaccendono
             if !sistema.spente.isEmpty { sistema.spente.removeAll() }

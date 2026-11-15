@@ -44,6 +44,13 @@ import UniformTypeIdentifiers
     @ObservationIgnored var ultimaInquadratura: String?
     /// Cresce a ogni documento nuovo: le ellissi ripartono.
     private(set) var giro = 0
+    /// Migliorie d'uso 42 (solo Mac): il documento conservato scelto con «Cambia ⌄», per vista (chiave: l'id del cliente
+    /// scelto, "" per «Tutti i clienti»). Nessuna voce = il documento letto, in memoria (o il primo conservato del
+    /// cliente). Il documento letto non si sovrascrive mai: un conservato si mostra dalle sue voci, non con `carica`.
+    var documentoScelto: [String: String] = [:]
+    /// La voce accesa in comune fra il foglio e l'elenco: un oggetto a parte, letto solo da ellissi e righe, così il
+    /// passaggio del puntatore non ridisegna tutta la vista (come `PuntatoreRadar`).
+    @ObservationIgnored let sopra = SopraSmontaggio()
 
     var vuoto: Bool { righe.isEmpty && !inLettura }
 
@@ -57,6 +64,8 @@ import UniformTypeIdentifiers
         tipiScelti = [:]
         esclusi = []
         inLettura = false
+        documentoScelto = [:]
+        sopra.riga = nil
         giro += 1
     }
 
@@ -72,8 +81,28 @@ import UniformTypeIdentifiers
         origine = ""
         posizioneId = nil
         propostaId = nil
+        documentoScelto = [:]
+        sopra.riga = nil
         giro += 1
     }
+}
+
+/// La voce dello Smontaggio sotto il puntatore (la riga del documento), in comune fra foglio ed elenco (solo Mac).
+@Observable final class SopraSmontaggio {
+    var riga: Int?
+}
+
+/// Migliorie d'uso 42: un documento smontato e già nei Documenti del cliente, riaperto dalle voci conservate
+/// (`Documento.costiTrovati`). Le cifre non si ricalcolano: sono quelle di Prisma al momento dell'aggiunta.
+struct SmontaggioRiaperto {
+    var documentoId: String
+    var righe: [RigaLetta]
+    var costi: SmontaggioCosti
+    var titolo: String
+    var clienteId: String
+    var posizioneId: String?
+    /// Il foglio è ricostruito dalle sole voci: il testo letto non c'è più (dopo un riavvio non si conserva).
+    var ricostruito: Bool
 }
 
 struct SmontaggioApple: View {
@@ -631,9 +660,11 @@ private struct ComparsaNota: ViewModifier {
 }
 
 /// Il fumetto di un'ellisse: la riga letta, il conto e la fonte; «Non è un costo» toglie la voce.
-private struct FumettoCosto: View {
+struct FumettoCosto: View {
     let voce: VoceCostoTrovata
     let togli: () -> Void
+    /// «Non è un costo» spento per un documento già nel dossier (migliorie d'uso 42, solo Mac).
+    var togliAttivo = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -642,6 +673,7 @@ private struct FumettoCosto: View {
             if let c = voce.conto { Text(c).carattereApple(Tema.Apple.Carattere.corpo) }
             Text(fonte).carattereApple(Tema.Apple.Carattere.secondario).foregroundColor(Tema.Apple.Colore.inchiostro2)
             Button("Non è un costo", action: togli).buttonStyle(.appleSobrio)
+                .disabled(!togliAttivo)
         }
         .padding(16)
         .frame(width: 300, alignment: .leading)
@@ -657,7 +689,7 @@ private struct FumettoCosto: View {
 }
 
 /// Le due linee a dieci anni (netto restando e netto cambiando) con l'area fra le due, e le etichette a destra.
-private struct GraficoDieciAnni: View {
+struct GraficoDieciAnni: View {
     let serie: [AnnoSostituzione]
     private typealias S = Tema.Apple.Posizioni.Smontaggio
 
@@ -736,9 +768,12 @@ extension StatoShell {
     }
 
     /// La sostituzione chiesta dallo Smontaggio diventa il bisogno scelto di Pratiche › Proposta.
-    func proponiSostituzioneDaSmontaggio(attuale: Posizione, registrata: Bool, proposta: Posizione, costi: SmontaggioCosti) {
+    /// `titolo`: quello del documento mostrato, se non è il documento letto (un documento conservato, migliorie d'uso 42).
+    func proponiSostituzioneDaSmontaggio(attuale: Posizione, registrata: Bool, proposta: Posizione, costi: SmontaggioCosti,
+                                         titolo: String? = nil) {
         guard let c = cliente(attuale.clienteId.isEmpty ? proposta.clienteId : attuale.clienteId) else { return }
-        var motivo = "Dallo Smontaggio di «\(smontaggio.titolo.isEmpty ? attuale.nome : smontaggio.titolo)»"
+        let nomeDocumento = titolo ?? smontaggio.titolo
+        var motivo = "Dallo Smontaggio di «\(nomeDocumento.isEmpty ? attuale.nome : nomeDocumento)»"
         if let oggi = costi.costoAnnuo { motivo += ": costi oggi \(Formati.euro(oggi)) l'anno" }
         motivo += ", confronto con «\(proposta.nome)»."
         var a = attuale
@@ -776,6 +811,42 @@ extension StatoShell {
         dati.documenti.append(doc)
         memorizzaTesto(doc.id, [smontaggio.righe.map(\.testo).joined(separator: "\n")])
         mostraAvviso("Documento aggiunto ai Documenti di \(c.nome.split(separator: " ").first.map(String.init) ?? c.nome), senza la foto")
+    }
+
+    /// Migliorie d'uso 42: i documenti con le voci di costo dello Smontaggio (del cliente, o di tutti con nil), i più
+    /// recenti prima. Dato ricavato: si rifà da solo quando un documento entra nel dossier.
+    func documentiSmontati(clienteId: String?) -> [Documento] {
+        ricavato("smontaggio-documenti-\(clienteId ?? "tutti")") {
+            dati.documenti
+                .filter { !($0.costiTrovati ?? []).isEmpty && (clienteId == nil || $0.clienteId == clienteId) }
+                .sorted { $0.importatoIl > $1.importatoIl }
+        }
+    }
+
+    /// Riapre un documento smontato e conservato. Con il testo letto ancora in memoria (stessa sessione, dati di prova)
+    /// il foglio è quello vero; altrimenti si ricostruisce dalle voci, una riga per voce. In entrambi i casi le voci e
+    /// le cifre sono quelle conservate (nessun `smonta` di nuovo: perderebbe le cifre calcolate dalle percentuali).
+    func riapriSmontaggio(_ d: Documento) -> SmontaggioRiaperto {
+        let voci = (d.costiTrovati ?? []).sorted { $0.riga < $1.riga }
+        let posizione = d.posizioneId.flatMap { id in dati.posizioni.first { $0.id == id } }
+        let righeVere = (testoDocumento(d, memorizza: false).first ?? "")
+            .components(separatedBy: .newlines)
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { !$0.isEmpty }
+            .map { RigaLetta(testo: $0) }
+        if !righeVere.isEmpty, let ultima = voci.last, ultima.riga < righeVere.count {
+            let costi = SmontaggioCosti(voci: voci,
+                                        valore: posizione?.valore ?? MotoreSmontaggio.valoreLetto(righeVere) ?? MotoreSmontaggio.valoreDaVoci(voci),
+                                        versato: posizione?.totaleVersato ?? MotoreSmontaggio.versatoLetto(righeVere)
+                                            ?? MotoreSmontaggio.versatoDaVoci(voci))
+            return SmontaggioRiaperto(documentoId: d.id, righe: righeVere, costi: costi, titolo: d.titolo, clienteId: d.clienteId,
+                                      posizioneId: d.posizioneId, ricostruito: false)
+        }
+        let costi = SmontaggioCosti(voci: MotoreSmontaggio.vociRiaperte(voci),
+                                    valore: posizione?.valore ?? MotoreSmontaggio.valoreDaVoci(voci),
+                                    versato: posizione?.totaleVersato ?? MotoreSmontaggio.versatoDaVoci(voci))
+        return SmontaggioRiaperto(documentoId: d.id, righe: MotoreSmontaggio.righe(da: voci, titolo: d.titolo), costi: costi,
+                                  titolo: d.titolo, clienteId: d.clienteId, posizioneId: d.posizioneId, ricostruito: true)
     }
 
     /// Le righe arrivate dall'iPhone mentre la vista attiva è lo Smontaggio: le legge MotoreSmontaggio, non Inquadra.

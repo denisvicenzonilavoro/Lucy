@@ -96,9 +96,11 @@ struct PianoPassiVeraVista: View {
     }
 
     private var origine: String {
-        var parti = [piano.conQwen ? "Piano proposto da Qwen e controllato da Prisma" : "Piano delle regole di Prisma",
+        var parti = [piano.conQwen ? TestiStatoVera.inVista(mac: "Piano proposto da Vera e controllato da Prisma",
+                                                         altrove: "Piano proposto da Qwen e controllato da Prisma") : "Piano delle regole di Prisma",
                      "cifre del simulatore di Prisma"]
-        if piano.spiegazioneConQwen { parti.append("spiegazione di Qwen con le cifre di Prisma") }
+        if piano.spiegazioneConQwen { parti.append(TestiStatoVera.inVista(mac: "spiegazione di Vera con le cifre di Prisma",
+                                                                             altrove: "spiegazione di Qwen con le cifre di Prisma")) }
         return parti.joined(separator: " · ")
     }
 }

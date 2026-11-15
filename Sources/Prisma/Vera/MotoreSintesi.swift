@@ -43,13 +43,16 @@ struct MotoreSintesi: MotoreVera {
             if let s = SpuntoVera.argomento(r.domanda) {
                 let risposta = componi(RichiestaVera(domanda: s.domanda, spunto: s, fonte: f, storia: []))
                 return RispostaVera(titolo: risposta.titolo, testo: risposta.testo
-                    + "\n\nHo letto la domanda come «\(s.domanda)». Per le domande libere serve Qwen sul Mac.",
+                    + "\n\nHo letto la domanda come «\(s.domanda)». " + TestiStatoVera.inVista(mac: "Per le domande libere serve che Vera sia pronta sul Mac.",
+                                                                altrove: "Per le domande libere serve Qwen sul Mac."),
                     proposte: risposta.proposte)
             }
             var risposta = riepilogo(f)
             risposta.titolo = "Ecco cosa trovo nel dossier"
             return RispostaVera(titolo: risposta.titolo, testo: risposta.testo
-                + "\n\nPer capire domande libere serve Qwen sul Mac. Intanto puoi usare gli spunti qui sotto.")
+                + "\n\n" + TestiStatoVera.inVista(mac: "Per capire domande libere serve che Vera sia pronta sul Mac.",
+                                        altrove: "Per capire domande libere serve Qwen sul Mac.")
+                + " Intanto puoi usare gli spunti qui sotto.")
         }
     }
 
@@ -132,7 +135,12 @@ struct MotoreSintesi: MotoreVera {
         if !punti.isEmpty {
             parti.append("Punti da toccare:\n" + punti.map { "• " + $0.prefix(1).uppercased() + String($0.dropFirst()) }.joined(separator: "\n"))
         }
+        #if os(macOS)
+        // Migliorie d'uso 65: «Da ricordare» è la nota in evidenza
+        if let e = Nota.inEvidenza(f.note, cliente: f.cliente) { parti.append("Da ricordare: \(ContestoVera.testoInEvidenza(e))") }
+        #else
         if !f.cliente.nota.isEmpty { parti.append("Da ricordare: \(f.cliente.nota)") }
+        #endif
         if !f.note.isEmpty {
             parti.append("Dal tuo taccuino:\n" + f.note.prefix(2).map { "• «\($0.titoloMostrato)», \(Formati.giornoMese.string(from: $0.aggiornataIl)): \($0.anteprima)" }.joined(separator: "\n"))
         }

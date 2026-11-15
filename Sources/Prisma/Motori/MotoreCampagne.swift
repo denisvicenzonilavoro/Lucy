@@ -407,7 +407,55 @@ enum TestiCampagne {
     static let veraNonPronta = "Vera non è pronta: resta il testo di Prisma, già con le cifre di ogni cliente."
 
     static func pronti(_ n: Int) -> String { "✓ \(n) \(n == 1 ? "messaggio pronto" : "messaggi pronti") · li spedisci tu" }
-    static func toastPronte(_ n: Int) -> String { "\(n) \(n == 1 ? "bozza pronta" : "bozze pronte") in Messaggi: le spedisci tu" }
+    /// Migliorie d'uso 49: «Un messaggio preparato: è in Messaggi, da rileggere», «5 messaggi preparati: sono in
+    /// Messaggi, da rileggere».
+    static func toastPronte(_ n: Int) -> String {
+        n == 1 ? "Un messaggio preparato: è in Messaggi, da rileggere" : "\(n) messaggi preparati: sono in Messaggi, da rileggere"
+    }
+
+    // MARK: Migliorie d'uso 49 (solo Mac): la campagna in tre passi
+
+    static let passoChi = "Chi"
+    /// «5 di 7 clienti con questo bisogno».
+    static func contoChi(q: Int, n: Int) -> String { "\(q) di \(n) \(n == 1 ? "cliente" : "clienti") con questo bisogno" }
+    static let passoCosa = "Cosa scrivi"
+    static let sottoCosa = "a ognuno il suo nome e il suo dato"
+    static let passoQuando = "Quando"
+    static let sottoQuando = "gli orari che proponi"
+    /// «Anteprima per Marco».
+    static func anteprimaPer(_ nome: String) -> String { "Anteprima per " + TestiTraguardi.primoNome(nome) }
+    static let anteprimaVuota = "Scegli almeno un cliente."
+    /// Il pulsante: «Prepara il messaggio», «Prepara 5 messaggi».
+    static func prepara(_ n: Int) -> String { n == 1 ? "Prepara il messaggio" : "Prepara \(n) messaggi" }
+    static let scegliCliente = "Scegli almeno un cliente"
+    static let scegliOrario = "Scegli almeno un orario"
+    static let scegliFirma = "Scegli la firma"
+    static let nienteParte = "Niente parte da solo: li rileggi e li spedisci tu, da Messaggi."
+    static let apriPreparati = "Apri i messaggi preparati"
+    static let prontoInMessaggi = "✓ pronto in Messaggi"
+    static let mostraTutti = "Mostra tutti"
+    /// La riga dopo le prime otto: «e un altro cliente», «e altri 22 clienti».
+    static func altriClienti(_ n: Int) -> String { n == 1 ? "e un altro cliente" : "e altri \(n) clienti" }
+    /// «Apri la prossima in Mail».
+    static func apriProssimaIn(_ canale: String) -> String { "Apri la prossima in " + canale }
+
+    /// Il testo del pulsante prima dell'avvio, e se si può premere. Prima i clienti, poi gli orari (solo se l'agenda ne
+    /// ha), poi la firma dei canali misti.
+    static func pulsante(inclusi: Int, orariDisponibili: Int, orariScelti: Int, firmaMancante: Bool) -> (testo: String, attivo: Bool) {
+        if inclusi == 0 { return (scegliCliente, false) }
+        if orariDisponibili > 0 && orariScelti == 0 { return (scegliOrario, false) }
+        if firmaMancante { return (scegliFirma, false) }
+        return (prepara(inclusi), true)
+    }
+
+    /// La nota piccola sopra il pulsante, solo quando qualcuno resta fuori: «2 senza consenso commerciale e 1 senza
+    /// recapito restano fuori». nil se non resta fuori nessuno.
+    static func notaFuori(senzaConsenso: Int, senzaRecapito: Int) -> String? {
+        var fuori: [String] = []
+        if senzaConsenso > 0 { fuori.append("\(senzaConsenso) senza consenso commerciale") }
+        if senzaRecapito > 0 { fuori.append("\(senzaRecapito) senza recapito") }
+        return fuori.isEmpty ? nil : fuori.joined(separator: " e ") + " restano fuori"
+    }
     static func giaScritto(_ d: Date) -> String { "già scritto " + ModelliMessaggi.il(Formati.dataEstesa.string(from: d)) }
     static func ancheIn(_ titoli: [String]) -> String { "anche in: " + titoli.joined(separator: ", ") }
     static func confermaApriTutte(_ n: Int) -> String { "Aprire \(n) messaggi uno dopo l'altro? Si apriranno \(n) finestre di Mail o Messaggi." }

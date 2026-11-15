@@ -575,7 +575,8 @@ extension StatoShell {
             if s.modifiche.isEmpty && !s.conQwen {
                 detto = "Il testo segue già la forma del tuo stile."
             } else {
-                detto = s.conQwen ? "Ecco il testo come lo scrivi tu: l'ha riscritto Qwen con le stesse cifre." :
+                detto = s.conQwen ? TestiStatoVera.inVista(mac: "Ecco il testo come lo scrivi tu: l'ha riscritto Vera con le stesse cifre.",
+                                                  altrove: "Ecco il testo come lo scrivi tu: l'ha riscritto Qwen con le stesse cifre.") :
                     (s.modifiche.count == 1 ? "Ecco il testo come lo scrivi tu: un ritocco." : "Ecco il testo come lo scrivi tu: \(s.modifiche.count) ritocchi.")
             }
             if s.grave { detto += " Una regola importante non è ancora rispettata: va sistemata prima di usarlo." }

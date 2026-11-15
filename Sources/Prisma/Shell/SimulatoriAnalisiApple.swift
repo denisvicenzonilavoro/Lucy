@@ -12,7 +12,7 @@ import SwiftUI
 //     @StateObject private var dettaglio = SimulatoriAnalisiApple.dettaglioIniziale(stato)
 //     …
 //     schedaArea(.previdenza).origineDettaglio(id: SimulatoriAnalisiApple.idPrevidenza)
-//         .onTapGesture { dettaglio.apri(SimulatoriAnalisiApple.idPrevidenza, misura: SimulatoriAnalisiApple.misura) }
+//         .onTapGesture { dettaglio.apri(SimulatoriAnalisiApple.idPrevidenza, misura: SimulatoriAnalisiApple.misura(.previdenza)) }
 //     …
 //     .presentatoreDettaglio(dettaglio) { id in
 //         if SimulatoriAnalisiApple.area(id: id) != nil { DettaglioSimulatoreAnalisiApple(id: id) }
@@ -22,8 +22,11 @@ import SwiftUI
 enum SimulatoriAnalisiApple {
     static let idPrevidenza = "simulatore-previdenza"
     static let idProtezione = "simulatore-protezione"
-    /// 940×540 (`Tema.Apple.Misura.DettaglioAperto.previdenzaProtezione`).
-    static var misura: CGSize { Tema.Apple.SimulatoriAnalisi.misura }
+    /// Previdenza 940×560 sul Mac (940×540 su iPhone e iPad), Protezione 940×540
+    /// (`Tema.Apple.Misura.DettaglioAperto.previdenza`, `.protezione`).
+    static func misura(_ area: AreaAnalisi) -> CGSize {
+        area == .previdenza ? Tema.Apple.SimulatoriAnalisi.misuraPrevidenza : Tema.Apple.SimulatoriAnalisi.misuraProtezione
+    }
 
     /// L'id del simulatore di un'area (nil per Investimenti e Risparmio, che hanno un dettaglio senza cursore).
     static func id(_ area: AreaAnalisi) -> String? {
@@ -47,7 +50,7 @@ enum SimulatoriAnalisiApple {
     /// lo chiede (`RichiestaIstantaneaSimulatore`), altrimenti chiuso.
     static func dettaglioIniziale(_ stato: StatoShell) -> StatoDettaglio {
         guard let r = RichiestaIstantaneaSimulatore.per(stato), let chiave = id(r.area) else { return StatoDettaglio() }
-        return StatoDettaglio(aperto: chiave, misura: misura)
+        return StatoDettaglio(aperto: chiave, misura: misura(r.area))
     }
 
     /// Il valore del cursore chiesto da una scena delle istantanee per quest'area (nil = quello di partenza).
@@ -259,3 +262,100 @@ struct CanaleSimulatoreApple: View {
         }
     }
 }
+
+// MARK: - Migliorie d'uso 45 (solo Mac): il segno «oggi» e la frase prima e dopo
+
+#if os(macOS)
+/// Il segno «oggi» sotto il binario del cursore (`.simOggi` del template): una tacca 2×6 e la parola «oggi», nella
+/// posizione del valore di partenza corretta per metà manopola. Non si muove con il cursore.
+struct SegnoOggiCursore: View {
+    /// La posizione del valore di oggi sul binario (0…1).
+    let frazione: Double
+
+    var body: some View {
+        let s = Tema.Apple.SimulatoriAnalisi.self
+        return GeometryReader { g in
+            let corsa = max(0, g.size.width - s.manopolaCursore)
+            let x = s.manopolaCursore / 2 + corsa * CGFloat(min(1, max(0, frazione)))
+            VStack(spacing: s.segnoOggiSpazio) {
+                RoundedRectangle(cornerRadius: s.segnoOggiRaggioTacca, style: .continuous)
+                    .fill(s.coloreTaccaOggi)
+                    .frame(width: s.segnoOggiTacca.width, height: s.segnoOggiTacca.height)
+                Text("oggi")
+                    .carattereApple(s.segnoOggiCarattere)
+                    .foregroundColor(s.coloreSegnoOggi)
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+            .position(x: x, y: s.segnoOggiSotto / 2)
+        }
+        .frame(height: s.segnoOggiSotto)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// La frase prima e dopo (`#simFr`): una tile a tutta larghezza, 14,5 con le parti in neretto. Cambia subito mentre
+/// si trascina (come le cifre «mosse»), senza animazione.
+struct FraseSimulatoreApple: View {
+    let pezzi: [PezzoFraseSimulatore]
+
+    var body: some View {
+        let s = Tema.Apple.SimulatoriAnalisi.self
+        let testo = pezzi.reduce(Text(verbatim: "")) { (t: Text, p: PezzoFraseSimulatore) -> Text in
+            p.grassetto ? t + Text(verbatim: p.testo).bold() : t + Text(verbatim: p.testo)
+        }
+        return testo
+            .carattereApple(s.frase)
+            .foregroundColor(s.coloreFrase)
+            .lineLimit(s.righeFrase)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(s.paddingFrase)
+            .superficieApple(s.superficieFrase)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel(Text(verbatim: TestiSimulatoriAnalisi.testo(pezzi)))
+    }
+}
+
+/// «Sono stime, non garanzie.» accanto ai pulsanti del piede.
+struct AvvisoSimulatoreApple: View {
+    var body: some View {
+        let s = Tema.Apple.SimulatoriAnalisi.self
+        return Text(TestiSimulatoriAnalisi.avviso)
+            .carattereApple(s.avviso)
+            .foregroundColor(s.coloreAvviso)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(.leading, s.spazioAvviso)
+    }
+}
+
+/// «LE IPOTESI» all'inizio della riga delle scelte.
+struct EtichettaIpotesiSimulatoreApple: View {
+    var body: some View {
+        let s = Tema.Apple.SimulatoriAnalisi.self
+        return Text("Le ipotesi")
+            .carattereApple(s.etichettaScelte)
+            .foregroundColor(s.coloreScelte)
+            .lineLimit(1)
+            .fixedSize()
+    }
+}
+
+/// Un testo grigio della riga delle ipotesi.
+struct TestoIpotesiSimulatoreApple: View {
+    let testo: String
+
+    init(_ testo: String) { self.testo = testo }
+
+    var body: some View {
+        let s = Tema.Apple.SimulatoriAnalisi.self
+        return Text(testo)
+            .carattereApple(s.testoScelte)
+            .foregroundColor(s.coloreScelte)
+            .lineLimit(1)
+            .minimumScaleFactor(s.riduzioneScelte)
+    }
+}
+#endif

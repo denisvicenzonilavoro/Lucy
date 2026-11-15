@@ -21,30 +21,40 @@ struct SegmentatoPillola<Valore: Hashable>: View {
     let voci: [(Valore, String)]
     /// Voci di uguale larghezza che riempiono lo spazio (settimana dell'Agenda).
     var larghezzaPiena: Bool
+    /// La variante piccola (voci 4×11, testo 12,5: le ipotesi dei simulatori di Analisi 360, migliorie d'uso 45).
+    var compatto: Bool
     /// Un'icona prima del titolo (avatar 24 dei clienti di Analisi 360).
     var icona: ((Valore) -> AnyView)?
     /// Il numerino dopo il titolo di una voce (Migliorie d'uso 33: le pratiche ferme su «Dopo la firma»); nil o zero:
     /// niente capsula.
     var numero: ((Valore) -> NumeroVoceSegmentato?)?
+    /// Gli indici delle voci davanti alle quali va un filo fra due gruppi (Migliorie d'uso 52: Studio). Vuoto: nessun
+    /// filo. I fili non hanno pillola: gli id del `matchedGeometryEffect` restano gli indici delle voci.
+    var separatoriPrima: Set<Int>
 
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
     @Namespace private var spazio
 
-    init(selezione: Binding<Valore>, voci: [(Valore, String)], larghezzaPiena: Bool = false,
-         icona: ((Valore) -> AnyView)? = nil, numero: ((Valore) -> NumeroVoceSegmentato?)? = nil) {
+    init(selezione: Binding<Valore>, voci: [(Valore, String)], larghezzaPiena: Bool = false, compatto: Bool = false,
+         icona: ((Valore) -> AnyView)? = nil, numero: ((Valore) -> NumeroVoceSegmentato?)? = nil,
+         separatoriPrima: Set<Int> = []) {
         self._selezione = selezione
         self.voci = voci
         self.larghezzaPiena = larghezzaPiena
+        self.compatto = compatto
         self.icona = icona
         self.numero = numero
+        self.separatoriPrima = separatoriPrima
     }
 
     /// Le voci da un elenco di valori e da come si chiamano.
     init(selezione: Binding<Valore>, valori: [Valore], titolo: (Valore) -> String, larghezzaPiena: Bool = false,
-         icona: ((Valore) -> AnyView)? = nil, numero: ((Valore) -> NumeroVoceSegmentato?)? = nil) {
+         compatto: Bool = false, icona: ((Valore) -> AnyView)? = nil,
+         numero: ((Valore) -> NumeroVoceSegmentato?)? = nil, separatoriPrima: Set<Int> = []) {
         self.init(selezione: selezione, voci: valori.map { ($0, titolo($0)) },
-                  larghezzaPiena: larghezzaPiena, icona: icona, numero: numero)
+                  larghezzaPiena: larghezzaPiena, compatto: compatto, icona: icona, numero: numero,
+                  separatoriPrima: separatoriPrima)
     }
 
     private var indiceScelto: Int? {
@@ -54,6 +64,9 @@ struct SegmentatoPillola<Valore: Hashable>: View {
     var body: some View {
         HStack(spacing: 0) {
             ForEach(voci.indices, id: \.self) { i in
+                if separatoriPrima.contains(i) {
+                    filo
+                }
                 voce(i)
             }
         }
@@ -72,6 +85,17 @@ struct SegmentatoPillola<Valore: Hashable>: View {
                 .ombraApple(.pillola)
                 .matchedGeometryEffect(id: i, in: spazio, properties: .frame, isSource: false)
         }
+    }
+
+    /// Il filo fra due gruppi (Migliorie d'uso 52): una vista a sé fra due voci, non un overlay della voce, perché la
+    /// pillola prende la cornice della voce e si allargherebbe sopra il filo.
+    private var filo: some View {
+        let c = Tema.Apple.Controlli.Segmentato.self
+        return Rectangle()
+            .fill(Tema.Apple.Colore.inchiostro3.opacity(c.opacitaFilo))
+            .frame(width: c.filo, height: c.altezzaFilo)
+            .padding(.horizontal, c.marginiFilo)
+            .accessibilityHidden(true)
     }
 
     private func voce(_ i: Int) -> some View {
@@ -102,10 +126,11 @@ struct SegmentatoPillola<Valore: Hashable>: View {
                     .padding(.leading, c.spazioNumero)
             }
         }
-        .carattereApple(Tema.Apple.Carattere.barra)
+        .carattereApple(compatto ? c.testoCompatto : Tema.Apple.Carattere.barra)
         .foregroundColor(attiva ? Tema.Apple.Colore.inchiostro : Tema.Apple.Colore.inchiostro2)
         .animation(animazioneTesto, value: attiva)
-        .padding(icona == nil ? Tema.Apple.Misura.Padding.voceSegmentato : c.paddingVoceIcona)
+        .padding(icona != nil ? c.paddingVoceIcona
+                 : (compatto ? c.paddingVoceCompatta : Tema.Apple.Misura.Padding.voceSegmentato))
         .frame(maxWidth: larghezzaPiena ? .infinity : nil)
         .contentShape(Capsule(style: .continuous))
         .matchedGeometryEffect(id: i, in: spazio, properties: .frame, isSource: true)

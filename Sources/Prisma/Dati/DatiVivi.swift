@@ -37,7 +37,7 @@ import Observation
     @ObservationIgnored private var inCarica = false
 
     /// Numero dei campi di `DatiPrisma` copiati qui (la prova lo confronta con Mirror).
-    static let numeroCampi = 53
+    static let numeroCampi = 54
 
     var versione: Int { didSet { segnala(.calcoli) } }
     var clienti: [Cliente] { didSet(prima) { segnalaClienti(prima, clienti, \.id) } }
@@ -107,6 +107,8 @@ import Observation
     var uscite: [UscitaCliente] { didSet { segnala(.neutro) } }
     /// Le lettere dal futuro conservate (§3.1.5): nessun calcolo in cache.
     var lettere: [LetteraFuturo] { didSet { segnala(.neutro) } }
+    /// Migliorie d'uso 60: le esperienze della Sala fatte con il cliente; nessun calcolo in cache.
+    var esperienzeFatte: [EsperienzaFatta] { didSet { segnala(.neutro) } }
     var clienteAttivoId: String { didSet(prima) { segnala(.clienteAttivo(prima: prima)) } }
     var impostazioni: Impostazioni { didSet(prima) { segnala(.impostazioni(prima: prima)) } }
 
@@ -162,6 +164,7 @@ import Observation
         sinistri = d.sinistri
         uscite = d.uscite
         lettere = d.lettere
+        esperienzeFatte = d.esperienzeFatte
         clienteAttivoId = d.clienteAttivoId
         impostazioni = d.impostazioni
     }
@@ -264,6 +267,7 @@ import Observation
         d.sinistri = sinistri
         d.uscite = uscite
         d.lettere = lettere
+        d.esperienzeFatte = esperienzeFatte
         return d
     }
 
@@ -320,6 +324,7 @@ import Observation
         d.sinistri = _sinistri
         d.uscite = _uscite
         d.lettere = _lettere
+        d.esperienzeFatte = _esperienzeFatte
         return d
     }
 
@@ -379,6 +384,7 @@ import Observation
         if sinistri != d.sinistri { sinistri = d.sinistri }
         if uscite != d.uscite { uscite = d.uscite }
         if lettere != d.lettere { lettere = d.lettere }
+        if esperienzeFatte != d.esperienzeFatte { esperienzeFatte = d.esperienzeFatte }
         if clienteAttivoId != d.clienteAttivoId { clienteAttivoId = d.clienteAttivoId }
         if impostazioni != d.impostazioni { impostazioni = d.impostazioni }
         inCarica = false

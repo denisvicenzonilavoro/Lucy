@@ -134,10 +134,21 @@ struct VuotoPratiche: View {
 }
 
 /// L'etichetta «dati di prova» accanto a ciò che viene dal catalogo d'esempio.
+/// `deiClienti`: l'etichetta parla di dati dei clienti di prova (sinistri, proposte) e tace durante la dimostrazione, dove
+/// basta l'etichetta della barra (migliorie d'uso 37); le tabelle e i moduli d'esempio la tengono sempre.
 struct EtichettaDatiDiProvaPratiche: View {
+    var deiClienti = false
+    /// Facoltativo: l'etichetta si disegna anche dove lo stato non c'è nell'ambiente.
+    @Environment(StatoShell.self) var stato: StatoShell?
     private typealias P = Tema.Apple.Pratiche
 
     var body: some View {
+        if !(deiClienti && stato?.inDimostrazione == true) {
+            etichetta
+        }
+    }
+
+    private var etichetta: some View {
         Text("dati di prova")
             .carattereApple(P.datiDiProva)
             .foregroundColor(P.coloreDatiDiProva)

@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 // I due grafici nuovi del Cruscotto di Studio (Design/template-novita-specifica.md §2.2.4): le colonne impilate degli
 // incassi per canale e la dispersione «il valore e il tempo». Non calcolano niente: disegnano le cifre di MotoreStudio.
@@ -10,11 +13,20 @@ import SwiftUI
 //   valore» oltre la mediana delle ore e sotto la mediana dei ricavi (`CruscottoStudio.ValoreTempo.criterio`). I punti
 //   compaiono con la molla (0,5 s, ritardo 0,40 + min(i, 24)·0,025); un tocco apre il dossier del cliente.
 // «Riduci movimento» e istantanee: colonne e punti subito alla misura.
+// Migliorie d'uso 53 (solo sul Mac): la colonna sotto il puntatore si schiarisce e dice le sue cifre nella riga della
+// card (al posto del fumetto, il testo resta per VoiceOver); la dispersione ha l'asse dei ricavi e la mano sui punti.
 
 // MARK: - Colonne impilate degli incassi
 
 struct ColonneIncassiStudio: View {
     let mesi: [CruscottoStudio.MeseIncasso]
+    /// Il mese sotto il puntatore (Migliorie d'uso 53, solo sul Mac); nil = colonne con il fumetto come prima.
+    private let sopra: Binding<Date?>?
+
+    init(mesi: [CruscottoStudio.MeseIncasso], sopra: Binding<Date?>? = nil) {
+        self.mesi = mesi
+        self.sopra = sopra
+    }
 
     var body: some View {
         let t = Tema.Apple.Studio.Incassi.self
@@ -23,23 +35,46 @@ struct ColonneIncassiStudio: View {
             let piena = max(0, min(t.colonnaMassima, geo.size.height - t.altezzaMese - t.sottoColonna))
             HStack(alignment: .bottom, spacing: t.spazioColonne) {
                 ForEach(Array(mesi.enumerated()), id: \.element.id) { i, m in
-                    VStack(spacing: t.sottoColonna) {
-                        ColonnaIncassoStudio(mese: m,
-                                             altezza: massimo > 0 ? piena * CGFloat(m.totale / massimo) : 0,
-                                             indice: i)
-                        Text(TestiStudio.meseBreve(m.inizio))
-                            .carattereApple(t.mese)
-                            .foregroundColor(t.coloreMese)
-                            .lineLimit(1)
-                            .minimumScaleFactor(Tema.Apple.Studio.Card.riduzioneTesto)
-                            .frame(height: t.altezzaMese)
-                    }
-                    .frame(maxWidth: .infinity)
-                    .help(TestiStudio.mese(m))
+                    colonna(m, indice: i, altezza: massimo > 0 ? piena * CGFloat(m.totale / massimo) : 0)
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .bottom)
         }
+    }
+
+    /// Una colonna con il mese sotto: con il fumetto, oppure (sul Mac, con `sopra`) con il passaggio del puntatore.
+    @ViewBuilder private func colonna(_ m: CruscottoStudio.MeseIncasso, indice i: Int, altezza: CGFloat) -> some View {
+        let t = Tema.Apple.Studio.Incassi.self
+        let chiara = sopra?.wrappedValue == m.inizio
+        let vista = VStack(spacing: t.sottoColonna) {
+            ColonnaIncassoStudio(mese: m, altezza: altezza, indice: i, chiara: chiara)
+            Text(TestiStudio.meseBreve(m.inizio))
+                .carattereApple(t.mese)
+                .foregroundColor(t.coloreMese)
+                .lineLimit(1)
+                .minimumScaleFactor(Tema.Apple.Studio.Card.riduzioneTesto)
+                .frame(height: t.altezzaMese)
+        }
+        .frame(maxWidth: .infinity)
+        #if os(macOS)
+        if let sopra {
+            vista
+                .contentShape(Rectangle())
+                .onHover { dentro in
+                    if dentro {
+                        sopra.wrappedValue = m.inizio
+                    } else if sopra.wrappedValue == m.inizio {
+                        sopra.wrappedValue = nil
+                    }
+                }
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text(verbatim: TestiStudio.mese(m)))
+        } else {
+            vista.help(TestiStudio.mese(m))
+        }
+        #else
+        vista.help(TestiStudio.mese(m))
+        #endif
     }
 }
 
@@ -48,6 +83,8 @@ private struct ColonnaIncassoStudio: View {
     let mese: CruscottoStudio.MeseIncasso
     let altezza: CGFloat
     let indice: Int
+    /// Sotto il puntatore: si schiarisce (Migliorie d'uso 53).
+    var chiara: Bool = false
 
     @Environment(\.prismaStatoFinale) private var fermo
     /// Istantanee: lo stato finale è per sempre, niente da scrivere alla comparsa (`prismaScatto`).
@@ -76,6 +113,7 @@ private struct ColonnaIncassoStudio: View {
         }
         .frame(maxWidth: .infinity)
         .frame(height: altezza, alignment: .bottom)
+        .brightness(chiara ? t.luceSopra : 0)
         .scaleEffect(x: 1, y: (fermo || cresciuta) ? 1 : 0.001, anchor: .bottom)
         .onAppear(perform: cresci)
     }
@@ -140,6 +178,16 @@ struct DispersioneClientiStudio: View {
                 let h = geo.size.height
                 ZStack(alignment: .topLeading) {
                     zona(larghezza: w, altezza: h, maxOre: maxOre, maxRicavi: maxRicavi)
+                    #if os(macOS)
+                    // Migliorie d'uso 53: l'etichetta dell'asse verticale, in alto a sinistra
+                    Text(TestiStudio.asseRicavi)
+                        .carattereApple(d.asse)
+                        .foregroundColor(d.coloreAsse)
+                        .lineLimit(1)
+                        .fixedSize()
+                        .offset(y: d.asseVerticaleSopra)
+                        .allowsHitTesting(false)
+                    #endif
                     ForEach(Array(senzaNome.enumerated()), id: \.element.id) { i, p in
                         PuntoClienteStudio(punto: p, conNome: false, indice: conNome.count + i) { apri(p.cliente.id) }
                             .position(Self.posizione(p, lato: d.punto, w: w, h: h, maxOre: maxOre, maxRicavi: maxRicavi))
@@ -236,6 +284,10 @@ private struct PuntoClienteStudio: View {
     @Environment(\.prismaStatoFinale) private var fermo
     @Environment(\.prismaScatto) private var scatto
     @State private var comparso = false
+    #if os(macOS)
+    /// La mano è nostra (push fatto): va tolta uscendo o alla scomparsa del punto.
+    @State private var mano = false
+    #endif
 
     var body: some View {
         let d = Tema.Apple.Studio.Dispersione.self
@@ -259,6 +311,22 @@ private struct PuntoClienteStudio: View {
         .accessibilityLabel(Text(TestiStudio.punto(punto)))
         .accessibilityAddTraits(.isButton)
         .onAppear(perform: compari)
+        #if os(macOS)
+        // Migliorie d'uso 53: i punti aprono il dossier, quindi la mano (con e senza nome, §53.6)
+        .onHover { dentro in
+            if dentro, !mano {
+                NSCursor.pointingHand.push()
+                mano = true
+            } else if !dentro, mano {
+                NSCursor.pop()
+                mano = false
+            }
+        }
+        .onDisappear {
+            if mano { NSCursor.pop() }
+            mano = false
+        }
+        #endif
     }
 
     private func compari() {

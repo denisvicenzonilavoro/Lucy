@@ -47,6 +47,179 @@ enum ProvaCalcoliPassaparola {
         datiDiProva(verifica)
         testoRichiesta(verifica)
         dallaCarta(verifica)
+        prossimoPasso(verifica)
+        ramo(verifica)
+    }
+
+    // MARK: - 11 Il ramo di una persona e il grazie (Migliorie d'uso 48)
+
+    private static func ramo(_ verifica: VerificaCalcoli) {
+        // Frasi: singolari, plurali, nessun cliente, nessun presentato
+        let euro = Formati.euro(328_000)
+        verifica.vero("Ramo: «Ti ha presentato 3 persone: 2 sono già clienti (…), una è ancora un potenziale.»",
+                      TestiPassaparola.ramo(nome: "Sofia Romano", clienti: 2, valoreClienti: 328_000, potenziali: 1)
+                      == "Ti ha presentato 3 persone: 2 sono già clienti (\(euro)), una è ancora un potenziale.")
+        verifica.vero("Ramo: una persona già cliente, nessun potenziale",
+                      TestiPassaparola.ramo(nome: "Marco Bianchi", clienti: 1, valoreClienti: 65_000, potenziali: 0)
+                      == "Ti ha presentato una persona: una è già cliente (\(Formati.euro(65_000))).")
+        verifica.vero("Ramo: nessuna è ancora cliente, due potenziali",
+                      TestiPassaparola.ramo(nome: "Marco Bianchi", clienti: 0, valoreClienti: 0, potenziali: 2)
+                      == "Ti ha presentato 2 persone: nessuna è ancora cliente, 2 sono ancora potenziali.")
+        verifica.vero("Ramo: una persona sola, ancora potenziale",
+                      TestiPassaparola.ramo(nome: "Marco Bianchi", clienti: 0, valoreClienti: 0, potenziali: 1)
+                      == "Ti ha presentato una persona: nessuna è ancora cliente, una è ancora un potenziale.")
+        verifica.vero("Ramo: chi non ha presentato nessuno",
+                      TestiPassaparola.ramo(nome: "Giulia Verdi", clienti: 0, valoreClienti: 0, potenziali: 0)
+                      == "Giulia non ti ha ancora presentato nessuno.")
+
+        // Il motore: tutti i presentati (anche oltre quelli disegnati), il valore dei soli clienti, mai le stime
+        let clienti = [cliente("sofia", "Sofia Romano"),
+                       cliente("elena", "Elena Marchi", da: "sofia", il: d(2024, 1, 10)),
+                       cliente("paola", "Paola Leone", da: "sofia", il: d(2022, 3, 5)),
+                       cliente("nuovo", "Nuovo Senza Posizioni", da: "sofia", il: d(2025, 6, 1)),
+                       cliente("giulia", "Giulia Verdi")]
+        var interessato = potenziale("davide", da: "sofia", stima: 320_000, fase: .analisi)
+        interessato.nome = "Davide Sala"
+        let noInteresse = potenziale("no", da: "sofia", stima: 90_000, fase: .nonInteressato)
+        var diventato = potenziale("diventato", da: "sofia", stima: 50_000, fase: .cliente)
+        diventato.clienteId = "elena"
+        let altrui = potenziale("altrui", da: "giulia", stima: 10_000)
+        let posizioni = [liquidita("elena", 140_000), liquidita("paola", 188_000)]
+        let netti = MotorePassaparola.patrimoni(posizioni)
+        let r = MotorePassaparola.ramo(di: "sofia", clienti: clienti, potenziali: [interessato, noInteresse, diventato, altrui],
+                                       netti: netti)
+        verifica.vero("Ramo: tre clienti e un potenziale (non interessati e già clienti fuori), prima i clienti dal più vecchio",
+                      r?.presentati.map(\.id) == ["c-paola", "c-elena", "c-nuovo", "p-davide"]
+                      && r?.clienti == 3 && r?.potenziali == 1)
+        verifica.vero("Ramo: il valore è dei soli clienti (328.000 €), senza la stima del potenziale",
+                      r?.valoreClienti == 328_000 && r?.presentati.last?.cifra == 320_000
+                      && r?.presentati.first(where: { $0.id == "c-nuovo" })?.cifra == nil)
+        let vuoto = MotorePassaparola.ramo(di: "giulia", clienti: clienti, potenziali: [altrui], netti: netti)
+        verifica.vero("Ramo: un cliente con solo un potenziale presentato; uno sconosciuto non ha ramo",
+                      vuoto?.presentati.map(\.id) == ["p-altrui"]
+                      && MotorePassaparola.ramo(di: "nessuno", clienti: clienti, potenziali: [], netti: netti) == nil)
+        if let r {
+            verifica.vero("Ramo: la frase con le cifre del motore",
+                          TestiPassaparola.ramo(nome: r.nome, clienti: r.clienti, valoreClienti: r.valoreClienti, potenziali: r.potenziali)
+                          == "Ti ha presentato 4 persone: 3 sono già clienti (\(euro)), una è ancora un potenziale.")
+        }
+
+        // Il grazie: in ogni tono e canale nessun nome delle persone presentate, nessuna cifra, non commerciale
+        let sofia = clienti[0]
+        let o = MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: posizioni, oggi: oggi, cal: cal)
+        let nomi = (r?.presentati.map(\.nome) ?? []).flatMap { n in [n, TestiTraguardi.primoNome(n)] }
+        var sbagliati: [String] = []
+        for tono in TonoMessaggio.allCases {
+            for canale in CanaleMessaggio.allCases {
+                let t = ModelliMessaggi.testo(o, tono: tono, canale: canale, cliente: sofia, firma: "Denis")
+                let nome = "\(tono.rawValue)/\(canale.rawValue)"
+                if nomi.contains(where: { t.completo.contains($0) }) { sbagliati.append("\(nome): nome di un presentato") }
+                if t.completo.contains(where: \.isNumber) || !CommentoVera.cifre(t.completo).isEmpty { sbagliati.append("\(nome): cifre") }
+                if (t.oggetto ?? "").contains(where: \.isNumber) { sbagliati.append("\(nome): cifre nell'oggetto") }
+                if tono == .breve, t.completo.count > RegoleMessaggi.caratteriBreve { sbagliati.append("\(nome): lunghezza") }
+            }
+        }
+        verifica.vero("Ramo: il grazie per le presentazioni non nomina i presentati, non ha cifre e non è commerciale"
+                      + (sbagliati.isEmpty ? "" : " (\(sbagliati.joined(separator: "; ")))"),
+                      sbagliati.isEmpty && !o.commerciale && o.cifre.isEmpty && o.tipo == .ringraziamentoPresentazione)
+        let domani = cal.date(byAdding: .day, value: 1, to: oggi) ?? oggi
+        verifica.vero("Ramo: un grazie al giorno (stesso giorno stessa occasione, il giorno dopo un'altra)",
+                      MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: [], oggi: oggi.addingTimeInterval(3600), cal: cal).id == o.id
+                      && MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: [], oggi: domani, cal: cal).id != o.id)
+    }
+
+    // MARK: - 10 Il prossimo passo (Migliorie d'uso 47)
+
+    private static func prossimoPasso(_ verifica: VerificaCalcoli) {
+        func passo(_ p: PotenzialeCliente, da: String? = nil, incontro: Appuntamento? = nil) -> PassoPotenziale {
+            MotorePassaparola.prossimoPasso(p, presentatore: da, primoIncontro: incontro, oggi: oggi, cal: cal)
+        }
+        func pronto(_ p: PotenzialeCliente, telefono: String = "", consenso: Bool = true) -> PotenzialeCliente {
+            var q = p
+            q.telefono = telefono
+            q.informativaIl = d(2026, 9, 1)
+            q.consensoContatto = consenso
+            return q
+        }
+        var sbagliati: [String] = []
+        func atteso(_ nome: String, _ x: PassoPotenziale, _ testo: String, _ azione: AzionePotenziale?) {
+            if x.testo != testo || x.azione != azione { sbagliati.append("\(nome): «\(x.testo)»") }
+        }
+        // Da contattare
+        let base = potenziale("p1", da: "marco")
+        atteso("presentato, telefono", passo(pronto(base, telefono: "333 1234567"), da: "Marco Bianchi"),
+               "Chiamalo: te l'ha presentato Marco", .chiama)
+        atteso("presentato, senza telefono", passo(pronto(base), da: "Marco Bianchi"),
+               "Scrivigli: te l'ha presentato Marco", .scrivi)
+        atteso("presentato, senza recapiti né consenso", passo(pronto(base, consenso: false), da: "Marco Bianchi"),
+               "Contattalo: te l'ha presentato Marco", nil)
+        var senzaInformativa = base
+        senzaInformativa.telefono = "333 1234567"
+        atteso("senza informativa", passo(senzaInformativa, da: "Marco Bianchi"), "Prima dagli l'informativa: poi chiamalo", .chiama)
+        atteso("senza informativa né telefono", passo(base, da: "Marco Bianchi"), "Prima dagli l'informativa: poi contattalo", nil)
+        var sito = pronto(potenziale("p2"), consenso: false)
+        sito.fonte = "dal sito dello studio"
+        atteso("fonte con «dal»", passo(sito), "Rispondi: arriva dal sito dello studio", nil)
+        sito.fonte = "evento in Comune"
+        atteso("fonte libera", passo(sito), "Rispondi: arriva da «evento in Comune»", nil)
+        atteso("né presentatore né fonte", passo(pronto(potenziale("p3"))), "Decidi come contattarlo", .scrivi)
+        // Primo incontro: fissato nel futuro, passato, nessuno
+        var inc = pronto(potenziale("p4", fase: .primoIncontro), telefono: "333 1")
+        inc.nome = "Davide Sala"
+        let futuro = Appuntamento(id: "a-futuro", clienteId: "", titolo: TestiPassaparola.titoloPrimoIncontro("Davide Sala"),
+                                  inizio: d(2026, 11, 6), durataMinuti: 30, luogo: "", note: "", stato: .pianificato,
+                                  tipo: .primoIncontro)
+        let passato = Appuntamento(id: "a-passato", clienteId: "", titolo: TestiPassaparola.titoloPrimoIncontro("Davide Sala"),
+                                   inizio: d(2026, 11, 2), durataMinuti: 30, luogo: "", note: "", stato: .pianificato,
+                                   tipo: .primoIncontro)
+        let altro = Appuntamento(id: "a-altro", clienteId: "", titolo: TestiPassaparola.titoloPrimoIncontro("Anna Galli"),
+                                 inizio: d(2026, 11, 7), durataMinuti: 30, luogo: "", note: "", stato: .pianificato,
+                                 tipo: .primoIncontro)
+        let trovati = MotorePassaparola.primiIncontri([inc], appuntamenti: [passato, altro, futuro], oggi: oggi)
+        if trovati[inc.id]?.id != "a-futuro" { sbagliati.append("primo incontro futuro non trovato") }
+        if !MotorePassaparola.primiIncontri([inc], appuntamenti: [passato, altro], oggi: oggi).isEmpty {
+            sbagliati.append("primo incontro passato o d'altri preso per buono")
+        }
+        let conIncontro = passo(inc, incontro: trovati[inc.id])
+        if conIncontro.azione != .preparaIncontro(appuntamentoId: "a-futuro") || !conIncontro.testo.hasPrefix("Primo incontro ")
+            || !conIncontro.testo.hasSuffix(" alle " + Formati.ora.string(from: futuro.inizio)) {
+            sbagliati.append("incontro fissato: «\(conIncontro.testo)»")
+        }
+        atteso("incontro da fissare", passo(inc), "Fissa la data del primo incontro", .fissaIncontro)
+        atteso("incontro passato", passo(inc, incontro: passato), "Fissa la data del primo incontro", .fissaIncontro)
+        // Le altre fasi
+        atteso("analisi", passo(pronto(potenziale("p5", fase: .analisi), telefono: "333 1")), "Raccogli i dati per l'analisi", .chiama)
+        atteso("proposta", passo(pronto(potenziale("p6", fase: .proposta))), "Ha la proposta in mano: senti cosa ne pensa", .scrivi)
+        atteso("cliente", passo(potenziale("p7", fase: .cliente)), "Cliente: è nell'albero del passaparola", nil)
+        atteso("non interessato", passo(potenziale("p8", fase: .nonInteressato)), "", nil)
+        verifica.vero("Passaparola: il prossimo passo di ogni fase, con e senza presentatore, telefono, informativa e incontro"
+                      + (sbagliati.isEmpty ? "" : " (\(sbagliati.joined(separator: "; ")))"), sbagliati.isEmpty)
+
+        // I giorni di fermo: storia vuota → dall'inserimento (1 settembre → 4 novembre: 64 giorni)
+        let vuota = potenziale("f1")
+        let sette = { () -> PotenzialeCliente in
+            var p = potenziale("f2", fase: .primoIncontro)
+            p.storia = [CambioFase(fase: .daContattare, il: d(2026, 9, 1)), CambioFase(fase: .primoIncontro, il: d(2026, 10, 28))]
+            return p
+        }()
+        func fermoDa(_ g: Int, fase: FasePotenziale = .analisi) -> PotenzialeCliente {
+            var p = potenziale("g\(g)", fase: fase)
+            p.storia = [CambioFase(fase: fase, il: cal.date(byAdding: .day, value: -g, to: oggi) ?? oggi)]
+            return p
+        }
+        let pv = passo(vuota), p7 = passo(sette), p14 = passo(fermoDa(14)), p15 = passo(fermoDa(15))
+        let giaCliente = passo(fermoDa(40, fase: .cliente))
+        verifica.vero("Passaparola: i giorni di fermo contano dall'ultimo cambio (o dall'inserimento), fermo oltre 14 giorni",
+                      pv.giorniFermo == 64 && pv.fermo && p7.giorniFermo == 7 && !p7.fermo
+                      && p14.giorniFermo == 14 && !p14.fermo && p15.giorniFermo == 15 && p15.fermo
+                      && giaCliente.giorniFermo == 40 && !giaCliente.fermo)
+        let elenco = [vuota, sette, fermoDa(15), fermoDa(40, fase: .cliente), fermoDa(30, fase: .nonInteressato)]
+        let passi = MotorePassaparola.passi(elenco, clienti: [cliente("marco", "Marco Bianchi")], appuntamenti: [], oggi: oggi, cal: cal)
+        verifica.vero("Passaparola: la tile «Fermi» conta solo le prime quattro colonne",
+                      MotorePassaparola.fermi(elenco, passi: passi) == 2)
+        verifica.vero("Passaparola: «fermo da» al singolare e oggi",
+                      TestiPassaparola.fermoDa(1) == "fermo da 1 giorno" && TestiPassaparola.fermoDa(0) == "fermo da oggi"
+                      && TestiPassaparola.fermoDa(21) == "fermo da 21 giorni")
     }
 
     // MARK: - 1, 2 Totali

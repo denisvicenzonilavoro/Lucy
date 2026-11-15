@@ -49,6 +49,44 @@ enum MotoreSimulatoriAnalisi {
         )
     }
 
+    /// Il passo della previdenza con l'aliquota IRPEF scelta al posto del reddito (migliorie d'uso 45: quando la scheda
+    /// non ha il reddito lordo): il risparmio fiscale è la deduzione dell'anno per l'aliquota, tutta nello stesso scaglione.
+    /// - Parameter aliquota: in percentuale (23, 33, 43).
+    static func previdenza(_ i: IpotesiPrevidenza, versamento: Double, datore: Double = 0,
+                           aliquota: Double) -> PassoPrevidenza {
+        let p = previdenza(i, versamento: versamento, datore: datore, reddito: nil)
+        return PassoPrevidenza(
+            versamento: p.versamento, montante: p.montante, integrazione: p.integrazione, divario: p.divario,
+            divarioResiduo: p.divarioResiduo, copertura: p.copertura, deducibili: p.deducibili,
+            risparmioFiscale: p.deducibili * max(0, aliquota) / 100
+        )
+    }
+
+    /// I tre rendimenti da scegliere nel simulatore (migliorie d'uso 45, decisione 45-a): quello delle ipotesi
+    /// dell'analisi, mezzo punto sotto (mai sotto 0) e mezzo punto sopra, senza doppioni, in ordine.
+    static func rendimentiDaScegliere(_ r: Double) -> [Double] {
+        let tondo = { (x: Double) -> Double in (x * 100).rounded() / 100 }
+        // Quello dell'analisi resta esatto (mai arrotondato), così il simulatore parte dalle stesse cifre dell'analisi
+        let voci = [tondo(max(0, r - scartoRendimento)), max(0, r), tondo(max(0, r) + scartoRendimento)]
+        var fatti: [Double] = []
+        for v in voci where !fatti.contains(v) { fatti.append(v) }
+        return fatti.sorted()
+    }
+
+    /// Mezzo punto l'anno sopra e sotto il rendimento dell'analisi.
+    static let scartoRendimento = 0.5
+    /// Sotto questo scarto il rendimento scelto è quello dell'analisi (le scelte accanto sono arrotondate al centesimo).
+    static let toleranzaRendimento = 0.006
+
+    /// Le aliquote da scegliere quando manca il reddito: quelle degli scaglioni IRPEF di oggi.
+    static var aliquoteDaScegliere: [Double] { RegoleFiscali.scaglioniIrpef.map { $0.1 } }
+
+    /// L'aliquota scelta all'apertura: quella di mezzo.
+    static var aliquotaIniziale: Double {
+        let a = aliquoteDaScegliere
+        return a.isEmpty ? 0 : a[a.count / 2]
+    }
+
     // MARK: - Protezione
 
     /// Il costo delle coperture caso morte, per stimare il premio di un capitale in più.

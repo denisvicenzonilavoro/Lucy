@@ -1147,7 +1147,7 @@ struct SchedaCopilotaVista: View {
 
     private var provenienza: String? {
         var parti: [String] = []
-        if scheda.origine == .qwen { parti.append("Qwen") }
+        if scheda.origine == .qwen { parti.append(TestiStatoVera.inVista(mac: "Vera", altrove: "Qwen")) }
         if !suIPad, let d = scheda.dispositivo { parti.append("dall’" + d) }
         return parti.isEmpty ? nil : parti.joined(separator: " · ")
     }

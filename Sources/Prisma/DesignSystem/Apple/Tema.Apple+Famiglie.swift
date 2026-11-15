@@ -77,6 +77,23 @@ extension Tema.Apple {
         static let spazioCautele: CGFloat = 3
         /// «Completa nella scheda del cliente ›» sotto la frase della cifra mancante.
         static let sopraCompleta: CGFloat = 8
+        /// Migliorie d'uso 46: «Apri l'area ›» sotto la frase di una voce sotto la metà, accanto a «Completa…».
+        static let spazioAzioniVoce: CGFloat = 14
+
+        // MARK: Il passo in fondo alla card principale (migliorie d'uso 46, `#famPasso`)
+
+        /// Margine 14 sopra il filo, padding 12 sotto.
+        static let sopraPasso: CGFloat = 14
+        static let sottoFiloPasso: CGFloat = 12
+        static let filoPasso = Tema.Misura.filo
+        static let coloreFiloPasso = Colore.separatore
+        /// Fra la capsula, la frase e il pulsante.
+        static let spazioPasso: CGFloat = 12
+        static let frasePasso = Carattere(dimensione: 14, peso: .regular, interlinea: 1.4)
+        static let coloreFrasePasso = Colore.inchiostro
+        /// Attesa fra il ritorno alle quattro aree e l'apertura del dettaglio dalla sua card (650 ms del template, al
+        /// ritmo `Tema.Apple.Moto.ritmo`): il cambio di vista (`rimonta`) è finito e la card è al suo posto.
+        static let attesaApriArea = 0.65
 
         // MARK: Righe dei gruppi (tavole a una dimensione)
 

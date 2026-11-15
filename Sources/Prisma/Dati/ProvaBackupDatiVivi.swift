@@ -82,6 +82,8 @@ extension ProvaBackup {
             ("le spiegazioni in tre livelli", { $0.spiegazioniTreLivelli = [] }),
             ("il profilo di stile", { $0.impostazioni.stileVera.firma = .scritta("Prova") }),
             ("le voci chiuse del sussurro", { $0.sussurriChiusi.append(SussurroChiuso(clienteId: altroCliente, chiave: "prova", chiusoIl: Date())) }),
+            // Migliorie d'uso 60: un'esperienza della Sala segnata non rifà le cache dei calcoli
+            ("le esperienze della Sala fatte", { $0.esperienzeFatte.append(EsperienzaFatta(clienteId: altroCliente, esperienza: .lettera, quando: Date())) }),
         ]
         modifiche += modificheNeutre(altroCliente)
         for (nome, modifica) in modifiche {

@@ -11,6 +11,13 @@ import SwiftUI
 /// - 855: nessun passaparola (nessun presentatore, nessun potenziale);
 /// - 856: i clienti fittizi, con il passaparola di prova a tre generazioni;
 /// - 857: come 854 con «Riduci movimento».
+/// Migliorie d'uso 47 (solo Mac): le 850-853 mostrano il prossimo passo e i giorni di fermo sulle schede, la tile «Fermi
+/// da più di due settimane» e il dettaglio nuovo (853: Davide Sala senza incontro fissato, «Fissa l'incontro»); in più
+/// - 1146: dopo «Passa a…» (Marta Conti da «Analisi» a «Proposta»): la nota sotto le colonne con «Annulla»;
+/// - 1147: il dettaglio di Davide Sala con il primo incontro fissato fra tre giorni alle 18: «Prepara l'incontro».
+/// Migliorie d'uso 48 (solo Mac): le 854-857 mostrano la nota nuova sotto l'albero («Tocca una persona…»); in più
+/// - 1148: Sofia scelta (un'ambasciatrice): l'albero con il suo ramo acceso e il resto al 20%, la card «Il ramo di»;
+/// - 1149: Chiara Marino scelta (non ha presentato nessuno): «… non ti ha ancora presentato nessuno.».
 /// DATI DI PROVA DICHIARATI: `PotenzialiDiProva` (la vista dice «dati di prova»); i tre clienti del template
 /// presentati (Chiara Marino, Elena Marchi, Paola Leone) vivono solo nella scena.
 extension Istantanee {
@@ -42,6 +49,25 @@ extension Istantanee {
                 s.vistaClienti = .potenziali
                 s.apri(.clienti)
             }),
+            ("1146-uso-potenziali-annulla", { s in
+                conTemplate(s)
+                s.spostaPotenzialeAnnullabile(PotenzialiDiProva.prefisso + "conti", a: .proposta)
+                s.vistaClienti = .potenziali
+                s.apri(.clienti)
+            }),
+            ("1147-uso-potenziale-dettaglio-incontro", { s in
+                conTemplate(s)
+                let cal = Calendar.current
+                let giorno = cal.date(byAdding: .day, value: 3, to: cal.startOfDay(for: Date())) ?? Date()
+                let inizio = cal.date(bySettingHour: 18, minute: 0, second: 0, of: giorno) ?? giorno
+                let a = Appuntamento(id: "event-scena-primo-incontro-sala", clienteId: "",
+                                     titolo: TestiPassaparola.titoloPrimoIncontro("Davide Sala"), inizio: inizio, durataMinuti: 30,
+                                     luogo: "", note: "", stato: .pianificato, tipo: .primoIncontro)
+                s.dati.appuntamenti = s.dati.appuntamenti + [a]
+                s.potenziali.dettaglioIstantanea = PotenzialiDiProva.prefisso + "sala"
+                s.vistaClienti = .potenziali
+                s.apri(.clienti)
+            }),
             ("854-clienti-passaparola", { s in passaparola(s) }),
             ("854-clienti-passaparola-scuro", { s in passaparola(s) }),
             ("855-clienti-passaparola-vuoto", { s in
@@ -62,6 +88,18 @@ extension Istantanee {
             }),
             ("857-clienti-passaparola-calmo", { s in
                 s.dati.impostazioni.riduciMovimento = true
+                passaparola(s)
+            }),
+            ("1148-uso-passaparola-ramo", { s in
+                s.potenziali.evidenziato = "sofia"
+                passaparola(s)
+            }),
+            ("1148-uso-passaparola-ramo-scuro", { s in
+                s.potenziali.evidenziato = "sofia"
+                passaparola(s)
+            }),
+            ("1149-uso-passaparola-ramo-vuoto", { s in
+                s.potenziali.evidenziato = "scena-chiara-marino"
                 passaparola(s)
             }),
         ]

@@ -175,10 +175,8 @@ extension AppImpostazioni {
                     interruttore(Bindable(stato.dati).impostazioni.promemoria.nomiClienti)
                 }
             }
-            .disabled(!scelte.attivi)
-            .opacity(scelte.attivi ? 1 : Tema.Misura.Shell.opacitaDisabilitato)
             // Con i promemoria spenti anche gli interruttori accesi diventano grigi: non sembrano più attivi
-            .saturation(scelte.attivi ? 1 : Tema.Misura.RifinitureScrivania.saturazioneSpento)
+            .attenuatoSeSpento(!scelte.attivi)
         }
     }
 

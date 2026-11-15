@@ -122,6 +122,36 @@ extension Tema.Apple {
             static let paddingCanaleDaScegliere = Tema.Apple.Misura.padding(3, 8)
             /// Il glifo `scan` del pulsante «Nuovo cliente» nella testata di Clienti.
             static let glifoTestata: CGFloat = 14
+
+            // Migliorie d'uso 43 («Prima di aggiungere, si controlla», solo Mac)
+            /// Le righe in più «＋ Telefono» e «＋ Canale»: il segno «＋» grigio in grassetto.
+            static let segnoPiu = "＋"
+            static let carattereSegnoPiu = C(dimensione: 14, peso: .bold)
+            static let coloreSegnoPiu = K.inchiostro3
+            /// Il telefono da scrivere: «da aggiungere» in grigio, 14 medium, largo almeno 150.
+            static let telefonoVuoto = C(dimensione: 14, peso: .medium)
+            static let coloreTelefonoVuoto = K.inchiostro3
+            static let larghezzaTelefono: CGFloat = 150
+            /// Le capsule dei canali (`.fch`): alte 30, padding 0×11, 12,5 semibold, pallino 8 a 6, a 8 fra loro; spente
+            /// `chip` col testo `inchiostro2`, accese `cardPiena` col testo `inchiostro` e l'ombra della pillola.
+            static let altezzaCapsulaCanale: CGFloat = 30
+            static let paddingCapsulaCanale = EdgeInsets(top: 0, leading: 11, bottom: 0, trailing: 11)
+            static let capsulaCanale = C(dimensione: 12.5, peso: .semibold)
+            static let pallinoCanale: CGFloat = 8
+            static let spazioPallino: CGFloat = 6
+            static let spazioCapsule: CGFloat = 8
+            static let fondoCapsulaCanale = K.chip
+            static let fondoCapsulaCanaleAccesa = K.cardPiena
+            static let testoCapsulaCanale = K.inchiostro2
+            static let testoCapsulaCanaleAccesa = K.inchiostro
+            static let ombraCapsulaCanaleAccesa = Tema.Apple.Ombra.pillola
+            static func coloreCanale(_ c: Canale) -> Color { c == .alleanza ? K.canaleAlleanza : K.canaleIndipendente }
+            /// La riga in fondo sopra un filo: 12 sopra, 10 dal filo, `.k` con interlinea 1,5.
+            static let rigaFondoSopra: CGFloat = 12
+            static let rigaFondoDalFilo: CGFloat = 10
+            static let rigaFondo = C(dimensione: 12.5, peso: .regular, interlinea: 1.5)
+            static let coloreRigaFondo = K.inchiostro2
+            static let filoRigaFondo = K.separatore
         }
 
         // MARK: iPhone e iPad

@@ -17,6 +17,12 @@ struct StrumentiAnalisi360: View {
             case .scenari: ScenariSalvati(inAnalisi: true)
             case .confronto: ConfrontoIpotesi(inAnalisi: true)
             case .tfr: StrumentoTFR()
+            case .simulaConfronta:
+                #if os(macOS)
+                SimulaConfrontaMac()
+                #else
+                SimulatoreIpotesi(inAnalisi: true)
+                #endif
             case nil: EmptyView()
             }
         }
@@ -24,7 +30,8 @@ struct StrumentiAnalisi360: View {
     }
 }
 
-/// Lo strumento TFR: la testata (come gli altri strumenti) sopra la `SchedaTFR` così com'è.
+/// Lo strumento TFR: la testata (come gli altri strumenti) sopra la `SchedaTFR` così com'è (iPhone e iPad; sul Mac il TFR
+/// sta in «Simula e confronta», migliorie d'uso 69).
 struct StrumentoTFR: View {
     private typealias M = Tema.Misura.StrumentiAnalisi
     private typealias K = Tema.Colore.StrumentiAnalisi
@@ -59,20 +66,63 @@ extension StatoShell {
     /// Sceglie uno strumento di Analisi 360 (nil = le aree). Tiene allineata la scheda di Simulazioni,
     /// che le viste del simulatore leggono ancora.
     func scegliStrumentoAnalisi(_ s: StrumentoAnalisi?) {
+        #if os(macOS)
+        // Migliorie d'uso 64: simulatore, scenari e confronto sono «Simula e confronta», nella modalità giusta; una bozza
+        // del simulatore (da una posizione, una scheda, un obiettivo, un'area) entra come strada
+        switch s {
+        case .simulatore, .scenari:
+            if modoSimula != .una { modoSimula = .una }
+            consumaBozzaSimulazione()
+            if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+            if schedaSimulazioni != .simulatore { schedaSimulazioni = .simulatore }
+            return
+        case .confronto:
+            if modoSimula != .due { modoSimula = .due }
+            importaConfrontoInSimula()
+            if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+            return
+        case .simulaConfronta:
+            // Una bozza da consumare è una strada: dal TFR si torna a «Una strada»
+            if bozzaSimulazione != nil, modoSimula == .tfr { modoSimula = .una }
+            consumaBozzaSimulazione()
+            if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+            let scheda: SchedaSimulazioni = modoSimula == .tfr ? .tfr : .simulatore
+            if schedaSimulazioni != scheda { schedaSimulazioni = scheda }
+            return
+        case .tfr:
+            // Migliorie d'uso 69: il TFR è la terza voce di «Simula e confronta»
+            if modoSimula != .tfr { modoSimula = .tfr }
+            if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+            if schedaSimulazioni != .tfr { schedaSimulazioni = .tfr }
+            return
+        case nil: break
+        }
+        #endif
         if strumentoAnalisi != s { strumentoAnalisi = s }
         switch s {
-        case .simulatore: if schedaSimulazioni != .simulatore { schedaSimulazioni = .simulatore }
+        case .simulatore, .simulaConfronta: if schedaSimulazioni != .simulatore { schedaSimulazioni = .simulatore }
         case .scenari: if schedaSimulazioni != .scenari { schedaSimulazioni = .scenari }
         case .tfr: if schedaSimulazioni != .tfr { schedaSimulazioni = .tfr }
         case .confronto, nil: break
         }
     }
 
+    #if os(macOS)
+    /// Il segmentato di «Simula e confronta» (migliorie d'uso 64 e 69): una strada, due a confronto o il TFR, con la
+    /// scheda di Simulazioni allineata (l'ex Simulazioni TFR).
+    func scegliModoSimula(_ m: ModoSimula) {
+        if modoSimula != m { modoSimula = m }
+        if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+        let scheda: SchedaSimulazioni = m == .tfr ? .tfr : .simulatore
+        if schedaSimulazioni != scheda { schedaSimulazioni = scheda }
+    }
+    #endif
+
     /// Apre uno strumento di Analisi 360 da un'altra app: sul Mac dentro Analisi 360 (il reindirizzamento
     /// di `apri`), su iPhone e iPad nell'app Simulazioni o Confronti, sulla scheda giusta.
     func apriStrumentoAnalisi(_ s: StrumentoAnalisi) {
         switch s {
-        case .simulatore: schedaSimulazioni = .simulatore
+        case .simulatore, .simulaConfronta: schedaSimulazioni = .simulatore
         case .scenari: schedaSimulazioni = .scenari
         case .tfr: schedaSimulazioni = .tfr
         case .confronto: break

@@ -80,9 +80,12 @@ struct IngressiStatiPratiche: Equatable {
 /// documenti) si rifà solo se cambia un ingresso.
 final class CacheStatiPratiche {
     private var ultimo: (ingressi: IngressiStatiPratiche, stati: [StatoPratica])?
+    /// Quante volte MotorePratiche si è rifatto (per `--prova-fluidita`: lo stesso disegno non lo rifà).
+    private(set) var calcoli = 0
 
     func stati(_ ingressi: IngressiStatiPratiche, calcola: () -> [StatoPratica]) -> [StatoPratica] {
         if let u = ultimo, u.ingressi == ingressi { return u.stati }
+        calcoli += 1
         let v = calcola()
         ultimo = (ingressi, v)
         return v

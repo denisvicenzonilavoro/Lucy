@@ -14,6 +14,10 @@ import SwiftUI
 // - Niente cifre inventate: senza aliquote la parte Alleanza dice «Inserisci le tue aliquote» (pulsante per
 //   Impostazioni › Studio), senza obiettivi niente anelli ma «Imposta gli obiettivi», senza parcelle la parte
 //   indipendente dice che arrivano con Parcelle e fatture. Con i clienti di prova ogni card porta «dati di prova».
+// - Migliorie d'uso 53 «Il cruscotto risponde a domande» (Design/uso/gruppo-09.md §53, solo sul Mac): i titoli sono le
+//   domande a cui le card rispondono; gli incassi dicono il mese più ricco e, con il puntatore su una colonna, le cifre
+//   di quel mese (la colonna si schiarisce); gli obiettivi dicono qual è il più indietro; «il valore e il tempo» dice
+//   cosa si vede (senza nomi), ha l'asse dei ricavi e la mano sui punti, che aprono il dossier.
 
 struct CruscottoStudioVista: View {
     let stato: StatoShell
@@ -85,6 +89,7 @@ struct CruscottoStudioVista: View {
 
     private func obiettivi(_ c: CruscottoStudio, prova: Bool) -> some View {
         CardObiettiviStudio(obiettivi: c.obiettivi, prova: prova, ritardoAnelli: ritardoAnelli,
+                            mesi: CruscottoStudio.Obiettivi.mesiAllaFine(oggi: c.oggi),
                             imposta: { stato.apriImpostazioniStudio() })
             .cardStudio(1, base: base)
     }
@@ -95,7 +100,11 @@ struct CruscottoStudioVista: View {
     }
 
     private func incassi(_ c: CruscottoStudio, prova: Bool) -> some View {
-        CardIncassiStudio(incassi: c.incassi, prova: prova, apriAliquote: { stato.apriImpostazioniStudio() })
+        // Le istantanee possono chiedere un mese «sotto il puntatore» (Migliorie d'uso 53, scena 1091)
+        let chiesto = RichiestaIstantaneaCruscotto.per(stato)?.mese
+        let meseIniziale = chiesto.flatMap { i in c.incassi.mesi.indices.contains(i) ? c.incassi.mesi[i].inizio : nil }
+        return CardIncassiStudio(incassi: c.incassi, prova: prova, meseIniziale: meseIniziale,
+                                 apriAliquote: { stato.apriImpostazioniStudio() })
             .cardStudio(3, base: base)
     }
 
@@ -142,6 +151,10 @@ private struct TitoloCardStudio<Destra: View>: View {
                 .carattereApple(c.etichetta)
                 .foregroundColor(c.coloreEtichetta)
                 .lineLimit(1)
+                #if os(macOS)
+                // Migliorie d'uso 53: le domande sono più lunghe dei titoli di prima, si stringono un poco
+                .minimumScaleFactor(c.riduzioneTesto)
+                #endif
                 .layoutPriority(1)
             if prova {
                 Text(TestiStudio.datiDiProva)
@@ -161,19 +174,24 @@ extension TitoloCardStudio where Destra == EmptyView {
     }
 }
 
-/// Una frase `.k` (didascalia o stato vuoto).
+/// Una frase `.k` (didascalia o stato vuoto); con `testo:` una frase composta (parti in grassetto).
 private struct NotaStudio: View {
-    let testo: String
+    let testo: Text
     var righe: Int? = nil
 
     init(_ testo: String, righe: Int? = nil) {
+        self.testo = Text(verbatim: testo)
+        self.righe = righe
+    }
+
+    init(testo: Text, righe: Int? = nil) {
         self.testo = testo
         self.righe = righe
     }
 
     var body: some View {
         let c = Tema.Apple.Studio.Card.self
-        Text(testo)
+        testo
             .carattereApple(c.nota)
             .foregroundColor(c.coloreNota)
             .lineLimit(righe)
@@ -197,7 +215,7 @@ private struct CardRicaviStudio: View {
     var body: some View {
         let r = Tema.Apple.Studio.Ricavi.self
         return VStack(alignment: .leading, spacing: 0) {
-            TitoloCardStudio("I tuoi ricavi \(String(ricavi.anno))", prova: prova)
+            TitoloCardStudio(TestiStudio.domandaRicavi(anno: ricavi.anno), prova: prova)
             HStack(alignment: .bottom, spacing: r.spazioTotale) {
                 Group {
                     if nienteDaContare {
@@ -378,13 +396,15 @@ private struct CardObiettiviStudio: View {
     let obiettivi: CruscottoStudio.Obiettivi
     let prova: Bool
     let ritardoAnelli: Double
+    /// I mesi che mancano alla fine dell'anno (per «Ne mancano tre in due mesi»).
+    let mesi: Int
     let imposta: () -> Void
 
     var body: some View {
         let o = Tema.Apple.Studio.Obiettivi.self
         let c = Tema.Apple.Studio.Card.self
         return VStack(alignment: .leading, spacing: 0) {
-            TitoloCardStudio("Gli obiettivi dell’anno", prova: prova)
+            TitoloCardStudio(TestiStudio.domandaObiettivi, prova: prova)
             if obiettivi.nessunoImpostato {
                 // Niente anelli finti: il consulente dà i suoi traguardi in Impostazioni › Studio
                 NotaStudio("Nessun obiettivo per il \(String(obiettivi.anno)): Prisma non li inventa. Scrivi i tuoi "
@@ -401,6 +421,20 @@ private struct CardObiettiviStudio: View {
                     legenda
                 }
                 .padding(.top, o.sopra)
+                #if os(macOS)
+                // Migliorie d'uso 53: qual è l'obiettivo più indietro (nessuna riga se sono tutti raggiunti)
+                if let indietro = obiettivi.piuIndietro, let resto = TestiStudio.piuIndietro(indietro, mesi: mesi) {
+                    (Text(TestiStudio.piuIndietroEtichetta).bold().foregroundColor(c.coloreForte)
+                        + Text(verbatim: " " + resto))
+                        .carattereApple(o.frase)
+                        .foregroundColor(o.coloreFrase)
+                        .lineLimit(3)
+                        .minimumScaleFactor(c.riduzioneTesto)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .layoutPriority(1)
+                        .padding(.top, o.sopraFrase)
+                }
+                #endif
             }
             Spacer(minLength: 0)
         }
@@ -484,7 +518,7 @@ private struct CardImbutoStudio: View {
         let t = Tema.Apple.Studio.Imbuto.self
         let c = Tema.Apple.Studio.Card.self
         return VStack(alignment: .leading, spacing: 0) {
-            TitoloCardStudio("L’imbuto delle proposte", prova: prova)
+            TitoloCardStudio(TestiStudio.domandaImbuto, prova: prova)
             if imbuto.vuoto {
                 NotaStudio("Nessuna proposta nel \(String(imbuto.anno)).")
                     .padding(.top, c.vuotoSopra)
@@ -563,21 +597,29 @@ private struct CardIncassiStudio: View {
     let incassi: CruscottoStudio.Incassi
     let prova: Bool
     let apriAliquote: () -> Void
+    /// Migliorie d'uso 53: il mese della colonna sotto il puntatore (il primo giorno del mese); nil = nessuno. Sta nella
+    /// card, non nello stato di Prisma: passare sulle colonne non ridisegna il resto del Cruscotto.
+    @State private var sopra: Date?
+
+    init(incassi: CruscottoStudio.Incassi, prova: Bool, meseIniziale: Date? = nil, apriAliquote: @escaping () -> Void) {
+        self.incassi = incassi
+        self.prova = prova
+        self.apriAliquote = apriAliquote
+        _sopra = State(initialValue: meseIniziale)
+    }
 
     var body: some View {
         let t = Tema.Apple.Studio.Incassi.self
         let c = Tema.Apple.Studio.Card.self
-        let senzaCifre = incassi.mancaAliquote && incassi.totaleIndipendente <= 0
         return VStack(alignment: .leading, spacing: 0) {
-            TitoloCardStudio("Gli incassi dei prossimi 12 mesi", prova: prova) {
-                if !senzaCifre {
-                    NumeroCheConta(incassi.totale, formato: .euro, indice: 7)
-                        .carattereApple(t.totale)
-                        .foregroundColor(t.coloreTotale)
-                        .lineLimit(1)
-                }
-            }
+            #if os(macOS)
+            // La didascalia lunga lascia il posto alla riga del mese, ma la stima resta dichiarata nel fumetto del titolo
+            titolo
+                .help(didascalia)
+            #else
+            titolo
             NotaStudio(didascalia, righe: 2)
+            #endif
             if incassi.mancaAliquote {
                 Button(CruscottoStudio.fraseSenzaAliquote + " ›", action: apriAliquote)
                     .buttonStyle(.apple)
@@ -594,15 +636,62 @@ private struct CardIncassiStudio: View {
                 HStack(spacing: t.spazioLegenda) {
                     EtichettaCanaleApple(canale: .alleanza, compatta: true)
                     EtichettaCanaleApple(canale: .indipendente, compatta: true)
+                    #if os(macOS)
+                    Spacer(minLength: t.spazioLegenda)
+                    rigaMese
+                    #endif
                 }
                 .padding(.top, t.legendaSopra)
+                #if os(macOS)
+                ColonneIncassiStudio(mesi: incassi.mesi, sopra: $sopra)
+                    .frame(maxHeight: t.altezza)
+                    .padding(.top, t.sopra)
+                    .frame(maxHeight: .infinity, alignment: .bottom)
+                #else
                 ColonneIncassiStudio(mesi: incassi.mesi)
                     .frame(maxHeight: t.altezza)
                     .padding(.top, t.sopra)
                     .frame(maxHeight: .infinity, alignment: .bottom)
+                #endif
             }
         }
     }
+
+    private var titolo: some View {
+        let t = Tema.Apple.Studio.Incassi.self
+        let senzaCifre = incassi.mancaAliquote && incassi.totaleIndipendente <= 0
+        return TitoloCardStudio(TestiStudio.domandaIncassi, prova: prova) {
+            if !senzaCifre {
+                NumeroCheConta(incassi.totale, formato: .euro, indice: 7)
+                    .carattereApple(t.totale)
+                    .foregroundColor(t.coloreTotale)
+                    .lineLimit(1)
+            }
+        }
+    }
+
+    #if os(macOS)
+    /// A riposo «Il mese più ricco: novembre, 7.400 €»; con il puntatore su una colonna le cifre di quel mese, con i
+    /// nomi dei canali scelti dall'utente.
+    private var rigaMese: some View {
+        let c = Tema.Apple.Studio.Card.self
+        let nomi = SegnaleNomiCanali.condiviso.nomi
+        let testo: Text
+        if let s = sopra, let m = incassi.mesi.first(where: { $0.inizio == s }) {
+            testo = TestiStudio.meseIncasso(m, nomeAlleanza: nomi.nome(.alleanza), nomeIndipendente: nomi.nome(.indipendente),
+                                            forte: c.coloreForte)
+        } else if let r = incassi.piuRicco {
+            testo = Text(verbatim: TestiStudio.piuRicco(r))
+        } else {
+            testo = Text(verbatim: "")
+        }
+        return testo
+            .carattereApple(c.nota)
+            .foregroundColor(c.coloreNota)
+            .lineLimit(1)
+            .minimumScaleFactor(c.riduzioneTesto)
+    }
+    #endif
 
     private var didascalia: String {
         let base = "Rinnovi e premi ricorrenti Alleanza, parcelle già firmate."
@@ -626,8 +715,13 @@ private struct CardValoreTempoStudio: View {
         let d = Tema.Apple.Studio.Dispersione.self
         let c = Tema.Apple.Studio.Card.self
         return VStack(alignment: .leading, spacing: 0) {
-            TitoloCardStudio("Il valore e il tempo", prova: prova)
+            TitoloCardStudio(TestiStudio.domandaValore, prova: prova)
+            #if os(macOS)
+            // Migliorie d'uso 53: la didascalia dice cosa si vede (quanti clienti nella zona e il più pesante, senza nome)
+            NotaStudio(testo: TestiStudio.valoreDice(valore, forte: c.coloreForte), righe: 2)
+            #else
             NotaStudio(TestiStudio.didascaliaValore, righe: 2)
+            #endif
             if valore.vuoto {
                 NotaStudio(TestiStudio.senzaOre)
                     .padding(.top, c.vuotoSopra)
@@ -653,5 +747,31 @@ private struct CardValoreTempoStudio: View {
         }
         if valore.ricaviParziali { return "Ricavi per cliente parziali: le parcelle arrivano con Parcelle e fatture." }
         return nil
+    }
+}
+
+// MARK: - Richiesta delle istantanee
+
+/// Il mese degli incassi che una scena delle istantanee chiede «sotto il puntatore» (Migliorie d'uso 53, scena 1091:
+/// si vede la riga che cambia e la colonna schiarita). `mese` è la posizione fra i dodici mesi (0 = il mese prossimo).
+/// Vale solo per lo stato della scena (riferimento debole: le scene dopo non lo vedono), come `RichiestaIstantaneaTrack`.
+final class RichiestaIstantaneaCruscotto {
+    nonisolated(unsafe) private static var attuale: RichiestaIstantaneaCruscotto?
+
+    private weak var stato: StatoShell?
+    let mese: Int?
+
+    private init(stato: StatoShell, mese: Int?) {
+        self.stato = stato
+        self.mese = mese
+    }
+
+    static func chiedi(_ s: StatoShell, mese: Int?) {
+        attuale = RichiestaIstantaneaCruscotto(stato: s, mese: mese)
+    }
+
+    static func per(_ s: StatoShell) -> RichiestaIstantaneaCruscotto? {
+        guard let r = attuale, r.stato === s else { return nil }
+        return r
     }
 }

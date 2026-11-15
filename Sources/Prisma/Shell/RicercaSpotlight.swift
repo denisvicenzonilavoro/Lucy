@@ -19,6 +19,13 @@ final class StatoSpotlight: ObservableObject {
     @Published var selezione = 0
     /// Il nome della ricerca da salvare, mentre lo si scrive (nil = non si sta salvando).
     @Published var nomeDaSalvare: String?
+    /// Migliorie d'uso 61 (solo sul Mac): i filtri da toccare. Il tipo (nil = «Tutto») e il canale acceso. Vivono quanto
+    /// il pannello: ogni apertura parte da «Tutto» e nessun canale.
+    @Published var tipo: GruppoRicerca?
+    @Published var canale: Canale?
+    /// Il pannello vuoto del Mac: i clienti recenti e le cinque azioni (le righe delle frecce, in `elenco`).
+    @Published private(set) var recenti: [RisultatoRicerca] = []
+    @Published private(set) var azioniVuoto: [RisultatoRicerca] = []
     /// I risultati in fila (l'ordine delle frecce) e il posto di ognuno.
     private(set) var elenco: [RisultatoRicerca] = []
     private(set) var indici: [ChiaveRisultato: Int] = [:]
@@ -28,24 +35,83 @@ final class StatoSpotlight: ObservableObject {
     private let memoria = MemoriaIndiceRicerca()
     /// Il testo e la versione dei dati dell'ultimo esito: riaprendo il pannello con la ricerca di prima, onAppear e
     /// onChange chiederebbero due volte la stessa ricerca sugli stessi dati.
-    private var ultimo: (testo: String, dati: Int)?
+    private var ultimo: (testo: String, limiti: LimitiRicerca, dati: Int)?
 
     var scelto: RisultatoRicerca? { elenco.indices.contains(selezione) ? elenco[selezione] : nil }
     var vuoto: Bool { testo.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    var limiti: LimitiRicerca { LimitiRicerca(tipo: tipo, canale: canale) }
+    /// Il pannello vuoto: niente di scritto e nessun filtro da toccare acceso.
+    var pannelloVuoto: Bool { vuoto && limiti.vuoti }
 
     func aggiorna(_ stato: StatoShell) {
         let versione = stato.versioneDati
-        if let u = ultimo, u.testo == testo, u.dati == versione { return }
-        let e = MotoreRicerca.cercaCompleta(testo, in: stato, memoria: memoria)
+        let l = limiti
+        if let u = ultimo, u.testo == testo, u.limiti == l, u.dati == versione { return }
+        var e = EsitoRicerca.vuoto
+        #if os(macOS)
+        if vuoto && l.vuoti {
+            // Migliorie d'uso 61: le righe del pannello vuoto sono lette, non calcolate (recenti in memoria, azioni fisse)
+            let righe = Self.righeVuoto(stato)
+            recenti = righe.recenti
+            azioniVuoto = righe.azioni
+        } else {
+            e = MotoreRicerca.cercaCompleta(testo, in: stato, memoria: memoria, limiti: l)
+        }
+        elenco = vuoto && l.vuoti ? recenti + azioniVuoto : e.elenco
+        #else
+        e = MotoreRicerca.cercaCompleta(testo, in: stato, memoria: memoria, limiti: l)
         elenco = e.elenco
+        #endif
         var posti: [ChiaveRisultato: Int] = [:]
         for (i, r) in elenco.enumerated() { posti[r.id] = i }
         indici = posti
         esito = e
+        #if os(macOS)
+        // Migliorie d'uso 61: i codici non si propongono più mentre si scrive (restano capiti se scritti)
+        suggerimenti = []
+        #else
         suggerimenti = FiltriRicerca.suggerimenti(per: testo)
+        #endif
         selezione = 0
-        ultimo = (testo: testo, dati: versione)
+        ultimo = (testo: testo, limiti: l, dati: versione)
     }
+
+    #if os(macOS)
+    /// I clienti recenti (al più tre: quelli scelti di recente, poi i primi della rubrica) e le cinque azioni del template.
+    static func righeVuoto(_ stato: StatoShell) -> (recenti: [RisultatoRicerca], azioni: [RisultatoRicerca]) {
+        var ids: [String] = []
+        for id in stato.clientiRecenti where !ids.contains(id) && ids.count < 3 { ids.append(id) }
+        if ids.count < 3 {
+            for c in stato.clienti.prefix(6) where c.unitaIn == nil && !ids.contains(c.id) && ids.count < 3 { ids.append(c.id) }
+        }
+        let recenti = ids.compactMap { id -> RisultatoRicerca? in
+            guard let c = stato.cliente(id) else { return nil }
+            return RisultatoRicerca(destinazione: .cliente(c.id), gruppo: .clienti, titolo: c.nome, dettaglio: c.tema)
+        }
+        let azioni = AzioneRicerca.delPannelloVuoto.filter { !stato.inModoCliente || $0.ammessaInModoCliente }.map { a in
+            RisultatoRicerca(destinazione: .app(.ricerca), gruppo: .azioni, titolo: a.titolo, dettaglio: a.dettaglio, azione: a)
+        }
+        return (recenti, azioni)
+    }
+
+    /// Una ricerca salvata (o il testo con cui si apre il pannello): i codici «tipo:» e «canale:» tornano etichette accese,
+    /// nel campo resta il resto.
+    func applica(_ testoSalvato: String) {
+        let e = FiltriRicerca.etichette(testoSalvato, canali: true)
+        tipo = e.tipo
+        canale = e.canale
+        testo = e.resto
+    }
+
+    /// Il testo da conservare (e da salvare): quello scritto con i codici delle etichette accese.
+    var testoConCodici: String { FiltriRicerca.conCodici(testo, tipo: tipo, canale: canale) }
+
+    /// Il nome della ricerca salvata con un tocco: il testo scritto (se è fatto solo di codici, il nome proposto).
+    var nomeSubito: String {
+        let r = FiltriRicerca.interpreta(testo)
+        return r.parole.isEmpty ? nomeProposto : testo.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+    #endif
 
     func sposta(_ passo: Int) {
         guard !elenco.isEmpty else { return }
@@ -67,7 +133,11 @@ final class StatoSpotlight: ObservableObject {
 /// I tasti del pannello: il monitor di AppKit decide subito quali tenere per sé, la vista li esegue
 /// sul thread principale (come `FrecceRicerca`).
 final class TastiSpotlight: @unchecked Sendable {
-    enum Tasto { case su, giu, invio, esc, tab }
+    enum Tasto {
+        case su, giu, invio, esc, tab
+        /// Migliorie d'uso 61 (solo Mac): una lettera scritta con il fuoco fuori dal campo torna nel campo.
+        case carattere(String)
+    }
 
     /// Il pannello è davanti (nessun modulo aperto sopra di lui).
     var attivo = false
@@ -75,6 +145,8 @@ final class TastiSpotlight: @unchecked Sendable {
     var conSuggerimenti = false
     /// Si scrive il nome della ricerca da salvare: Invio e frecce vanno a quel campo, Esc annulla.
     var inNome = false
+    /// Il cursore è nel campo della ricerca (lo aggiorna la vista dal suo `@FocusState`).
+    var nelCampo = true
     var esegui: (@MainActor (Tasto) -> Void)?
 
     #if os(macOS)
@@ -90,12 +162,22 @@ final class TastiSpotlight: @unchecked Sendable {
         case 126: tasto = inNome || !conRisultati ? nil : .su
         case 36, 76: tasto = inNome || !conRisultati ? nil : .invio
         case 48: tasto = inNome || !conSuggerimenti ? nil : .tab
-        default: tasto = nil
+        default: tasto = inNome || nelCampo ? nil : Self.stampabile(evento).map { Tasto.carattere($0) }
         }
         guard let tasto else { return false }
         let esegui = esegui
         Task { @MainActor in esegui?(tasto) }
         return true
+    }
+
+    /// I caratteri di un tasto che scrive (lettere, cifre, punteggiatura, spazio): niente tasti di controllo né tasti
+    /// funzione (che AppKit dà nell'area privata da U+F700).
+    static func stampabile(_ evento: NSEvent) -> String? {
+        guard let c = evento.characters, !c.isEmpty else { return nil }
+        let scrive = c.unicodeScalars.allSatisfy { u in
+            !CharacterSet.controlCharacters.contains(u) && !(0xF700...0xF8FF).contains(u.value)
+        }
+        return scrive ? c : nil
     }
     #endif
 }
@@ -117,6 +199,18 @@ struct RicercaSpotlight: View {
     @State private var chiudiDopoModulo = false
 
     private typealias M = Misure.Spotlight
+    #if os(macOS)
+    private typealias RM = Tema.Apple.AltreApp.Ricerca.Mac
+    #endif
+
+    /// La distanza dall'alto della scatola del Mac (84 punti, mai sopra la barra).
+    private var distanzaAltoMac: CGFloat {
+        #if os(macOS)
+        return max(RM.distanzaAlto, M.distanzaAltoMinima)
+        #else
+        return 0
+        #endif
+    }
 
     var body: some View {
         let _ = ContaCorpi.segna()
@@ -125,20 +219,42 @@ struct RicercaSpotlight: View {
             let alto = max(M.distanzaAltoMinima, geo.size.height * M.distanzaAltoQuota)
             // Quanto possono crescere i risultati: il pannello resta entro il 70% della shell
             let disponibile = max(M.nessunRisultato, geo.size.height * M.altezzaQuota - M.campoAltezza - 2 * M.cornice - M.riservaStrisciaPie)
+            #if os(macOS)
+            // Migliorie d'uso 61: sul Mac la scatola del template (900, a 84 punti dall'alto); sotto la soglia il pannello stretto
+            let larghezzaMac = max(0, min(RM.larghezza, geo.size.width - 2 * M.margineLato))
+            let scatola = larghezzaMac >= M.sogliaAnteprima
+            #else
+            let larghezzaMac: CGFloat = 0
+            let scatola = false
+            #endif
             ZStack(alignment: .top) {
                 Colori.Spotlight.velo
                     .contentShape(Rectangle())
                     .onTapGesture { chiudi() }
-                pannello(disponibile: disponibile, compatto: larghezza < M.sogliaAnteprima)
-                    .frame(width: larghezza)
-                    .entrataScheda(Tema.Moto.Spotlight.entrata, scala: Tema.Moto.Spotlight.scala, ancora: .top,
-                                   y: Tema.Moto.Spotlight.spostamento)
-                    .padding(.top, alto)
+                Group {
+                    if scatola {
+                        #if os(macOS)
+                        pannelloMac
+                            .frame(width: larghezzaMac)
+                        #endif
+                    } else {
+                        pannello(disponibile: disponibile, compatto: larghezza < M.sogliaAnteprima)
+                            .frame(width: larghezza)
+                    }
+                }
+                .entrataScheda(Tema.Moto.Spotlight.entrata, scala: Tema.Moto.Spotlight.scala, ancora: .top,
+                               y: Tema.Moto.Spotlight.spostamento)
+                .padding(.top, scatola ? distanzaAltoMac : alto)
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
         }
         .onAppear {
+            #if os(macOS)
+            // Migliorie d'uso 61: i codici «tipo:» e «canale:» del testo di partenza tornano etichette accese
+            motore.applica(stato.testoRicerca)
+            #else
             if motore.testo != stato.testoRicerca { motore.testo = stato.testoRicerca }
+            #endif
             motore.aggiorna(stato)
             installaTasti()
             aggiornaTasti()
@@ -153,11 +269,27 @@ struct RicercaSpotlight: View {
             monitor = nil
             tasti.attivo = false
             tasti.esegui = nil
-            if stato.testoRicerca != motore.testo { stato.testoRicerca = motore.testo }
+            #if os(macOS)
+            let conservato = motore.testoConCodici
+            #else
+            let conservato = motore.testo
+            #endif
+            if stato.testoRicerca != conservato { stato.testoRicerca = conservato }
         }
         .onChange(of: motore.testo) { _ in
             motore.aggiorna(stato)
             aggiornaTasti()
+        }
+        // Migliorie d'uso 61: toccare un filtro rifà la ricerca (la scelta torna sulla prima riga) e il fuoco resta nel campo
+        .onChange(of: motore.tipo) { _ in
+            motore.aggiorna(stato)
+            aggiornaTasti()
+            fuoco = true
+        }
+        .onChange(of: motore.canale) { _ in
+            motore.aggiorna(stato)
+            aggiornaTasti()
+            fuoco = true
         }
         .onChange(of: motore.nomeDaSalvare != nil) { inNome in
             aggiornaTasti()
@@ -166,6 +298,8 @@ struct RicercaSpotlight: View {
         .onChange(of: moduloAppuntamento != nil) { _ in aggiornaTasti() }
         .onChange(of: moduloAttivita != nil) { _ in aggiornaTasti() }
         .onChange(of: stato.richiestaFuocoRicerca) { _ in fuoco = true }
+        // Migliorie d'uso 61: il monitor dei tasti sa se il cursore è nel campo
+        .onChange(of: fuoco) { valore in tasti.nelCampo = valore }
         // Blocco, modalità cliente e presentazione chiudono il pannello
         .onChange(of: sistema.bloccato) { if $0 { chiudi() } }
         .onChange(of: stato.inModoCliente) { if $0 { chiudi() } }
@@ -211,6 +345,9 @@ struct RicercaSpotlight: View {
             guard !tasti.inNome, tasti.conSuggerimenti else { return .ignored }
         case .esc:
             break
+        case .carattere:
+            // Su iPad la lettera la scrive il campo
+            return .ignored
         }
         esegui(tasto)
         return .handled
@@ -593,6 +730,25 @@ struct RicercaSpotlight: View {
             stato.apriCliente(id)
         case .eseguiAzione(let a):
             esegui(a)
+        case .posizioniCliente(let id):
+            // Migliorie d'uso 61: Posizioni con quel cliente scelto
+            chiudi()
+            #if os(macOS)
+            stato.scegliCliente(id)
+            #else
+            stato.clienteAttivoId = id
+            #endif
+            stato.apri(.posizioni)
+        case .mostraAlCliente(let id):
+            // Migliorie d'uso 61: lo sceglie e apre il pannello di «Mostra al cliente» (miglioria 1)
+            chiudi()
+            #if os(macOS)
+            stato.scegliCliente(id)
+            stato.apriMostraAlCliente()
+            #else
+            stato.clienteAttivoId = id
+            stato.alternaModoCliente()
+            #endif
         }
     }
 
@@ -612,6 +768,10 @@ struct RicercaSpotlight: View {
             case .esc:
                 // Esc annulla il nome della ricerca da salvare; altrimenti chiude, come Spotlight
                 if motore.nomeDaSalvare != nil { motore.nomeDaSalvare = nil } else { chiudi() }
+            case .carattere(let c):
+                // Migliorie d'uso 61: la lettera scritta altrove si aggiunge al testo e il cursore torna nel campo
+                motore.testo += c
+                fuoco = true
             }
         }
         #if os(macOS)
@@ -626,10 +786,361 @@ struct RicercaSpotlight: View {
     private func aggiornaTasti() {
         tasti.attivo = moduloAppuntamento == nil && moduloAttivita == nil
         tasti.conRisultati = !motore.elenco.isEmpty
+        #if os(macOS)
+        // Migliorie d'uso 61: niente «Tab per completare» sul Mac
+        tasti.conSuggerimenti = false
+        #else
         tasti.conSuggerimenti = !motore.suggerimenti.isEmpty
+        #endif
         tasti.inNome = motore.nomeDaSalvare != nil
     }
 }
+
+// MARK: - La scatola del Mac (migliorie d'uso 61)
+
+#if os(macOS)
+/// I testi di «Cerca ovunque, e fa» (migliorie d'uso 61, Design/uso/gruppo-11.md §61, template righe 4861-4912).
+enum TestiRicercaMac {
+    static let invito = "Cerca un cliente, una posizione, un documento… o scrivi cosa vuoi fare"
+    static let tutto = "Tutto"
+    static let salva = "Salva questa ricerca"
+    static let salvata = "Ricerca salvata: la ritrovi aprendo «Cerca»"
+    static let recenti = "Clienti recenti"
+    static let azioni = "Azioni"
+    static let salvate = "Ricerche salvate"
+    static let fraseVuoto = "Scrivi un nome, un prodotto o una parola. Oppure quello che vuoi fare: «nuovo cliente», «aggiorna»."
+    static func nessunRisultato(_ testo: String) -> String { "Nessun risultato per «\(testo)»." }
+    static let nessunSotto = "Prova con una parte del nome, o togli un filtro."
+    static let chiediVera = "Chiedilo a Vera"
+    static let completaFiltro = "Completa il filtro: per esempio scade:2027, sri>4, canale:alleanza, stato:proposta."
+    static let soloMac = "Cerca solo su questo Mac"
+    static let esc = "esc"
+    static let scegli = "↑ ↓ per scegliere"
+    static let invio = "Invio per aprire"
+    static let chiudi = "Esc per chiudere"
+    // Anteprima
+    static let patrimonio = "Patrimonio netto"
+    static let prossimo = "Prossimo incontro"
+    static let nonFissato = "non fissato"
+    static let daFare = "Da fare"
+    static func aperti(_ n: Int) -> String { n == 0 ? "niente" : (n == 1 ? "1 aperto" : "\(n) aperti") }
+    static let occhielloParola = "Le parole"
+    static let occhielloDocumento = "Documento"
+    static let occhielloProposta = "Proposta"
+    static let occhielloInEssere = "Posizione in essere"
+}
+
+extension RicercaSpotlight {
+    private typealias RMac = Tema.Apple.AltreApp.Ricerca.Mac
+    private typealias MS = Misure.Spotlight
+
+    /// La scatola del template: campo, filtri da toccare, corpo a due colonne alto 392, piede.
+    var pannelloMac: some View {
+        VStack(spacing: 0) {
+            campoMac
+            filtriMac
+            strisciaMac
+            corpoMac
+                .frame(height: RMac.altezzaCorpo)
+                .bordoAlto(Colori.Spotlight.separatore)
+            pieMac
+                .bordoAlto(Colori.Spotlight.separatore)
+        }
+        .padding(RMac.margine)
+        .superficieApple(Tema.Apple.AltreApp.Ricerca.superficie, raggio: RMac.raggio)
+        .altreAppApple()
+    }
+
+    /// Il campo: lente, testo d'invito, la ✕ che cancella (con del testo) e il pulsante «esc» che chiude.
+    private var campoMac: some View {
+        HStack(spacing: MS.campoSpazio) {
+            Image(systemName: "magnifyingglass")
+                .font(RMac.carattereLente.fontLeggibile)
+                .foregroundColor(Colori.Spotlight.lente)
+            TextField(TestiRicercaMac.invito, text: $motore.testo)
+                .textFieldStyle(.plain)
+                .font(RMac.carattereCampo.fontLeggibile)
+                .foregroundColor(Colori.Spotlight.testo)
+                .focused($fuoco)
+                .onSubmit { if let r = motore.scelto { apri(r) } }
+            if !motore.testo.isEmpty {
+                Button { motore.testo = "" } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundColor(Colori.Spotlight.cancella)
+                }
+                .buttonStyle(StileSemplice())
+                .help("Cancella la ricerca")
+            }
+            Button { stato.chiudiRicerca() } label: {
+                Text(TestiRicercaMac.esc)
+                    .font(RMac.carattereEsc.fontLeggibile)
+                    .foregroundColor(RMac.testoEsc)
+                    .padding(RMac.escMargine)
+                    .background(RoundedRectangle(cornerRadius: RMac.raggioEsc, style: .continuous).fill(RMac.fondoEsc))
+            }
+            .buttonStyle(StileSemplice())
+            .help("Chiudi · Esc")
+        }
+        .padding(RMac.campoMargine)
+    }
+
+    /// La fila dei filtri: «Tutto», «Clienti», «Posizioni», «Documenti», un filetto, i due canali; a destra, con del testo
+    /// scritto, «Salva questa ricerca».
+    private var filtriMac: some View {
+        HStack(spacing: RMac.spazioFiltri) {
+            Button { motore.tipo = nil } label: {
+                EtichettaFiltroRicerca(testo: TestiRicercaMac.tutto, acceso: motore.tipo == nil)
+            }
+            .buttonStyle(StileSemplice())
+            ForEach(GruppoRicerca.tipiEtichetta) { g in
+                Button { motore.tipo = g } label: {
+                    EtichettaFiltroRicerca(testo: g.titolo, acceso: motore.tipo == g)
+                }
+                .buttonStyle(StileSemplice())
+            }
+            Rectangle()
+                .fill(RMac.coloreFiletto)
+                .frame(width: RMac.filettoFiltri.width, height: RMac.filettoFiltri.height)
+            ForEach(Canale.allCases) { c in
+                Button { motore.canale = motore.canale == c ? nil : c } label: {
+                    EtichettaFiltroRicerca(testo: c.nomeBreve, acceso: motore.canale == c, canale: c)
+                }
+                .buttonStyle(StileSemplice())
+                .help(motore.canale == c ? "Tocca di nuovo per spegnere il canale" : c.nome)
+            }
+            Spacer(minLength: 0)
+            if !motore.vuoto && !stato.solaLettura {
+                Button {
+                    stato.salvaRicercaSubito(motore.testoConCodici, nome: motore.nomeSubito)
+                    fuoco = true
+                } label: {
+                    Text(TestiRicercaMac.salva)
+                        .font(RMac.carattereSalva.fontLeggibile)
+                        .foregroundColor(Colori.Spotlight.collegamento)
+                }
+                .buttonStyle(StileSemplice())
+                .help("La ritrovi qui, a campo vuoto")
+            }
+        }
+        .lineLimit(1)
+        .padding(RMac.filtriMargine)
+    }
+
+    /// I filtri scritti riconosciuti restano pillole leggibili (una notifica di conformità, o un codice scritto a mano).
+    @ViewBuilder private var strisciaMac: some View {
+        let e = motore.esito
+        if e.interpretata.conFiltri || !e.interpretata.incompleti.isEmpty {
+            HStack(alignment: .top, spacing: MS.pillolaSpazio) {
+                DisposizioneAcapoRicerca(spazio: MS.pillolaSpazio) {
+                    ForEach(e.interpretata.filtri, id: \.self) { f in
+                        PillolaSpotlight(testo: f.descrizione, tono: .filtro)
+                    }
+                    ForEach(e.interpretata.incompleti, id: \.self) { x in
+                        PillolaSpotlight(testo: x, nota: "da completare", tono: .incompleto)
+                    }
+                }
+                ForEach(e.totali) { t in TotaleCanaleSpotlight(totale: t) }
+            }
+            .padding(MS.strisciaMargine)
+        }
+    }
+
+    @ViewBuilder private var corpoMac: some View {
+        if motore.pannelloVuoto {
+            vuotoMac
+        } else if !motore.elenco.isEmpty {
+            HStack(spacing: 0) {
+                elencoMac
+                    .frame(width: RMac.colonnaElenco)
+                Rectangle()
+                    .fill(Colori.Spotlight.separatore)
+                    .frame(width: Tema.Misura.filo)
+                anteprimaMac
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+        } else if !motore.esito.interpretata.incompleti.isEmpty {
+            Text(TestiRicercaMac.completaFiltro)
+                .font(Tipo.spotlightMessaggio)
+                .foregroundColor(Colori.Spotlight.messaggio)
+                .multilineTextAlignment(.center)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .padding(MS.messaggioMargine)
+        } else {
+            nessunRisultatoMac
+        }
+    }
+
+    /// I risultati per gruppi, come sempre (la riga scelta blu, ↑ ↓ in giro, doppio clic apre).
+    private var elencoMac: some View {
+        ScrollViewReader { scorri in
+            ScrollView {
+                LazyVStack(alignment: .leading, spacing: 0) {
+                    ForEach(motore.esito.sezioni) { s in
+                        HStack {
+                            Text(s.gruppo.titolo)
+                            Spacer(minLength: 0)
+                            if s.totale > s.risultati.count { Text("\(s.risultati.count) di \(s.totale)") }
+                        }
+                        .font(Tipo.spotlightGruppo)
+                        .foregroundColor(Colori.Spotlight.gruppo)
+                        .padding(MS.gruppoMargine)
+                        ForEach(s.risultati) { r in
+                            rigaMac(r)
+                        }
+                    }
+                }
+                .padding(MS.margineElenco)
+            }
+            .onChange(of: motore.selezione) { i in
+                if motore.elenco.indices.contains(i) { scorri.scrollTo(motore.elenco[i].id) }
+            }
+        }
+    }
+
+    /// Una riga dell'elenco o del pannello vuoto: un tocco la sceglie (il mouse sposta la scelta), il doppio clic apre.
+    private func rigaMac(_ r: RisultatoRicerca, apreAlTocco: Bool = false) -> some View {
+        let i = motore.indici[r.id] ?? 0
+        let c: Cliente? = {
+            if case .cliente(let id) = r.destinazione { return stato.cliente(id) }
+            return nil
+        }()
+        return RigaSpotlight(risultato: r, selezionata: i == motore.selezione, cliente: c)
+            .id(r.id)
+            .onHover { dentro in if dentro && motore.selezione != i { motore.selezione = i } }
+            .onTapGesture {
+                motore.selezione = i
+                if apreAlTocco { apri(r) } else { fuoco = true }
+            }
+            .simultaneousGesture(TapGesture(count: 2).onEnded { if !apreAlTocco { apri(r) } })
+    }
+
+    @ViewBuilder private var anteprimaMac: some View {
+        if let r = motore.scelto {
+            AnteprimaRicerca(scheda: SchedeRicerca.scheda(r, stato: stato), sola: stato.solaLettura) { fai($0, r) }
+                .id(r.id)
+        }
+    }
+
+    /// Campo vuoto: a sinistra «Clienti recenti» e «Azioni» (le righe delle frecce), a destra le ricerche salvate e la frase.
+    private var vuotoMac: some View {
+        let salvate = stato.ricercheSalvate
+        return HStack(alignment: .top, spacing: 0) {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    if !motore.recenti.isEmpty {
+                        titoloGruppoMac(TestiRicercaMac.recenti)
+                        ForEach(motore.recenti) { r in rigaMac(r, apreAlTocco: true) }
+                    }
+                    titoloGruppoMac(TestiRicercaMac.azioni)
+                    ForEach(motore.azioniVuoto) { r in rigaMac(r, apreAlTocco: true) }
+                }
+                .padding(MS.margineElenco)
+            }
+            .frame(width: RMac.colonnaElenco)
+            Rectangle()
+                .fill(Colori.Spotlight.separatore)
+                .frame(width: Tema.Misura.filo)
+            ScrollView {
+                VStack(alignment: .leading, spacing: 0) {
+                    if !salvate.isEmpty {
+                        titoloGruppoMac(TestiRicercaMac.salvate)
+                        ForEach(salvate) { r in salvataMac(r) }
+                    }
+                    Text(TestiRicercaMac.fraseVuoto)
+                        .carattereApple(RMac.frase)
+                        .foregroundColor(RMac.coloreFrase)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(RMac.fraseMargine)
+                }
+                .padding(MS.margineElenco)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+        }
+    }
+
+    private func titoloGruppoMac(_ titolo: String) -> some View {
+        Text(titolo)
+            .font(Tipo.spotlightGruppo)
+            .foregroundColor(Colori.Spotlight.gruppo)
+            .padding(MS.gruppoMargine)
+    }
+
+    /// Una ricerca salvata: un tocco la riapre (i codici tornano etichette accese), la ✕ la toglie.
+    private func salvataMac(_ r: RicercaSalvata) -> some View {
+        HStack(spacing: MS.rigaSpazio) {
+            Button {
+                motore.applica(r.testo)
+                fuoco = true
+            } label: {
+                HStack(spacing: MS.rigaSpazio) {
+                    TesseraAzioneRicerca(simbolo: "magnifyingglass", lato: MS.icona)
+                    Text(r.nome)
+                        .font(Tipo.spotlightTitolo)
+                        .foregroundColor(Colori.Spotlight.titolo)
+                        .lineLimit(1)
+                    Spacer(minLength: 0)
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(StileSemplice())
+            .help(r.testo)
+            if !stato.solaLettura {
+                Button { stato.eliminaRicerca(r.id) } label: {
+                    Image(systemName: "xmark.circle.fill").foregroundColor(Colori.Spotlight.cancella)
+                }
+                .buttonStyle(StileSemplice())
+                .help("Togli dalle ricerche salvate")
+            }
+        }
+        .padding(MS.rigaMargine)
+        .fondoPassaggio(.arrotondata(Tema.Apple.AltreApp.raggioVoce), sopra: Colori.Spotlight.sopra)
+    }
+
+    /// Nessun risultato: la frase del template e «Chiedilo a Vera» (chiude, apre Vera e le passa il testo: Qwen sul Mac).
+    private var nessunRisultatoMac: some View {
+        VStack(spacing: RMac.nessunSpazio) {
+            Text(TestiRicercaMac.nessunRisultato(motore.testo.trimmingCharacters(in: .whitespacesAndNewlines)))
+                .carattereApple(RMac.nessunTitolo)
+                .foregroundColor(Colori.Spotlight.titolo)
+            Text(TestiRicercaMac.nessunSotto)
+                .carattereApple(RMac.nessunSotto)
+                .foregroundColor(Colori.Spotlight.messaggio)
+            if !motore.vuoto {
+                Button { chiediliAVera() } label: {
+                    Label(TestiRicercaMac.chiediVera, systemImage: "sparkles")
+                }
+                .buttonStyle(StileBlu())
+                .padding(.top, RMac.nessunSpazio)
+            }
+        }
+        .multilineTextAlignment(.center)
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(MS.messaggioMargine)
+    }
+
+    private func chiediliAVera() {
+        let domanda = motore.testo.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !domanda.isEmpty else { return }
+        stato.chiudiRicerca()
+        stato.apri(.vera)
+        stato.chiediVera(domanda)
+    }
+
+    /// Il piede: i tre tasti e, a destra, «Cerca solo su questo Mac» (un testo, non un pulsante).
+    private var pieMac: some View {
+        HStack(spacing: MS.pieSpazio) {
+            Text(TestiRicercaMac.scegli)
+            Text(TestiRicercaMac.invio)
+            Text(TestiRicercaMac.chiudi)
+            Spacer(minLength: 0)
+            Text(TestiRicercaMac.soloMac)
+        }
+        .font(Tipo.spotlightPie)
+        .foregroundColor(Colori.Spotlight.pie)
+        .lineLimit(1)
+        .padding(RMac.pieMargine)
+    }
+}
+#endif
 
 // MARK: - Anteprima
 
@@ -650,6 +1161,9 @@ enum AzioneAnteprima: Hashable {
     case alternaCompletata(String)
     case cliente(String)
     case eseguiAzione(AzioneRicerca)
+    /// Migliorie d'uso 61: Posizioni con il cliente scelto, «Mostra al cliente» sul cliente.
+    case posizioniCliente(String)
+    case mostraAlCliente(String)
 }
 
 /// Il contenuto della colonna di anteprima per il risultato scelto.
@@ -665,6 +1179,12 @@ struct SchedaAnteprima {
     var azioni: [(titolo: String, simbolo: String, azione: AzioneAnteprima)] = []
     /// Azioni che cambiano i dati: spente in sola lettura.
     var modificano: Set<Int> = []
+    /// Migliorie d'uso 61 (sul Mac): l'occhiello sopra il titolo («Proposta», «Documento», «Le parole»…), azzurro per le parole.
+    var occhiello: String? = nil
+    var occhielloAccento = false
+    /// Le azioni del menu «⋯» (sul Mac quelle che escono dai pulsanti dell'anteprima del cliente).
+    var altre: [(titolo: String, simbolo: String, azione: AzioneAnteprima)] = []
+    var altreModificano: Set<Int> = []
 }
 
 /// Le schede dell'anteprima: le cifre principali dell'elemento e le azioni che servono.
@@ -687,6 +1207,27 @@ enum SchedeRicerca {
             guard let c = stato.cliente(id) else { break }
             s.cliente = c
             s.sottotitolo = [c.tema, c.professione].filter { !$0.isEmpty }.joined(separator: " · ")
+            #if os(macOS)
+            // Migliorie d'uso 61: le tre righe del template, lette dalle cache per cliente (niente scorrimento dell'archivio)
+            let riepilogo = stato.riepilogoPosizioniCliente(id)
+            aggiungi(TestiRicercaMac.patrimonio, Formati.euro(riepilogo.patrimonioNetto))
+            let prossimo: Date? = stato.ricavato("ricerca-prossimo-\(id)-\(DerivatiDati.ora())") { () -> Date? in
+                stato.appuntamentiCliente(id).first { $0.stato == .pianificato && $0.inizio >= oggi }?.inizio
+            }
+            aggiungi(TestiRicercaMac.prossimo, prossimo.map { Formati.dataOra.string(from: $0) } ?? TestiRicercaMac.nonFissato)
+            aggiungi(TestiRicercaMac.daFare, TestiRicercaMac.aperti(stato.nastroDaFareCompleto(cliente: id).totale))
+            azione("Apri il dossier", "person.crop.circle", .apri)
+            azione("Posizioni", "chart.bar.doc.horizontal", .posizioniCliente(id))
+            azione("Mostra al cliente", "person.crop.rectangle", .mostraAlCliente(id))
+            // «Resoconto», «Fissa un appuntamento» e «Crea un'attività» passano nel menu «⋯»
+            if riepilogo.attivita > 0 || riepilogo.debiti > 0 {
+                s.altre.append((titolo: "Resoconto", simbolo: "doc.richtext", azione: .prospetto(.resoconto(report: false), cliente: id)))
+            }
+            s.altreModificano.insert(s.altre.count)
+            s.altre.append((titolo: "Fissa un appuntamento", simbolo: "calendar.badge.plus", azione: .appuntamento(cliente: id, posizione: nil)))
+            s.altreModificano.insert(s.altre.count)
+            s.altre.append((titolo: "Crea un'attività", simbolo: "checklist", azione: .attivita(cliente: id, appuntamento: nil)))
+            #else
             let suePosizioni = dati.posizioni.filter { $0.clienteId == id }
             let inEssere = suePosizioni.filter { $0.stato == .inEssere }
             let attive = inEssere.filter { !$0.area.passivo }
@@ -707,6 +1248,7 @@ enum SchedeRicerca {
             if !inEssere.isEmpty { azione("Resoconto", "doc.richtext", .prospetto(.resoconto(report: false), cliente: id)) }
             azione("Fissa un appuntamento", "calendar.badge.plus", .appuntamento(cliente: id, posizione: nil), modifica: true)
             azione("Crea un'attività", "checklist", .attivita(cliente: id, appuntamento: nil), modifica: true)
+            #endif
 
         case .posizione(let id):
             guard let p = dati.posizioni.first(where: { $0.id == id }) else { break }
@@ -725,7 +1267,12 @@ enum SchedeRicerca {
                 aggiungi("Beneficiari", b.isEmpty ? "da indicare" : b)
             }
             if !p.emittente.isEmpty { aggiungi("Emittente", p.emittente) }
+            #if os(macOS)
+            s.occhiello = p.stato == .proposta ? TestiRicercaMac.occhielloProposta : TestiRicercaMac.occhielloInEssere
+            azione("Apri la scheda", "chart.bar.doc.horizontal", .apri)
+            #else
             azione("Apri la posizione", "chart.bar.doc.horizontal", .apri)
+            #endif
             azione("Prospetto", "doc.richtext", .prospetto(.posizione(p.id), cliente: p.clienteId))
             azione("Fissa un appuntamento", "calendar.badge.plus", .appuntamento(cliente: p.clienteId, posizione: p.id), modifica: true)
             azione("Crea un'attività", "checklist", .attivita(cliente: p.clienteId, appuntamento: nil), modifica: true)
@@ -752,6 +1299,9 @@ enum SchedeRicerca {
             aggiungi("Importato il", Formati.dataEstesa.string(from: d.importatoIl))
             if !d.campi.isEmpty { aggiungi("Dati letti", "\(d.campi.count)") }
             s.testo = r.estratto
+            #if os(macOS)
+            s.occhiello = TestiRicercaMac.occhielloDocumento
+            #endif
             azione("Apri il documento", "doc.text", .apri)
             azione("Apri il cliente", "person.crop.circle", .cliente(d.clienteId))
 
@@ -815,6 +1365,19 @@ enum SchedeRicerca {
             azione(pagina > 1 ? "Apri a pagina \(pagina)" : "Apri il documento", "books.vertical", .apri)
 
         case .app(let app):
+            #if os(macOS)
+            // Migliorie d'uso 61: occhiello del gruppo, titolo, riga; «Fai» / «Apri»
+            if let a = r.azione {
+                s.occhiello = GruppoRicerca.azioni.titolo
+                s.sottotitolo = a.dettaglio
+                azione("Fai", a.simbolo, .eseguiAzione(a), modifica: a.conModulo)
+            } else {
+                s.occhiello = GruppoRicerca.app.titolo
+                s.sottotitolo = app.sottotitolo
+                s.testo = app.inArrivo
+                azione("Apri", "arrow.up.forward.app", .apri)
+            }
+            #else
             if let a = r.azione {
                 s.sottotitolo = "Azione rapida"
                 s.testo = a.dettaglio
@@ -825,6 +1388,19 @@ enum SchedeRicerca {
                 // Sul Mac le app accorpate dicono dove si aprono («Apri Analisi 360 · Simulazioni»)
                 azione("Apri \(app.titoloInPrisma)", "arrow.up.forward.app", .apri)
             }
+            #endif
+
+        case .parola(let chiave):
+            // Migliorie d'uso 61: occhiello azzurro «Le parole», termine, la riga breve, «Apri il glossario»
+            guard let v = Glossario.voce(chiave) else { break }
+            s.titolo = v.termine
+            s.sottotitolo = v.perEsteso ?? ""
+            s.testo = v.breve
+            #if os(macOS)
+            s.occhiello = TestiRicercaMac.occhielloParola
+            s.occhielloAccento = true
+            #endif
+            azione("Apri il glossario", "text.book.closed", .apri)
         }
         return s
     }
@@ -844,8 +1420,16 @@ struct AnteprimaRicerca: View {
         VStack(alignment: .leading, spacing: 0) {
             ScrollView {
                 VStack(alignment: .leading, spacing: M.anteprimaSpazio) {
+                    #if os(macOS)
+                    if let o = scheda.occhiello {
+                        Text(o)
+                            .carattereApple(Tema.Apple.AltreApp.Ricerca.Mac.occhiello)
+                            .foregroundColor(scheda.occhielloAccento ? Tema.Apple.AltreApp.Ricerca.Mac.coloreOcchielloParola
+                                                                     : Tema.Apple.AltreApp.Ricerca.Mac.coloreOcchiello)
+                    }
+                    #endif
                     HStack(spacing: M.intestazioneSpazio) {
-                        IconaRisultatoRicerca(risultato: scheda.risultato, cliente: scheda.cliente, lato: M.iconaAnteprima)
+                        IconaRisultatoRicerca(risultato: scheda.risultato, cliente: scheda.cliente, lato: latoIcona)
                         VStack(alignment: .leading, spacing: M.rigaTestoSpazio) {
                             Text(scheda.titolo)
                                 .font(Tipo.spotlightAnteprimaTitolo)
@@ -889,6 +1473,15 @@ struct AnteprimaRicerca: View {
         }
     }
 
+    /// Sul Mac l'avatar del cliente è 48 come nel template (migliorie d'uso 61).
+    private var latoIcona: CGFloat {
+        #if os(macOS)
+        return scheda.cliente != nil ? Tema.Apple.AltreApp.Ricerca.Mac.avatarAnteprima : M.iconaAnteprima
+        #else
+        return M.iconaAnteprima
+        #endif
+    }
+
     private var azioni: some View {
         DisposizioneAcapoRicerca(spazio: M.azioniSpazio) {
             ForEach(Array(scheda.azioni.enumerated()), id: \.offset) { i, a in
@@ -902,6 +1495,23 @@ struct AnteprimaRicerca: View {
                         .disabled(sola && scheda.modificano.contains(i))
                 }
             }
+            #if os(macOS)
+            // Migliorie d'uso 61: le altre azioni nel menu «⋯» (non spariscono)
+            if !scheda.altre.isEmpty {
+                Menu {
+                    ForEach(Array(scheda.altre.enumerated()), id: \.offset) { i, a in
+                        Button { fai(a.azione) } label: { Label(a.titolo, systemImage: a.simbolo) }
+                            .disabled(sola && scheda.altreModificano.contains(i))
+                    }
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+                .menuStyle(.borderlessButton)
+                .menuIndicator(.hidden)
+                .fixedSize()
+                .help("Altre azioni")
+            }
+            #endif
         }
     }
 }

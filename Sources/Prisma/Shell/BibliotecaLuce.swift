@@ -146,6 +146,8 @@ extension StatoShell {
     func apriDocumentoBiblioteca(_ id: String, pagina: Int = 1) {
         guard let d = documentoBiblioteca(id) else { return }
         #if os(macOS)
+        // Migliorie d'uso 63: un documento si apre sempre nella sezione «Documenti» (anche dal catalogo dei prodotti)
+        if sezioneBiblioteca != .documenti { sezioneBiblioteca = .documenti }
         // Migliorie d'uso 35: un documento nuovo svuota il campo, che ora chiede «Chiedi qualcosa su «…»…»
         if trovaPagina.aperta?.documentoId != id { trovaPagina.domanda = "" }
         #endif
@@ -254,6 +256,8 @@ extension StatoShell {
 
     /// «Aggiungi…»: il pannello per scegliere i PDF (o le immagini delle scansioni).
     func scegliDocumentiBiblioteca() {
+        // Migliorie d'uso 37: il pannello non si apre neppure durante la dimostrazione
+        guard !inDimostrazione else { return mostraAvviso(TestiDimostrazione.nonDurante) }
         let p = NSOpenPanel()
         p.allowedContentTypes = [.pdf, .png, .jpeg, .tiff, .heic]
         p.allowsMultipleSelection = true

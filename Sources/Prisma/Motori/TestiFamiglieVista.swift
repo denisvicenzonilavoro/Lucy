@@ -28,10 +28,11 @@ extension TestiFamiglie {
                             ambito: AmbitoFamiglie = .cella) -> (prima: String, numero: Int, dopo: String) {
         let circa = ridotto ? " circa" : ""
         let chi = famiglieFraseGrande(ambito)
+        // Gli articoli seguono il numero (migliorie d'uso 46): «più dell'80%», «L'82% delle famiglie»
         if p >= 50 {
-            return ("\(nome) risparmia più del ", p, "\(circa) \(chi).")
+            return ("\(nome) risparmia più \(Formati.elide(p) ? "dell'" : "del ")", p, "\(circa) \(chi).")
         }
-        return ("Il ", 100 - p, "\(circa) \(chi) risparmia più di \(nome).")
+        return (Formati.elide(100 - p) ? "L'" : "Il ", 100 - p, "\(circa) \(chi) risparmia più di \(nome).")
     }
 
     /// Il formato del numero che si conta nella frase grande delle tavole a una dimensione: «28,7%».
@@ -187,6 +188,48 @@ extension TestiFamiglie {
         let cifra = c.percentile.map { "\($0)%" } ?? [valoreGruppo(c), parolaVoce(c)].compactMap { $0 }.joined(separator: ", ")
         let testa = gruppo.map { "\(nome(c.voce)), \($0)" } ?? nome(c.voce)
         return "\(testa): \(cifra.isEmpty ? "dato mancante" : cifra). \(c.frase)"
+    }
+
+    // MARK: Il punto debole (migliorie d'uso 46)
+
+    static let capsulaIndietro = "Dove resta indietro"
+    /// Il template dice «in tutte e quattro»: le voci dell'app possono essere cinque o meno.
+    static let capsulaSopra = "Sopra la metà in tutto"
+    static let nessunPuntoDebole = "Non c'è un punto debole rispetto alle famiglie come la sua."
+    static let apriAreaCard = "Apri l'area ›"
+
+    /// «Apri l'area Previdenza», «Apri l'area Risparmio e liquidità».
+    static func apriArea(_ a: AreaAnalisi) -> String { "Apri l'area \(TestiAree360.nomeArea(a))" }
+
+    /// «Sul risparmio», «Sul patrimonio» (patrimonio finanziario e ricchezza netta), «Sulla protezione», «Sulla previdenza».
+    static func sulla(_ v: VoceFamiglie) -> String {
+        switch v {
+        case .tassoRisparmio: return "Sul risparmio"
+        case .ricchezzaFinanziaria, .ricchezzaNetta: return "Sul patrimonio"
+        case .protezione: return "Sulla protezione"
+        case .previdenzaComplementare: return "Sulla previdenza"
+        }
+    }
+
+    /// La frase del punto debole, mai con un percentile inventato (decisione 46-a): con i quantili «Sul risparmio: il
+    /// 62% delle famiglie come la sua fa meglio.»; con mediana o media «… sta sotto la mediana (la media) delle famiglie
+    /// come la sua.»; con la quota «… la maggior parte delle famiglie come la sua ce l'ha, Giulia no.» (con il nome al
+    /// posto di «lui» della proposta: vale per chiunque).
+    static func frasePuntoDebole(_ p: PuntoDeboleFamiglie, nome: String) -> String {
+        let testa = sulla(p.voce) + ": "
+        switch p.metodo {
+        case .quantili:
+            let n = 100 - (p.percentile ?? 50)
+            return testa + Formati.ilPercentuale(n) + " delle famiglie come la sua fa meglio."
+        case .mediana:
+            return testa + "sta sotto la mediana delle famiglie come la sua."
+        case .media, .rapportoMedie:
+            return testa + "sta sotto la media delle famiglie come la sua."
+        case .quota:
+            return testa + "la maggior parte delle famiglie come la sua ce l'ha, \(nome) no."
+        case .nessuno:
+            return testa + "c'è margine rispetto alle famiglie come la sua."
+        }
     }
 
     // MARK: Stati senza confronto

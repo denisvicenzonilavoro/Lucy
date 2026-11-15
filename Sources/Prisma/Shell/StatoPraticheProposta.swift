@@ -146,6 +146,13 @@ extension StatoShell {
                               pratiche: imp.pratiche, costruite: p.costruite, ultimi: p.ultimoProdotto, richieste: p.richieste)
     }
 
+    /// I bisogni della proposta sono in cache per lo stato di adesso (per `--prova-fluidita`: scegliere un cliente filtra
+    /// soltanto, senza rifare i motori).
+    var bisogniPropostaInCache: Bool {
+        guard let c = praticheProposta.cacheBisogni else { return false }
+        return c.chiave == chiaveProposta()
+    }
+
     /// I bisogni scoperti dall'analisi di tutti i clienti: prima il più urgente di ognuno, poi il secondo, e così via
     /// (nell'ordine della rubrica). Ricalcolati solo quando cambia ciò che i motori leggono (`ChiaveProposta`).
     func bisogniProposta() -> [BisognoScoperto] {

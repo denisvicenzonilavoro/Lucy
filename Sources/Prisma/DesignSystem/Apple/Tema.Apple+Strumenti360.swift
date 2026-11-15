@@ -136,6 +136,139 @@ extension Tema.Apple {
         static let spazioTitoloScheda: CGFloat = 1
     }
 
+    /// Migliorie d'uso 64 «Simula e confronta: prima la frase» (Shell/SimulaConfronta.swift): misure e caratteri del
+    /// template (righe 5024-5064); colori quelli che il tema ha già (serie dei confronti, accento, verde, arancio).
+    enum SimulaConfronta {
+        // MARK: Colonna di sinistra
+        static let larghezzaColonna: CGFloat = 372
+        static let paddingColonna = Misura.padding(18, 20)
+        static let spazioBlocchi: CGFloat = 12
+        static let spazioOcchiello: CGFloat = 6
+        static let occhiello = Carattere.etichetta
+        static let coloreOcchiello = Colore.inchiostro2
+        static let filo = Colore.separatore
+        /// La riga della strada: tondino col colore e la lettera, nome, provenienza, freccia.
+        static let tondinoStrada: CGFloat = 22
+        static let letteraStrada = Carattere(dimensione: 11, peso: .bold)
+        static let coloreLettera = Color.white
+        static let nomeStrada = Carattere(dimensione: 14, peso: .semibold)
+        static let rigaStrada = Carattere(dimensione: 12, peso: .regular)
+        static let coloreNomeStrada = Colore.inchiostro
+        static let coloreRigaStrada = Colore.inchiostro2
+        static let frecciaStrada = Carattere(dimensione: 11, peso: .semibold)
+        static let fondoStrada = Colore.chip
+        static let raggioStrada = Raggio.voce
+        static let paddingStrada = Misura.padding(9, 12)
+        static let spazioStrada: CGFloat = 10
+        /// Il menu delle strade (popover).
+        static let larghezzaMenu: CGFloat = 380
+        static let altezzaMenu: CGFloat = 420
+        static let paddingMenu = Misura.padding(10, 12)
+        static let gruppoMenu = Carattere.sottotitolo
+        static let voceMenu = Carattere(dimensione: 13, peso: .medium)
+        static let provenienzaMenu = Carattere(dimensione: 12, peso: .regular)
+        static let paddingVoceMenu = Misura.padding(6, 8)
+        static let fondoVoceScelta = Colore.chip
+        static let larghezzaEditor: CGFloat = 320
+        /// La riga delle ipotesi in grigio sotto i cursori.
+        static let rigaIpotesi = Carattere.secondario
+        static let coloreRigaIpotesi = Colore.inchiostro2
+
+        // MARK: La frase
+        static let superficie = Superficie.cardPiatta
+        static let riquadro = Superficie.tile
+        static let paddingFrase = Misura.padding(18, 22)
+        static let paddingRiquadro = Misura.Padding.tile
+        static let fraseUna = Carattere(dimensione: 23, peso: .bold, tracking: -0.4, interlinea: 1.3)
+        static let fraseDue = Carattere(dimensione: 21, peso: .bold, interlinea: 1.35)
+        static let sottoFrase = Carattere(dimensione: 14.5, peso: .regular, interlinea: 1.5)
+        static let coloreFrase = Colore.inchiostro
+        static let coloreSottoFrase = Colore.inchiostro2
+        static let cifraFrase = Colore.accento
+        static let differenzaFrase = Colore.verde
+        static let spazioFrase: CGFloat = 6
+
+        // MARK: Se va diversamente, grafico, tabella
+        static let larghezzaSeVa: CGFloat = 300
+        static let barraSeVa: CGFloat = 8
+        static let spazioSeVa: CGFloat = 10
+        static let nomeSeVa = Carattere(dimensione: 13, peso: .semibold)
+        static let notaSeVa = Carattere(dimensione: 12, peso: .regular)
+        static let cifraSeVa = Carattere(dimensione: 13, peso: .semibold, tabellare: true)
+        static let binario = Colore.binario
+        static let male = Colore.arancio
+        static let previsto = Colore.accento
+        static let bene = Colore.verde
+        static let assi = Carattere(dimensione: 11.5, peso: .regular)
+        static let coloreAssi = Colore.inchiostro2
+        /// Le tre colonne della tabella: etichetta (resto), A e B.
+        static let colonnaTabella: CGFloat = 130
+        static let testaTabella = Carattere(dimensione: 11.5, peso: .semibold)
+        static let cellaTabella = Carattere(dimensione: 13, peso: .regular)
+        static let cifraTabella = Carattere(dimensione: 13, peso: .semibold, tabellare: true)
+        static let coloreCella = Colore.inchiostro
+        static let coloreCellaNota = Colore.inchiostro2
+        static let spunta = Colore.verde
+        static let spazioTabella: CGFloat = 9
+
+        // MARK: Fila e ipotesi salvate
+        static let chip = Carattere(dimensione: 12, peso: .medium)
+        static let coloreChip = Colore.inchiostro
+        static let fondoChip = Colore.chip
+        static let paddingChip = Misura.padding(5, 10)
+        static let massimoChip = 6
+        static let notaFila = Carattere.secondario
+        static let coloreNotaFila = Colore.inchiostro2
+
+        /// I colori delle due strade: quelli delle serie dei confronti (A accento, B viola).
+        static var serieA: Color { Colori.Strumenti.serie[0] }
+        static var serieB: Color { Colori.Strumenti.serie[1] }
+        static var versato: Color { Colori.Analisi.lineaTratteggiata }
+
+        /// Migliorie d'uso 69 «Il TFR: prima la risposta» (template righe 801-806: `.tfFr`, `.tfV`, `.tfB`, `.tfC`).
+        enum TFR {
+            /// La frase in testa: 21 bold, tracking −0,4, interlinea 1,33, nella card 16×22.
+            static let frase = Carattere(dimensione: 21, peso: .bold, tracking: -0.4, interlinea: 1.33)
+            static let paddingFrase = Misura.padding(16, 22)
+            static let paddingSenza = Misura.padding(22, 24)
+            /// Testo corrente della colonna e della riga sotto la frase (14,5, interlinea 1,5).
+            static let corpo = Carattere(dimensione: 14.5, peso: .regular, interlinea: 1.5)
+            static let coloreCorpo = Colore.inchiostro
+            static let nota = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
+            static let coloreNota = Colore.inchiostro2
+            static let spazioBlocchi: CGFloat = 10
+            static let spazioInterno: CGFloat = 5
+            /// Le strade: riga con nome e cifra, poi la barra alta 10 (al minimo il 4% della più lunga).
+            static let paddingStrade = Misura.padding(12, 20)
+            static let rigaStrada = Carattere(dimensione: 14, peso: .regular)
+            static let cifraStrada = Carattere(dimensione: 14, peso: .bold, tabellare: true)
+            static let barra: CGFloat = 10
+            static let barraMinima = 0.04
+            static let spazioBarra: CGFloat = 5
+            static let spazioStrade: CGFloat = 10
+            static let binario = Colore.binario
+            static var coloreAzienda: Color { Tema.Colore.TFR.azienda }
+            static var coloreFondo: Color { Tema.Colore.TFR.fondo }
+            static var coloreContributi: Color { Tema.Colore.TFR.fondoContributi }
+            /// I tre riquadri: cifra 20 bold (tracking −0,3) e testo breve.
+            static let paddingTessera = Misura.padding(13, 16)
+            static let cifraTessera = Carattere(dimensione: 20, peso: .bold, tracking: -0.3, tabellare: true)
+            static let testoTessera = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.42)
+            static let primaAliquota = Colore.inchiostro3
+            static let dopoAliquota = Colore.verde
+            /// «Cosa cambia»: righe 13,5 (interlinea 1,45) con il pallino di 5.
+            static let paddingCambia = Misura.padding(11, 20)
+            static let rigaCambia = Carattere(dimensione: 13.5, peso: .regular, interlinea: 1.45)
+            static let pallino: CGFloat = 5
+            static let spazioPallino: CGFloat = 9
+            static let altezzaPallino: CGFloat = 7
+            static let colorePallino = Colore.inchiostro3
+            /// «Altre ipotesi ⌄»: la freccia ruota di mezzo giro.
+            static let frecciaAltre = Carattere(dimensione: 11, peso: .semibold)
+            static let rotazioneAperta: Double = 180
+        }
+    }
+
     /// Gettoni del TFR (Analisi 360 › TFR) nel tema Apple: solo superfici e caratteri, il resto com'è.
     enum ConfrontoTFR {
         static let occhiello = Carattere.etichetta

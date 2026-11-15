@@ -132,6 +132,10 @@ struct DatiPrisma: Codable, Equatable {
     /// quelle aggiunte al Prisma del cliente o salvate in PDF, l'ultima per cliente e versione. Nel file del cliente e nei
     /// backup; mai in «Prisma ovunque» (D-L8).
     var lettere: [LetteraFuturo] = []
+    /// Le esperienze della Sala fatte con il cliente (Migliorie d'uso 60, `Dati/EsperienzaFatta.swift`): solo chi, cosa e
+    /// quando, mai il contenuto. Letto con tolleranza, nessuna versione nuova. Nel file del cliente e nei backup; mai in
+    /// «Prisma ovunque».
+    var esperienzeFatte: [EsperienzaFatta] = []
     var clienteAttivoId: String
     var impostazioni: Impostazioni
 
@@ -239,6 +243,8 @@ struct DatiPrisma: Codable, Equatable {
     ///     (`ImpostazioniSala`), tutti letti con tolleranza (un elemento illeggibile si scarta).
     ///     Migliorie d'uso 25: `MessaggioCliente.speditoIl` (il segno «Sì, spedito» del consulente), facoltativo e letto
     ///     con tolleranza, nel file del cliente con i suoi messaggi: nessuna versione nuova.
+    ///     Migliorie d'uso 60: le esperienze della Sala fatte con il cliente (`esperienzeFatte`: chi, cosa, quando),
+    ///     lette con tolleranza nel file del cliente: nessuna versione nuova.
     static let versioneAttuale = 27
 
     init(clienti: [Cliente], appuntamenti: [Appuntamento], attivita: [Attivita], posizioni: [Posizione],
@@ -319,6 +325,7 @@ struct DatiPrisma: Codable, Equatable {
         case notti
         case capsule, sinistri, uscite
         case lettere
+        case esperienzeFatte
     }
 
     /// Lettura tollerante: gli archivi delle versioni precedenti non hanno tutte le sezioni.
@@ -406,6 +413,8 @@ struct DatiPrisma: Codable, Equatable {
         uscite = ((try? c.decodeIfPresent(ElencoTollerante<UscitaCliente>.self, forKey: .uscite)) ?? nil)?.elementi ?? []
         // Le lettere dal futuro conservate (versione 27): una lettera illeggibile si scarta, le altre restano
         lettere = ((try? c.decodeIfPresent(ElencoTollerante<LetteraFuturo>.self, forKey: .lettere)) ?? nil)?.elementi ?? []
+        // Migliorie d'uso 60: le esperienze della Sala fatte; un'esperienza sconosciuta si scarta, le altre restano
+        esperienzeFatte = ((try? c.decodeIfPresent(ElencoTollerante<EsperienzaFatta>.self, forKey: .esperienzeFatte)) ?? nil)?.elementi ?? []
         clienteAttivoId = try c.decodeIfPresent(String.self, forKey: .clienteAttivoId) ?? (clienti.first?.id ?? "")
         impostazioni = try c.decodeIfPresent(Impostazioni.self, forKey: .impostazioni) ?? Impostazioni()
     }
@@ -473,6 +482,7 @@ struct DatiPrisma: Codable, Equatable {
         try metti(sinistri, .sinistri)
         try metti(uscite, .uscite)
         try metti(lettere, .lettere)
+        try metti(esperienzeFatte, .esperienzeFatte)
         try metti(clienteAttivoId, .clienteAttivoId)
         try metti(impostazioni, .impostazioni)
     }

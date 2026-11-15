@@ -382,6 +382,16 @@ enum ProvaOvunque {
             try controlla(mac.appuntamenti[i].daConfermare == nil,
                           "la conferma fatta sul dispositivo non arriva sul Mac (esito \(esito))")
         }
+        #if os(macOS)
+        // Migliorie d'uso 51 (decisione 51-a): «Manda il giro all'iPhone» con lo spazio spento non scrive nulla
+        let stato = StatoShell(persistente: false)
+        stato.dati.impostazioni.ovunque.acceso = false
+        let giri = stato.ovunque.giri
+        stato.mandaGiroAlliPhone(Date())
+        try controlla(stato.territorio.giroIPhone == nil && stato.ovunque.giri == giri && !stato.ovunque.inCorso
+                        && !stato.giroSulliPhone(Date()),
+                      "con «Prisma ovunque» spento «Manda il giro all'iPhone» ha cercato di scrivere l'istantanea")
+        #endif
     }
 
     /// Le pratiche dopo la firma sull'iPhone («Luce» §7.3.4, decisione 44): entrano nell'istantanea; un passo segnato sul
@@ -610,9 +620,13 @@ enum ProvaOvunque {
         dati.capsule = [capsula]
         dati.uscite = [uscita]
         dati.sinistri = [sinistro]
+        // Migliorie d'uso 60 (decisione 60-e): le esperienze della Sala fatte restano sul Mac
+        let fatta = EsperienzaFatta(id: "fatta-ovunque", clienteId: "giulia", esperienza: .giocoRischio, quando: ora(1))
+        dati.esperienzeFatte = [fatta]
         let istantanea = SpazioOvunque.datiIstantanea(dati)
         try controlla(istantanea.capsule.isEmpty && istantanea.uscite.isEmpty,
                       "le capsule del tempo o le uscite entrano nell'istantanea di Prisma ovunque")
+        try controlla(istantanea.esperienzeFatte.isEmpty, "le esperienze della Sala fatte entrano nell'istantanea di Prisma ovunque")
         let chiaro = try JSONOvunque.codificatore().encode(istantanea)
         let testo = String(decoding: chiaro, as: UTF8.self)
         for segreto in ["Obiettivo riservato 3H8T", "Biglietto riservato 9P4K", "Descrizione riservata 6W1R", "SIN-PROVA-4417",
@@ -631,6 +645,7 @@ enum ProvaOvunque {
         // L'archivio del Mac non cambia
         try controlla(dati.capsule == [capsula] && dati.uscite == [uscita] && dati.sinistri == [sinistro],
                       "l'istantanea ha toccato capsule, uscite o sinistri dell'archivio del Mac")
+        try controlla(dati.esperienzeFatte == [fatta], "l'istantanea ha toccato le esperienze della Sala fatte dell'archivio del Mac")
         // Sul dispositivo: capsule e uscite restano le sue
         var telefono = DatiPrisma.demo()
         telefono.capsule = []
@@ -640,6 +655,11 @@ enum ProvaOvunque {
         let accolto = SincroniaOvunque.accogli(ist, in: telefono).dati
         try controlla(accolto.capsule.isEmpty && accolto.uscite.isEmpty,
                       "accogliendo l'istantanea il dispositivo riceve capsule o uscite")
+        // Un'istantanea senza il campo non cancella le esperienze fatte locali
+        var conFatte = telefono
+        conFatte.esperienzeFatte = [fatta]
+        try controlla(SincroniaOvunque.accogli(ist, in: conFatte).dati.esperienzeFatte == [fatta],
+                      "accogliendo l'istantanea il dispositivo perde le sue esperienze della Sala fatte")
         try controlla(accolto.sinistri.map(\.id).contains(sinistro.id), "il dispositivo non riceve i sinistri dello spazio")
     }
 
@@ -731,8 +751,9 @@ enum ProvaOvunque {
         var prima = tel
         let notaTel = Nota(id: "nota-telefono-1", clienteId: cid, titolo: "Dal cliente", testo: testoSegreto, creataIl: ora(4), aggiornataIl: ora(4))
         tel.note.append(notaTel)
+        // Migliorie d'uso 65: l'attività nata da una nota porta il legame (`daNota`), che arriva intatto sul Mac
         let attivitaTel = Attivita(id: "task-telefono-1", clienteId: cid, titolo: "Richiamare per la casa", scadenza: ora(600),
-                                   priorita: .alta, completata: false)
+                                   priorita: .alta, completata: false, daNota: notaTel.id)
         tel.attivita.append(attivitaTel)
         try controlla(RegistroOvunque.registra(prima: prima, dopo: &tel, adesso: ora(4)) == 2
                       && tel.giornaleOvunque.map(\.seq) == [1, 2] && tel.giornaleOvunque.map(\.tipo) == [.crea, .crea]
@@ -765,6 +786,8 @@ enum ProvaOvunque {
                       && mac.attivita.filter { $0.id == attivitaTel.id }.count == 1, "la copia del giornale ha dato doppioni")
         try controlla(mac.note.first { $0.id == notaTel.id } == notaTel && mac.attivita.first { $0.id == attivitaTel.id } == attivitaTel,
                       "la nota o l'attività dell'iPhone non arrivano uguali sul Mac")
+        try controlla(mac.attivita.first { $0.id == attivitaTel.id }?.daNota == notaTel.id,
+                      "l'attività nata da una nota perde il legame con la nota nel giornale")
         try controlla(!(try icloud.elenca()).contains { $0.nome == copia }, "la copia del giornale non è stata eliminata")
         try controlla(em.istantaneaScritta && mac.impostazioni.ovunque.generazione == 2
                       && mac.impostazioni.ovunque.vistoFinoA[idTelefono] == 2 && mac.arriviOvunque.count == 2,

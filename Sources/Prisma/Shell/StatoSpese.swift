@@ -67,20 +67,34 @@ import UniformTypeIdentifiers
     /// Solo per l'istantanea 787: Impostazioni › Studio mostra in cima la sezione dei chilometri e delle spese.
     var impostazioniInCima = false
 
-    /// Il mese mostrato.
+    /// Il mese mostrato. Migliorie d'uso 57: mai oltre il mese di calendario di oggi (un mese futuro scelto in altro
+    /// modo si riporta al mese di oggi).
     func mese(oggi: Date = Date(), impostazioni: ImpostazioniSpese) -> Date {
-        meseScelto ?? MotoreChilometri.meseMostrato(oggi: oggi, giornoCambio: impostazioni.giornoCambioMese)
+        let scelto = meseScelto ?? MotoreChilometri.meseMostrato(oggi: oggi, giornoCambio: impostazioni.giornoCambioMese)
+        return min(scelto, Self.ultimoMese(oggi: oggi))
     }
 
-    /// Cambia il mese di `passo` mesi (‹ ›); il pacchetto pronto riguarda il mese di prima e si toglie.
+    /// L'ultimo mese che si può scegliere: il mese di calendario di oggi (anche nei primi giorni, quando il mese
+    /// mostrato all'apertura è ancora il precedente).
+    static func ultimoMese(oggi: Date = Date()) -> Date { MotoreChilometri.inizioMese(oggi) }
+
+    /// La freccia › è attiva: il mese mostrato è prima del mese di oggi.
+    func puoAvanzare(oggi: Date = Date(), impostazioni: ImpostazioniSpese) -> Bool {
+        mese(oggi: oggi, impostazioni: impostazioni) < Self.ultimoMese(oggi: oggi)
+    }
+
+    /// Cambia il mese di `passo` mesi (‹ ›), senza andare oltre il mese di oggi; il pacchetto pronto riguarda il mese
+    /// di prima e si toglie.
     func sposta(_ passo: Int, oggi: Date = Date(), impostazioni: ImpostazioniSpese) {
         let attuale = mese(oggi: oggi, impostazioni: impostazioni)
         guard let nuovo = Calendar.current.date(byAdding: .month, value: passo, to: attuale) else { return }
-        scegli(nuovo)
+        scegli(nuovo, oggi: oggi)
     }
 
-    func scegli(_ mese: Date) {
-        meseScelto = MotoreChilometri.inizioMese(mese)
+    /// Sceglie un mese (frecce, colonne, spesa salvata): mai oltre il mese di oggi.
+    func scegli(_ mese: Date, oggi: Date = Date()) {
+        let nuovo = min(MotoreChilometri.inizioMese(mese), Self.ultimoMese(oggi: oggi))
+        meseScelto = nuovo
         nuovaSpesaId = nil
         if case .inPreparazione = pacchetto { return }
         pacchetto = .nessuno
@@ -235,6 +249,59 @@ extension StatoShell {
         apri(.agenda)
     }
 
+    #if os(macOS)
+    /// Rifinitura 57: le scadenze dello Studio da fare nei giorni mostrati dalla vista mese dell'Agenda, per giorno. Mai in
+    /// modalità cliente (sono del consulente) né con un cliente scelto nell'Agenda (il filtro mostra solo quel cliente).
+    /// Fra i dati ricavati con le scadenze come ingresso: `speseStudio` è esclusa da `stessiCalcoli`.
+    func scadenzeStudioAgenda(_ giorni: [Date]) -> [Date: [ScadenzaStudio]] {
+        guard !inModoCliente, filtroClienteAgenda == nil, let primo = giorni.min(), let ultimo = giorni.max() else { return [:] }
+        let cal = Calendar.current
+        let inizio = cal.startOfDay(for: primo)
+        let fine = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: ultimo)) ?? inizio
+        let scadenze = dati.speseStudio.scadenze
+        return ricavato("agenda-scadenze-studio|\(inizio.timeIntervalSinceReferenceDate)|\(fine.timeIntervalSinceReferenceDate)",
+                        ingresso: scadenze) {
+            MotoreSpese.perGiorno(scadenze, da: inizio, a: fine, calendario: cal)
+        }
+    }
+
+    /// Rifinitura 57: le scadenze dello Studio nella vista mese dell'Agenda: la scadenza da fare c'è nel suo giorno, la
+    /// fatta no; con un cliente scelto nell'Agenda o in modalità cliente non c'è; cambiata la scadenza (dato fuori dai
+    /// calcoli) l'Agenda la rilegge. Da chiamare in `Prisma --prova-fluidita` (solo stato, niente finestre).
+    static func provaScadenzeStudioAgenda(_ controlla: (Bool, String) -> Void) {
+        let s = StatoShell(persistente: false)
+        let cal = Calendar.current
+        let giorno = cal.startOfDay(for: Date())
+        let giorni = CalendarioAgenda.settimane(meseDi: giorno).flatMap { $0 }
+        s.modoCliente = nil
+        s.filtroClienteAgenda = nil
+        s.dati.speseStudio.scadenze = [
+            ScadenzaStudio(id: "prova-agenda-f24", titolo: "F24", data: giorno, tipo: .fiscale),
+            ScadenzaStudio(id: "prova-agenda-rc", titolo: "Polizza RC professionale", data: giorno, tipo: .polizza,
+                           fattaIl: giorno),
+        ]
+        let prima = s.scadenzeStudioAgenda(giorni)[giorno]?.map(\.id) ?? []
+        controlla(prima == ["prova-agenda-f24"], "Agenda 57: la scadenza dello Studio da fare c'è nel suo giorno, la fatta no")
+        s.dati.speseStudio.scadenze[0].titolo = "Saldo delle imposte"
+        controlla(s.scadenzeStudioAgenda(giorni)[giorno]?.first?.titolo == "Saldo delle imposte",
+                  "Agenda 57: cambiata una scadenza dello Studio, l'Agenda la rilegge (fuori da versioneCalcoli)")
+        if let c = s.dati.clienti.first?.id {
+            s.filtroClienteAgenda = c
+            controlla(s.scadenzeStudioAgenda(giorni).isEmpty, "Agenda 57: con un cliente scelto le scadenze dello Studio non ci sono")
+            s.filtroClienteAgenda = nil
+            s.modoCliente = c
+            controlla(s.scadenzeStudioAgenda(giorni).isEmpty, "Agenda 57: in modalità cliente le scadenze dello Studio non ci sono")
+            s.modoCliente = nil
+        }
+    }
+    #endif
+
+    /// Migliorie d'uso 57: apre l'Agenda sul giorno di una scadenza dello Studio, nella vista mese.
+    func apriAgendaMese(_ giorno: Date) {
+        vistaAgenda = .mese
+        apriAgendaGiorno(giorno)
+    }
+
     /// Apre Impostazioni › Studio sulla sezione dei chilometri e delle spese.
     func apriImpostazioniSpese() {
         schedaImpostazioni = .studio
@@ -262,7 +329,8 @@ extension StatoShell {
         guard pannello.runModal() == .OK, let destinazione = pannello.url else { return }
         let contenuto = contenutoPacchetto(mese: mese)
         s.pacchetto = .inPreparazione(0)
-        let descrizione = PacchettoCommercialista.descrizione(scontrini: contenuto.scontrini.count, pdf: contenuto.pdf != nil)
+        let descrizione = PacchettoCommercialista.descrizione(scontrini: contenuto.scontrini.count, pdf: contenuto.pdf != nil,
+                                                              parcelle: contenuto.csvParcelle != nil)
         Task.detached(priority: .userInitiated) {
             do {
                 try PacchettoCommercialista.scrivi(contenuto, in: destinazione) { fatti, totale in
@@ -289,14 +357,17 @@ extension StatoShell {
         let nomi: [String: String]? = imp.nomiNelPacchetto
             ? Dictionary(dati.clienti.map { ($0.id, $0.nome) }, uniquingKeysWith: { a, _ in a }) : nil
         let file = PacchettoCommercialista.scontrini(spese, cartella: Archivio.cartellaScontrini())
+        // Migliorie d'uso 57: le parcelle emesse nel mese (lo stesso elenco che conta la tessera «Nel pacchetto di …»)
+        let parcelle = PacchettoCommercialista.parcelleDelMese(dati.parcelle, mese: mese)
         let testi = TestiRiepilogoSpese(mese: mese, riepilogo: riepilogo, spese: spese, nomi: nomi,
                                         consulente: dati.impostazioni.studio.fatturazione.nome.isEmpty
                                             ? nomeUtente : dati.impostazioni.studio.fatturazione.nome,
-                                        euroPerKm: imp.euroPerKm)
+                                        euroPerKm: imp.euroPerKm, parcelle: parcelle)
         return PacchettoCommercialista.Contenuto(
             nome: PacchettoCommercialista.nome(mese: mese), suffisso: PacchettoCommercialista.suffisso(mese: mese),
             csvChilometri: PacchettoCommercialista.csvChilometri(riepilogo.giri, nomi: nomi, euroPerKm: imp.euroPerKm),
             csvSpese: PacchettoCommercialista.csvSpese(spese, scontrini: file.perSpesa, nomi: nomi),
-            pdf: StampaCarta.pdf(DocumentoStampabile(testi)), scontrini: file.file)
+            pdf: StampaCarta.pdf(DocumentoStampabile(testi)), scontrini: file.file,
+            csvParcelle: parcelle.isEmpty ? nil : PacchettoCommercialista.csvParcelle(parcelle, nomi: nomi))
     }
 }

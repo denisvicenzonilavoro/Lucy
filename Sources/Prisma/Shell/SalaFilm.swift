@@ -325,6 +325,8 @@ struct FilmDelPiano: View {
             }
             let video = try Data(contentsOf: url)
             let id = stato.registraFilmEsportato(c, dati: d, video: video)
+            // Migliorie d'uso 60: «Esporta il video» riuscito è una fine chiara, l'esperienza si segna da sola
+            stato.segnaEsperienza(.film, cliente: c.id, avviso: false)
             regista = nil
             fase = .pronto(url, documentoId: id)
             return true

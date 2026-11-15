@@ -68,6 +68,41 @@ extension Tema.Apple {
         static let spazioMedio: CGFloat = 8
         static let spazioRiga: CGFloat = 12
         static let spessoreScelta: CGFloat = 1.5
+
+        // Migliorie d'uso 47 (solo Mac): il prossimo passo sulla scheda, i giorni di fermo, il dettaglio nuovo
+        static let nomeSchedaPasso = Tema.Apple.Carattere(dimensione: 14, peso: .bold)
+        static let fonteSchedaPasso = Tema.Apple.Carattere(dimensione: 12, peso: .regular)
+        /// `.kPasso`: 12,5 semibold, interlinea 1,35, colore accento (in «Cliente» verde).
+        static let passoScheda = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, interlinea: 1.35)
+        static let colorePasso = Tema.Apple.Colore.accento
+        static let colorePassoCliente = Tema.Apple.Colore.verde
+        /// «fermo da 3 giorni»: grigio; oltre la soglia arancio scuro (--orangeT) e semibold.
+        static let fermoScheda = Tema.Apple.Carattere(dimensione: 12.5, peso: .regular, tabellare: true)
+        static let fermoSchedaOltre = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, tabellare: true)
+        static let coloreFermo = Tema.Apple.Colore.inchiostro3
+        static let coloreFermoOltre = Tema.Apple.Colore.arancioTesto
+        /// La quarta tile «Fermi da più di due settimane»: il numero in arancio se più di zero.
+        static let coloreTileFermi = Tema.Apple.Colore.arancio
+        /// La nota sotto le colonne dopo uno spostamento: il nome in neretto.
+        static let notaForte = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, interlinea: 1.45)
+        // Il dettaglio (820 × 460: il template è 820 × 430, le righe di oggi scorrono sotto i pulsanti)
+        static let larghezzaDettaglioPasso: CGFloat = 820
+        static let altezzaDettaglioPasso: CGFloat = 460
+        static let avatarDettaglio: CGFloat = 54
+        static let inizialiDettaglio = Tema.Apple.Carattere(dimensione: 19, peso: .bold)
+        static let fondoAvatar = Tema.Apple.Colore.chip
+        static let bordoAvatar = Tema.Apple.Colore.separatore
+        static let testoAvatar = Tema.Apple.Colore.inchiostro2
+        static let spazioTesta: CGFloat = 14
+        static let spazioTileDettaglio: CGFloat = 10
+        static let paddingTileDettaglio: CGFloat = 14
+        static let tileDettaglioValore = Tema.Apple.Carattere(dimensione: 22, peso: .bold, tracking: -0.4, tabellare: true)
+        static let tileDettaglioNota = Tema.Apple.Carattere(dimensione: 11.5, peso: .regular)
+        static let testoPassoDettaglio = Tema.Apple.Carattere(dimensione: 15, peso: .semibold, interlinea: 1.35)
+        static let puntoPasso: CGFloat = 8
+        static let numeroChiama = Tema.Apple.Carattere(dimensione: 28, peso: .bold, tracking: -0.5, tabellare: true)
+        static let paddingChiama: CGFloat = 18
+        static let larghezzaChiama: CGFloat = 280
     }
 
     // MARK: - Passaparola (§9.2.2)
@@ -104,7 +139,22 @@ extension Tema.Apple {
         static let spessorePotenziale: CGFloat = 1.4
         static let opacitaPotenziale: Double = 0.45
         static let spessoreTronco: CGFloat = 1.6
+        #if os(macOS)
+        /// Migliorie d'uso 48: il resto dell'albero scende al 20% quando si sceglie una persona (come il template).
+        static let opacitaSpenta: Double = 0.2
+        #else
         static let opacitaSpenta: Double = 0.30
+        #endif
+        /// La card «Il ramo di» (Migliorie d'uso 48): avatar 42, nome 19 bold, righe dei presentati 13,5.
+        static let avatarRamo: CGFloat = 42
+        static let nomeRamo = Tema.Apple.Carattere(dimensione: 19, peso: .bold)
+        static let fraseRamo = Tema.Apple.Carattere(dimensione: 14, peso: .regular, interlinea: 1.5)
+        static let rigaRamo = Tema.Apple.Carattere(dimensione: 13.5, peso: .regular)
+        static let cifraRamo = Tema.Apple.Carattere(dimensione: 13.5, peso: .semibold, tabellare: true)
+        static let faseRamo = Tema.Apple.Carattere(dimensione: 11, peso: .regular)
+        static let larghezzaCifraRamo: CGFloat = 86
+        static let paddingRigaRamo: CGFloat = 6
+        static let separatoreRamo = Tema.Apple.Colore.separatore
         static let nomePrimo = Tema.Apple.Carattere(dimensione: 13, peso: .semibold)
         static let nomeSecondo = Tema.Apple.Carattere(dimensione: 11.5, peso: .medium)
         static let cifra = Tema.Apple.Carattere(dimensione: 11, peso: .regular, tabellare: true)
@@ -208,6 +258,38 @@ extension Tema.Apple {
         static let paddingChip = Tema.Apple.Misura.padding(4, 10)
         static let paddingPillola = Tema.Apple.Misura.padding(2, 7)
         static let spazioRiga: CGFloat = 2
+        // Migliorie d'uso 49 (solo Mac): la campagna in tre passi (`.cmPa`, `.cmR`, `.chip.on3` del template)
+        /// Il tondino numerato del passo: 20, nel colore del gruppo, con la cifra bianca 11,5 bold.
+        static let passoTondino: CGFloat = 20
+        static let passoCifra = Tema.Apple.Carattere(dimensione: 11.5, peso: .bold, tabellare: true)
+        static let coloreCifraPasso = Tema.Apple.Controlli.Pulsante.testoPrincipale
+        /// «Chi», «Cosa scrivi», «Quando» in neretto 14; accanto il sottotitolo grigio.
+        static let passoTitolo = Tema.Apple.Carattere(dimensione: 14, peso: .bold)
+        static let passoSottotitolo = Tema.Apple.Carattere.secondario
+        static let coloreSottotitoloPasso = Tema.Apple.Colore.inchiostro2
+        /// 9 fra tondino, titolo e sottotitolo; 14 sopra ogni passo; 6 fra il passo e il suo contenuto.
+        static let spazioPasso: CGFloat = 9
+        static let spazioPassi: CGFloat = 14
+        static let sottoPasso: CGFloat = 6
+        /// Le righe del passo «Chi» visibili prima di «Mostra tutti».
+        static let righeVisibili = 8
+        /// La riga di un cliente: 6 × 4, filetto basso, 10 fra casella, avatar e nome.
+        static let paddingRigaPasso = Tema.Apple.Misura.padding(6, 4)
+        static let spazioRigaPasso: CGFloat = 10
+        static let nomeRigaPasso = Tema.Apple.Carattere(dimensione: 13.5, peso: .regular)
+        static let filoRiga = Tema.Apple.Colore.separatore
+        /// Le capsule degli orari: accese (fondo accento, testo bianco) o spente (fondo `chip`), 12,5 con 5 × 11.
+        static let chipPasso = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, tabellare: true)
+        static let paddingChipPasso = Tema.Apple.Misura.padding(5, 11)
+        static let spazioChip: CGFloat = 6
+        static let fondoChipScelto = Tema.Apple.Colore.accento
+        static let testoChipScelto = Tema.Apple.Controlli.Pulsante.testoPrincipale
+        static let testoChip = Tema.Apple.Colore.inchiostro
+        /// L'intestazione dell'anteprima («Anteprima per Marco») e la tile: 11 × 14.
+        static let paddingAnteprimaPasso = Tema.Apple.Misura.padding(11, 14)
+        /// Il piede con il pulsante: 16 sotto, 22 ai lati; 7 fra il pulsante e «Niente parte da solo…».
+        static let paddingPiede = Tema.Apple.Misura.padding(14, 22)
+        static let sottoPulsante: CGFloat = 7
 
         /// Il colore di un gruppo nella mappa.
         static func tinta(_ t: TipoGruppoCampagna) -> Color {
@@ -249,6 +331,13 @@ extension Tema.Apple.Moto {
         static var animazioneNodo: Animation { Curva.molla.animazione(nodo) }
         static var animazioneColonna: Animation { Curva.uscita.animazione(colonna) }
         static var animazioneTratteggio: Animation { Curva.easeOut.animazione(tratteggio) }
+        /// Migliorie d'uso 48: il ramo scelto si accende (gli altri si spengono) in 0,3 s.
+        static let ramo = 0.3
+        static var animazioneRamo: Animation { Curva.ease.animazione(ramo) }
+        /// La card «Il ramo di» entra dal basso di 6 punti in 0,26 s.
+        static let carta = 0.26
+        static let spostamentoCarta: CGFloat = 6
+        static var animazioneCarta: Animation { Curva.easeOut.animazione(carta) }
     }
 
     enum Campagne {
@@ -260,5 +349,7 @@ extension Tema.Apple.Moto {
         static let lampo = 0.9
         /// Le righe diventano «✓ bozza pronta» una dopo l'altra (passo).
         static let passoBozze = 0.12
+        /// Migliorie d'uso 49 (solo Mac): le righe diventano «✓ pronto in Messaggi» una dopo l'altra, ogni 320 ms.
+        static let pronta = 0.32
     }
 }

@@ -25,7 +25,12 @@ struct AppBiblioteca: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         #if os(macOS)
-        VistaBiblioteca(biblioteca: stato.biblioteca, trova: stato.trovaPagina)
+        // Migliorie d'uso 63: «Documenti | Prodotti» nella testata; con «Prodotti» il catalogo (BibliotecaProdotti.swift)
+        if stato.sezioneBiblioteca == .prodotti {
+            CatalogoProdottiMac()
+        } else {
+            VistaBiblioteca(biblioteca: stato.biblioteca, trova: stato.trovaPagina)
+        }
         #else
         // Su iPhone e iPad la Biblioteca non c'è in questo giro (decisione 114): più avanti dal ponte di Vera
         let n = NovitaLuce.trovaLaPagina
@@ -172,6 +177,9 @@ struct VistaBiblioteca: View {
                 .frame(maxWidth: 440)
             Button("Scegli i PDF…") { stato.scegliDocumentiBiblioteca() }
                 .buttonStyle(.applePrimarioGrande)
+                // Migliorie d'uso 37: durante la dimostrazione la Biblioteca non cambia
+                .disabled(stato.inDimostrazione)
+                .help(stato.inDimostrazione ? TestiDimostrazione.nonDurante : "")
         }
         .frame(maxWidth: .infinity)
         .padding(.top, B.sopraInvito - 40)
@@ -509,7 +517,8 @@ private struct LateraleBiblioteca: View {
                 }
                 .buttonStyle(.plain)
                 .foregroundColor(B.coloreEtichetta)
-                .help("Aggiungi i PDF che usi")
+                .disabled(stato.inDimostrazione)
+                .help(stato.inDimostrazione ? TestiDimostrazione.nonDurante : "Aggiungi i PDF che usi")
             }
             ScrollView(.vertical, showsIndicators: false) {
                 // Pigra: con molti documenti si costruiscono (menu compresi) solo le righe in vista; le righe vanno già

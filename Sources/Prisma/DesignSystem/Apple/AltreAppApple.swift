@@ -187,6 +187,62 @@ extension Tema.Apple {
             static let carattereGruppo = Carattere.etichetta
             static let carattereVoce = Carattere(dimensione: 13.5, peso: .semibold)
             static let carattereSotto = Carattere(dimensione: 12, peso: .regular)
+
+            #if os(macOS)
+            /// Migliorie d'uso 61 «Cerca ovunque, e fa» (Design/uso/gruppo-11.md §61.3 punto 9, template righe 756-767 e
+            /// 4861-4912): la scatola del template sul Mac. Il pannello stretto di iPhone e iPad resta con `Misure.Spotlight`
+            /// e il raggio 22.
+            enum Mac {
+                // La scatola
+                static let larghezza: CGFloat = 900
+                static let colonnaElenco: CGFloat = 420
+                static let raggio: CGFloat = 26
+                static let distanzaAlto: CGFloat = 84
+                static let altezzaCorpo: CGFloat = 392
+                /// Padding 14×16×10.
+                static let margine = EdgeInsets(top: 14, leading: 16, bottom: 10, trailing: 16)
+                /// Il velo sotto la scatola (scrim; la sfocatura 8 del template non c'è ancora: resta-da-fare.md §61).
+                static let velo = Colore.velo
+                // Il campo
+                static let carattereLente = Carattere(dimensione: 22, peso: .medium)
+                static let carattereCampo = Carattere(dimensione: 19, peso: .regular, tracking: -0.2)
+                static let campoMargine = EdgeInsets(top: 2, leading: 4, bottom: 10, trailing: 2)
+                static let carattereEsc = Carattere(dimensione: 11, peso: .semibold)
+                static let testoEsc = Colore.inchiostro2
+                static let fondoEsc = Colore.chip
+                static let raggioEsc: CGFloat = 6
+                static let escMargine = EdgeInsets(top: 3, leading: 8, bottom: 3, trailing: 8)
+                // I filtri da toccare
+                static let etichettaFiltro = EdgeInsets(top: 5, leading: 11, bottom: 5, trailing: 11)
+                static let carattereFiltro = Carattere(dimensione: 12.5, peso: .semibold)
+                static let fondoFiltroAcceso = Colore.accento.opacity(0.14)
+                static let testoFiltroAcceso = Colore.accento
+                static let fondoFiltro = Colore.chip
+                static let testoFiltro = Colore.inchiostro
+                static let filettoFiltri = CGSize(width: 1, height: 18)
+                static let coloreFiletto = Colore.separatore
+                static let spazioFiltri: CGFloat = 6
+                static let spazioPallino: CGFloat = 6
+                static let pallinoCanale: CGFloat = 7
+                static let filtriMargine = EdgeInsets(top: 0, leading: 2, bottom: 10, trailing: 2)
+                static let carattereSalva = Carattere(dimensione: 12.5, peso: .semibold)
+                // Righe e anteprima
+                static let avatarRecente: CGFloat = 30
+                static let avatarAnteprima: CGFloat = 48
+                static let occhiello = Carattere.etichetta
+                static let coloreOcchiello = Colore.inchiostro2
+                static let coloreOcchielloParola = Colore.accento
+                // Il pannello vuoto e nessun risultato
+                static let frase = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
+                static let coloreFrase = Colore.inchiostro2
+                static let fraseMargine = EdgeInsets(top: 12, leading: 10, bottom: 8, trailing: 10)
+                static let nessunTitolo = Carattere(dimensione: 15, peso: .semibold)
+                static let nessunSotto = Carattere(dimensione: 13, peso: .regular)
+                static let nessunSpazio: CGFloat = 6
+                // Il piede
+                static let pieMargine = EdgeInsets(top: 8, leading: 6, bottom: 0, trailing: 6)
+            }
+            #endif
         }
     }
 }

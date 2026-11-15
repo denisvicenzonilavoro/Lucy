@@ -167,6 +167,28 @@ enum MotoreOCF {
         return ripasso + scelte
     }
 
+    // MARK: Il ritmo fino all'esame (migliorie d'uso 55)
+
+    /// Quante domande al giorno servono per arrivare pronti all'esame fra `giorni` giorni: le domande mai viste più i
+    /// ripassi aperti (le domande risposte che non sono ancora arrivate al gradino dei 30 giorni, o sbagliate
+    /// all'ultima risposta), divise per i giorni e arrotondate per eccesso, almeno 1. Nil se i giorni non sono
+    /// almeno uno (esame oggi o passato) o se non c'è nessuna domanda da fare.
+    static func domandeAlGiorno(archivio a: ArchivioOCF, giorni: Int, cal: Calendar = .current) -> Int? {
+        guard giorni > 0, !a.domande.isEmpty else { return nil }
+        let stati = ripassi(a.risposte, cal: cal)
+        let ultimo = intervalli.count - 1
+        var daFare = 0
+        for d in a.domande {
+            if let s = stati[d.id] {
+                if s.passo < ultimo || !s.ultimaGiusta { daFare += 1 }
+            } else {
+                daFare += 1
+            }
+        }
+        guard daFare > 0 else { return nil }
+        return max(1, (daFare + giorni - 1) / giorni)
+    }
+
     // MARK: Preparazione
 
     static func preparazione(_ a: ArchivioOCF, oggi: Date, cal: Calendar) -> PreparazioneOCF {

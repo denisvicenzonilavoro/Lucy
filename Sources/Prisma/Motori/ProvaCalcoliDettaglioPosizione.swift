@@ -70,6 +70,14 @@ enum ProvaCalcoliDettaglioPosizione {
                       !TestiDettaglioPosizione.campiVuoti(polizza).contains("Note") && !TestiDettaglioPosizione.campiVuoti(polizza).contains("Garanzie"))
         let conto = Posizione(clienteId: "prova", canale: .indipendente, stato: .inEssere, area: .liquidita, nome: "Conto corrente")
         verifica.vero("Dettaglio 15: un conto chiede solo l'intestatario", TestiDettaglioPosizione.campiVuoti(conto) == ["Intestatario"])
+        // «Completa i dati» apre il modulo sul primo campo vuoto, con l'etichetta del modulo
+        verifica.vero("Dettaglio 15: un ETF apre il modulo su «Numero di contratto»",
+                      TestiDettaglioPosizione.primoCampoModulo(etf) == "Numero di contratto")
+        verifica.vero("Dettaglio 15: la polizza col numero apre il modulo su «Contraente»",
+                      TestiDettaglioPosizione.primoCampoModulo(polizza) == "Contraente")
+        verifica.vero("Dettaglio 15: «Intestatario» è «Contraente» nel modulo",
+                      TestiDettaglioPosizione.etichettaModulo("Intestatario") == "Contraente"
+                        && TestiDettaglioPosizione.etichettaModulo("Decorrenza") == "Decorrenza")
         verifica.vero("Dettaglio 15: le righe del contratto sono solo quelle piene",
                       TestiDettaglioPosizione.righeContratto(polizza).allSatisfy { !$0.valore.isEmpty }
                         && TestiDettaglioPosizione.righeContratto(polizza).contains { $0.etichetta == "Numero" })

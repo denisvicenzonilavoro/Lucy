@@ -225,3 +225,72 @@ enum MotoreNotaVocale {
         return esito
     }
 }
+
+// MARK: - Migliorie d'uso 68: la regola delle conferme
+
+extension MotoreNotaVocale {
+    /// La voce chiede una risposta (riga arancione): l'obiettivo (cambia un piano del cliente), un'attività con la data
+    /// da confermare, e tutte quando il cliente non è ancora scelto. Nota, attività con data certa e messaggio sono pronte.
+    static func daDecidere(_ p: PropostaNota, in n: NotaInArrivo) -> Bool {
+        if n.clienteId == nil { return true }
+        switch p.tipo {
+        case .obiettivo: return true
+        case .attivita: return p.scadenzaDaConfermare
+        case .nota, .messaggio: return false
+        }
+    }
+
+    /// Che cosa fa «Va bene così»: le voci da confermare (pronte non annullate e da decidere con il sì) e quelle da
+    /// scartare (annullate e «No»). Le voci già decise prima restano come sono; una da decidere senza risposta non va
+    /// in nessuno dei due elenchi (il pulsante non si chiude finché c'è).
+    static func esitoChiusura(_ n: NotaInArrivo, annullate: Set<String>, risposte: [String: Bool]) -> (conferma: Set<String>, scarta: Set<String>) {
+        var conferma = Set<String>(), scarta = Set<String>()
+        for p in n.proposte where p.stato == .proposta {
+            if annullate.contains(p.id) || risposte[p.id] == false {
+                scarta.insert(p.id)
+            } else if !daDecidere(p, in: n) || risposte[p.id] == true {
+                conferma.insert(p.id)
+            }
+        }
+        return (conferma, scarta)
+    }
+}
+
+/// I testi della scheda «Arriva sul Mac» con la regola delle conferme (migliorie d'uso 68).
+enum TestiNotaVocale {
+    static let aggiorna = "Aggiorna"
+    static let no = "No"
+    static let vaBene = "Va bene"
+    static let modifica = "Modifica"
+    static let cambia = "Cambia"
+    static let apriObiettivo = "Apri l’obiettivo"
+    static let aggiornato = "Aggiornato"
+    static let lasciato = "Lasciato com’era"
+    static let confermata = "Confermata"
+    static let scartaTutta = "Scarta tutta la nota"
+    static let primaIlCliente = "Prima scegli il cliente di cui si parla"
+
+    /// «3 cose pronte, 1 annullata, una da decidere.»; «1 cosa pronta.»; «Una da decidere.».
+    static func conteggio(fatte: Int, annullate: Int, daDecidere: Int) -> String {
+        var parti: [String] = []
+        if fatte > 0 { parti.append(fatte == 1 ? "1 cosa pronta" : "\(fatte) cose pronte") }
+        if annullate > 0 { parti.append(annullate == 1 ? "1 annullata" : "\(annullate) annullate") }
+        if daDecidere > 0 { parti.append(daDecidere == 1 ? "una da decidere" : "\(daDecidere) da decidere") }
+        guard let primo = parti.first else { return "Niente da fare." }
+        parti[0] = primo.prefix(1).uppercased() + primo.dropFirst()
+        return parti.joined(separator: ", ") + "."
+    }
+
+    /// La riga dell'obiettivo dopo la risposta: «Casa: un anno prima · aggiornato» / «Casa: resta com’era».
+    static func rigaObiettivo(_ titolo: String, aggiorna: Bool) -> String {
+        if aggiorna {
+            let base = titolo.components(separatedBy: " · da confermare").first ?? titolo
+            return base + " · aggiornato"
+        }
+        let area = titolo.components(separatedBy: ":").first ?? titolo
+        return area == titolo ? titolo + " · resta com’era" : area + ": resta com’era"
+    }
+
+    /// «Nota di Giulia a posto: la trovi nel suo dossier».
+    static func aPosto(_ primoNome: String) -> String { "Nota di \(primoNome) a posto: la trovi nel suo dossier" }
+}

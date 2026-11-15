@@ -118,14 +118,23 @@ struct BarraSuperiore: View {
         }
     }
 
-    /// La pillola con il nome dell'app in primo piano («Scrivania» se non ce n'è): apre gli spazi di lavoro.
-    private var appCorrente: some View {
+    /// La pillola con il nome dell'app in primo piano («Scrivania» se non ce n'è). Sul Mac (migliorie d'uso 67) apre il
+    /// menu delle app aperte e degli spazi di lavoro (MenuAppBarra.swift), senza freccia come nel template; su iPhone e
+    /// iPad il pannello degli spazi di lavoro.
+    @ViewBuilder private var appCorrente: some View {
+        #if os(macOS)
+        PulsanteBarra(aiuto: TestiMenuApp.aiutoPillola, forma: .pillola, azione: { stato.alternaMenuApp() }) {
+            TitoloAppAttiva()
+        }
+        .anchorPreference(key: AncoraPillolaApp.self, value: .bounds) { $0 }
+        #else
         PulsanteBarra(aiuto: "Spazi di lavoro", forma: .pillola, azione: {
             if stato.pannelloNotifiche { stato.pannelloNotifiche = false }
             if !stato.inModoCliente { stato.pannelloSpazi.toggle() }
         }) {
             TitoloAppAttiva()
         }
+        #endif
     }
 
     #if os(macOS)
@@ -188,7 +197,9 @@ struct BarraSuperiore: View {
         HStack(spacing: B.spazio) {
             #if os(macOS)
             if stato.inVistaCliente {
-                // Migliorie d'uso 1: nella vista pulita resta solo l'avatar, con l'anello: l'unica uscita
+                // Migliorie d'uso 1: nella vista pulita resta solo l'avatar, con l'anello: l'unica uscita. Migliorie d'uso
+                // 58: subito prima, l'etichetta del luogo («Su questo schermo» / «iPad sul tavolo») con il suo menu
+                EtichettaLuogo()
                 avatarUscita
             } else {
                 strumentiLavoro
@@ -224,7 +235,10 @@ struct BarraSuperiore: View {
     /// L'avatar «DV» della vista pulita: l'anello bianco e il menu «Fine: torna al lavoro» / «Schermata neutra».
     private var avatarUscita: some View {
         let U = Tema.Apple.MostraAlCliente.Uscita.self
-        return PulsanteBarra(aiuto: TestiMostra.aiutoUscita, forma: nil, azione: { stato.menuUscitaMostra.toggle() }) {
+        return PulsanteBarra(aiuto: TestiMostra.aiutoUscita, forma: nil, azione: {
+            if stato.menuLuogo { stato.menuLuogo = false }
+            stato.menuUscitaMostra.toggle()
+        }) {
             AvatarUtente(iniziali: stato.inizialiUtente)
                 .overlay(Circle().strokeBorder(U.anello, lineWidth: U.spessore))
         }
@@ -393,6 +407,36 @@ private struct PulsanteBarra<Etichetta: View>: View {
         }
     }
 }
+
+#if os(macOS)
+/// Migliorie d'uso 58: l'etichetta del luogo nella barra della vista pulita, subito prima di «DV» (`#bTav`): pillola di
+/// vetro con il glifo, «Su questo schermo» o «iPad sul tavolo» e la freccina al 60%. Un clic apre il menu (disegnato
+/// sotto la pillola da `StratoSopraVistaCliente`). Osserva solo il luogo: la barra non si ridisegna ai cambi del tavolo.
+private struct EtichettaLuogo: View {
+    @Environment(StatoShell.self) var stato
+
+    private typealias L = Tema.Apple.MostraAlCliente.Luogo
+
+    var body: some View {
+        let tavolo = stato.luogoCliente == .tavolo
+        PulsanteBarra(aiuto: TestiLuogo.aiuto, forma: .pillola, azione: { stato.alternaMenuLuogo() }) {
+            HStack(spacing: L.spazio) {
+                Image(systemName: tavolo ? TestiLuogo.glifoTavolo : TestiLuogo.glifoSchermo)
+                    .carattereApple(L.glifo)
+                Text(tavolo ? TestiLuogo.tavolo : TestiLuogo.schermo)
+                    .carattereApple(L.carattere)
+                    .lineLimit(1)
+                    .fixedSize()
+                Image(systemName: "chevron.down")
+                    .carattereApple(L.freccia)
+                    .opacity(L.opacitaFreccia)
+            }
+        }
+        .accessibilityLabel(Text(tavolo ? TestiLuogo.tavolo : TestiLuogo.schermo))
+        .accessibilityAddTraits(stato.menuLuogo ? .isSelected : [])
+    }
+}
+#endif
 
 /// Forma del vetro di un pulsante della barra.
 private enum FormaElementoBarra {

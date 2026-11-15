@@ -8,6 +8,8 @@ enum GruppoRicerca: String, CaseIterable, Identifiable {
     case app, clienti, posizioni, documenti, note, appuntamenti, attivita, obiettivi, incontri, prodotti, biblioteca
     /// Comandi rapidi del pannello (nuovo appuntamento, crea backup…): solo nella ricerca a parole.
     case azioni
+    /// Le voci del glossario (migliorie d'uso 61, solo sul Mac e solo senza filtri): termine e definizione.
+    case parole
 
     var id: String { rawValue }
 
@@ -25,8 +27,18 @@ enum GruppoRicerca: String, CaseIterable, Identifiable {
         case .prodotti: return "Prodotti"
         case .biblioteca: return "Biblioteca"
         case .azioni: return "Azioni"
+        case .parole: return "Parole"
         }
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 61: l'ordine dei gruppi sul Mac, quello del template (Clienti, Posizioni, Documenti) prima, gli
+    /// altri dove sono sempre stati, poi Azioni, App e Parole. Fisso: non cambia con il punteggio.
+    static let ordineMac: [GruppoRicerca] = [.clienti, .posizioni, .documenti, .note, .appuntamenti, .attivita, .obiettivi,
+                                             .incontri, .prodotti, .biblioteca, .azioni, .app, .parole]
+    /// Le etichette del tipo nella fila dei filtri (dopo «Tutto»).
+    static let tipiEtichetta: [GruppoRicerca] = [.clienti, .posizioni, .documenti]
+    #endif
 
     /// L'app che apre i risultati del gruppo (e ne presta l'icona).
     var app: AppPrisma {
@@ -43,6 +55,7 @@ enum GruppoRicerca: String, CaseIterable, Identifiable {
         case .prodotti: return .prodotti
         case .biblioteca: return .biblioteca
         case .azioni: return .ricerca
+        case .parole: return .ricerca
         }
     }
 }
@@ -50,24 +63,74 @@ enum GruppoRicerca: String, CaseIterable, Identifiable {
 /// Un comando rapido del pannello di ricerca: si trova scrivendo («appuntamento», «backup») e si esegue con Invio.
 enum AzioneRicerca: String, CaseIterable, Hashable {
     case nuovoAppuntamento, nuovaAttivita, nuovaNota, creaBackup, modoCliente, spaziLavoro, appAperte, notifiche, scrivania
+    /// Migliorie d'uso 61 (solo sul Mac): le azioni del template.
+    case nuovoCliente, aggiornaValori, mostraAlCliente, inquadra
+
+    /// Le azioni che si trovano scrivendo. Sul Mac (migliorie d'uso 61) «Modalità cliente» diventa «Mostra al cliente» e
+    /// spazi e app aperte stanno nel menu della barra (miglioria 67); su iPhone e iPad le azioni di sempre.
+    static var disponibili: [AzioneRicerca] {
+        #if os(macOS)
+        return [.nuovoCliente, .nuovoAppuntamento, .aggiornaValori, .mostraAlCliente, .inquadra,
+                .nuovaAttivita, .nuovaNota, .creaBackup, .notifiche, .scrivania]
+        #else
+        return [.nuovoAppuntamento, .nuovaAttivita, .nuovaNota, .creaBackup, .modoCliente, .spaziLavoro, .appAperte,
+                .notifiche, .scrivania]
+        #endif
+    }
+
+    /// In modalità cliente restano solo le azioni che lì servono: niente «Modalità cliente» (ci si è già) né le azioni
+    /// del Mac che davanti al cliente non fanno nulla («Mostra al cliente», «Aggiorna i valori») o non vanno mostrate
+    /// («Nuovo cliente», «Inquadra»).
+    var ammessaInModoCliente: Bool {
+        switch self {
+        case .modoCliente, .mostraAlCliente, .aggiornaValori, .nuovoCliente, .inquadra: return false
+        case .nuovoAppuntamento, .nuovaAttivita, .nuovaNota, .creaBackup, .spaziLavoro, .appAperte, .notifiche, .scrivania:
+            return true
+        }
+    }
+
+    #if os(macOS)
+    /// Le cinque azioni del pannello vuoto, come nel template (le altre si trovano scrivendo).
+    static let delPannelloVuoto: [AzioneRicerca] = [.nuovoCliente, .nuovoAppuntamento, .aggiornaValori, .mostraAlCliente, .inquadra]
+    #endif
 
     var titolo: String {
         switch self {
-        case .nuovoAppuntamento: return "Nuovo appuntamento"
+        case .nuovoAppuntamento:
+            #if os(macOS)
+            return "Nuovo impegno"
+            #else
+            return "Nuovo appuntamento"
+            #endif
         case .nuovaAttivita: return "Nuova attività"
         case .nuovaNota: return "Nuova nota"
         case .creaBackup: return "Crea backup"
         case .modoCliente: return "Modalità cliente"
         case .spaziLavoro: return "Spazi di lavoro"
         case .appAperte: return "Le tue app aperte"
-        case .notifiche: return "Centro notifiche"
+        case .notifiche:
+            #if os(macOS)
+            // Migliorie d'uso 3: sul Mac il centro notifiche è il «Da fare»
+            return "Da fare"
+            #else
+            return "Centro notifiche"
+            #endif
         case .scrivania: return "Mostra la scrivania"
+        case .nuovoCliente: return "Nuovo cliente"
+        case .aggiornaValori: return "Aggiorna i valori"
+        case .mostraAlCliente: return "Mostra al cliente"
+        case .inquadra: return "Inquadra un documento"
         }
     }
 
     var dettaglio: String {
         switch self {
-        case .nuovoAppuntamento: return "Fissa un incontro in agenda con il cliente attivo"
+        case .nuovoAppuntamento:
+            #if os(macOS)
+            return "In Agenda"
+            #else
+            return "Fissa un incontro in agenda con il cliente attivo"
+            #endif
         case .nuovaAttivita: return "Segna una cosa da fare per il cliente attivo"
         case .nuovaNota: return "Una pagina nuova nel taccuino del cliente attivo"
         case .creaBackup: return "Copia di clienti, agenda, posizioni e documenti nella cartella dei backup"
@@ -76,6 +139,10 @@ enum AzioneRicerca: String, CaseIterable, Hashable {
         case .appAperte: return "Le finestre aperte, con un clic per tornarci"
         case .notifiche: return "Scadenze, riesami e promemoria"
         case .scrivania: return "Riduce le finestre e torna alla scrivania"
+        case .nuovoCliente: return "Dal documento, o scrivendo i dati"
+        case .aggiornaValori: return "Dall’elenco della compagnia"
+        case .mostraAlCliente: return "Scegli cosa mostrare"
+        case .inquadra: return "Con l’iPhone"
         }
     }
 
@@ -91,6 +158,10 @@ enum AzioneRicerca: String, CaseIterable, Hashable {
         case .appAperte: return "square.grid.2x2"
         case .notifiche: return "bell"
         case .scrivania: return "menubar.dock.rectangle"
+        case .nuovoCliente: return "person.crop.circle.badge.plus"
+        case .aggiornaValori: return "arrow.triangle.2.circlepath"
+        case .mostraAlCliente: return "person.crop.rectangle"
+        case .inquadra: return "doc.viewfinder"
         }
     }
 
@@ -104,8 +175,12 @@ enum AzioneRicerca: String, CaseIterable, Hashable {
         case .modoCliente: return "presenta schermo cliente riservato"
         case .spaziLavoro: return "spazi disposizione finestre lavoro"
         case .appAperte: return "finestre aperte app passa"
-        case .notifiche: return "avvisi scadenze promemoria notifiche"
+        case .notifiche: return "avvisi scadenze promemoria notifiche da fare"
         case .scrivania: return "desktop scrivania chiudi riduci"
+        case .nuovoCliente: return "nuovo cliente crea anagrafica carta identità documento aggiungi"
+        case .aggiornaValori: return "aggiorna valori elenco compagnia importa quotazioni"
+        case .mostraAlCliente: return "mostra cliente presenta schermo modalità vista"
+        case .inquadra: return "inquadra documento iphone fotografa scansiona leggi"
         }
     }
 
@@ -127,6 +202,33 @@ enum DestinazioneRicerca: Hashable {
     case prodotto(String)
     /// Un documento della Biblioteca, alla pagina in cui compare la parola cercata (1 se è nel titolo).
     case biblioteca(String, pagina: Int)
+    /// Una voce del glossario (migliorie d'uso 61, solo sul Mac): si apre nel glossario, sulla parola.
+    case parola(VoceGlossario.Chiave)
+}
+
+/// Migliorie d'uso 61: i filtri da toccare del pannello del Mac (tipo e canale). Vuoti (il predefinito) non cambiano niente:
+/// iPhone, iPad e la finestra di prima (`AppRicerca`) cercano come sempre.
+struct LimitiRicerca: Equatable {
+    /// Un gruppo solo (nil = «Tutto»): Clienti, Posizioni o Documenti (con la Biblioteca).
+    var tipo: GruppoRicerca?
+    /// Solo ciò che è di quel canale: clienti con posizioni del canale, posizioni e documenti del canale.
+    var canale: Canale?
+
+    var vuoti: Bool { tipo == nil && canale == nil }
+
+    /// Il gruppo compare con questi limiti? Azioni, App e Parole solo senza filtri; con un canale solo i gruppi che ne hanno uno.
+    func ammette(_ g: GruppoRicerca) -> Bool {
+        guard !vuoti else { return true }
+        if g == .azioni || g == .app || g == .parole { return false }
+        if let t = tipo {
+            let dentro = t == .documenti ? (g == .documenti || g == .biblioteca) : g == t
+            if !dentro { return false }
+        }
+        if canale != nil {
+            return g == .clienti || g == .posizioni || g == .documenti || g == .biblioteca
+        }
+        return true
+    }
 }
 
 /// Chiave unica di un risultato: le azioni portano tutte al pannello, si distinguono per l'azione.
@@ -185,6 +287,8 @@ struct EsitoRicerca {
 enum MotoreRicerca {
     /// Risultati mostrati per gruppo.
     static let perGruppo = 5
+    /// Con un tipo scelto fra i filtri da toccare (migliorie d'uso 61): un gruppo solo, fino a 40 righe come nel template.
+    static let perGruppoTipo = 40
     /// Con i filtri si vede l'elenco intero (fino a questo numero per gruppo).
     static let perGruppoFiltri = 60
     /// Caratteri attorno alla parola trovata nel testo di un documento.
@@ -342,20 +446,75 @@ enum MotoreRicerca {
 
     /// La ricerca del pannello: le parole come sempre e, se ci sono, i filtri (`FiltriRicerca`) con i totali per canale.
     /// `memoria`: l'indice dei candidati tenuto dal pannello tra un tasto e l'altro (nil = fatto apposta e lasciato).
+    /// `limiti`: i filtri da toccare del pannello del Mac (migliorie d'uso 61); vuoti, la ricerca di sempre.
     static func cercaCompleta(_ testo: String, in stato: StatoShell, oggi: Date = Date(),
-                              memoria: MemoriaIndiceRicerca? = nil) -> EsitoRicerca {
-        let interpretata = FiltriRicerca.interpreta(testo)
+                              memoria: MemoriaIndiceRicerca? = nil, limiti: LimitiRicerca = LimitiRicerca()) -> EsitoRicerca {
+        // Migliorie d'uso 61: il codice «tipo:» delle ricerche salvate è un limite, non una parola da cercare
+        let etichette = FiltriRicerca.etichette(testo, canali: false)
+        var limiti = limiti
+        if limiti.tipo == nil { limiti.tipo = etichette.tipo }
+        let interpretata = FiltriRicerca.interpreta(etichette.resto)
         var esito = EsitoRicerca()
         esito.interpretata = interpretata
+        let ammesso = filtroCanale(limiti.canale, stato: stato)
         if interpretata.conFiltri {
             cercaConFiltri(interpretata, in: stato, oggi: oggi, esito: &esito)
+            if !limiti.vuoti {
+                var tenute: [SezioneRicerca] = []
+                for s in esito.sezioni where limiti.ammette(s.gruppo) {
+                    let restano = s.risultati.filter { ammesso($0) }
+                    guard !restano.isEmpty else { continue }
+                    tenute.append(SezioneRicerca(gruppo: s.gruppo, risultati: restano,
+                                                 totale: restano.count == s.risultati.count ? s.totale : restano.count))
+                }
+                esito.sezioni = tenute
+            }
         } else {
+            let sezioni = cercaParole(interpretata.testoLibero, in: stato, memoria: memoria, limiti: limiti, ammesso: ammesso)
+            #if os(macOS)
+            // Migliorie d'uso 61: sul Mac i gruppi nell'ordine del template, sempre lo stesso
+            esito.sezioni = GruppoRicerca.ordineMac.compactMap { g in sezioni.first { $0.gruppo == g } }
+            #else
             // Prima i gruppi che rispondono meglio (come Spotlight); a pari merito l'ordine di sempre
-            esito.sezioni = cercaParole(interpretata.testoLibero, in: stato, memoria: memoria).enumerated()
+            esito.sezioni = sezioni.enumerated()
                 .sorted { a, b in a.element.migliore != b.element.migliore ? a.element.migliore > b.element.migliore : a.offset < b.offset }
                 .map(\.element)
+            #endif
         }
         return esito
+    }
+
+    /// Migliorie d'uso 61: con un canale acceso fra i filtri da toccare, ciò che è di quel canale. Lo stesso codice del
+    /// filtro scritto «canale:» (`FiltriRicerca.rispetta`): clienti con almeno una posizione non chiusa del canale,
+    /// posizioni del canale, documenti della posizione del canale (o, senza posizione, del cliente del canale), documenti
+    /// della Biblioteca del canale. Gli altri gruppi non hanno un canale e non compaiono. Senza canale ammette tutto.
+    private static func filtroCanale(_ canale: Canale?, stato: StatoShell) -> (RisultatoRicerca) -> Bool {
+        guard let c = canale else { return { _ in true } }
+        let filtro = FiltroRicerca.canale(c)
+        var clienti = Set<String>()
+        var posizioni = Set<String>()
+        for p in stato.dati.posizioni where FiltriRicerca.rispetta(p, filtro, prodotto: nil) {
+            posizioni.insert(p.id)
+            if p.stato != .chiusa { clienti.insert(p.clienteId) }
+        }
+        var documenti = Set<String>()
+        for d in stato.dati.documenti {
+            let ok: Bool
+            if let pid = d.posizioneId { ok = posizioni.contains(pid) } else { ok = clienti.contains(d.clienteId) }
+            if ok { documenti.insert(d.id) }
+        }
+        let clientiOK = clienti
+        let posizioniOK = posizioni
+        let documentiOK = documenti
+        return { r in
+            switch r.destinazione {
+            case .cliente(let id): return clientiOK.contains(id)
+            case .posizione(let id): return posizioniOK.contains(id)
+            case .documento(let id): return documentiOK.contains(id)
+            case .biblioteca: return r.canale == c
+            default: return false
+            }
+        }
     }
 
     /// I nomi dei clienti per id.
@@ -498,9 +657,15 @@ enum MotoreRicerca {
                              campi: [("Edizione", d.edizione), ("Sigla", d.sigla)],
                              fonte: .biblioteca(d))
         }
+        // Migliorie d'uso 61: le parole del glossario, nel termine e nella sigla per esteso; il dettaglio è la riga breve
+        candidati[.parole] = Glossario.voci.map { v in
+            let titolo = v.perEsteso.map { "\(v.termine) · \($0)" } ?? v.termine
+            return CandidatoRicerca(RisultatoRicerca(destinazione: .parola(v.chiave), gruppo: .parole, titolo: titolo,
+                                                     dettaglio: v.breve))
+        }
         #endif
 
-        candidati[.azioni] = AzioneRicerca.allCases.filter { $0 != .modoCliente || !firma.modoCliente }.map { a in
+        candidati[.azioni] = AzioneRicerca.disponibili.filter { !firma.modoCliente || $0.ammessaInModoCliente }.map { a in
             CandidatoRicerca(RisultatoRicerca(destinazione: .app(.ricerca), gruppo: .azioni, titolo: a.titolo,
                                               dettaglio: a.dettaglio, azione: a),
                              campi: [("Azione", a.paroleChiave)])
@@ -508,16 +673,25 @@ enum MotoreRicerca {
         return IndiceRicerca(firma: firma, candidati: candidati)
     }
 
-    /// La ricerca a parole su tutto l'archivio, con l'indice del pannello (`memoria`) o con uno fatto apposta.
-    private static func cercaParole(_ testo: String, in stato: StatoShell, memoria: MemoriaIndiceRicerca?) -> [SezioneRicerca] {
+    /// La ricerca a parole su tutto l'archivio, con l'indice del pannello (`memoria`) o con uno fatto apposta. Con i
+    /// filtri da toccare del Mac (`limiti`, migliorie d'uso 61) solo i gruppi e i candidati ammessi; senza parole, con un
+    /// filtro acceso (una ricerca salvata fatta solo di «tipo:» e «canale:»), l'elenco di ciò che è ammesso.
+    private static func cercaParole(_ testo: String, in stato: StatoShell, memoria: MemoriaIndiceRicerca?,
+                                    limiti: LimitiRicerca = LimitiRicerca(),
+                                    ammesso: (RisultatoRicerca) -> Bool = { _ in true }) -> [SezioneRicerca] {
         let ricerca = testo.trimmingCharacters(in: .whitespacesAndNewlines)
         let parole = parole(ricerca)
-        guard !parole.isEmpty else { return [] }
+        guard !parole.isEmpty || !limiti.vuoti else { return [] }
         let q = Domanda(ricerca: ricerca, parole: parole)
         let indice = memoria?.indice(stato) ?? nuovoIndice(stato, firma: firmaIndice(stato))
-        return GruppoRicerca.allCases.compactMap { g in
-            sezione(g, indice.candidati[g] ?? [], q, limite: perGruppo, pagine: indice.pagine, stato: stato)
+        let limite = limiti.tipo != nil ? perGruppoTipo : perGruppo
+        var sezioni: [SezioneRicerca] = []
+        for g in GruppoRicerca.allCases where limiti.ammette(g) {
+            let candidati = indice.candidati[g] ?? []
+            let tenuti = limiti.canale == nil ? candidati : candidati.filter { ammesso($0.risultato) }
+            if let s = sezione(g, tenuti, q, limite: limite, pagine: indice.pagine, stato: stato) { sezioni.append(s) }
         }
+        return sezioni
     }
 
     /// La ricerca per criterio: solo clienti e posizioni che rispettano i filtri, e tra questi quelli con tutte le parole.
@@ -624,6 +798,7 @@ extension StatoShell {
         // Un pannello alla volta, come in macOS
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }
+        if menuApp { menuApp = false }
         if pannelloAppAperte { pannelloAppAperte = false }
         if sistema.pannelloNovita { sistema.pannelloNovita = false }
         if !pannelloRicerca { pannelloRicerca = true }
@@ -631,8 +806,17 @@ extension StatoShell {
     }
 
     /// ⌘K e il pulsante «Cerca» della barra: apre o chiude il pannello.
+    /// Sul Mac (migliorie d'uso 61) ogni apertura da qui parte pulita: campo vuoto, «Tutto», nessun canale. Chi apre la
+    /// ricerca con un testo apposta (le notifiche di conformità, la Biblioteca) passa da `cercaOvunque()` e lo ritrova.
     func alternaRicerca() {
-        if pannelloRicerca { chiudiRicerca() } else { cercaOvunque() }
+        if pannelloRicerca {
+            chiudiRicerca()
+        } else {
+            #if os(macOS)
+            if !testoRicerca.isEmpty { testoRicerca = "" }
+            #endif
+            cercaOvunque()
+        }
     }
 
     func chiudiRicerca() {
@@ -668,9 +852,34 @@ extension StatoShell {
         case .appAperte:
             pannelloAppAperte = true
         case .notifiche:
+            #if os(macOS)
+            // Migliorie d'uso 3 e 61: sul Mac è il «Da fare»
+            apriDaFare()
+            #else
             if !pannelloNotifiche { alternaNotifiche() }
+            #endif
         case .scrivania:
             mostraScrivania()
+        case .nuovoCliente:
+            #if os(macOS)
+            apriNuovoCliente()
+            #endif
+        case .aggiornaValori:
+            #if os(macOS)
+            guard !inModoCliente else { return }
+            apri(.posizioni)
+            apriAggiornaValori()
+            #endif
+        case .mostraAlCliente:
+            #if os(macOS)
+            apriMostraAlCliente()
+            #else
+            alternaModoCliente()
+            #endif
+        case .inquadra:
+            #if os(macOS)
+            apriInquadra()
+            #endif
         }
     }
 
@@ -690,6 +899,21 @@ extension StatoShell {
         }
         mostraAvviso("Ricerca salvata: «\(r.nome)».")
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 61: «Salva questa ricerca» salva subito, senza chiedere il nome (il nome è il testo scritto). Una
+    /// ricerca con lo stesso nome non si salva due volte.
+    func salvaRicercaSubito(_ testo: String, nome: String) {
+        let t = testo.trimmingCharacters(in: .whitespacesAndNewlines)
+        let n = nome.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !t.isEmpty, !solaLettura else { return }
+        let nomeFinale = n.isEmpty ? t : n
+        if !dati.impostazioni.ricercheSalvate.contains(where: { $0.nome == nomeFinale }) {
+            dati.impostazioni.ricercheSalvate.insert(RicercaSalvata(nome: nomeFinale, testo: t), at: 0)
+        }
+        mostraAvviso(TestiRicercaMac.salvata)
+    }
+    #endif
 
     func eliminaRicerca(_ id: String) {
         guard !solaLettura else { return }
@@ -722,8 +946,16 @@ extension StatoShell {
             giornoAgenda = Calendar.current.startOfDay(for: a.inizio)
             appuntamentoSelezionato = a.id
             #if os(macOS)
-            // Migliorie d'uso 18: la settimana non ha la colonna del dettaglio, l'appuntamento si mostra in «Giorno»
-            if vistaAgenda == .settimana { vistaAgenda = .giorno }
+            // Rifinitura 18-24: un impegno passato e senza esito («Com'è andato?») apre la sua traccia sopra la
+            // settimana, che chiede com'è andata (miglioria 19); gli altri si mostrano in «Giorno» (miglioria 18: la
+            // settimana non ha la colonna del dettaglio)
+            if vistaAgenda == .settimana {
+                if MomentoImpegno.di(a, adesso: Date()) == .daChiudere {
+                    richiestaTracciaImpegno = a.id
+                } else {
+                    vistaAgenda = .giorno
+                }
+            }
             #endif
             apri(.agenda)
         case .attivita(let id):
@@ -756,6 +988,9 @@ extension StatoShell {
             apriApp(.biblioteca)
             trovaPagina.preparaIndice()
             apriDocumentoBiblioteca(id, pagina: pagina)
+        case .parola(let chiave):
+            // Migliorie d'uso 61: la parola si apre nel glossario, sulla sua voce
+            apriGuida(.glossario(chiave))
         }
     }
 }

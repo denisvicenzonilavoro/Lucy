@@ -1,14 +1,31 @@
 import SwiftUI
 
+/// L'id delle righe che aprono una posizione dalle analisi (rifinitura 11-17 delle migliorie d'uso): al ritorno
+/// dalla scheda AnalisiPosizioniApple riporta in vista la riga. Prefisso proprio, per non urtare le ancore.
+enum RientroPosizione {
+    static func id(_ posizione: String) -> String { "rientro-posizione-\(posizione)" }
+}
+
 /// Il peso dei costi nel dossier Posizioni: quanto costano quest'anno le posizioni del cliente,
 /// quanto tolgono in 10 e 20 anni e dove un'alternativa a parità di rischio lascerebbe di più.
 struct PannelloCosti: View {
     @Environment(StatoShell.self) var stato
     let analisi: AnalisiCosti
 
+    private static let nota = "Gestione, caricamenti e trattenute delle posizioni finanziarie in essere; imposte e bollo a parte"
+    private static let metodo = "Il costo pesa due volte: quello che paghi e il rendimento che quei soldi non producono più. «Come nel KID» è l'incidenza annua dei costi (RIY) che Prisma calcola sugli anni raccomandati, prima delle imposte, con sotto quella dichiarata nel KID quando c'è: una stima da confrontare con il documento. Le alternative sono prodotti del catalogo con la stessa area e lo stesso indicatore di rischio, calcolate con lo stesso rendimento lordo e con penali, imposte d'uscita e costo d'ingresso."
+
+    private var senzaDati: String? {
+        analisi.senzaDati.isEmpty ? nil
+            : "Senza costi indicati: \(analisi.senzaDati.map(\.nome).joined(separator: ", ")). Completali dal KID nella scheda della posizione (o da Documenti)."
+    }
+
     var body: some View {
         let _ = ContaCorpi.segna()
-        PannelloAnalisi(titolo: "Peso dei costi", nota: "Gestione, caricamenti e trattenute delle posizioni finanziarie in essere; imposte e bollo a parte") {
+        // Migliorie d'uso 66: le parole del mestiere segnate una volta nella schermata, nell'ordine in cui si leggono
+        let mancanti = senzaDati
+        let parole = stato.paroleSchermata("costi", [Self.nota, mancanti ?? "", Self.metodo])
+        PannelloAnalisi(titolo: "Peso dei costi", nota: Self.nota, paroleNota: parole[0]) {
             HStack(spacing: 8) {
                 if analisi.risparmioPossibile > 0 {
                     Pillola(testo: "Si può risparmiare", tono: .attenzione)
@@ -32,13 +49,13 @@ struct PannelloCosti: View {
                     }
                     tabella
                 }
-                if !analisi.senzaDati.isEmpty {
-                    Text("Senza costi indicati: \(analisi.senzaDati.map(\.nome).joined(separator: ", ")). Completali dal KID nella scheda della posizione (o da Documenti).")
-                        .font(Tipo.kpiNota).foregroundColor(Colori.Analisi.attenzioneTesto)
+                if let mancanti {
+                    TestoConParole(mancanti, parole: parole[1], colore: Colori.Analisi.attenzioneTesto)
+                        .font(Tipo.kpiNota)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                Text("Il costo pesa due volte: quello che paghi e il rendimento che quei soldi non producono più. «Come nel KID» è l'incidenza annua dei costi (RIY) che Prisma calcola sugli anni raccomandati, prima delle imposte, con sotto quella dichiarata nel KID quando c'è: una stima da confrontare con il documento. Le alternative sono prodotti del catalogo con la stessa area e lo stesso indicatore di rischio, calcolate con lo stesso rendimento lordo e con penali, imposte d'uscita e costo d'ingresso.")
-                    .font(Tipo.kpiNota).foregroundColor(Colori.Analisi.kpiNota)
+                TestoConParole(Self.metodo, parole: parole[2], colore: Colori.Analisi.kpiNota)
+                    .font(Tipo.kpiNota)
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
@@ -66,6 +83,7 @@ struct PannelloCosti: View {
             ForEach(Array(analisi.voci.enumerated()), id: \.element.id) { i, v in
                 Button { stato.posizioneInDettaglio = v.posizione.id } label: { riga(v, incidenza: incidenze[v.posizione.id]) }
                     .buttonStyle(StileSemplice())
+                    .id(RientroPosizione.id(v.posizione.id))
                     .background(i % 2 == 1 ? Colori.Analisi.tabellaAlternata : Colori.Analisi.principale)
                     .bordoBasso(Colori.Analisi.tabellaRiga)
             }

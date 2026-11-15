@@ -426,9 +426,16 @@ enum ProvaVera {
         controlla(AppPrisma.delDock.count == 15 && AppPrisma.delDock.allSatisfy(\.nelDock)
                   && AppPrisma.allCases.filter { !$0.nelDock }.allSatisfy { $0.ospite?.nelDock == true || ($0.ospite == nil && $0.fuoriDalDock) },
                   "Dock: 15 app con icona propria, le accorpate ospitate da un'app del dock, le altre con una finestra propria")
+        // Migliorie d'uso 63: sul Mac Prodotti è il catalogo della Biblioteca (accorpata), su iPhone e iPad resta un'app a sé
+        // Migliorie d'uso 65: sul Mac anche Note (le note stanno nella sezione Note del dossier)
+        #if os(macOS)
+        let altreAppAttese: [AppPrisma] = [.ricerca]
+        #else
+        let altreAppAttese: [AppPrisma] = [.prodotti, .note, .ricerca]
+        #endif
         controlla(AppPrisma.delDock == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio, .messaggi, .pratiche,
                                         .presentazioni, .sala, .biblioteca, .mercato, .studio, .vera, .impostazioni]
-                  && AppPrisma.altreApp == [.prodotti, .note, .ricerca],
+                  && AppPrisma.altreApp == altreAppAttese,
                   "Dock di «Luce»: Clienti, Posizioni, Analisi 360, Incontri, Agenda, Territorio, Messaggi, Pratiche, Prospetti, Sala, Biblioteca, Mercato, Studio, Vera, Impostazioni; Prodotti, Note e Ricerca fuori dal dock")
         controlla(Array(AppPrisma.delDock.prefix(9)) == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio,
                                                          .messaggi, .pratiche, .presentazioni],
@@ -605,27 +612,52 @@ enum ProvaVera {
                   "Accorpate: Documenti si apre in Clienti, scheda Documenti, sul cliente scelto")
         accorpate.apri(.obiettivi)
         controlla(accorpate.appAttiva == .clienti && accorpate.schedaCliente == .obiettivi, "Accorpate: Obiettivi si apre in Clienti, scheda Obiettivi")
+        provaNoteDossier(controlla)
         accorpate.schedaSimulazioni = .tfr
         accorpate.apri(.simulazioni)
-        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .tfr && accorpate.inPrimoPiano(.simulazioni),
-                  "Accorpate: Simulazioni (TFR) si apre negli strumenti di Analisi 360")
+        // Migliorie d'uso 69: sul Mac il TFR è la terza voce di «Simula e confronta»
+        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta && accorpate.modoSimula == .tfr
+                  && accorpate.inPrimoPiano(.simulazioni),
+                  "Accorpate: Simulazioni (TFR) si apre in Analisi 360, «Simula e confronta» su «Il TFR»")
         accorpate.apri(.confronti)
-        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .confronto, "Accorpate: Confronti si apre in Analisi 360")
+        // Migliorie d'uso 64: sul Mac simulatore, scenari e confronto sono «Simula e confronta»
+        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta
+                  && accorpate.modoSimula == .due && accorpate.inPrimoPiano(.confronti),
+                  "Accorpate: Confronti si apre in Analisi 360, «Simula e confronta» su «Due a confronto»")
         // Gli ingressi degli strumenti di Analisi 360: simula, confronta e i «Collegati» delle altre app
-        if let p = accorpate.posizioniCliente("marco").first(where: { $0.area.proiettabile && $0.stato != .chiusa }) {
+        if let p = accorpate.posizioniCliente("marco").first(where: { $0.area.proiettabile && $0.stato == .inEssere }) {
             accorpate.simula(p)
-            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulatore
-                      && accorpate.bozzaSimulazione?.posizioneId == p.id,
-                      "Strumenti: «Simula» da una posizione apre il Simulatore di Analisi 360 con le sue ipotesi")
+            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta
+                      && accorpate.modoSimula == .una && accorpate.stradaA == .posizione(p.id)
+                      && accorpate.bozzaSimulazione == nil && accorpate.clienteSimula == "marco",
+                      "Strumenti: «Simula» da una posizione apre «Simula e confronta» con la posizione come strada")
             accorpate.confronta(p)
-            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .confronto && accorpate.confrontoA == .posizione(p.id),
-                      "Strumenti: «Confronta» apre il Confronto di Analisi 360 con la posizione in A")
+            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta
+                      && accorpate.modoSimula == .due && accorpate.confrontoA == .posizione(p.id)
+                      && accorpate.stradaA == .posizione(p.id),
+                      "Strumenti: «Confronta» apre «Due a confronto» con la posizione in A")
+            // Scegliendo in B la strada di A, le due si scambiano
+            let primaB = accorpate.stradeSimula(accorpate.opzioniSimula()).b
+            accorpate.scegliStradaSimula(.posizione(p.id), perA: false)
+            controlla(accorpate.stradaB == .posizione(p.id) && accorpate.stradaA == primaB,
+                      "Simula e confronta: la strada di A scelta in B scambia le due strade")
         }
         accorpate.apriStrumentoAnalisi(.scenari)
-        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .scenari && accorpate.schedaSimulazioni == .scenari,
-                  "Strumenti: i Collegati aprono gli Scenari in Analisi 360")
+        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta && accorpate.modoSimula == .una
+                  && accorpate.inPrimoPiano(.simulazioni),
+                  "Strumenti: i Collegati degli Scenari aprono «Simula e confronta» su «Una strada»")
+        controlla(StrumentoAnalisi.inVista == [.simulaConfronta],
+                  "Strumenti: sul Mac la barra laterale ha solo «Simula e confronta» (il TFR è la sua terza voce)")
         accorpate.apriStrumentoAnalisi(.tfr)
-        controlla(accorpate.strumentoAnalisi == .tfr && accorpate.inPrimoPiano(.simulazioni), "Strumenti: il TFR si apre in Analisi 360")
+        controlla(accorpate.strumentoAnalisi == .simulaConfronta && accorpate.modoSimula == .tfr && accorpate.schedaSimulazioni == .tfr
+                  && accorpate.inPrimoPiano(.simulazioni), "Strumenti: il TFR si apre in «Simula e confronta», su «Il TFR»")
+        accorpate.scegliModoSimula(.una)
+        controlla(accorpate.modoSimula == .una && accorpate.schedaSimulazioni == .simulatore && accorpate.strumentoAnalisi == .simulaConfronta,
+                  "Simula e confronta: dal TFR il segmentato torna a «Una strada»")
+        accorpate.scegliStrumentoAnalisi(.tfr)
+        accorpate.scegliStrumentoAnalisi(.simulaConfronta)
+        controlla(accorpate.modoSimula == .tfr && accorpate.schedaSimulazioni == .tfr,
+                  "Simula e confronta: la voce della barra laterale non lascia il TFR se non c'è una bozza da aprire")
         accorpate.scegliStrumentoAnalisi(nil)
         controlla(accorpate.strumentoAnalisi == nil && accorpate.accorpataMostrata(in: .analisi360) == nil,
                   "Strumenti: la panoramica di Analisi 360 chiude lo strumento")
@@ -689,7 +721,11 @@ enum ProvaVera {
         }
         if let incontro = SpazioLavoro.predefiniti.first {
             apriSpazio(incontro)
+            #if os(macOS)
+            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .incontri], "Spazio «\(incontro.nome)»: Incontri in primo piano, Vera accanto")
+            #else
             controlla(spazi.finestreVisibili.map(\.app) == [.vera, .clienti], "Spazio «\(incontro.nome)»: Vera e Clienti in primo piano")
+            #endif
             controlla(!sovrapposte(spazi) && dentro(spazi), "Spazio «\(incontro.nome)»: finestre affiancate, dentro lo schermo")
             controlla(spazi.finestreVisibili.allSatisfy { spazi.cornice(di: $0).width >= Misure.Finestra.minima.width && spazi.cornice(di: $0).height >= Misure.Finestra.minima.height },
                       "Spazio «\(incontro.nome)»: nessuna finestra sotto la misura minima")
@@ -722,6 +758,42 @@ enum ProvaVera {
                       "◫ affianca Vera (a sinistra) e Agenda (a destra)")
         }
 
+        #if os(macOS)
+        // Migliorie d'uso 67: il menu della pillola dell'app, con le app aperte tranne quella davanti e gli spazi pronti
+        let menu = StatoShell(persistente: false)
+        controlla(SpazioLavoro.predefiniti.map(\.nome) == ["Preparo un incontro", "Faccio un’analisi", "Comincio la giornata"]
+                  && SpazioLavoro.predefiniti.map(TestiMenuApp.appDelloSpazio) == ["Incontri + Vera", "Analisi 360 + Posizioni", "Agenda + Messaggi"],
+                  "Menu delle app: i tre spazi pronti con i nomi del template e le loro app")
+        controlla(menu.appRecentiMenu.isEmpty, "Menu delle app: dalla scrivania nessun’altra app aperta")
+        menu.scegliCliente("giulia")
+        menu.apri(.clienti)
+        menu.apri(.agenda)
+        controlla(menu.appRecentiMenu == [.clienti] && menu.clienteNelMenu(per: .clienti) == "Giulia"
+                  && menu.clienteNelMenu(per: .impostazioni) == nil,
+                  "Menu delle app: Clienti (con Giulia) sotto Agenda, senza l'app davanti")
+        for app in [AppPrisma.posizioni, .analisi360, .messaggi, .pratiche] { menu.apri(app) }
+        controlla(menu.appRecentiMenu.count == 4 && !menu.appRecentiMenu.contains(.pratiche) && menu.appRecentiMenu.first == .messaggi,
+                  "Menu delle app: al più quattro, dalla più vicina")
+        menu.alternaMenuApp()
+        controlla(menu.menuApp, "Menu delle app: il nome dell'app lo apre")
+        menu.alternaMenuApp()
+        controlla(!menu.menuApp, "Menu delle app: un secondo tocco lo chiude")
+        menu.alternaMenuApp()
+        menu.apriSceltaCliente()
+        controlla(!menu.menuApp && menu.pannelloCliente, "Menu delle app: la scelta del cliente lo chiude")
+        menu.pannelloCliente = false
+        menu.scegliCliente(nil)
+        menu.alternaMenuApp()
+        controlla(menu.clienteNelMenu(per: .clienti) == nil, "Menu delle app: con «Tutti i clienti» niente nome accanto")
+        menu.scegliCliente("giulia")
+        if !menu.menuApp { menu.alternaMenuApp() }
+        menu.entraModoCliente(avviso: false)
+        controlla(menu.inModoCliente && !menu.menuApp, "Menu delle app: la modalità cliente lo chiude")
+        menu.alternaMenuApp()
+        controlla(!menu.menuApp, "Menu delle app: in modalità cliente non si apre")
+        menu.esciModoCliente()
+        #endif
+
         // Note: il taccuino legato ai clienti
         let taccuino = StatoShell(persistente: false)
         controlla(taccuino.noteFiltrate.count == 3 && taccuino.noteFiltrate.prefix(2).allSatisfy(\.fissata), "Note di prova: tre, le fissate in cima")
@@ -751,8 +823,13 @@ enum ProvaVera {
                   "Cerca ovunque trova le note anche nel testo")
         taccuino.filtroClienteNote = "giulia"
         taccuino.vai(a: .nota("nota-laura"))
-        controlla(taccuino.appAttiva == .note && taccuino.notaSelezionata == "nota-laura" && taccuino.noteFiltrate.contains { $0.id == "nota-laura" },
+        // Sul Mac (migliorie d'uso 65) «Note» è la sezione Note del dossier del cliente della nota
+        controlla(taccuino.inPrimoPiano(.note) && taccuino.notaSelezionata == "nota-laura" && taccuino.noteFiltrate.contains { $0.id == "nota-laura" },
                   "Il risultato della ricerca apre la nota in Note, anche con un altro filtro")
+        #if os(macOS)
+        controlla(taccuino.appAttiva == .clienti && taccuino.schedaCliente == .note && taccuino.clienteAttivoId == "laura",
+                  "Note: sul Mac il risultato della ricerca apre il dossier del cliente sulla sezione Note")
+        #endif
         let rilette = try? Archivio.decodifica(Archivio.codificatore.encode(taccuino.dati.istantanea))
         controlla(rilette?.note == taccuino.dati.note, "Le note restano nell'archivio")
         taccuino.eliminaCliente("laura")
@@ -1125,6 +1202,8 @@ enum ProvaVera {
         ProvaMessaggiVera.esegui(controlla)
         // Il copilota dell'incontro (giro 5 di Orizzonte): consenso, regole, Qwen finto, conferma, archivio, ponte (ProvaCopilota.swift)
         ProvaCopilota.esegui(controlla)
+        // Migliorie d'uso 37: la dimostrazione accesa (Vera vede solo i clienti di prova, nota e routine ferme) (ProvaVeraDimostrazione.swift)
+        ProvaVeraDimostrazione.esegui(controlla)
         // «Luce» giro 13: la nota vocale (busta, arrivo, cliente, proposte, conferma senza doppioni, coda cifrata dell'iPhone,
         // fuori da Prisma ovunque, Novità) (ProvaNotaVocale.swift)
         ProvaNotaVocale.esegui(controlla)
@@ -1191,6 +1270,8 @@ enum ProvaVera {
         ProvaDaFareShell.esegui(controlla)
         // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (MostraAlCliente.swift, solo sul Mac)
         ProvaMostraAlCliente.esegui(controlla)
+        // Migliorie d'uso 61: cerca ovunque, e fa (filtri da toccare, Parole, azioni, apertura pulita; ProvaRicercaUso.swift)
+        ProvaRicercaUso.esegui(controlla)
         #endif
         // Le domande dei passi con il loro seguito, «Rifai i calcoli», il piano vuoto evitato
         StatoShell.provaPassiSeguito(controlla)
@@ -1499,6 +1580,68 @@ enum ProvaVera {
                   "Incolla da Excel: righe di contatti in Clienti")
         return esiti
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 65 «Le note stanno con il cliente»: la nota in evidenza (la fissata più recente, altrimenti «Da
+    /// ricordare»), una sola per cliente, «Fanne un «Da fare»» con il legame, «Elimina» con «Annulla» e la scheda di Vera.
+    static func provaNoteDossier(_ controlla: (Bool, String) -> Void) {
+        let s = StatoShell(persistente: false)
+        guard let marco = s.cliente("marco"), !marco.nota.isEmpty else {
+            controlla(false, "Note del dossier: Marco con la sua nota «Da ricordare» nei dati di prova")
+            return
+        }
+        // Nessuna nota fissata: in evidenza «Da ricordare»
+        for n in s.dati.note where n.clienteId == "marco" && n.fissata { s.modificaNota(n.id) { $0.fissata = false } }
+        let dr = s.notaInEvidenza(marco)
+        controlla(dr?.daRicordare == true && dr?.testo == marco.nota.trimmingCharacters(in: .whitespacesAndNewlines),
+                  "Note del dossier: senza note in evidenza vale «Da ricordare»")
+        controlla(s.righeNoteDossier(marco).first?.id == StatoShell.idDaRicordare("marco"),
+                  "Note del dossier: «Da ricordare» in evidenza sta in cima all'elenco")
+        // Due note fissate (archivio di prima): vale la più recente; «Metti in evidenza» ne lascia una sola
+        let vecchia = Nota(id: "nota-prova-vecchia", clienteId: "marco", titolo: "Vecchia", testo: "Prima nota",
+                           fissata: true, creataIl: Date(timeIntervalSinceNow: -86_400 * 3), aggiornataIl: Date(timeIntervalSinceNow: -86_400 * 3))
+        let nuova = Nota(id: "nota-prova-nuova", clienteId: "marco", titolo: "Nuova", testo: "Seconda nota",
+                         fissata: true, creataIl: Date(timeIntervalSinceNow: -86_400), aggiornataIl: Date(timeIntervalSinceNow: -86_400))
+        s.dati.note.append(vecchia)
+        s.dati.note.append(nuova)
+        controlla(s.notaInEvidenza(marco)?.id == nuova.id, "Note del dossier: con più note fissate vale la più recente")
+        s.mettiInEvidenza(vecchia.id, cliente: "marco")
+        controlla(s.dati.note.filter { $0.clienteId == "marco" && $0.fissata }.map(\.id) == [vecchia.id]
+                  && s.notaInEvidenza(marco)?.id == vecchia.id && s.righeNoteDossier(marco).first?.id == vecchia.id,
+                  "Note del dossier: «Metti in evidenza» ne lascia una sola, in cima all'elenco")
+        if let fonte = s.fonteVera("marco") {
+            controlla(ContestoVera.scheda(fonte).contains("Da ricordare: «Vecchia»: Prima nota"),
+                      "Note del dossier: Vera riceve la nota in evidenza come «Da ricordare»")
+        } else {
+            controlla(false, "Note del dossier: la fonte di Vera per Marco")
+        }
+        s.togliEvidenza(cliente: "marco")
+        controlla(s.notaInEvidenza(marco)?.daRicordare == true, "Note del dossier: «Tolta dall'evidenza» rimette «Da ricordare»")
+        // «Fanne un «Da fare»»: un'attività per oggi con il legame; completata, la nota torna libera
+        let attivitaPrima = s.dati.attivita.count
+        s.notaNelDaFare(nuova.id)
+        let creata = s.dati.attivita.first { $0.daNota == nuova.id }
+        controlla(s.dati.attivita.count == attivitaPrima + 1 && creata?.titolo == "Nuova" && creata?.clienteId == "marco"
+                  && creata.map { Calendar.current.isDateInToday($0.scadenza) } == true
+                  && s.righeNoteDossier(marco).first { $0.id == nuova.id }?.nelDaFare == true,
+                  "Note del dossier: «Fanne un «Da fare»» crea l'attività per oggi e la riga dice «Nel Da fare»")
+        if let a = creata { s.alternaCompletata(a.id) }
+        controlla(s.righeNoteDossier(marco).first { $0.id == nuova.id }?.nelDaFare == false,
+                  "Note del dossier: completata l'attività, la nota non è più «Nel Da fare»")
+        // «Elimina» con «Annulla»
+        let primaDiEliminare = s.nota(nuova.id)
+        s.eliminaNotaDossier(nuova.id)
+        controlla(s.nota(nuova.id) == nil && s.azioneAvviso != nil, "Note del dossier: «Elimina» toglie la nota e offre «Annulla»")
+        s.eseguiAzioneAvviso()
+        controlla(primaDiEliminare != nil && s.nota(nuova.id) == primaDiEliminare, "Note del dossier: «Annulla» rimette la nota com'era")
+        // L'app Note sul Mac è la sezione Note del dossier
+        s.scegliNota(nuova.id)
+        s.apri(.note)
+        controlla(s.appAttiva == .clienti && s.schedaCliente == .note && s.clienteAttivoId == "marco" && s.inPrimoPiano(.note)
+                  && !s.finestre.contains { $0.app == .note },
+                  "Note del dossier: apri(.note) porta al dossier del cliente della nota, senza una finestra Note")
+    }
+    #endif
 }
 
 // MARK: - Finti per le prove dell'ascolto

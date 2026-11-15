@@ -212,7 +212,8 @@ struct DettaglioDocumento: View {
         if d.dimensione > 0 { parti.append(Formati.dimensione(d.dimensione)) }
         parti.append("importato il \(Formati.dataEstesa.string(from: d.importatoIl))")
         if d.pagineOCR > 0 { parti.append(d.pagineOCR == 1 ? "1 pagina letta dalla scansione" : "\(d.pagineOCR) pagine lette dalla scansione") }
-        if d.file == nil { parti.append("documento di prova") }
+        // Migliorie d'uso 37: in dimostrazione basta l'etichetta della barra (e i PDF archiviati lì non hanno file)
+        if d.file == nil && !stato.inDimostrazione { parti.append("documento di prova") }
         return parti.joined(separator: " · ")
     }
 
@@ -1256,7 +1257,7 @@ struct ConfrontoClienteVista: View {
 // MARK: - Scheda «Testo»
 
 /// Il testo letto, pagina per pagina (la stessa pagina dell'anteprima), con le righe dei dati letti evidenziate.
-private struct SchedaTestoDocumento: View {
+struct SchedaTestoDocumento: View {
     @Environment(StatoShell.self) var stato
     let documento: Documento
 

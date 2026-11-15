@@ -214,6 +214,8 @@ final class TavoloMac: ObservableObject {
     @Published private(set) var attesaPresaVisione: RichiestaPresaVisioneTavolo?
     /// Il documento dei Documenti con l'ultima presa visione archiviata.
     @Published private(set) var ultimaPresaVisione: String?
+    /// Migliorie d'uso 58: quante prese visione dall'iPad sono state archiviate (la scheda sul Mac si accende al cambio).
+    @Published private(set) var presaVisioneArchiviate = 0
     @Published private(set) var avviso: String?
     /// Ciò che arriva dall'iPad per l'esperienza mostrata (le viste della Sala lo ascoltano con `.dalTavolo`, giro 16).
     let dallIPad = PassthroughSubject<ContenutoTavolo, Never>()
@@ -595,13 +597,22 @@ final class TavoloMac: ObservableObject {
     }
 
     /// L'immagine ferma di un palco (decisione 111: prisma di luce, giornata della pensione), come una pagina.
+    /// Migliorie d'uso 58: anche l'immagine di un capitolo della vista del cliente. `cifre` falso per ciò che non porta
+    /// cifre del cliente (la griglia della Sala, il gioco del rischio): niente conferma. `documento`: la pagina su carta
+    /// di ciò che si vede, per la presa visione chiesta dopo.
     @MainActor
-    func mandaImmagine(_ c: ContestoTavolo, titolo: String, png: Data, misura: CGSize) {
-        guard collegato, let s = stato, let id = clientePresente(c), let cliente = s.cliente(id), cifreConfermate.contains(id),
+    func mandaImmagine(_ c: ContestoTavolo, titolo: String, png: Data, misura: CGSize, cifre: Bool = true,
+                       documento carta: DocumentoStampabile? = nil) {
+        guard collegato, let s = stato, let id = clientePresente(c), let cliente = s.cliente(id),
+              !cifre || cifreConfermate.contains(id),
               !png.isEmpty, png.count <= ProtocolloTavolo.massimoMessaggio else { return }
         let pagina = PaginaTavolo(numero: 1, totale: 1, larghezza: Double(misura.width), altezza: Double(misura.height), png: png)
         let m = MostraTavolo(id: UUID().uuidString, genere: .pagina, titolo: titolo, cliente: cliente.nome, pagine: [pagina])
         mostra(m, cliente: id, descrizione: titolo, sala: c.dallaSala)
+        if let carta {
+            documento = carta
+            clienteDocumento = id
+        }
     }
 
     /// La capsula del tempo scritta sull'iPad (D-C4): il testo arriva una volta sola a `riceve` e l'iPad torna neutro.
@@ -739,12 +750,15 @@ final class TavoloMac: ObservableObject {
         let adesso = Date()
         let data = Date(timeIntervalSince1970: p.data)
         let quando = abs(data.timeIntervalSince(adesso)) <= ProtocolloTavolo.tolleranzaOrologio ? data : adesso
-        let completo = Self.documentoConPresaVisione(d, tratto: tratto, data: quando)
+        // Migliorie d'uso 58: «pagina per pagina» solo per un documento di più pagine
+        let testo = d.pagine.count > 1 ? TestiPresaVisione.iPadPagine : TestiPresaVisione.iPadUna
+        let completo = Self.documentoConPresaVisione(d, tratto: tratto, data: quando, testo: testo)
         guard let pdf = StampaCarta.pdf(completo) else {
             avviso = "Non sono riuscito a creare il PDF della presa visione."
             return
         }
         ultimaPresaVisione = s.archiviaProspetto(pdf, documento: completo, cliente: cliente)
+        if ultimaPresaVisione != nil { presaVisioneArchiviate += 1 }
     }
 
     // MARK: Aiuti
@@ -826,9 +840,10 @@ final class TavoloMac: ObservableObject {
     }
 
     /// Il documento con la pagina della presa visione in fondo (stesso formato delle altre pagine).
-    static func documentoConPresaVisione(_ d: DocumentoStampabile, tratto: CGImage, data: Date) -> DocumentoStampabile {
+    static func documentoConPresaVisione(_ d: DocumentoStampabile, tratto: CGImage, data: Date,
+                                         testo: String = TestiPresaVisione.iPadPagine) -> DocumentoStampabile {
         let finale = AnyView(PaginaPresaVisione(titolo: d.titolo, genere: d.genere, cliente: d.cliente, pagine: d.pagine.count,
-                                                formato: d.formato, tratto: tratto, data: data))
+                                                formato: d.formato, tratto: tratto, data: data, testo: testo))
         return DocumentoStampabile(titolo: "Presa visione · \(d.titolo)", cliente: d.cliente, genere: d.genere, formato: d.formato,
                                    pagine: d.pagine + [finale], tipo: d.tipo)
     }

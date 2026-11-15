@@ -65,6 +65,9 @@ extension Tema.Apple {
             static let vuotoSopra: CGFloat = 12
             /// Il pulsante di uno stato vuoto («Inserisci le tue aliquote», «Imposta gli obiettivi»).
             static let pulsanteSopra: CGFloat = 12
+            /// Migliorie d'uso 53: le parti in grassetto delle frasi che rispondono (il mese, il totale, «N clienti»),
+            /// in `--ink`.
+            static let coloreForte = Colore.inchiostro
         }
 
         // MARK: Card 1 · I tuoi ricavi
@@ -137,6 +140,10 @@ extension Tema.Apple {
             static let filo = Colore.separatore
             /// Una voce senza traguardo: il pallino in `inchiostro3`.
             static let pallinoSenza = Colore.inchiostro3
+            /// Migliorie d'uso 53: «Il più indietro: …» sotto la legenda, 10 sopra, `.k` con interlinea 1,45.
+            static let sopraFrase: CGFloat = 10
+            static let frase = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
+            static let coloreFrase = Colore.inchiostro2
         }
 
         // MARK: Card 3 · L'imbuto delle proposte
@@ -189,6 +196,8 @@ extension Tema.Apple {
             /// Le etichette dei due canali sopra le colonne (il canale resta sempre riconoscibile), 8 sotto la didascalia.
             static let legendaSopra: CGFloat = 8
             static let spazioLegenda: CGFloat = 8
+            /// Migliorie d'uso 53: la colonna sotto il puntatore si schiarisce (il `brightness(1.12)` del template).
+            static let luceSopra: Double = 0.06
         }
 
         // MARK: Card 5 · Il valore e il tempo
@@ -221,6 +230,8 @@ extension Tema.Apple {
             static let passoOre: Double = 5
             /// Margine sopra il valore più alto dei ricavi.
             static let margineRicavi: Double = 1.1
+            /// Migliorie d'uso 53: «ricavi dell’anno ↑» in alto a sinistra del grafico, 2 sopra il bordo.
+            static let asseVerticaleSopra: CGFloat = -2
         }
 
         // MARK: Schede che arrivano

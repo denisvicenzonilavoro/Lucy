@@ -44,7 +44,8 @@ enum VistaMessaggi: String, CaseIterable, Identifiable, Hashable {
 /// Lo stato in memoria di Potenziali e Passaparola. Il dettaglio aperto non sta qui: è lo `StatoDettaglio` della vista
 /// Potenziali (come in Pratiche › Dopo la firma).
 @Observable final class StatoPotenziali {
-    /// L'ambasciatore evidenziato nell'albero (gli altri rami al 30%).
+    /// L'ambasciatore evidenziato nell'albero (gli altri rami al 30%). Sul Mac (Migliorie d'uso 48) la persona scelta
+    /// nell'albero o fra gli ambasciatori: il suo ramo acceso (il resto al 20%) e a destra la card «Il ramo di».
     var evidenziato: String?
     /// La scheda che si sta trascinando.
     var trascinato: String?
@@ -60,6 +61,15 @@ enum VistaMessaggi: String, CaseIterable, Identifiable, Hashable {
     var occasioniRichieste: [String: String] = [:]
     /// Solo per le istantanee: il potenziale con il dettaglio già aperto.
     @ObservationIgnored var dettaglioIstantanea: String?
+    /// Migliorie d'uso 47: l'ultimo spostamento, da annullare con «Annulla» sotto le colonne (nil = nessuno). Vale finché
+    /// non si fa un altro spostamento o si lascia la vista.
+    var ultimoSpostamento: SpostamentoPotenziale?
+}
+
+/// Lo spostamento di un potenziale che si può annullare: la copia di prima e la fase d'arrivo.
+struct SpostamentoPotenziale: Equatable {
+    let prima: PotenzialeCliente
+    let a: FasePotenziale
 }
 
 /// Lo stato in memoria di Messaggi › Campagne.

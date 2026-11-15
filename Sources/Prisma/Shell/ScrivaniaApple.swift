@@ -553,11 +553,20 @@ private struct RiquadroMossa: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         let v = ultimi.valori(fermi: ScrivaniaFuoriVista.fermi(stato, inVista: inVista)) {
-            ValoriMossaScrivania(chiave: stato.chiaveVista, esito: stato.mossaDelGiorno())
+            ValoriMossaScrivania(chiave: stato.chiaveVista, esito: stato.mossaDelGiorno(), voce: voceDellaMossa())
         }
-        CorpoMossaScrivania(stato: stato, chiave: v.chiave, esito: v.esito)
+        CorpoMossaScrivania(stato: stato, chiave: v.chiave, esito: v.esito, voce: v.voce)
             .equatable()
             .riquadroScrivania(apre: { apriPosizioni() })
+    }
+
+    /// Sul Mac la voce del «Da fare» che è la mossa (migliorie d'uso 3, proposta di 3.6): «✓ Fatto» la spunta.
+    private func voceDellaMossa() -> VoceDaFare? {
+        #if os(macOS)
+        return stato.voceDellaMossa(in: stato.nastroDaFareCompleto(cliente: nil).voci)
+        #else
+        return nil
+        #endif
     }
 
     /// Il riquadro porta in Posizioni: il dossier del cliente della mossa, o il portafoglio se non c'è una mossa.
@@ -577,6 +586,8 @@ private struct RiquadroMossa: View {
 private struct ValoriMossaScrivania {
     let chiave: ChiaveVista
     let esito: EsitoMossaDelGiorno
+    /// La voce del «Da fare» che è la mossa (solo sul Mac).
+    let voce: VoceDaFare?
 }
 
 private struct CorpoMossaScrivania: View, Equatable {
@@ -585,6 +596,8 @@ private struct CorpoMossaScrivania: View, Equatable {
     /// Dal riquadro (`RiquadroMossa`): il body non legge lo stato, così le modifiche dei dati non lo rifanno da sole
     /// (Observation) mentre la scrivania è nascosta.
     let esito: EsitoMossaDelGiorno
+    /// La voce del «Da fare» che è la mossa: «✓ Fatto» la spunta (solo sul Mac).
+    let voce: VoceDaFare?
     @State private var originePrepara = OrigineApertura()
     @State private var origineDossier = OrigineApertura()
 
@@ -667,8 +680,21 @@ private struct CorpoMossaScrivania: View, Equatable {
                 }
                 .buttonStyle(.apple)
                 .misuraOrigine(origineDossier)
+                #if os(macOS)
+                // Migliorie d'uso 3 (proposta di 3.6): la mossa è la prima voce del «Da fare», e qui si spunta
+                if let v = voce {
+                    Button {
+                        stato.fattoDaFare(v)
+                    } label: {
+                        Label(TestiDaFare.fattoMossa, systemImage: m.simboloFatto)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .buttonStyle(.apple)
+                    .help(TestiDaFare.segnaFatto)
+                }
+                #endif
             }
-            // I due pulsanti larghi uguali (quanto il più largo)
+            // I pulsanti larghi uguali (quanto il più largo)
             .fixedSize(horizontal: true, vertical: false)
         } else {
             Button {
@@ -1300,10 +1326,14 @@ private struct RiquadroDaFareScrivania: View {
         let _ = ContaCorpi.segna()
         let v = ultimi.valori(fermi: ScrivaniaFuoriVista.fermi(stato, inVista: inVista)) {
             let n = stato.nastroDaFareCompleto(cliente: nil)
+            // Proposta di 3.6: la voce della mossa del giorno è la prima e sta nella mossa; il riquadro parte dalla seconda
+            let mossa = stato.voceDellaMossa(in: n.voci)
+            let dopo = n.voci.filter { $0.id != mossa?.id }
             return ValoriDaFareScrivania(chiave: stato.chiaveVista,
-                                         voci: Array(n.voci.prefix(Tema.Apple.ElencoDaFare.righeScrivania)), totale: n.totale)
+                                         voci: Array(dopo.prefix(Tema.Apple.ElencoDaFare.righeScrivania)),
+                                         totale: n.totale - (mossa == nil ? 0 : 1), dopoMossa: mossa != nil)
         }
-        CorpoDaFareScrivaniaMac(stato: stato, chiave: v.chiave, voci: v.voci, totale: v.totale)
+        CorpoDaFareScrivaniaMac(stato: stato, chiave: v.chiave, voci: v.voci, totale: v.totale, dopoMossa: v.dopoMossa)
             .equatable()
             .riquadroScrivania(apre: { stato.apriDaFare() })
     }
@@ -1314,6 +1344,8 @@ private struct ValoriDaFareScrivania {
     let chiave: ChiaveVista
     let voci: [VoceDaFare]
     let totale: Int
+    /// La prima voce del nastro è nella mossa del giorno: sotto il titolo «dopo la mossa del giorno».
+    let dopoMossa: Bool
 }
 
 private struct CorpoDaFareScrivaniaMac: View, Equatable {
@@ -1322,6 +1354,7 @@ private struct CorpoDaFareScrivaniaMac: View, Equatable {
     /// Dal riquadro: il body non legge lo stato, così le modifiche dei dati non lo rifanno da sole.
     let voci: [VoceDaFare]
     let totale: Int
+    let dopoMossa: Bool
 
     nonisolated static func == (a: CorpoDaFareScrivaniaMac, b: CorpoDaFareScrivaniaMac) -> Bool { a.chiave == b.chiave }
 
@@ -1335,6 +1368,13 @@ private struct CorpoDaFareScrivaniaMac: View, Equatable {
                     .foregroundColor(Tema.Apple.Colore.inchiostro)
                     .lineLimit(1)
                 NumeroDaFare(numero: totale)
+                if dopoMossa {
+                    Text(TestiDaFare.dopoMossa)
+                        .carattereApple(r.vuoto)
+                        .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                        .lineLimit(1)
+                        .layoutPriority(-1)
+                }
                 Spacer(minLength: 0)
                 Button { stato.apriDaFare() } label: {
                     Text((totale > voci.count ? TestiDaFare.altre(totale - voci.count) : "") + TestiDaFare.apriTutto)

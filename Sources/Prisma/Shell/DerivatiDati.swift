@@ -7,6 +7,11 @@ import Foundation
 /// aggiorna dai getter senza pubblicare StatoShell. Ogni voce si calcola alla prima richiesta dopo un
 /// cambiamento, non tutte insieme. Si usa solo dal thread principale.
 final class DerivatiDati {
+    /// Una voce di `altri` con ciò da cui dipende oltre ai dati dei calcoli (`StatoShell.ricavato(_:ingresso:_:)`).
+    struct VoceConIngresso<E: Equatable, T> {
+        let ingresso: E
+        let valore: T
+    }
     /// Il radar del portafoglio (Posizioni › Radar): con Observation la vista lo chiede a ogni rivalutazione.
     var radar: RadarPortafoglio?
     /// La copia dell'archivio per i motori che vogliono tutto `DatiPrisma` (StatoShell.datiDeiCalcoli).
@@ -51,7 +56,8 @@ final class DerivatiDati {
         let cliente: String
         let orizzonteConfronto: Int?
         let orizzonteSostituzione: Int?
-        let fascicolo: Set<TipoProspetto>
+        /// I report del fascicolo spuntati, nell'ordine scelto (migliorie d'uso 70: l'ordine cambia il documento).
+        let fascicolo: [TipoProspetto]
         let appuntamento: String?
         let ora: Int
     }
@@ -267,6 +273,19 @@ extension StatoShell {
         let v = calcola()
         if d.altri.count >= DerivatiDati.vociMassimeAltri { d.altri.removeAll(keepingCapacity: true) }
         d.altri[chiave] = v
+        return v
+    }
+
+    /// Come `ricavato(_:_:)`, per un calcolo che legge anche dati fuori da quelli dei calcoli (esclusi da
+    /// `DatiPrisma.stessiCalcoli`, come le spese dello Studio, i km per cliente e le loro impostazioni): `ingresso` li
+    /// raccoglie e la voce vale finché resta uguale (`==`), oltre a `versioneCalcoli`, il giorno e la modalità cliente.
+    /// Migliorie d'uso, rifinitura 57: così un motore pesante esce dal body senza mettere nella chiave tutto l'archivio.
+    func ricavato<E: Equatable, T>(_ chiave: String, ingresso: E, _ calcola: () -> T) -> T {
+        let d = derivatiValidi()
+        if let voce = d.altri[chiave] as? DerivatiDati.VoceConIngresso<E, T>, voce.ingresso == ingresso { return voce.valore }
+        let v = calcola()
+        if d.altri.count >= DerivatiDati.vociMassimeAltri { d.altri.removeAll(keepingCapacity: true) }
+        d.altri[chiave] = DerivatiDati.VoceConIngresso(ingresso: ingresso, valore: v)
         return v
     }
 
@@ -517,7 +536,7 @@ extension StatoShell {
         let k = DerivatiDati.ChiaveDocumento(scelta: scelta, note: DerivatiDati.leggeLeNote(scelta) ? versioneNote : 0,
                                              prospetto: prospetto, cliente: clienteAttivoId,
                                              orizzonteConfronto: orizzonteConfronto, orizzonteSostituzione: orizzonteSostituzione,
-                                             fascicolo: sceltaFascicolo, appuntamento: fascicoloAppuntamento, ora: DerivatiDati.ora())
+                                             fascicolo: reportFascicolo, appuntamento: fascicoloAppuntamento, ora: DerivatiDati.ora())
         if let i = d.documenti.lastIndex(where: { $0.chiave == k }) {
             if i == d.documenti.count - 1 || !DerivatiDati.soloSeUltimo(scelta) {
                 // Il più recente va in fondo; il numero è quello della sua impaginazione
@@ -636,6 +655,9 @@ extension DatiPrisma {
         b.uscite = a.uscite
         // Le lettere dal futuro conservate non entrano in nessun calcolo in cache
         b.lettere = a.lettere
+        // Migliorie d'uso 60: le esperienze della Sala fatte non entrano in nessun calcolo in cache (le loro letture hanno
+        // nella chiave quante sono e l'ultima)
+        b.esperienzeFatte = a.esperienzeFatte
         b.impostazioni.studio.spese = a.impostazioni.studio.spese
         // Vera, fase 4: le routine, il tagliando dei dati («Va bene così» non rifà le cache), le spiegazioni in tre livelli
         // e il profilo di stile non entrano in nessun calcolo in cache

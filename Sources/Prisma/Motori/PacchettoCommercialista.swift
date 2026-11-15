@@ -7,6 +7,8 @@ import Foundation
 // - Nessun nome di cliente con `nomiNelPacchetto` spento (di base): dei giri solo data, km e numero di visite; delle spese
 //   il cliente legato non compare (descrizione e nota sono parole dell'utente).
 // - Solo fatti: niente deducibilità, niente IVA detraibile; il valore per km solo se l'utente l'ha scritto.
+// - Migliorie d'uso 57: una spesa senza scontrino è segnata «manca» nella colonna «Scontrino»; le parcelle emesse nel
+//   mese (non bozze né annullate) vanno in `parcelle-<aaaa-mm>.csv`, con il cliente solo con `nomiNelPacchetto` acceso.
 
 enum PacchettoCommercialista {
     /// Il contenuto del pacchetto, preparato sul thread principale (testi e PDF), scritto poi altrove.
@@ -20,6 +22,8 @@ enum PacchettoCommercialista {
         let pdf: Data?
         /// I file degli scontrini: (url sul Mac, nome nello zip).
         let scontrini: [(url: URL, nome: String)]
+        /// Migliorie d'uso 57: le parcelle emesse nel mese (nil se non ce ne sono: il file non si scrive).
+        var csvParcelle: String? = nil
     }
 
     enum Errore: LocalizedError {
@@ -105,8 +109,41 @@ enum PacchettoCommercialista {
         for s in spese {
             var campi = [formatoData.string(from: s.data), s.descrizione, s.esercente ?? "", s.categoria.nome,
                          s.canale?.nomeBreve ?? "", numero(s.importo, decimali: 2), s.iva.map { numero($0, decimali: 2) } ?? "",
-                         s.pagamento ?? "", scontrini[s.id] ?? "", s.nota]
+                         s.pagamento ?? "", campoScontrino(s, scontrini: scontrini), s.nota]
             if let nomi { campi.append(s.clienteId.flatMap { nomi[$0] } ?? "") }
+            righe.append(riga(campi))
+        }
+        return bom + righe.joined(separator: "\r\n") + "\r\n"
+    }
+
+    /// Migliorie d'uso 57: «segnata» vuol dire scritta. Il campo «Scontrino» di una spesa: il file nello zip, «manca» se
+    /// la spesa non ha lo scontrino, vuoto se il file non si trova più sul Mac.
+    static let scontrinoMancante = "manca"
+    static func campoScontrino(_ s: SpesaStudio, scontrini: [String: String]) -> String {
+        if let f = scontrini[s.id] { return f }
+        return s.scontrino == nil ? scontrinoMancante : ""
+    }
+
+    /// Migliorie d'uso 57: le parcelle emesse nel mese che comincia in `mese` (emesse o pagate: niente bozze né
+    /// annullate), in ordine di data e di numero.
+    static func parcelleDelMese(_ parcelle: [Parcella], mese: Date, calendario cal: Calendar = .current) -> [Parcella] {
+        let inizio = MotoreChilometri.inizioMese(mese, cal)
+        guard let fine = cal.date(byAdding: .month, value: 1, to: inizio) else { return [] }
+        return parcelle.filter { ($0.stato == .emessa || $0.stato == .pagata) && $0.data >= inizio && $0.data < fine }
+            .sorted { ($0.data, $0.progressivo ?? 0, $0.id) < ($1.data, $1.progressivo ?? 0, $1.id) }
+    }
+
+    /// Migliorie d'uso 57: le parcelle emesse nel mese, una per riga (numero, data, imponibile, totale, stato). Il
+    /// cliente solo con `nomi` acceso.
+    static func csvParcelle(_ parcelle: [Parcella], nomi: [String: String]?) -> String {
+        var intestazione = ["Numero", "Data", "Imponibile (€)", "Totale (€)", "Stato"]
+        if nomi != nil { intestazione.append("Cliente") }
+        var righe = [riga(intestazione)]
+        for p in parcelle {
+            let imponibile = MotoreParcelle.imponibile(p)
+            var campi = [p.numero ?? "", formatoData.string(from: p.data), numero(imponibile, decimali: 2),
+                         numero(p.voci?.totaleDocumento ?? imponibile, decimali: 2), p.stato.nome]
+            if let nomi { campi.append(nomi[p.clienteId] ?? "") }
             righe.append(riga(campi))
         }
         return bom + righe.joined(separator: "\r\n") + "\r\n"
@@ -161,7 +198,7 @@ enum PacchettoCommercialista {
         let lavoro = fm.temporaryDirectory.appendingPathComponent(prefissoLavoro + UUID().uuidString, isDirectory: true)
         defer { try? fm.removeItem(at: lavoro) }
         let cartella = lavoro.appendingPathComponent(c.nome, isDirectory: true)
-        let totale = 2 + (c.pdf == nil ? 0 : 1) + c.scontrini.count + 1
+        let totale = 2 + (c.csvParcelle == nil ? 0 : 1) + (c.pdf == nil ? 0 : 1) + c.scontrini.count + 1
         var fatti = 0
         func passo() {
             fatti += 1
@@ -173,6 +210,10 @@ enum PacchettoCommercialista {
             passo()
             try Data(c.csvSpese.utf8).write(to: cartella.appendingPathComponent("spese-\(c.suffisso).csv"))
             passo()
+            if let parcelle = c.csvParcelle {
+                try Data(parcelle.utf8).write(to: cartella.appendingPathComponent("parcelle-\(c.suffisso).csv"))
+                passo()
+            }
             if let pdf = c.pdf {
                 try pdf.write(to: cartella.appendingPathComponent("riepilogo-\(c.suffisso).pdf"))
                 passo()
@@ -198,10 +239,13 @@ enum PacchettoCommercialista {
         }
     }
 
-    /// «chilometri, spese e 6 scontrini, in CSV e PDF».
-    static func descrizione(scontrini: Int, pdf: Bool) -> String {
-        let s = scontrini == 0 ? "chilometri e spese" : scontrini == 1 ? "chilometri, spese e 1 scontrino"
-            : "chilometri, spese e \(scontrini) scontrini"
-        return s + (pdf ? ", in CSV e PDF" : ", in CSV")
+    /// «chilometri, spese e 6 scontrini, in CSV e PDF: lo mandi tu al commercialista» (con le parcelle: «chilometri,
+    /// spese, parcelle e 6 scontrini…»).
+    static func descrizione(scontrini: Int, pdf: Bool, parcelle: Bool = false) -> String {
+        let voci = parcelle ? "chilometri, spese" : "chilometri"
+        let ultima = scontrini == 0 ? (parcelle ? "parcelle" : "spese")
+            : scontrini == 1 ? "1 scontrino" : "\(scontrini) scontrini"
+        let prima = scontrini == 0 ? voci : voci + (parcelle ? ", parcelle" : ", spese")
+        return prima + " e " + ultima + (pdf ? ", in CSV e PDF" : ", in CSV") + ": lo mandi tu al commercialista"
     }
 }

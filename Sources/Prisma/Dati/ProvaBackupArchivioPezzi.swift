@@ -27,8 +27,19 @@ extension ProvaBackup {
             return "archivio a pezzi: DatiPrisma ha un campo senza chiave"
         }
 
+        // Migliorie d'uso 65: un'attività nata da una nota (`daNota`) e una senza tornano uguali dal disco
+        var conDaNota = DatiPrisma.demo()
+        if conDaNota.attivita.count >= 2, let n = conDaNota.note.first {
+            conDaNota.attivita[0].daNota = n.id
+            conDaNota.attivita[1].daNota = nil
+            let riletti = try passatoDalDisco(conDaNota)
+            guard riletti.attivita.first(where: { $0.id == conDaNota.attivita[0].id })?.daNota == n.id,
+                  riletti.attivita.first(where: { $0.id == conDaNota.attivita[1].id })?.daNota == nil else {
+                return "archivio a pezzi: l'attività nata da una nota non torna con il suo legame"
+            }
+        }
         let casi: [(String, DatiPrisma)] = [("dati di prova", DatiPrisma.demo()), ("clienti fittizi", ClientiFittizi.completi()),
-                                            ("archivio della prova", originale)]
+                                            ("archivio della prova", originale), ("attività nate da una nota", conDaNota)]
         for (n, (nome, d)) in casi.enumerated() {
             if let e = try provaConversione(base.appendingPathComponent("Conversione-\(n)", isDirectory: true), nome: nome, dati: d) {
                 return "archivio a pezzi, \(nome): \(e)"

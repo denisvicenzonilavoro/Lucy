@@ -147,11 +147,15 @@ struct ComandiPrisma: Commands {
                     }
                 }
             }
-            // Le app con una finestra propria fuori dal dock (versione «Orizzonte»): Prodotti e Note.
+            // Le app con una finestra propria fuori dal dock (versione «Orizzonte»). Sul Mac Prodotti si apre nella
+            // Biblioteca e Note nel dossier (migliorie d'uso 63 e 65), quindi l'elenco è vuoto e il filo non compare.
             // La Ricerca è «Cerca ovunque» (⌘K), qui sopra
-            Divider()
-            ForEach(AppPrisma.altreApp.filter { $0 != .ricerca }) { app in
-                Button(app.titolo) { stato.apriApp(app) }
+            let altre = AppPrisma.altreApp.filter { $0 != .ricerca }
+            if !altre.isEmpty {
+                Divider()
+                ForEach(altre) { app in
+                    Button(app.titolo) { stato.apriApp(app) }
+                }
             }
             }
             // Durante la presentazione nulla si muove sotto il velo: resta solo la schermata di benvenuto. Nella vista

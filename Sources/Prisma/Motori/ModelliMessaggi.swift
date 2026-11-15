@@ -279,6 +279,16 @@ enum ModelliMessaggi {
                 : ["volevo dirti grazie per la fiducia: il passo di questi giorni\(fatto) è un bel risultato, e averlo raggiunto insieme mi fa piacere.",
                    "Ti faccio una richiesta semplice, senza nessun impegno: se conosci qualcuno a cui potrebbe servire una mano come quella che ho dato a te, sarei felice di conoscerlo.",
                    "Grazie ancora."]
+        case .ringraziamentoPresentazione:
+            // Il grazie a chi ti ha presentato delle persone (Migliorie d'uso 48, decisione 48-b): per la fiducia e per aver
+            // parlato di te. Mai i nomi delle persone presentate (dati di terzi), mai cifre, mai una proposta
+            return lei
+                ? ["volevo ringraziarla: so che ha parlato di me a persone a cui tiene, ed è il segno di fiducia più bello che potessi ricevere.",
+                   "Me ne prenderò cura con la stessa attenzione che dedico al lavoro con lei.",
+                   "Un cordiale saluto e grazie ancora."]
+                : ["volevo dirti grazie: so che hai parlato di me a persone a cui tieni, ed è il segno di fiducia più bello che potessi ricevere.",
+                   "Me ne prenderò cura con la stessa attenzione che metto nel lavoro con te.",
+                   "Grazie davvero."]
         }
     }
 
@@ -368,6 +378,9 @@ enum ModelliMessaggi {
         case .richiestaPresentazione:
             return (["grazie per la fiducia di questi giorni!"],
                     ["Se conosci qualcuno a cui potrebbe servire una mano come quella che ho dato a te, sarei felice di conoscerlo."])
+        case .ringraziamentoPresentazione:
+            return (["grazie per aver parlato di me: è il segno di fiducia più bello."],
+                    ["Me ne prenderò cura come mi prendo cura di te."])
         }
     }
 

@@ -8,6 +8,9 @@ import Foundation
 /// - 722: la fine: anello del punteggio, la frase, cosa ha funzionato, i tre strumenti e «Rifai», chiaro e scuro;
 /// - 723: Qwen non pronto; 724: Vera che scrive (puntini e prima riga, ferma);
 /// - 725: un cliente con pochi dati (prima di cominciare); 726: nessun cliente scelto.
+/// Migliorie d'uso 56: 720 con «L’ultima volta con Giulia», 721 in Facile con «la più efficace», 722 con l'esito di oggi;
+/// 1094-uso-palestra-primo-allenamento («Con Giulia · Primo allenamento») e 1094-uso-palestra-difficile (la riga di
+/// Difficile e una replica che insiste, scritta qui come le altre).
 ///
 /// TESTI DI PROVA DICHIARATI: obiezioni, risposte e repliche sono frasi scritte qui (riprese dal template, senza cifre
 /// inventate: l'unica cifra è l'imposta del 26% delle regole fiscali di Prisma), mai chieste a Qwen. Il cliente è
@@ -23,14 +26,19 @@ extension Istantanee {
             una(nome + "-scuro", prepara)
         }
         coppia("720-studio-palestra") { s in
+            registraUltimaPalestra(s, punteggio: 78, giorniFa: 18)
             preparaPalestra(s, turni: [turnoPalestra(0)], fase: .tuoTurno, convinta: 40)
         }
         coppia("721-studio-palestra-turno") { s in
-            preparaPalestra(s, turni: [turnoPalestra(0, risposta: 2), turnoPalestra(1)], fase: .tuoTurno, convinta: 55)
+            var dopo = turnoPalestra(1)
+            dopo.migliore = 2
+            preparaPalestra(s, turni: [turnoPalestra(0, risposta: 2), dopo], fase: .tuoTurno, convinta: 70, difficolta: .facile)
         }
         coppia("722-studio-palestra-fine") { s in
-            preparaPalestra(s, turni: [turnoPalestra(0, risposta: 2), turnoPalestra(1, risposta: 0), turnoPalestra(2, risposta: 0)],
-                            fase: .fine, convinta: 75, strumenti: [.lineaVita, .film])
+            let turni = [turnoPalestra(0, risposta: 2), turnoPalestra(1, risposta: 0), turnoPalestra(2, risposta: 0)]
+            // Come nell'app: a fine allenamento l'esito è già nel registro («78% · oggi»)
+            registraUltimaPalestra(s, punteggio: PalestraVera.punteggio(turni.compactMap(\.giudizio)), giorniFa: 0)
+            preparaPalestra(s, turni: turni, fase: .fine, convinta: 75, strumenti: [.lineaVita, .film])
         }
         una("723-studio-palestra-vera-non-pronta") { s in
             preparaPalestra(s, turni: [], fase: .nonPronta(MessaggiDiProva.motivoNonPronta), convinta: 40)
@@ -55,6 +63,17 @@ extension Istantanee {
         una("726-studio-palestra-scegli-cliente") { s in
             s.clienteAttivoId = ""
             s.apriStudio(.palestra)
+        }
+        // Migliorie d'uso 56
+        una("1094-uso-palestra-primo-allenamento") { s in
+            s.dati.impostazioni.palestra.allenamenti = []
+            s.clienteAttivoId = "giulia"
+            s.apriStudio(.palestra)
+        }
+        una("1094-uso-palestra-difficile") { s in
+            var primo = turnoPalestra(0, risposta: 0)
+            primo.replica = replicaInsiste
+            preparaPalestra(s, turni: [primo, turnoPalestra(1)], fase: .tuoTurno, convinta: 25, difficolta: .difficile)
         }
         return scene
     }
@@ -101,10 +120,22 @@ extension Istantanee {
         return t
     }
 
+    /// La replica di prova in Difficile dopo una risposta solo «buona»: il cliente torna sullo stesso dubbio (frase
+    /// scritta qui, come le altre: nell'app la scrive Vera seguendo la regola di Difficile).
+    nonisolated static let replicaInsiste = "Ah, quindi non è tutto bloccato. Però non mi ha ancora convinto del tutto: me lo fa vedere con i miei numeri?"
+
+    /// Un allenamento con Giulia nel registro, `giorniFa` giorni fa (0: oggi).
+    nonisolated static func registraUltimaPalestra(_ s: StatoShell, punteggio: Int, giorniFa: Int) {
+        let data = Calendar.current.date(byAdding: .day, value: -giorniFa, to: Date()) ?? Date()
+        s.dati.impostazioni.palestra.allenamenti = [EsitoPalestra(data: data, clienteId: "giulia", difficolta: .realistica, punteggio: punteggio)]
+    }
+
     /// Studio › Palestra con Giulia e la conversazione di prova.
     nonisolated static func preparaPalestra(_ s: StatoShell, turni: [TurnoPalestra], fase: StatoPalestra.Fase, convinta: Int,
-                                            parziale: String = "", strumenti: [StrumentoPalestra] = []) {
+                                            parziale: String = "", strumenti: [StrumentoPalestra] = [],
+                                            difficolta: DifficoltaPalestra = .realistica) {
         s.clienteAttivoId = "giulia"
+        s.palestra.difficolta = difficolta
         if let f = s.fonteVera("giulia") {
             s.palestra.prepara(scheda: PalestraVera.scheda(f), turni: turni, fase: fase, convinta: convinta, parziale: parziale,
                                strumenti: strumenti)

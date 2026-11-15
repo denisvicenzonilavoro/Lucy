@@ -230,7 +230,7 @@ extension StatoShell {
     }
 }
 
-// MARK: - «▣ Mostra sul tavolo» dal palco (decisioni 48, 49, 111)
+// MARK: - L'esperienza sul tavolo (decisioni 48, 49, 111; dalla miglioria d'uso 58 la manda l'etichetta del luogo)
 
 extension EsperienzaSala {
     /// Il genere a doppio senso dell'esperienza sull'iPad (nil = immagine del palco o pagina).
@@ -283,27 +283,20 @@ extension StatoShell {
     func confermaCifreSulTavolo(_ e: EsperienzaSala, cliente id: String) {
         tavolo.confermaCifre(id)
         sala.confermaCifreTavolo = nil
-        mostraEsperienzaSulTavolo(e, cliente: id)
+        // Migliorie d'uso 58: con il cliente sull'iPad decide l'etichetta («può toccare» o l'immagine del palco)
+        if inVistaCliente && luogoCliente == .tavolo {
+            seguiSulTavolo()
+        } else {
+            mostraEsperienzaSulTavolo(e, cliente: id)
+        }
     }
 
-    /// L'immagine ferma del palco (decisione 111): il palco disegnato nello stato finale, come una pagina.
+    /// L'immagine ferma del palco (decisione 111): il palco disegnato nello stato finale, come una pagina. Migliorie d'uso
+    /// 58: con la pagina su carta per la presa visione (`mandaImmagineVista`, LuogoCliente.swift).
     @MainActor
-    private func mandaImmaginePalco(_ e: EsperienzaSala, cliente c: Cliente) {
-        let misura = Tema.Apple.RealtaAumentata.ImmaginePalco.misura
-        let vista = ContenutoPalco(esperienza: e, cliente: c, inSala: true)
-            .environment(self)
-            .environment(\.modoIstantanea, true)
-            .environment(\.colorScheme, .dark)
-            .frame(width: misura.width, height: misura.height)
-            .background(Tema.Apple.RealtaAumentata.ImmaginePalco.fondo)
-        let r = ImageRenderer(content: vista)
-        r.proposedSize = ProposedViewSize(misura)
-        r.scale = Tema.Apple.RealtaAumentata.ImmaginePalco.scala
-        guard let immagine = r.immaginePrisma, let png = ProtocolloTavolo.png(immagine) else {
-            mostraAvviso("Non riesco a preparare l'immagine del palco per l'iPad.")
-            return
-        }
-        tavolo.mandaImmagine(ContestoTavolo(documento: nil, pagina: 0, clienteId: c.id), titolo: e.titolo, png: png, misura: misura)
+    func mandaImmaginePalco(_ e: EsperienzaSala, cliente c: Cliente) {
+        mandaImmagineVista(ContenutoPalco(esperienza: e, cliente: c, inSala: true), titolo: e.titolo, cliente: c,
+                           cifre: e.cifreSulTavolo)
     }
 
     /// Il gioco del rischio al tavolo: lo scenario o il risultato, se il tavolo è per il gioco.
@@ -331,51 +324,6 @@ extension StatoShell {
         if sala.tavoloEsperienza == e { sala.tavoloEsperienza = nil }
         if sala.confermaCifreTavolo == e { sala.confermaCifreTavolo = nil }
         if let g = e.genereTavolo, tavolo.mostraAttivo?.genere == g { tavolo.schermataNeutra() }
-    }
-}
-
-/// «▣ Mostra sul tavolo» nella testata del palco: osserva il tavolo (si accende quando l'iPad si collega). A tavolo
-/// chiuso o senza iPad apre il pannello del tavolo con l'avviso.
-struct PulsanteMostraSulTavolo: View {
-    @Environment(StatoShell.self) var stato
-    @ObservedObject var tavolo: TavoloMac
-    let esperienza: EsperienzaSala
-    let cliente: Cliente
-    @State private var pannello = false
-
-    var body: some View {
-        // Le stesure della lettera non sono osservate (`@ObservationIgnored`): si guardano al tocco, non per spegnere il
-        // pulsante, che altrimenti resterebbe spento anche dopo che la lettera è scritta
-        let senzaLettera = esperienza == .lettera && stato.sala.stesureLettera[cliente.id]?[stato.sala.versioneLettera] == nil
-        Button {
-            if esperienza == .lettera && stato.sala.stesureLettera[cliente.id]?[stato.sala.versioneLettera] == nil {
-                stato.mostraAvviso(TestiRealta.scriviPrimaLettera)
-            } else if tavolo.collegato {
-                stato.mostraEsperienzaSulTavolo(esperienza, cliente: cliente.id)
-            } else {
-                pannello = true
-            }
-        } label: { Text("▣ Mostra sul tavolo") }
-            .buttonStyle(.apple)
-            .disabled(!esperienza.disponibile || !esperienza.tavoloPronto)
-            .help(aiuto(senzaLettera: senzaLettera))
-            .popover(isPresented: $pannello, arrowEdge: .bottom) {
-                VStack(alignment: .leading, spacing: Tema.Apple.Tavolo.spazioPannello) {
-                    Text(TestiRealta.attesaTavolo)
-                        .carattereApple(Tema.Apple.Carattere.secondario)
-                        .foregroundColor(Tema.Apple.Colore.inchiostro2)
-                    PannelloAlTavolo(tavolo: tavolo, contesto: ContestoTavolo(documento: nil, pagina: 0, clienteId: cliente.id))
-                }
-                .environment(stato)
-            }
-    }
-
-    private func aiuto(senzaLettera: Bool) -> String {
-        if senzaLettera { return TestiRealta.scriviPrimaLettera }
-        if !tavolo.collegato { return TestiRealta.attesaTavolo }
-        return esperienza.genereTavolo == nil
-            ? "Sull'iPad del tavolo: l'immagine di questo palco"
-            : "Sull'iPad del tavolo: il cliente guarda e risponde da lì"
     }
 }
 

@@ -247,7 +247,7 @@ private struct ColonnaProposta: View {
                     .foregroundColor(Tema.Apple.Colore.inchiostro)
                     .fixedSize(horizontal: false, vertical: true)
                 EtichettaCanale(canale: p.canale, compatta: true)
-                if MotoreProposta.diProva(p) { EtichettaDatiDiProvaPratiche() }
+                if MotoreProposta.diProva(p) { EtichettaDatiDiProvaPratiche(deiClienti: true) }
             }
         case .daScegliere(let prodotti):
             VStack(alignment: .leading, spacing: Q.spazioScelta) {

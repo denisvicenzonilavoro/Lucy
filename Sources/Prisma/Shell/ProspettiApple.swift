@@ -330,7 +330,12 @@ extension AppProspetti {
 
     private var cardFascicoloApple: some View {
         let l = Tema.Apple.Prospetti.Laterale.self
+        #if os(macOS)
+        // Migliorie d'uso 70: il fascicolo non è più una voce dell'elenco; la card apre la scheda che nasce da lei
+        let scelto = false
+        #else
         let scelto = scelta.tipo == .fascicolo
+        #endif
         let forma = RoundedRectangle(cornerRadius: l.raggioFascicolo, style: .continuous)
         return VStack(alignment: .leading, spacing: 0) {
             Text("Fascicolo dell'incontro")
@@ -348,10 +353,19 @@ extension AppProspetti {
                     .padding(.horizontal, -l.rientroScelte)
                     .transition(.opacity)
             } else {
+                #if os(macOS)
+                let senzaCliente = stato.clienteAttivo == nil
+                Button(senzaCliente ? TestiFascicolo.scegliCliente : TestiFascicolo.componi) { stato.fascicoloDaAprire = true }
+                    .buttonStyle(.apple)
+                    .padding(.top, l.sopraPulsanteFascicolo)
+                    .disabled(senzaCliente || stato.inModoCliente)
+                    .help(TestiFascicolo.aiutoComponi)
+                #else
                 Button("Componi il fascicolo") { scegliApple(.fascicolo) }
                     .buttonStyle(.apple)
                     .padding(.top, l.sopraPulsanteFascicolo)
                     .help("Il fascicolo dell'incontro: spunta i report da consegnare e salvali in un solo PDF")
+                #endif
             }
         }
         .padding(l.paddingFascicolo)
@@ -362,7 +376,65 @@ extension AppProspetti {
                 forma.strokeBorder(l.bordoFascicoloScelto, lineWidth: Tema.Apple.Misura.bordo)
             }
         }
+        #if os(macOS)
+        .origineDettaglio(id: ComponiFascicoloMac.idDettaglio)
+        #endif
     }
+
+    #if os(macOS)
+    // MARK: Il fascicolo che si compone a vista (migliorie d'uso 70)
+
+    /// Prospetti con sopra la scheda «Il fascicolo dell'incontro» che nasce dalla card.
+    var corpoProspettiConFascicolo: some View {
+        let apertoSubito = stato.fascicoloDaAprire && !stato.inModoCliente && stato.clienteAttivo != nil
+        return PresentatoreFascicoloMac(apertoSubito: apertoSubito) {
+            corpoProspettiApple
+        } scheda: { d in
+            ComponiFascicoloMac(nome: { nomeBreve($0) },
+                                salva: { salvaFascicolo() },
+                                salvaAltrove: { salvaFascicoloAltrove() },
+                                stampa: { stampaFascicolo() },
+                                mostra: {
+                                    d.chiudi(subito: true)
+                                    stato.mostraFascicolo()
+                                })
+        }
+    }
+
+    /// Il PDF del fascicolo (mai nelle istantanee).
+    private func pdfFascicolo(_ d: DocumentoStampabile) -> Data? {
+        guard !modoIstantanea else { return nil }
+        let dati = StampaCarta.pdf(d)
+        if dati == nil { stato.mostraAvviso("Non sono riuscito a creare il PDF.") }
+        return dati
+    }
+
+    /// «Salva il PDF»: la seconda lettura, poi nei Documenti del cliente con il titolo del fascicolo e l'avviso.
+    private func salvaFascicolo() {
+        guard let d = stato.documentoFascicolo(), let dati = pdfFascicolo(d) else { return }
+        let n = stato.reportPresentiFascicolo.count
+        let nome = stato.clienteAttivo.map { $0.nome.split(separator: " ").first.map(String.init) ?? $0.nome } ?? ""
+        rileggiPoi(d, dati: dati) {
+            let id = stato.archiviaProspetto(dati, documento: d)
+            archiviato = id
+            if id != nil { stato.mostraAvviso(TestiFascicolo.salvato(nome, report: n, pagine: d.pagine.count)) }
+        }
+    }
+
+    /// «Altro › Salva in un'altra cartella…»: la seconda lettura, poi il foglio con la password del cliente.
+    private func salvaFascicoloAltrove() {
+        guard let d = stato.documentoFascicolo(), let dati = pdfFascicolo(d) else { return }
+        rileggiPoi(d, dati: dati) {
+            daSalvare = PDFDaSalvare(dati: dati, nome: StampaCarta.nomeFile(d), cliente: stato.clienteAttivo)
+        }
+    }
+
+    /// «Altro › Stampa…».
+    private func stampaFascicolo() {
+        guard let d = stato.documentoFascicolo(), let dati = pdfFascicolo(d) else { return }
+        StampaCarta.stampa(dati, formato: d.formato)
+    }
+    #endif
 
     /// In fondo: dove si impagina, e le app collegate.
     private var piedeLateraleApple: some View {
@@ -376,7 +448,11 @@ extension AppProspetti {
                 collegamento(AppPrisma.prodotti.titolo) { stato.apri(.prodotti) }
             }
             HStack(spacing: l.spazioCollegati) {
-                collegamento(AppPrisma.documenti.titolo) { stato.apri(.documenti) }
+                collegamento(AppPrisma.documenti.titolo) {
+                    stato.apri(.documenti)
+                    // Migliorie d'uso 62: qui si chiede l'elenco, non il documento scelto l'ultima volta
+                    stato.vistaDocumenti.lettore = nil
+                }
                 collegamento(StrumentoAnalisi.confronto.titolo) { stato.apriStrumentoAnalisi(.confronto) }
             }
             Text(Self.notaStato)

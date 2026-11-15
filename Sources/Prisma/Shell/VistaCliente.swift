@@ -73,6 +73,23 @@ struct StratoSopraVistaCliente: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         ZStack(alignment: .topTrailing) {
+            #if os(macOS)
+            if stato.inVistaCliente {
+                // Migliorie d'uso 58: l'iPad segue la vista del cliente; la riga di conferma delle cifre dei capitoli
+                OsservatoreLuogo(tavolo: stato.tavolo)
+                ConfermaCifreLuogo()
+                    .padding(.top, Tema.Apple.Misura.Barra.altezza + Tema.Apple.MostraAlCliente.Luogo.sottoBarraConferma)
+                    .frame(maxWidth: .infinity, alignment: .top)
+            }
+            if stato.inVistaCliente && stato.menuLuogo {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { stato.menuLuogo = false }
+                MenuLuogo(tavolo: stato.tavolo)
+                    .padding(.top, Tema.Apple.Misura.Barra.altezza + Tema.Apple.MostraAlCliente.Luogo.dallAlto)
+                    .padding(.trailing, Tema.Apple.MostraAlCliente.Luogo.rientroMenu)
+            }
+            #endif
             if stato.inVistaCliente && stato.menuUscitaMostra {
                 Color.clear
                     .contentShape(Rectangle())
@@ -85,6 +102,12 @@ struct StratoSopraVistaCliente: View {
                 SchedaVistaCliente(scheda: s)
                     .prismaScalaTesto(max(scala, V.scalaMinima))
             }
+            #if os(macOS)
+            // Migliorie d'uso 58: la presa visione di ciò che si vede (PresaVisioneMac.swift)
+            if stato.inVistaCliente && stato.presaVisioneAperta, let c = stato.clienteAttivo {
+                SchedaPresaVisione(tavolo: stato.tavolo, cliente: c)
+            }
+            #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
     }
@@ -204,6 +227,67 @@ private struct RigaMenuUscita: View {
         }
         .buttonStyle(StileSemplice())
         .onHover { s in withAnimation(Tema.Moto.passaggio) { sopra = s } }
+    }
+}
+
+// MARK: - Il menu dell'etichetta del luogo (migliorie d'uso 58)
+
+/// Il menu sotto «Su questo schermo» / «iPad sul tavolo», con le voci del template nell'ordine. Osserva il tavolo per la
+/// voce spenta «iPad non collegato».
+private struct MenuLuogo: View {
+    @Environment(StatoShell.self) var stato
+    @ObservedObject var tavolo: TavoloMac
+
+    private typealias U = Tema.Apple.MostraAlCliente.Uscita
+    private typealias L = Tema.Apple.MostraAlCliente.Luogo
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if stato.luogoCliente == .tavolo {
+                RigaMenuUscita(glifo: TestiLuogo.glifoSchermo, testo: TestiLuogo.torna, tasto: nil) { stato.tornaSulloSchermo() }
+                Rectangle()
+                    .fill(L.filo)
+                    .frame(height: 1)
+                    .padding(L.paddingFilo)
+                RigaMenuUscita(glifo: "hand.tap", testo: TestiLuogo.tocca(stato.tavoloTocca), tasto: nil) { stato.cambiaTocco() }
+            } else {
+                // Decisione 58-d: con il tavolo aperto e l'iPad non ancora collegato la voce resta, spenta
+                let spenta = tavolo.acceso && !tavolo.collegato
+                RigaMenuUscita(glifo: TestiLuogo.glifoTavolo, testo: TestiLuogo.manda,
+                               tasto: tavolo.collegato ? nil : TestiLuogo.nonCollegato) { stato.mandaAlTavolo() }
+                    .disabled(spenta)
+                    .opacity(spenta ? L.opacitaSpenta : 1)
+            }
+            RigaMenuUscita(glifo: "hand.draw", testo: TestiLuogo.presa, tasto: nil) { stato.apriPresaVisione() }
+        }
+        .padding(U.padding)
+        .frame(width: L.larghezza)
+        .superficieApple(U.superficie, raggio: U.raggio)
+    }
+}
+
+// MARK: - La vista ferma di un capitolo (migliorie d'uso 58)
+
+/// Il contenuto di un capitolo nello stato finale, per l'immagine mandata all'iPad sul tavolo e per la pagina della presa
+/// visione. Il capitolo «La Sala» è la griglia ferma.
+struct CapitoloClienteFermo: View {
+    let capitolo: CapitoloCliente
+    let cliente: Cliente
+
+    var body: some View {
+        Group {
+            switch capitolo {
+            case .quadro: CapitoloQuadro(cliente: cliente)
+            case .posizioni: CapitoloPosizioni(cliente: cliente)
+            case .obiettivi: CapitoloObiettivi(cliente: cliente)
+            case .tempo: CapitoloNelTempo(cliente: cliente)
+            case .sala: GrigliaSalaFerma(cliente: cliente)
+            }
+        }
+        .frame(maxWidth: V.larghezzaMassima, alignment: .topLeading)
+        .padding(V.margini)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .prismaScalaTesto(V.scalaMinima)
     }
 }
 
@@ -334,6 +418,11 @@ private struct PiedeCapitolo: View {
     @Environment(StatoShell.self) var stato
     var parole: [(String, VoceGlossario.Chiave)] = []
 
+    /// Le parole del quadro: nel piede solo quelle che le frasi non dicono già (lì si toccano nel testo).
+    static let paroleQuadro: [(String, VoceGlossario.Chiave)] = [("divario previdenziale", .divarioPrevidenziale),
+                                                                ("capitale caso morte", .capitaleMorte),
+                                                                ("indicatore di rischio (SRI)", .sri)]
+
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: V.spazioPiede) {
             Button { stato.schedaMostra = .ipotesi } label: {
@@ -379,6 +468,13 @@ private struct CapitoloQuadro: View {
             FrasiCliente.quadro(analisi: stato.analisi360(id), posizioni: stato.posizioniCliente(id),
                                 aree: stato.aree360(id), famiglia: famiglia)
         }
+        // Le parole si toccano dentro le frasi (una volta per schermata, `ParoleSchermata`): per ogni area le parole
+        // della frase e della seconda riga; nel piede restano solo quelle che le frasi non dicono
+        let parole: [Set<VoceGlossario.Chiave>] = stato.ricavato("mostra-quadro-parole|\(id)") {
+            ParoleSchermata.segna(frasi.flatMap { [$0.frase, $0.seconda] })
+        }
+        let dette = parole.reduce(into: Set<VoceGlossario.Chiave>()) { $0.formUnion($1) }
+        let piede = PiedeCapitolo.paroleQuadro.filter { !dette.contains($0.1) }
         let righe: [[FraseArea]] = [Array(frasi.prefix(2)), Array(frasi.dropFirst(2).prefix(2))]
         return VStack(alignment: .leading, spacing: 0) {
             TestataCapitolo(titolo: TestiMostra.titoloQuadro(TestiTraguardi.primoNome(cliente.nome)),
@@ -387,15 +483,16 @@ private struct CapitoloQuadro: View {
                 ForEach(0..<righe.count, id: \.self) { r in
                     HStack(spacing: V.spazio) {
                         ForEach(Array(righe[r].enumerated()), id: \.element.id) { k, f in
-                            RiquadroAreaCliente(frase: f, indice: r * 2 + k)
+                            let i = r * 2 + k
+                            RiquadroAreaCliente(frase: f, indice: i,
+                                                paroleFrase: i * 2 < parole.count ? parole[i * 2] : [],
+                                                paroleSeconda: i * 2 + 1 < parole.count ? parole[i * 2 + 1] : [])
                         }
                     }
                 }
             }
             .frame(height: V.altezzaQuadro)
-            PiedeCapitolo(parole: [("divario previdenziale", .divarioPrevidenziale),
-                                   ("capitale caso morte", .capitaleMorte),
-                                   ("indicatore di rischio (SRI)", .sri)])
+            PiedeCapitolo(parole: piede)
         }
     }
 }
@@ -403,6 +500,9 @@ private struct CapitoloQuadro: View {
 private struct RiquadroAreaCliente: View {
     let frase: FraseArea
     let indice: Int
+    /// Le parole da segnare dentro la frase e dentro la seconda riga (migliorie d'uso 1 e 66).
+    var paroleFrase: Set<VoceGlossario.Chiave> = []
+    var paroleSeconda: Set<VoceGlossario.Chiave> = []
 
     var body: some View {
         let colore = Tema.Apple.Aree360.colore(frase.area)
@@ -416,14 +516,12 @@ private struct RiquadroAreaCliente: View {
                     .carattereApple(V.occhiello)
                     .foregroundColor(colore)
                     .lineLimit(1)
-                Text(frase.frase)
+                TestoConParole(vistaCliente: frase.frase, parole: paroleFrase, colore: V.colore)
                     .carattereApple(V.frase)
-                    .foregroundColor(V.colore)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, V.sopraFrase)
-                Text(frase.seconda)
+                TestoConParole(vistaCliente: frase.seconda, parole: paroleSeconda, colore: V.colore2)
                     .carattereApple(V.testo)
-                    .foregroundColor(V.colore2)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, V.sopraTesto)
             }
@@ -514,7 +612,8 @@ private struct CapitoloPosizioni: View {
                     .entrataCascata(1, sfocatura: false)
             }
             .fixedSize(horizontal: false, vertical: true)
-            PiedeCapitolo(parole: [("in essere", .inEssere), ("patrimonio netto", .patrimonioNetto)])
+            // «Patrimonio netto» si tocca già nell'etichetta della colonna di sinistra
+            PiedeCapitolo(parole: [("in essere", .inEssere)])
         }
     }
 

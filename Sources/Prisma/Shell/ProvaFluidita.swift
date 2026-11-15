@@ -334,12 +334,23 @@ enum ProvaFluidita {
         // «Luce»: la Sala, il prisma di luce, Pratiche, il radar e la Biblioteca, con le app di lavoro aperte sotto
         // (nel giro del dock si aprono con la scrivania quasi vuota)
         misuraLuce(s, banco, stato)
+        // Migliorie d'uso 32 e 33: il cambio di cliente non rifà i motori di Territorio e Pratiche
+        if !pesanti { controllaCacheCliente(s, stato) }
+        if !pesanti { controllaCacheSpese(s, stato) }
 
         s.misura(banco, [
             PassoFluidita(nome: "apri gli spazi di lavoro", azione: { stato.pannelloSpazi = true },
                           verifica: { stato.pannelloSpazi }),
             PassoFluidita(nome: "chiudi gli spazi di lavoro", azione: { stato.pannelloSpazi = false },
                           verifica: { !stato.pannelloSpazi }),
+        ])
+
+        // Migliorie d'uso 67: il menu della pillola dell'app non ridisegna la shell (colonna «avvisi StatoFinestre»)
+        s.misura(banco, [
+            PassoFluidita(nome: "apri il menu delle app", azione: { stato.alternaMenuApp() },
+                          verifica: { stato.menuApp }),
+            PassoFluidita(nome: "chiudi il menu delle app", azione: { stato.menuApp = false },
+                          verifica: { !stato.menuApp }),
         ])
 
         s.misura(banco, [
@@ -350,6 +361,90 @@ enum ProvaFluidita {
         ])
         s.notaMemoria("\(nome), alla fine (shell aperta)")
         return stato
+    }
+
+    /// Migliorie d'uso 32 e 33 (rifinitura 32-39): scegliere un cliente nel Territorio non ricalcola la mappa di Oggi
+    /// (cache in `derivatiValidi`), scegliere un cliente in Pratiche filtra i bisogni senza rifare `bisogniProposta()`, e la
+    /// testata di Pratiche letta due volte non rifà MotorePratiche. Senza aprire le finestre (niente Metal sul runner):
+    /// solo lo stato. Il cliente attivo torna quello di prima.
+    private static func controllaCacheCliente(_ s: SessioneFluidita, _ stato: StatoShell) {
+        let altri = stato.dati.clienti.map(\.id).filter { $0 != stato.clienteAttivoId }
+        guard let altro = altri.first, stato.modoCliente == nil else {
+            print("PASSO fluidità · cache al cambio di cliente saltate (serve un secondo cliente, fuori dalla modalità cliente)")
+            return
+        }
+        let primaCliente = stato.clienteAttivoId
+        let ora = DerivatiDati.ora()
+
+        // (a) Territorio: la tabella dei comuni come all'apertura, la mappa di Oggi in cache, poi un cliente scelto
+        let tabellaCaricata = stato.territorio.tabella != nil
+        stato.territorio.caricaSeServe()
+        if stato.territorio.tabella != nil {
+            _ = stato.territorioOggi()
+            let derivati = stato.derivatiValidi()
+            stato.territorio.luceScelta = altro
+            stato.scegliCliente(altro)
+            _ = stato.territorioOggi()
+            let stessa = stato.derivatiValidi() === derivati && derivati.territorioOggi != nil
+            if DerivatiDati.ora() == ora {
+                s.controlla(stessa, "fluidità · Territorio: scegliere un cliente non ricalcola la mappa di Oggi")
+            } else {
+                print("PASSO fluidità · Territorio: controllo della cache saltato (è scoccata l'ora)")
+            }
+            stato.territorio.luceScelta = nil
+            if !tabellaCaricata { stato.territorio.chiudi() }
+        } else {
+            print("PASSO fluidità · Territorio: tabella dei comuni non leggibile, controllo della cache saltato")
+        }
+
+        // (b) Pratiche › Proposta: i bisogni di tutti in cache, poi due clienti diversi filtrano soltanto
+        stato.scegliCliente(primaCliente.isEmpty ? nil : primaCliente)
+        _ = stato.bisogniProposta(solo: nil)
+        stato.scegliCliente(altro)
+        _ = stato.bisogniProposta(solo: stato.clientePratiche?.id)
+        s.controlla(stato.bisogniPropostaInCache, "fluidità · Pratiche: scegliere un cliente filtra i bisogni senza rifare i motori")
+
+        // (c) La testata di Pratiche (le pratiche ferme) letta due volte di fila: MotorePratiche una volta sola
+        _ = stato.praticheFermeVisibili()
+        let calcoli = stato.cacheStatiPratiche.calcoli
+        _ = stato.praticheFermeVisibili()
+        _ = stato.statiPraticheVisti(solo: stato.clientePratiche?.id)
+        s.controlla(stato.cacheStatiPratiche.calcoli == calcoli, "fluidità · Pratiche: la testata non rifà MotorePratiche a ogni disegno")
+
+        stato.scegliCliente(primaCliente.isEmpty ? nil : primaCliente)
+    }
+
+    /// Migliorie d'uso 57 (rifinitura 52-60): Studio › Spese non rifà il riepilogo dei km (dieci mesi di giri su tutti gli
+    /// appuntamenti) a ogni ridisegno. Letto tre volte con lo stesso ingresso si calcola una volta; con le impostazioni
+    /// dello Studio cambiate (escluse da `stessiCalcoli`, quindi fuori da `versioneCalcoli`) si rifà. Solo lo stato.
+    private static func controllaCacheSpese(_ s: SessioneFluidita, _ stato: StatoShell) {
+        let giorno = Calendar.current.startOfDay(for: Date())
+        let mese = MotoreChilometri.inizioMese(giorno, Calendar.current)
+        let imp = stato.dati.impostazioni.studio.spese
+        let kmClienti = stato.dati.kmClienti
+        let tolte = stato.dati.speseStudio.visiteTolte
+        let chiave = "prova-fluidita-spese-km-\(mese.timeIntervalSinceReferenceDate)"
+        var calcoli = 0
+        func leggi(_ impostazioni: ImpostazioniSpese) {
+            _ = stato.ricavato(chiave, ingresso: IngressoKmSpese(impostazioni: impostazioni, kmClienti: kmClienti,
+                                                                 visiteTolte: tolte)) {
+                calcoli += 1
+                return MotoreChilometri.riepilogo(mese: mese, appuntamenti: stato.dati.appuntamenti,
+                                                  impostazioni: impostazioni, kmClienti: kmClienti, visiteTolte: tolte)
+            }
+        }
+        let prima = stato.derivatiValidi()
+        for _ in 0..<3 { leggi(imp) }
+        var altre = imp
+        altre.contaVisiteSenzaCliente.toggle()
+        leggi(altre)
+        guard stato.derivatiValidi() === prima, Calendar.current.startOfDay(for: Date()) == giorno else {
+            print("PASSO fluidità · Spese: controllo della cache saltato (è cambiato il giorno)")
+            return
+        }
+        s.controlla(calcoli == 2, "fluidità · Spese: il riepilogo dei km si calcola una volta e si rifà solo se cambia ciò che legge")
+        // Le scadenze dello Studio nella vista mese dell'Agenda (con uno stato a parte, che non tocca questo)
+        StatoShell.provaScadenzeStudioAgenda { s.controlla($0, "fluidità · " + $1) }
     }
 
     /// Le azioni nuove di «Luce» (Design/template-luce-specifica.md): ognuna si apre e si richiude, e lo stato torna

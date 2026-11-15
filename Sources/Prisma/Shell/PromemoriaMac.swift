@@ -242,6 +242,7 @@ extension DestinazioneRicerca {
         case .incontro(let id): return "incontro:" + id
         case .prodotto(let id): return "prodotto:" + id
         case .biblioteca(let id, let pagina): return "biblioteca:" + id + "@" + String(pagina)
+        case .parola(let chiave): return "parola:" + chiave.rawValue
         }
     }
 
@@ -270,6 +271,9 @@ extension DestinazioneRicerca {
             let doc = String(id[..<chiocciola])
             guard !doc.isEmpty else { return nil }
             self = .biblioteca(doc, pagina: pagina)
+        case "parola":
+            guard let chiave = VoceGlossario.Chiave(rawValue: id) else { return nil }
+            self = .parola(chiave)
         default: return nil
         }
     }

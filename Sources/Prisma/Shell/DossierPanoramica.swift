@@ -61,6 +61,9 @@ struct PanoramicaDossierApple: View {
             DaRicordareApple(cliente: cliente)
                 .entrataDossier(2)
             if !stato.inModoCliente {
+                // Migliorie d'uso 60: le ultime esperienze della Sala fatte con il cliente (StatoEsperienzeFatte.swift)
+                InSalaDossierApple(cliente: cliente)
+                    .entrataDossier(2)
                 let daFesteggiare = stato.traguardiDaFesteggiareDossier(cliente.id)
                 if !daFesteggiare.isEmpty {
                     DaFesteggiareApple(traguardi: daFesteggiare)
@@ -389,16 +392,36 @@ struct DaRicordareApple: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         let p = Tema.Apple.Clienti.Panoramica.self
+        #if os(macOS)
+        // Migliorie d'uso 65: la nota in evidenza (una del taccuino fissata, o «Da ricordare»); il titolo della card resta
+        let evidenza = stato.notaInEvidenza(cliente)
+        let nota = evidenza.map { $0.testo.isEmpty ? $0.titolo : $0.testo } ?? ""
+        let titoloNota: String? = evidenza.flatMap { $0.daRicordare || $0.titolo.isEmpty || $0.testo.isEmpty ? nil : $0.titolo }
+        #else
         let nota = cliente.nota.trimmingCharacters(in: .whitespacesAndNewlines)
+        let titoloNota: String? = nil
+        #endif
         return VStack(alignment: .leading, spacing: p.sottoTitolo) {
             Text("Da ricordare")
                 .carattereApple(p.titolo)
                 .foregroundColor(p.coloreTitolo)
+            if let titoloNota {
+                Text(titoloNota)
+                    .carattereApple(p.nota)
+                    .foregroundColor(p.notaVuota)
+                    .lineLimit(1)
+            }
             if nota.isEmpty {
                 Text("Niente da ricordare, per ora.")
                     .carattereApple(p.nota)
                     .foregroundColor(p.notaVuota)
-                Button("Scrivi una nota ›") { stato.schedaCliente = .note }
+                Button("Scrivi una nota ›") {
+                    #if os(macOS)
+                    // La sezione Note, sulla riga «Da ricordare»
+                    stato.scegliNotaDossier(StatoShell.idDaRicordare(cliente.id))
+                    #endif
+                    stato.schedaCliente = .note
+                }
                     .buttonStyle(.appleSobrio)
                     .disabled(stato.solaLettura)
             } else {

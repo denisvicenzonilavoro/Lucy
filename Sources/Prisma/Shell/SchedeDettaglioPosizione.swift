@@ -367,7 +367,14 @@ extension DettaglioPosizione {
             .id("dettaglio-contratto")
             PannelloAnalisi(titolo: vuoti.isEmpty ? T.datiDelContratto : T.daCompletare(vuoti.count)) {
                 if !vuoti.isEmpty {
-                    Button(T.completaIDati, action: modifica)
+                    Button(T.completaIDati) {
+                        // Sul primo campo vuoto, evidenziato e portato in vista dal modulo
+                        if let campo = T.primoCampoModulo(p), let suCampo = modificaSuCampo {
+                            suCampo(campo)
+                        } else {
+                            modifica()
+                        }
+                    }
                         .buttonStyle(StileVetro())
                         .disabled(stato.solaLettura)
                         .help("Apre «Modifica»: i campi vuoti si completano in una volta")

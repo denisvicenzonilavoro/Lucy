@@ -5,7 +5,7 @@ private typealias C = Tema.Apple.Studio.Spese.Carta
 // Il riepilogo del mese per il commercialista (Design/template-luce-specifica.md §6.3.5 punto 6, «Luce» giro 9): A4
 // verticale, sempre chiaro, carta bianca con i colori opachi della carta (niente vetro), come i documenti PDF di Prisma.
 // Dall'alto: il logo e «Chilometri e spese · Ottobre 2026», il consulente, i totali (km, visite, spese per categoria),
-// i giri (data, visite, km, senza nomi se `nomiNelPacchetto` è spento) e le spese. In fondo la frase che dice che sono
+// i giri (data, visite, km, senza nomi se `nomiNelPacchetto` è spento), le spese e le parcelle emesse nel mese. In fondo la frase che dice che sono
 // solo fatti: deducibilità e IVA le valuta il commercialista. Con molte righe si continua sulla pagina dopo.
 
 /// I testi del riepilogo, preparati dai motori (nessun calcolo qui).
@@ -28,7 +28,7 @@ struct TestiRiepilogoSpese {
     static func km(_ v: Double) -> String { FormatoCifra.mesi.testo(v) + " km" }
 
     init(mese: Date, riepilogo: MotoreChilometri.Riepilogo, spese: [SpesaStudio], nomi: [String: String]?, consulente: String,
-         euroPerKm: Double?) {
+         euroPerKm: Double?, parcelle: [Parcella] = []) {
         titolo = "Chilometri e spese · " + Formati.meseAnno.string(from: mese).capitalizzaPrima
         self.consulente = consulente
         var t: [(String, String)] = [
@@ -63,6 +63,17 @@ struct TestiRiepilogoSpese {
             r.append((i == 0 ? "Le spese" : nil,
                       Riga(data: Self.formatoData.string(from: s.data), testo: testo, numero: Formati.euroDecimali(s.importo))))
         }
+        // Rifinitura 57: le parcelle emesse nel mese, lo stesso elenco del CSV `parcelle-aaaa-mm.csv` (numero, data,
+        // imponibile, totale, stato; il cliente solo con «nomi nel pacchetto»)
+        for (i, p) in parcelle.enumerated() {
+            let imponibile = MotoreParcelle.imponibile(p)
+            var testo = p.numero.map { $0.isEmpty ? "Parcella" : "Parcella n. " + $0 } ?? "Parcella"
+            testo += " · imponibile " + Formati.euroDecimali(imponibile) + " · " + p.stato.nome
+            if let nomi, let n = nomi[p.clienteId], !n.isEmpty { testo += " · " + n }
+            r.append((i == 0 ? "Le parcelle" : nil,
+                      Riga(data: Self.formatoData.string(from: p.data), testo: testo,
+                           numero: Formati.euroDecimali(p.voci?.totaleDocumento ?? imponibile))))
+        }
         righe = r
         piede = "Preparato con Prisma dai dati che hai scritto. Solo fatti: deducibilità, IVA detraibile e regime fiscale li "
             + "valuta il tuo commercialista." + (nomi == nil ? " Senza i nomi dei clienti." : "")
@@ -88,7 +99,7 @@ extension DocumentoStampabile {
 
 enum CartaRiepilogoSpese {
     /// Le righe di ogni pagina, divise per altezza: la prima pagina ha anche il titolo e i totali del mese, ogni pagina il
-    /// logo e il piede; un'intestazione di sezione («I giri», «Le spese») conta con la sua riga.
+    /// logo e il piede; un'intestazione di sezione («I giri», «Le spese», «Le parcelle») conta con la sua riga.
     static func gruppi(_ t: TestiRiepilogoSpese) -> [[(sezione: String?, riga: TestiRiepilogoSpese.Riga)]] {
         let utile = C.formato.height - C.margine.top - C.margine.bottom
         // Logo, piede e gli spazi fra logo, righe, spaziatore e piede

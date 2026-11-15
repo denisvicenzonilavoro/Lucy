@@ -76,6 +76,7 @@ extension StatoShell {
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             chiudiRicerca()
             if sistema.guida != nil { sistema.guida = nil }

@@ -2,7 +2,8 @@ import SwiftUI
 
 // L'app Studio (versione «Orizzonte», Design/template-novita-specifica.md §1.6 e §2): il lavoro del consulente visto
 // come un portafoglio. Testata «Il tuo studio. · Il tuo lavoro, come un portafoglio» (`AppPrisma.titoloIntestazione` e
-// `occhiello`) con il segmentato a pillola Cruscotto · Parcelle e fatture · Track record · Esame OCF a destra.
+// `occhiello`) con il segmentato a pillola a destra, in tre gruppi separati da un filo (Migliorie d'uso 52, «Lo Studio
+// in ordine»): i conti Cruscotto · Parcelle · Spese | i risultati Track record | l'allenamento Esame OCF · Palestra.
 // Cruscotto (StudioCruscotto.swift), Parcelle e fatture (StudioParcelle.swift), Track record (StudioTrackRecord.swift) ed
 // Esame OCF (StudioEsameOCF.swift); una scheda che non c'è ancora direbbe con una nota sobria cosa arriverà.
 //
@@ -13,22 +14,45 @@ import SwiftUI
 // - «Riduci movimento» e istantanee: tutto subito fermo nello stato finale.
 // Valori in DesignSystem/Apple/Tema.Apple+Studio.swift.
 
-/// Le schede di Studio, nell'ordine del segmentato.
+/// Le schede di Studio, nell'ordine del segmentato (Migliorie d'uso 52: le Spese salgono accanto alle Parcelle; i
+/// `rawValue` restano gli stessi).
 enum SchedaStudio: String, CaseIterable, Identifiable, Hashable {
-    case cruscotto, fatture, track, ocf, palestra, spese
+    case cruscotto, fatture, spese, track, ocf, palestra
 
     var id: String { rawValue }
 
     var titolo: String {
         switch self {
         case .cruscotto: return "Cruscotto"
-        // Con «Luce» i titoli si accorciano per farci stare le schede nuove (Design/template-luce-specifica.md, riga 2085)
+        // Con «Luce» «Parcelle e fatture» si accorcia in «Parcelle»; con le migliorie d'uso 52 sul Mac «OCF» torna
+        // «Esame OCF» (su iPhone e iPad resta corto, perché il segmentato ci stia)
         case .fatture: return "Parcelle"
         case .track: return "Track record"
-        case .ocf: return "OCF"
+        case .ocf:
+            #if os(macOS)
+            return "Esame OCF"
+            #else
+            return "OCF"
+            #endif
         case .palestra: return "Palestra"
         case .spese: return "Spese"
         }
+    }
+
+    /// Il gruppo della scheda nel segmentato (Migliorie d'uso 52): 0 i conti, 1 i risultati, 2 l'allenamento. Fra due
+    /// gruppi c'è un filo.
+    var gruppo: Int {
+        switch self {
+        case .cruscotto, .fatture, .spese: return 0
+        case .track: return 1
+        case .ocf, .palestra: return 2
+        }
+    }
+
+    /// Gli indici delle schede davanti alle quali va il filo: dove il gruppo cambia rispetto alla scheda prima (così,
+    /// senza le Spese, i fili restano giusti).
+    static func separatoriPrima(_ schede: [SchedaStudio]) -> Set<Int> {
+        Set(schede.indices.filter { $0 > 0 && schede[$0].gruppo != schede[$0 - 1].gruppo })
     }
 
     /// Studio › Spese c'è solo sul Mac: iPhone e iPad non la hanno (decisione 34), e le spese restano fuori da «Prisma
@@ -92,7 +116,12 @@ enum TestiStudio {
     static let senzaAliquoteScrivania = "stima senza le tue aliquote"
     static let inserisciAliquote = "Inserisci le tue aliquote"
     static let imposta = "Imposta gli obiettivi"
+    #if os(macOS)
+    /// Migliorie d'uso 53: la frase di riposo della dispersione (prima che il grafico dica cosa si vede).
+    static let didascaliaValore = "Ogni punto è un cliente: più a destra, più ore; più in alto, più ricavi."
+    #else
     static let didascaliaValore = "Ogni punto è un cliente: ore che gli dedichi nell’anno e ricavi che genera."
+    #endif
     static let senzaOre = "Servono appuntamenti con una durata per contare le ore."
     static let zona = "molto tempo, poco valore"
 
@@ -132,6 +161,120 @@ enum TestiStudio {
     static func mese(_ m: CruscottoStudio.MeseIncasso) -> String {
         let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
         return "\(mese(m.inizio)) · \(Canale.alleanza.nomeBreve) \(alleanza) · \(Canale.indipendente.nomeBreve) \(euro(m.indipendente))"
+    }
+
+    // MARK: Migliorie d'uso 53 · Il cruscotto risponde a domande
+
+    // I titoli delle card diventano le domande a cui rispondono (solo sul Mac: iPhone e iPad li prendono con il loro
+    // aggiornamento).
+    static func domandaRicavi(anno: Int) -> String {
+        #if os(macOS)
+        return "Quanto ho guadagnato nel \(String(anno))?"
+        #else
+        return "I tuoi ricavi \(String(anno))"
+        #endif
+    }
+
+    static var domandaObiettivi: String {
+        #if os(macOS)
+        return "A che punto sono con gli obiettivi?"
+        #else
+        return "Gli obiettivi dell’anno"
+        #endif
+    }
+
+    static var domandaImbuto: String {
+        #if os(macOS)
+        return "Dove si fermano le proposte?"
+        #else
+        return "L’imbuto delle proposte"
+        #endif
+    }
+
+    static var domandaIncassi: String {
+        #if os(macOS)
+        return "Cosa incasso nei prossimi 12 mesi?"
+        #else
+        return "Gli incassi dei prossimi 12 mesi"
+        #endif
+    }
+
+    static var domandaValore: String {
+        #if os(macOS)
+        return "A chi dedico più tempo di quanto rende?"
+        #else
+        return "Il valore e il tempo"
+        #endif
+    }
+
+    /// L'etichetta dell'asse verticale della dispersione.
+    static let asseRicavi = "ricavi dell’anno ↑"
+
+    /// Un numero intero in lettere fino a dieci («tre»), poi in cifre («12»).
+    static func inLettere(_ n: Int) -> String {
+        let lettere = ["zero", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove", "dieci"]
+        guard n >= 0, n < lettere.count else { return FormatoCifra.migliaia(Double(n)) }
+        return lettere[n]
+    }
+
+    /// «in due mesi», «in un mese»; con un mese solo (dicembre: manca meno di un mese) «entro fine anno».
+    static func inMesi(_ mesi: Int) -> String {
+        if mesi <= 1 { return "entro fine anno" }
+        let lettere = ["", "un", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove", "dieci", "undici", "dodici"]
+        return "in " + (mesi < lettere.count ? lettere[mesi] : FormatoCifra.migliaia(Double(mesi))) + " mesi"
+    }
+
+    /// «Il mese più ricco: novembre, 7.400 €».
+    static func piuRicco(_ m: CruscottoStudio.MeseIncasso) -> String {
+        "Il mese più ricco: \(mese(m.inizio)), \(euro(m.totale))"
+    }
+
+    /// La riga degli incassi con il puntatore su una colonna: «**novembre**: Alleanza 5.200 € + Indipendente 2.200 € =
+    /// **7.400 €**». Senza aliquote la parte del primo canale dice «senza aliquote» e il totale è solo il secondo.
+    static func meseIncasso(_ m: CruscottoStudio.MeseIncasso, nomeAlleanza: String, nomeIndipendente: String,
+                            forte: Color) -> Text {
+        let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
+        return Text(mese(m.inizio)).bold().foregroundColor(forte)
+            + Text(verbatim: ": \(nomeAlleanza) \(alleanza) + \(nomeIndipendente) \(euro(m.indipendente)) = ")
+            + Text(euro(m.totale)).bold().foregroundColor(forte)
+    }
+
+    /// La parte della frase degli obiettivi dopo l'etichetta: «nuovi clienti, 7 su 10. Ne mancano tre in due mesi.»
+    /// (la voce con la prima lettera minuscola; nil senza traguardo).
+    static func piuIndietro(_ o: CruscottoStudio.Obiettivo, mesi: Int) -> String? {
+        guard let t = o.traguardo, t > 0 else { return nil }
+        let nome = o.voce.nome
+        let voce = (nome.first.map { $0.lowercased() } ?? "") + String(nome.dropFirst())
+        let clienti = o.voce == .nuoviClienti
+        let fatto = clienti ? FormatoCifra.migliaia(o.fatto.rounded()) : euro(o.fatto)
+        let traguardo = clienti ? FormatoCifra.migliaia(t.rounded()) : euro(t)
+        let manca = max(0, t - o.fatto)
+        let resto: String
+        if clienti {
+            let n = Int(manca.rounded(.up))
+            resto = (n == 1 ? "Ne manca uno " : "Ne mancano \(inLettere(n)) ") + inMesi(mesi) + "."
+        } else {
+            resto = "Ne mancano \(euro(manca)) " + inMesi(mesi) + "."
+        }
+        return "\(voce), \(fatto) su \(traguardo). " + resto
+    }
+
+    /// L'etichetta in grassetto della frase degli obiettivi.
+    static let piuIndietroEtichetta = "Il più indietro:"
+
+    /// Cosa si vede nella dispersione, senza nomi: «**2 clienti** prendono molte ore e rendono poco: il più pesante,
+    /// 14 ore per 900 € l’anno. Tocca un punto con il nome per aprirlo.» Se la zona non si calcola, la frase di riposo.
+    static func valoreDice(_ v: CruscottoStudio.ValoreTempo, forte: Color) -> Text {
+        guard v.sogliaOre != nil else { return Text(didascaliaValore) }
+        let zona = v.inZona
+        guard let p = v.piuPesante, !zona.isEmpty else {
+            return Text("Nessun cliente prende molte ore rendendo poco.")
+        }
+        let quanti = zona.count == 1 ? "1 cliente" : "\(zona.count) clienti"
+        let verbo = zona.count == 1 ? " prende molte ore e rende poco" : " prendono molte ore e rendono poco"
+        return Text(quanti).bold().foregroundColor(forte)
+            + Text(verbatim: verbo + ": il più pesante, \(FormatoCifra.migliaia(p.ore.rounded())) ore per \(euro(p.ricavi)) l’anno. "
+                   + "Tocca un punto con il nome per aprirlo.")
     }
 }
 
@@ -205,8 +348,16 @@ struct AzioniStudio: View {
                 .fixedSize()
                 .help("Il tuo anno da consulente, in un minuto")
             }
+            // Migliorie d'uso 52: sul Mac tre gruppi separati da un filo (su iPhone e iPad niente fili)
+            let schede = SchedaStudio.visibili(modoCliente: stato.inModoCliente)
+            #if os(macOS)
+            let separatori: Set<Int> = SchedaStudio.separatoriPrima(schede)
+            #else
+            let separatori: Set<Int> = []
+            #endif
             SegmentatoPillola(selezione: Bindable(stato).schedaStudio,
-                              valori: SchedaStudio.visibili(modoCliente: stato.inModoCliente), titolo: { $0.titolo })
+                              valori: schede, titolo: { $0.titolo },
+                              separatoriPrima: separatori)
                 .fixedSize()
             #if os(macOS)
             // Migliorie d'uso 28: «＋ Nuova parcella» sta qui, dopo le schede, solo in Parcelle (come «Nuovo cliente»);

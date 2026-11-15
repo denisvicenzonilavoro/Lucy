@@ -94,7 +94,8 @@ struct AppAnalisi360: View {
         // Gli strumenti (le app accorpate Simulazioni e Confronti): stessa finestra, stesso cliente
         EtichettaRail(testo: "Strumenti")
         VStack(spacing: 0) {
-            ForEach(StrumentoAnalisi.allCases) { s in
+            // Migliorie d'uso 64: sul Mac «Simula e confronta» (e il TFR) al posto di simulatore, scenari e confronto
+            ForEach(StrumentoAnalisi.inVista) { s in
                 VoceNavigazione(titolo: s.titolo, simbolo: s.simbolo, attiva: stato.strumentoAnalisi == s) {
                     stato.scegliStrumentoAnalisi(s)
                 }

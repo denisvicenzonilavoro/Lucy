@@ -7,6 +7,13 @@ import Observation
 // StatoShell, i calcoli con le loro cache e le azioni che scrivono l'archivio. Niente rete: tabella e confini vengono
 // dalle risorse (decisione 20).
 
+/// Migliorie d'uso 51: il giorno del giro mandato all'iPhone e quante scritture riuscite di «Prisma ovunque» c'erano
+/// prima del tocco (il giro è sull'iPhone quando ne arriva una in più).
+struct GiroInviatoIPhone: Equatable {
+    let giorno: Date
+    let giri: Int
+}
+
 @Observable final class StatoTerritorio {
     /// Osservata (non `@ObservationIgnored`): la vista la legge nel `body` e deve ridisegnarsi quando `apri` la carica dopo
     /// la prima comparsa. Liberata alla chiusura (Mac da 8 GB, §5.4).
@@ -36,6 +43,8 @@ import Observation
     var spostando: Bool { spostaClienteId != nil || spostaPartenza }
     /// L'appuntamento appena aggiunto al giro (riga evidenziata).
     var rigaNuovaId: String?
+    /// Migliorie d'uso 51: «Manda il giro all'iPhone» premuto per quel giorno (solo in memoria, mai salvato).
+    var giroIPhone: GiroInviatoIPhone?
     /// Zoom e spostamento della mappa (doppio clic: torna a vedere tutti).
     var zoom: CGFloat = 1
     var spostamento: CGSize = .zero
@@ -262,6 +271,37 @@ extension StatoShell {
         let minuti = cal.component(.hour, from: s.ora) * 60 + cal.component(.minute, from: s.ora)
         mostraAvviso("\(MotoreTerritorio.nomeBattesimo(s.cliente)) nel giro alle \(OrariLavoro.testoOra(minuti)): conferma in Agenda")
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 51: «Togli» accanto a una tappa proposta dal Territorio e non ancora confermata. Elimina
+    /// l'appuntamento solo se è ancora `daConfermare` (mai uno confermato); il suggerimento «Lungo la strada» torna da solo
+    /// al ricalcolo del giro. Il nome di battesimo, perché Prisma non conosce il genere.
+    func togliDalGiro(_ id: String) {
+        guard !solaLettura, let a = dati.appuntamenti.first(where: { $0.id == id }), a.daConfermare == true else { return }
+        eliminaAppuntamento(id)
+        territorio.rigaNuovaId = nil
+        let nome = cliente(a.clienteId).map(MotoreTerritorio.nomeBattesimo) ?? "La visita"
+        mostraAvviso(TestiTerritorio.toltoDalGiro(nome))
+    }
+
+    /// Migliorie d'uso 51: le cose da portare alle tappe del giro (id appuntamento → cose), con le regole della borsa
+    /// della notte (MotoreBorsa). Una volta per giorno, tappe, giorni del documento e modelli di modulo letti: mai nel body
+    /// a ogni ridisegno. I modelli si leggono all'apertura del pannello (`moduli.carica()`).
+    func borsaGiro(_ giro: GiroGiorno) -> [String: [String]] {
+        let appuntamenti = giro.tappe.compactMap(\.appuntamento)
+        guard !appuntamenti.isEmpty else { return [:] }
+        let giorniDocumenti = dati.impostazioni.notte.giorniDocumenti
+        let modelli = moduli.tutti
+        let impronta = modelli.map { "\($0.id):\($0.compilabile):\($0.mappaConfermata)" }.joined(separator: ",")
+        let tappe = appuntamenti.map(\.id).joined(separator: ",")
+        let chiave = "borsa-giro-\(Int(giro.giorno.timeIntervalSinceReferenceDate))|\(tappe)|\(giorniDocumenti)|\(impronta)"
+        return ricavato(chiave) {
+            var d = datiDeiCalcoli()
+            d.impostazioni.notte.giorniDocumenti = giorniDocumenti
+            return MotoreBorsa.cose(per: appuntamenti, dati: d, modelli: modelli, oggi: giro.giorno)
+        }
+    }
+    #endif
 
     /// Conferma un appuntamento proposto dal Territorio (Agenda).
     func confermaAppuntamento(_ id: String) {

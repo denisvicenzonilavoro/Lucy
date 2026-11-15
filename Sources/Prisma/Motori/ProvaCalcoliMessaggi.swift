@@ -119,6 +119,15 @@ enum ProvaCalcoliMessaggi {
                       tutti.occasione(sua.id) == nil && tutti.oggi.count == RegoleMessaggi.massimoPerGruppo)
         verifica.vero("M13 Cliente: con il cliente della barra resta (il taglio a 8 viene dopo il filtro)",
                       suoi.oggi.map(\.id) == [sua.id] && suoi.festeggiare.isEmpty && suoi.settimana.isEmpty)
+        // Il dossier («Scrivi a …», rifinitura 25-31): la prima occasione del cliente fuori dalle prime 8 di tutti si trova
+        // con il filtro; per chi è fra le prime, il filtro dà la stessa prima occasione dell'elenco di tutti
+        let primoDiTutti = tutti.tutte.first?.clienteId ?? ""
+        let soloAltro = MotoreOccasioniMessaggi.dividi(altri + [sua], messaggi: [], clienti: [:], oggi: oggi, cal: cal, soloCliente: primoDiTutti)
+        verifica.vero("M13 Dossier: «Scrivi a …» trova la prima occasione del cliente anche fuori dalle prime 8 di tutti",
+                      tutti.tutte.first { $0.clienteId == "giulia" } == nil
+                      && suoi.tutte.first { $0.clienteId == "giulia" }?.id == sua.id
+                      && soloAltro.tutte.first?.id == tutti.tutte.first?.id
+                      && soloAltro.tutte.first != nil)
         verifica.vero("M13 Cliente: senza cliente il motore dà lo stesso risultato di sempre",
                       calcola(conSpedito) == MotoreOccasioniMessaggi.calcola(dati: conSpedito, oggi: oggi, cal: cal, soloCliente: nil)
                       && calcola(conSpedito) == MotoreOccasioniMessaggi.calcola(dati: conSpedito, oggi: oggi, cal: cal, soloCliente: "giulia"))
@@ -418,6 +427,8 @@ enum ProvaCalcoliMessaggi {
                                          fatto: "ha raggiunto «Rendita integrativa» ieri", riferimento: "obiettivo-prova",
                                          data: oggi)
         occasioni.append(MotorePassaparola.occasioneRichiesta(momento, cliente: sofia, posizioni: []))
+        // Il grazie per le presentazioni (Migliorie d'uso 48): nessuna cifra, nessun nome delle persone presentate
+        occasioni.append(MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: [], oggi: oggi))
         // Il messaggio detto nella nota vocale («Luce» giro 13): solo la cosa promessa, nessuna cifra in più
         if let giulia = x.clienti.first(where: { $0.id == "giulia" }) {
             let nota = NotaVocaleDiProva.inArrivo(x, oggi: oggi)

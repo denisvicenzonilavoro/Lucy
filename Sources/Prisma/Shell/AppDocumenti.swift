@@ -167,6 +167,22 @@ struct ElencoDocumenti: View {
     let elimina: (Documento) -> Void
     /// Nella scheda del cliente: stringe l'elenco alle sole tessere, per lasciare spazio al documento.
     var comprimi: (() -> Void)? = nil
+    /// Migliorie d'uso 62 (solo Mac, scheda del cliente): il tocco su un documento lo apre nel lettore grande, nato dalla
+    /// sua riga. nil = il tocco sceglie il documento, come sempre.
+    var apriLettore: ((String) -> Void)? = nil
+
+    /// Migliorie d'uso 37 (solo Mac): durante la dimostrazione «+» è spento, il file finirebbe nella cartella vera.
+    private var spentoInDimostrazione: Bool {
+        #if os(macOS)
+        return stato.inDimostrazione
+        #else
+        return false
+        #endif
+    }
+
+    private var aiutoAggiungi: String {
+        spentoInDimostrazione ? TestiDimostrazione.nonDurante : "Aggiungi documenti (anche trascinandoli qui)"
+    }
 
     var body: some View {
         let _ = ContaCorpi.segna()
@@ -175,7 +191,8 @@ struct ElencoDocumenti: View {
         VStack(spacing: 0) {
             HStack(spacing: Misure.ColonneStrumento.spazioTestata) {
                 CampoRicerca(testo: $ricerca, segnaposto: "Cerca nei documenti")
-                PulsanteIcona(simbolo: "plus", aiuto: "Aggiungi documenti (anche trascinandoli qui)", azione: importa)
+                PulsanteIcona(simbolo: "plus", aiuto: aiutoAggiungi, azione: importa)
+                    .disabled(spentoInDimostrazione)
                 if let comprimi {
                     PulsanteIcona(simbolo: "sidebar.left", aiuto: "Stringi l'elenco: più spazio al documento", azione: comprimi)
                 }
@@ -237,11 +254,15 @@ struct ElencoDocumenti: View {
         let file = stato.urlDocumento(d).flatMap { FileManager.default.fileExists(atPath: $0.path) ? $0 : nil }
         return Button {
             stato.documentoSelezionato = d.id
+            apriLettore?(d.id)
         } label: {
             RigaDocumento(voce: t.voce, nelTesto: t.nelTesto, attiva: t.id == scelta,
                           daLeggere: MotoreDocumenti.appartiene(t.voce, a: .daLeggere))
         }
         .buttonStyle(StileSemplice())
+        #if os(macOS)
+        .modifier(OrigineLettore(attiva: apriLettore != nil, id: LettoreDocumento.idDettaglio(d.id)))
+        #endif
         .contextMenu {
             #if os(macOS)
             Button("Apri in Anteprima") { if let file { ApriFile.apri(file) } }

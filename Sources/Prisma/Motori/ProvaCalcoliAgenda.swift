@@ -17,6 +17,36 @@ enum ProvaCalcoliAgenda {
         archivio(verifica)
         spaziCampagne(verifica)
         momento(verifica)
+        meseUso(verifica)
+    }
+
+    /// Migliorie d'uso 50: le righe di una cella del mese (al più due impegni, uno solo con una scadenza, «+N altri»
+    /// quando non c'è posto) e i testi della colonna del giorno.
+    private static func meseUso(_ verifica: VerificaCalcoli) {
+        typealias R = RegoleMeseAgenda.Righe
+        verifica.vero("A-U1 Mese: tre impegni in una cella grande, due pillole e «+1 altro»",
+                      RegoleMeseAgenda.righe(appuntamenti: 3, scadenze: 0, posto: 5) == R(pillole: 2, scadenze: 0, altri: 1)
+                      && RegoleMeseAgenda.altri(1) == "+1 altro" && RegoleMeseAgenda.altri(2) == "+2 altri")
+        verifica.vero("A-U2 Mese: con una scadenza un impegno solo, e la scadenza scritta",
+                      RegoleMeseAgenda.righe(appuntamenti: 2, scadenze: 1, posto: 5) == R(pillole: 1, scadenze: 1, altri: 1)
+                      && RegoleMeseAgenda.scadenza("Infortuni famiglia") == "Scade Infortuni famiglia")
+        verifica.vero("A-U3 Mese: nella cella bassa si tolgono prima le scadenze in più, poi gli impegni",
+                      RegoleMeseAgenda.righe(appuntamenti: 1, scadenze: 3, posto: 3) == R(pillole: 1, scadenze: 1, altri: 2)
+                      && RegoleMeseAgenda.righe(appuntamenti: 3, scadenze: 0, posto: 2) == R(pillole: 1, scadenze: 0, altri: 2)
+                      && RegoleMeseAgenda.righe(appuntamenti: 2, scadenze: 1, posto: 0) == R(pillole: 0, scadenze: 0, altri: 3))
+        verifica.vero("A-U4 Mese: due impegni che stanno, niente «+N»",
+                      RegoleMeseAgenda.righe(appuntamenti: 2, scadenze: 0, posto: 2) == R(pillole: 2, scadenze: 0, altri: 0))
+        verifica.vero("A-U5 Mese: la pillola dice il cliente, il titolo solo senza cliente",
+                      RegoleMeseAgenda.nomePillola(cliente: "Marco", titolo: "Rinnovo") == "Marco"
+                      && RegoleMeseAgenda.nomePillola(cliente: nil, titolo: "F24") == "F24"
+                      && RegoleMeseAgenda.sottoRiga(cliente: nil) == "Per te")
+        verifica.vero("A-U6 Mese: il conteggio della colonna, con e senza cliente scelto",
+                      RegoleMeseAgenda.conteggio(impegni: 0, scadenze: 0, solo: nil) == "nessun impegno"
+                      && RegoleMeseAgenda.conteggio(impegni: 1, scadenze: 2, solo: "Marco") == "1 impegno · 2 scadenze · solo Marco"
+                      && RegoleMeseAgenda.conteggio(impegni: 3, scadenze: 1, solo: nil) == "3 impegni · 1 scadenza")
+        verifica.vero("A-U7 Mese: «Giornata libera» con e senza cliente",
+                      RegoleMeseAgenda.giornataLibera(per: nil) == "Giornata libera."
+                      && RegoleMeseAgenda.giornataLibera(per: "Marco") == "Giornata libera per Marco.")
     }
 
     /// Migliorie d'uso 18: il momento di un impegno (prima, da chiudere, chiuso), il blocco «Non disponibile», l'impegno

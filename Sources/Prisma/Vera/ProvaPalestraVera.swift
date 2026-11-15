@@ -22,6 +22,7 @@ enum ProvaPalestraVera {
         #endif
         registro(controlla)
         studio(controlla)
+        usoMac56(scheda, s, controlla)
     }
 
     // MARK: - Pacchetto
@@ -354,13 +355,128 @@ enum ProvaPalestraVera {
     }
 
     private static func studio(_ controlla: (Bool, String) -> Void) {
+        #if os(macOS)
+        let titoloOCF = "Esame OCF"
+        #else
+        let titoloOCF = "OCF"
+        #endif
         controlla(SchedaStudio.allCases.contains(.palestra) && SchedaStudio.palestra.titolo == "Palestra" && SchedaStudio.palestra.prossima == nil
-                  && SchedaStudio.ocf.titolo == "OCF" && SchedaStudio.fatture.titolo == "Parcelle",
-                  "Palestra: nuova scheda di Studio (Cruscotto · Parcelle · Track record · OCF · Palestra)")
+                  && SchedaStudio.ocf.titolo == titoloOCF && SchedaStudio.fatture.titolo == "Parcelle",
+                  "Palestra: nuova scheda di Studio (Cruscotto · Parcelle · Spese | Track record | Esame OCF · Palestra)")
+        // Migliorie d'uso 52: tre gruppi separati da un filo, giusti anche senza le Spese
+        controlla(SchedaStudio.separatoriPrima(SchedaStudio.allCases) == [3, 4]
+                  && SchedaStudio.separatoriPrima([.cruscotto, .fatture, .track, .ocf, .palestra]) == [2, 3],
+                  "Studio in ordine: i fili fra i conti, i risultati e l’allenamento")
         let s = StatoShell(persistente: false)
         s.apriVoceNovita(NovitaLuce.palestra)
         controlla(NovitaLuce.palestra.disponibile && s.appAttiva == .studio && s.schedaStudio == .palestra,
                   "Novità: «La palestra della trattativa» apre Studio › Palestra")
+    }
+
+    // MARK: - Migliorie d'uso 56
+
+    /// La palestra sul cliente che vedrai: il segno in Facile (dato da Qwen, mai dal codice), lo schema con il campo
+    /// nuovo, le regole di Facile e Difficile, «recitato» o «recitata», l'ultimo allenamento con il cliente, il cliente
+    /// della barra e «Cambia».
+    private static func usoMac56(_ scheda: SchedaRecita, _ s: StatoShell, _ controlla: (Bool, String) -> Void) {
+        let ammesse = PalestraVera.cifreAmmesse(scheda: scheda, turni: [])
+        func letta(_ o: [String: Any]) -> RispostaPalestra? {
+            if case .valida(let r) = PalestraVera.leggi(json(o), ammesse: ammesse, primo: true, ultimo: false) { return r }
+            return nil
+        }
+        let base: [String: Any] = ["giudizio": "nessuno", "motivo": "", "replica": "", "convinta": 60,
+                                   "prossimaObiezione": "Restano bloccati?", "suggerite": suggeriteBuone, "strumento": "nessuno"]
+        var valido = base
+        valido["migliore"] = 1
+        var fuori = base
+        fuori["migliore"] = 5
+        var negativo = base
+        negativo["migliore"] = -1
+        var conTolta = base
+        conTolta["suggerite"] = ["Con noi rende il 6% garantito.", suggeriteBuone[1], suggeriteBuone[2]]
+        conTolta["migliore"] = 2
+        var tolta = base
+        tolta["suggerite"] = ["Con noi rende il 6% garantito.", suggeriteBuone[1], suggeriteBuone[2]]
+        tolta["migliore"] = 0
+        controlla(letta(valido)?.migliore == 1 && letta(fuori)?.migliore == nil && letta(negativo)?.migliore == nil
+                  && letta(base)?.migliore == nil && letta(valido)?.suggerite.count == 3,
+                  "Palestra 56: «migliore» valido si legge, fuori intervallo si scarta, assente resta nil")
+        controlla(letta(conTolta)?.migliore == 1 && letta(tolta)?.migliore == nil,
+                  "Palestra 56: il segno segue la sua suggerita se un'altra si toglie, e sparisce con lei")
+        let proprieta = (PalestraVera.schemaInterno["properties"] as? [String: Any]) ?? [:]
+        let richiesti = (PalestraVera.schemaInterno["required"] as? [String]) ?? []
+        controlla(proprieta["migliore"] != nil && !richiesti.contains("migliore"),
+                  "Palestra 56: «migliore» nello schema, facoltativo")
+        #if os(macOS)
+        let facile = PalestraVera.messaggi(scheda: scheda, difficolta: .facile, turni: []).last?.testo ?? ""
+        let difficile = PalestraVera.messaggi(scheda: scheda, difficolta: .difficile, turni: []).last?.testo ?? ""
+        let realistica = PalestraVera.messaggi(scheda: scheda, difficolta: .realistica, turni: []).last?.testo ?? ""
+        controlla(facile.contains(PalestraVera.regolaMigliore) && difficile.contains(PalestraVera.regolaInsiste)
+                  && !realistica.contains(PalestraVera.regolaMigliore) && !realistica.contains(PalestraVera.regolaInsiste)
+                  && !difficile.contains(PalestraVera.regolaMigliore),
+                  "Palestra 56: Facile chiede il segno, Difficile insiste con i numeri, Realistica senza aiuti")
+        // Il segno entra nel turno solo in Facile
+        let p = StatoPalestra()
+        p.difficolta = .realistica
+        if let r = letta(valido) { p.applica(r, scheda: scheda) }
+        let inRealistica = p.turni.first?.migliore
+        p.azzera()
+        p.difficolta = .facile
+        if let r = letta(valido) { p.applica(r, scheda: scheda) }
+        controlla(inRealistica == nil && p.turni.first?.migliore == 1,
+                  "Palestra 56: il segno della suggerita più efficace solo in Facile")
+        // «recitato» o «recitata»
+        var uomo = s.clienti[0]
+        uomo.codiceFiscale = "BNCMRC80A01H501U"
+        let fonte = FonteVera(oggi: Date(), nomeUtente: "Denis", cliente: uomo, posizioni: [], appuntamenti: [], attivita: [],
+                              analisi: s.analisi360(uomo.id), analisiSalvata: false, simulazioni: [])
+        let maschio = PalestraVera.scheda(fonte)
+        var ignoto = scheda
+        ignoto.femminile = nil
+        let inventato = PalestraVera.scheda(inventato: ProfiloInventatoPalestra(eta: "45", lavoro: "", timori: ""))
+        controlla(maschio.femminile == false && TestiPalestra.recitata(maschio).hasSuffix("recitato da Vera")
+                  && TestiPalestra.recitata(ignoto).hasSuffix("recitata da Vera")
+                  && TestiPalestra.recitata(inventato).hasSuffix("recitata da Vera"),
+                  "Palestra 56: «recitato» per un cliente uomo, «recitata» con il genere sconosciuto e il profilo inventato")
+        // Il cliente della barra e «Cambia»
+        let barra = StatoShell(persistente: false)
+        let pb = barra.palestra
+        barra.clienteAttivoId = "giulia"
+        pb.clienteId = "marco"
+        let colBarra = pb.clienteScelto(barra)?.id
+        barra.scegliCliente(nil)
+        let conTutti = pb.clienteScelto(barra)?.id
+        pb.cambia(cliente: "andrea", stato: barra)
+        let soloPalestra = barra.tuttiIClienti && pb.clienteScelto(barra)?.id == "andrea"
+        barra.clienteAttivoId = "giulia"
+        pb.cambia(cliente: "marco", stato: barra)
+        controlla(colBarra == "giulia" && conTutti == "marco" && soloPalestra && barra.clienteAttivoId == "marco"
+                  && pb.clienteScelto(barra)?.id == "marco",
+                  "Palestra 56: vale il cliente della barra; «Cambia» con un cliente scelto cambia tutta Prisma, con «Tutti i clienti» solo la palestra")
+        #endif
+        // L'ultimo allenamento con il cliente
+        let t = Date(timeIntervalSinceReferenceDate: 800_000_000)
+        let esiti = [EsitoPalestra(data: t, clienteId: "giulia", difficolta: .facile, punteggio: 50),
+                     EsitoPalestra(data: t.addingTimeInterval(86_400 * 3), clienteId: "giulia", difficolta: .realistica, punteggio: 78),
+                     EsitoPalestra(data: t.addingTimeInterval(86_400 * 5), clienteId: "marco", difficolta: .difficile, punteggio: 33),
+                     EsitoPalestra(data: t.addingTimeInterval(86_400), clienteId: nil, difficolta: .facile, punteggio: 90)]
+        controlla(PalestraVera.ultimo([], cliente: "giulia") == nil && PalestraVera.ultimo(esiti, cliente: "giulia")?.punteggio == 78
+                  && PalestraVera.ultimo(esiti, cliente: "marco")?.punteggio == 33 && PalestraVera.ultimo(esiti, cliente: "sofia") == nil,
+                  "Palestra 56: l'ultimo allenamento è il più recente di quel cliente, mai di altri")
+        var cal = Calendar(identifier: .gregorian)
+        cal.timeZone = TimeZone(identifier: "Europe/Rome") ?? .current
+        let oggi = cal.date(from: DateComponents(year: 2026, month: 11, day: 15, hour: 12)) ?? Date()
+        let ieri = cal.date(from: DateComponents(year: 2026, month: 11, day: 14, hour: 9)) ?? Date()
+        let ottobre = cal.date(from: DateComponents(year: 2026, month: 10, day: 28, hour: 12)) ?? Date()
+        let annoPrima = cal.date(from: DateComponents(year: 2025, month: 10, day: 28, hour: 12)) ?? Date()
+        controlla(TestiPalestra.esito(78, data: oggi, oggi: oggi, cal: cal) == "78% · oggi"
+                  && TestiPalestra.esito(64, data: ieri, oggi: oggi, cal: cal) == "64% · ieri"
+                  && TestiPalestra.esito(78, data: ottobre, oggi: oggi, cal: cal) == "78% · 28 ottobre"
+                  && TestiPalestra.esito(78, data: annoPrima, oggi: oggi, cal: cal) == "78% · 28 ottobre 2025",
+                  "Palestra 56: «78% · 28 ottobre», «oggi», «ieri» e l'anno solo se non è questo")
+        controlla(TestiPalestra.spiega(.facile).hasPrefix("Facile:") && TestiPalestra.spiega(.difficile).contains("insiste")
+                  && TestiPalestra.ultimaVolta("Giulia") == "L’ultima volta con Giulia" && TestiPalestra.conCliente("Giulia") == "Con Giulia",
+                  "Palestra 56: la riga della difficoltà e la tessera dell'ultima volta")
     }
 
     /// Aspetta un lavoro asincrono dal thread delle prove.

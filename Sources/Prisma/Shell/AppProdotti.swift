@@ -12,14 +12,23 @@ struct AppProdotti: View {
     @State var daiDocumenti: RichiestaSchedaDocumenti?
     @State var confermaEliminazione = false
     @State var ricerca = ""
+    /// Migliorie d'uso 63: le schede segnate come verificate da questa vista («Fonte segnata come verificata oggi»).
+    @State var segnateOggi: Set<String> = []
+    /// Migliorie d'uso 63: sul Mac il catalogo vive nella Biblioteca (sezione «Prodotti», BibliotecaProdotti.swift),
+    /// con la scheda che parla chiaro; su iPhone e iPad (e fuori dalla Biblioteca) l'app di sempre.
+    let nellaBiblioteca: Bool
+
+    init(nellaBiblioteca: Bool = false) {
+        self.nellaBiblioteca = nellaBiblioteca
+    }
 
     /// Le schede in ordine di nome, ordinate una volta per dati dei calcoli (`stato.prodotti` riordina a ogni lettura).
-    private var ordinati: [Prodotto] {
+    var ordinati: [Prodotto] {
         stato.ricavato("prodotti-ordinati") { stato.prodotti }
     }
 
     /// Le schede con i filtri del canale e dell'area e la ricerca.
-    private func filtrati(_ tutti: [Prodotto]) -> [Prodotto] {
+    func filtrati(_ tutti: [Prodotto]) -> [Prodotto] {
         let testo = ricerca.trimmingCharacters(in: .whitespaces).lowercased()
         let canale = stato.filtroCanaleProdotti
         let area = stato.filtroAreaProdotti
@@ -29,16 +38,19 @@ struct AppProdotti: View {
             .filter { testo.isEmpty || $0.nome.lowercased().contains(testo) || $0.emittente.lowercased().contains(testo) }
     }
 
-    private static func schedaScelta(in elenco: [Prodotto], id: String?) -> Prodotto? {
+    static func schedaScelta(in elenco: [Prodotto], id: String?) -> Prodotto? {
         elenco.first { $0.id == id } ?? elenco.first
     }
 
-    private var scelto: Prodotto? {
-        Self.schedaScelta(in: filtrati(ordinati), id: stato.prodottoSelezionato)
+    var scelto: Prodotto? {
+        #if os(macOS)
+        if nellaBiblioteca { return Self.schedaScelta(in: elencoCatalogo, id: stato.prodottoSelezionato) }
+        #endif
+        return Self.schedaScelta(in: filtrati(ordinati), id: stato.prodottoSelezionato)
     }
 
     /// Quante schede in tutto, da verificare, per canale e per area: in un passaggio, non un filtro per voce.
-    private struct Conteggi {
+    struct Conteggi {
         var totale = 0
         var daVerificare = 0
         var perCanale: [Canale: Int] = [:]
@@ -56,6 +68,48 @@ struct AppProdotti: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
+        contenuto
+            .sheet(item: $modulo) { p in
+                ModuloProdotto(bozza: p, nuovo: stato.prodotto(p.id) == nil) { stato.salvaProdotto($0) }
+            }
+            .sheet(item: $daiDocumenti) { r in
+                ModuloSchedaDaiDocumenti(esistente: r.esistente)
+                    .environment(stato)
+            }
+            .sheet(item: $sulCliente) { r in
+                ModuloProdottoSulCliente(prodotto: r.prodottoId.flatMap { stato.prodotto($0) }, statoIniziale: r.stato,
+                                         clienteId: stato.clienteAttivoId, clienteScelto: r.clienteScelto)
+                    .environment(stato)
+            }
+            .sheet(item: $moduloCondizioni) { p in
+                ModuloCondizioni(bozza: p.condizioni ?? CondizioniContratto(), prodotto: p.nome) { nuove in
+                    var x = p
+                    x.condizioni = nuove
+                    stato.salvaProdotto(x)
+                }
+            }
+            .alert("Eliminare la scheda?", isPresented: $confermaEliminazione) {
+                Button("Annulla", role: .cancel) {}
+                Button("Elimina", role: .destructive) { if let p = scelto { stato.eliminaProdotto(p.id) } }
+            } message: {
+                Text("Le proposte già create restano nelle Posizioni, senza collegamento alla scheda.")
+            }
+    }
+
+    /// Il catalogo nella Biblioteca (solo Mac) o l'app di sempre.
+    @ViewBuilder var contenuto: some View {
+        #if os(macOS)
+        if nellaBiblioteca {
+            catalogo
+        } else {
+            appDiSempre
+        }
+        #else
+        appDiSempre
+        #endif
+    }
+
+    @ViewBuilder var appDiSempre: some View {
         // Una volta per passaggio: l'elenco ordinato dalla cache, i filtri e la scheda scelta qui e non per ogni riga
         let elenco = filtrati(ordinati)
         let attuale = Self.schedaScelta(in: elenco, id: stato.prodottoSelezionato)
@@ -90,35 +144,11 @@ struct AppProdotti: View {
         }
         // Tema Apple: barra laterale `.side`, card piatte, tessere, pulsanti, tendine ed etichette del canale
         .altreAppApple()
-        .sheet(item: $modulo) { p in
-            ModuloProdotto(bozza: p, nuovo: stato.prodotto(p.id) == nil) { stato.salvaProdotto($0) }
-        }
-        .sheet(item: $daiDocumenti) { r in
-            ModuloSchedaDaiDocumenti(esistente: r.esistente)
-                .environment(stato)
-        }
-        .sheet(item: $sulCliente) { r in
-            ModuloProdottoSulCliente(prodotto: r.prodottoId.flatMap { stato.prodotto($0) }, statoIniziale: r.stato,
-                                     clienteId: stato.clienteAttivoId, clienteScelto: r.clienteScelto)
-                .environment(stato)
-        }
-        .sheet(item: $moduloCondizioni) { p in
-            ModuloCondizioni(bozza: p.condizioni ?? CondizioniContratto(), prodotto: p.nome) { nuove in
-                var x = p
-                x.condizioni = nuove
-                stato.salvaProdotto(x)
-            }
-        }
-        .alert("Eliminare la scheda?", isPresented: $confermaEliminazione) {
-            Button("Annulla", role: .cancel) {}
-            Button("Elimina", role: .destructive) { if let p = scelto { stato.eliminaProdotto(p.id) } }
-        } message: {
-            Text("Le proposte già create restano nelle Posizioni, senza collegamento alla scheda.")
-        }
     }
 
     /// Le condizioni dettagliate del contratto, per le valutazioni di riscatto (prospetto e report).
-    private func condizioni(_ p: Prodotto) -> some View {
+    /// `gestione: false` (catalogo in modalità cliente, migliorie d'uso 63): senza «Aggiungi/Modifica le condizioni…».
+    func condizioni(_ p: Prodotto, gestione: Bool = true) -> some View {
         PannelloAnalisi(titolo: "Condizioni del contratto",
                         nota: p.condizioni == nil ? "Per prospetti e report di valutazione" : "Per le valutazioni di riscatto") {
             EmptyView()
@@ -139,11 +169,13 @@ struct AppProdotti: View {
                         .padding(.vertical, 6)
                 }
                 HStack(spacing: 8) {
-                    Button { moduloCondizioni = p } label: {
-                        Label(p.condizioni == nil ? "Aggiungi le condizioni…" : "Modifica le condizioni…",
-                              systemImage: p.condizioni == nil ? "plus" : "pencil")
+                    if gestione {
+                        Button { moduloCondizioni = p } label: {
+                            Label(p.condizioni == nil ? "Aggiungi le condizioni…" : "Modifica le condizioni…",
+                                  systemImage: p.condizioni == nil ? "plus" : "pencil")
+                        }
+                        .buttonStyle(StileVetro())
                     }
-                    .buttonStyle(StileVetro())
                     if p.condizioni != nil {
                         // Il blu della scheda è «Crea una proposta»: la valutazione va nel vetro d'accento
                         Button { stato.valutaProdotto(p.id) } label: {
@@ -167,7 +199,7 @@ struct AppProdotti: View {
 
     /// I costi come nel KID: l'incidenza annua (RIY) dichiarata, quella che calcola Prisma su un esempio di
     /// 10.000 € in un'unica soluzione (stima, prima delle imposte) e il periodo raccomandato.
-    private func testoKID(_ p: Prodotto) -> String {
+    func testoKID(_ p: Prodotto) -> String {
         var parti: [String] = []
         if let dichiarato = p.incidenzaCostiKID {
             parti.append("RIY dichiarato \(Formati.percentuale(dichiarato)) l'anno")
@@ -184,7 +216,7 @@ struct AppProdotti: View {
     }
 
     /// I costi come nel KID in breve: «RIY 0,25% · Prisma 0,26% a 5 anni».
-    private func testoKIDBreve(_ p: Prodotto) -> String {
+    func testoKIDBreve(_ p: Prodotto) -> String {
         var parti: [String] = []
         if let dichiarato = p.incidenzaCostiKID {
             parti.append("RIY \(Formati.percentuale(dichiarato))")
@@ -197,7 +229,7 @@ struct AppProdotti: View {
         return parti.joined(separator: " · ")
     }
 
-    private func nuova() {
+    func nuova() {
         var p = Prodotto(nome: "", canale: stato.filtroCanaleProdotti ?? .alleanza, area: stato.filtroAreaProdotti ?? .investimento)
         p.verificatoIl = Calendar.current.startOfDay(for: Date())
         modulo = p
@@ -205,7 +237,7 @@ struct AppProdotti: View {
 
     // MARK: - Elenco laterale
 
-    @ViewBuilder private func rail(_ conti: Conteggi) -> some View {
+    @ViewBuilder func rail(_ conti: Conteggi) -> some View {
         DossierRail()
         // Il canale come in Documenti e in Posizioni: una voce per canale, un secondo clic toglie il filtro
         EtichettaRail(testo: "Canale")
@@ -242,7 +274,7 @@ struct AppProdotti: View {
 
     // MARK: - Elenco
 
-    private func colonnaElenco(_ elenco: [Prodotto], sceltoId: String?) -> some View {
+    func colonnaElenco(_ elenco: [Prodotto], sceltoId: String?) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: Misure.ColonneStrumento.spazioTestata) {
                 CampoRicerca(testo: $ricerca, segnaposto: "Cerca prodotto o compagnia")
@@ -264,7 +296,7 @@ struct AppProdotti: View {
         }
     }
 
-    private func rigaElenco(_ p: Prodotto, attiva: Bool) -> some View {
+    func rigaElenco(_ p: Prodotto, attiva: Bool) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             // Il nome va a capo (due righe) invece di troncarsi; canale e «da verificare» sulla prima riga
             HStack(alignment: .firstTextBaseline, spacing: 6) {
@@ -308,7 +340,7 @@ struct AppProdotti: View {
 
     // MARK: - Condizioni e fonte
 
-    private func pannelloCondizioni(_ p: Prodotto, cifre: CifreScheda) -> some View {
+    func pannelloCondizioni(_ p: Prodotto, cifre: CifreScheda) -> some View {
         PannelloAnalisi(titolo: "Condizioni") { EmptyView() } contenuto: {
             VStack(spacing: 0) {
                 RigaDato("Garanzie", p.garanzie)
@@ -339,7 +371,8 @@ struct AppProdotti: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func pannelloFonte(_ p: Prodotto) -> some View {
+    /// `gestione: false` (catalogo in modalità cliente, migliorie d'uso 63): senza «Segna verificata oggi».
+    func pannelloFonte(_ p: Prodotto, gestione: Bool = true) -> some View {
         PannelloAnalisi(titolo: "Fonte", nota: "Da dove vengono i dati") { EmptyView() } contenuto: {
             VStack(alignment: .leading, spacing: 8) {
                 Text(p.fonte.isEmpty ? "Fonte non indicata" : p.fonte)
@@ -350,14 +383,16 @@ struct AppProdotti: View {
                         .font(Tema.Apple.AltreApp.nota.fontLeggibile).foregroundColor(Tema.Apple.AltreApp.testoSecondario)
                     if p.daVerificare { Pillola(testo: "Da rileggere sul KID", tono: .attenzione) }
                 }
-                Button {
-                    var x = p
-                    x.verificatoIl = Calendar.current.startOfDay(for: Date())
-                    stato.salvaProdotto(x)
-                } label: {
-                    Label("Segna verificata oggi", systemImage: "checkmark")
+                if gestione {
+                    Button {
+                        var x = p
+                        x.verificatoIl = Calendar.current.startOfDay(for: Date())
+                        stato.salvaProdotto(x)
+                    } label: {
+                        Label("Segna verificata oggi", systemImage: "checkmark")
+                    }
+                    .buttonStyle(StileVetro(margine: EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10)))
                 }
-                .buttonStyle(StileVetro(margine: EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 10)))
             }
         }
         .frame(minWidth: Misure.SchedaProdotto.fonteMinima, idealWidth: Misure.SchedaProdotto.fonte,
@@ -370,7 +405,7 @@ struct AppProdotti: View {
     enum PostoEtichetta { case completa, compatta, sotto }
 
     /// Barretta dell'area, nome, sottotitolo ed etichetta del canale.
-    private func testata(_ p: Prodotto, etichetta: PostoEtichetta) -> some View {
+    func testata(_ p: Prodotto, etichetta: PostoEtichetta) -> some View {
         HStack(alignment: .center, spacing: 14) {
             Capsule(style: .continuous).fill(Colori.Analisi.area(p.area)).frame(width: 8, height: 46)
             VStack(alignment: .leading, spacing: 3) {
@@ -398,7 +433,7 @@ struct AppProdotti: View {
 
     /// Le tessere in testa alla scheda: costo annuo, costo d'ingresso, rendimento, rischio (SRI) e orizzonte.
     /// Le note restano brevi; il dettaglio (due parti della multiramo) è nell'aiuto al passaggio del puntatore.
-    private func tessere(_ p: Prodotto, parametri: ParametriProiezione, dueParti: Bool, composizione: String) -> some View {
+    func tessere(_ p: Prodotto, parametri: ParametriProiezione, dueParti: Bool, composizione: String) -> some View {
         let costoAnnuo = dueParti ? CifreDoc.percento(parametri.costoAnnuoEquivalente, decimali: 2)
             : (p.costoAnnuo.map { Formati.percentuale($0) } ?? "—")
         let rendimento = dueParti ? CifreDoc.percento(parametri.rendimentoEquivalente, decimali: 2)
@@ -425,7 +460,7 @@ struct AppProdotti: View {
 
     /// Le cifre della scheda che non cambiano con la ricerca, i filtri o un'altra scheda aperta prima: la proiezione
     /// d'esempio, il peso dei costi, i costi come nel KID e le posizioni collegate.
-    private struct CifreScheda {
+    struct CifreScheda {
         let parametri: ParametriProiezione
         let versato: Double
         let netto: Double
@@ -438,7 +473,7 @@ struct AppProdotti: View {
 
     /// Le cifre della scheda una volta per dati dei calcoli (schede e posizioni), giorno e ora (i costi del KID guardano la
     /// data di oggi), non a ogni tasto nella ricerca: la scheda aperta si ridisegna con l'elenco.
-    private func cifre(_ p: Prodotto) -> CifreScheda {
+    func cifre(_ p: Prodotto) -> CifreScheda {
         stato.ricavato("prodotti-scheda|\(p.id)|\(DerivatiDati.ora())") { () -> CifreScheda in
             let parametri = p.parametriEsempio
             let esito = MotoreProiezione.calcola(parametri)
@@ -449,7 +484,35 @@ struct AppProdotti: View {
         }
     }
 
-    private func dettaglio(_ p: Prodotto) -> some View {
+    /// «Dove è usata»: le posizioni e le proposte nate dalla scheda (anche nei dettagli del catalogo, migliorie d'uso 63).
+    func doveUsata(_ usi: [Posizione]) -> some View {
+        PannelloAnalisi(titolo: "Dove è usata", nota: usi.isEmpty ? "Nessuna posizione o proposta collegata" : nil) { EmptyView() } contenuto: {
+            VStack(spacing: 0) {
+                ForEach(usi) { u in
+                    Button { stato.apriPosizione(u) } label: {
+                        HStack {
+                            Text(stato.cliente(u.clienteId)?.nome ?? "Cliente")
+                                .font(Tema.Apple.AltreApp.titoloVoce.fontLeggibile)
+                            EtichettaCanale(canale: u.canale, compatta: true)
+                            Text(u.stato == .proposta ? "Proposta · \((u.esito ?? .bozza).nome.lowercased())" : "In essere")
+                                .font(Tema.Apple.AltreApp.secondario.fontLeggibile)
+                                .foregroundColor(Tema.Apple.AltreApp.testoSecondario)
+                            Spacer()
+                            (Text("Apri ") + Text(Image(systemName: "chevron.right")))
+                                .font(Tema.Apple.AltreApp.collegamento.fontLeggibile)
+                                .foregroundColor(Tema.Apple.AltreApp.accento)
+                        }
+                        .foregroundColor(Tema.Apple.AltreApp.testo)
+                        .padding(.vertical, 7)
+                        .bordoBasso(Tema.Apple.AltreApp.separatore)
+                    }
+                    .buttonStyle(StileSemplice())
+                }
+            }
+        }
+    }
+
+    func dettaglio(_ p: Prodotto) -> some View {
         let c = cifre(p)
         let parametri = c.parametri
         // Multiramo a due parti: costo e rendimento pesati sulle due parti (dalla proiezione d'esempio)
@@ -494,30 +557,7 @@ struct AppProdotti: View {
                 condizioni(p)
                     .entrataCascata(4, base: Tema.Apple.Moto.Cascata.baseDentroApp)
                 StoricoAggiornamentiProdotto(prodotto: p)
-                PannelloAnalisi(titolo: "Dove è usata", nota: usi.isEmpty ? "Nessuna posizione o proposta collegata" : nil) { EmptyView() } contenuto: {
-                    VStack(spacing: 0) {
-                        ForEach(usi) { u in
-                            Button { stato.apriPosizione(u) } label: {
-                                HStack {
-                                    Text(stato.cliente(u.clienteId)?.nome ?? "Cliente")
-                                        .font(Tema.Apple.AltreApp.titoloVoce.fontLeggibile)
-                                    EtichettaCanale(canale: u.canale, compatta: true)
-                                    Text(u.stato == .proposta ? "Proposta · \((u.esito ?? .bozza).nome.lowercased())" : "In essere")
-                                        .font(Tema.Apple.AltreApp.secondario.fontLeggibile)
-                                        .foregroundColor(Tema.Apple.AltreApp.testoSecondario)
-                                    Spacer()
-                                    (Text("Apri ") + Text(Image(systemName: "chevron.right")))
-                                        .font(Tema.Apple.AltreApp.collegamento.fontLeggibile)
-                                        .foregroundColor(Tema.Apple.AltreApp.accento)
-                                }
-                                .foregroundColor(Tema.Apple.AltreApp.testo)
-                                .padding(.vertical, 7)
-                                .bordoBasso(Tema.Apple.AltreApp.separatore)
-                            }
-                            .buttonStyle(StileSemplice())
-                        }
-                    }
-                }
+                doveUsata(usi)
                 HStack(spacing: 8) {
                     Button { sulCliente = RichiestaProdottoCliente(prodottoId: p.id, stato: .proposta, clienteScelto: true) } label: {
                         Label("Metti su un cliente…", systemImage: "plus")

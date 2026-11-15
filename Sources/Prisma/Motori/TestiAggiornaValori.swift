@@ -265,4 +265,145 @@ enum TestiAggiornaValori {
     static let nessunaPosizione = "Nel file non ho trovato posizioni: servono almeno il prodotto o il numero di contratto, con i nomi delle colonne nella prima riga."
     /// Le righe copiate non hanno l'intestazione o non sono una tabella.
     static let appuntiVuoti = "Negli appunti non ci sono righe di tabella. In Excel seleziona le righe con l'intestazione, ⌘C, poi «Incolla da Excel»."
+
+    // MARK: - Migliorie d'uso 44 (Mac): prima i dubbi
+
+    /// L'occhiello della testata: «Aggiorna i valori», con « · {nome}» quando c'è un cliente scelto.
+    static func occhielloMac(cliente: String?) -> String {
+        "Aggiorna i valori" + (cliente.map { " · \($0)" } ?? "")
+    }
+    static let titoloElenco = "Dall’elenco della compagnia."
+    static let titoloGriglia = "I valori fermi da 12 mesi."
+
+    /// ««Valori.xlsx»: 9 righe lette» (« per Marco Bianchi» con un cliente scelto).
+    static func righeLette(file: String, n: Int, cliente: String?) -> String {
+        "«\(file)»: \(n) \(n == 1 ? "riga letta" : "righe lette")\(cliente.map { " per \($0)" } ?? "")."
+    }
+    static let scegliAltroFile = "Scegli un altro file"
+    static func fuoriCliente(_ n: Int) -> String {
+        n == 1 ? "1 riga di altri clienti resta fuori." : "\(n) righe di altri clienti restano fuori."
+    }
+    static let mostraTutto = "Mostra tutto l’elenco"
+
+    static func daDecidere(_ n: Int) -> String { "Da decidere · \(n)" }
+    static let deciso = "Deciso"
+    static let primaQueste = "Prima queste: poi si registra tutto insieme."
+    static let puoiRegistrare = "Puoi registrare."
+
+    /// Una percentuale intera, senza segno: «18%».
+    private static func pctIntera(_ v: Double) -> String { "\(Int(abs(v).rounded()))%" }
+
+    static func domandaCalo(pct: Double, prima: Double, dopo: Double) -> String {
+        "Il valore nuovo è più basso del \(pctIntera(pct)): da \(Formati.euro(prima)) a \(Formati.euro(dopo)). È giusto, o nell’elenco c’è un errore?"
+    }
+    static func domandaAumento(pct: Double, prima: Double, dopo: Double) -> String {
+        "Il valore nuovo è più alto del \(pctIntera(pct)): da \(Formati.euro(prima)) a \(Formati.euro(dopo)). È giusto, o nell’elenco c’è un errore?"
+    }
+    static func domandaZero(prima: Double) -> String {
+        "Il valore nuovo è zero: da \(Formati.euro(prima)) a \(Formati.euro(0)). Se la polizza è stata riscattata o è scaduta, si chiude dalla sua scheda."
+    }
+    /// La polizza non trovata, intestata a un cliente.
+    static func domandaNuova(nome: String) -> String {
+        "Nell’elenco è intestata a \(nome), ma tra le sue posizioni non c’è. È una polizza nuova?"
+    }
+    /// La polizza non trovata, intestata a una persona che non è fra i clienti (o senza nome).
+    static func domandaNuovaSenzaCliente(nome: String) -> String {
+        nome.isEmpty ? "Nell’elenco manca il nome del cliente e tra le posizioni non c’è. È una polizza nuova? Scegli di chi è."
+                     : "Nell’elenco è intestata a \(nome), che non è fra i tuoi clienti. È una polizza nuova? Scegli di chi è."
+    }
+    static func domandaScegli(_ e: AggiornaValori.Esito, posizioni: [String: Posizione], clienti: [String: String]) -> String {
+        if e.candidate.count == 1, let p = posizioni[e.candidate[0]] {
+            return "Il numero è di una posizione di \(clienti[p.clienteId] ?? "un altro cliente"). È questa?"
+        }
+        return "Più posizioni possono essere questa: scegli quella giusta."
+    }
+
+    /// La domanda della riga in dubbio, scritta in chiaro. `nomeCliente`: il cliente riconosciuto della riga non trovata.
+    static func domanda(_ e: AggiornaValori.Esito, nomeCliente: String?, posizioni: [String: Posizione],
+                        clienti: [String: String]) -> String {
+        switch AggiornaValori.dubbio(e) {
+        case .calo?:
+            return domandaCalo(pct: e.variazionePct ?? 0, prima: e.precedente ?? 0, dopo: e.riga.valore ?? 0)
+        case .aumento?:
+            return domandaAumento(pct: e.variazionePct ?? 0, prima: e.precedente ?? 0, dopo: e.riga.valore ?? 0)
+        case .nuova?:
+            if let n = nomeCliente { return domandaNuova(nome: n) }
+            return domandaNuovaSenzaCliente(nome: e.riga.cliente)
+        case .scegli?:
+            return domandaScegli(e, posizioni: posizioni, clienti: clienti)
+        case nil:
+            return AggiornaValori.zero(e) ? domandaZero(prima: e.precedente ?? 0) : ""
+        }
+    }
+
+    /// Il titolo della riga non trovata: «Polizza n. AL-2024-77120 · Temporanea caso morte».
+    static func titoloNonTrovata(_ r: AggiornaValori.Riga) -> String {
+        let numero = r.numeroContratto.isEmpty ? "" : "Polizza n. \(r.numeroContratto)"
+        let parti = [numero, r.prodotto].filter { !$0.isEmpty }
+        return parti.isEmpty ? "Riga \(r.id)" : parti.joined(separator: " · ")
+    }
+
+    static let eGiusto = "È giusto"
+    static let eNuova = "È nuova"
+    static let eNuovaMenu = "È nuova: di chi è? ⌄"
+    static let scegliPosizione = "Scegli la posizione ⌄"
+    static let salta = "Salta"
+    static let cambia = "Cambia"
+    static let decisoGiusto = "il valore è giusto, si registra"
+    static let decisoNuova = "è una posizione nuova, si aggiunge"
+    static func decisoNuovaDi(cliente: String) -> String { "è una posizione nuova di \(cliente), si aggiunge" }
+    static let decisoSalta = "saltata, resta com’è"
+    static func decisoScelta(_ posizione: String) -> String { "si registra su «\(posizione)»" }
+    static func canaleRiconosciuto(_ c: Canale) -> String { "canale: \(c.nomeBreve)" }
+
+    static func pronti(_ n: Int) -> String { "Pronti · \(n)" }
+    static let riconosciuti = "riconosciuti dal numero di polizza o dal nome"
+    static let nessunoPronto = "Nessun valore pronto da registrare."
+    static let aiutoSpunta = "Togli la spunta per non registrare questo valore"
+    /// Il valore più vecchio: «valore del 19 aprile 2026: più vecchio di quello che hai già. Va solo nello storico.»
+    static func soloStorico(data d: Date?) -> String {
+        let quando = d.map { "valore del \(Formati.dataEstesa.string(from: $0))" } ?? "valore"
+        return "\(quando): più vecchio di quello che hai già. Va solo nello storico."
+    }
+    /// La capsula del valore a zero tra le righe che non si registrano.
+    static let pillolaZero = "Valore zero"
+    static func nonSiRegistrano(_ n: Int) -> String { "Non si registrano · \(n)" }
+
+    /// Il pulsante principale: con dubbi aperti dice quante righe decidere, poi quanti valori registra.
+    static func pulsanteRegistra(daDecidere: Int, valori: Int) -> String {
+        if daDecidere > 0 {
+            return daDecidere == 1 ? "Decidi la riga in arancione" : "Decidi le \(daDecidere) righe in arancione"
+        }
+        return registra(valori)
+    }
+    static let avvisoDecidi = "Prima decidi le righe in arancione"
+    static let notaCopia = "Prima di registrare Prisma salva una copia: si può annullare."
+    static let notaCopiaFatta = "Prima di registrare Prisma ha salvato una copia."
+
+    /// Il titolo del riepilogo: «8 valori registrati.».
+    static func registrati(_ n: Int) -> String {
+        switch n {
+        case 0: return "Nessun valore registrato."
+        case 1: return "1 valore registrato."
+        default: return "\(n) valori registrati."
+        }
+    }
+    /// Le frasi sotto il titolo del riepilogo.
+    static func frasiDopo(storico: Int, nuove: Int) -> String {
+        var frasi = ["Il valore di prima resta nello storico di ogni posizione e nell’andamento."]
+        if storico == 1 { frasi.append("Un valore più vecchio è andato solo nello storico.") }
+        if storico > 1 { frasi.append("\(storico) valori più vecchi sono andati solo nello storico.") }
+        if nuove == 1 { frasi.append("Una posizione nuova è stata aggiunta.") }
+        if nuove > 1 { frasi.append("\(nuove) posizioni nuove sono state aggiunte.") }
+        return frasi.joined(separator: " ")
+    }
+    static let fatto = "Fatto"
+    static let annulla = "Annulla la registrazione"
+    static let annullaNonPiu = "Una posizione è cambiata dopo la registrazione: resta il backup fatto prima."
+    static let avvisoRegistrati = "Valori registrati: quelli di prima restano nello storico"
+    static let avvisoAnnullata = "Registrazione annullata: i valori sono quelli di prima"
+    static let prima = "Prima"
+    static let dopo = "Dopo"
+    static let variazione = "Variazione"
+    static func contoPosizioni(_ n: Int) -> String { n == 1 ? "1 posizione" : "\(n) posizioni" }
 }

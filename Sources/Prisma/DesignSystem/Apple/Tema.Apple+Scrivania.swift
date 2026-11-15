@@ -107,6 +107,8 @@ extension Tema.Apple {
             static let spazioPulsanti: CGFloat = 8
             /// Il simbolo di «Preparami l'incontro» (✦ del template).
             static let simboloPrepara = "sparkles"
+            /// «✓ Fatto» della mossa (migliorie d'uso 3, solo sul Mac).
+            static let simboloFatto = "checkmark"
             /// Etichetta del canale accanto all'etichetta della mossa.
             static let spazioCanale: CGFloat = 8
         }

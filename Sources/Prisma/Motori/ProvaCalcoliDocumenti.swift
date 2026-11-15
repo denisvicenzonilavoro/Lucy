@@ -76,6 +76,7 @@ enum ProvaCalcoliDocumenti {
         schedaLeggibile(verifica)
         documentiDelCliente(verifica)
         archivio(verifica)
+        datiIncerti(verifica)
     }
 
     // MARK: - Aiuti
@@ -105,6 +106,137 @@ enum ProvaCalcoliDocumenti {
         [.isin, .dataDocumento, .rendimentoPrimaCosti, .numeroDocumento, .intestatario, .codiceFiscale, .dataRilascio,
          .profiloRischio, .orizzonte]
     }
+
+    // MARK: - Migliorie d'uso 62: dati certi e incerti
+
+    /// Le regole di `MotoreDocumenti.incerti` (Design/uso/gruppo-11.md §62.5): riga d'origine vuota, importo illeggibile,
+    /// data futura, Qwen, SRI fuori scala, ISIN e codice fiscale; un dato scritto a mano non è mai incerto.
+    private static func datiIncerti(_ verifica: VerificaCalcoli) {
+        func dato(_ k: CampoDocumento, _ valore: String, estratto: String = "riga del documento",
+                   origine: String = "Regole di Prisma") -> CampoEstratto {
+            CampoEstratto(chiave: k, valore: valore, pagina: 1, estratto: estratto, origine: origine)
+        }
+        func perche(_ c: CampoEstratto) -> String? { MotoreDocumenti.perche(c, oggi: oggi) }
+        verifica.vero("U62 incerti: senza riga d'origine", perche(dato(.contraente, "Marco Bianchi", estratto: "")) == TestiDocumenti.senzaRiga)
+        verifica.vero("U62 incerti: a mano mai incerto",
+                      perche(dato(.premio, "abc", estratto: "", origine: TestiDocumenti.origineAMano)) == nil)
+        verifica.vero("U62 incerti: importo illeggibile", perche(dato(.premio, "mille euro")) == TestiDocumenti.importoIlleggibile)
+        verifica.vero("U62 incerti: importo leggibile", perche(dato(.premio, "1.200,00 €")) == nil)
+        verifica.vero("U62 incerti: data del documento nel futuro", perche(dato(.dataDocumento, "12/03/2027")) == TestiDocumenti.dataNelFuturo)
+        verifica.vero("U62 incerti: scadenza nel futuro va bene", perche(dato(.scadenza, "12/03/2040")) == nil)
+        verifica.vero("U62 incerti: data illeggibile", perche(dato(.decorrenza, "31/02/2026")) == TestiDocumenti.dataIlleggibile)
+        verifica.vero("U62 incerti: letto con Qwen", perche(dato(.premio, "1.200", estratto: "", origine: "Qwen")) == TestiDocumenti.lettoConQwen)
+        verifica.vero("U62 incerti: SRI fuori scala", perche(dato(.sri, "9")) == TestiDocumenti.sriFuoriScala)
+        verifica.vero("U62 incerti: SRI 4", perche(dato(.sri, "4")) == nil)
+        verifica.vero("U62 incerti: ISIN con la cifra di controllo", MotoreDocumenti.isinValido("US0378331005"))
+        verifica.vero("U62 incerti: ISIN sbagliato", !MotoreDocumenti.isinValido("US0378331006"))
+        verifica.vero("U62 incerti: codice fiscale di Giulia", MotoreDocumenti.codiceFiscaleValido("RSSGLI89C54A944H"))
+        verifica.vero("U62 incerti: codice fiscale troppo corto", perche(dato(.codiceFiscale, "RSSGLI89C54")) == TestiDocumenti.codiceFiscaleNonValido)
+        let kid = documento("doc-prova-kid", cliente: "marco", titolo: "KID", tipo: .kid, pagine: kidMultiramo)
+        verifica.vero("U62 incerti: il KID letto dalle regole è tutto certo", MotoreDocumenti.incerti(kid, oggi: oggi).isEmpty)
+        var conDubbio = kid
+        if let i = conDubbio.campi.firstIndex(where: { $0.chiave == .sri }) { conDubbio.campi[i].valore = "12" }
+        verifica.vero("U62 incerti: un SRI sbagliato nel KID", MotoreDocumenti.incerti(conDubbio, oggi: oggi)[.sri] == TestiDocumenti.sriFuoriScala)
+        dueValori(verifica)
+        decisioni(verifica)
+        #if os(macOS)
+        fattoNelDossier(verifica)
+        #endif
+        verifica.vero("U62 pulsante: «Controlla i 2 dati in arancione»", TestiDocumenti.controlla(2) == "Controlla i 2 dati in arancione")
+        verifica.vero("U62 pulsante: «Decidi la differenza»", TestiDocumenti.decidi(1) == "Decidi la differenza")
+    }
+
+    /// §62.3 punto 1: un dato che nel testo compare con due valori diversi è incerto (con le pagine come parametro).
+    private static func dueValori(_ verifica: VerificaCalcoli) {
+        let pagine = ["Abbiamo classificato questo prodotto nella classe di rischio 3 su 7.",
+                      "Indicatore sintetico di rischio: classe di rischio 4 su 7."]
+        let d = documento("doc-prova-due-valori", cliente: "marco", titolo: "KID", tipo: .kid, pagine: pagine)
+        verifica.vero("U62 due valori: le regole trovano due SRI diversi", EstrattoreDocumento.valoriDiversi(pagine) == [.sri])
+        verifica.vero("U62 due valori: l'SRI è incerto con il suo perché",
+                      MotoreDocumenti.incerti(d, pagine: pagine, oggi: oggi)[.sri] == TestiDocumenti.dueValori)
+        verifica.vero("U62 due valori: senza le pagine la regola non vale", MotoreDocumenti.incerti(d, oggi: oggi).isEmpty)
+        var aMano = d
+        if let i = aMano.campi.firstIndex(where: { $0.chiave == .sri }) { aMano.campi[i].origine = TestiDocumenti.origineAMano }
+        verifica.vero("U62 due valori: un dato scritto a mano non è mai incerto",
+                      MotoreDocumenti.incerti(aMano, pagine: pagine, oggi: oggi)[.sri] == nil)
+        verifica.vero("U62 due valori: lo stesso valore due volte non è un dubbio",
+                      EstrattoreDocumento.valoriDiversi(["Classe di rischio 4 su 7", "classe di rischio 4 su 7, rischio medio"]).isEmpty)
+        verifica.vero("U62 due valori: il KID della multiramo non ha doppi", EstrattoreDocumento.valoriDiversi(kidMultiramo).isEmpty)
+        verifica.vero("U62 due valori: la carta d'identità di Giulia non ha doppi", EstrattoreDocumento.valoriDiversi(identita).isEmpty)
+        let kid = documento("doc-prova-kid", cliente: "marco", titolo: "KID", tipo: .kid, pagine: kidMultiramo)
+        verifica.vero("U62 due valori: il KID con le sue pagine resta tutto certo",
+                      MotoreDocumenti.incerti(kid, pagine: kidMultiramo, oggi: oggi).isEmpty)
+    }
+
+    /// §62.5: il conto dei dubbi e il piano di «Fatto» (`DecisioniLettore`): «Fatto» non conferma un dato incerto.
+    private static func decisioni(_ verifica: VerificaCalcoli) {
+        var d = documento("doc-prova-kid", cliente: "marco", titolo: "KID", tipo: .kid, pagine: kidMultiramo)
+        for i in d.campi.indices { d.campi[i].confermato = false }
+        let incerti: [CampoDocumento: String] = [.sri: TestiDocumenti.dueValori]
+        verifica("U62 Fatto: un dubbio aperto", Double(DecisioniLettore.datiDubbi(d, incerti: incerti, mancanti: [], visti: [])), 1)
+        verifica.vero("U62 Fatto: con un dato incerto non si salva",
+                      DecisioniLettore.piano(d, incerti: incerti, mancanti: [], visti: [], gruppi: [], scelte: [:]) == nil)
+        var confermato = d
+        if let i = confermato.campi.firstIndex(where: { $0.chiave == .sri }) { confermato.campi[i].confermato = true }
+        let piano = DecisioniLettore.piano(confermato, incerti: incerti, mancanti: [], visti: [], gruppi: [], scelte: [:])
+        verifica.vero("U62 Fatto: confermato con «Va bene», si salva", piano != nil)
+        verifica.vero("U62 Fatto: non conferma il dato incerto", piano.map { !$0.conferma.contains(.sri) } ?? false)
+        verifica("U62 Fatto: conferma i dati certi", Double(piano?.conferma.count ?? -1), Double(d.campi.count - 1))
+        verifica.vero("U62 Fatto: un mancante non visto ferma il pulsante",
+                      DecisioniLettore.piano(confermato, incerti: incerti, mancanti: [.beneficiari], visti: [], gruppi: [], scelte: [:]) == nil)
+        verifica.vero("U62 Fatto: il mancante visto non lo ferma più",
+                      DecisioniLettore.piano(confermato, incerti: incerti, mancanti: [.beneficiari], visti: [.beneficiari],
+                                             gruppi: [], scelte: [:]) != nil)
+        let salvato = documento("doc-prova-kid", cliente: "marco", titolo: "KID", tipo: .kid, pagine: kidMultiramo)
+        verifica.vero("U62 Fatto: a documento salvato i mancanti non sono dubbi",
+                      DecisioniLettore.mancantiAperti(salvato, mancanti: [.beneficiari], visti: []).isEmpty)
+        verifica.vero("U62 Fatto: già salvato, il pulsante dice «Chiudi»", DecisioniLettore.salvato(salvato, gruppi: []))
+    }
+
+    #if os(macOS)
+    /// §62.5 sullo stato: la scelta «Nel documento» aggiorna la posizione con lo storico e `ripristina` la riporta.
+    private static func fattoNelDossier(_ verifica: VerificaCalcoli) {
+        let s = StatoShell(persistente: false)
+        let id = "doc-marco-polizza"
+        let pid = "pos-marco-infortuni-famiglia"
+        s.aggiornaDocumento(id) { d in
+            for i in d.campi.indices { d.campi[i].confermato = false }
+        }
+        guard var d = s.documento(id) else {
+            verifica.vero("U62 Fatto nel dossier: la polizza di Marco c'è", false)
+            return
+        }
+        for k in LetturaLettore.calcola(d, stato: s).incerti.keys { s.confermaCampo(id, k, true) }
+        d = s.documento(id) ?? d
+        let l = LetturaLettore.calcola(d, stato: s)
+        let capitale = l.gruppi.contains { $0.righe.contains { $0.voce == .capitaleAssicurato } }
+        verifica.vero("U62 Fatto nel dossier: il capitale della polizza è una differenza", capitale)
+        verifica.vero("U62 Fatto nel dossier: senza scelte non si salva",
+                      DecisioniLettore.piano(d, incerti: l.incerti, mancanti: l.mancanti, visti: Set(l.mancanti),
+                                             gruppi: l.gruppi, scelte: [:]) == nil)
+        var scelte: [String: Bool] = [:]
+        for g in l.gruppi {
+            for r in g.righe { scelte[DecisioniLettore.chiaveScelta(g, r)] = true }
+        }
+        guard let piano = DecisioniLettore.piano(d, incerti: l.incerti, mancanti: l.mancanti, visti: Set(l.mancanti),
+                                                 gruppi: l.gruppi, scelte: scelte) else {
+            verifica.vero("U62 Fatto nel dossier: tutto scelto, si salva", false)
+            return
+        }
+        let prima = s.dati.posizioni.first { $0.id == pid }
+        s.applicaFattoLettore(id, piano: piano)
+        let dopo = s.dati.posizioni.first { $0.id == pid }
+        verifica.vero("U62 Fatto nel dossier: tutti i dati confermati", s.documento(id)?.campi.allSatisfy(\.confermato) ?? false)
+        verifica("U62 Fatto nel dossier: il capitale del documento", dopo?.capitaleAssicurato ?? 0, 150_000)
+        let variazione = dopo?.variazioni?.last { $0.voce == VoceDossier.capitaleAssicurato.rawValue && $0.documentoId == id }
+        verifica.vero("U62 Fatto nel dossier: lo storico ricorda il valore di prima", variazione != nil)
+        if let variazione {
+            s.ripristina(variazione.id, in: .posizione(pid))
+            let ripristinato = s.dati.posizioni.first { $0.id == pid }?.capitaleAssicurato
+            verifica("U62 Fatto nel dossier: il ripristino riporta il capitale", ripristinato ?? 0, prima?.capitaleAssicurato ?? -1)
+        }
+    }
+    #endif
 
     // MARK: - D1–D6 Lettura
 

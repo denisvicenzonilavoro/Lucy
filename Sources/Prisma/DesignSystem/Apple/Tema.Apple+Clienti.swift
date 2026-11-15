@@ -65,6 +65,58 @@ extension Tema.Apple {
             static let fraRighePiede: CGFloat = 2
         }
 
+        // MARK: «La tua rubrica» con «Tutti i clienti» (migliorie d'uso 2, 3 e 11)
+
+        /// Senza un cliente scelto, al posto del dossier (`rubricaTuttiHTML` del template): la testa con l'icona, le
+        /// quattro cifre in tessere e il «Da fare» di tutti con cinque voci. Solo sul Mac.
+        enum TuttiIClienti {
+            /// Padding della pagina 22×24 (come il dossier); al massimo largo 860.
+            static let padding = Misura.padding(22, 24)
+            static let larghezzaMassima: CGFloat = 860
+            /// La testa: quadrato 60 raggio 20 con fondo accento al 10%, simbolo 30; 16 fra icona e testi.
+            static let icona: CGFloat = 60
+            static let raggioIcona: CGFloat = 20
+            static let fondoIcona = Colore.accento.opacity(0.10)
+            static let coloreIcona = Colore.accento
+            static let simbolo = Carattere(dimensione: 30, peso: .regular)
+            static let spazioTesta: CGFloat = 16
+            /// «Tutti i clienti» 11 maiuscolo, «La tua rubrica» 27 bold (tracking −0,6), la frase 13,5 `inchiostro2`.
+            static let occhiello = Carattere(dimensione: 11, peso: .semibold, tracking: 0.6, maiuscolo: true)
+            static let coloreOcchiello = Colore.inchiostro2
+            static let titolo = Carattere(dimensione: 27, peso: .bold, tracking: -0.6)
+            static let coloreTitolo = Colore.inchiostro
+            static let frase = Carattere(dimensione: 13.5, peso: .regular)
+            static let coloreFrase = Colore.inchiostro2
+            /// Le quattro tessere: 18 sotto la testa, 12 fra l'una e l'altra, padding 14×16, raggio `tile`.
+            static let tessereSopra: CGFloat = 18
+            static let spazioTessere: CGFloat = 12
+            static let paddingTessera = Misura.padding(14, 16)
+            static let superficieTessera = Superficie.tile
+            static let raggioTessera: CGFloat = Raggio.tile
+            static let nomeTessera = Carattere.secondario
+            static let coloreNomeTessera = Colore.inchiostro2
+            static let cifra = Carattere.valore
+            static let coloreCifra = Colore.inchiostro
+            /// « su 35» dopo la cifra: 15 semibold `inchiostro2`.
+            static let suffisso = Carattere(dimensione: 15, peso: .semibold)
+            static let coloreSuffisso = Colore.inchiostro2
+            /// La card «Da fare»: 14 sotto le tessere, padding 16/20/8, senza ombra; cinque voci; «Apri tutto ›» 13 in
+            /// accento; 4 sotto la testata.
+            static let daFareSopra: CGFloat = 14
+            static let paddingDaFare = EdgeInsets(top: 16, leading: 20, bottom: 8, trailing: 20)
+            static let superficieDaFare = Superficie.cardPiatta
+            static let raggioDaFare: CGFloat = Raggio.card
+            static let righeDaFare = 5
+            static let etichettaDaFare = Carattere.etichetta
+            static let coloreEtichettaDaFare = Colore.inchiostro2
+            static let spazioTestataDaFare: CGFloat = 8
+            static let sottoTestataDaFare: CGFloat = 4
+            static let collegamento = Carattere(dimensione: 13, peso: .regular)
+            static let coloreCollegamento = Colore.accento
+            static let paddingAltre = EdgeInsets(top: 8, leading: 2, bottom: 4, trailing: 2)
+            static let paddingVuoto = Misura.padding(12, 2)
+        }
+
         // MARK: Indice del dossier (migliorie d'uso 11)
 
         /// Con un cliente scelto la colonna di sinistra è l'indice del suo dossier (`#dosIdx` del template, `.side`

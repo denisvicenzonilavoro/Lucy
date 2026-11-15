@@ -10,7 +10,10 @@ import CoreGraphics
 /// - 893: nessun modello: radar vuoto e invito, chiaro e scuro;
 /// - 894: dopo «Riequilibra»: bozze pronte, punti al loro posto con il segno della proposta;
 /// - 895: 200 clienti (come `--prova-carico`); 896: Impostazioni › Portafogli modello, chiaro e scuro;
-/// - 897: la finestra stretta.
+/// - 897: la finestra stretta;
+/// - 898: la riga di un cliente fuori tolleranza che accende il suo punto (migliorie d'uso 40), chiaro e scuro.
+/// Dalle migliorie d'uso 40 la colonna ha la legenda a colori e la card «chi» con tutti i fuori tolleranza (891 e 892:
+/// «Apri le posizioni di …»; 894: capsule «Proposta pronta» e numero di chi resterebbe fuori).
 /// DATI DI PROVA DICHIARATI: modelli e tolleranza sono quelli del template (`PortafogliModelloDiProva`, nota «Dati di
 /// prova»); le cifre le calcola MotoreRadar.
 extension Istantanee {
@@ -59,6 +62,11 @@ extension Istantanee {
             preparaRadar(s)
             s.alternaIngrandimento(.posizioni)
             s.ridimensiona(.posizioni, dimensione: CGSize(width: 760, height: 640))
+        }
+        coppia("898-posizioni-radar-riga-accesa") { s in
+            preparaRadar(s)
+            // Il cliente più lontano: il puntatore è sulla sua riga della card «chi»
+            s.radarPuntatoreIstantanea = MotoreRadar.calcola(s.dati.istantanea).fuori.first?.id
         }
         return scene
     }

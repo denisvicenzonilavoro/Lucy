@@ -8,6 +8,7 @@ import CoreGraphics
 /// colonna del giorno; la traccia di un impegno ancora da venire (Marco) e, dalla miglioria 19, quella di un impegno
 /// passato con la proposta da chiudere (Laura) e senza proposta (Giulia); la settimana di un cliente scelto e la finestra
 /// stretta senza barra laterale. Le cifre vengono dai motori di Prisma sui dati di prova (date relative a oggi).
+/// Dalla miglioria 50 il mese a tutta larghezza: 1152 (chiara e scura), 1153 con Marco scelto e 1154 con un giorno libero.
 /// Il menu del pulsante «Occasioni» è un popover (una finestra a sé): le istantanee non lo vedono, serve uno screenshot.
 extension Istantanee {
     nonisolated static var sceneAgendaApple: [(nome: String, prepara: (StatoShell) -> Void)] {
@@ -35,7 +36,42 @@ extension Istantanee {
                 RichiestaIstantaneaAgenda.chiedi(s, impegno: "event-giulia")
                 preparaAgendaApple(s, vista: .settimana)
             }),
+            // Migliorie d'uso 50: il mese a tutta larghezza con la colonna del giorno stretta (oggi scelto, tutti i
+            // clienti), il mese di Marco («solo Marco», «Tutti i clienti») e un giorno senza impegni («Giornata libera»)
+            ("1152-uso-agenda-mese", { s in preparaAgendaApple(s, vista: .mese) }),
+            ("1152-uso-agenda-mese-scuro", { s in preparaAgendaApple(s, vista: .mese) }),
+            ("1153-uso-agenda-mese-cliente", { s in preparaAgendaApple(s, vista: .mese, cliente: "marco") }),
+            ("1154-uso-agenda-mese-giorno-libero", { s in
+                preparaAgendaApple(s, vista: .mese)
+                s.giornoAgenda = giornoLiberoDelMese(s)
+            }),
         ]
+    }
+
+    /// Il primo giorno feriale del mese di oggi, da domani in poi (o prima, se il mese finisce), senza impegni, senza
+    /// attività e senza posizioni in scadenza: la colonna del mese dice «Giornata libera».
+    nonisolated static func giornoLiberoDelMese(_ s: StatoShell) -> Date {
+        let cal = Calendar.current
+        let oggi = cal.startOfDay(for: Date())
+        guard let mese = cal.dateInterval(of: .month, for: oggi) else { return oggi }
+        var giorni: [Date] = []
+        var g = mese.start
+        while g < mese.end {
+            giorni.append(g)
+            guard let dopo = cal.date(byAdding: .day, value: 1, to: g) else { break }
+            g = dopo
+        }
+        // Prima i giorni dopo oggi, poi quelli prima
+        let ordine = giorni.filter { $0 > oggi } + giorni.filter { $0 < oggi }.reversed()
+        let libero = ordine.first { d in
+            let settimana = cal.component(.weekday, from: d)
+            guard settimana != 1 && settimana != 7 else { return false }
+            let impegni = s.dati.appuntamenti.contains { cal.isDate($0.inizio, inSameDayAs: d) }
+            let attivita = s.dati.attivita.contains { cal.isDate($0.scadenza, inSameDayAs: d) }
+            let scadenze = s.dati.posizioni.contains { p in p.scadenza.map { cal.isDate($0, inSameDayAs: d) } ?? false }
+            return !impegni && !attivita && !scadenze
+        }
+        return libero ?? oggi
     }
 
     /// Una presentazione della proposta di infortuni di Laura stamattina (8:30-9:15), passata alle 10:24 e ancora

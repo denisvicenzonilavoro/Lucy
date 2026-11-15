@@ -29,6 +29,11 @@
     "strumento": {
       "type": "string",
       "enum": ["lineaVita", "lanciaAnno", "film", "provaFuoco", "nessuno"]
+    },
+    "migliore": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
     }
   },
   "required": ["giudizio", "motivo", "replica", "convinta", "prossimaObiezione", "suggerite", "strumento"]

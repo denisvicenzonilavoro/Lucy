@@ -84,12 +84,12 @@ ProvaScenariVera.
 Resta:
 - **L'etichetta del motore sotto le risposte** («Sul Mac · Qwen…», `EtichettaMotore.per`): resta com'è per decisione
   (regola bloccata del cervello grande), finché l'utente non dà il via alla proposta di 9.6.
-- Altri testi con «Qwen» in vista, meno frequenti: VistePassiVera («Piano proposto da Qwen…»), VisteFaseTreVera
-  («spiegati da Qwen», «Scritta da Qwen…»), VisteTreLivelliVera («Parole di Qwen»), VisteStileVera, VisteMotoriVera
-  (pagina dei motori: lì il nome ha senso), CollegaStileShell, VerbaleCopilota («riscrivendo con Qwen»), NotaVocaleArrivo
-  («Capito con Qwen»), AppIncontri («Proposta letta da Qwen»), ComponentiAppDocumenti («p. N · Qwen»), MotoreSintesi
-  («serve Qwen sul Mac»), gli avvisi di StatoShell con il motivo di Ollama (commento del mercato) e il motivo tecnico
-  nella mini Vera (`motivoNonPronta`). Da passare a «Vera» guardando le istantanee.
+- ~~Altri testi con «Qwen» in vista~~: fatto nella rifinitura con `TestiStatoVera.inVista(mac:altrove:)` (sul Mac «Vera»,
+  su iPhone e iPad il testo di prima): VistePassiVera, VisteFaseTreVera, VisteTreLivelliVera, VisteStileVera,
+  CollegaStileShell, VerbaleCopilota, NotaVocaleArrivo, AppIncontri, ComponentiAppDocumenti, CopilotaIncontro,
+  MotoreSintesi, TestiDocumenti, CollegaMotoriShell, MotoreDaSistemare, ImpostazioniNotteVista, NovitaVera, il motivo
+  della palestra e l'avviso del commento del mercato (StatoShell). Il nome resta in VisteMotoriVera, nelle pagine delle
+  Impostazioni, in `EtichettaMotore`, in MisuraVelocita (strumento di misura) e nei nomi interni (`storiaPerQwen`…).
 - «Check-up completo» negli spunti → miglioria 5 («Il quadro»).
 - La riga «Due velocità» di Impostazioni › Vera dice ancora «Qwen sul Mac»: in Impostazioni il nome resta (9.2).
 - **Istantanee**: rigenerare sul Mac «410-scrivania-apple», «296-scrivania-vera», «297-scrivania-vera-risposta»,
@@ -140,7 +140,10 @@ Resta:
 - **Prospetti**: il tipo `.portafoglio` non è diventato una lettura di `tuttiIClienti`. Con «Tutti i clienti» si apre il
   vuoto: il prospetto del portafoglio si raggiunge dalla scrivania o da Posizioni.
 - **Ancora da fare**:
-  - «La tua rubrica» con le quattro cifre e il «Da fare» (con la miglioria 11).
+  - ~~«La tua rubrica» con le quattro cifre e il «Da fare»~~: fatto nella rifinitura (Shell/RubricaTuttiApple.swift,
+    token `Tema.Apple.Clienti.TuttiIClienti`): persone seguite, in regola e riesami dell'anno da `statoDelLavoro`,
+    patrimonio seguito da `riepilogoPortafoglio(canale: nil, area: nil)`, «Da fare» con cinque voci, «Apri tutto ›» e
+    «altre N ›». Istantanea da guardare: la rubrica con «Tutti i clienti» (nessuna scena dedicata per ora).
   - Vera che parla del cliente della barra, con domande d'esempio e «Parliamo di» (miglioria 27).
   - `ContestoFinestra` senza il nome (miglioria 4).
   - La pillola che non si apre nella vista pulita (miglioria 1).
@@ -215,9 +218,12 @@ Resta:
   sinistra, filo bianco al 40% fra le due). Serve una forma del tema per le due metà.
 - **Inquadra senza iPhone collegato**: la voce apre la scena di oggi (con il ponte spento si trascina una foto o un PDF);
   il rimando a Impostazioni › iPhone e iPad arriva con la miglioria 39.
-- **Testi della guida delle altre app** (`GUIDA` del template, righe 3014-3029): non riscritti in questo giro; vanno
-  aggiornati app per app solo dove descrivono ciò che l'app fa già (indice del dossier, settimana a sette giorni, «Da
-  fare» unico… arrivano con le loro migliorie). Il passo 2 della scrivania del template («Spunta le cose da fare:
+- **Testi della guida delle altre app**: fatto nella rifinitura per Clienti, Posizioni, Analisi 360, Incontri, Agenda,
+  Messaggi, Prospetti, Sala, Mercato, Vera e Impostazioni (`GuidaTesti.aiutoMac`, solo sul Mac: frase e passi del
+  template, parole e riga breve di sempre). Restano i testi di prima per Territorio, Pratiche, Biblioteca, Studio e le app
+  ospitate (da riprendere quando quelle schermate fanno ciò che il template dice: «Segui la crescita», il numero rosso
+  delle pratiche ferme, i tre gruppi di Studio, i prodotti dei clienti in cima alla Biblioteca). Prospetti dice «apre la
+  pagina davanti a lui», non «sempre quella per il cliente», finché la miglioria 22 non sceglie la versione da sola. Il passo 2 della scrivania del template («Spunta le cose da fare:
   spariscono da tutta Prisma») è stato scritto senza la seconda parte: va ripreso con la miglioria 3.
 
 ## 3. Un solo «Da fare» al posto di notifiche, scadenze e promemoria
@@ -257,13 +263,18 @@ Resta:
   spuntano). La tabella di 3.3 punto 1 va completata: impegni senza esito → miglioria 19; pratiche e sinistri fermi → 33;
   backup e impostazioni → Impostazioni › Da sistemare (31); le voci per cliente (ricontattare, beneficiari, esperienza,
   adeguatezza) e le voci «Per te» dei documenti come voci del nastro; poi «Arrivati» solo per carta, note, notte e capsule.
-- **La mossa del giorno** resta di `MotoreMossaDelGiorno` e il riquadro «Da fare» parte dalla prima voce del nastro (senza
-  «dopo la mossa del giorno»): da fare l'allineamento proposto in 3.6 (la voce della mossa prima, il riquadro dalla seconda,
-  «✓ Fatto» nella mossa).
-- **Rubrica** con «Tutti i clienti» (cinque voci, miglioria 11), **dossier** «Da fare per <Nome>» con «Apri tutto ›» su «Solo
-  <Nome>» (miglioria 5), **Agenda** «Da fare oggi» al posto di «Da fare e da ricordare» e via «Da non dimenticare» (miglioria
-  18, `RigaDaFare(filoAgenda: true, conCanali: false)` è pronta), **Vera** senza «Da non dimenticare» (miglioria 27), il
-  collegamento «<N> da fare per <Nome> ›» di Posizioni.
+- **La mossa del giorno**: fatto nella rifinitura sulla scrivania (`voceDellaMossa(in:)` in StatoDaFare: la stessa
+  posizione del cliente della mossa, altrimenti lo stesso tipo di voce). Il riquadro «Da fare» parte dalla seconda voce con
+  «dopo la mossa del giorno» e la mossa ha «✓ Fatto». Il nastro del pannello resta in ordine di tempo (la mossa non è
+  spostata in testa: cambierebbe l'ordine provato da `ProvaDaFare`). Da guardare nelle istantanee 410 e 616 che il terzo
+  pulsante della mossa stia nell'altezza del riquadro; manca una prova di `voceDellaMossa`.
+- ~~**Rubrica** con «Tutti i clienti»~~ e ~~**Agenda** «Da fare oggi»~~: fatti nella rifinitura (la card «Da fare oggi»
+  nella colonna di sinistra della settimana con due voci di oggi e la riga comune, al posto di «Da non dimenticare»; la
+  fascia della giornata si chiama «Da fare oggi», «Da fare» negli altri giorni, ma tiene le sue capsule: passarla alla
+  riga comune resta da fare). **Dossier** «Da fare per <Nome>» (miglioria 5), **Vera** senza «Da non dimenticare»
+  (miglioria 27), il collegamento «<N> da fare per <Nome> ›» di Posizioni. Verificato nella rifinitura 18-24: sul Mac la
+  card «Da non dimenticare» non c'è più né nell'Agenda né in Vera (resta solo per iPhone e iPad); la colonna del giorno del
+  mese tiene le righe delle attività di sempre, «in piccolo» (decisione 50-b).
 - **Notifiche viste**: `notificheViste` e il numero delle «nuove» restano nel codice comune (le usano iPhone, iPad e le
   prove); sul Mac non si vedono più. I promemoria del Mac (notifiche di sistema) leggono ancora `MotoreNotifiche.promemoria`:
   da far leggere al nastro.
@@ -321,17 +332,23 @@ all'incontro» (la presentazione dentro la vista pulita); Sala: il blu «Mostra 
 Resta:
 - **Il blocco chiude la vista pulita** (come oggi chiude la modalità cliente, e la prova di Vera lo vuole): la specifica
   dice «allo sblocco si torna dov'eri». Per farlo il blocco dovrebbe tenere la modalità cliente quando la vista è aperta.
-- **Gli avvisi interni con il nome di altri clienti** (note e carta dall'iPhone, carte della notte, «Prisma ovunque»,
-  routine) non sono ancora trattenuti mentre si mostra: vanno messi in coda e mostrati dopo «Fine» (§1.3 punto 12).
+- ~~**Gli avvisi interni con il nome di altri clienti**~~ fatto nella rifinitura: `mostraAvviso(_:riservato:)` mette in
+  coda in memoria (`avvisiTrattenuti`) gli avvisi riservati mentre la vista pulita è aperta; «Fine» mostra l'ultimo (con
+  quanti altri), il blocco li scarta. Riservati: carta dall'iPhone, testo inquadrato, routine finite (portafoglio e dopo
+  la firma), sincronizzazione automatica di «Prisma ovunque». La scheda della nota vocale era già trattenuta dalla
+  modalità cliente; le carte della notte non danno avvisi a lavoro finito. Caso nuovo in `ProvaMostraAlCliente`.
 - **«Sull’iPad sul tavolo»** fa come il template (apre Prospetti con l'avviso), non avvia ancora il tavolo; se l'iPad non è
   collegato dovrebbe portare a Impostazioni › iPhone e iPad (miglioria 39).
 - **«Un prospetto»** mostra il report del check-up del cliente: la scelta del prospetto (e la versione «Per il cliente»
   della miglioria 22) resta da fare.
-- **Le parole** stanno nel piede di ogni capitolo, non dentro le frasi (il template le sottolinea nel testo); da unire con
-  il componente della miglioria 66. «Gli obiettivi» dice «traguardo a <mese anno>» (la data dell'obiettivo), non una data
+- **Le parole**: fatto nella rifinitura per «Il quadro» (`TestoConParole(vistaCliente:)`: nella vista pulita le parole
+  restano segnate e il tocco apre `schedaMostra` (.parola); nel piede restano solo quelle che le frasi non dicono). «Le
+  posizioni» tocca «patrimonio netto» nell'etichetta e tiene «in essere» nel piede; «Nel tempo» resta con il piede (le
+  cifre non hanno frasi). Da guardare nelle istantanee 1010-1013 quali parole del glossario le frasi di `FrasiCliente`
+  fanno davvero comparire. «Gli obiettivi» dice «traguardo a <mese anno>» (la data dell'obiettivo), non una data
   d'arrivo stimata, che Prisma oggi non calcola.
-- **Nel capitolo «La Sala»** la barra dei capitoli si sovrappone al fondo della finestra della Sala; la chiusura della
-  finestra non è nascosta; la Sala aperta su un'esperienza resta aperta solo entrando da lì (`tieni` non è distinto).
+- **Nel capitolo «La Sala»** la barra dei capitoli si sovrappone al fondo della finestra della Sala; ~~la chiusura della
+  finestra non è nascosta~~ (fatto nella rifinitura: nella vista pulita niente chiusura né «Chiudi» nel menu della riga); la Sala aperta su un'esperienza resta aperta solo entrando da lì (`tieni` non è distinto).
 - **Movimento**: il pannello entra con `entrataScheda` (dal basso, 0,97); l'ombra al passaggio delle righe non c'è (solo
   la salita di 2). Il menu dell'avatar è una scheda disegnata, non un menu del Mac.
 - `ContrassegnoModoCliente` resta come ripiego quando la modalità cliente è accesa senza la vista (presentazione della
@@ -407,7 +424,8 @@ Resta:
   portata sulle sezioni senza titolo proprio: da fare guardando le istantanee, sezione per sezione.
 - **La sfumatura in fondo all'indice** (come le altre colonne): il tema non ha ancora un modificatore comune; l'indice
   scorre senza indicatori e senza sfumatura.
-- **«La tua rubrica» con le quattro cifre e il «Da fare»** (Tutti i clienti, miglioria 2 §2.3 punto 7) non è in questo giro.
+- ~~**«La tua rubrica» con le quattro cifre e il «Da fare»**~~: fatto (`RubricaTuttiApple`, Shell/RubricaTuttiApple.swift:
+  persone seguite, in regola, riesami dell'anno, patrimonio seguito e il «Da fare» di tutti; verificato nella rifinitura 11-17).
 - **Istantanee**: rigenerare sul Mac 430 e -scuro, 431-clienti-panoramica-apple, 431-clienti-dossier-in-regola, 432, 433,
   434, 1023, 1075, 1050-1052 e le nuove 1028-1029; controllare che il nome lungo si tagli nella testa dell'indice e che
   con la finestra stretta compaia «Sezione: … ⌄». `--prova-fluidita`: guardare i corpi di `IndiceDossierApple` nel passo di
@@ -497,16 +515,22 @@ cima; senza dati una riga che dice perché e «Aggiungi una posizione»). Nella 
 apre la schermata della resistenza. Nessun campo d'archivio nuovo.
 
 Resta:
-- **Vuoto delle analisi con «Completa»**: la proposta 14.6 vuole anche il pulsante che apre il dato mancante
-  (`stato.apriCompletamento` con la prima voce di `completezzaCliente(id)` che tocca quell'analisi); oggi c'è solo
-  «Aggiungi una posizione». Serve una mappa voce di completezza → analisi.
+- ~~**Vuoto delle analisi con «Completa»**~~: fatto nella rifinitura 11-17. `MotoreCompletezza.analisi(perSchermataPosizioni:)`
+  (costi → Costi, successione → Passaggio generazionale, resistenza e coerenza → Rischio e investimenti, patrimonio →
+  anche Previdenza) e `voceDaCompletare(_:schermataPosizioni:)` (la voce più pesante che tocca la schermata); accanto ad
+  «Aggiungi una posizione» c'è «Completa «{voce}»» con `stato.apriCompletamento`, non in modalità cliente né in sola
+  lettura. Prova C19 in `ProvaCalcoliCompletezza`. Da guardare sul Mac: che il titolo lungo della voce («Costi del KID ·
+  {prodotto}») non stringa troppo la riga.
 - **Titolo grande delle analisi** (`PannelloAnalisi.titoloGrande`, 21 bold): non fatto, il pannello tiene il titolo 17
   della card; da decidere guardando le istantanee.
 - **Altezza 92 delle tessere e 304 della ripartizione**: le tessere tengono l'altezza del loro contenuto e la colonna
   destra scorre da sola; i due token non ci sono.
 - **«· x € l'anno» nella quarta tessera**: come nella miglioria 12, resta «per x €» (il valore non è annuo).
-- **Dopo la scheda di una posizione** aperta da «Peso dei costi» o «Passaggio generazionale» si torna alla stessa
-  schermata, ma lo scorrimento riparte dall'alto.
+- ~~**Dopo la scheda di una posizione**~~: fatto nella rifinitura 11-17. `AppPosizioni.rientroPosizione` (in memoria)
+  ricorda la posizione aperta; `AnalisiPosizioniApple(rientro:)` al ritorno porta in vista la riga (`RientroPosizione.id`,
+  sulle righe di `PannelloCosti` e `PannelloSuccessione`) senza movimento; cambiando schermata, cliente o ancora si
+  riparte dall'alto. Da provare sul Mac vero (non si vede nelle istantanee). «Quadro e posizioni» non è coperto: l'elenco
+  scorre dentro la card ed è pigro.
 - **Gruppi 07 e 08**: chi vuole aprire una schermata delle posizioni (radar, smontaggio, «Apri le posizioni di …») scrive
   l'ancora di oggi (`stato.ancoraPosizioni = "coerenza"`), non una proprietà nuova.
 - **Istantanee e prove sul Mac**: rigenerare 2, 9, 10, 71, 74, 76, 79, 95-97 e le nuove 1040-1043; misurare un cliente
@@ -536,8 +560,13 @@ scura), 1073-uso-posizione-contratto, 1074-uso-proposta (1027-1029 della specifi
 94, 119 e 121 aprono ora la scheda giusta. Nessun campo d'archivio nuovo.
 
 Resta:
-- **«Completa i dati» sul primo campo vuoto**: apre «Modifica», ma `ModuloPosizione` non legge `\.fuocoModulo` (lo imposta
-  solo `AppPosizioni` per la completezza): il fuoco sul primo campo vuoto va aggiunto nel modulo.
+- ~~**«Completa i dati» sul primo campo vuoto**~~: fatto nella rifinitura 11-17. `DettaglioPosizione.modificaSuCampo` apre
+  il modulo con `FuocoModulo` sul primo di `campiVuoti`, tradotto in etichetta del modulo da
+  `TestiDettaglioPosizione.etichettaModulo` («Numero» e «Numero del deposito» → «Numero di contratto», «Intestatario» →
+  «Contraente»); `CampoModulo` evidenzia e `CorniceModulo` porta in vista (c'erano già). Prova in
+  `ProvaCalcoliDettaglioPosizione`. Resta un buco del modulo: per conti, immobili e debiti `ModuloPosizione` non ha il
+  campo «Contraente» (la sezione «Persone e date» non c'è o non lo mostra), quindi «Intestatario» non si può completare
+  e il modulo si apre senza evidenza; da decidere se aggiungere il campo per quelle aree.
 - **Rientro al cambio di scheda** (opacità e y +6 in 0,24 s del template): la scheda nuova compare subito.
 - **Grafico piccolo di «Come sta andando»**: è `GraficoAndamento` intero (altezza fissa `Misure.Analisi.grafico`), senza
   una misura ridotta.
@@ -612,8 +641,14 @@ Resta:
 - **Istantanee**: rigenerare sul Mac 470/471, 1054/1055, «250-impostazioni-panoramica» (ora «Da sistemare») e le nuove
   1056-1058; guardare che l'etichetta più lunga («sullo stesso Mac», «non aggiornato») non stringa troppo il titolo delle
   voci della colonna (il titolo si riduce fino all'85%), e aggiornare la pagina delle anteprime.
-- **§31.3 punto 6**, da controllare guardando le istantanee: le righe sotto un interruttore spento in Mercato («Dati di
-  mercato»), «Prisma ovunque» e Notte devono essere attenuate, non nascoste (i promemoria lo fanno già).
+- ~~**§31.3 punto 6**~~: fatto nella rifinitura 25-31 per Mercato e Notte. Il modificatore `attenuatoSeSpento(_:)`
+  (DesignSystem/TemaRifiniture1.swift: `.disabled`, `opacitaDisabilitato`, `saturazioneSpento`) raccoglie lo schema dei
+  promemoria, che ora lo usano; in Impostazioni › Mercato serie, soglie e riferimenti si attenuano con «Dati di mercato»
+  spento (solo sul Mac: su iPhone e iPad la pagina si legge soltanto), in «Stanotte» ora d'inizio, bozze, apertura,
+  notifica e «Cosa preparare» con la notte spenta; gli interruttori restano attivi. Resta «Prisma ovunque», che con lo
+  spazio spento **nasconde** le righe (`if o.acceso`) invece di attenuarle: è un altro disegno (le righe dipendono anche
+  dalla cartella e dalla chiave), da decidere guardando le istantanee. Da guardare sul Mac: 250-… di Mercato e la pagina
+  di Vera con la notte spenta (il caso di base, quindi le righe ora sono grigie anche nelle istantanee di sempre).
 - **«Lasciali spenti»** per i promemoria (§31.6): non fatto, servirebbe un campo in `Impostazioni`; i promemoria spenti
   contano come nel template.
 - **La card del tagliando** resta anche nella pagina di Vera (l'uscita dalla colonna di Vera è della miglioria 27).
@@ -647,10 +682,9 @@ Resta:
 - **CLAUDE.md**: la regola del canale («Alleanza = etichetta in vetro blu con il logo Alleanza; indipendente = …») va
   aggiornata dall'utente come in §38.6.1 (con un nome scelto l'etichetta perde il logo e mostra il nome, sempre nel suo
   colore). Non l'ho toccata.
-- **Miglioria 37**: «Guardo Prisma con i clienti di prova» oggi mostra solo l'avviso «Si comincia con la dimostrazione»
-  (i dati di prova ci sono già al primo avvio); con la 37 deve chiamare `accendiDimostrazione(.trentacinque)`, e «Porto i
-  miei clienti» / «Parto da zero» devono spegnere la dimostrazione accesa (`spegniDimostrazione()`) prima di proseguire
-  (`StatoShell.cominciaPrimoAvvio`, PrimoAvvio.swift).
+- ~~**Miglioria 37**: «Porto i miei clienti» / «Parto da zero» spengono la dimostrazione accesa~~ fatto nella rifinitura
+  32-39: `cominciaPrimoAvvio` passa da `dopoLaDimostrazione`, che spegne senza avviso e prosegue con `poi` di
+  `spegniDimostrazione` a archivio vero riletto («Guardo Prisma con i clienti di prova» accendeva già la dimostrazione).
 - **«Come funziona» della guida** (§38.6.3): per ora resta nel «?» come scheda in più (alternativa della specifica), con
   la riga «Come funziona Prisma» di Impostazioni › Aspetto e la voce del menu Aiuto; le istantanee 222-224 e 229 restano
   quelle dell'introduzione. Se l'utente sceglie la proposta: togliere la scheda sul Mac e far aprire `PrimoAvvio` dal menu.
@@ -693,8 +727,8 @@ Resta:
   NotaVocaleTelefono, AperturaBackup); con «Nota a voce» spenta sul Mac l'iPhone riceve «rifiutata»: va verificato che la
   nota resti nella coda cifrata come quando il Mac non risponde (oggi la coda scatta solo senza collegamento).
 - **Il codice breve che scade** (decisione 2): richiede un abbinamento nuovo su Mac, iPhone e iPad.
-- **La scheda del codice** resta aperta se si blocca Prisma o si chiudono le Impostazioni (sotto la schermata di
-  benvenuto non si vede); se serve, chiuderla in `blocca()` e alla chiusura di Impostazioni.
+- ~~**La scheda del codice** resta aperta se si blocca Prisma o si chiudono le Impostazioni~~ fatto nella rifinitura
+  32-39: si chiude in `blocca()` (nel blocco animato) e in `chiudi(.impostazioni)`.
 - **Istantanee**: rigenerare sul Mac 560-566 (la pagina ha il nuovo ordine), 251 (riga che rimanda), le scene di
   Inquadra senza ponte e «Come funziona» della nota (compare «Collega l’iPhone»), guardare 1069-1071 chiare e scure e
   aggiornare la pagina delle anteprime.
@@ -729,24 +763,33 @@ Prova `ProvaBackupDimostrazione` in `--prova-backup`. Istantanee nuove 1060 (chi
 scura), 1063; 85 mostra la pagina nuova, 86 le misure in Impostazioni › Vera.
 
 Resta:
-- **Primo avvio senza dati di prova** (37.3 D, decisione 5): `Archivio.carica` scrive ancora `DatiPrisma.demo()` in una
-  cartella vuota (Archivio.swift, ramo finale e `caricaVecchio`). Va cambiato in un archivio vuoto controllando le prove
-  che partono da una cartella vuota; per l'utente non cambia nulla.
-- **Altre scritte «di prova»** che guardano la nota o il prefisso del dato e non sono ancora spente in dimostrazione:
-  PraticheComuniApple (`dati di prova`), SalaGiornataPensione, PaginePrismaCliente (`c.diProva`), SmontaggioApple,
-  DettaglioDocumento («documento di prova»), FamiglieComeLaSua, `TestiStudio.datiDiProva`, StudioSpese, StudioEsameOCF,
-  TestiPassaparola, MotoreTraguardi, TestiSinistri (chiudere con `grep -rn "di prova" Sources/Prisma/Shell
-  Sources/Prisma/Motori`). `scritteProva` non guarda la modalità cliente (la specifica lo propone): aggiungerlo cambierebbe
-  le istantanee della Sala in modalità cliente, da decidere guardandole.
-- **Pulsanti disattivati** con l'aiuto «Non durante la dimostrazione» (documenti, scontrini, attestati, Biblioteca,
-  moduli): oggi la guardia è nello stato (avviso), non nei pulsanti. Un documento aggiunto ai Documenti di un cliente di
-  prova copia comunque il file nella cartella Documenti: non entra nell'archivio vero e la pulizia dei file orfani lo
-  sposta nel Cestino al primo avvio dopo la dimostrazione. Da guardare anche le scritture di capsule e sinistri
-  (StatoCapsule, StatoSinistri).
-- **Prove**: `--prova-ovunque` (con la dimostrazione accesa `sincronizzaOvunque` non scrive e non unisce) e `--prova-vera`
-  (la guida e il contesto di Vera senza id di clienti veri) non sono estese: la prova del backup lavora su uno stato non
-  persistente e controlla dati, ricerca, guida, pulizie e scritture ferme; la lettura dal disco allo spegnimento non è
-  provata (servirebbe uno StatoShell persistente su una cartella di prova).
+- **Primo avvio senza dati di prova** (37.3 D, decisione 5): fatto nella rifinitura 32-39, solo sul Mac
+  (`Archivio.archivioIniziale` = `ArchivioPezzi.vuoto`; su iPhone e iPad resta `DatiPrisma.demo()` fino al loro giro),
+  nel ramo della cartella vuota e in `caricaVecchio` (avviso «…e ripartito da un archivio vuoto»). I due rami in sola
+  lettura tengono `demo()` come segnaposto, come diceva la specifica. Resta da guardare sul Mac vero un primo avvio da
+  zero (rubrica vuota, guida, tre domande) e che nessuna prova della CI partisse da una cartella vuota aspettandosi i 5
+  clienti (le prove e le istantanee non persistenti partono ancora da `demo()`).
+- **Altre scritte «di prova»**: nella rifinitura 32-39 tacciono in dimostrazione l'etichetta di Pratiche sui sinistri e
+  sulle proposte (`EtichettaDatiDiProvaPratiche(deiClienti: true)`; le tabelle e i moduli d'esempio la tengono, sono
+  risorse e non clienti), la giornata della pensione nella Sala e «documento di prova» nel dettaglio di un documento
+  (i PDF archiviati in dimostrazione non hanno file). Restano da setacciare: PaginePrismaCliente (`c.diProva`, dentro il
+  documento per il cliente), StudioSpese (le card non hanno lo stato nell'ambiente), TestiPassaparola, MotoreTraguardi,
+  `TestiStudio.datiDiProva` dove non passa già da `scritteProva`; SmontaggioApple, FamiglieComeLaSua e StudioEsameOCF
+  parlano di fac-simile e tabelle d'esempio (risorse), da lasciare. Manca la prova a dimostrazione accesa sui testi
+  principali (sono viste, non stato). `scritteProva` non guarda la modalità cliente (la specifica lo propone): aggiungerlo
+  cambierebbe le istantanee della Sala in modalità cliente, da decidere guardandole.
+- **Pulsanti e guardie** (rifinitura 32-39, fatto): «+» dei Documenti e i due pulsanti della Biblioteca spenti con l'aiuto
+  «Non durante la dimostrazione»; il pannello dei documenti e quello della Biblioteca non si aprono; `importaDocumenti`,
+  `importaFileSinistro` e l'archiviazione di un file trascinato su Vera si fermano con l'avviso; `archiviaPDF` e
+  `archiviaFile` (moduli compilati, Prisma del cliente, film, capsula) tengono il documento solo in memoria, senza file;
+  la capsula si sigilla con la chiave in memoria e non tocca il Portachiavi. Scontrini, attestati e moduli avevano già la
+  guardia nello stato; i loro pulsanti (FogliSpese, PraticheModuli) non sono ancora spenti.
+- **Prove** (rifinitura 32-39): `ProvaBackupDimostrazione` controlla anche sinistro, documento trascinato e capsula;
+  `--prova-vera` ha `ProvaVeraDimostrazione` (schede di Vera e del portafoglio senza il cliente vero, guida, routine
+  ferme, nota dettata rifiutata, il cliente vero che torna). Resta `--prova-ovunque`: le guardie di `sincronizzaOvunque`
+  stanno dietro `persistente`, quindi servirebbe uno StatoShell persistente su una cartella di prova (con Portachiavi e
+  cartella dello spazio finti): troppo rischioso senza un Mac per provarlo; anche la lettura dal disco allo spegnimento
+  resta non provata.
 - **«Riapri ora»** (dimensione del testo) durante la dimostrazione: la misura scelta non si salva e Prisma riparte con
   quella dell'archivio vero (in dimostrazione).
 - **Istantanee**: rigenerare sul Mac 85, 86 (chiara e scura), le pagine di Vera, Promemoria e Archivio (righe nuove in
@@ -781,8 +824,10 @@ Fatto (solo sul Mac, `#if os(macOS)`; l'iPad tiene le quattro viste, la striscia
 Resta:
 - **454-agenda-occasioni-pulsante**: il menu è un popover (finestra a sé), le istantanee non lo vedono: chiedere uno
   screenshot all'utente.
-- **Colonna a sinistra**: «Da non dimenticare» resta; il template mette lì il «Da fare» (con `RigaDaFare(filoAgenda: true,
-  conCanali: false)`). Nella giornata la fascia «Da fare e da ricordare» non è ancora «Da fare oggi» (miglioria 3).
+- **Colonna a sinistra**: fatto nella rifinitura (`DaFareOggiAgendaApple`: «Da fare oggi» con il numero, «Apri tutto ›» e
+  due voci di oggi con `RigaDaFare(filoAgenda: true, conCanali: false)`; vuoto «Niente per oggi[ con <Nome>].»). La fascia
+  della giornata ha il titolo nuovo ma le capsule di prima. Istantanee da rigenerare: 450, 453. Ricontrollato nella
+  rifinitura 18-24: «Da non dimenticare» resta solo nel ramo di iPhone e iPad.
 - **Scala al passaggio** (1,03) non messa: basta l'inclinazione (come chiede 18.3 punto 3).
 - **`--prova-fluidita`**: guardare in CI che la settimana con 30 clienti non faccia crescere i corpi rifatti (ogni colonna
   di oggi ha una `TimelineView` della riga dell'ora e una degli impegni); `ProvaRiesamiAgenda` non tocca la vista e resta.
@@ -824,9 +869,8 @@ Fatto (solo sul Mac, `#if os(macOS)`; iPhone e iPad restano con le tendine e la 
 Resta:
 - **«Tutti i clienti»**: toccare la riga di un altro cliente **non** cambia il cliente della barra, come nel template.
   La specifica (21.3 punto 3) diceva di metterlo, ma allora l'elenco si stringerebbe a quel cliente a ogni tocco. Il
-  quaderno usa il cliente dell'incontro mostrato. Il collegamento «Analisi» delle schede dei temi apre però Analisi 360
-  sul cliente della barra, che con «Tutti» mostra il vuoto: da sistemare con la miglioria 20 o scegliendo il cliente al
-  tocco di «Analisi».
+  quaderno usa il cliente dell'incontro mostrato. ~~Il collegamento «Analisi» delle schede dei temi~~: fatto nella
+  rifinitura 18-24, sul Mac sceglie il cliente dell'incontro (`scegliCliente(i.clienteId)`) prima di aprire Analisi 360.
 - **«Prima» dall'appuntamento**: oggi la bozza usa la «Preparazione» di sempre (priorità, dossier, temi, l'ultima volta).
   I «punti da toccare» e le cifre del template arrivano con la miglioria 20 (Prima, Durante, Dopo), e così anche
   «Riapri» per i fatti in sola lettura e «Fermare l'ascolto?» (20-c). Oggi, mentre si ascolta, le righe sono solo spente.
@@ -884,15 +928,22 @@ dettaglio):
 Resta:
 - **L'uscita del contenuto in 120 ms** (opacità e 6 punti in giù) prima della cascata al cambio di momento: oggi il
   contenuto nuovo entra a cascata senza l'uscita del vecchio (si può fare come `DossierApple` con `CambioScheda`).
-- **Incontro concluso con il solo verbale del copilota**: in «Dopo» si vede l'archivio degli appunti scritti, non i
-  punti del verbale confermato (da aggiungere in sola lettura, come «Il verbale» del template).
+- ~~**Incontro concluso con il solo verbale del copilota**~~: fatto nella rifinitura 18-24. Sotto l'archivio degli appunti
+  c'è «Il verbale» in sola lettura (`VerbaleConfermatoLettura` in VerbaleCopilota.swift: «Confermato il …», i punti, le
+  attività e cosa è entrato nel dossier, senza pulsanti), solo se il verbale è confermato e non vuoto
+  (`RegoleVerbaleLettura.daRileggere`, prova in `ProvaVistaCopilota`). Istantanea da guardare: un incontro concluso con il
+  verbale (584/585 se mostrano un concluso).
 - **«Fissa il prossimo»** apre il modulo dell'appuntamento fra 30 giorni alle 10 (titolo «Seguito · …», revisione), non
   l'Agenda: da guardare se l'utente preferisce aprire l'Agenda con il cliente scelto.
 - **Il numero delle domande** degli appunti a mano usa ancora il tondo del tema di prima (`Tema.Misura.Incontri`); il
   token `Durante.numeroDomanda` (22, `.pzN`) è pronto.
 - La testata con titoli lunghi e finestra stretta: i momenti hanno la precedenza e il titolo si tronca; sotto i 900 punti
   della parte destra potrebbe non starci tutto (guardare l'istantanea a finestra stretta).
-- Il «?» con «Come funziona» del copilota (miglioria 6): sul Mac il riquadro non si vede più.
+- ~~Il «?» con «Come funziona» del copilota~~: fatto nella rifinitura 18-24. La guida di Incontri sul Mac (`aiutoMac`) dice
+  i tre momenti: Prima con i punti da toccare, Durante con il testo di `TestiCopilota.comeFunziona` o gli appunti a mano,
+  Dopo con il verbale e «Chiudi e archivia l’incontro». L'iPad tiene il riquadro e la guida di sempre.
+- «Prepara con Vera» di `azioneFase` (AppIncontri) resta: sul Mac non si vede (la testata con `azioneFase` è solo
+  dell'iPad, sul Mac c'è «Prima»).
 - `CollegamentiCopilota` e la scheda del consenso a riquadro non si usano più sul Mac (restano per l'iPad).
 - **Istantanee da rigenerare sul Mac**: 21, 22, 105, 215, 476, 477, 580-589 (testata con i momenti, barra di «Durante»)
   e le nuove 472-475; aggiornare la pagina delle anteprime. Il foglio del consenso, l'avviso «Fermare l'ascolto?» e la
@@ -931,12 +982,21 @@ prossimo passo si decide nel verbale.») e 19-d (la voce del «Da fare» resta e
   457-agenda-impegno-concluso-senza-proposta (Giulia, «Concluso» spenta e «Non ancora scritto»).
 
 Resta:
-- **Dal «Da fare»** la voce «Com'è andato «…»?» apre «Giorno» con il dettaglio (che ora dice «Scrivi il verbale» e
-  «Altro ⌄»), non la traccia della 19 sopra la settimana: aprire la traccia da `vai(.appuntamento(id))` chiede un modo
-  per far nascere il dettaglio dell'Agenda dallo stato (oggi lo apre solo il tocco su un impegno).
-- **«Prepara con Vera»** sparisce dalla scheda concluso; la richiesta a Vera per l'incontro passa dalla decisione 20-e
-  (nel dettaglio di «Giorno» per un impegno «prima» il pulsante resta finché la miglioria 10 non lo rinomina).
-- **«Presenta al cliente»** nella traccia «prima» resta finché la miglioria 1 non porta «Mostra al cliente».
+- ~~**Dal «Da fare»** la voce «Com'è andato «…»?»~~: fatto nella rifinitura 18-24. `StatoShell.richiestaTracciaImpegno`
+  (solo in memoria) la legge `PresentatoreImpegniApple` (all'apertura dell'Agenda e quando cambia) e apre la traccia
+  sopra l'Agenda. `vai(a: .appuntamento)` con la settimana: un impegno da chiudere (`MomentoImpegno.daChiudere`) resta
+  sulla settimana del suo giorno e apre la traccia; gli altri passano a «Giorno» come prima. Prova in
+  `ProvaSettimanaAgenda`. Sul Mac la voce arriva dai promemoria di sistema (`Notifiche`, «esito-…»); il nastro del «Da
+  fare» non ha ancora la voce «Com'è andato?» (vedi miglioria 3, «impegni senza esito → miglioria 19»).
+- ~~**«Prepara con Vera»**~~: fatto nella rifinitura 18-24. Nel dettaglio di «Giorno» per un impegno «prima» il pulsante
+  dice «Preparami l'incontro» (`Parole.preparamiIncontro`) e fa come la traccia: la traccia si apre sopra l'Agenda già
+  avviata (`tracciaDaPreparare`), spunta i punti e apre il fascicolo. Un blocco senza cliente apre Vera come prima.
+  «Prepara l'incontro» accanto (che porta in Incontri) sul Mac si chiama «Prima dell'incontro». iPad e widget restano.
+- ~~**«Presenta al cliente»**~~: fatto nella rifinitura 18-24. La traccia «prima» dice «Mostra al cliente»
+  (`Parole.mostraAlCliente`) e `presentaImpegno` sul Mac passa da `mostraProspetto`, dentro la vista pulita (prova in
+  `ProvaMostraAlCliente`, che controlla la vista pulita solo se il fascicolo di prova ha pagine). iPhone e iPad restano.
+- Da guardare nelle istantanee e con uno screenshot: la traccia aperta dal promemoria sopra la settimana e quella aperta
+  da «Preparami l'incontro» del dettaglio di «Giorno» (i punti che si spuntano).
 - La traccia aperta non si rifà da sola quando l'impegno finisce mentre la si guarda (si rifà alla prossima apertura).
 - **Istantanee da rigenerare sul Mac**: 452, 456 (chiara e scura), 457, 11-agenda e 11b-agenda-giorno (il dettaglio di un
   impegno passato alle 10:24 ferme, con «Scrivi il verbale» e «Altro ⌄»); il menu «Altro ⌄» e i passi
@@ -1117,10 +1177,13 @@ Resta:
   `Tema.Apple.Messaggi.Colonna`; se lo usano altre app conviene spostarli in un enum comune.
 - **iPhone e iPad**: la barra a tre stati e «Mandati oggi» arriveranno con il loro aggiornamento (l'iPhone non segna
   spediti e il giornale di «Prisma ovunque» non porta il segno).
-- **Modalità cliente su iPhone e iPad**: sul Mac le occasioni del cliente si filtrano nel motore prima del limite di 8
-  per gruppo (`soloCliente`); su iPhone e iPad `occasioniMessaggi` e il dossier filtrano ancora dopo il limite, come
-  prima (dentro `#if os(macOS)`), e perdono le occasioni del cliente fuori dalle prime 8 di tutti. Portare la stessa
-  correzione con l'aggiornamento di iPhone e iPad.
+- ~~**Modalità cliente su iPhone e iPad**~~: fatto nella rifinitura 25-31. `occasioniMessaggi` e il dossier non hanno più
+  i rami `#if os(macOS)`: anche su iPhone e iPad il filtro del cliente sta nel motore, prima del limite di 8. Il codice
+  iOS si compila solo su main o lanciando il workflow a mano: **lanciarlo** prima di unire.
+- ~~**«Scrivi a …» del dossier fuori dalle prime 8**~~ (trovato nella rifinitura 25-31): fuori dalla modalità cliente il
+  dossier cercava l'occasione nell'elenco di tutti, già tagliato a 8 per gruppo. Ora, se l'elenco in cache non la
+  comprende, `MessaggiNoteDossier` la cerca con `occasioniMessaggi(cliente:)` (prima volta e istantanee) o con il calcolo
+  fuori dal thread principale con `soloCliente`. Caso «M13 Dossier» in `--prova-calcoli`.
 
 ## 27. Vera dice cosa sa fare
 
@@ -1150,7 +1213,10 @@ Fatto (solo Mac, `#if os(macOS)`; iPhone e iPad tengono la colonna di prima e la
 Resta:
 - **«La giornata» con un cliente scelto** («Cosa ho oggi?»): non c'è, perché non è provato che la Vera grande la tenga
   nella conversazione del cliente (passa da `smistaVera` e dai comandi dell'agenda). Provarla con `--prova-vera` e, se
-  resta nel dossier, aggiungerla come primo esempio con un caso in `ProvaEsempiVera`.
+  resta nel dossier, aggiungerla come primo esempio con un caso in `ProvaEsempiVera`. Rimandata anche nella rifinitura
+  25-31: `SpuntoVera` non ha uno spunto per «Cosa ho oggi?» e la prova degli esempi vuole che ogni riquadro porti a uno
+  spunto riconosciuto, quindi servirebbe uno spunto nuovo (o un esempio a testo libero) instradato da `smistaVera`
+  prima di routine, sussurro e comandi dell'agenda: senza poter lanciare `--prova-vera` qui era un cambio alla cieca.
 - Il passo della cascata è quello del tema (0,048 s) e non 0,07 del template: serve un `ritardo` con passo proprio in
   `EntrataApple` se lo si vuole esatto.
 - I token di «Oggi», dell'avviso e delle tessere in `Tema.Apple.Vera.Colonna` restano: li usano ancora iPhone e iPad.
@@ -1219,8 +1285,12 @@ Fatto (solo Mac, `#if os(macOS)`; su iPad fascia verde, interruttore e «Soglie 
   1052-uso-mercato-riservatezza e 1053-uso-mercato-spento.
 
 Resta:
-- La frase per il singolo cliente non dice ancora la quota in azioni del template («ha il 38% in azioni»): il motore
-  non la porta in `ClienteToccato`.
+- ~~La frase per il singolo cliente non dice la quota in azioni~~: fatto nella rifinitura 25-31. `ClienteToccato.quotaAzioni`
+  (facoltativa, nil di base) la porta per gli indici azionari: pesata per valore su tutte le posizioni del cliente di cui
+  si conosce la composizione (immobili esclusi), non solo su quelle toccate, così un cliente con un ETF e molte
+  obbligazioni non risulta «tutto in azioni». `fraseToccato` aggiunge «: ha il 38% in azioni.» (o «ha tutto in
+  azioni») dopo la cifra, solo per gli indici azionari. Casi in `ProvaCalcoliMercato.usoMercato`; la prova delle
+  richieste non cambia (nessun dato esce).
 - I pulsanti degli avvisi usano `.apple` di misura normale (il tema non ha ancora una variante piccola 6×12).
 - Rigenerare sul Mac 540-547 e guardare 1051-1053: con i dati di prova Marco potrebbe non avere eventi o avvisi (allora
   1051 mostra i due vuoti con il nome); la larghezza della riga degli avvisi con due pulsanti nelle finestre strette.
@@ -1256,7 +1326,8 @@ Fatto (solo Mac, dentro `#if os(macOS)`; l'iPad tiene il clic che apre il dossie
 Resta:
 - La caduta delle luci spente in 0,4 s del template: l'opacità cambia di colpo (le luci sono disegnate in un `Canvas`).
 - Al passaggio i riquadri non si alzano di 1 e non hanno l'anello azzurro (l'app li accende con il fondo, come prima).
-- La prova di fluidità per «cambiare cliente non rifà `territorioOggi`» non è stata scritta.
+- ~~La prova di fluidità per «cambiare cliente non rifà `territorioOggi`»~~ fatto nella rifinitura 32-39
+  (`ProvaFluidita.controllaCacheCliente`: stessa `DerivatiDati` e mappa di Oggi ancora in cache dopo la scelta).
 - Guardare sul Mac 1100-1103: se Giulia ha vicini con i 35 clienti di prova, la posizione della scheda vicino al bordo
   (l'altezza per tenerla dentro la mappa è stimata, 170) e la lunghezza della riga patrimonio + due canali.
 
@@ -1288,8 +1359,9 @@ Fatto (solo Mac; su iPhone e iPad `clientePratiche` è sempre nil e Pratiche res
 - Istantanee: 800-807, 820-823 e 830-835 su «Tutti i clienti» esplicito; nuove 1105 e 1106 (chiare e scure), 1107-1112.
 
 Resta:
-- La prova di `--prova-fluidita` («la testata di Pratiche non rifà MotorePratiche a ogni disegno», «scegliere un cliente
-  filtra senza rifare `bisogniProposta`») non è stata scritta.
+- ~~La prova di `--prova-fluidita` («la testata di Pratiche non rifà MotorePratiche a ogni disegno», «scegliere un cliente
+  filtra senza rifare `bisogniProposta`»)~~ fatto nella rifinitura 32-39 (`controllaCacheCliente`, con
+  `bisogniPropostaInCache` e il contatore `CacheStatiPratiche.calcoli`).
 - Guardare sul Mac 801 e 1105: che la riga dei passi spenti si legga con l'opacità 0,7 del riquadro (se no va fuori
   dall'opacità), e 1106 se nessun cliente di prova è senza bisogni (la scena apre proposte presentate per il primo).
 - I token dei chip di «Compila per» (`Tema.Apple.Pratiche.Moduli.chip…`, `paddingPopover`) restano nel tema, non più
@@ -1359,3 +1431,1016 @@ Resta:
   si vede solo collegando a mano un documento (come fanno 1120-1122). Decide l'utente se `caricaEsempiBiblioteca`
   debba collegarli ai prodotti con lo stesso nome.
 - Le domande del documento non si sollevano al passaggio del puntatore come le pillole: guardare sul Mac se serve.
+
+## 40. Il radar dice chi e perché
+
+Fatto (solo sul Mac; iPhone e iPad tengono la colonna di prima, con i testi `riequilibraClienti` e
+`spiegaRiequilibraClienti`, fino al loro aggiornamento):
+- Card dei modelli a riga unica (nome largo 92 e barra), pesi nell'aiuto della riga, legenda a colori
+  (`LeggendaClassiRadar`).
+- Card «chi» (`CardChiRadar`) al posto del conteggio e dei «più lontani»: numero, «fuori tolleranza», «su N seguiti con
+  un modello» (aiuto: previdenza esclusa), «punti» spiegato con la tolleranza delle impostazioni, elenco pigro di tutti
+  i fuori dal più lontano con capsula dei punti o «Proposta pronta», pulsante «Prepara le N proposte di riequilibrio»;
+  dopo il pulsante il numero dice quanti resterebbero fuori accettando le proposte, i punti restano col trattino. Via
+  la nota in fondo.
+- `PuntatoreRadar` sale a `CorpoRadar`: la riga accende il punto (alone bianco nel fumetto, che resta l'unica vista che
+  legge il puntatore).
+- Capsula di stato comune `CapsulaStatoApple` (token in `Tema.Apple+CapsulaStato.swift`: `Tema.Apple+Capsula.swift` è
+  della capsula del tempo).
+- Dettaglio: «Apri le posizioni di …» → `apriPosizioniDalRadar` (cliente scelto, ancora «coerenza»); il doppio clic sul
+  punto apre ancora il dossier.
+- Istantanea nuova 898-posizioni-radar-riga-accesa (chiara e scura); prove dei testi in `ProvaCalcoliRadar`.
+
+Resta:
+- `--prova-fluidita`: il passo che conta i corpi passando sulle righe (`ContaCorpi`) non c'è; il passaggio del puntatore
+  non si simula dal codice. Da guardare sul Mac (passare sulle righe non deve rifare la tela).
+- La card «chi» che occupa l'altezza va guardata nelle istantanee 890, 895 (elenco lungo che scorre dentro) e 897
+  (finestra stretta: l'elenco si allunga nello scorrimento della pagina).
+- Il nome sotto i punti piccoli al passaggio (`.rNm2`): il fumetto mostra già nome e distanza, non si è aggiunto altro.
+
+## 41. La prova del fuoco in tre gruppi
+
+Fatto (solo sul Mac; l'iPad tiene la lista, la riga con «Chiama» e «Messaggio» e i testi di prima fino al suo giro):
+- Motore: `RigaProvaFuoco` ha in più `quotaAzioni`, `quotaObbligazioni`, `quoteStimate`, `anniAllObiettivo` e
+  `patrimonio` (tutte le finanziarie in essere); `GruppoProvaFuoco` (da chiamare, da tenere d'occhio, reggono, senza
+  obiettivo) da `livello(calo:)`; `anniPocoTempo = 5`. Coperture e ordine non cambiano.
+- Lista a gruppi (`ProvaDelFuocoApple.listaGruppi`): testate (`TestataGruppoFuoco`, capsula `CapsulaStatoApple` con il
+  conto e la frase con le soglie del motore) nello stesso `LazyVStack` delle righe con id distinti; i gruppi si prendono
+  insieme all'ordine (`gruppiMostrati`): mentre si trascina il cursore restano fermi, al rilascio scivolano con le righe.
+- «Chi sentire, in ordine» con la legenda (`BarrettaLegendaFuoco`) e «patrimonio in meno» sopra la colonna della perdita.
+- Riga Mac (`RigaProvaFuocoMac`): avatar 34, «oggi → dopo» (rossa per chi è da chiamare, «≈» delle stime), perdita
+  larga 104, «›», fondo `chip` al passaggio, tutta la riga apre il dettaglio; il canale resta; via «Chiama» e
+  «Messaggio».
+- Dettaglio 840×440 (`DettaglioProvaFuoco`): occhiello del gruppo con lo scenario, «Obiettivo: …» che apre il dossier
+  sull'obiettivo, tre riquadri, «Perché» (`TestiProvaFuoco.perche`), «Prepara il messaggio» (Messaggi sull'occasione),
+  «Segna «da chiamare»» (`segnaDaChiamare`, attività `task-fuoco-<cliente>-<giorno>`, idempotente), «Apri la sua prova di
+  resistenza» (`apriResistenzaDaFuoco`, ancora «resistenza»). Senza obiettivo: «Nessun obiettivo nel dossier» e
+  «Aggiungi un obiettivo». Si chiude con dati nuovi.
+- «Prepara i N messaggi» (`preparaMessaggiProvaFuoco`): bozze del modello fisso (cordiale, Mail), una sola assegnazione a
+  `dati.messaggi`, idempotente sull'occasione; «✓ Preparati» finché scenario e valore non cambiano (stato della vista).
+- Istantanea nuova 599-posizioni-fuoco-dettaglio (chiara e scura); prove P17 (gruppi, quote, anni, «Perché», testi) e
+  P18 (solo Mac: niente doppioni di bozze e attività) in `ProvaCalcoliProvaFuoco`.
+
+Resta:
+- Le istantanee 590-598 cambiano (gruppi, legenda, «oggi → dopo», niente pulsanti): vanno guardate, in particolare 598
+  (finestra stretta: la legenda può troncarsi) e 596 (il quarto gruppo «Senza obiettivo»).
+- `--prova-carico` e `--prova-fluidita` non hanno un passo nuovo per le testate e il riordino a gruppi con 200 clienti:
+  da guardare sul Mac (il calcolo dei gruppi è lineare sulle righe mostrate).
+- ~~«Prepara il messaggio» del dettaglio apre Messaggi come prima~~ **Fatto (rifinitura 40-51):** il dettaglio salva la
+  bozza con `bozzaProvaFuoco` (riusa `preparaMessaggiProvaFuoco`, idempotente sull'occasione, senza avviso) e apre Messaggi
+  su di lei (`apriBozzaProvaFuoco` → `preparaMessaggio(clienteId:occasioneId:messaggioId:)`); se la bozza c'è già si apre
+  quella, in sola lettura si apre l'occasione come prima. Prova in P18 di `ProvaCalcoliProvaFuoco`: due tocchi, una bozza.
+
+## 43. Prima di aggiungere, si controlla (Inquadra e Nuovo cliente)
+
+Fatto (solo sul Mac; la `RigaSchedaInquadra` comune e la schermata dell'iPhone restano come sono):
+- Motore (solo funzioni nuove, in `Motori/SchedaInquadra.swift`): `MotoreInquadra.daControllare` (le quattro regole di
+  43.3 punto 2, solo righe con un valore), `applica(_:correzioni:)` (scrive le correzioni leggibili nei campi **e negli
+  estratti**: il documento e la posizione nascono dai dati corretti; senza correzioni i dati restano identici),
+  `correzioneLeggibile`, `cifra`, `dataScritta` («01/03/2021», «1 marzo 2021», «marzo 2021»).
+- Stato (`StatoInquadra`): `correzioni`, `confermate`, `inModifica`, `scosse`, `datiCorretti`, `righeCorrette`,
+  `dubbi(canale:)`; si azzerano con la scena e con un foglio nuovo. `clienteInquadra`, `canaleEAreaInquadra`,
+  `posizioneGiaInquadrata`, `aggiungiInquadrata`, `confrontaInquadrata…` usano i dati corretti; il documento arrivato
+  dall'iPhone prende i campi corretti. Nuovi (solo Mac): `origineClienteInquadra`, `avvisoClienteInquadra`,
+  `scuotiDubbiInquadra`.
+- Scheda: `RigaSchedaInquadraMac` (clic per correggere, Invio/Esc, matita, fondo arancio e «?» con «Va bene», scossa con
+  `ScuotiEffetto`), «Di chi è» in testa alle righe con i quattro casi e l'avviso arancio, titolo «Letta: un dato da
+  controllare» / «Letta e controllata», «Controlla il dato in arancione» (non blu, scuote e avvisa), poi «Aggiungi alle
+  posizioni di …» e la conferma di sempre; «Senza iPhone? Scegli un file dal Mac» in fondo. Esc chiude prima la modifica.
+- Nuovo cliente: sottotitolo «Letta dal documento: controlla e completa», righe «＋ Telefono» (dal potenziale con
+  «Diventa cliente») e «＋ Canale» (nessuno acceso di base, nomi delle impostazioni), riga in fondo con «Scrivi tu i dati» e
+  «Scegli un file dal Mac»; `clienteDaCarta` prende telefono e canali scritti.
+- Istantanee: 604 con il «Tipo» in dubbio (foglio senza la compagnia, `FoglioInquadraDiProva.senzaCompagnia`); nuove
+  1160 (chiara e scura), 1161, 1162, 1163. Prove IQ14-IQ16 in `ProvaCalcoliSchedaInquadra`, telefono e canali in
+  `ProvaCalcoliCartaIdentita`.
+
+Resta:
+- «Va bene» usa il pulsante `.apple` (12,5 con padding 7×14) invece del 4×11 del template; «Cambia» è un menu sobrio
+  (testo blu) e non un `.btn`.
+- La riga «Tipo» si corregge in un campo solo («Vita intera · Esempio Vita S.p.A.»: la parte dopo «·» è la compagnia),
+  non in due campi come le righe a più campi di Nuovo cliente.
+- Esc con due significati (modifica, poi scena) e Invio nel campo con il pulsante principale accanto: serve uno
+  screenshot o una prova sul Mac.
+- Le istantanee 605, 606, 608, 609 e 841-849 cambiano (titolo, «Di chi è», righe in più, riga in fondo): vanno guardate.
+
+## 42. Lo smontaggio ha i numeri
+
+Fatto (solo Mac, `Shell/SmontaggioMac.swift`; l'iPad tiene `SmontaggioApple` con le note ai margini):
+- Foglio senza note: accanto a ogni ellisse il cerchio rosso pieno con il numero della voce (raggio 11, 12 bold), che
+  compare con la sua ellisse; il foglio non ha più i margini delle note (la scala cresce).
+- Colonna a destra (520) con tre card: il documento («Documento di {nome} · valore {euro}», «Documento da assegnare»,
+  l'origine nell'aiuto, avatar 38, titolo su una riga, «Cambia ⌄», «Costi l’anno, oggi» → «Con la tua proposta» e a
+  destra «In 10 anni» con il netto del confronto di oggi); «Le voci cerchiate, in ordine sul documento» (numero 22,
+  nome, cifra del motore o «—», valore scritto · spiegazione, accensione con l'ellisse da 0,4 a 1, menu «Non è un
+  costo»); in basso grafico piccolo 186×60 con la didascalia del motore, «Confronta con», «Crea la proposta di
+  sostituzione» e «Smonta un altro documento».
+- Voce accesa in comune (`SopraSmontaggio`, letto solo da ellissi e righe): puntatore sulla riga → ellisse con tratto 3,6
+  e fondo rosso tenue; sull'ellisse → riga con fondo rosso 0,09.
+- Documenti smontati (`StatoShell.documentiSmontati`, dato ricavato) e riapertura senza ricalcolo
+  (`StatoShell.riapriSmontaggio`, `MotoreSmontaggio.righe(da:titolo:)`, `vociRiaperte`, `valoreDaVoci`,
+  `versatoDaVoci`): con il testo in memoria il foglio vero, altrimenti ricostruito dalle voci; le cifre sono sempre
+  quelle conservate. Un conservato non si modifica e non si aggiunge di nuovo al dossier.
+- La vista segue il cliente: `StatoSmontaggio.documentoScelto` per vista (cliente o «Tutti»); il documento letto resta in
+  memoria e ricompare tornando alla sua vista. Vuoto nuovo del cliente (avatar 58, «Nessun documento smontato per …»,
+  «Inquadra un documento», «Vedi quelli degli altri clienti», che in modalità cliente non c'è).
+- Indice delle Posizioni del cliente: «Smontaggio di un documento» con il numero, prima di «Passaggio generazionale»
+  (`VistaPosizioniCliente.smontaggio`, ancora "smontaggio"), anche in modalità cliente.
+- «Apri l'esempio (fac-simile)» solo con i dati di prova (`haDatiDiProva`); le proposte del cliente fra i dati ricavati.
+- Istantanee nuove 887 (voce accesa, chiara e scura), 888 (cliente senza documenti, chiara e scura), 889 (indice di
+  Giulia con il documento conservato ricostruito dalle voci). Prove «Smontaggio 42» in `ProvaCalcoliSmontaggio`
+  (numerazione, foglio ricostruito, voci riaperte, valore e versato, documenti per cliente e per tutti, riapertura senza
+  e con testo in memoria). Nessun campo nuovo nell'archivio.
+
+Resta:
+- Le istantanee 880-886 cambiano (numeri al posto delle note, elenco, cifre su una riga): vanno guardate, in particolare
+  la finestra stretta (886) e la card delle voci quando la colonna è bassa.
+- Le righe dell'iPhone che arrivano da sole (senza la scena di Inquadra) vanno allo Smontaggio solo nella vista
+  «Smontaggio» del portafoglio (`provaFuoco.vista == .smontaggio`), non nella schermata del cliente: dal cliente si passa
+  da «Smonta un altro documento» / «Inquadra un documento».
+- I token delle note (`nota`, `larghezzaNota`, `distanzaNota`, richiamo) restano perché l'iPad li usa ancora: si tolgono
+  con il giro dell'iPad.
+- L'accensione al passaggio non ha animazione propria (cambia subito); le ellissi accese si vedono solo con il puntatore
+  vero: serve uno screenshot sul Mac.
+- Un documento conservato con il valore scritto ma senza voci calcolate e senza posizione collegata si riapre senza
+  valore («Con la tua proposta» e il confronto restano «—»), perché il testo non è conservato (decisione 42.6).
+
+## 44. Aggiorna valori: prima i dubbi
+
+Fatto (solo Mac, `Shell/AggiornaValoriMac.swift`; l'iPad tiene `PannelloAggiornaValori`):
+- Pannello nuovo nel tema Apple: testata «Aggiorna i valori · {nome}» con «Dall’elenco della compagnia.», ««file»: N righe
+  lette» e «Scegli un altro file»; «Da decidere · n» / «Deciso» con i riquadri arancio (avatar 34, domanda in chiaro,
+  «È giusto» / «È nuova» / «Scegli la posizione ⌄» e «Salta»; decisa: spunta verde e «Cambia»); «Pronti · n» in quattro
+  colonne (1fr · 130 · 200 · 86) con la spunta in fondo alla riga e il totale colorato; «ⓘ … Va solo nello storico.»;
+  «Non si registrano · n» chiusa di base. Filtro e indicatori di prima tolti; «Importa come nuove» uscito dal piede.
+- Motore: `AggiornaValori.dubbio`, `daDecidere`, `pronte`, `esclusiPerRegistrare`, `soloStorico`, `nonSiRegistrano`,
+  `nuove`, `posizioniNuove`, `canaleNuova`, `zero`; `Sessione.decisioni` e `clientiNuove` (solo memoria);
+  `Riepilogo.nuove`.
+- Pulsante: «Decidi la riga / le N righe in arancione» (non blu: il primo dubbio trema, avviso «Prima decidi le righe in
+  arancione») oppure «Registra N valori» blu, con «Prima di registrare Prisma salva una copia: si può annullare.».
+- «È nuova»: la posizione nasce alla registrazione (lettura dell'importazione, canale riconosciuto mostrato nella riga),
+  insieme ai valori con una sola assegnazione; per chi non è fra i clienti «È nuova: di chi è? ⌄» chiede prima il cliente.
+- Annullamento: `StatoShell.annullaValori` (in memoria, `@ObservationIgnored`), `puoAnnullareValori` (vale solo se le
+  posizioni toccate sono ancora quelle di subito dopo), `annullaRegistrazioneValori()`; si cancella con «Fatto», con una
+  sessione nuova e al blocco. Riepilogo con «N valori registrati.», le frasi, «Prima», «Dopo», «Variazione»
+  (`NumeroCheConta`), «Fatto» e «Annulla la registrazione».
+- Con un cliente scelto l'elenco da file mostra solo le sue righe («N righe di altri clienti restano fuori», «Mostra tutto
+  l’elenco»), e le righe nascoste non si registrano.
+- Dati di prova: il calo del fondo pensione di Laura (18.000 → 13.100) e la temporanea AL-2024-077120 di Marco; la
+  polizza di Sofia ora a 41.640 (prima 52.000, che con la regola nuova sarebbe stata un terzo tipo di domanda).
+- Istantanee: 180 (e scura), 182 rifatte; nuove 184 (decisi, chiara e scura) e 185 (Marco). Prove AV37-AV42.
+
+Resta:
+- Nella scena 180 le righe da decidere sono 3, non 2 come nel testo della specifica: anche la polizza di «Paolo Neri» (chi
+  non è fra i clienti) ha la sua domanda (44.3 punto 1).
+- La griglia dei valori fermi ha solo le pillole a segmento e la tabella nel tema Apple (`.strumentiApple()`): le righe
+  (`RigaGriglia`, condivisa con l'iPad) restano nei caratteri di prima.
+- Il pulsante «Aggiorna valori» della barra di Posizioni resta nello stile di prima (tocca alle migliorie 4 e 6).
+- L'annullamento dopo aver chiuso il pannello non c'è (proposta 44.6): resta il backup fatto prima di registrare.
+- Le istantanee 180-185 vanno guardate, in particolare l'altezza dei riquadri dei dubbi e la colonna «prima → dopo» con
+  importi a sei cifre.
+
+## 45. Il simulatore mostra prima e dopo
+
+Fatto (solo Mac, dentro `#if os(macOS)`; iPhone e iPad restano come prima):
+- Previdenza (940×560) e Protezione (940×540): anello 190/19 con la percentuale 40, valore del cursore 40 (carattere
+  proprio, quello da 44 resta alla Sala dei giochi), corpo e cursore a 14. Il segno «oggi» sotto il binario
+  (`SegnoOggiCursore`, posizione corretta per metà manopola; protezione all'inizio). Lo scarto «+150 € al mese rispetto
+  a oggi» a destra del valore (`TestiSimulatoriAnalisi.scarto`; «Nessun anno di accumulo…» al suo posto).
+- La frase prima e dopo (`FraseSimulatoreApple`, testi in `Motori/TestiSimulatoriAnalisi.swift` con `articolo(_:)` e
+  `al(_:)`), con i casi «non versa niente», «non ha divario» e il premio mancante (niente «per circa … al mese»).
+- «LE IPOTESI»: rendimento da scegliere (quello dell'analisi e ±0,5 punti, mai sotto 0, solo nello stato della vista;
+  la copertura di oggi si rifà solo al cambio di rendimento), aliquota dal reddito della scheda oppure segmentato quando
+  manca, «deduzione fino a …»; protezione con da dove viene il premio (niente «Fuma», decisione 45-c). Le ipotesi intere
+  nel suggerimento della riga. `SegmentatoPillola` ha la variante `compatto`.
+- Piede con «Sono stime, non garanzie.» (`TestiSimulatoriAnalisi.avviso`); la nota della proposta ricorda il rendimento
+  scelto se diverso da quello dell'analisi.
+- Investimenti e Liquidità: `PassoDettaglioArea360` sopra il piede (testi in `TestiAree360.passoInvestimenti` e
+  `passoLiquidita`, nessuna soglia dell'80%, soglia della riserva dalle ipotesi), che chiude il dettaglio e apre
+  Posizioni con `StatoShell.apriPosizioniCliente(_:vista:)` (in `IndicePosizioniApple.swift`; nuova ancora «quadro»).
+  I due dettagli crescono di 56 sul Mac (900×536 e 900×496).
+- Istantanee 1140 (e scura), 1141, 1142, 1143; 441-444 mostrano già le novità. Prove in `ProvaCalcoliSimulatoriAnalisi`
+  e `ProvaCalcoliAree360`.
+
+Resta:
+- Le aliquote da scegliere sono quelle degli scaglioni IRPEF di oggi (23 | 33 | 43, `RegoleFiscali.scaglioniIrpef`), non
+  il «23% | 35% | 43%» del template: il 35% non c'è più dal 2026. Da confermare con l'utente.
+- La frase non entra con la cascata del dettaglio: compare con il contenuto (che il dettaglio già fa entrare).
+- Le altezze nuove (previdenza 560, investimenti 536, liquidità 496) vanno verificate nelle istantanee e a finestra bassa
+  su 13": la frase a tre righe e la riga delle ipotesi senza reddito sono le parti più lunghe (il testo a destra si
+  riduce fino all'80% e poi si tronca).
+- «Sono stime, non garanzie.» non è ancora coordinato con la capsula delle stime della miglioria 16 (un solo testo,
+  `TestiSimulatoriAnalisi.avviso`, pronto per essere riusato).
+
+## 46. Il confronto con le famiglie porta a un passo
+
+Fatto (solo Mac, dentro `#if os(macOS)`; iPhone e iPad restano come prima, salvo gli articoli della frase grande):
+- `MotoreFamiglie.esitoPuntoDebole(_:)` / `puntoDebole(_:)` (`PuntoDeboleFamiglie`, `EsitoPuntoDeboleFamiglie`:
+  `.indietro`, `.sopraLaMeta`, `.senzaCifre`), `area(_:)` voce → area, `voceSottoLaMeta(_:in:)` per le card.
+- In fondo alla card principale, sopra un filo: `CapsulaStatoApple` «Dove resta indietro», la frase e il pulsante
+  primario «Apri l'area …»; oppure la capsula verde «Sopra la metà in tutto» e «Non c'è un punto debole…». Senza cifre
+  del cliente la riga non c'è. Resta anche in modalità cliente.
+- «Apri l'area ›» (`StileCollegamento`) sulle card delle voci sotto la metà, accanto a «Completa nella scheda».
+- `StatoShell.areaDaAprire` e `apriAreaAnalisi360(_:)`: torna alle quattro aree e, dopo 650 ms al ritmo dell'app
+  (`Tema.Apple.Famiglie.attesaApriArea`; subito con «Riduci movimento»), apre il dettaglio dalla card (i simulatori per
+  Previdenza e Protezione). Se Analisi 360 nasce con la richiesta il dettaglio è già aperto (istantanea 1145).
+- Articoli: `Formati.elide`, `ilPercentuale`, `alPercentuale` (in comune con la 45); la frase grande dice «L'82% …» e
+  «più dell'81%».
+- Istantanee 1144 (e scura), 1145; prove P1-P7 in `ProvaCalcoliFamiglie`.
+
+Resta / da decidere:
+- Frasi senza percentile (decisione 46-a): con la quota il testo usa il nome («… ce l'ha, Giulia no.») al posto di
+  «lui no» della proposta. Da approvare con le altre.
+- Con la quota la voce è «sotto la metà» solo se più di metà delle famiglie ha la cosa e il cliente no (con le tavole
+  della Banca d'Italia le polizze vita e i fondi pensione sono di una minoranza: chi non li ha sta con i più). La
+  specifica diceva `sopra == false` e basta: scelta mia per non scrivere «la maggior parte ce l'ha» quando non è vero.
+- Le voci con un percentile sotto la metà vengono prima di quelle con la sola mediana, media o quota (senza percentile
+  si confrontano come 50): da confermare.
+- Le card delle voci sono un solo elemento per VoiceOver (`children: .ignore`, come prima): «Apri l'area ›» e «Completa»
+  non si raggiungono da VoiceOver dentro la card; il pulsante della card principale sì.
+
+## 47. Ogni potenziale ha il suo prossimo passo
+
+Fatto (solo Mac, dentro `#if os(macOS)` o in `Shell/DettaglioPotenzialeMac.swift`; iPhone e iPad restano come prima):
+- `MotorePassaparola.prossimoPasso` / `passi` / `primiIncontri` / `fermi` / `giorniFermo`, `PassoPotenziale`,
+  `AzionePotenziale`, `RegolePassaparola.giorniFermo = 14`; testi in `TestiPassaparola` (sezione «Il prossimo passo»).
+  Nessun campo nuovo (47-a); il primo incontro si riconosce dal tipo e dal titolo `titoloPrimoIncontro` (47-d), che ora
+  usa anche `fissaPrimoIncontro`. I passi si tengono con `stato.passiPotenziali()` (`ricavato`, chiave con l'ora).
+- Scheda: nome 14 neretto, fonte, passo (accento, verde in «Cliente»), stima e «fermo da N giorni» (arancio scuro e
+  semibold oltre 14); niente barra né probabilità. Il clic apre il dettaglio (anche per chi è cliente); menu con
+  «Apri il dossier» per i clienti; ⌘→ e «Avanti» restano.
+- Tile: la quarta è «Fermi da più di due settimane» (arancio se > 0); il probabile entro fine anno va nella nota del
+  patrimonio (47-b).
+- Dettaglio 820 × 460 (`DettaglioPotenzialeMac`): avatar 54 con le iniziali, occhiello «fase · fonte», tre tile, «Il
+  prossimo passo», pulsanti (Chiama con il riquadro del numero e «Copia il numero», 47-c; Scrivi; Fissa l'incontro;
+  Prepara l'incontro → Agenda), «Passa a «…»» o «Diventa cliente», «Non interessato»; per un cliente «Fatto», «Va bene»,
+  «Apri il dossier»; sotto le righe di prima, «Modifica…» e «Scrivigli».
+- «Passa a…», trascinamento e ⌘→ si annullano: `StatoPotenziali.ultimoSpostamento`, `spostaPotenzialeAnnullabile`,
+  `annullaSpostamentoPotenziale` e la nota «**Nome** è passato a «fase». Annulla». Avviso di «Non interessato».
+- Istantanee 1146, 1147 (e le 850-853 aggiornate da sole); prove del prossimo passo e dei giorni di fermo in
+  `ProvaCalcoliPassaparola`.
+
+Resta / da decidere:
+- La nota della tile del patrimonio mostra il probabile quando c'è, altrimenti «N senza stima»: le due insieme non
+  stanno su una riga. Da decidere quale prevale.
+- I dati di prova hanno sette potenziali su otto fermi da più di 14 giorni (le date della storia erano già così): il
+  template ne mostra meno. Si possono avvicinare le date se l'utente vuole un quadro più vario.
+- Dopo «Chiama» Prisma non chiede com'è andata (non esiste ancora per i potenziali, 47-c).
+- «Annulla» non vale per «Indietro» dal menu (chiude l'annullamento, come ogni altro spostamento).
+- Il volo dopo «Passa a…» parte quando il dettaglio è tornato sulla scheda (`chiudi(poi:)`), con la molla di sempre
+  (`Tema.Apple.Moto.Potenziali.avanza`).
+
+## 48. Il passaparola segue la persona
+
+Fatto (solo Mac, dentro `#if os(macOS)`; iPhone e iPad restano come prima):
+- Clic su un cliente dell'albero (a qualsiasi livello) o su un ambasciatore: si sceglie la persona
+  (`stato.potenziali.evidenziato`, solo in memoria); secondo clic, o «Tutti», spegne. ⌘-clic apre il dossier (48-c);
+  un potenziale apre il suo dettaglio come prima. `NodoDisposto.antenati` dà il ramo di chiunque: restano pieni la
+  persona, chi scende da lei e i loro legami (anche il legame verso la persona scelta, come nel template); il resto al
+  20% (`Tema.Apple.Passaparola.opacitaSpenta`, 0,2 solo sul Mac) con `Tema.Apple.Moto.Passaparola.animazioneRamo`.
+- Card «Il ramo di» (`RamoPassaparolaCard`) al posto degli ambasciatori, entrata 0,26 s dal basso di 6 punti: avatar 42,
+  nome 19 bold, frase `TestiPassaparola.ramo(nome:clienti:valoreClienti:potenziali:)`, elenco con capsula «Cliente» /
+  «Potenziale» (con la fase) e cifra, «Ringrazia …» e «Apri il dossier». Senza presentati: «Chiedi una presentazione»
+  solo se c'è un momento giusto per quella persona (48-a), altrimenti la riga «Il momento giusto per chiedere te lo dice
+  Prisma, dopo un fatto bello.».
+- Le persone del ramo vengono da `MotorePassaparola.ramo(di:…)` (tutte, non solo le otto disegnate per persona e le tre
+  generazioni dell'albero: con il «+ N» l'albero non basta), con le regole di `ambasciatori`; valore dei soli clienti.
+- «Ringrazia …»: `TipoOccasioneMessaggio.ringraziamentoPresentazione` in fondo all'enum (non commerciale), modello nei
+  tre toni in `ModelliMessaggi`, `StatoShell.preparaRingraziamento(clienteId:)` mette la bozza nel dossier senza
+  cambiare app (come le campagne) e lo dice l'avviso; «✓ Messaggio pronto» quando la bozza di oggi esiste.
+- Prestazioni: albero, ambasciatori, quota, nuovi per anno e patrimoni in `stato.datiPassaparola()` (`ricavato`), il
+  momento giusto in `momentiPassaparola()` con l'impronta delle pratiche nella chiave. I potenziali sono neutri per i
+  calcoli (`DatiVivi.potenziali`): la loro impronta va nella chiave. Corretto anche `passiPotenziali()` della 47, che
+  senza l'impronta restava al passo di prima dopo uno spostamento.
+- Istantanee 1148 (chiara e scura) e 1149; prove del ramo e del grazie in `ProvaCalcoliPassaparola`, il grazie nel
+  campionario dei modelli (`ProvaCalcoliMessaggi`), andata e ritorno e tipo sconosciuto in `ProvaBackupLuceClienti`.
+
+Resta / da decidere:
+- 48-b: il testo del grazie nei tre toni va fatto vedere all'utente prima dell'unione (cordiale: «volevo dirti grazie:
+  so che hai parlato di me a persone a cui tieni…»; formale con il lei; breve «grazie per aver parlato di me…»).
+- La bozza del grazie è sempre nel tono cordiale e con il canale dal telefono (Messaggi con un cellulare, altrimenti
+  Mail); si cambia in Messaggi prima di aprirla.
+- ~~L'avviso non ha un collegamento diretto a Messaggi~~ **Fatto (rifinitura 40-51, solo Mac):** l'avviso del grazie ha
+  «Apri in Messaggi» (`TestiPassaparola.apriGrazieInMessaggi`), che apre Messaggi sulla bozza appena creata o su quella di
+  oggi già pronta (`preparaMessaggio(clienteId:occasioneId:messaggioId:)`).
+
+## 49. La campagna in tre passi
+
+Fatto (solo Mac, dentro `#if os(macOS)`; l'iPad in sola lettura resta come prima):
+- `PannelloCampagna` in tre passi numerati (`PassoCampagna`: tondino 20 nel colore del gruppo, titolo 14 neretto,
+  sottotitolo grigio): «1 · Chi» «{q} di {N} clienti con questo bisogno» con le righe di sempre e in testa la casella
+  quadrata del tema (nuovo `CasellaSceltaApple`, 18 × 18, raggio 6, bordo 1,6 `inchiostro3`, piena d'accento con la
+  spunta); tutta la riga include o esclude (consenso e recapito controllati come prima); le prime 8 righe e poi «e altri
+  N clienti» con «Mostra tutti». «2 · Cosa scrivi»: «Tono» e «Invia con» (49-a), poi «Anteprima per {nome}» o «Scegli
+  almeno un cliente.». «3 · Quando»: capsule accese (accento, testo bianco) o spente, niente barrato; tutte accese di
+  base (49-b); con l'agenda piena la frase di sempre e il pulsante non chiede orari.
+- Il piede resta fermo sotto i passi (lo scorrimento è solo dei passi): pulsante grande a tutta larghezza
+  `TestiCampagne.pulsante(…)` («Prepara il messaggio» / «Prepara N messaggi»; spento «Scegli almeno un cliente», «Scegli
+  almeno un orario», «Scegli la firma»), sopra la nota di chi resta fuori solo quando serve, sotto «Niente parte da solo:
+  li rileggi e li spedisci tu, da Messaggi.».
+- Dopo: «✓ pronto in Messaggi» in verde con il lampo, una riga dopo l'altra ogni 320 ms
+  (`Tema.Apple.Moto.Campagne.pronta`, `ritardoPrisma`); avviso «N messaggi preparati: sono in Messaggi, da rileggere»;
+  «Apri i messaggi preparati» apre Messaggi sulla prima bozza ancora da aprire (`preparaMessaggio(clienteId:messaggioId:)`,
+  non Mail); sotto, sobri, «Apri la prossima in …», «Apri tutte», «Annulla la campagna». Una campagna riaperta dallo
+  storico non lampeggia più.
+- Con un cliente nella barra e nessun gruppo scelto, Campagne si apre sul suo gruppo.
+- Istantanee 1150 (un orario spento) e 1151 (nessun cliente); prove dei testi del pulsante in `ProvaCalcoliCampagne`.
+
+Resta:
+- Il passaggio «Preparo…» del pulsante: l'avvio è sincrono (le bozze nascono subito), quindi il pulsante passa
+  direttamente a «Apri i messaggi preparati» mentre le righe si accendono una dopo l'altra.
+- Le istantanee non mostrano il lampo (stato finale) né «Mostra tutti» aperto: da guardare sul Mac.
+
+## 50. Il mese a tutta larghezza
+
+Fatto (solo Mac, dentro `#if os(macOS)` o nel file solo Mac `Shell/AgendaMeseUso.swift`; iPhone e iPad tengono la
+griglia di sempre con la colonna al 42%):
+- **La griglia** (`MeseAgenda.grigliaUso`): testata alta 26 «LUN … DOM» (11,5 semibold, maiuscolo, `inchiostro2`, a 10
+  dal bordo), celle come card (`CellaMeseUso`: raggio 14, fondo `card`, filo `separatore`, padding 7 × 8, 6 di spazio),
+  sabato e domenica sul fondo dei pannelli (`Colori.Agenda.festivo`), i giorni fuori mese senza fondo né bordo e senza
+  righe, il numero nel tondo 22 (oggi rosso pieno), il giorno scelto con l'anello d'accento di 2 fuori dalla cella,
+  passaggio `cardPiena`. Doppio clic: il giorno in «Giorno».
+- **Le righe della cella** (`RegoleMeseAgenda.righe`, regola pura): al più due impegni, uno solo se c'è una scadenza;
+  la pillola con l'ora in peso normale e il nome breve del cliente (il titolo senza cliente), filo e fondo **del canale**
+  (50-a); le scadenze scritte «Scade {posizione}» con il pallino arancio; poi «+N altro / altri». Se le righe non stanno
+  si tolgono prima le scadenze in più, poi gli impegni; con la cella troppo bassa tornano i segni (puntino degli impegni
+  e delle scadenze). I segni dei riesami, delle attività e delle occasioni restano (50-b). I nomi brevi vengono da un
+  dizionario in `ricavato` (`nomiBreviClienti`), non da `stato.cliente` per ogni pillola.
+- **La colonna del giorno** (`colonnaGiornoMese`): 304 a 14 dalla griglia (`Misure.AgendaMese.larghezzaColonna`, fino a
+  260 sotto la pagina minima), card piatta con padding 18 × 20. Occhiello «OGGI» in rosso o «NOVEMBRE 2026», titolo
+  «lunedì 2 novembre», «{n} impegni · {n} scadenze · solo {nome}» o «nessun impegno»; le righe `RigaMeseUso` (filo del
+  canale, fondo `chip`, raggio 4/10, ora in neretto larga 44, titolo in neretto, sotto il cliente o «Per te», «›»): il clic
+  apre la scheda dell'impegno come prima; le scadenze con «Scade» in arancio aprono la posizione. Sotto, in piccolo, le
+  attività rimaste indietro e del giorno (50-b); le occasioni restano nella vista «Occasioni». Vuoto: «Giornata
+  libera{ per Marco}.» e «È un buon posto per un impegno nuovo.». «Apri il giorno» (primario) e «＋ Impegno»; la legenda
+  con i quadratini dei due canali e il pallino arancio, e con un cliente scelto «Tutti i clienti» (`scegliCliente(nil)`).
+  Un appuntamento aperto da ricerca o notifiche si vede ancora nella colonna (`vistaScelta`, con «‹ data»).
+- Il cambio di giorno: la colonna entra da destra di 8 con l'opacità da 0,4 in 260 ms al ritmo (`EntrataGiornoMese`,
+  `.id(giorno)`); con «Riduci movimento» la dissolvenza di 0,15 s; nelle istantanee già ferma.
+- Prove A-U1…A-U7 in `ProvaCalcoliAgenda` (`--prova-calcoli`). Istantanee nuove 1152-uso-agenda-mese (chiara e scura),
+  1153-uso-agenda-mese-cliente (Marco), 1154-uso-agenda-mese-giorno-libero; 12, 124, 132 e 238 mostrano già il mese nuovo.
+
+Resta:
+- **Altezza delle righe**: le righe della cella sono stimate a 18 punti per la Dimensione del testo (`rigaCella`); con il
+  testo grande o una finestra 13" bassa guardare sul Mac che le pillole non vengano tagliate (la cella le ritaglia).
+- **«Da fare» della miglioria 3** nella colonna, **in parte fatto (rifinitura 40-51):** la spunta delle attività
+  nell'Agenda (colonna del mese e giorno) passa dal «Da fare» unico (`spuntaAttivitaAgenda` → `fattoDaFare` sulla voce
+  del nastro, `voceDaFare(attivitaId:)`): vale in tutta Prisma e si annulla dal pannello con «Annulla l’ultima»; le
+  riprese delle proposte e le attività già fatte si alternano come prima. Prova in `ProvaDaFareShell` (`--prova-vera`).
+  Resta l'aspetto: le attività restano le righe di sempre (`RigaRegistroAttivita`, con il
+  loro rientro di 16), non ancora la riga comune `RigaDaFare`: è un cambio di aspetto (niente selezione, scadenza e
+  priorità nella riga) da far vedere all'utente prima di farlo.
+- Il doppio clic con `onTapGesture(count: 2)` ritarda un poco il clic singolo (come nella settimana): da sentire sul Mac.
+- `--prova-fluidita` con i 30 clienti fittizi sul mese: da guardare in CI che le celle non si rifacciano al passaggio
+  del puntatore sulla colonna (la colonna sta in `ParteAgenda`, la griglia resta `Equatable`).
+- Istantanee da rigenerare sul Mac e pagina delle anteprime da aggiornare; l'entrata della colonna e il passaggio del
+  puntatore chiedono uno screenshot.
+
+## 51. Il giro di domani si porta in tasca
+
+Fatto (solo Mac, decisioni 51-a e 51-b come da proposta):
+- **«La borsa» estratta** in `Motori/MotoreBorsa.swift`: incontri del giorno, fascicolo già nei Documenti, modelli di
+  modulo compatibili, proposte con un incontro entro 7 giorni, moduli per cliente, documenti da rinnovare (senza
+  richiesta già in Messaggi) e le cose di un incontro. `MotoreNotte` la usa al posto del suo codice (stesse carte: prova
+  «Borsa» in `ProvaCalcoliNotte`, che confronta la carta della notte con il giro).
+- **Nel giro**: «Da portare: …» (11,5, accento) sotto il motivo, da `stato.borsaGiro(giro)` in `ricavato` (giorno, tappe,
+  giorni del documento e modelli nella chiave); senza cose nessuna riga. Nel giro il fascicolo conta solo se è già nei
+  Documenti (la notte lo prepara, il giro non lo inventa).
+- **La tappa** confermata con un cliente apre la preparazione dell'incontro (`apriIncontro(per:scheda: .preparazione)`,
+  suggerimento «Prepara l'incontro», nessun incontro creato); quella da confermare apre l'Agenda come prima.
+  «✓ Conferma in Agenda» è un collegamento; accanto «Togli» (`togliDalGiro`: elimina solo un appuntamento ancora
+  `daConfermare`, avviso «{nome} tolto dal giro»).
+- **Il pulsante in fondo** solo con «Prisma ovunque» acceso sul Mac: `mandaGiroAlliPhone` (in `StatoOvunque.swift`, fuori
+  dai file del Territorio) chiama `sincronizzaOvunque()`; «✓ Il giro è sull'iPhone» quando `ovunque.giri` cresce dopo il
+  tocco (stato in memoria per quel giorno, `territorio.giroIPhone`). Sotto: «Sull'iPhone lo trovi in Agenda. Tocca una
+  tappa per prepararla.». Niente Mappe. Spento: la riga «Per averlo sull'iPhone accendi «Prisma ovunque» in
+  Impostazioni.» con il collegamento a Impostazioni › iPhone e iPad. In dimostrazione un avviso, nessuna scrittura.
+- **La crescita**: le tre date sotto il cursore (con almeno tre anni) e la tile «Hanno cominciato nel {anno}{ o prima}»
+  con «**{n} famiglie**: nomi{ e un'altra / e altre n}» o «**Nessuna famiglia nuova**», che segue l'anno.
+- Prove: `ProvaCalcoliTerritorio` (nomi dell'anno, «tolto dal giro», niente Mappe nel testo), `ProvaCalcoliNotte`
+  (le due strade della borsa), `--prova-ovunque` (con lo spazio spento il pulsante non scrive nulla). Istantanee nuove
+  1155-uso-territorio-giro-borsa (chiara e scura), 1156-uso-territorio-giro-iphone, 1157-uso-territorio-crescita-nomi;
+  701-704 e 707 mostrano già le novità.
+
+Resta:
+- **Il puntatore a mano** sulle tappe toccabili: nel progetto non c'è un aiuto per il cursore; per ora il suggerimento
+  «Prepara l'incontro» e il tratto di pulsante per VoiceOver.
+- **«Il giro è sull'iPhone»** si basa sul contatore delle scritture riuscite: se una sincronizzazione era già in corso al
+  tocco, la «✓» può arrivare con quella (che ha comunque già gli appuntamenti del giro). Una vista del giro sull'iPhone
+  appartiene all'aggiornamento di iPhone e iPad (allora cambierà la frase sotto il pulsante).
+- Nel giro la borsa non conta i fascicoli che la notte preparerebbe: solo quelli già nei Documenti.
+- La data di mezzo sotto il cursore è centrata nella riga, non sotto la manopola dell'anno di mezzo con un numero pari di
+  anni.
+- Istantanee da rigenerare sul Mac e pagina delle anteprime da aggiornare; il tocco sulla tappa e il pulsante chiedono
+  uno screenshot.
+
+## 52. Lo Studio in ordine
+
+Fatto: ordine Cruscotto · Parcelle · Spese | Track record | Esame OCF · Palestra, «OCF» torna «Esame OCF», i fili
+(`separatoriPrima` di `SegmentatoPillola`, token `filo`, `marginiFilo`, `opacitaFilo`, `altezzaFilo`), prova in
+`ProvaPalestraVera`, istantanee 1090 (chiara, scura, modalità cliente). Resta:
+- Verificare nell'istantanea che l'altezza del filo (riga del carattere × 1,2 più il padding, meno 12) e la pillola che
+  scivola sopra il filo siano come nel template; la finestra di Studio al minimo con la riga in testa più larga.
+- Facoltativo: un segmentato con un filo nella vetrina «400-vetrina-apple».
+
+## 53. Il cruscotto risponde a domande
+
+Fatto (solo sul Mac, iPhone e iPad tengono titoli e didascalie di prima): i cinque titoli-domanda (`TestiStudio.domanda…`,
+che si stringono un poco se non ci stanno), la riga degli incassi con le due etichette e «Il mese più ricco» / le cifre del
+mese sotto il puntatore con i nomi dei canali scelti e la colonna schiarita (`Incassi.luceSopra`; lo stato del puntatore
+sta nella card), la stima dichiarata nel fumetto del titolo e il pulsante delle aliquote quando mancano, «Il più
+indietro» sotto gli anelli, la frase della dispersione senza nomi, l'asse «ricavi dell’anno ↑» e la mano su tutti i punti.
+Motore: `Incassi.piuRicco`, `Obiettivi.piuIndietro`, `Obiettivi.mesiAllaFine`, `ValoreTempo.piuPesante`, con le prove in
+`ProvaCalcoliStudio` (anche i testi). Istantanee nuove 1091 (mese sotto il puntatore, chiara e scura; obiettivi
+raggiunti); 570, 571, 572 e 574 cambiano da sole. Resta:
+- Guardare nelle istantanee 570 e 1091 che la card degli obiettivi (alta 300) tenga legenda con gli avvisi più la frase di
+  due righe senza tagliare il fondo; se non ci sta, ridurre gli anelli o portare la frase su una riga sola.
+- Provare a occhio `luceSopra` (0,06) chiara e scura, e le domande più lunghe alla larghezza minima della card con
+  «dati di prova» accanto.
+- «Il più indietro» nel mese di dicembre dice sempre «entro fine anno» (i mesi alla fine sono arrotondati per eccesso).
+- `--prova-fluidita`: nessuna prova nuova che il passaggio sulle colonne non rifaccia i motori (lo stato è nella card,
+  fuori dalla `ChiaveVista`).
+
+## 54. Il track record segue il cliente
+
+Fatto (solo sul Mac, iPhone e iPad tengono il track record di prima): il track record segue il cliente della barra
+(tessere «Raccomandazioni a <Nome>», «Accettate», «Rimandate o rifiutate», «In più rispetto all’alternativa» con la
+somma stimata degli scarti; titolo «Le raccomandazioni a <Nome>»; solo le sue voci), i filtri a chip «Tutte · Accettate ·
+Rimandate · Rifiutate» a destra del titolo (nuovo componente `ChipFiltroApple`, token `Controlli.ChipFiltro`; il filtro
+si azzera cambiando cliente), la nota sulle stime in fondo, gli elenchi vuoti («Nessuna con questo esito.», «Nessuna
+raccomandazione registrata per <Nome>…»), la colonna destra a 132 e «Riproponi» sulle rimandate
+(`StatoShell.riproponiRaccomandazione`: proposta di nuovo bozza, ripresa tolta e attività completata, nota datata nel
+registro, scelte intatte; nella card poi «✓ Tra le proposte»). Motore: `PresentazioneTrackRecord.perCliente`, `filtra`,
+`traLeProposte`, `riproponibile`, `FiltroTrackRecord`, `TrackRecordCliente`, con le prove in
+`ProvaCalcoliPresentazioneTrack` (anche «Riproponi» nello stato e la sola lettura). Istantanee nuove 1092 (cliente chiara
+e scura, filtro «Rimandate», cliente senza raccomandazioni, dopo «Riproponi»); 520, 524 e 525 partono da «Tutti i
+clienti» e cambiano da sole. Resta:
+- `--prova-backup`: nessuna estensione; la nota di «Riproponi» è una nota del registro come le altre, già coperta dalla
+  prova delle note.
+- `--prova-fluidita`: nessuna prova nuova che cambiare cliente non rifaccia `MotoreTrackRecord.calcola` (il cliente non
+  entra nella cache del track record, e le voci per cliente vengono dalle voci di oggi in `ricavato`).
+- Guardare nelle istantanee che i quattro chip stiano accanto al titolo lungo «Le raccomandazioni e come sono andate»
+  alla larghezza minima della finestra (il titolo è su una riga e ha la precedenza), e che «Riproponi» stia nei 132.
+- Il dettaglio della card non ha «Riproponi» (il template non lo chiede); VoceOver lo trova fra le azioni della card.
+
+## 55. Il quiz OCF chiude con un bilancio
+
+Fatto (solo sul Mac, iPhone e iPad tengono il quiz di prima con `SessioneEsameOCF.conBilancio`): il piede dice «Salta»
+(grande, non blu) finché non si risponde, poi «Prossima domanda ›» o, all'ultima della coda, «Vedi com’è andata ›»;
+la saltata non torna più nella coda di oggi (resta nella quota delle nuove o fra i ripassi scaduti); il giro vive nella
+sessione (`SessioneEsameOCF.esiti`, `EsitoGiroOCF`, azzerato da `avvia`) e chiude con `BilancioOCFVista` («Il ripasso di
+oggi», «4 giuste su 6.», la regola vera dagli intervalli del motore, l'elenco con segno, domanda, materia e pillola
+«Fatta» / «Torna domani» / «Saltata: torna domani», «Ripassa il punto debole», «Ricomincia», «Punto debole: …»); la nota
+delle materie nuova, con il fondo tenue e il cursore a mano al passaggio; dopo «Salva» della data l'avviso «Mancano <g>
+giorni: <k> domande al giorno per arrivare pronto» (`MotoreOCF.domandeAlGiorno`, niente con le domande di esempio).
+Nuova pillola di stato comune `PillolaStatoApple` / `TonoPillola` con i colori in `Tema.Apple.PillolaStato`
+(`PillolaEsitoApple` ora la usa; i nomi in `Tema.Apple.Studio.Track` puntano lì). Prove O7 e O8 in `ProvaCalcoliOCF`.
+Istantanee nuove 1093 (bilancio chiara e scura, tutte giuste, ultima domanda); 530, 531, 532 cambiano da sole. Resta:
+- Guardare nelle istantanee 1093 che il piede del bilancio («Ripassa il punto debole», «Ricomincia», «Punto debole: …»)
+  stia su una riga alla larghezza minima della card della domanda; se no, portare il punto debole sopra i pulsanti.
+- Il bilancio entra da destra con la stessa transizione della domanda; non c'è la cascata delle righe (il template non
+  la chiede).
+- `--prova-fluidita`: nessuna prova nuova (gli esiti sono della sessione della vista, fuori dalla `ChiaveVista`).
+
+## 56. La palestra si fa sul cliente che vedrai
+
+Fatto (solo sul Mac): Vera recita il cliente della barra (`StatoPalestra.clienteScelto`: prima la barra, poi il cliente
+scelto nella palestra con «Tutti i clienti»), e cambiare cliente nella barra rifà la palestra se l'allenamento non è in
+corso; «Cambia» (menu con la rubrica in ordine e «Profilo inventato…», `StatoPalestra.cambia(cliente:stato:)`) con un
+cliente nella barra cambia tutta Prisma, con «Tutti i clienti» solo la palestra, sempre bloccato durante l'allenamento;
+sotto la difficoltà la riga che dice cosa cambia (`TestiPalestra.spiega`); il campo facoltativo `migliore` nello schema
+(cartella e `schemaInterno`), nel ripiego, nelle istruzioni e in `RispostaPalestra`/`TurnoPalestra`, chiesto solo in
+Facile e mostrato con la pillola verde «la più efficace» (mai inventato dal codice; segue la sua suggerita se un'altra si
+toglie); in Difficile la regola dell'insistenza per Qwen; sotto la barra la tessera «L’ultima volta con <Nome>» /
+«Con <Nome> · Primo allenamento» (`PalestraVera.ultimo` sul registro che c'è già); «recitato» per i clienti uomini dal
+codice fiscale (`SchedaRecita.femminile`). Prove «Palestra 56» in `ProvaPalestraVera` (`--prova-vera`). Istantanee: 720,
+721 (Facile, «la più efficace»), 722 (l'esito di oggi) aggiornate; nuove 1094-uso-palestra-primo-allenamento e
+1094-uso-palestra-difficile; 726 cambia da sola («Cambia»). Resta:
+- «Cambia» usa il pulsante `.apple` del tema (padding 7×14) attraverso `.menuStyle(.button)`, non il padding 5×12 del
+  template: un menu del Mac non prende un'etichetta con un fondo proprio in modo affidabile. Se le istantanee lo mostrano
+  troppo grande accanto al nome, serve una variante piccola di `StilePulsanteApple`.
+- Le istruzioni `Vera/Istruzioni/palestra.md` (comuni) parlano già di `migliore` e dell'insistenza; su iPhone e iPad la
+  regola della difficoltà resta quella di prima, quindi Qwen non li riceve dalla scheda.
+- Gli esempi `Vera/Esempi/palestra.json` non mostrano `migliore` (non servono alle prove delle regole).
+- Guardare con un Qwen vero (qwen3.5:4b) che in Facile `migliore` arrivi e che la risposta non diventi troppo lunga.
+
+## 57. Le spese, mese per mese
+
+Fatto (Studio › Spese c'è solo sul Mac, `SchedaStudio.speseSulDispositivo`):
+- **La serie ferma**: `MotoreChilometri.riepilogo(…, fineSerie:)` e `MotoreChilometri.fineSerie(scelto:oggi:)` (il mese di
+  calendario di oggi se il mese scelto è fra gli ultimi 10, altrimenti il mese scelto); `Riepilogo.indiceScelto`. Le colonne
+  (`ColonnaMeseSpese`) accendono quella scelta (iniziale in accento e grassetto), al passaggio si scuriscono (−0,04) con la
+  mano, il tocco sceglie il mese.
+- **Il mese a destra**: «I chilometri» e «‹ Ottobre 2026 ›» (14 bold, largo almeno 112); la › si spegne (0,3) sul mese di
+  calendario di oggi. `StatoSpese.ultimoMese`, `puoAvanzare`; `sposta` e `scegli` non vanno oltre il mese di oggi e
+  `mese(…)` riporta un mese futuro al mese di oggi. Sotto il numero «22 visite · 14 clienti · contati dalle visite
+  dell’agenda, da soli».
+- **Le spese**: «Le spese di ottobre», «3 spese · 1 senza scontrino» (arancio grassetto) o «… · tutte con lo scontrino»,
+  la miniatura senza scontrino vuota con il bordo arancio tratteggiato (anche nel foglio delle spese), «· manca lo
+  scontrino» nella data.
+- **Le scadenze**: il tocco sulla riga apre l'Agenda sul giorno nella vista mese (`StatoShell.apriAgendaMese`), con «›»
+  a destra; «Modifica…» nel menu contestuale (e fra le azioni di VoiceOver); il cerchio «fatta» resta. L'anello delle ore
+  lascia il posto a «I tuoi corsi e gli attestati ›» (senza le ore richieste resta «Imposta le ore richieste per l’anno»).
+- **Il pacchetto**: la tessera «Nel pacchetto di ottobre» (`DentroPacchettoSpese`) con «412 km in 22 visite · 5 spese
+  (358,80 €) · 3 parcelle emesse» («almeno» con i km non completi, le parti a zero dette) e l'avviso arancio per le spese
+  senza scontrino; il pulsante «Prepara il pacchetto di ottobre». Nel CSV delle spese «manca» nella colonna «Scontrino»;
+  le parcelle emesse nel mese (emesse o pagate) vanno in `parcelle-aaaa-mm.csv` (numero, data, imponibile, totale, stato;
+  il cliente solo con «nomi nel pacchetto»), contate dallo stesso elenco della tessera
+  (`PacchettoCommercialista.parcelleDelMese`). La descrizione del file pronto finisce con «: lo mandi tu al commercialista».
+- Prove «Spese 57» in `ProvaCalcoliSpese` (`--prova-calcoli`). Istantanee nuove 1095-uso-spese-mese-prima (chiara e scura),
+  1095-uso-spese-mese-di-oggi, 1095-uso-spese-senza-scontrino; 780-788 cambiano da sole.
+
+Fatto nella rifinitura 52-60:
+- **Le scadenze dello Studio nell'Agenda**: fatto (solo Mac). Non nell'indice dell'Agenda (la sua cache segue solo
+  `versioneCalcoli`) ma accanto: `StatoShell.scadenzeStudioAgenda(_:)` (Shell/StatoSpese.swift) con `MotoreSpese.perGiorno`
+  (le da fare, per giorno e titolo; le ricorrenti come in `segnaFatta`: c'è solo la data da fare), fra i dati ricavati con
+  le scadenze come ingresso (`StatoShell.ricavato(_:ingresso:_:)`, nuovo in DerivatiDati.swift: la voce vale finché
+  l'ingresso resta `==`). `MeseAgenda.scadenzeStudio` (nel confronto), `CellaMeseUso.scadenzeStudio` («Scade F24» col
+  pallino arancio dopo quelle delle posizioni, contate con loro in `RegoleMeseAgenda.righe`, nel segno e nella
+  descrizione) e, nella colonna del giorno del mese, la riga «Scade … · Studio › Spese» che apre Studio › Spese. Mai in
+  modalità cliente né con un cliente scelto nell'Agenda. Prove: `MotoreSpese.perGiorno` in `--prova-calcoli` («Spese
+  57»), stato, cache, filtro e modalità cliente in `--prova-fluidita` (`StatoShell.provaScadenzeStudioAgenda`).
+- **Il PDF del riepilogo**: fatto. La sezione «Le parcelle» in `TestiRiepilogoSpese` (parametro `parcelle:`, lo stesso
+  elenco di `parcelleDelMese` del CSV): data, «Parcella n. … · imponibile … · stato» (il cliente solo con «nomi nel
+  pacchetto») e il totale. Prove in `--prova-calcoli` («Spese 57»).
+- **I calcoli fuori dal body**: fatto. Il riepilogo dei km e le spese del mese in `stato.ricavato(_:ingresso:_:)` con mese
+  e fine della serie nella chiave e `IngressoKmSpese` (impostazioni, km per cliente, visite tolte) / le spese come
+  ingresso; caso nuovo in `--prova-fluidita` (`controllaCacheSpese`: tre letture, un calcolo; impostazioni cambiate, si
+  rifà).
+
+Resta:
+- Le scadenze dello Studio non ci sono ancora nelle viste Giorno e Settimana dell'Agenda (solo nel mese, dove apre il
+  tocco della scheda); l'istantanea del mese con una scadenza dello Studio è da aggiungere e guardare sul Mac.
+- Istantanee da rigenerare sul Mac (780, 781, 782 con «almeno … km» nella tessera, 785, 788 in colonna: la tessera non
+  deve tagliarsi) e pagina delle anteprime da aggiornare; il passaggio sulle colonne chiede uno screenshot.
+
+## 59. Ogni esperienza ha il suo copione
+
+Fatto (solo Mac):
+- I copioni delle undici esperienze in `Motori/CopioneSala.swift` (`CopioneSala`, `EsperienzaSala.copione` con lo
+  `switch` completo, `TestiCopione` con l'occhiello «Cosa dire · per spiegare · 3 minuti», «1 minuto», senza durata
+  solo il momento). Decisione 59-a applicata: il film «In venti secondi…», il Prisma del cliente «Scegliete insieme la
+  password, davanti a lui». Copioni fissi (59-b), «tu» al consulente e «lei» al cliente (59-c).
+- `StatoSala.copioneAperto` (osservato, non salvato): si chiude con `apriEsperienza`, `tornaAllaSala`, al cambio di
+  cliente, entrando nella modalità cliente (quindi nella vista pulita) e alla chiusura della Sala. Esc lo chiude prima di
+  tornare alla griglia.
+- «Cosa dire» (glifo `info.circle`) primo dei pulsanti della testata del palco (`AzioniPalco`, Shell/SalaAzioniPalco.swift)
+  e il riquadro `RiquadroCopione` in overlay in alto a destra di `PalcoSala` (48 sotto la testata, largo 372), fuori da
+  `ContenutoPalco`: mai nella presentazione né nelle immagini per l'iPad. Si vedono solo con `StatoShell.consulenteVede`
+  (fuori dalla modalità cliente e dalla vista pulita). Token in `Tema.Apple.SalaEsperienze.Copione` e
+  `Tema.Apple.Moto.SalaEsperienze.copione`; superficie `vetroSopra` (ombra `vetro`, la più vicina a 0 24 50 −18 del
+  template: nessun caso nuovo in `Ombra`).
+- Prove: i copioni (tre passi, occhiello, nessuna cifra) in `ProvaCalcoliSalaMomenti` (`--prova-calcoli`; la specifica
+  diceva `ProvaCalcoliEsperienza`, che però prova l'esperienza in prodotti finanziari del profilo MiFID); `consulenteVede`
+  e la chiusura del copione nella vista pulita in `ProvaMostraAlCliente` (`--prova-vera`).
+- Istantanee nuove 684-sala-copione e 685-sala-copione-senza-durata (chiare e scure); 691-sala-palco cambia da sola.
+
+Fatto nella rifinitura 52-60:
+- **Il cliente guarda l'iPad (58)**: già fatto (verificato): `consulenteVede` vale anche nella vista del cliente con
+  `luogoCliente == .tavolo`, e `tornaSulloSchermo` chiude il copione.
+- **Finestre strette**: fatto (solo Mac). La testata del palco è un `ViewThatFits` di quattro righe: tutti i testi; poi
+  «Prossima» (freccia) e «✦ Aggiungi al Prisma» (solo il segno); poi anche «Cosa dire» (icona), «Segna come fatta»
+  (icona) e «✓ Fatta oggi» («✓»); solo all'ultimo il nome dell'esperienza si taglia. Il testo intero resta nell'aiuto e
+  nell'etichetta di accessibilità (`AzioniPalco(compatta:)`, `AzioniFattaPalco(prossimaBreve:compatta:)`).
+
+Resta:
+- Da guardare a occhio sul Mac: 618-app-nuove-sala, 691-sala-palco e una scena stretta del palco (non c'è ancora
+  un'istantanea della testata stretta).
+- Istantanee da rigenerare sul Mac (684, 685, 691; controllare che 693-sala-modo-cliente non mostri «Cosa dire»; 681 con
+  la 58) e pagina delle anteprime da aggiornare; l'entrata a molla chiede uno screenshot.
+
+## 58. Un solo modo di mostrare (e i comandi del tavolo in un'etichetta)
+
+Fatto (solo sul Mac, `#if os(macOS)` o file solo Mac): lo stato in memoria in `StatoShell` (`luogoCliente`, `tavoloTocca`,
+`menuLuogo`, `presaVisioneAperta`, `cifreLuogoDaConfermare`) e le funzioni in Shell/LuogoCliente.swift (`mandaAlTavolo`,
+`tornaSulloSchermo`, `cambiaTocco`, `azzeraLuogo`, `seguiSulTavolo`, `mandaImmagineVista`, `documentoDiCioCheSiVede`).
+Nella barra della vista pulita l'etichetta «Su questo schermo» / «iPad sul tavolo» subito prima di «DV», con il menu
+disegnato come quello dell'avatar (voci del template nell'ordine; con il tavolo aperto e l'iPad non collegato «Manda
+sull’iPad» resta spenta con «iPad non collegato»; a tavolo chiuso lo apre e manda appena l'iPad arriva, decisione 58-d;
+con «Al tavolo» spento solo un avviso, mai le Impostazioni nella vista). L'iPad segue la vista (`OsservatoreLuogo`, a
+vista ferma dopo `attesaSegui`): immagine ferma del capitolo (`CapitoloClienteFermo`) o della griglia della Sala
+(`GrigliaSalaFerma`, senza conferma delle cifre), immagine del palco o, con «può toccare: sì», i generi vivi di oggi
+(rischio, Lancia l'anno, disegno, realtà aumentata) e la lettera come la sua pagina; il prospetto a tutto schermo pagina per
+pagina (con «sì» tutto il documento da sfogliare). Le cifre del cliente passano sempre dalla conferma: nel palco la riga di
+oggi, nei capitoli e nel prospetto la riga nuova `ConfermaCifreLuogo` sotto la barra. «Fine: torna al lavoro» (e il blocco)
+rimette l'iPad sulla schermata neutra e lascia il tavolo in ascolto (58-c); la schermata neutra copre anche l'iPad e alla
+ripresa l'iPad torna a seguire. «Sull’iPad sul tavolo» del pannello entra in «Il quadro» e manda all'iPad con l'avviso del
+template. I pulsanti del consulente del palco (copione) tornano visibili con il cliente sull'iPad (`consulenteVede`). La
+presa visione (Shell/PresaVisioneMac.swift): la scheda del template; sul Mac il tratto con mouse o trackpad (Canvas),
+«Registra» spento senza tratto, PDF con la pagina di ciò che si vede su carta e `PaginaPresaVisione` («su questo schermo»);
+sull'iPad la richiesta di oggi anche per l'immagine mandata (`mandaImmagine` ricorda la pagina su carta), «Registra» si
+accende quando il PDF è archiviato (`presaVisioneArchiviate`). Il sottotitolo della pagina PDF è un parametro
+(`TestiPresaVisione`: più pagine, una pagina, questo schermo). Tolti dal palco «▣ Mostra sul tavolo»
+(`PulsanteMostraSulTavolo` eliminato) e, sul Mac, «▶︎ Presenta» (su iPhone e iPad resta); nella presentazione dentro la vista
+del cliente niente «Al tavolo» né striscia. «Scrivi sull’iPad» della capsula solo con il cliente sull'iPad e «può toccare:
+sì». Prove: `--prova-tavolo` (fuori dalla vista niente; immagine del quadro e dei capitoli; conferma delle cifre; rischio
+come immagine con «no» e vivo con «sì»; presa visione dell'immagine sull'iPad e sul Mac, PDF di 2 pagine; «Fine» con iPad
+neutro e tavolo aperto), `--prova-vera` (`ProvaMostraAlCliente`: luogo all'ingresso, pulsanti del consulente, Esc, «Fine»).
+Istantanee nuove 680-683 (chiare e scure).
+
+Resta:
+- **Istantanee**: generarle sul Mac (680-683) e guardare in particolare la posizione del menu sotto l'etichetta (allineato a
+  destra della pillola con `rientroMenu`), la riga di conferma sotto la barra e la scheda della presa visione; rigenerare
+  470 e 471 (non cambiano fuori dalla vista), 691, 620-678, 633-635, 695 (senza «▣ Mostra sul tavolo» e «▶︎ Presenta») e
+  aggiornare la pagina delle anteprime. «694-sala-presenta» resta (la funzione `presentaEsperienza` c'è ancora per
+  iPhone e iPad e per la prova di Vera) ma sul Mac non si raggiunge più dal palco: da togliere o sostituire con la vista
+  del cliente sul capitolo «La Sala».
+- **Il prospetto a tutto schermo dentro la vista** copre la barra: l'etichetta non si raggiunge finché la presentazione è
+  aperta (il luogo scelto prima resta e la pagina segue). Nel template il prospetto è un capitolo della vista.
+- **Le immagini dei capitoli** sono alla misura fissa del palco (1280×800): un capitolo più lungo (il quadro con testo
+  «Grande», molte posizioni) si taglia in basso. Da guardare sull'iPad vero; eventualmente più pagine.
+- **«Nel tempo» con «può toccare: sì»**: fatto nella rifinitura 52-60. `seguiSulTavolo` nel capitolo «Nel tempo» con il
+  tocco acceso e le cifre confermate chiama `TavoloMac.lasciaCursore` (una volta per cliente: `cursoreSeguito`, rimandato
+  se il cursore non c'è più); con «può toccare: no» torna l'immagine ferma. Prova in `--prova-tavolo`.
+- **Il Prisma del cliente sull'iPad** (decisione 58-f): va controllato nell'immagine del palco che non compaia la password;
+  se compare, nasconderla con `inSala`.
+- **Il menu del luogo** è disegnato (come quello dell'avatar), non un menu del Mac; l'iPad collegato si vede dal testo
+  «iPad non collegato» (non c'è il `PuntinoTavolo`).
+- **La presa visione**: chiedere all'utente conferma che basti un tratto fatto con il trackpad (58-e); la scheda non ha il
+  tratto che si disegna da solo del template (scelta della specifica). «Annulla» con il cliente sull'iPad ritira la
+  richiesta mettendo l'iPad sulla schermata neutra e poi lo fa tornare a seguire.
+- La prova della modalità cliente in `--prova-backup` (`provaModoClienteLuce`) non è stata estesa: il caso «fuori dalla
+  vista `mandaAlTavolo()` non fa nulla» è in `--prova-tavolo`. `--prova-realta` non ha un caso nuovo per la conferma
+  passando dall'etichetta. `EsperienzaSala.mostraSulTavolo` e `tavoloPronto` restano (li conta la prova di Vera).
+
+## 60. Ogni esperienza lascia qualcosa
+
+Fatto (solo Mac): il campo nuovo `DatiPrisma.esperienzeFatte` (`Dati/EsperienzaFatta.swift`: chi, cosa, quando; letto con
+tolleranza, nessuna versione nuova, 27) nel file del cliente (`ArchivioPezzi.pezzo`: `.cliente`), in `DatiVivi` (54 campi,
+`.neutro`), tolto con il cliente, spostato da «Unisci le schede» e rimesso dall'annullamento, mai in «Prisma ovunque»
+(fuori dall'istantanea, le locali restano all'unione). Le funzioni in `Shell/StatoEsperienzeFatte.swift`: le fatte oggi e le
+ultime in `ricavato` con nella chiave quante sono e l'id dell'ultima; il segno una volta al giorno (solo Mac); «Togli»;
+la prossima pura (`EsperienzaSala.prossima(dopo:fatte:consigliate:)`, ordine esplicito `ordineMomenti`, film prima del
+Prisma del cliente). Nel palco, dopo «Cosa dire», «Segna come fatta» oppure «✓ Fatta oggi» (`CapsulaStatoApple` `.ok`, i
+toni `.st2.ok` già del tema) e «Prossima: … ›». Il segno da solo nei punti di fine del codice: capsula sigillata (anche
+dall'iPad del tavolo) e «Apri e consegna», obiettivo salvato dal disegno, «Prepara il file» riuscito, video esportato o
+mandato, partita del rischio salvata nel dossier (decisione 60-b). Sulla griglia «✓ Fatta oggi» a 44/14 e l'occhiello della
+Sala «2 esperienze fatte oggi con Giulia» (riga sola della finestra e intestazione di prima; non nella vista del cliente né
+in modalità cliente). Nel dossier il riquadro «In Sala» nella Panoramica (decisione 60-a), le ultime cinque, clic che apre
+l'esperienza, menu «Togli» (60-d). Prove: `ProvaBackupEsperienzeFatte` in `--prova-backup` (posto su disco, backup e
+ripristino, archivio di prima, esperienza sconosciuta scartata, cliente tolto, segno una volta al giorno, «Togli»),
+`--prova-ovunque` (fuori dall'istantanea, le locali restano), il tagliando (unione e annullamento, in
+`provaCollegamentoTagliando`), la prossima e i testi in `ProvaCalcoliSalaMomenti` (non in `ProvaCalcoliEsperienza`, che
+è dell'esperienza MiFID). Istantanee nuove 686, 687, 688 (chiare e scure).
+
+Resta:
+- **CLAUDE.md**: aggiungere all'elenco di ciò che il backup comprende «da «Migliorie d'uso» le esperienze della Sala fatte
+  con il cliente: data ed esperienza, mai il contenuto» (non toccato da questo giro: lo decide l'utente).
+- **Istantanee**: generarle sul Mac (686-688) e guardare che «✓ Fatta oggi» sulla scheda grande non copra il saluto
+  (la testata del palco stretta passa ai segni: rifinitura 52-60, vedi 59); rigenerare 690 e 691 (ora con «Segna come
+  fatta») e aggiornare la pagina delle anteprime.
+- **`--prova-fluidita`**: nessun caso nuovo; la griglia legge le fatte una volta (ricavato) e passa il booleano alle schede.
+- Il riquadro «In Sala» c'è solo nella Panoramica del Mac (con il quadro); nella cronologia degli incontri e in Documenti
+  non c'è una riga (alternative di 60-a non fatte).
+- Il segno da solo per la lettera e la giornata con «✦ Aggiungi al Prisma di …» non c'è (decisione 60-b: aggiungere al file
+  non vuol dire averla fatta).
+
+## 66. Le parole si spiegano dove sono
+
+Fatto (solo sul Mac): le forme delle parole (`Glossario.forme`, nell'ordine del template, sigle solo in maiuscolo), la
+voce nuova «Plusvalenza» (Previdenza e tasse; «Divario previdenziale» c'era già dalla miglioria 1), la regola «una volta
+per schermata» (`ParoleSchermata.segna`, tenuta fra i dati ricavati con `stato.paroleSchermata`), `TestoConParole` (filo a
+puntini color accento, collegamento interno `prisma-parola://` gestito da `OpenURLAction`, testo semplice sui documenti
+e in modalità cliente), `SchedaParola` nel popover con «Tutte le parole ›», le etichette di `EtichettaConTermine` col filo
+al posto della «i» («Apri nel glossario» diventa «Tutte le parole ›»), la frase sotto il campo del glossario e «Nessuna
+parola così.», i token `Tema.Apple.Parole`, le prove in `--prova-calcoli` e le istantanee 1308 e 1309 (chiare e scure).
+Prima vista adottata: Posizioni › Peso dei costi (nota del pannello, costi mancanti, nota di metodo: una schermata sola);
+`PannelloAnalisi` ha `paroleNota` per le altre analisi.
+
+Resta:
+- **Adozione nelle altre viste** (la miglioria si estende a pezzi): le frasi delle aree di Analisi 360
+  (`TestiAree360`), i dettagli di Posizioni (`PannelliPosizione`: riscatto, gestione separata, composizione;
+  `DettaglioPosizione` come seconda schermata con la sua chiave), la scheda di un prodotto (`ComponentiProdotti`), le
+  spiegazioni del TFR e del simulatore previdenza, le note di metodo (`NotaMetodo`: va passato l'insieme della schermata,
+  non segnata da sola, altrimenti la stessa parola si segnerebbe due volte). Le frasi composte con interpolazioni vanno
+  prima scritte come stringa intera.
+- **Il colore al passaggio del mouse** e il cursore d'aiuto del template: SwiftUI su macOS 14 non li dà per una sola
+  parola di un `Text`; la scheda è ancorata al paragrafo, non alla parola (decisione 66.6).
+- **Da guardare nelle istantanee**: che la tinta del `Text` tenga la parola del colore del paragrafo (se macOS colora i
+  collegamenti d'accento, la parola resta azzurra: accettabile, è il colore del passaggio nel template); 227 e 228 con la
+  frase nuova; le etichette con il filo in Prodotti, Rubrica e Multiramo («106-posizioni-multiramo»).
+- `InfoTermine` resta nel codice (oggi non la usa più nessuno sul Mac): serve dove l'etichetta è un simbolo.
+
+## 67. App aperte e spazi dal nome dell'app
+
+Fatto (solo sul Mac): il menu sotto la pillola dell'app (`MenuAppBarra`, Shell/MenuAppBarra.swift) con le finestre aperte
+tranne quella davanti (al più quattro, dalla più vicina, con il nome di battesimo del cliente accanto alle app che lo
+seguono), i tre spazi pronti con i nomi del template («Preparo un incontro», «Faccio un’analisi», «Comincio la
+giornata», stessi `id`), gli spazi dell'utente con «Elimina lo spazio» nel clic destro, «Salva le finestre aperte come
+spazio…» (il modulo al posto delle voci, spento senza finestre) e «Torna alla scrivania». Stato in memoria
+(`StatoFinestre.menuApp`, `menuAppSalva`), ancora dal layout (`AncoraPillolaApp`), token `Tema.Apple.MenuApp` e
+`Tema.Apple.Moto.MenuApp`; chiusura con un clic fuori, Esc (monitor di EscFinestra), secondo tocco, modalità cliente,
+blocco, ricerca, «Da fare», notifiche, guida, novità, scelta del cliente e «Mostra al cliente». Prove in `--prova-vera`
+e `--prova-fluidita`; istantanee 1310 (chiara e scura), 1311, 1312; 55, 57 e 58 cambiano da sole con gli spazi nuovi.
+
+Resta:
+- **Da guardare nelle istantanee**: «57-spazio-analisi» con Posizioni al 42% (decisione 67.6: se non si legge, Posizioni
+  principale e Analisi 360 accanto).
+- `ProvaGuidata` (stato iniziale dei pannelli) e le frecce di `AppRicerca` non conoscono il menu: si chiude da sé
+  aprendo la ricerca, quindi oggi non serve.
+- Le azioni «Spazi di lavoro» e «Le tue app aperte» della ricerca escono con la miglioria 61 (61.3 punto 4); il pannello
+  grande degli spazi e «Le tue app aperte» restano nel menu «Vai».
+
+## 68. Quello che Prisma prepara da solo si conferma allo stesso modo
+
+Fatto (solo sul Mac): i componenti comuni in DesignSystem/Apple/ConfermeApple.swift (`StatoConferma`,
+`RigaConfermaApple`, `AnnullaRimettiApple`, `CollegamentoConfermaApple`, `PulsanteChiusuraConferma`, `ScuotiConferma`;
+`ScuotiEffetto` spostato qui da VisteMotoriVera.swift, stesso nome per Inquadra e Aggiorna valori) con i token
+`Tema.Apple.Conferme` e la vetrina `VetrinaConferme`. Stanotte: «Più tardi» e «Va bene» sotto ✕ e ✓, il registro «COSA
+HAI DECISO» con la frase del vuoto, nella fine «La cosa rimandata è nel «Da fare» di oggi.» (con la miglioria 3 fatta, la
+frase dice già «Da fare»); la voce degli arrivi del «Da fare» dice «Stanotte: N cose rimandate» quando restano solo le
+rimandate, e un tocco riapre Stanotte come prima. Nota vocale: verde = «pronto, si fa con «Va bene così»» (proposta di
+68.6: nulla entra nel dossier senza la conferma, decisione 102 di «Luce»), «Annulla»/«Rimetti» sulle verdi, l'obiettivo e
+l'attività con la data da confermare in arancione («Aggiorna»/«No», «Va bene»/«Modifica»/«Annulla»), la capsula
+«Aggiornato»/«Lasciato com’era» con «Cambia», senza cliente la testa in arancione; un pulsante solo («Rispondi alla riga
+in arancione» → «Va bene così», con la frase che conta), la scossa e l'avviso «Prima rispondi alla riga in arancione»,
+«Scarta tutta la nota» come collegamento; «Va bene così» scarta e conferma in un solo `dati.carica` e chiude con «Nota di
+<Nome> a posto: la trovi nel suo dossier» (`confermaNota` ha i parametri `scarta` e `avviso`, `chiudiNotaVocale` sul Mac).
+Le decisioni prima di «Va bene così» stanno solo in memoria (`StatoNotaVocaleMac.annullate`, `risposte`). Prove in
+`--prova-vera` (ProvaNotaVocale: regole, «Va bene così», tutto annullato), `--prova-calcoli` (testi della notte, scossa
+ferma); istantanee nuove 1313 (chiara e scura), 1314, 1315 (chiara e scura); 760-766 e 771-773 cambiano da sole.
+
+Resta:
+- **Punto 3 di 68.3**: Inquadra (43), Aggiorna valori (44) e il documento (62) tengono ancora le loro righe «da
+  controllare»; passano a `RigaConfermaApple` e `PulsanteChiusuraConferma` con un lavoro a parte (le schermate sono
+  grandi e già provate: meglio non toccarle nello stesso giro).
+- Le parole sotto ✕ e ✓ spariscono insieme ai comandi quando la pila è finita (la pila lascia il posto alla carta
+  finale), senza la dissolvenza propria di 0,4 s del template.
+- Il tremolio dell'esame OCF (Tema.Apple+OCF.swift) resta a sé: ha passi diversi (−8, +8, −5).
+- **Da guardare nelle istantanee**: 771 (due righe in arancione nella nota del template, perché anche l'attività «a
+  gennaio» ha la data da confermare) e l'altezza della carta finale di 763 con la frase delle rimandate.
+
+## 61. Cerca ovunque, e fa
+
+Fatto (solo sul Mac, sotto la soglia del pannello stretto resta il pannello di sempre): la scatola del template (900, a 84
+punti dall'alto, raggio 26, corpo alto 392, colonna dell'elenco 420; token in `Tema.Apple.AltreApp.Ricerca.Mac`); il campo
+con l'invito «Cerca un cliente, una posizione, un documento… o scrivi cosa vuoi fare», la ✕ con del testo e il pulsante
+«esc»; la fila dei filtri da toccare (`EtichettaFiltroRicerca`, `PallinoCanale`: «Tutto», «Clienti», «Posizioni»,
+«Documenti», filetto, i due canali che si spengono con un secondo tocco) con «Salva questa ricerca» a destra, che salva
+subito (nome = il testo, niente doppioni con lo stesso nome, `salvaRicercaSubito`); `LimitiRicerca` in
+`MotoreRicerca.cercaCompleta` (predefinito vuoto: iPhone, iPad e `AppRicerca` cercano come prima; il canale con lo stesso
+`FiltriRicerca.rispetta` del filtro scritto); il codice `tipo:` e i codici `canale:` che riaprendo una ricerca salvata
+tornano etichette (`FiltriRicerca.etichette`, `conCodici`: `RicercaSalvata` non cambia forma); i filtri scritti restano
+capiti e mostrati come pillole, ma niente più invito con «scade:2027», «Cerca per criterio» e «Tab per completare»; il
+pannello vuoto a due colonne (clienti recenti da `clientiRecenti`, poi i primi della rubrica; le cinque azioni del
+template; ricerche salvate con la ✕; la frase) con frecce e Invio; le azioni nuove (`nuovoCliente`, `aggiornaValori`,
+`mostraAlCliente`, `inquadra`), «Nuovo impegno», «Da fare» al posto del centro notifiche, fuori sul Mac «Modalità
+cliente», «Spazi di lavoro», «Le tue app aperte»; il gruppo «Parole» dal glossario (`DestinazioneRicerca.parola`, anche
+nel testo dei promemoria) solo senza filtri; i gruppi nell'ordine fisso del template; l'anteprima del cliente con
+«Patrimonio netto», «Prossimo incontro» («non fissato»), «Da fare» (dalle cache), avatar 48, «Apri il dossier»,
+«Posizioni», «Mostra al cliente» e «Resoconto», «Fissa un appuntamento», «Crea un'attività» nel menu «⋯»; gli occhielli
+(«Proposta», «Posizione in essere», «Documento», «Le parole» azzurro, «Azioni», «App») e «Apri la scheda», «Fai»,
+«Apri», «Apri il glossario»; «Nessun risultato per «…».» con «Chiedilo a Vera»; il piede con «Cerca solo su questo Mac»;
+l'apertura pulita in `alternaRicerca()` (lente, ⌘K, menu) e non in `cercaOvunque()` (notifiche di conformità e Biblioteca).
+Prove in `--prova-vera` (ProvaRicercaUso); istantanee nuove 1300 (chiara e scura), 1301, 1302, 1303; 103 ora con
+`tipo:posizioni canale:alleanza` accesi come etichette.
+
+Resta:
+- **Il velo sfocato** (scrim con sfocatura 8 del template, con il ripiego senza sfocatura nelle istantanee): oggi resta il
+  velo di sempre senza sfocatura (token `Tema.Apple.AltreApp.Ricerca.Mac.velo` pronto).
+- **L'entrata** resta quella del pannello delle notifiche (`Tema.Moto.Spotlight`), non i 380 ms da 14 punti del template.
+- ~~**Una lettera scritta altrove torna nel campo**~~: fatto nella rifinitura 61-70. `TastiSpotlight` sa se il cursore è
+  nel campo (`nelCampo`, dal `@FocusState` della vista); con il fuoco altrove un tasto che scrive, senza ⌘⌃⌥ e non mentre
+  si scrive il nome della ricerca, diventa `.carattere`: la lettera si aggiunge al testo e il fuoco torna nel campo.
+- **Al più 40 risultati in tutto**: non c'è un tetto unico (taglierebbe gruppi interi, come la Biblioteca in fondo); restano
+  5 righe per gruppo, 40 con un tipo scelto.
+- **Documento: «Apri il documento»** apre Documenti come oggi; il lettore in grande arriva con la miglioria 62.
+- **Avatar e tessere 30 con raggio 10**: le righe usano `Misure.Spotlight.icona` (30) e la tessera delle azioni con il
+  raggio delle icone delle app; `avatarRecente` è pronto nei token.
+- **Istantanee da rigenerare e guardare sul Mac**: 53 (e scura), 54, 103, 104, 154, 879 e le nuove 1300-1303; aggiornare la
+  pagina delle anteprime. In 1303 controllare che la prima riga sia davvero la parola «Interesse composto».
+- `--prova-carico` e `--prova-fluidita`: confrontare i tempi di apertura della ricerca con i 30 clienti di prova.
+
+## 62. Il documento si apre in grande
+
+Fatto (solo Mac): nella scheda Documenti del dossier l'elenco prende tutta la larghezza e il documento toccato si apre nel
+lettore (`Shell/LettoreDocumento.swift`), un dettaglio del tema che nasce dalla sua riga (`.origineDettaglio(id:
+"documento:<id>")`) con il presentatore che Clienti ha già (`PresentatoreDettaglioDossier`): velo, ✕, Esc, clic sul velo,
+«Riduci movimento» e istantanee come gli altri dettagli; misura `Tema.Apple.Lettore.misura` 1220×790 ristretta alla
+finestra. A sinistra l'anteprima di sempre (carta sempre chiara) con la capsula «pagina N · data»; il puntatore su un dato
+accende la sua riga in giallo (`evidenziaSopra:` di `AnteprimaDocumento`, mai scritto in `vistaDocumenti`; sulla stessa
+pagina il foglio non si sposta, nel PDF si cerca solo nella pagina mostrata), e anche «p. N» accende in giallo. A destra
+la testata (occhiello, titolo rinominabile, data, canale, menu «⋯» con «Mostra il testo», Vera, collega, crea, «Aggiorna
+il valore», tipo, Anteprima, Finder, rileggi, scollega, elimina) e i tre passi: «I dati letti» (incerti prima, con il
+perché delle regole `MotoreDocumenti.incerti`, correggibili sul posto e confermati con «Va bene»; i mancanti dell'attesa
+del tipo come dubbi finché ci sono dati da confermare, poi righe grigie «Non trovato» con «Aggiungi»; i certi in una riga
+con «Mostra»), «A cosa è collegato» (con «Cambia»; senza collegamento il suggerimento di oggi e «Collega»), «Cosa non
+torna» (due riquadri da toccare per ogni differenza, applicati solo da «Fatto» con `aggiornaDalDocumento` o
+`alternaVociTenute`). Il piede con `PulsanteChiusuraConferma`: «Controlla…» → «Decidi…» → «Fatto: salva nel dossier» →
+«Chiudi», la scossa e l'avviso sul primo dubbio, «Chiedi a Vera». La ricerca, le notifiche, Vera, Prodotti e le scene
+delle istantanee che scelgono un documento e aprono Documenti lo aprono nel lettore (`vistaDocumenti.lettore`, messo da
+`preparaOspite`). Prove `U62` in `--prova-calcoli` (ProvaCalcoliDocumenti); istantanee 1304-1307.
+
+Resta:
+- **Istantanee**: rigenerarle sul Mac e guardarle. Le scene di prima della scheda Documenti (26, 68, 161-166, 190-194, 237,
+  281, 290, 903 e le altre che scelgono un documento con `apri(.documenti)`) ora si aprono nel lettore: controllare che
+  dicano ancora quello che il nome promette (163 mostra il testo dal menu, 165 il confronto del documento d'identità nel
+  passo 3, 191 e 194 l'impatto e lo storico dentro «Apri il confronto completo», che nelle scene è chiuso: se serve,
+  aggiungere a `RichiestaIstantaneaLettore` l'apertura del confronto completo). Le scene che mostrano solo l'elenco ma
+  hanno un documento scelto ora mostrano anche il lettore: se serve, togliere da quelle scene `documentoSelezionato`.
+- ~~**Regola dei «due valori diversi nel testo»**~~ (§62.3 punto 1): fatta nella rifinitura 61-70.
+  `MotoreDocumenti.incerti(_:pagine:oggi:)` riceve le pagine (il lettore le passa da `testoDocumento`) e
+  `EstrattoreDocumento.valoriDiversi` cerca tutte le occorrenze, ma solo per i campi che hanno un valore unico per natura
+  (SRI, periodo, ISIN, codice fiscale, numero e rilascio del documento, orizzonte): premi, importi, date del contratto e
+  nomi compaiono spesso con valori diversi (saldo iniziale e finale, premio e rata) e darebbero falsi dubbi. Se l'utente
+  vuole la regola su altri campi, si allarga `campiAValoreUnico`. Prove U62 «due valori».
+- ~~**«Fatto non conferma un dato incerto» e «Nel documento» con lo storico**~~ (§62.5): fatto nella rifinitura 61-70. Il
+  conto dei dubbi e il piano di «Fatto» stanno nel tipo puro `DecisioniLettore` (MotoreDocumenti.swift, con
+  `GruppoDifferenzeDocumento`), l'applicazione in `StatoShell.applicaFattoLettore`; prove U62 «Fatto» (pure) e «Fatto nel
+  dossier» (sul Mac: la polizza di Marco, capitale dal documento con lo storico, `ripristina` lo riporta).
+- **Il collegamento mancante non conta come dubbio**: la riga «Non è collegato» è arancione ma non ferma il pulsante (un
+  documento senza candidate non si potrebbe mai salvare). Decidere se contarlo quando c'è un suggerimento.
+- **Menu e collegamenti duplicati**: `vociMenu` e `vociCollega` del lettore ripetono quelli (privati) di
+  `DettaglioDocumento`, che resta per iPhone e iPad. Con l'aggiornamento di iPhone e iPad spostarli in un tipo comune.
+- **«Aggiorna il valore» come differenza «Valore» del passo 3** (§62.3 punto 9): per ora è una voce del menu «⋯».
+- **L'app Documenti** (`AppDocumenti`, di iPhone e iPad) non ha il lettore: sul Mac Documenti vive nel dossier.
+- **«Vedi chi»** dell'impatto di un nuovo KID: sta dentro «Apri il confronto completo» (la tabella di prima), non come riga
+  propria in fondo al passo 3.
+- **Collegamento esterno con un documento già scelto**: `apri(.documenti)` senza un documento nuovo (per esempio il
+  collegamento «Documenti» di Prospetti) riapre nel lettore l'ultimo documento scelto.
+
+## 63. I prodotti parlano chiaro
+
+Fatto (solo Mac): `AppPrisma.prodotti.ospite` è la Biblioteca (`#if os(macOS)`), quindi ogni `apri(.prodotti)` (menu Vai,
+ricerca, Collegati, Guida, istantanee) porta alla sezione «Prodotti» della Biblioteca (`StatoShell.sezioneBiblioteca`,
+`preparaOspite`, `accorpataMostrata`); `altreApp` sul Mac perde Prodotti. Nella testata della Biblioteca il segmentato
+«Documenti | Prodotti» e, sul catalogo, il menu «Altro ⌄» (Nuova scheda, Dai documenti…, Modifica, Aggiorna dai
+documenti…, Simula, Elimina la scheda…; nascosto in modalità cliente) attraverso `StatoShell.richiestaCatalogo`. Il
+catalogo (`Shell/BibliotecaProdotti.swift`) è `AppProdotti(nellaBiblioteca: true)`: colonna «Per <nome>, dal più adatto»
+/ «I prodotti» con la ricerca e «Filtra ⌄» (canale e area), righe con quadratino dell'area, «<Area> · costo x% · rischio n
+su 7», «fonte da verificare», «risponde a una priorità» / «rischia più del profilo»; la scheda con testata (occhiello,
+nome 27, canale, pillola dell'esito, fonte verificata / da verificare / «c'è un KID nuovo» con «Segna verificata oggi»),
+«È per / Non è per» proposte dal codice, «Su 10.000 € in dieci anni» in parole (`PesoCostiProdotto(riga: true)`, la quota
+di sempre), «Quanto rischia» (`TesseraRischio(chiara: true)`), «Per quanto tempo», tre condizioni, il piede («Proponi a
+<nome>» con `proponi(_:apri: false)` e l'avviso «Apri», «Confronta con quello che ha», «Apri il suo documento», «Metti su
+un cliente…» senza cliente) e «Tutti i dettagli ⌄» con tutto quello di prima. Motore puro `MotoreSchedaProdotto` (esito
+con la soglia `sriMassimo`, ordine, frasi), testi in `TestiCatalogo`, token in `Tema.Apple.Catalogo`, prova
+`ProvaCalcoliSchedaProdotto` in `--prova-calcoli`, istantanee 23, 32 (dettagli aperti), 4 (finestra della Biblioteca) e
+nuove 1400-1402.
+
+Decisione applicata (template-uso-specifica.md): **nessun campo nuovo in `Prodotto`**. Quindi niente «In una frase» (il
+riquadro non c'è: nessuna frase automatica), niente campi «Per il cliente» in «Modifica» né «Proponi dai dati della
+scheda», nessun cambio all'archivio né a `ProvaBackupArchivioPezzi`. «È per / Non è per» sono sempre quelle del codice,
+con la nota «Scritte da Prisma dai dati della scheda».
+
+Resta:
+- **Istantanee**: rigenerarle sul Mac e guardarle (23, 32, 4, 192, 878, 1400-1402, chiare e scure); controllare che la
+  griglia delle cifre (costi + due tessere da 170) stia nella finestra a 1100 e che il piede non tagli i pulsanti.
+- ~~**«Quanto costa, per dare un’idea» della protezione**~~ (63-d): fatto nella rifinitura 61-70. La tessera
+  «circa N € l’anno · per 100.000 € di capitale: stima dalle polizze in archivio» c'è solo con una tariffa di
+  `MotoreSimulatoriAnalisi.tariffaCasoMorte` (prima le coperture del cliente scelto, poi l'archivio; in modalità cliente
+  solo le sue), tenuta fra i dati ricavati; premio da `MotoreSchedaProdotto.premioIndicativo` (arrotondato a 10 €), prova
+  in `ProvaCalcoliSchedaProdotto`. Da guardare nell'istantanea 1401 (la scheda di protezione ora ha due riquadri se i
+  dati di prova danno una tariffa).
+- ~~**«Confronta con quello che ha»**~~: fatto con la miglioria 64 (`confrontaProdottoInSimula`: «Due a confronto» con
+  la scheda in A e la prima posizione in essere della stessa area in B, o il conto). Se il cliente ha già quel prodotto,
+  la scheda non è fra le strade «dal catalogo» e A resta quella di partenza.
+- **Salita di 8 e dissolvenza** al cambio di scheda: oggi rientra con la cascata di sempre (`riavviaCascata`) e torna in
+  cima (`.id`); la salita di 8 in 0,3 s del template non è un token a parte.
+- **iPhone e iPad**: l'app Prodotti resta quella di prima (nessun esito, nessuna frase); da portare con il loro
+  aggiornamento.
+
+## 64. Simula e confronta: prima la frase
+
+Fatto (solo Mac): `StrumentoAnalisi.simulaConfronta` con `delMac` / `diIOS` / `inVista`; la barra laterale di Analisi 360
+mostra «Simula e confronta» e il TFR; `scegliStrumentoAnalisi(.simulatore / .scenari / .confronto)` sul Mac porta a
+«Simula e confronta» in «Una strada» o «Due a confronto» (così `simula(_:)`, `confronta(_:)`, `apri(.simulazioni)`,
+`apri(.confronti)`, i Collegati, Vera e le istantanee continuano a funzionare); `accorpataMostrata` dice `.confronti` in
+«Due a confronto». La bozza del simulatore di prima entra come strada A (posizione, ipotesi salvata, scheda del catalogo
+riconosciuta da nome e canale, altrimenti «un'ipotesi mia») con i suoi soldi, tasse e inflazione, poi si consuma; le voci
+di `confrontoA/B` diventano le due strade. Il segmentato delle viste ha la terza voce «Simula e confronta» (stesso stato
+della barra laterale, `VoceRigaAnalisi360`), ed è in testa alla vista. Via la fila «Strumenti» del piede delle aree.
+Vista nuova `Shell/SimulaConfronta.swift`: a sinistra «Una strada | Due a confronto», le righe delle strade (tondino A/B,
+nome, canale, «provenienza · rende x%, costa y% l’anno») con il menu raggruppato (Ce l’ha già, Proposte, Dal catalogo,
+Ipotesi salvate, Ipotesi mia, Non fare niente) e «Un’ipotesi mia…» (rendimento, costi, canale), scambio automatico A/B,
+tre cursori (intervalli di prima, decisione 64-c), la riga delle ipotesi con «Cambia» (tasse e inflazione); a destra la
+frase, «Se va diversamente» (tre barre, scarti del KID se ci sono), «Anno per anno, al netto», «Come viene calcolato?»,
+«Salva questa ipotesi» (una `Simulazione` con titolo breve, senza chiedere il nome), «Confrontala con un’altra strada»,
+le chip delle ipotesi salvate (al più sei, le altre in «Tutte», menu con Rinomina ed Elimina); con due strade la frase, la
+tabella con la spunta, il grafico a due linee, «Fanne un prospetto per <nome>» (le strade salvate come `Simulazione`,
+riusate se uguali, poi il prospetto del confronto di sempre), «Torna a una strada sola», «Restare o cambiare…» con due
+posizioni e «Stime … non sono promesse.». Motore `MotoreSimulaConfronta` (cifre di `MotoreProiezione`), testi
+`TestiSimulaConfronta`, token `Tema.Apple.SimulaConfronta`, prova `ProvaCalcoliSimulaConfronta` in `--prova-calcoli`,
+`ProvaVera` aggiornata (accorpate, bozza, scambio), istantanee nuove 1403-1404; il catalogo (63) usa «Confronta con
+quello che ha».
+
+Resta:
+- **Istantanee**: rigenerare sul Mac e guardare 14, 15, 16, 233, 239 (chiare e scure) e le nuove 1403-1404; controllare
+  la finestra stretta (239: `ViewThatFits` mette tabella e grafico uno sotto l'altro) e la lunghezza della fila dei
+  pulsanti. Aggiornare la pagina delle anteprime.
+- **«Prospetto in PDF» con una strada sola**: c'è solo per una posizione (`.posizione(id)`); per una scheda, un'ipotesi o
+  il conto non esiste un prospetto della simulazione singola. Serve un caso `SceltaProspetto` nuovo (o il confronto con il
+  conto) da decidere con l'utente.
+- **La cifra della frase non si conta**: è dentro la frase come testo colorato (`Text` + `Text`), quindi niente
+  `NumeroCheConta`; le barre di «Se va diversamente» non si riempiono con il movimento (sono già piene) e non è stato
+  estratto il componente comune con `BarreStradeTFR` (servirà alla 69).
+- **La capsula «Stime in uso · N dati da completare ›»** (miglioria 16) non è nella riga della vista: apre un dettaglio
+  del presentatore delle aree (`Analisi360Apple`), che qui non c'è.
+- **1404 «quasi pari»**: la seconda strada è un'ipotesi mia, che non ha un SRI: la frase dice «quasi allo stesso punto»
+  ma senza il confronto del rischio. Con due strade vere quasi pari compare anche il rischio.
+- **Fluidità**: `RigaStradaSimula` è Equatable con `.equatable()` (rifinitura 61-70): trascinando un cursore le righe
+  delle strade non si ridisegnano. Resta da misurare prima e dopo con `--prova-fluidita` sul runner (qui non si può
+  eseguire): confrontare i corpi contati della colonna di sinistra.
+- **Il conto**: rende 0% (decisione 64-b); l'alternativa con un tasso in Impostazioni › Analisi non è fatta.
+- **Altri collegamenti** che dicono ancora «Simulatore» e «Confronto» (Posizioni, indice delle posizioni, Prospetti,
+  `CollegatiStrumenti`): portano già a «Simula e confronta», ma i nomi sono quelli di prima.
+- **Cambio di cliente**: strade, soldi e ipotesi valgono per `clienteSimula`; tornando a un cliente già visto si ritrova
+  quello che si era lasciato (in memoria), invece di ripartire.
+- **iPhone e iPad**: restano simulatore, scenari e confronto di prima.
+
+## 65. Le note stanno con il cliente
+
+Fatto (solo Mac): la sezione Note del dossier è un elenco solo con la nota a fianco (`NoteDossierMac`,
+`Shell/DossierNote.swift`): testata «Note · un elenco solo · si salvano da sole» con «Nuova nota», a sinistra le note del
+cliente (in cima quella in evidenza con la stella, poi per data di modifica; «Senza titolo», «Nota vuota», «oggi», la
+pillola «Nel Da fare»; menu della riga con «Esporta .txt…» ed «Elimina») e la riga «Da ricordare» (`Cliente.nota`, id
+fisso, mai copiata in una nota); a destra titolo e testo con `TestoRinviato` (Invio nel titolo porta al testo, il fuoco nel
+titolo per la nota nuova), «Metti in evidenza / In evidenza» (una sola per cliente), «Fanne un «Da fare»» (attività per
+oggi salvata subito, con «Annulla», legata con il campo nuovo `Attivita.daNota`), «Elimina» con «Annulla» (o «Svuota» per
+«Da ricordare») e la riga grigia del template. `Nota.inEvidenza` / `stato.notaInEvidenza` (la fissata più recente,
+altrimenti «Da ricordare») per Panoramica (`DaRicordareApple`, con il titolo della nota sopra il testo), la scheda di Vera
+(`ContestoVera`) e la traccia dell'incontro (`MotoreSintesi`). `AppPrisma.note.ospite = .clienti` sul Mac: `apri(.note)` e
+`vai(a: .nota)` portano al dossier del cliente della nota; «Note» sparisce da `altreApp`. In modalità cliente solo la nota
+in evidenza, in sola lettura (decisione presa). I messaggi del dossier restano sotto la griglia. `daNota` in «Prisma
+ovunque» (campi dell'attività), `ProvaOvunque` e `ProvaBackupArchivioPezzi` aggiornate; prova `ProvaVera.provaNoteDossier`;
+istantanee nuove 1405-1407, 60 e 61 cambiano da sole.
+
+Resta:
+- **Istantanee**: rigenerare sul Mac e guardare 60, 61, 64 (Note non ha più una finestra), le Panoramiche di Giulia e Marco
+  (ora mostrano la nota del taccuino fissata dei dati di prova al posto di `Cliente.nota`), 1405-1407; aggiornare la
+  pagina delle anteprime. Valutare se nei dati di prova le note di Giulia e Marco debbano restare fissate (oggi lo sono:
+  quindi sono loro «in evidenza», non «Da ricordare»; il template parte da «Da ricordare»).
+- **«Prima dell'incontro» (miglioria 20)**: non ho trovato una vista che legga `Cliente.nota` oltre alla traccia di Vera
+  (`MotoreSintesi`, già aggiornata); se la 20 mostra «Da ricordare» altrove, va portata su `notaInEvidenza`.
+- **La nota vocale (771, 772)**: arriva come `Nota` del taccuino e quindi compare già nell'elenco del cliente; le istantanee
+  non sono state rifatte per mostrarla nella sezione Note.
+- **Le note di partenza** del template («Da ricordare» e una seconda nota per ogni cliente) non sono state aggiunte ai dati
+  di prova.
+- **Nota appena scritta**: l'elenco aggiorna titolo e anteprima dopo la pausa di 0,3 s (`TestoRinviato`), non a ogni
+  lettera come nel template (rischio accettato in 65.6).
+- **iPhone e iPad**: restano l'app Note, «Da ricordare» com'era e le note fissate «in cima» (più di una possibile).
+
+## 69. Il TFR: prima la risposta
+
+Fatto (solo Mac): il TFR è la terza voce del segmentato di «Simula e confronta» (`ModoSimula.tfr`,
+`StatoShell.scegliModoSimula`, `SegmentatoModoSimula`); la barra laterale di Analisi 360 sul Mac ha solo «Simula e
+confronta» e `scegliStrumentoAnalisi(.tfr)` / `apriStrumentoAnalisi(.tfr)` aprono «Il TFR». La vista è la stessa
+`SchedaTFR` (stessa bozza, stesso salvataggio dopo la pausa) con le colonne del Mac in `Shell/SimulaConfrontaTFR.swift`:
+tre cursori con le parole del template e la definizione di oggi nell'aiuto (69-a), le note dei ripieghi, «Altre ipotesi ⌄»
+con tutti gli altri comandi nei tre gruppi di oggi (69-b, stato in memoria `StatoShell.altreIpotesiTFR`), la riga grigia
+delle ipotesi con i valori veri; a destra la frase con le tre soglie (`TestiTFR.fraseRispostaParti`, 3% e otto anni,
+«a/ad»), la riga sotto con il contributo e i soldi di oggi, le strade, i tre riquadri, «Cosa cambia», la fila e il
+«Dettaglio ⌄» con grafico, tabella, semplificazioni, avvisi e metodo. Il non dipendente ha la sua schermata con la frase
+per tipo (69-d), «Apri il conto della pensione» e «Fai il conto lo stesso». Testi in `Motori/TestiTFRRisposta.swift`
+(`CifreDoc.euroArrotondato`), token in `Tema.Apple.SimulaConfronta.TFR`. `MotoreTFR` non è cambiato. Prove T17 in
+`ProvaCalcoliTFR`, `ProvaVera` aggiornata; istantanee nuove 1408-1410, la 204, la 207 e la 208 cambiano da sole.
+
+Resta:
+- **«Chiedi a Vera di spiegarlo» (69-f)**: non c'è uno `SpuntoVera.tfr` con le cifre di `EsitoTFR` nella fonte di Vera
+  (aggiungere un caso a `SpuntoVera` tocca molti `switch` di Vera, la sintesi e le prove). Per ora il pulsante apre Vera
+  e manda, in modalità lavoro sullo spunto della pensione, una domanda che porta la frase e la riga sotto di Prisma
+  (`TestiTFR.domandaVera`): le cifre restano di Prisma. Da fare: lo spunto vero con la fonte e il prompt in `Vera/`, e
+  la prova in `--prova-vera`.
+- **I nomi delle strade (69-c)**: «Lasciato in azienda», «Nel fondo pensione», «Nel fondo, con il contributo suo e
+  dell'azienda» valgono solo sullo schermo del Mac (`TestiTFR.stradaLasciata/…`). Prospetto e report (205, 206) e
+  iPhone/iPad tengono «TFR in azienda» e «Fondo con contributi»: il nome lungo non entra nelle colonne delle tabelle dei
+  PDF. Decidere guardando le istantanee 205-206.
+- **La cifra che si conta**: la cifra della frase è dentro il testo (in verde) e non si conta (`NumeroCheConta` non entra
+  in un `Text` composto); le barre delle strade non si disegnano con il movimento del tema.
+- **La nota del pubblico impiego (69-e)**: «Da verificare» mostra solo gli avvisi che l'app già dà (fondo che riceve già il
+  TFR, datore senza contributo del cliente, Tesoreria INPS); il dipendente pubblico (TFS) resta fuori.
+- **«Altro ⌄»**: prospetto per te / report per il cliente, Salva PDF, Stampa, Archivia e «Apri in Documenti» stanno nel
+  menu della fila (la vista non ha una testata propria); il nome del fondo non si vede più sullo schermo del Mac (resta nei
+  PDF).
+- **Istantanee**: rigenerare sul Mac e guardare 204, 207, 208 e 1408-1410 (chiare e scure), e aggiornare la pagina delle
+  anteprime.
+
+## 70. Il fascicolo si compone a vista
+
+Fatto (solo Mac): la card «Fascicolo dell'incontro» di Prospetti apre la scheda «Il fascicolo dell'incontro», un
+dettaglio del tema 1080×640 che nasce dalla card (`Shell/ComponiFascicolo.swift`, `PresentatoreFascicoloMac`); la apre
+anche `apriProspetto(.fascicolo)` (Agenda, «Preparami l'incontro», Pratiche, Vera) con `stato.fascicoloDaAprire`, sopra
+il documento del fascicolo. A sinistra la copertina fissa e i report che il cliente ha, nell'ordine scelto, con la spunta,
+la riga «a cosa serve», «per l'incontro di oggi» (stessa regola della miglioria 23), le pagine vere e le frecce; a destra
+la prima pagina vera del PDF (la copertina con l'indice) e la somma, con «Tante da leggere a casa» oltre dieci pagine; la
+fila «Salva il PDF · n pagine» (seconda lettura e archivio nei Documenti), «Mostra al cliente» (dalla copertina, decisione
+70-c, con «1 di n · fascicolo») e «Altro ⌄» (salva in un'altra cartella con la password, stampa). La scelta è per
+cliente, in memoria (`StatoShell.fascicoli`, `SceltaFascicolo`, decisione 70-a); su iPhone e iPad resta una sola. Sul Mac
+l'indice va sulla copertina (riquadro «Dentro» di `CopertinaReport`) fino a 8 report e la pagina dell'indice sparisce
+(decisione 70-b). Testi in `Motori/TestiFascicolo.swift`, token in `Tema.Apple.Prospetti.Fascicolo` e
+`Misure.Documento`/`Tipo.Report`. Prove in `--prova-prospetti` (`provaFascicoloPerCliente`, indice sulla copertina, pagine),
+`ProvaAnnoInsieme` aggiornata; istantanee 81-fascicolo-scuro, 1411, 1412 nuove, la 81, la 82 e la 460 cambiano da sole.
+
+Resta:
+- **⌥↑ / ⌥↓ sulla riga a fuoco**: le righe non prendono il fuoco della tastiera; l'ordine si cambia solo con le frecce.
+- **«1413-uso-fascicolo-un-report»**: con i motori di oggi ogni cliente di prova ha più report pronti (check-up,
+  liquidità, patrimonio… si impaginano sempre), quindi il caso «un solo report» non si vede con i dati di prova. Il testo
+  c'è (`TestiFascicolo.unSoloReport`); serve un cliente di prova adatto o una scena con dati costruiti.
+- ~~**Prova di carico**~~: fatta nella rifinitura 61-70. `--prova-carico` apre la scheda per un cliente nuovo (pagine di
+  ogni report e documento composto, limite `limiteFascicolo`) e verifica con il contatore
+  `StatoShell.partiFascicoloImpaginate` che una spunta non impagini di nuovo i report, e il tempo della ricomposizione
+  (`limiteSpuntaFascicolo`). Resta da leggere il tempo della prima apertura nel registro del workflow (riga «INFO Scheda
+  del fascicolo»): solo se è lento, contare le pagine in un secondo passaggio con il segnaposto «— pagine».
+- **La card dopo la chiusura**: chiusa la scheda aperta dall'Agenda, l'anteprima di Prospetti resta sul documento del
+  fascicolo (con le azioni di sempre); nessuna voce dell'elenco è scelta. Valutare guardando le istantanee.
+- **Istantanee**: rigenerare sul Mac e guardare 81, 81-scuro, 82, 460, 1411 e 1412 (l'indice sulla copertina: righe,
+  misure e se 8 voci entrano davvero) e aggiornare la pagina delle anteprime.

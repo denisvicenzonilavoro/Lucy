@@ -319,3 +319,59 @@ extension Tema.Apple.Clienti {
         static let notaScadenza = Tema.Apple.Carattere(dimensione: 12.5, peso: .regular)
     }
 }
+
+// MARK: - Migliorie d'uso 65: la sezione Note del dossier (Mac)
+
+extension Tema.Apple.Clienti {
+    /// La sezione Note del dossier sul Mac (Shell/DossierNote.swift): testata, elenco a sinistra (300) e la nota a destra,
+    /// in due card piatte alte quanto la sezione (minimo 420).
+    enum NoteDossier {
+        typealias K = Tema.Apple.Carattere
+        typealias C = Tema.Apple.Colore
+
+        // Testata della sezione
+        static let titoloSezione = K.h2
+        static let sottotitolo = K.secondario
+        static let spazioTestata: CGFloat = 2
+        static let spazioBlocchi: CGFloat = 14
+
+        // Griglia `300px 1fr`
+        static let larghezzaElenco: CGFloat = 300
+        static let altezzaMinima: CGFloat = 420
+        static let spazioColonne: CGFloat = Tema.Apple.Misura.Spazio.griglia
+        static let superficie = Tema.Apple.Superficie.cardPiatta
+
+        // L'elenco
+        static let paddingElenco = Tema.Apple.Misura.padding(8, 8)
+        static let spazioRighe: CGFloat = 2
+        static let paddingRiga = Tema.Apple.Misura.padding(9, 12)
+        static let spazioInRiga: CGFloat = 3
+        static let titoloRiga = K(dimensione: 14, peso: .semibold)
+        static let anteprimaRiga = K(dimensione: 12.5, peso: .regular)
+        static let dataRiga = K(dimensione: 12, peso: .regular, tabellare: true)
+        static let stella = K(dimensione: 11, peso: .semibold)
+        static let fondoRigaAccesa = C.selezioneVoce
+        static let raggioRiga = Tema.Apple.Raggio.voce
+        static let paddingVuoto = Tema.Apple.Misura.padding(18, 14)
+
+        // La nota (padding 18×22)
+        static let paddingNota = Tema.Apple.Misura.padding(18, 22)
+        static let spazioNota: CGFloat = 10
+        static let titoloNota = K(dimensione: 22, peso: .bold, tracking: -0.4)
+        static let testoNota = K(dimensione: 15, peso: .regular, interlinea: 1.5)
+        static let spazioFila: CGFloat = 8
+        static let rigaGrigia = K.secondario
+        static let filo = C.separatore
+        static let spessoreFilo: CGFloat = 1
+
+        // Colori
+        static let testo = C.inchiostro
+        static let secondario = C.inchiostro2
+        static let segnaposto = C.inchiostro3
+        /// La stella della nota in evidenza: l'arancio del tema.
+        static let coloreStella = C.arancio
+
+        // Lo spazio fra la griglia e i messaggi del dossier
+        static let sopraMessaggi: CGFloat = 14
+    }
+}

@@ -108,7 +108,8 @@ extension StatoShell {
         d.lettura = .letto
         d.dimensione = Int64(dati.count)
         let ext = estensione.trimmingCharacters(in: CharacterSet(charactersIn: ". "))
-        if persistente {
+        // Migliorie d'uso 37: in dimostrazione il documento resta solo in memoria, senza file nella cartella vera
+        if persistente && !inDimostrazione {
             let cartella = Archivio.cartellaDocumenti.appendingPathComponent(cliente, isDirectory: true)
             do {
                 try FileManager.default.createDirectory(at: cartella, withIntermediateDirectories: true)

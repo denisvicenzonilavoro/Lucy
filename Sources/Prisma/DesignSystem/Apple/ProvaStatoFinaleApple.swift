@@ -46,6 +46,12 @@ enum ProvaStatoFinaleApple {
         verifica.vero("Tema Apple: nessuna animazione in istantanea",
                       MotoApple.animazione(MotoApple.Cascata.animazione, calmo: false, istantanea: true) == nil)
         verifica("Tema Apple: dissolvenza calma di 0,15 s", MotoApple.durataCalma, 0.15, tolleranza: 1e-9)
+        // Migliorie d'uso 68: la scossa della riga in arancione è ferma nelle istantanee e con calma, di 6 punti nell'uso
+        verifica("Conferme: scossa ferma nelle istantanee",
+                 Double(ScuotiConferma.ampiezza(attiva: true, calmo: false, istantanea: true)), 0)
+        verifica("Conferme: scossa ferma con calma", Double(ScuotiConferma.ampiezza(attiva: true, calmo: true, istantanea: false)), 0)
+        verifica("Conferme: scossa di 6 punti", Double(abs(ScuotiConferma.ampiezza(attiva: true, calmo: false, istantanea: false))), 6)
+        verifica("Conferme: le altre righe non tremano", Double(ScuotiConferma.ampiezza(attiva: false, calmo: false, istantanea: false)), 0)
 
         // Vera (§2.18-2.20): la sfera respira fino a 1,045 a metà ciclo e pulsa fino a 1,1; i puntini salgono al 30%
         // e al 60% sono di nuovo spenti; il testo si divide in parole tenendo spazi e a capo di Qwen

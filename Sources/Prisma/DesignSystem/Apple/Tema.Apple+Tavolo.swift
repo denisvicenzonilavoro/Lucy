@@ -70,6 +70,50 @@ extension Tema.Apple {
             /// Il tratto di prova (istantanee e prove): blu scuro su trasparente, 3 pt.
             static let coloreTrattoProva = CGColor(red: 0.08, green: 0.13, blue: 0.17, alpha: 1)
             static let spessoreTrattoProva: CGFloat = 3
+
+            /// Migliorie d'uso 58: la scheda «Presa visione» sul Mac (`.presaF` del template, CSS riga 748): il riquadro
+            /// tratteggiato del tratto (bordo 1,5, trattini 6/5, inchiostro3, raggio 18, padding 10×16×12, alto 120),
+            /// tratto 2,6 color inchiostro, testo sotto 13 secondario. Il tratto si fa con il mouse o il trackpad.
+            enum Scheda {
+                static let larghezza: CGFloat = 560
+                static let raggio: CGFloat = Tema.Apple.Raggio.dettaglioAperto
+                static let padding: CGFloat = 28
+                static let superficie = Tema.Apple.Superficie.vetroSopra
+                static let spazio: CGFloat = 12
+                static let occhiello = Carattere(dimensione: 12, peso: .semibold, tracking: 0.6, maiuscolo: true)
+                static let coloreOcchiello = Colore.accento
+                static let titolo = Carattere(dimensione: 26, peso: .bold, tracking: -0.6)
+                static let testo = Carattere(dimensione: 15, peso: .regular, interlinea: 1.4)
+                static let coloreTitolo = Colore.inchiostro
+                static let coloreTesto = Colore.inchiostro2
+                static let bordoArea: CGFloat = 1.5
+                static let trattini: [CGFloat] = [6, 5]
+                static let coloreArea = Colore.inchiostro3
+                static let raggioArea: CGFloat = 18
+                static let paddingArea = EdgeInsets(top: 10, leading: 16, bottom: 12, trailing: 16)
+                static let altezzaArea: CGFloat = 120
+                static let tratto: CGFloat = 2.6
+                static let coloreTratto = Colore.inchiostro
+                static let sottoArea = Carattere(dimensione: 13, peso: .regular)
+                static let coloreSottoArea = Colore.inchiostro2
+                static let piccolo = Carattere(dimensione: 12.5, peso: .regular)
+                static let sopraPulsanti: CGFloat = 8
+                /// Il tratto disegnato sul Mac diventa un'immagine 2× per la pagina del PDF (inchiostro della carta).
+                static let scalaTratto: CGFloat = 2
+                static let inchiostroCarta = CGColor(red: 0.08, green: 0.13, blue: 0.17, alpha: 1)
+            }
+
+            /// La pagina con ciò che si vedeva (un capitolo o un palco), su carta bianca come le pagine del PDF.
+            enum Pagina {
+                static let formato = CGSize(width: 595, height: 842)
+                static let margine: CGFloat = 48
+                static let spazio: CGFloat = 16
+                static let titolo = Carattere(dimensione: 20, peso: .bold, tracking: -0.3)
+                static let nota = Carattere(dimensione: 9.5, peso: .regular)
+                static let inchiostro = Color(hex: "#14202B")
+                static let inchiostro2 = Color(hex: "#5A6873")
+                static let raggioImmagine: CGFloat = 6
+            }
         }
     }
 }

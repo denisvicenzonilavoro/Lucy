@@ -5,7 +5,12 @@ import Foundation
 enum TestiPassaparola {
     // MARK: - Potenziali
 
+    #if os(macOS)
+    /// Migliorie d'uso 47: il clic apre la scheda, con il prossimo passo.
+    static let notaPercorso = "Tocca una scheda per aprirla: dentro c'è il prossimo passo. Prisma ricorda chi l'ha presentata: quando diventa cliente compare nell'albero del passaparola."
+    #else
     static let notaPercorso = "Tocca una scheda per farla avanzare. Prisma ricorda chi l'ha presentata: quando diventa cliente, compare nell'albero del passaparola."
+    #endif
     static let notaPercorsoSolaLettura = "Su iPad il percorso si guarda soltanto: le schede si spostano dal Mac."
     static let aggiungi = "Aggiungi un potenziale cliente"
     static let aggiungiBreve = "+ Potenziale"
@@ -72,6 +77,105 @@ enum TestiPassaparola {
     static let primoIncontroFissato = "Primo incontro fissato in Agenda"
     static let agendaPiena = "Nessuno spazio libero nelle prossime settimane: fissalo a mano in Agenda."
 
+    // MARK: - Il prossimo passo (Migliorie d'uso 47)
+
+    static let tileFermi = "Fermi da più di due settimane"
+
+    /// La nota della tile del patrimonio (decisione 47-b): il probabile entro fine anno non sparisce.
+    static func diCuiProbabile(_ euro: Double) -> String { "di cui probabile entro fine anno: " + Formati.euro(euro) }
+
+    /// Il titolo dell'appuntamento del primo incontro (lo scrive `fissaPrimoIncontro`, lo riconosce il prossimo passo).
+    static func titoloPrimoIncontro(_ nome: String) -> String { "Primo incontro · \(nome)" }
+
+    /// «Da contattare»: chi l'ha presentato, la fonte o «Decidi come contattarlo»; senza informativa, prima quella.
+    static func passoDaContattare(_ p: PotenzialeCliente, presentatore: String?, azione: AzionePotenziale?) -> String {
+        if p.informativaIl == nil {
+            return azione == .chiama ? "Prima dagli l'informativa: poi chiamalo" : "Prima dagli l'informativa: poi contattalo"
+        }
+        if let presentatore {
+            let chi = TestiTraguardi.primoNome(presentatore)
+            switch azione {
+            case .some(.chiama): return "Chiamalo: te l'ha presentato \(chi)"
+            case .some(.scrivi): return "Scrivigli: te l'ha presentato \(chi)"
+            default: return "Contattalo: te l'ha presentato \(chi)"
+            }
+        }
+        if let f = p.fonte?.trimmingCharacters(in: .whitespaces), !f.isEmpty {
+            return "Rispondi: arriva " + daFonte(f)
+        }
+        return "Decidi come contattarlo"
+    }
+
+    /// «dal sito dello studio» resta com'è; «evento in Comune» diventa «da «evento in Comune»».
+    static func daFonte(_ f: String) -> String {
+        let prima = f.lowercased().split(separator: " ").first.map(String.init) ?? ""
+        let preposizioni: Set<String> = ["da", "dal", "dalla", "dallo", "dai", "dagli", "dalle"]
+        if preposizioni.contains(prima) || prima.hasPrefix("dall'") || prima.hasPrefix("dall’") { return f }
+        return "da «\(f)»"
+    }
+
+    private static let giornoIncontro = Formati.formato("EEEE d")
+
+    /// «Primo incontro giovedì 5 alle 18:00».
+    static func passoIncontroFissato(_ inizio: Date) -> String {
+        "Primo incontro " + giornoIncontro.string(from: inizio) + " alle " + Formati.ora.string(from: inizio)
+    }
+
+    static let passoFissaIncontro = "Fissa la data del primo incontro"
+    static let passoAnalisi = "Raccogli i dati per l'analisi"
+    static let passoProposta = "Ha la proposta in mano: senti cosa ne pensa"
+    static let passoCliente = "Cliente: è nell'albero del passaparola"
+
+    /// «fermo da 3 giorni», «fermo da 1 giorno», «fermo da oggi».
+    static func fermoDa(_ giorni: Int) -> String {
+        switch giorni {
+        case ..<1: return "fermo da oggi"
+        case 1: return "fermo da 1 giorno"
+        default: return "fermo da \(giorni) giorni"
+        }
+    }
+
+    /// Il valore della tile «Fermo da» del dettaglio: «3 giorni», «1 giorno», «oggi».
+    static func valoreFermo(_ n: Int) -> String {
+        switch n {
+        case ..<1: return "oggi"
+        case 1: return "1 giorno"
+        default: return "\(n) giorni"
+        }
+    }
+
+    /// «in «Analisi»».
+    static func inFase(_ f: FasePotenziale) -> String { "in «\(f.titolo)»" }
+
+    /// Il pulsante primario del dettaglio, secondo l'azione del passo.
+    static func pulsantePasso(_ a: AzionePotenziale) -> String {
+        switch a {
+        case .chiama: return "Chiama"
+        case .scrivi: return "Scrivi"
+        case .fissaIncontro: return "Fissa l'incontro"
+        case .preparaIncontro: return "Prepara l'incontro"
+        }
+    }
+
+    /// «Passa a «Analisi»».
+    static func passaA(_ f: FasePotenziale) -> String { "Passa a «\(f.titolo)»" }
+
+    /// La nota sotto le colonne dopo uno spostamento (il nome in neretto sta a parte).
+    static func passatoA(_ f: FasePotenziale) -> String { "è passato a «\(f.titolo)»." }
+
+    /// L'avviso di «Non interessato».
+    static func toltoDaiPotenziali(_ nome: String) -> String { "\(nome) tolto dai potenziali: resta in archivio" }
+
+    static let passoTitolo = "Il prossimo passo"
+    static let tileFatto = "Fatto"
+    static let fattoCliente = "Ora è un cliente: lo trovi tra i clienti e nell'albero del passaparola."
+    static let cheDiventiCliente = "che diventi cliente"
+    static let nessunPasso = "Nessun passo: non è interessato. Con «Ripristina» torna in «Da contattare»."
+    static let nessunContatto = "Scrivi un telefono, o l'informativa e il consenso, con «Modifica…»."
+    static let copiaNumero = "Copia il numero"
+    static let numeroCopiato = "Numero copiato"
+    static let notaChiama = "Prisma non chiama: componi il numero dal telefono."
+
     // MARK: - Albero
 
     /// «CHI TI HA PRESENTATO CHI · DAL 2016» (senza date solo «Chi ti ha presentato chi»).
@@ -79,7 +183,12 @@ enum TestiPassaparola {
         anno.map { "CHI TI HA PRESENTATO CHI · DAL \($0)" } ?? "CHI TI HA PRESENTATO CHI"
     }
 
+    #if os(macOS)
+    /// Migliorie d'uso 48: toccare una persona accende il suo ramo.
+    static let notaAlbero = "La grandezza di ogni cerchio è il patrimonio. Le persone in grigio sono ancora potenziali clienti. Tocca una persona per vedere il suo ramo."
+    #else
     static let notaAlbero = "La grandezza di ogni cerchio è il patrimonio. Le persone in grigio sono ancora potenziali clienti."
+    #endif
     static let vuotoAlbero = "Nessuna presentazione registrata per ora. Quando un cliente te ne presenta un altro, scrivilo nel suo dossier («Presentato da»): qui nasce l'albero."
     static let tu = "Tu"
 
@@ -155,6 +264,56 @@ enum TestiPassaparola {
 
     static func titoloRichiesta(_ nome: String) -> String { "Chiedere una presentazione a \(TestiTraguardi.primoNome(nome))" }
     static let oggettoRichiesta = "Un grazie"
+
+    // MARK: - Il ramo di una persona (Migliorie d'uso 48)
+
+    static let ramoDi = "Il ramo di"
+    static let tutti = "Tutti"
+    static let apriDossier = "Apri il dossier"
+    static let capsulaCliente = "Cliente"
+    static let capsulaPotenziale = "Potenziale"
+    static let chiediPresentazione = "Chiedi una presentazione"
+    /// Decisione 48-a: senza un fatto bello in corso, niente richiesta.
+    static let momentoDaPrisma = "Il momento giusto per chiedere te lo dice Prisma, dopo un fatto bello."
+    static let suggerimentoNodo = "Clic: il suo ramo · ⌘-clic: il dossier"
+
+    /// «Ringrazia Sofia».
+    static func ringrazia(_ nome: String) -> String { "Ringrazia " + TestiTraguardi.primoNome(nome) }
+
+    /// La frase del ramo: «Ti ha presentato 3 persone: 2 sono già clienti (328.000 €), una è ancora un potenziale.»;
+    /// senza clienti «… nessuna è ancora cliente…»; senza presentati «Sofia non ti ha ancora presentato nessuno.».
+    /// Il valore è dei soli già clienti: mai sommato alle stime dei potenziali (decisione 95).
+    static func ramo(nome: String, clienti: Int, valoreClienti: Double, potenziali: Int) -> String {
+        let totale = clienti + potenziali
+        guard totale > 0 else { return "\(TestiTraguardi.primoNome(nome)) non ti ha ancora presentato nessuno." }
+        var frase = "Ti ha presentato " + (totale == 1 ? "una persona" : "\(totale) persone") + ": "
+        switch clienti {
+        case 0: frase += "nessuna è ancora cliente"
+        case 1: frase += "una è già cliente (\(Formati.euro(valoreClienti)))"
+        default: frase += "\(clienti) sono già clienti (\(Formati.euro(valoreClienti)))"
+        }
+        switch potenziali {
+        case 0: break
+        case 1: frase += ", una è ancora un potenziale"
+        default: frase += ", \(potenziali) sono ancora potenziali"
+        }
+        return frase + "."
+    }
+
+    /// La cifra a destra di un presentato: patrimonio o stima, «—» se non nota.
+    static func cifraPresentato(_ p: PresentatoRamo) -> String { p.cifra.map { Formati.euro($0) } ?? "—" }
+
+    static func titoloRingraziamento(_ nome: String) -> String { "Ringraziare \(TestiTraguardi.primoNome(nome)) per le presentazioni" }
+    static let percheRingraziamento = "Ti ha presentato delle persone"
+    static let oggettoRingraziamento = "Grazie di cuore"
+
+    /// L'avviso dopo «Ringrazia…»: la bozza è in Messaggi, la spedisce il consulente.
+    /// Rifinitura 48: l'azione dell'avviso del grazie.
+    static let apriGrazieInMessaggi = "Apri in Messaggi"
+
+    static func ringraziamentoPronto(_ nome: String) -> String {
+        "Per \(TestiTraguardi.primoNome(nome)): un grazie per le persone che ti ha presentato. Lo trovi in Messaggi"
+    }
 
     // MARK: - Colonne degli anni
 

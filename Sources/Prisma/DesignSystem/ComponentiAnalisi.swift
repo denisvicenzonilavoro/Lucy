@@ -346,6 +346,8 @@ struct Pillola: View {
 struct PannelloAnalisi<Destra: View, Contenuto: View>: View {
     let titolo: String
     var nota: String? = nil
+    /// Migliorie d'uso 66: le parole da segnare nella nota (l'insieme di `stato.paroleSchermata`); nil: nota semplice.
+    var paroleNota: Set<VoceGlossario.Chiave>? = nil
     @ViewBuilder let destra: () -> Destra
     @ViewBuilder let contenuto: () -> Contenuto
     @Environment(\.superficiApple) private var apple
@@ -368,9 +370,14 @@ struct PannelloAnalisi<Destra: View, Contenuto: View>: View {
                         .carattereApple(a.titoloPannello)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
                     if let nota {
-                        Text(nota)
-                            .carattereApple(a.notaPannello)
-                            .foregroundColor(a.coloreNota)
+                        if let paroleNota {
+                            TestoConParole(nota, parole: paroleNota, colore: a.coloreNota)
+                                .carattereApple(a.notaPannello)
+                        } else {
+                            Text(nota)
+                                .carattereApple(a.notaPannello)
+                                .foregroundColor(a.coloreNota)
+                        }
                     }
                 }
                 Spacer()
@@ -390,7 +397,12 @@ struct PannelloAnalisi<Destra: View, Contenuto: View>: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(titolo).font(Tema.Testo.Componenti.titoloPannello).foregroundColor(Tema.Colore.inchiostro)
                     if let nota {
-                        Text(nota).font(Tema.Testo.secondario).foregroundColor(Tema.Colore.inchiostroSecondario)
+                        if let paroleNota {
+                            TestoConParole(nota, parole: paroleNota, colore: Tema.Colore.inchiostroSecondario)
+                                .font(Tema.Testo.secondario)
+                        } else {
+                            Text(nota).font(Tema.Testo.secondario).foregroundColor(Tema.Colore.inchiostroSecondario)
+                        }
                     }
                 }
                 Spacer()

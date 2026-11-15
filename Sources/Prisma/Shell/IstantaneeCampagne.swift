@@ -10,7 +10,9 @@ import SwiftUI
 /// - 866: nessun gruppo (la frase al centro);
 /// - 867: Vera non è pronta (resta il testo di Prisma, con l'avviso);
 /// - 868: il gruppo più grande dei clienti fittizi;
-/// - 869: la testata di Messaggi con il segmentato «Messaggi · Campagne».
+/// - 869: la testata di Messaggi con il segmentato «Messaggi · Campagne»;
+/// - 1150 e 1151 (migliorie d'uso 49, il pannello in tre passi che mostrano già anche 862-868): un orario spento, e
+///   nessun cliente scelto con il pulsante spento «Scegli almeno un cliente».
 /// DATI DI PROVA DICHIARATI: i clienti fittizi (`ClientiFittizi`) con i gruppi del template di `CampagneDiProva`
 /// (titoli di Stato in scadenza, compleanni tondi, fondi pensione fermi: solo nei dati della scena); il pannello dice
 /// «tra i clienti di prova».
@@ -60,6 +62,18 @@ extension Istantanee {
             ("869-messaggi-testata-campagne", { s in
                 MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia")
                 s.vistaMessaggi = .messaggi
+            }),
+            // Migliorie d'uso 49: un orario spento (la capsula non accesa, le altre piene d'accento)
+            ("1150-uso-campagna-orario-spento", { s in
+                campagne(s, gruppo: 0)
+                if let primo = s.spaziCampagna().first { s.campagne.chipTolti.insert(primo.inizio) }
+            }),
+            // Migliorie d'uso 49: tutti esclusi, il pulsante spento dice «Scegli almeno un cliente»
+            ("1151-uso-campagna-nessun-cliente", { s in
+                campagne(s, gruppo: 0)
+                if let g = s.gruppiCampagne().first {
+                    for m in g.membri { s.campagne.esclusi.insert(StatoCampagne.chiave(g.id, m.clienteId)) }
+                }
             }),
         ]
     }

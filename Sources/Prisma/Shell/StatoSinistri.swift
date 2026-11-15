@@ -156,6 +156,8 @@ extension StatoShell {
     /// File trascinati su un documento (o sulla card): vanno nei Documenti del cliente (collegati alla polizza del
     /// sinistro) e il documento risulta ricevuto oggi; senza un documento scelto ognuno diventa un documento ricevuto.
     func importaFileSinistro(_ id: String, documento: String?, urls: [URL]) {
+        // Migliorie d'uso 37: i sinistri in memoria sono di prova, i file finirebbero nella cartella Documenti vera
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else { return }
         guard !solaLettura else {
             mostraAvviso("Archivio in sola lettura: aggiorna Prisma per importare documenti.")

@@ -11,6 +11,8 @@ import Foundation
 /// - 848: «È un potenziale cliente» (§9.1.4): la carta di Elena Marchi letta mentre Elena è tra i potenziali, presentata
 ///   da Sofia (chiara e scura); 849: la scena aperta da «Diventa cliente» (§9.2.4), in attesa della carta, con il nome
 ///   già scritto e chi l'ha presentata (chiara e scura).
+/// - Migliorie d'uso 43: 841 con le righe «＋ Telefono» e «＋ Canale», il sottotitolo «controlla e completa» e la riga in
+///   fondo; 1163 il telefono scritto (numero finto «333 000 0000») e il canale Alleanza acceso.
 ///
 /// DATI DI PROVA DICHIARATI: la carta fac-simile «Elena Marchi» (`CartaIdentitaFacSimile`, scritta «FAC-SIMILE», numero
 /// «CA00000AA» palesemente finto), i moduli fac-simile disegnati da Prisma e il codice fiscale messo a un cliente di prova
@@ -57,6 +59,12 @@ extension Istantanee {
         coppia("848-clienti-nuovo-potenziale") { s in
             s.dati.potenziali = s.dati.potenziali + [elenaTraIPotenziali()]
             preparaNuovoCliente(s, righe: CartaIdentitaFacSimile.righe(), moduli: true)
+        }
+        // Migliorie d'uso 43: la riga Telefono scritta (numero palesemente finto) e il canale Alleanza acceso
+        una("1163-uso-clienti-nuovo-telefono-canale") { s in
+            preparaNuovoCliente(s, righe: CartaIdentitaFacSimile.righe(), moduli: true)
+            s.nuovoCliente.telefono = "333 000 0000"
+            s.nuovoCliente.canali = [.alleanza]
         }
         coppia("849-clienti-nuovo-da-potenziale") { s in
             let p = elenaTraIPotenziali()

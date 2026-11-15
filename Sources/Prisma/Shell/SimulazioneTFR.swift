@@ -10,25 +10,25 @@ import SwiftUI
 /// ridisegnerebbe tutte le finestre aperte: sull'M1 da 8 GB si sente.
 struct SchedaTFR: View {
     @Environment(StatoShell.self) var stato
-    @Environment(\.modoIstantanea) private var modoIstantanea
-    @State private var report = false
-    @State private var daSalvare: PDFDaSalvare?
-    @State private var archiviato: String?
-    @State private var mostraDettaglio = false
+    @Environment(\.modoIstantanea) var modoIstantanea
+    @State var report = false
+    @State var daSalvare: PDFDaSalvare?
+    @State var archiviato: String?
+    @State var mostraDettaglio = false
     /// Per un cliente non dipendente: il consulente sceglie di fare il confronto lo stesso (per esempio se cambia lavoro).
-    @State private var confrontaComunque = false
+    @State var confrontaComunque = false
     /// La bozza delle ipotesi e il cliente a cui appartiene (nil = si leggono quelle dell'archivio).
-    @State private var bozza: IpotesiTFR?
-    @State private var clienteBozza: String?
+    @State var bozza: IpotesiTFR?
+    @State var clienteBozza: String?
 
-    private typealias M = Tema.Misura.TFR
-    private typealias K = Tema.Colore.TFR
-    private typealias F = Tema.Testo.TFR
-    private typealias A = Tema.Apple.ConfrontoTFR
-    private typealias S = Tema.Apple.Strumenti360
+    typealias M = Tema.Misura.TFR
+    typealias K = Tema.Colore.TFR
+    typealias F = Tema.Testo.TFR
+    typealias A = Tema.Apple.ConfrontoTFR
+    typealias S = Tema.Apple.Strumenti360
 
     /// Intervalli e passi dei comandi della console (la lettura dell'archivio ha limiti più larghi: `IpotesiTFR.Limiti`).
-    private enum Console {
+    enum Console {
         static let retribuzione: ClosedRange<Double> = IpotesiTFR.Limiti.retribuzione
         static let passoRetribuzione = 500.0
         static let fineRetribuzione = 150_000.0
@@ -52,24 +52,24 @@ struct SchedaTFR: View {
         static let passoCosto = 0.05
     }
 
-    private var cliente: String { stato.clienteAttivoId }
+    var cliente: String { stato.clienteAttivoId }
 
     /// Le ipotesi sul tavolo: la bozza del cliente attivo o quelle dell'archivio (salvate o dai dati del cliente).
-    private var ipotesi: IpotesiTFR {
+    var ipotesi: IpotesiTFR {
         if let b = bozza, clienteBozza == cliente { return b }
         return stato.ipotesiTFR(cliente)
     }
 
     /// Le ipotesi ricavate dai soli dati del cliente (per le note dei ripieghi), una volta per dati dei calcoli e giorno:
     /// la console le confronta a ogni passo del cursore. Solo dossier e posizioni, nessuna ipotesi salvata.
-    private var partenza: IpotesiTFR {
+    var partenza: IpotesiTFR {
         let id = cliente
         return stato.ricavato("tfr-partenza|\(id)") {
             IpotesiTFR.dalCliente(stato.cliente(id), posizioni: stato.posizioniCliente(id))
         }
     }
 
-    private var legame: Binding<IpotesiTFR> {
+    var legame: Binding<IpotesiTFR> {
         Binding(get: { ipotesi }, set: { nuove in
             if clienteBozza != cliente { clienteBozza = cliente }
             bozza = nuove
@@ -78,12 +78,8 @@ struct SchedaTFR: View {
 
     var body: some View {
         let i = ipotesi
-        let e = MotoreTFR.calcola(i)
-        ColonneAffiancate(larghezza: Misure.ColonneStrumento.comandi) {
-            console(i, e)
-        } flessibile: {
-            risultati(i, e)
-        }
+        let e = esito(i)
+        corpo(i, e)
         .sheet(item: $daSalvare) { pdf in
             ModuloSalvaPDF(pdf: pdf, impostazioni: stato.dati.impostazioni.pdf)
                 .environment(stato)
@@ -104,15 +100,36 @@ struct SchedaTFR: View {
         .onDisappear { salvaBozza() }
     }
 
+    /// Le cifre delle ipotesi sul tavolo, calcolate direttamente: le ipotesi cambiano a ogni passo dei cursori e una
+    /// voce nella cache comune (`stato.ricavato`) per ogni passo la riempirebbe e la svuoterebbe tutta.
+    func esito(_ i: IpotesiTFR) -> EsitoTFR? {
+        MotoreTFR.calcola(i)
+    }
+
+    /// Le due colonne: sul Mac quelle di «Simula e confronta › Il TFR» (SimulaConfrontaTFR.swift), su iPhone e iPad
+    /// la console e i risultati di sempre.
+    @ViewBuilder
+    func corpo(_ i: IpotesiTFR, _ e: EsitoTFR?) -> some View {
+        #if os(macOS)
+        corpoMac(i, e)
+        #else
+        ColonneAffiancate(larghezza: Misure.ColonneStrumento.comandi) {
+            console(i, e)
+        } flessibile: {
+            risultati(i, e)
+        }
+        #endif
+    }
+
     /// Scrive la bozza nell'archivio (se è cambiata: `salvaIpotesiTFR` non riscrive ipotesi uguali).
-    private func salvaBozza() {
+    func salvaBozza() {
         guard let b = bozza, let c = clienteBozza else { return }
         stato.salvaIpotesiTFR(c, b)
     }
 
     // MARK: - Console
 
-    private func console(_ i: IpotesiTFR, _ e: EsitoTFR?) -> some View {
+    func console(_ i: IpotesiTFR, _ e: EsitoTFR?) -> some View {
         let b = legame
         // Ripieghi: la nota compare solo se il valore è ancora quello di partenza ricavato senza il dato
         let rip = stato.ripieghiTFR(cliente)
@@ -262,12 +279,12 @@ struct SchedaTFR: View {
         }
     }
 
-    private var filo: some View {
+    var filo: some View {
         Rectangle().fill(S.filo).frame(height: Tema.Misura.filo)
     }
 
     /// Un gruppo della console con il suo titolo.
-    private func gruppo<C: View>(_ titolo: String, @ViewBuilder _ contenuto: () -> C) -> some View {
+    func gruppo<C: View>(_ titolo: String, @ViewBuilder _ contenuto: () -> C) -> some View {
         VStack(alignment: .leading, spacing: M.spazioGruppo) {
             Text(titolo)
                 .carattereApple(S.gruppo)
@@ -279,7 +296,7 @@ struct SchedaTFR: View {
 
     /// La nota sotto un comando (un ripiego o una stima); niente se nil.
     @ViewBuilder
-    private func notaComando(_ testo: String?, avviso: Bool = false) -> some View {
+    func notaComando(_ testo: String?, avviso: Bool = false) -> some View {
         if let testo {
             Text(testo)
                 .carattereApple(A.notaComando)
@@ -289,13 +306,13 @@ struct SchedaTFR: View {
     }
 
     /// Un campo intero letto e scritto dal cursore, nell'intervallo dei comandi.
-    private func intero(_ b: Binding<Int>, _ r: ClosedRange<Double>) -> Binding<Double> {
+    func intero(_ b: Binding<Int>, _ r: ClosedRange<Double>) -> Binding<Double> {
         Binding(get: { Double(b.wrappedValue) },
                 set: { b.wrappedValue = Int(min(max($0, r.lowerBound), r.upperBound).rounded()) })
     }
 
     /// Un intero facoltativo: zero vuol dire «non indicato».
-    private func interoFacoltativo(_ b: Binding<Int?>, _ r: ClosedRange<Double>) -> Binding<Double> {
+    func interoFacoltativo(_ b: Binding<Int?>, _ r: ClosedRange<Double>) -> Binding<Double> {
         Binding(get: { Double(b.wrappedValue ?? 0) },
                 set: { v in
                     let n = Int(min(max(v, r.lowerBound), r.upperBound).rounded())
@@ -304,7 +321,7 @@ struct SchedaTFR: View {
     }
 
     /// Un numero facoltativo: zero vuol dire «non indicato».
-    private func facoltativo(_ b: Binding<Double?>, _ r: ClosedRange<Double>) -> Binding<Double> {
+    func facoltativo(_ b: Binding<Double?>, _ r: ClosedRange<Double>) -> Binding<Double> {
         Binding(get: { b.wrappedValue ?? 0 },
                 set: { v in
                     let x = min(max(v, r.lowerBound), r.upperBound)
@@ -313,12 +330,12 @@ struct SchedaTFR: View {
     }
 
     /// Un sì/no facoltativo: nil vale «no».
-    private func vero(_ b: Binding<Bool?>) -> Binding<Bool> {
+    func vero(_ b: Binding<Bool?>) -> Binding<Bool> {
         Binding(get: { b.wrappedValue == true }, set: { b.wrappedValue = $0 ? true : nil })
     }
 
     /// Netto o lordo: cambiando base il rendimento si converte, così il risultato non salta.
-    private func baseNetta(_ b: Binding<IpotesiTFR>) -> Binding<Bool> {
+    func baseNetta(_ b: Binding<IpotesiTFR>) -> Binding<Bool> {
         Binding(get: { b.wrappedValue.rendimentoNetto },
                 set: { netta in
                     var i = b.wrappedValue
@@ -333,7 +350,7 @@ struct SchedaTFR: View {
     }
 
     /// «Calcolata» o «La indico io»: passando a mano si parte dall'aliquota che Prisma calcola.
-    private func aliquotaAMano(_ b: Binding<IpotesiTFR>) -> Binding<Bool> {
+    func aliquotaAMano(_ b: Binding<IpotesiTFR>) -> Binding<Bool> {
         Binding(get: { b.wrappedValue.aliquotaTFR != nil },
                 set: { aMano in
                     var i = b.wrappedValue
@@ -349,7 +366,7 @@ struct SchedaTFR: View {
     }
 
     /// «Inflazione» o «Un tasso mio»: passando a mano si parte dall'inflazione.
-    private func tassoAMano(_ b: Binding<IpotesiTFR>) -> Binding<Bool> {
+    func tassoAMano(_ b: Binding<IpotesiTFR>) -> Binding<Bool> {
         Binding(get: { b.wrappedValue.tassoAlternativo != nil },
                 set: { aMano in
                     var i = b.wrappedValue
@@ -358,7 +375,7 @@ struct SchedaTFR: View {
                 })
     }
 
-    private func scelta<C: View>(_ etichetta: String, @ViewBuilder _ contenuto: () -> C) -> some View {
+    func scelta<C: View>(_ etichetta: String, @ViewBuilder _ contenuto: () -> C) -> some View {
         VStack(alignment: .leading, spacing: M.spazioScelta) {
             Text(etichetta)
                 .carattereApple(S.etichettaScelta)
@@ -369,7 +386,7 @@ struct SchedaTFR: View {
 
     // MARK: - Risultati
 
-    private func risultati(_ i: IpotesiTFR, _ e: EsitoTFR?) -> some View {
+    func risultati(_ i: IpotesiTFR, _ e: EsitoTFR?) -> some View {
         let senza = confrontaComunque ? nil : stato.senzaTFR(cliente)
         return ScrollView {
             VStack(alignment: .leading, spacing: M.spazioRisultati) {
@@ -408,7 +425,7 @@ struct SchedaTFR: View {
     }
 
     /// Il cliente non è dipendente: niente TFR, niente confronto (si può fare lo stesso, per esempio se cambia lavoro).
-    private func nessunTFR(_ tipo: TipoLavoratore) -> some View {
+    func nessunTFR(_ tipo: TipoLavoratore) -> some View {
         VStack(alignment: .leading, spacing: M.spazioRisultati) {
             TitoloStrumento(occhiello: "TFR in azienda o nel fondo", titolo: "Nessun TFR da confrontare",
                             testo: "Nel dossier: \(tipo.nome.lowercased()). Il TFR spetta solo ai lavoratori dipendenti.")
@@ -424,7 +441,7 @@ struct SchedaTFR: View {
 
     /// Se il TFR va già in un fondo la scelta è fatta e non si revoca: il confronto è solo retrospettivo.
     @ViewBuilder
-    private var fondoGiaConferito: some View {
+    var fondoGiaConferito: some View {
         if let p = stato.fondoConTFR(cliente), let tfr = p.tfrConferito {
             Text("Il TFR va già in «\(p.nome)»: \(Formati.euro(tfr)) l'anno. La scelta non si revoca: il confronto mostra cosa è cambiato rispetto a lasciarlo in azienda.")
                 .carattereApple(A.testo)
@@ -434,7 +451,7 @@ struct SchedaTFR: View {
     }
 
     /// Le semplificazioni che possono cambiare la conclusione, sempre visibili.
-    private func pillole(_ t: TestiTFR) -> some View {
+    func pillole(_ t: TestiTFR) -> some View {
         ScrollView(.horizontal, showsIndicators: false) {
             HStack(spacing: M.spazioPillole) {
                 ForEach(t.pillole, id: \.self) { Pillola(testo: $0, tono: .neutro) }
@@ -444,7 +461,7 @@ struct SchedaTFR: View {
 
     // MARK: Testata: canale, fondo, prospetto o report, uscite del PDF
 
-    private func testata(_ i: IpotesiTFR, disponibile: Bool) -> some View {
+    func testata(_ i: IpotesiTFR, disponibile: Bool) -> some View {
         let nome = i.nomeFondo.trimmingCharacters(in: .whitespacesAndNewlines)
         let b = legame
         let identita = HStack(spacing: M.spazioTestata) {
@@ -483,7 +500,7 @@ struct SchedaTFR: View {
         }
     }
 
-    private func pulsanti(_ disponibile: Bool) -> some View {
+    func pulsanti(_ disponibile: Bool) -> some View {
         HStack(spacing: M.spazioTestata) {
             if let id = archiviato {
                 Button {
@@ -527,7 +544,7 @@ struct SchedaTFR: View {
     }
 
     /// Il documento delle ipotesi sul tavolo: prima si salva la bozza, perché il documento legge l'archivio.
-    private func documento() -> DocumentoStampabile? {
+    func documento() -> DocumentoStampabile? {
         salvaBozza()
         guard let d = stato.documentoTFR(report: report) else {
             stato.mostraAvviso("Indica la retribuzione utile al TFR per preparare il documento.")
@@ -536,7 +553,7 @@ struct SchedaTFR: View {
         return d
     }
 
-    private func pdf(_ d: DocumentoStampabile) -> Data? {
+    func pdf(_ d: DocumentoStampabile) -> Data? {
         guard !modoIstantanea else { return nil }
         let dati = StampaCarta.pdf(d)
         if dati == nil { stato.mostraAvviso("Non sono riuscito a creare il PDF.") }
@@ -545,7 +562,7 @@ struct SchedaTFR: View {
 
     // MARK: La cifra principale: la differenza e le barre affiancate
 
-    private func principale(_ e: EsitoTFR, _ t: TestiTFR) -> some View {
+    func principale(_ e: EsitoTFR, _ t: TestiTFR) -> some View {
         let n = e.ipotesi.anni
         return VStack(alignment: .leading, spacing: M.spazioCifra) {
             Text("TFR FUTURO, NETTO, TRA \(n) \(n == 1 ? "ANNO" : "ANNI")")
@@ -570,7 +587,7 @@ struct SchedaTFR: View {
     // MARK: Indicatori: le aliquote a confronto, il capitale e il vantaggio
 
     /// Tre tessere: cifra grande, etichetta e al massimo una riga breve; il resto nell'aiuto al passaggio del mouse.
-    private func indicatori(_ e: EsitoTFR, _ t: TestiTFR) -> some View {
+    func indicatori(_ e: EsitoTFR, _ t: TestiTFR) -> some View {
         FasciaKPI {
             TesseraAliquoteTFR(e: e)
             tesseraCapitale(e)
@@ -583,7 +600,7 @@ struct SchedaTFR: View {
         }
     }
 
-    private func tesseraCapitale(_ e: EsitoTFR) -> some View {
+    func tesseraCapitale(_ e: EsitoTFR) -> some View {
         let p = e.fondo.prestazione
         let nota: String
         if let p, !p.tuttoCapitale {
@@ -597,7 +614,7 @@ struct SchedaTFR: View {
 
     // MARK: Grafico
 
-    private func grafico(_ e: EsitoTFR) -> some View {
+    func grafico(_ e: EsitoTFR) -> some View {
         var serie: [GraficoProiezione.Serie] = [
             .init(id: "azienda", punti: e.puntiAzienda, colore: K.azienda),
             .init(id: "fondo", punti: e.puntiFondo, colore: K.fondo, principale: true),
@@ -619,7 +636,7 @@ struct SchedaTFR: View {
 
     // MARK: Dettaglio: perché, contributi, tabella, metodo
 
-    private func dettaglio(_ e: EsitoTFR, _ t: TestiTFR) -> some View {
+    func dettaglio(_ e: EsitoTFR, _ t: TestiTFR) -> some View {
         VStack(alignment: .leading, spacing: M.spazioRisultati) {
             Button { mostraDettaglio.toggle() } label: {
                 Label(mostraDettaglio ? "Nascondi il dettaglio" : "Dettaglio: anno per anno e metodo",
@@ -655,7 +672,7 @@ struct SchedaTFR: View {
         return anni
     }
 
-    private func tabella(_ e: EsitoTFR, eta: Int?) -> some View {
+    func tabella(_ e: EsitoTFR, eta: Int?) -> some View {
         let righe = Self.anniTabella(e.anni.count).compactMap { a in e.anni.first { $0.anno == a } }
         let contributi = e.conContributi
         let l = M.colonnaTabella
@@ -687,7 +704,7 @@ struct SchedaTFR: View {
 
     // MARK: Da sapere
 
-    private var piede: some View {
+    var piede: some View {
         VStack(alignment: .leading, spacing: M.spazioRisultati) {
             Text(TestiTFR.daSapere[0])
                 .carattereApple(A.nota)

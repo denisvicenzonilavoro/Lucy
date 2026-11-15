@@ -21,8 +21,9 @@ enum Istantanee {
             s.schedaImpostazioni = .archivio
         }),
         ("4-finestra-non-ingrandita", { s in
+            // Migliorie d'uso 63: sul Mac Prodotti è il catalogo della Biblioteca, la finestra è quella della Biblioteca
             s.apri(.prodotti)
-            s.alternaIngrandimento(.prodotti)
+            s.alternaIngrandimento(.biblioteca)
         }),
         ("5-clienti-panoramica", { $0.apri(.clienti) }),
         ("6-clienti-famiglia", { s in
@@ -88,7 +89,10 @@ enum Istantanee {
             // Attività è accorpata nell'Agenda: l'attività si apre nel mese, nel giorno della scadenza
             s.mostraAttivitaInAgenda("task-casa")
         }),
-        // Gli strumenti di Analisi 360 (le ex app Simulazioni e Confronti): rail di Analisi 360, testata compatta
+        // Gli strumenti di Analisi 360 (le ex app Simulazioni e Confronti): rail di Analisi 360, testata compatta.
+        // Migliorie d'uso 64: sul Mac sono «Simula e confronta» — 14 «Una strada» dall'ETF di Giulia, 15 «Una strada» con
+        // le chip delle ipotesi salvate, 16 e 239 «Due a confronto» per Marco (una posizione e una scheda del catalogo),
+        // 233 un cliente senza ipotesi salvate
         ("14-analisi360-simulatore", { s in
             if let p = s.posizioni.first(where: { $0.id == "pos-giulia-etf-azionario-globale" }) { s.simula(p) }
         }),
@@ -128,6 +132,10 @@ enum Istantanee {
             s.apri(.incontri)
         }),
         ("23-prodotti", { s in
+            // Migliorie d'uso 63: il catalogo nella Biblioteca con Giulia scelta («Per Giulia, dal più adatto» e gli esiti)
+            #if os(macOS)
+            s.scegliCliente("giulia")
+            #endif
             s.prodottoSelezionato = "prodotto-previdenza-pip"
             s.apri(.prodotti)
         }),
@@ -188,6 +196,8 @@ enum Istantanee {
         }),
         ("32-prodotti-condizioni", { s in
             s.prodottoSelezionato = "prodotto-orizzonte-valore"
+            // Migliorie d'uso 63: le condizioni dettagliate stanno in «Tutti i dettagli», aperto
+            s.dettagliProdottoAperti = true
             s.apri(.prodotti)
         }),
         ("30-valutazione-prospetto", { s in
@@ -484,6 +494,7 @@ enum Istantanee {
             s.pannelloSpazi = true
         }),
         ("60-note", { s in
+            // Sul Mac (migliorie d'uso 65) apre il dossier di Giulia sulla sezione Note, con la sua nota
             s.scegliNota("nota-giulia")
             s.apri(.note)
         }),
@@ -636,8 +647,9 @@ enum Istantanee {
             }
         }),
         ("103-ricerca-filtri", { s in
-            // Ricerca per criterio: filtri riconosciuti, totali per canale e anteprima della prima posizione
-            s.testoRicerca = "sri>3 canale:alleanza"
+            // Ricerca per criterio: filtri riconosciuti, totali per canale e anteprima della prima posizione. Migliorie d'uso 61:
+            // sul Mac «tipo:» e «canale:» si accendono come etichette («Posizioni», «Alleanza»), «sri>3» resta scritto
+            s.testoRicerca = "sri>3 tipo:posizioni canale:alleanza"
             s.cercaOvunque()
         }),
         ("104-ricerca-salvate", { s in
@@ -967,7 +979,8 @@ enum Istantanee {
         }),
         // Giro 5 · aggiornamento dei valori in blocco (180–183)
         ("180-posizioni-aggiorna-elenco", { s in
-            // «Aggiorna i valori» sull'elenco della compagnia: indicatori, righe per canale, tutte le pillole
+            // «Aggiorna i valori» sull'elenco della compagnia (migliorie d'uso 44 sul Mac): in alto i dubbi con la domanda
+            // (il calo di Laura, la polizza che Marco non ha, quella di chi non è fra i clienti), sotto i pronti
             s.portafoglio = true
             s.aggiornaValori = AggiornaValori.sessione(tabella: ImportaClienti.righeCSV(DatiAggiornaValoriDemo.elenco(oggi: Date())),
                                                        file: "Valori Alleanza e indipendenti.xlsx", dataComune: Date())
@@ -981,14 +994,38 @@ enum Istantanee {
             s.apri(.posizioni)
         }),
         ("182-posizioni-aggiorna-registrati", { s in
-            // Il riepilogo dopo «Registra»: prima e dopo, righe per canale, elenco delle posizioni
+            // Il riepilogo dopo «Registra» (migliorie d'uso 44): «N valori registrati.», prima, dopo e variazione,
+            // «Fatto» e «Annulla la registrazione»; il calo detto giusto e la polizza nuova di Marco
             s.portafoglio = true
-            s.aggiornaValori = AggiornaValori.sessione(tabella: ImportaClienti.righeCSV(DatiAggiornaValoriDemo.elenco(oggi: Date())),
-                                                       file: "Valori Alleanza e indipendenti.xlsx", dataComune: Date())
+            s.aggiornaValori = DatiAggiornaValoriDemo.sessione()
             if let sessione = s.aggiornaValori {
+                let d = DatiAggiornaValoriDemo.decisioni(s, sessione: sessione)
                 let e = AggiornaValori.esiti(sessione.righe, posizioni: s.posizioni, clienti: s.clienti,
-                                             dataComune: sessione.dataComune, oggi: Date())
-                s.applicaValoriInBlocco(e, esclusi: AggiornaValori.esclusiIniziali(e))
+                                             dataComune: sessione.dataComune, oggi: Date(), scelte: d.scelte)
+                let fuori = AggiornaValori.esclusiPerRegistrare(e, decisioni: d.decisioni, esclusi: AggiornaValori.esclusiIniziali(e))
+                s.applicaValoriInBlocco(e, esclusi: fuori, nuove: AggiornaValori.nuove(e, decisioni: d.decisioni, clienti: d.clienti))
+            }
+            s.apri(.posizioni)
+        }),
+        ("184-posizioni-aggiorna-decisi", { s in
+            // Migliorie d'uso 44: i dubbi decisi (righe con la spunta verde e «Cambia»), il pulsante blu «Registra N valori»
+            s.portafoglio = true
+            if var sessione = DatiAggiornaValoriDemo.sessione() {
+                let d = DatiAggiornaValoriDemo.decisioni(s, sessione: sessione)
+                sessione.decisioni = d.decisioni
+                sessione.clientiNuove = d.clienti
+                sessione.scelte = d.scelte
+                s.aggiornaValori = sessione
+            }
+            s.apri(.posizioni)
+        }),
+        ("185-posizioni-aggiorna-cliente", { s in
+            // Migliorie d'uso 44: con Marco scelto l'elenco mostra solo le sue righe; «righe di altri clienti restano fuori»
+            s.portafoglio = false
+            s.clienteAttivoId = "marco"
+            if var sessione = DatiAggiornaValoriDemo.sessione() {
+                sessione.soloCliente = "marco"
+                s.aggiornaValori = sessione
             }
             s.apri(.posizioni)
         }),
@@ -1383,6 +1420,17 @@ enum Istantanee {
                                                        file: "Valori Alleanza e indipendenti.xlsx", dataComune: Date())
             s.apri(.posizioni)
         }),
+        ("184-posizioni-aggiorna-decisi-scuro", { s in
+            s.portafoglio = true
+            if var sessione = DatiAggiornaValoriDemo.sessione() {
+                let d = DatiAggiornaValoriDemo.decisioni(s, sessione: sessione)
+                sessione.decisioni = d.decisioni
+                sessione.clientiNuove = d.clienti
+                sessione.scelte = d.scelte
+                s.aggiornaValori = sessione
+            }
+            s.apri(.posizioni)
+        }),
         ("191-clienti-documenti-confronto-kid-impatto-scuro", { s in
             s.clienteAttivoId = "giulia"
             s.dati.documenti.append(DatiConfrontoDemo.kidETF())
@@ -1702,6 +1750,16 @@ enum Istantanee {
         tutteLeScene += sceneDaFare
         // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (IstantaneeMostra.swift)
         tutteLeScene += sceneMostra
+        // Migliorie d'uso 66: le parole si spiegano dove sono (IstantaneeParole.swift)
+        tutteLeScene += sceneParole
+        // Migliorie d'uso 67: app aperte e spazi dal nome dell'app (IstantaneeMenuApp.swift)
+        tutteLeScene += sceneMenuApp
+        // Migliorie d'uso 68: la regola delle conferme (IstantaneeConferme.swift)
+        tutteLeScene += sceneConferme
+        // Migliorie d'uso 61: cerca ovunque, e fa (IstantaneeRicercaUso.swift)
+        tutteLeScene += sceneRicercaUso
+        // Migliorie d'uso 62: il documento si apre in grande (IstantaneeLettore.swift)
+        tutteLeScene += sceneLettore
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu
@@ -1714,6 +1772,12 @@ enum Istantanee {
         tutteLeScene += sceneDossierApple
         tutteLeScene += sceneSimulatoriApple
         tutteLeScene += sceneAnalisi360Apple
+        // Migliorie d'uso 65: le note stanno con il cliente (IstantaneeNoteDossier.swift)
+        tutteLeScene += sceneNoteDossier
+        // Migliorie d'uso 69: il TFR, prima la risposta (IstantaneeTFRUso.swift)
+        tutteLeScene += sceneTFRUso
+        // Migliorie d'uso 70: il fascicolo si compone a vista (IstantaneeFascicoloUso.swift)
+        tutteLeScene += sceneFascicoloUso
         tutteLeScene += sceneAgendaApple
         // Migliorie d'uso 21: l'elenco di Incontri (IstantaneeElencoIncontri.swift)
         tutteLeScene += sceneElencoIncontri
@@ -1832,6 +1896,7 @@ enum Istantanee {
                 // Il foglio della fattura a grandezza piena (515): solo la carta, sempre chiara
                 let carta = cartaIstantanea(scena.nome, stato) ?? moduloAziendaIstantanea(scena.nome, stato)
                     ?? moduloProdottoClienteIstantanea(scena.nome, stato) ?? tavolaLuce(scena.nome)
+                    ?? tavolaParola(scena.nome) ?? tavolaConferme(scena.nome)
                 let vista = ZStack(alignment: .topTrailing) {
                     if vetrina {
                         VetrinaApple(intensita: stato.dati.impostazioni.pioggia.forza)

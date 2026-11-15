@@ -13,6 +13,10 @@ import Foundation
 ///
 /// Migliorie d'uso 32 «La mappa risponde» (serie 1100-1129 del gruppo 05): 700, 701, 702, 706 e 708 restano su «Tutti i
 /// clienti» (con un cliente scelto la vista Oggi lo mette in evidenza con i vicini); 700 mostra «Apri «Da fare» ›».
+/// Migliorie d'uso 51 «Il giro di domani si porta in tasca»: 703, 704 (con «Togli»), 707 mostrano il piede nuovo
+/// («Per averlo sull'iPhone accendi «Prisma ovunque»…»), 701 e 702 le date sotto il cursore e «Hanno cominciato nel …».
+/// - 1155: le tappe con «Da portare: …», chiaro e scuro; 1156: «Prisma ovunque» acceso finto e «✓ Il giro è sull'iPhone»;
+///   1157: la crescita su un anno con i nomi.
 /// - 1100: la scheda aperta su un cliente con qualcosa da fare, chiaro e scuro; 1101: il cliente scelto (riquadro suo,
 ///   vicini accesi, anello bianco fermo); 1102: lo stesso con «Con qualcosa da fare» acceso (niente anello); 1103: il
 ///   cliente scelto non è sulla mappa.
@@ -125,7 +129,50 @@ extension Istantanee {
             s.scegliCliente("giulia")
             s.apriTerritorioIstantanea(.oggi)
         }
+        // Migliorie d'uso 51
+        coppia("1155-uso-territorio-giro-borsa") { s in
+            let g = giroDiProva(s, spostaVisite: 0)
+            borsaDiProva(s, giorno: g)
+            s.apriTerritorioIstantanea(.giro)
+        }
+        una("1156-uso-territorio-giro-iphone") { s in
+            let g = giroDiProva(s, spostaVisite: 0)
+            borsaDiProva(s, giorno: g)
+            // «Prisma ovunque» acceso solo nella scena (nessuna cartella, nessuna scrittura): il giro risulta già mandato
+            s.dati.impostazioni.ovunque.acceso = true
+            s.territorio.giroIPhone = GiroInviatoIPhone(giorno: g, giri: s.ovunque.giri - 1)
+            s.apriTerritorioIstantanea(.giro)
+        }
+        una("1157-uso-territorio-crescita-nomi") { s in
+            s.scegliCliente(nil)
+            conFittizi(s)
+            s.territorio.avvioCrescitaFatto = true
+            s.apriTerritorioIstantanea(.crescita)
+            // L'anno con più famiglie nuove dopo il primo (così si vedono i nomi e «e altre n»)
+            let anni = s.crescitaTerritorio().anni
+            if let a = anni.dropFirst().max(by: { ($0.nuovi.count, -$0.anno) < ($1.nuovi.count, -$1.anno) }) {
+                s.territorio.annoCrescita = a.anno
+            }
+        }
         return scene
+    }
+
+    /// Migliorie d'uso 51 (DATI DI PROVA): il fascicolo della visita di Laura già nei Documenti e il documento d'identità di
+    /// Andrea che scade fra dieci giorni, così le tappe dicono «Da portare: …».
+    nonisolated static func borsaDiProva(_ s: StatoShell, giorno: Date) {
+        var d = s.dati.istantanea
+        let cal = Calendar.current
+        if let a = d.appuntamenti.first(where: { $0.clienteId == "laura" && cal.isDate($0.inizio, inSameDayAs: giorno) }) {
+            d.documenti.append(Documento(clienteId: "laura", titolo: MotoreBorsa.titoloFascicolo(a), tipo: .report))
+        }
+        if let i = d.clienti.firstIndex(where: { $0.id == "andrea" }) {
+            var conf = d.clienti[i].conformita ?? ConformitaCliente()
+            let scadenza = cal.date(byAdding: .day, value: 10, to: giorno) ?? giorno
+            conf.documento = DocumentoIdentita(tipo: .cartaIdentita, numero: nil,
+                                               rilasciatoIl: cal.date(byAdding: .year, value: -10, to: scadenza), scadenza: scadenza)
+            d.clienti[i].conformita = conf
+        }
+        s.dati.carica(d)
     }
 
     /// I 5 clienti di prova più i 30 fittizi (dati di prova).

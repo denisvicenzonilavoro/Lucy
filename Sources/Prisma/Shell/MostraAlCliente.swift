@@ -37,6 +37,10 @@ enum SchedaMostra: Equatable {
 /// I testi di «Mostra al cliente» (dal template, righe 853, 3285-3349).
 enum TestiMostra {
     static let titolo = Parole.mostraAlCliente
+    /// Dopo «Fine», con più avvisi trattenuti mentre si mostrava: l'ultimo e quanti altri c'erano.
+    static func altriAvvisi(_ altri: Int, _ ultimo: String) -> String {
+        "\(ultimo) (e \(altri == 1 ? "un altro avviso" : "altri \(altri) avvisi") arrivati mentre mostravi)"
+    }
     static let aiutoPillola = "Mostra al cliente: una vista pulita con il suo quadro, per girare lo schermo (⌥⌘M)"
     static func cosaMostri(_ nome: String) -> String { "Cosa mostri a \(nome)?" }
     static let aChi = "A chi vuoi mostrare Prisma?"
@@ -55,9 +59,6 @@ enum TestiMostra {
         "Per tornare al lavoro: «\(iniziali)» in alto a destra, oppure ⌥⌘M"
     }
     static let chiusa = "Vista del cliente chiusa"
-    static func tavoloAvviso(_ nome: String) -> String {
-        "«Al tavolo» resta com’è: da Prospetti si apre con \(nome) già scelto."
-    }
     static let senzaProspetto = "Il report del cliente non è pronto: aprilo da Prospetti."
     static let fine = "Fine: torna al lavoro"
     static let tastoFine = "⌥⌘M"
@@ -122,6 +123,7 @@ extension StatoShell {
         guard !inVistaCliente, !inModoCliente, !bloccato, presentazione == nil else { return }
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }
+        if menuApp { menuApp = false }
         if pannelloCliente { pannelloCliente = false }
         if pannelloAppAperte { pannelloAppAperte = false }
         chiudiRicerca()
@@ -165,6 +167,8 @@ extension StatoShell {
         schedaMostra = nil
         menuUscitaMostra = false
         schermataNeutraMac = false
+        // Migliorie d'uso 58: si entra sempre con il cliente davanti a questo schermo
+        azzeraLuogo()
         vistaCliente = capitolo
         if capitolo == .sala { apri(.sala) }
         if !zitto && !avvisoVistaVisto {
@@ -206,7 +210,9 @@ extension StatoShell {
         presenta(d, daPagina: daPagina)
     }
 
-    /// «Sull’iPad sul tavolo»: il tavolo resta quello dei Prospetti, con il cliente già scelto.
+    /// «Sull’iPad sul tavolo»: entra nella vista del cliente su «Il quadro» con il cliente sull'iPad (migliorie d'uso 58).
+    /// Il pannello è prima della vista: con «Al tavolo» spento porta a Impostazioni › iPhone e iPad (miglioria 39); con
+    /// l'iPad non collegato apre il tavolo e manda appena l'iPad arriva.
     func tavoloDalPannello() {
         sceltaMostra = false
         // Migliorie d'uso 39: con «Al tavolo» spento si va a Impostazioni › iPhone e iPad
@@ -214,14 +220,17 @@ extension StatoShell {
             apriCollegamenti()
             return
         }
-        guard let c = clienteAttivo else { return }
-        apri(.presentazioni)
-        mostraAvviso(TestiMostra.tavoloAvviso(TestiTraguardi.primoNome(c.nome)))
+        guard clienteAttivo != nil else { return }
+        mostra(.quadro, zitto: true)
+        guard inVistaCliente else { return }
+        mandaAlTavolo(avviso: TestiLuogo.avvisoQuadro)
     }
 
     /// «Fine: torna al lavoro» (e ⌥⌘M): esce dalla modalità cliente, torna l'app di prima (o la scrivania).
     func fineMostra() {
         guard inVistaCliente else { return }
+        // Migliorie d'uso 58: l'iPad torna alla schermata neutra, il tavolo resta in ascolto (decisione 58-c)
+        azzeraLuogo()
         let prima = appPrimaDellaVista
         if presentazione != nil { chiudiPresentazione() }
         chiudiVistaClienteSenzaRitorno()
@@ -231,13 +240,23 @@ extension StatoShell {
         } else {
             mostraScrivania()
         }
-        mostraAvviso(TestiMostra.chiusa)
+        // Migliorie d'uso 1 (§1.3 punto 12): gli avvisi trattenuti mentre si mostrava escono ora (l'avviso è uno alla
+        // volta: si vede l'ultimo arrivato, con il numero degli altri)
+        let trattenuti = avvisiTrattenuti
+        avvisiTrattenuti = []
+        if let ultimo = trattenuti.last {
+            let testo = trattenuti.count == 1 ? ultimo.testo : TestiMostra.altriAvvisi(trattenuti.count - 1, ultimo.testo)
+            mostraAvviso(testo, daVera: ultimo.daVera, azione: ultimo.azione)
+        } else {
+            mostraAvviso(TestiMostra.chiusa)
+        }
     }
 
     /// Spegne la vista pulita e ciò che le sta sopra, senza riportare l'app di prima (lo chiama anche lo spegnersi della
     /// modalità cliente: blocco, cliente eliminato).
     func chiudiVistaClienteSenzaRitorno() {
         appPrimaDellaVista = nil
+        azzeraLuogo()
         if schermataNeutraMac { schermataNeutraMac = false }
         if schedaMostra != nil { schedaMostra = nil }
         if menuUscitaMostra { menuUscitaMostra = false }
@@ -262,6 +281,8 @@ extension StatoShell {
     func mostraNeutra() {
         sceltaMostra = false
         menuUscitaMostra = false
+        menuLuogo = false
+        presaVisioneAperta = false
         schedaMostra = nil
         schermataNeutraMac = true
     }
@@ -276,7 +297,10 @@ extension StatoShell {
         if schermataNeutraMac { schermataNeutraMac = false; return true }
         if sceltaMostra { sceltaMostra = false; return true }
         guard inVistaCliente else { return false }
+        // Come «Annulla»: con il cliente sull'iPad la richiesta del segno si ritira e l'iPad torna a ciò che si vede
+        if presaVisioneAperta { MainActor.assumeIsolated { annullaPresaVisione() }; return true }
         if schedaMostra != nil { schedaMostra = nil; return true }
+        if menuLuogo { menuLuogo = false; return true }
         if menuUscitaMostra { menuUscitaMostra = false; return true }
         return true
     }
@@ -301,9 +325,14 @@ enum ProvaMostraAlCliente {
                   "Mostra al cliente: scelto il cliente, il pannello passa alle quattro scelte")
         s.chiudiSceltaMostra()
         s.apri(.agenda)
+        // Migliorie d'uso 59: il copione «Cosa dire» si vede solo al consulente e si chiude davanti al cliente
+        controlla(s.consulenteVede, "Mostra al cliente: fuori dalla vista pulita il consulente vede il copione")
+        s.sala.copioneAperto = true
         s.mostra(.quadro)
         controlla(s.inVistaCliente && s.inModoCliente && s.vistaCliente == .quadro && !s.sceltaMostra,
                   "Mostra al cliente: «Il suo quadro» entra nella vista pulita sopra la modalità cliente")
+        controlla(!s.consulenteVede && !s.sala.copioneAperto,
+                  "Mostra al cliente: nella vista pulita il copione non si vede e si chiude")
         controlla(s.clienti.map(\.id) == [primo.id], "Mostra al cliente: si vede solo il cliente mostrato")
         let posizioniAperte = s.sistema.aperta(.posizioni)
         s.apri(.posizioni)
@@ -325,13 +354,40 @@ enum ProvaMostraAlCliente {
         s.mostraNeutra()
         controlla(s.schermataNeutraMac && s.escMostra() && !s.schermataNeutraMac && s.inVistaCliente,
                   "Mostra al cliente: Esc chiude la schermata neutra e si resta nella vista")
+        // Migliorie d'uso 58: con il cliente sull'iPad il consulente rivede i suoi pulsanti; «Fine» lo rimette sullo schermo
+        controlla(s.luogoCliente == .schermo, "Mostra al cliente: si entra con il cliente davanti a questo schermo")
+        s.luogoCliente = .tavolo
+        controlla(s.consulenteVede, "Mostra al cliente: con il cliente sull'iPad il consulente vede i suoi pulsanti")
+        s.menuLuogo = true
+        controlla(s.escMostra() && !s.menuLuogo && s.inVistaCliente, "Mostra al cliente: Esc chiude il menu del luogo")
         s.fineMostra()
+        controlla(s.luogoCliente == .schermo && !s.tavoloTocca, "Mostra al cliente: «Fine» rimette il cliente su questo schermo")
         controlla(!s.inVistaCliente && !s.inModoCliente && s.sistema.appAttiva == .agenda,
                   "Mostra al cliente: «Fine: torna al lavoro» esce e riporta l'app di prima")
         s.alternaMostraAlCliente()
         controlla(s.vistaCliente == .quadro && !s.sceltaMostra, "Mostra al cliente: con il cliente ⌥⌘M va dritto a «Il quadro»")
+        // §1.3 punto 12: l'avviso con il nome di un altro cliente resta in coda e si vede dopo «Fine»
+        let riservato = "Una nota dall'iPhone su un altro cliente"
+        s.mostraAvviso(riservato, riservato: true)
+        controlla(s.avviso != riservato && s.avvisiTrattenuti.count == 1,
+                  "Mostra al cliente: nella vista pulita l'avviso con il nome di un altro cliente resta in coda")
+        s.fineMostra()
+        controlla(s.avviso == riservato && s.avvisiTrattenuti.isEmpty,
+                  "Mostra al cliente: dopo «Fine» l'avviso trattenuto si vede")
+        s.alternaMostraAlCliente()
+        s.mostraAvviso(riservato, riservato: true)
         s.blocca(animato: false)
         controlla(!s.inVistaCliente && !s.inModoCliente, "Mostra al cliente: il blocco chiude la vista pulita con la modalità cliente")
+        controlla(s.avvisiTrattenuti.isEmpty, "Mostra al cliente: il blocco scarta gli avvisi trattenuti")
+        // Rifinitura 18-24: «Mostra al cliente» della traccia dell'impegno presenta il fascicolo dentro la vista pulita
+        let t = StatoShell(persistente: false)
+        if let e = t.dati.appuntamenti.first(where: { t.cliente($0.clienteId) != nil }) {
+            t.presentaImpegno(e)
+            controlla(t.presentazione == nil || (t.inVistaCliente && t.clienteAttivoId == e.clienteId),
+                      "Mostra al cliente: il fascicolo dell'impegno si presenta nella vista pulita, del suo cliente")
+            controlla(TracciaImpegnoApple.titoloMostra == Parole.mostraAlCliente,
+                      "Mostra al cliente: la traccia dell'impegno dice «Mostra al cliente»")
+        }
     }
 }
 #endif

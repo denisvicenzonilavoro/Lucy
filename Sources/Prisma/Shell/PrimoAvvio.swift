@@ -92,6 +92,7 @@ extension StatoShell {
         withTransaction(Transaction(animation: nil)) {
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             if pannelloCliente { pannelloCliente = false }
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
@@ -118,13 +119,26 @@ extension StatoShell {
             // parte, intatto)
             accendiDimostrazione(gruppoProva)
         case .miei:
-            // Clienti e il pannello «Importa…» (vCard, Excel o CSV); incollare da Excel resta nel menu … della Rubrica
-            apriApp(.clienti)
-            mostraAvviso(TestiPrimoAvvio.avvisoMiei)
-            Task { @MainActor [weak self] in self?.importaClientiDaFile() }
+            // Rifinitura 32-39: da «Rivedi» con la dimostrazione accesa, prima si spegne (i clienti importati vanno
+            // nell'archivio vero) e si prosegue a dati veri riletti
+            dopoLaDimostrazione { [weak self] in
+                guard let self else { return }
+                // Clienti e il pannello «Importa…» (vCard, Excel o CSV); incollare da Excel resta nel menu … della Rubrica
+                self.apriApp(.clienti)
+                self.mostraAvviso(TestiPrimoAvvio.avvisoMiei)
+                Task { @MainActor [weak self] in self?.importaClientiDaFile() }
+            }
         case .zero:
-            apriNuovoClienteDaNovita()
+            dopoLaDimostrazione { [weak self] in self?.apriNuovoClienteDaNovita() }
         }
+    }
+
+    /// Esegue `azione` con i dati veri: subito se la dimostrazione è spenta, altrimenti dopo averla spenta (senza
+    /// l'avviso di spegnimento: segue quello della scelta). Se si sta già spegnendo, non fa nulla: si riprova a giro finito.
+    private func dopoLaDimostrazione(_ azione: @escaping () -> Void) {
+        guard inDimostrazione else { return azione() }
+        guard !spegnimentoDimostrazione else { return }
+        spegniDimostrazione(avviso: nil, poi: azione)
     }
 
     /// Scrive il nome di un canale (a fine scrittura del campo): ripulito, vuoto = quello di base; con i due nomi di

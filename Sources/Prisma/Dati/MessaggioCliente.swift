@@ -40,6 +40,10 @@ enum TipoOccasioneMessaggio: String, Codable, CaseIterable, Identifiable {
     /// fase e ultimo fatto scritti dal consulente, mai referti, diagnosi, numeri di polizza o importi (salvo «Mostra
     /// l'importo pagato»). Non commerciale. In fondo all'enum; un Prisma di prima salta questi messaggi (ElencoTollerante).
     case sinistro
+    /// Il grazie a chi ti ha presentato delle persone (Clienti › Passaparola, Migliorie d'uso 48, decisione 48-b): un
+    /// grazie per la fiducia e per aver parlato di te, mai i nomi delle persone presentate (dati di terzi), mai cifre,
+    /// mai una proposta. Non commerciale. In fondo all'enum; un Prisma di prima salta questi messaggi (ElencoTollerante).
+    case ringraziamentoPresentazione
 
     var id: String { rawValue }
 
@@ -63,6 +67,7 @@ enum TipoOccasioneMessaggio: String, Codable, CaseIterable, Identifiable {
         case .notaVocale: return "Dalla nota vocale"
         case .documentoIdentita: return "Documento d'identità"
         case .sinistro: return "Sinistro"
+        case .ringraziamentoPresentazione: return "Grazie per le presentazioni"
         }
     }
 
@@ -71,7 +76,7 @@ enum TipoOccasioneMessaggio: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .riesame, .occasioneAgenda, .avvisoMercato, .provaFuoco, .campagna, .richiestaPresentazione: return true
         case .riepilogoIncontro, .scadenzaPosizione, .compleanno, .consenso, .parcella, .richiestaVera, .pratica, .traguardo, .datiMancanti,
-             .notaVocale, .documentoIdentita, .sinistro: return false
+             .notaVocale, .documentoIdentita, .sinistro, .ringraziamentoPresentazione: return false
         }
     }
 

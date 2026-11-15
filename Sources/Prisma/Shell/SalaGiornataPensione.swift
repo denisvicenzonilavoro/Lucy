@@ -102,7 +102,8 @@ struct GiornataPensioneVista: View {
                     Text(cifre.map { "\(nome), a \($0.etaPensione) anni · la pensione al mese" } ?? "\(nome) · la pensione al mese")
                         .carattereApple(G.frase)
                         .foregroundColor(G.coloreFrase)
-                    if giornata.diProva == true {
+                    // Migliorie d'uso 37: in dimostrazione basta l'etichetta della barra
+                    if giornata.diProva == true && !stato.inDimostrazione {
                         Text("dati di prova")
                             .carattereApple(G.etichettaStato)
                             .foregroundColor(G.coloreEtichettaStato)

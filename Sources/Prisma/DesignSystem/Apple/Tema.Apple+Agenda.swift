@@ -74,6 +74,14 @@ extension Tema.Apple {
             static let avvisoSopra: CGFloat = 6
             /// Al massimo tante righe di «Da non dimenticare».
             static let righeAvviso = 4
+            /// Migliorie d'uso 3 e 18, «Da fare oggi» (stesso fondo arancio): due voci, padding 12×14 (4 sotto), il
+            /// numero `.k` a 6 dall'etichetta, «Apri tutto ›» 12,5 in accento, 10 sotto il testo vuoto.
+            static let righeDaFare = 2
+            static let paddingDaFare = EdgeInsets(top: 12, leading: 14, bottom: 4, trailing: 14)
+            static let spazioNumeroDaFare: CGFloat = 6
+            static let collegamentoDaFare = Carattere(dimensione: 12.5, peso: .regular)
+            static let coloreCollegamentoDaFare = Colore.accento
+            static let sottoVuotoDaFare: CGFloat = 10
         }
 
         // MARK: Calendario del mese (barra laterale)
@@ -145,6 +153,68 @@ extension Tema.Apple {
             static let fondoPassaggio = Colore.chip
             static let raggio: CGFloat = Raggio.giorno
         }
+
+        #if os(macOS)
+        // MARK: Il mese a tutta larghezza (Migliorie d'uso 50, solo Mac)
+
+        /// Design/uso/gruppo-08.md §50: celle come card (fondo `card`, filo `separatore`, sabato e domenica `pannello`,
+        /// passaggio `cardPiena`, il giorno scelto con l'anello d'accento), pillole con l'ora e il nome breve del cliente
+        /// nel colore del canale (decisione 50-a), scadenze scritte in arancio, la colonna del giorno in una card piatta.
+        /// Misure in `Misure.AgendaMese` (TemaAgendaMese.swift).
+        enum MeseUso {
+            static let nomeGiorno = Carattere(dimensione: 11.5, peso: .semibold, tracking: 0.5, maiuscolo: true)
+            static let coloreNomeGiorno = Colore.inchiostro2
+            static let numero = Carattere(dimensione: 13, peso: .semibold, tabellare: true)
+            static let numeroOggi = Carattere(dimensione: 13, peso: .bold, tabellare: true)
+            static let coloreNumero = Colore.inchiostro
+            static let coloreFuoriMese = Colore.inchiostro3
+            static let fondoOggi = Colore.rosso
+            static let testoOggi = Color.white
+            static let fondo = Colore.card
+            static let fondoFestivo = Colore.pannello
+            static let fondoPassaggio = Colore.cardPiena
+            static let bordo = Colore.separatore
+            static let anelloScelto = Colore.accento
+            /// La pillola: 11,5 semibold, l'ora in peso normale `inchiostro2`.
+            static let pillola = Carattere(dimensione: 11.5, peso: .semibold)
+            static let oraPillola = Carattere(dimensione: 11.5, peso: .regular, tabellare: true)
+            static let colorePillola = Colore.inchiostro
+            static let coloreOraPillola = Colore.inchiostro2
+            static let colorePillolaConclusa = Colore.inchiostro3
+            /// La scadenza: pallino arancio e testo `arancioTesto` 11,5 semibold.
+            static let scadenza = Carattere(dimensione: 11.5, peso: .semibold)
+            static let coloreScadenza = Colore.arancioTesto
+            static let pallinoScadenza = Colore.arancio
+            /// «+2 altri»: 11, `inchiostro2`.
+            static let altri = Carattere(dimensione: 11, peso: .regular)
+            static let coloreAltri = Colore.inchiostro2
+
+            // La colonna del giorno
+            static let superficie = Superficie.cardPiatta
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let coloreOcchielloOggi = Colore.rosso
+            static let titolo = Carattere.h2
+            static let coloreTitolo = Colore.inchiostro
+            static let conteggio = Carattere.secondario
+            static let coloreConteggio = Colore.inchiostro2
+            /// Le righe: l'ora in neretto, il titolo in neretto 13,5, sotto il cliente; fondo `chip`.
+            static let oraRiga = Carattere(dimensione: 13.5, peso: .bold, tabellare: true)
+            static let titoloRiga = Carattere(dimensione: 13.5, peso: .bold)
+            static let clienteRiga = Carattere.secondario
+            static let fondoRiga = Colore.chip
+            static let fondoRigaPassaggio = Colore.binario
+            static let freccia = Colore.inchiostro3
+            static let occhielloAttivita = Carattere(dimensione: 11, peso: .semibold, tracking: 0.6, maiuscolo: true)
+            /// La legenda in fondo: 12, `inchiostro2`, sopra un filo.
+            static let legenda = Carattere(dimensione: 12, peso: .regular)
+            static let coloreLegenda = Colore.inchiostro2
+            static let filo = Colore.separatore
+            /// Il cambio di giorno: 260 ms sulla curva d'uscita, al ritmo dell'app.
+            static let durataEntrata = 0.26
+            static var animazioneEntrata: Animation { Moto.Curva.uscita.animazione(durataEntrata) }
+        }
+        #endif
 
         // MARK: Settimana a pillola
 

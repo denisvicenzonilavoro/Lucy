@@ -26,6 +26,12 @@ extension StatoShell {
         apriSovrapposizione(.scena(.cartaIdentita))
         guard sovrapposizione == .scena(.cartaIdentita) else { return }
         nuovoCliente.apri(fase: ponteInquadraAcceso ? .attesa : .trascina, potenziale: potenziale)
+        #if os(macOS)
+        // Migliorie d'uso 43: da «Diventa cliente» la riga Telefono parte con il telefono del potenziale
+        if let id = potenziale, let p = dati.potenziali.first(where: { $0.id == id }) {
+            nuovoCliente.telefono = p.telefono
+        }
+        #endif
         if let ultima = carteInArrivo.last { prendiCarta(ultima) }
     }
 
@@ -102,7 +108,7 @@ extension StatoShell {
             return
         }
         #endif
-        mostraAvviso("Una carta d’identità dall’iPhone: crea il cliente.")
+        mostraAvviso("Una carta d’identità dall’iPhone: crea il cliente.", riservato: true)
     }
 
     /// Al blocco di Prisma e al riposo del Mac: le carte in arrivo si scartano (decisione 25).
@@ -212,7 +218,8 @@ extension StatoShell {
     }
 
     /// La bozza del cliente con i soli dati della carta (non salvata): nome, codice fiscale, nascita, luogo,
-    /// cittadinanza e documento. Mai canali, consensi, email, telefono o professione: la completezza li chiede.
+    /// cittadinanza e documento. Telefono e canali solo se scritti dall'utente nella scheda (migliorie d'uso 43); mai
+    /// consensi, email o professione: la completezza li chiede.
     func clienteDaCarta() -> Cliente {
         let l = nuovoCliente.letturaCorretta
         var c = Cliente.nuovo(tinta: prossimaTinta)
@@ -222,6 +229,9 @@ extension StatoShell {
         c.codiceFiscale = l.codiceFiscale ?? ""
         c.luogoNascita = l.luogoNascita
         c.cittadinanza = l.cittadinanza
+        let telefono = nuovoCliente.telefono.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !telefono.isEmpty { c.telefono = telefono }
+        c.canali = Canale.allCases.filter { nuovoCliente.canali.contains($0) }
         let documento = l.documento
         if documento.tipo != nil || documento.numero != nil || documento.scadenza != nil || documento.rilasciatoIl != nil {
             var k = c.conformita ?? ConformitaCliente()

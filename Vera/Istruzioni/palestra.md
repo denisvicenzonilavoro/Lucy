@@ -24,6 +24,7 @@ Il JSON:
 - prossimaObiezione: la prossima obiezione del cliente; "" quando Prisma dice che era l'ultima;
 - suggerite: tre possibili risposte del consulente alla prossima obiezione, brevi, di qualità diversa (una ottima che usa i numeri o uno strumento di Prisma, una buona, una debole) in ordine sparso; [] se non c'è una prossima obiezione;
 - strumento: lo strumento di Prisma che avrebbe aiutato di più il consulente in questo turno: "lineaVita", "lanciaAnno", "film", "provaFuoco" o "nessuno".
+- migliore: solo quando la DIFFICOLTÀ te lo chiede (Facile), l'indice (0, 1 o 2) della suggerita più efficace; altrimenti non scriverlo.
 
 Esempio (primo turno):
 {"giudizio":"nessuno","motivo":"","replica":"","convinta":40,"prossimaObiezione":"Mi piace l'idea, ma se mi servono i soldi per la casa restano bloccati?","suggerite":["Non si preoccupi, è un ottimo prodotto.","Guardiamo insieme la linea della vita: vediamo quando arriva la casa anche ritirando una parte.","Il piano prevede riscatti parziali, come dicono le condizioni del prodotto."],"strumento":"nessuno"}

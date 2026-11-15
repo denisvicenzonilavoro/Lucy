@@ -428,7 +428,7 @@ extension StatoShell {
         if let primo = esiti.first {
             mostraAvviso(esiti.count == 1 ? "Vera ha preparato «\(primo.titolo)»: lo trovi in Vera, nel portafoglio"
                                           : "Vera ha preparato \(SchedaConfermaVera.numero(esiti.count)) routine: le trovi in Vera, nel portafoglio",
-                         daVera: true)
+                         daVera: true, riservato: true)
         }
         return esiti
     }
@@ -447,7 +447,7 @@ extension StatoShell {
                           chiave: p.clienteId, oggi: oggi, parla: false)
         }
         if let primo = esiti.first, let c = cliente(p.clienteId) {
-            mostraAvviso("Firmato: Vera ha preparato «\(primo.titolo)» nella conversazione di \(c.nome)", daVera: true)
+            mostraAvviso("Firmato: Vera ha preparato «\(primo.titolo)» nella conversazione di \(c.nome)", daVera: true, riservato: true)
         }
         return esiti
     }

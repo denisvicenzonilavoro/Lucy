@@ -25,6 +25,33 @@ enum ProvaCalcoliAree360 {
         verifica.vero("Aree 360: genere maschile dal codice fiscale", TestiAree360.femminile(c) == false)
         c.codiceFiscale = ""
         verifica.vero("Aree 360: senza codice fiscale nessun genere", TestiAree360.femminile(c) == nil)
+        passo(verifica)
+    }
+
+    /// Migliorie d'uso 45: il passo di Investimenti e Liquidità verso Posizioni.
+    private static func passo(_ verifica: VerificaCalcoli) {
+        verifica.vero("Passo investimenti: senza profilo nessun passo", TestiAree360.passoInvestimenti(entroProfilo: nil) == nil)
+        verifica.vero("Passo investimenti: tutto entro il profilo, in linea",
+                      TestiAree360.passoInvestimenti(entroProfilo: 100) == "Il portafoglio è in linea con il profilo: niente da sistemare.")
+        verifica.vero("Passo investimenti: nessuna soglia dell'80% (al 90% entro, il 10% fuori)",
+                      TestiAree360.passoInvestimenti(entroProfilo: 90)
+                        == "Il 10% del capitale rischia più del profilo scelto: si vede posizione per posizione.")
+        verifica.vero("Passo investimenti: l'articolo si accorda («L'8%»)",
+                      TestiAree360.passoInvestimenti(entroProfilo: 92)?.hasPrefix("L'8% del capitale") == true)
+        func liquidita(mesi: Double?, soglia: Int, spese: Double, conti: Double) -> Liquidita360 {
+            Liquidita360(liquidita: conti, perCanale: [:], speseMensili: spese, mesi: mesi, soglia: soglia, inScadenza: 0,
+                         mesiFinestraScadenze: 6, riservaNecessaria: spese * Double(soglia),
+                         eccedenza: max(0, conti - spese * Double(soglia)))
+        }
+        verifica.vero("Passo liquidità: senza spese nessun passo",
+                      TestiAree360.passoLiquidita(liquidita(mesi: nil, soglia: 6, spese: 0, conti: 5_000)) == nil)
+        verifica.vero("Passo liquidità: la riserva c'è, con la soglia delle ipotesi",
+                      TestiAree360.passoLiquidita(liquidita(mesi: 7.2, soglia: 6, spese: 2_000, conti: 14_400))
+                        == "La riserva c'è: oltre i 6 mesi di spese.")
+        // 12 mesi × 1.800 € = 21.600 €, sui conti 9.250 €: mancano 12.350 €, circa 12.400 €
+        verifica.vero("Passo liquidità: quanto manca, alle centinaia",
+                      TestiAree360.passoLiquidita(liquidita(mesi: 5.1, soglia: 12, spese: 1_800, conti: 9_250))
+                        == "Per arrivare a 12 mesi servono ancora circa \(Formati.euro(12_400)).")
     }
 
     private static func previdenza(_ verifica: VerificaCalcoli) {

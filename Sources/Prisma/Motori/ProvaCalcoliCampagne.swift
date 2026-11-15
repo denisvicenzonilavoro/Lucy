@@ -45,9 +45,42 @@ enum ProvaCalcoliCampagne {
         dividi(verifica)
         seme(verifica)
         fittizi(verifica)
+        pulsante(verifica)
         #if os(macOS)
         bozze(verifica)
         #endif
+    }
+
+    // MARK: - Migliorie d'uso 49: il pulsante della campagna in tre passi
+
+    private static func pulsante(_ verifica: VerificaCalcoli) {
+        let uno = TestiCampagne.pulsante(inclusi: 1, orariDisponibili: 4, orariScelti: 3, firmaMancante: false)
+        let cinque = TestiCampagne.pulsante(inclusi: 5, orariDisponibili: 4, orariScelti: 4, firmaMancante: false)
+        let nessuno = TestiCampagne.pulsante(inclusi: 0, orariDisponibili: 4, orariScelti: 0, firmaMancante: true)
+        let senzaOrario = TestiCampagne.pulsante(inclusi: 3, orariDisponibili: 4, orariScelti: 0, firmaMancante: true)
+        let agendaPiena = TestiCampagne.pulsante(inclusi: 3, orariDisponibili: 0, orariScelti: 0, firmaMancante: false)
+        let firma = TestiCampagne.pulsante(inclusi: 3, orariDisponibili: 4, orariScelti: 2, firmaMancante: true)
+        verifica.vero("Campagne (uso 49): «Prepara il messaggio» con un cliente", uno.testo == "Prepara il messaggio" && uno.attivo)
+        verifica.vero("Campagne (uso 49): «Prepara 5 messaggi» con cinque", cinque.testo == "Prepara 5 messaggi" && cinque.attivo)
+        verifica.vero("Campagne (uso 49): nessun cliente, spento «Scegli almeno un cliente» (prima di orari e firma)",
+                      nessuno.testo == TestiCampagne.scegliCliente && !nessuno.attivo)
+        verifica.vero("Campagne (uso 49): orari tutti spenti, spento «Scegli almeno un orario» (prima della firma)",
+                      senzaOrario.testo == TestiCampagne.scegliOrario && !senzaOrario.attivo)
+        verifica.vero("Campagne (uso 49): con l'agenda piena il pulsante non chiede orari",
+                      agendaPiena.testo == "Prepara 3 messaggi" && agendaPiena.attivo)
+        verifica.vero("Campagne (uso 49): canali misti senza firma, spento «Scegli la firma»",
+                      firma.testo == TestiCampagne.scegliFirma && !firma.attivo)
+        verifica.vero("Campagne (uso 49): «5 di 7 clienti con questo bisogno», «1 di 1 cliente…»",
+                      TestiCampagne.contoChi(q: 5, n: 7) == "5 di 7 clienti con questo bisogno"
+                        && TestiCampagne.contoChi(q: 1, n: 1) == "1 di 1 cliente con questo bisogno")
+        verifica.vero("Campagne (uso 49): l'avviso dopo la preparazione, singolare e plurale",
+                      TestiCampagne.toastPronte(1) == "Un messaggio preparato: è in Messaggi, da rileggere"
+                        && TestiCampagne.toastPronte(4) == "4 messaggi preparati: sono in Messaggi, da rileggere")
+        verifica.vero("Campagne (uso 49): chi resta fuori, solo quando c'è",
+                      TestiCampagne.notaFuori(senzaConsenso: 0, senzaRecapito: 0) == nil
+                        && TestiCampagne.notaFuori(senzaConsenso: 2, senzaRecapito: 1) == "2 senza consenso commerciale e 1 senza recapito restano fuori")
+        verifica.vero("Campagne (uso 49): «e altri N clienti» oltre le prime otto righe",
+                      TestiCampagne.altriClienti(1) == "e un altro cliente" && TestiCampagne.altriClienti(22) == "e altri 22 clienti")
     }
 
     // MARK: - 1-5 Regole dei gruppi

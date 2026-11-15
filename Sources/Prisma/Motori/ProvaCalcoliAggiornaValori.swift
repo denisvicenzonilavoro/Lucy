@@ -13,6 +13,8 @@ enum ProvaCalcoliAggiornaValori {
         excel(verifica)
         importazione(verifica)
         testi(verifica)
+        primaIDubbi(verifica)
+        registrazioneEAnnullamento(verifica)
     }
 
     // MARK: - Dati delle prove (§7.1)
@@ -514,5 +516,129 @@ enum ProvaCalcoliAggiornaValori {
         for c in clienti { nomi[c.id] = c.nome }
         verifica.vero("AV36 Spiegazione della riga 13: il numero è di Anna Verdi",
                       TestiAggiornaValori.spiegazione(r13, posizioni: perId, clienti: nomi).contains("Anna Verdi"))
+    }
+
+    // MARK: - AV37–AV40: prima i dubbi (migliorie d'uso 44)
+
+    private static let csvDubbi = """
+        Contraente;Numero polizza;Prodotto;Valore;Data valore
+        Anna Verdi;AL-2019-000111;Piano rivalutabile;12.000;30/09/2026
+        Carla Neri;;Fondo bilanciato;8.400;30/09/2026
+        Dario Gialli;AL-2024-000999;Piano nuovo;5.000;30/09/2026
+        Bruno Neri;AL-2021-000222;Multiramo;51.000;30/09/2026
+        Bruno Neri;AL-2022-000333;Temporanea caso morte;0;30/09/2026
+        Anna Verdi;;ETF globale;0;30/09/2026
+
+        """
+
+    private static func primaIDubbi(_ verifica: VerificaCalcoli) {
+        let base = posizioni
+        let e = esitiDi(csvDubbi, posizioni: base)
+
+        // AV37. I dubbi: calo oltre la soglia, posizione da scegliere, polizza non trovata; il valore zero non è un dubbio
+        verifica.vero("AV37 Riga 1: calo oltre la soglia", riga(e, 1).flatMap(AV.dubbio) == .calo)
+        verifica.vero("AV37 Riga 2: posizione da scegliere", riga(e, 2).flatMap(AV.dubbio) == .scegli)
+        verifica.vero("AV37 Riga 3: polizza non trovata", riga(e, 3).flatMap(AV.dubbio) == .nuova)
+        verifica.vero("AV37 Riga 4: nessun dubbio", riga(e, 4).map { AV.dubbio($0) == nil } ?? false)
+        verifica.vero("AV37 Riga 6: il valore zero non è un dubbio", riga(e, 6).map { AV.dubbio($0) == nil && AV.zero($0) } ?? false)
+        verifica.vero("AV37 Da decidere: righe 1, 2 e 3", AV.daDecidere(e, decisioni: [:], scelte: [:]) == [1, 2, 3])
+        verifica.vero("AV37 Pronte senza decisioni: la riga 4", AV.pronte(e, decisioni: [:], esclusi: []) == [4])
+        verifica.vero("AV37 Non si registrano: copertura e valore zero", AV.nonSiRegistrano(e) == [5, 6])
+        verifica.vero("AV37 L'insolita non decisa resta fuori", AV.esclusiPerRegistrare(e, decisioni: [:], esclusi: []).contains(1))
+
+        // AV38. Le decisioni: «È giusto», la scelta, «Salta»
+        let decise: [Int: AV.DecisioneValore] = [1: .giusto, 3: .salta]
+        let scelte = [2: "av-p6"]
+        let e2 = esitiDi(csvDubbi, posizioni: base, scelte: scelte)
+        verifica.vero("AV38 Dopo le decisioni niente da decidere", AV.daDecidere(e2, decisioni: decise, scelte: scelte).isEmpty)
+        verifica.vero("AV38 Pronte: il calo detto giusto, la scelta e la riga 4",
+                      AV.pronte(e2, decisioni: decise, esclusi: []) == [1, 2, 4])
+        verifica.vero("AV38 La scelta resta tra i dubbi (decisa)", riga(e2, 2).flatMap(AV.dubbio) == .scegli)
+        verifica.vero("AV38 Tolta a mano: non è pronta", AV.pronte(e2, decisioni: decise, esclusi: [4]) == [1, 2])
+        verifica.vero("AV38 «Salta» sulla scelta: decisa", AV.daDecidere(e, decisioni: [1: .giusto, 2: .salta, 3: .salta], scelte: [:]).isEmpty)
+        verifica.vero("AV38 «È nuova» senza cliente non entra fra le nuove",
+                      AV.nuove(e, decisioni: [3: .nuova], clienti: [:]).isEmpty)
+        verifica.vero("AV38 «È nuova» con il cliente", AV.nuove(e, decisioni: [3: .nuova], clienti: [3: "av-anna"]) == [3: "av-anna"])
+
+        // AV39. La posizione nuova dalla riga del file, con il cliente scelto
+        let nuove = AV.posizioniNuove(tabella: ImportaClienti.righeCSV(csvDubbi), righe: [3: "av-anna"], clienti: clienti,
+                                      posizioni: base, prodotti: [], oggi: oggi)
+        verifica("AV39 Una posizione nuova", Double(nuove.count), 1)
+        verifica.vero("AV39 Del cliente scelto, con numero e nome del file",
+                      nuove.first.map { $0.clienteId == "av-anna" && $0.numeroContratto == "AL-2024-000999" && $0.nome == "Piano nuovo" } ?? false)
+        verifica("AV39 Con il valore del file", nuove.first?.controvalore ?? -1, 5_000)
+
+        // AV40. I testi
+        typealias X = TestiAggiornaValori
+        verifica.vero("AV40 Pulsante con due dubbi", X.pulsanteRegistra(daDecidere: 2, valori: 5) == "Decidi le 2 righe in arancione")
+        verifica.vero("AV40 Pulsante con un dubbio", X.pulsanteRegistra(daDecidere: 1, valori: 5) == "Decidi la riga in arancione")
+        verifica.vero("AV40 Pulsante: 1 valore", X.pulsanteRegistra(daDecidere: 0, valori: 1) == "Registra 1 valore")
+        verifica.vero("AV40 Pulsante: 8 valori", X.pulsanteRegistra(daDecidere: 0, valori: 8) == "Registra 8 valori")
+        let calo = X.domandaCalo(pct: -18.03, prima: 96_000, dopo: 78_700)
+        verifica.vero("AV40 Domanda del calo", calo.hasPrefix("Il valore nuovo è più basso del 18%: da ")
+                      && calo.hasSuffix(". È giusto, o nell’elenco c’è un errore?"))
+        verifica.vero("AV40 Domanda della polizza nuova",
+                      X.domandaNuova(nome: "Marco Bianchi") == "Nell’elenco è intestata a Marco Bianchi, ma tra le sue posizioni non c’è. È una polizza nuova?")
+        verifica.vero("AV40 Domanda senza cliente", X.domandaNuovaSenzaCliente(nome: "Paolo Neri").contains("che non è fra i tuoi clienti"))
+        verifica.vero("AV40 Titolo del riepilogo", X.registrati(8) == "8 valori registrati." && X.registrati(1) == "1 valore registrato.")
+        let frasi = X.frasiDopo(storico: 1, nuove: 1)
+        verifica.vero("AV40 Frasi del riepilogo", frasi.contains("Un valore più vecchio è andato solo nello storico.")
+                      && frasi.contains("Una posizione nuova è stata aggiunta."))
+        verifica.vero("AV40 Righe lette per un cliente",
+                      X.righeLette(file: "Valori.xlsx", n: 4, cliente: "Marco Bianchi") == "«Valori.xlsx»: 4 righe lette per Marco Bianchi.")
+    }
+
+    /// AV41–AV42: la registrazione con le decisioni e l'annullamento, su uno stato in memoria con i dati di prova.
+    private static func registrazioneEAnnullamento(_ verifica: VerificaCalcoli) {
+        let s = StatoShell(persistente: false)
+        guard let sessione = DatiAggiornaValoriDemo.sessione() else {
+            verifica.vero("AV41 Sessione dell'elenco di prova", false)
+            return
+        }
+        s.aggiornaValori = sessione
+        let d = DatiAggiornaValoriDemo.decisioni(s, sessione: sessione)
+        let e = AV.esiti(sessione.righe, posizioni: s.posizioni, clienti: s.clienti, dataComune: sessione.dataComune,
+                         oggi: Date(), scelte: d.scelte)
+        let laura = e.first { $0.riga.cliente == "Laura Moretti" && $0.riga.prodotto == "Fondo pensione aperto" }
+        let marco = e.first { $0.riga.numeroContratto == "AL-2024-077120" }
+        let paolo = e.first { $0.riga.cliente == "Paolo Neri" }
+        verifica.vero("AV41 Dati di prova: il calo di Laura", laura.flatMap(AV.dubbio) == .calo)
+        verifica.vero("AV41 Dati di prova: la polizza che Marco non ha", marco.flatMap(AV.dubbio) == .nuova)
+        verifica.vero("AV41 Dati di prova: chi non è fra i clienti si salta",
+                      paolo.map { AV.dubbio($0) == .nuova && d.decisioni[$0.id] == .salta } ?? false)
+
+        let prima = s.dati.posizioni
+        let fuori = AV.esclusiPerRegistrare(e, decisioni: d.decisioni, esclusi: AV.esclusiIniziali(e))
+        let nuove = AV.nuove(e, decisioni: d.decisioni, clienti: d.clienti)
+        verifica("AV41 Una sola riga nuova (Marco)", Double(nuove.count), 1)
+        let r = s.applicaValoriInBlocco(e, esclusi: fuori, nuove: nuove)
+        let idLaura = "pos-laura-fondo-pensione-aperto"
+        verifica("AV41 Posizione nuova nel riepilogo", Double(r.nuove), 1)
+        verifica("AV41 Una posizione in più", Double(s.dati.posizioni.count - prima.count), 1)
+        verifica("AV41 «È giusto»: il calo si registra", s.dati.posizioni.first { $0.id == idLaura }?.controvalore ?? -1, 13_100)
+        verifica.vero("AV41 La nuova è di Marco", s.dati.posizioni.last.map { $0.clienteId == "marco" && $0.numeroContratto == "AL-2024-077120" } ?? false)
+        verifica.vero("AV41 Annullabile subito dopo", s.puoAnnullareValori)
+
+        // AV42. Annullare rimette valori, storico e date e toglie le nuove
+        verifica.vero("AV42 Annullata", s.annullaRegistrazioneValori())
+        verifica.vero("AV42 Le posizioni sono quelle di prima (valori, storico, date; niente nuove)", s.dati.posizioni == prima)
+        verifica.vero("AV42 Il riepilogo e il ricordo non ci sono più", s.aggiornaValori?.riepilogo == nil && s.annullaValori == nil)
+        verifica.vero("AV42 Una seconda volta no", !s.annullaRegistrazioneValori())
+
+        // «Salta» sul calo: il valore resta com'è
+        var saltata = d.decisioni
+        if let id = laura?.id { saltata[id] = .salta }
+        let fuori2 = AV.esclusiPerRegistrare(e, decisioni: saltata, esclusi: AV.esclusiIniziali(e))
+        s.applicaValoriInBlocco(e, esclusi: fuori2, nuove: [:])
+        verifica("AV42 «Salta»: il valore di Laura resta", s.dati.posizioni.first { $0.id == idLaura }?.controvalore ?? -1, 18_000)
+
+        // Una posizione toccata cambia dopo la registrazione: «Annulla» non c'è più
+        if let toccata = s.annullaValori?.dopo.first?.id, let i = s.dati.posizioni.firstIndex(where: { $0.id == toccata }) {
+            s.dati.posizioni[i].note += " Cambiata dopo."
+            verifica.vero("AV42 Cambiata dopo: non annullabile", !s.puoAnnullareValori && !s.annullaRegistrazioneValori())
+            verifica.vero("AV42 Cambiata dopo: la modifica resta", s.dati.posizioni.first { $0.id == toccata }?.note.hasSuffix(" Cambiata dopo.") ?? false)
+        } else {
+            verifica.vero("AV42 Una posizione toccata dalla seconda registrazione", false)
+        }
     }
 }

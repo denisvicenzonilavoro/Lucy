@@ -7,6 +7,8 @@ struct DettaglioPosizione: View {
     @Environment(\.modoIstantanea) var modoIstantanea
     let posizione: Posizione
     let modifica: () -> Void
+    /// Rifinitura 11-17 (solo Mac): «Completa i dati» apre il modulo sul campo indicato (nil: come «Modifica»).
+    var modificaSuCampo: ((String) -> Void)? = nil
     @State var confermaEliminazione = false
     @State var mostraMetodo = false
     @State var moduloRilevazione = false

@@ -12,18 +12,11 @@ extension StatoShell {
     /// filtrate dal motore prima del limite per gruppo, tenute con `ricavato` per cliente; la modalità cliente passa dalla
     /// stessa via (prima filtrava dopo il limite e perdeva le occasioni del cliente fuori dalle prime 8 di tutti).
     func occasioniMessaggi(oggi: Date = Date(), cliente: String? = nil) -> OccasioniMessaggi {
-        #if os(macOS)
+        // Sul Mac e (rifinitura 25-31) anche su iPhone e iPad: il filtro del cliente nel motore, prima del limite
         let solo = modoCliente ?? cliente
         let calcola = { () -> OccasioniMessaggi in
             MotoreOccasioniMessaggi.calcola(dati: self.datiDeiCalcoli(), oggi: oggi, soloCliente: solo)
         }
-        #else
-        // iPhone e iPad come prima: tutto il portafoglio, poi in modalità cliente solo le sue (dopo il limite per gruppo)
-        let calcola = { () -> OccasioniMessaggi in
-            let tutte = MotoreOccasioniMessaggi.calcola(dati: self.datiDeiCalcoli(), oggi: oggi)
-            return self.modoCliente.map { tutte.soloCliente($0) } ?? tutte
-        }
-        #endif
         guard Calendar.current.isDateInToday(oggi) else { return calcola() }
         if modoCliente == nil, let c = cliente {
             return ricavato("messaggi-occasioni|\(c)") { calcola() }

@@ -93,6 +93,104 @@ enum MotoreDocumenti {
                           categoria: d.genere, nonLetto: d.lettura == .daLeggere)
     }
 
+    // MARK: - Dati certi e incerti (migliorie d'uso 62)
+
+    /// I dati da controllare di un documento, con il perché (Design/uso/gruppo-11.md §62.3 punto 1). Solo regole, niente
+    /// stato: un dato è incerto se è stato letto da Qwen e non dalle regole, se non ha la riga d'origine, se il valore non
+    /// si rilegge nel formato del suo campo (importo, data, percentuale, anni, SRI fra 1 e 7, ISIN con la cifra di
+    /// controllo, codice fiscale) o se è una data nel futuro dove non può esserlo. Un dato scritto a mano non è mai
+    /// incerto. La conferma non conta: chi chiama guarda `confermato` per sapere se il dubbio è ancora aperto.
+    /// Con le `pagine` del documento vale anche la regola dei due valori: un dato che nel testo compare con due valori
+    /// diversi (`EstrattoreDocumento.valoriDiversi`) è incerto, se non è scritto a mano e non ha già un altro perché.
+    static func incerti(_ d: Documento, pagine: [String] = [], oggi: Date = Date()) -> [CampoDocumento: String] {
+        guard d.genere != .prisma else { return [:] }
+        let doppi: Set<CampoDocumento> = pagine.isEmpty ? [] : EstrattoreDocumento.valoriDiversi(pagine)
+        var esito: [CampoDocumento: String] = [:]
+        for c in d.campi {
+            if let perche = perche(c, oggi: oggi) {
+                esito[c.chiave] = perche
+            } else if doppi.contains(c.chiave), c.origine != TestiDocumenti.origineAMano {
+                esito[c.chiave] = TestiDocumenti.dueValori
+            }
+        }
+        return esito
+    }
+
+    /// Il perché di un dato incerto, nil se il dato è certo.
+    static func perche(_ c: CampoEstratto, oggi: Date) -> String? {
+        if c.origine == TestiDocumenti.origineAMano { return nil }
+        let v = c.valore.trimmingCharacters(in: .whitespacesAndNewlines)
+        if c.origine.localizedCaseInsensitiveContains("qwen") { return TestiDocumenti.lettoConQwen }
+        if c.estratto.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return TestiDocumenti.senzaRiga }
+        if c.chiave.data {
+            guard let giorno = EstrattoreDocumento.data(v) else { return TestiDocumenti.dataIlleggibile }
+            if datePassate.contains(c.chiave), giorno > oggi { return TestiDocumenti.dataNelFuturo }
+            return nil
+        }
+        switch c.chiave {
+        case .sri:
+            guard let n = Int(v), (1...7).contains(n) else { return TestiDocumenti.sriFuoriScala }
+            return nil
+        case .isin:
+            return isinValido(v) ? nil : TestiDocumenti.isinNonValido
+        case .codiceFiscale:
+            return codiceFiscaleValido(v) ? nil : TestiDocumenti.codiceFiscaleNonValido
+        default:
+            break
+        }
+        switch c.chiave.unita {
+        case "€":
+            guard let n = EstrattoreDocumento.numero(v), n >= 0 else { return TestiDocumenti.importoIlleggibile }
+        case "%":
+            guard EstrattoreDocumento.numero(v) != nil else { return TestiDocumenti.percentualeIlleggibile }
+        case "anni":
+            guard let n = EstrattoreDocumento.numero(v), n > 0, n <= 100 else { return TestiDocumenti.anniIlleggibili }
+        default:
+            break
+        }
+        return nil
+    }
+
+    /// Le date che non possono essere nel futuro (quella del documento, del rilascio, del valore).
+    private static let datePassate: Set<CampoDocumento> = [.dataDocumento, .dataRilascio, .dataValore]
+
+    /// Due lettere, nove caratteri e la cifra di controllo (ISO 6166: lettere in numeri, poi Luhn).
+    static func isinValido(_ s: String) -> Bool {
+        let c = compatto(s)
+        guard c.count == 12, let ultimo = c.last, ultimo.isNumber,
+              c.prefix(2).allSatisfy({ $0.isLetter && $0.isASCII }), c.allSatisfy({ $0.isASCII }) else { return false }
+        var cifre: [Int] = []
+        for ch in c {
+            if let n = ch.wholeNumberValue {
+                cifre.append(n)
+            } else if let a = ch.asciiValue {
+                let valore = Int(a) - 55 // A = 10
+                guard (10...35).contains(valore) else { return false }
+                cifre.append(valore / 10)
+                cifre.append(valore % 10)
+            } else {
+                return false
+            }
+        }
+        var somma = 0
+        for (i, n) in cifre.reversed().enumerated() {
+            if i % 2 == 1 {
+                let doppio = n * 2
+                somma += doppio > 9 ? doppio - 9 : doppio
+            } else {
+                somma += n
+            }
+        }
+        return somma % 10 == 0
+    }
+
+    /// La forma del codice fiscale delle persone (16 caratteri, con le cifre che possono essere lettere di omocodia).
+    static func codiceFiscaleValido(_ s: String) -> Bool {
+        let c = compatto(s)
+        return c.range(of: #"^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"#,
+                       options: .regularExpression) != nil
+    }
+
     // MARK: - Collegamento
 
     /// Identità e questionari sono del cliente per natura: non si collegano a posizioni o schede.
@@ -841,5 +939,88 @@ extension MotoreDocumenti {
             return .indipendente
         }
         return nil
+    }
+}
+
+// MARK: - Il conto dei dubbi del lettore e il piano di «Fatto» (migliorie d'uso 62, §62.5)
+
+/// Le differenze di un documento con una posizione o una scheda, come le mostra il passo 3 del lettore: solo le righe da
+/// portare in Prisma (diverse o nuove).
+struct GruppoDifferenzeDocumento {
+    let bersaglio: BersaglioConfronto
+    /// «posizione|id» o «prodotto|id».
+    let chiave: String
+    let nome: String
+    let scheda: Bool
+    let righe: [RigaDossier]
+}
+
+/// Il conto dei dubbi del lettore e ciò che fa il pulsante «Fatto: salva nel dossier», senza stato né viste: le scelte
+/// arrivano come parametro (true = «Nel documento», false = «Nella posizione» / «Nella scheda»). Le prove stanno in
+/// `--prova-calcoli` (ProvaCalcoliDocumenti, U62).
+enum DecisioniLettore {
+
+    /// Ciò che «Fatto» scrive in un gruppo: le voci da portare dal documento e quelle da lasciare come in Prisma.
+    struct Applicazione: Equatable {
+        let bersaglio: BersaglioConfronto
+        let scheda: Bool
+        let dalDocumento: Set<VoceDossier>
+        let comeInPrisma: Set<VoceDossier>
+    }
+
+    /// Il piano di «Fatto»: i dati da confermare (solo i certi) e le scelte del passo 3.
+    struct Piano: Equatable {
+        let conferma: [CampoDocumento]
+        let applica: [Applicazione]
+    }
+
+    /// La chiave di una scelta del passo 3.
+    static func chiaveScelta(_ g: GruppoDifferenzeDocumento, _ r: RigaDossier) -> String { "\(g.chiave)|\(r.voce.rawValue)" }
+
+    /// Un dubbio aperto: incerto e non ancora confermato.
+    static func dubbioAperto(_ c: CampoEstratto, incerti: [CampoDocumento: String]) -> Bool {
+        incerti[c.chiave] != nil && !c.confermato
+    }
+
+    static func conNonConfermati(_ d: Documento) -> Bool { d.campi.contains { !$0.confermato } }
+
+    /// I mancanti contano come dubbi solo finché il documento ha dati da confermare.
+    static func mancantiAperti(_ d: Documento, mancanti: [CampoDocumento], visti: Set<CampoDocumento>) -> [CampoDocumento] {
+        conNonConfermati(d) ? mancanti.filter { !visti.contains($0) } : []
+    }
+
+    /// I dati in arancione: gli incerti non confermati e i mancanti non ancora visti.
+    static func datiDubbi(_ d: Documento, incerti: [CampoDocumento: String], mancanti: [CampoDocumento],
+                          visti: Set<CampoDocumento>) -> Int {
+        d.campi.filter { dubbioAperto($0, incerti: incerti) }.count + mancantiAperti(d, mancanti: mancanti, visti: visti).count
+    }
+
+    /// Le differenze del passo 3 ancora da scegliere.
+    static func differenzeAperte(_ gruppi: [GruppoDifferenzeDocumento], scelte: [String: Bool]) -> Int {
+        gruppi.reduce(0) { conto, g in
+            conto + g.righe.filter { scelte[chiaveScelta(g, $0)] == nil }.count
+        }
+    }
+
+    /// Già salvato: nessun dato da confermare e nessuna differenza aperta (si ricava, nessun campo nuovo).
+    static func salvato(_ d: Documento, gruppi: [GruppoDifferenzeDocumento]) -> Bool {
+        !conNonConfermati(d) && gruppi.isEmpty
+    }
+
+    /// Il piano di «Fatto», nil finché resta un dubbio o una differenza da scegliere: «Fatto» non conferma mai un dato
+    /// incerto (quelli si confermano uno per uno con «Va bene»), conferma i certi (visti nella riga riassunto) e applica
+    /// le scelte del passo 3.
+    static func piano(_ d: Documento, incerti: [CampoDocumento: String], mancanti: [CampoDocumento],
+                      visti: Set<CampoDocumento>, gruppi: [GruppoDifferenzeDocumento], scelte: [String: Bool]) -> Piano? {
+        guard datiDubbi(d, incerti: incerti, mancanti: mancanti, visti: visti) == 0,
+              differenzeAperte(gruppi, scelte: scelte) == 0 else { return nil }
+        let conferma = d.campi.filter { !$0.confermato && incerti[$0.chiave] == nil }.map(\.chiave)
+        let applica: [Applicazione] = gruppi.compactMap { g in
+            let dalDocumento = Set(g.righe.filter { scelte[chiaveScelta(g, $0)] == true }.map(\.voce))
+            let comeInPrisma = Set(g.righe.filter { scelte[chiaveScelta(g, $0)] == false }.map(\.voce))
+            guard !dalDocumento.isEmpty || !comeInPrisma.isEmpty else { return nil }
+            return Applicazione(bersaglio: g.bersaglio, scheda: g.scheda, dalDocumento: dalDocumento, comeInPrisma: comeInPrisma)
+        }
+        return Piano(conferma: conferma, applica: applica)
     }
 }

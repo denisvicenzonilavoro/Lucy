@@ -12,6 +12,8 @@ import SwiftUI
 // - Sotto i risultati le ipotesi, sempre scritte; nel piede «Salva come proposta» sul canale scelto (le proposte
 //   di Prisma per l'area, MotoreSintesi.calcolaProposte), «Chiedi a Vera di spiegarlo»; in alto «Apri l'analisi
 //   completa ›» porta al pannello di sempre.
+// - Sul Mac (migliorie d'uso 45) sopra il piede un passo verso Posizioni del cliente: la frase della coerenza con
+//   «Apri la coerenza nelle posizioni», quella della riserva con «Vedi dove sono i suoi soldi» (PassoDettaglioArea360).
 // Le cifre vengono da MotoreAree360 (in cache, CacheAree360). Valori in DesignSystem/Apple/Tema.Apple+Aree360.swift.
 
 // MARK: - Investimenti
@@ -54,6 +56,13 @@ struct DettaglioInvestimentiApple: View {
             }
             Spacer(minLength: 0)
             IpotesiDettaglioArea360(testo: ipotesi(k))
+            #if os(macOS)
+            if let frase = TestiAree360.passoInvestimenti(entroProfilo: k.entroProfilo) {
+                PassoDettaglioArea360(frase: frase, pulsante: TestiAree360.pulsanteCoerenza,
+                                      clienteId: cliente.id, vista: .coerenza)
+                    .padding(.top, d.passoSopra)
+            }
+            #endif
             PiedeDettaglioArea360(area: .investimenti, canale: $canale)
                 .padding(.top, d.piedeSopra)
         }
@@ -184,6 +193,13 @@ struct DettaglioLiquiditaApple: View {
                 .padding(.top, d.cifreSopra)
             Spacer(minLength: 0)
             IpotesiDettaglioArea360(testo: ipotesi(l))
+            #if os(macOS)
+            if let frase = TestiAree360.passoLiquidita(l) {
+                PassoDettaglioArea360(frase: frase, pulsante: TestiAree360.pulsanteQuadro,
+                                      clienteId: cliente.id, vista: .quadro)
+                    .padding(.top, d.passoSopra)
+            }
+            #endif
             PiedeDettaglioArea360(area: .risparmio, canale: $canale)
                 .padding(.top, d.piedeSopra)
         }
@@ -359,6 +375,48 @@ private struct IpotesiDettaglioArea360: View {
             .padding(.top, d.ipotesiSopra)
     }
 }
+
+#if os(macOS)
+/// Migliorie d'uso 45: la frase del passo a sinistra (14,5) e il pulsante principale grande a destra, che chiude il
+/// dettaglio e apre Posizioni del cliente sulla schermata giusta (coerenza o quadro).
+private struct PassoDettaglioArea360: View {
+    @Environment(StatoShell.self) var stato
+    @Environment(\.statoDettaglioApple) private var dettaglio
+    let frase: String
+    let pulsante: String
+    let clienteId: String
+    let vista: VistaPosizioniCliente
+
+    var body: some View {
+        let d = Tema.Apple.Aree360.Dettaglio.self
+        return HStack(alignment: .center, spacing: d.spazioPasso) {
+            Text(frase)
+                .carattereApple(d.frasePasso)
+                .foregroundColor(d.coloreFrasePasso)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            Button(action: vai) {
+                Text(pulsante)
+            }
+            .buttonStyle(.applePrimarioGrande)
+            .fixedSize()
+        }
+    }
+
+    /// Il dettaglio torna sulla card, poi si apre Posizioni del cliente.
+    private func vai() {
+        let s = stato
+        let id = clienteId
+        let v = vista
+        if let d = dettaglio {
+            d.chiudi(subito: true, poi: { s.apriPosizioniCliente(id, vista: v) })
+        } else {
+            s.apriPosizioniCliente(id, vista: v)
+        }
+    }
+}
+#endif
 
 /// «Salva come proposta» (sul canale scelto, sempre riconoscibile), «Chiedi a Vera di spiegarlo».
 private struct PiedeDettaglioArea360: View {

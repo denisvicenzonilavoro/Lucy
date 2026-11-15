@@ -149,6 +149,13 @@ extension Tema.Apple {
             /// Il collegamento «Apri «Da fare» ›» in fondo al riquadro «Con qualcosa da fare».
             static let collegamento = Tema.Apple.Colore.accento
             static let sopraCollegamento: CGFloat = 6
+            // Migliorie d'uso 51: le date sotto il cursore degli anni (primo, di mezzo, ultimo: 11,5) e la tile «Hanno
+            // cominciato nel …» sotto «▶︎ Guarda la crescita» (13,5, interlinea 1,5, a 12), al più 4 nomi
+            static let dateCursore = C(dimensione: 11.5, peso: .regular, tabellare: true)
+            static let sopraDateCursore: CGFloat = -8
+            static let testoChi = C(dimensione: 13.5, peso: .regular, interlinea: 1.5)
+            static let sopraChi: CGFloat = 4
+            static let nomiCrescita = 4
         }
 
         // MARK: Il giro di domani
@@ -186,6 +193,16 @@ extension Tema.Apple {
             static let curvatura: CGFloat = 0.12
             /// Margine della proiezione del giro (le tappe non toccano il bordo né il pannello).
             static let margineProiezione: CGFloat = 70
+            // Migliorie d'uso 51: «Da portare: …» sotto il motivo (11,5, accento), i collegamenti della tappa («Togli»,
+            // «✓ Conferma in Agenda»), il pulsante in fondo a tutta larghezza e la riga centrata sotto (12)
+            static let daPortare = C(dimensione: 11.5, peso: .regular)
+            static let coloreDaPortare = Tema.Apple.Colore.accento
+            static let collegamento = C(dimensione: 12, peso: .semibold)
+            static let coloreCollegamento = Tema.Apple.Colore.accento
+            static let spazioTogli: CGFloat = 6
+            static let sopraPulsante: CGFloat = 10
+            static let sottoPulsante: CGFloat = 7
+            static let notaIPhone = C(dimensione: 12, peso: .regular)
         }
 
         // MARK: La crescita
