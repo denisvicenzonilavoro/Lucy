@@ -110,7 +110,12 @@ enum TestiStudio {
     static let senzaAliquoteScrivania = "stima senza le tue aliquote"
     static let inserisciAliquote = "Inserisci le tue aliquote"
     static let imposta = "Imposta gli obiettivi"
+    #if os(macOS)
+    /// Migliorie d'uso 53: la frase di riposo della dispersione (prima che il grafico dica cosa si vede).
+    static let didascaliaValore = "Ogni punto è un cliente: più a destra, più ore; più in alto, più ricavi."
+    #else
     static let didascaliaValore = "Ogni punto è un cliente: ore che gli dedichi nell’anno e ricavi che genera."
+    #endif
     static let senzaOre = "Servono appuntamenti con una durata per contare le ore."
     static let zona = "molto tempo, poco valore"
 
@@ -150,6 +155,120 @@ enum TestiStudio {
     static func mese(_ m: CruscottoStudio.MeseIncasso) -> String {
         let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
         return "\(mese(m.inizio)) · \(Canale.alleanza.nomeBreve) \(alleanza) · \(Canale.indipendente.nomeBreve) \(euro(m.indipendente))"
+    }
+
+    // MARK: Migliorie d'uso 53 · Il cruscotto risponde a domande
+
+    // I titoli delle card diventano le domande a cui rispondono (solo sul Mac: iPhone e iPad li prendono con il loro
+    // aggiornamento).
+    static func domandaRicavi(anno: Int) -> String {
+        #if os(macOS)
+        return "Quanto ho guadagnato nel \(String(anno))?"
+        #else
+        return "I tuoi ricavi \(String(anno))"
+        #endif
+    }
+
+    static var domandaObiettivi: String {
+        #if os(macOS)
+        return "A che punto sono con gli obiettivi?"
+        #else
+        return "Gli obiettivi dell’anno"
+        #endif
+    }
+
+    static var domandaImbuto: String {
+        #if os(macOS)
+        return "Dove si fermano le proposte?"
+        #else
+        return "L’imbuto delle proposte"
+        #endif
+    }
+
+    static var domandaIncassi: String {
+        #if os(macOS)
+        return "Cosa incasso nei prossimi 12 mesi?"
+        #else
+        return "Gli incassi dei prossimi 12 mesi"
+        #endif
+    }
+
+    static var domandaValore: String {
+        #if os(macOS)
+        return "A chi dedico più tempo di quanto rende?"
+        #else
+        return "Il valore e il tempo"
+        #endif
+    }
+
+    /// L'etichetta dell'asse verticale della dispersione.
+    static let asseRicavi = "ricavi dell’anno ↑"
+
+    /// Un numero intero in lettere fino a dieci («tre»), poi in cifre («12»).
+    static func inLettere(_ n: Int) -> String {
+        let lettere = ["zero", "uno", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove", "dieci"]
+        guard n >= 0, n < lettere.count else { return FormatoCifra.migliaia(Double(n)) }
+        return lettere[n]
+    }
+
+    /// «in due mesi», «in un mese»; con un mese solo (dicembre: manca meno di un mese) «entro fine anno».
+    static func inMesi(_ mesi: Int) -> String {
+        if mesi <= 1 { return "entro fine anno" }
+        let lettere = ["", "un", "due", "tre", "quattro", "cinque", "sei", "sette", "otto", "nove", "dieci", "undici", "dodici"]
+        return "in " + (mesi < lettere.count ? lettere[mesi] : FormatoCifra.migliaia(Double(mesi))) + " mesi"
+    }
+
+    /// «Il mese più ricco: novembre, 7.400 €».
+    static func piuRicco(_ m: CruscottoStudio.MeseIncasso) -> String {
+        "Il mese più ricco: \(mese(m.inizio)), \(euro(m.totale))"
+    }
+
+    /// La riga degli incassi con il puntatore su una colonna: «**novembre**: Alleanza 5.200 € + Indipendente 2.200 € =
+    /// **7.400 €**». Senza aliquote la parte del primo canale dice «senza aliquote» e il totale è solo il secondo.
+    static func meseIncasso(_ m: CruscottoStudio.MeseIncasso, nomeAlleanza: String, nomeIndipendente: String,
+                            forte: Color) -> Text {
+        let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
+        return Text(mese(m.inizio)).bold().foregroundColor(forte)
+            + Text(verbatim: ": \(nomeAlleanza) \(alleanza) + \(nomeIndipendente) \(euro(m.indipendente)) = ")
+            + Text(euro(m.totale)).bold().foregroundColor(forte)
+    }
+
+    /// La parte della frase degli obiettivi dopo l'etichetta: «nuovi clienti, 7 su 10. Ne mancano tre in due mesi.»
+    /// (la voce con la prima lettera minuscola; nil senza traguardo).
+    static func piuIndietro(_ o: CruscottoStudio.Obiettivo, mesi: Int) -> String? {
+        guard let t = o.traguardo, t > 0 else { return nil }
+        let nome = o.voce.nome
+        let voce = (nome.first.map { $0.lowercased() } ?? "") + String(nome.dropFirst())
+        let clienti = o.voce == .nuoviClienti
+        let fatto = clienti ? FormatoCifra.migliaia(o.fatto.rounded()) : euro(o.fatto)
+        let traguardo = clienti ? FormatoCifra.migliaia(t.rounded()) : euro(t)
+        let manca = max(0, t - o.fatto)
+        let resto: String
+        if clienti {
+            let n = Int(manca.rounded(.up))
+            resto = (n == 1 ? "Ne manca uno " : "Ne mancano \(inLettere(n)) ") + inMesi(mesi) + "."
+        } else {
+            resto = "Ne mancano \(euro(manca)) " + inMesi(mesi) + "."
+        }
+        return "\(voce), \(fatto) su \(traguardo). " + resto
+    }
+
+    /// L'etichetta in grassetto della frase degli obiettivi.
+    static let piuIndietroEtichetta = "Il più indietro:"
+
+    /// Cosa si vede nella dispersione, senza nomi: «**2 clienti** prendono molte ore e rendono poco: il più pesante,
+    /// 14 ore per 900 € l’anno. Tocca un punto con il nome per aprirlo.» Se la zona non si calcola, la frase di riposo.
+    static func valoreDice(_ v: CruscottoStudio.ValoreTempo, forte: Color) -> Text {
+        guard v.sogliaOre != nil else { return Text(didascaliaValore) }
+        let zona = v.inZona
+        guard let p = v.piuPesante, !zona.isEmpty else {
+            return Text("Nessun cliente prende molte ore rendendo poco.")
+        }
+        let quanti = zona.count == 1 ? "1 cliente" : "\(zona.count) clienti"
+        let verbo = zona.count == 1 ? " prende molte ore e rende poco" : " prendono molte ore e rendono poco"
+        return Text(quanti).bold().foregroundColor(forte)
+            + Text(verbatim: verbo + ": il più pesante, \(FormatoCifra.migliaia(p.ore.rounded())) ore per \(euro(p.ricavi)) l’anno. "
+                   + "Tocca un punto con il nome per aprirlo.")
     }
 }
 

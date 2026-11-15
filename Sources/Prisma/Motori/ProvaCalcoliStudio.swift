@@ -221,6 +221,67 @@ enum ProvaCalcoliStudio {
         verifica.vero("Studio valore e tempo: con meno di 3 clienti niente zona", pochi.punti.count == 1 && pochi.sogliaOre == nil && pochi.inZona.isEmpty)
         verifica("Studio: mediana con un numero pari di valori", MotoreStudio.mediana([4, 1, 3, 2]) ?? -1, 2.5)
 
+        // 8 bis. Migliorie d'uso 53, «Il cruscotto risponde a domande»: il mese più ricco, l'obiettivo più indietro, i mesi
+        // alla fine dell'anno, il cliente più pesante e i testi
+        func mese(_ m: Int, a: Double?, i: Double) -> CruscottoStudio.MeseIncasso {
+            CruscottoStudio.MeseIncasso(inizio: d(2026 + (m > 12 ? 1 : 0), (m - 1) % 12 + 1, 1), alleanza: a, indipendente: i)
+        }
+        func incassi(_ mesi: [CruscottoStudio.MeseIncasso]) -> CruscottoStudio.Incassi {
+            CruscottoStudio.Incassi(mesi: mesi, mancaAliquote: false, posizioniSenzaAliquota: 0, nessunaParcella: false)
+        }
+        let ricchi = incassi([mese(12, a: 100, i: 0), mese(13, a: 300, i: 200), mese(14, a: 500, i: 0), mese(15, a: 0, i: 50)])
+        verifica.vero("Studio 53: il mese più ricco a pari merito è il primo",
+                      ricchi.piuRicco.map { cal.isDate($0.inizio, equalTo: d(2027, 1, 1), toGranularity: .month) } == true)
+        verifica.vero("Studio 53: tutti a zero, nessun mese più ricco",
+                      incassi([mese(12, a: nil, i: 0), mese(13, a: 0, i: 0)]).piuRicco == nil)
+        verifica.vero("Studio 53: la frase del mese più ricco",
+                      TestiStudio.piuRicco(mese(13, a: 300, i: 200)) == "Il mese più ricco: \(TestiStudio.mese(d(2027, 1, 1))), \(TestiStudio.euro(500))")
+
+        func obiettivo(_ v: VoceObiettivoStudio, _ fatto: Double, _ traguardo: Double?) -> CruscottoStudio.Obiettivo {
+            CruscottoStudio.Obiettivo(voce: v, fatto: fatto, traguardo: traguardo, avviso: nil)
+        }
+        let raggiunti = CruscottoStudio.Obiettivi(anno: 2026, voci: [obiettivo(.produzioneAlleanza, 600, 500),
+                                                                    obiettivo(.nuoviClienti, 12, 10),
+                                                                    obiettivo(.ricaviConsulenza, 0, nil)])
+        verifica.vero("Studio 53: tutti raggiunti, nessuno più indietro", raggiunti.piuIndietro == nil)
+        let indietro = CruscottoStudio.Obiettivi(anno: 2026, voci: [obiettivo(.produzioneAlleanza, 250, 500),
+                                                                   obiettivo(.nuoviClienti, 0, 10),
+                                                                   obiettivo(.ricaviConsulenza, 100, 100)])
+        verifica.vero("Studio 53: uno a zero è il più indietro", indietro.piuIndietro?.voce == .nuoviClienti)
+        let pari = CruscottoStudio.Obiettivi(anno: 2026, voci: [obiettivo(.produzioneAlleanza, 5, 10),
+                                                               obiettivo(.nuoviClienti, 15, 10),
+                                                               obiettivo(.ricaviConsulenza, 50, 100)])
+        verifica.vero("Studio 53: nuovi clienti oltre il traguardo non sono indietro; a pari merito il primo",
+                      pari.piuIndietro?.voce == .produzioneAlleanza)
+        verifica.vero("Studio 53: senza obiettivi nessuno più indietro",
+                      CruscottoStudio.Obiettivi(anno: 2026, voci: [obiettivo(.nuoviClienti, 3, nil)]).piuIndietro == nil)
+        verifica("Studio 53: mesi alla fine da gennaio", Double(CruscottoStudio.Obiettivi.mesiAllaFine(oggi: d(2026, 1, 10), cal: cal)), 12)
+        verifica("Studio 53: mesi alla fine da metà novembre", Double(CruscottoStudio.Obiettivi.mesiAllaFine(oggi: d(2026, 11, 15), cal: cal)), 2)
+        verifica("Studio 53: mesi alla fine dal 31 dicembre", Double(CruscottoStudio.Obiettivi.mesiAllaFine(oggi: d(2026, 12, 31), cal: cal)), 1)
+        verifica.vero("Studio 53: la frase dell'obiettivo più indietro",
+                      TestiStudio.piuIndietro(obiettivo(.nuoviClienti, 7, 10), mesi: 2) == "nuovi clienti, 7 su 10. Ne mancano tre in due mesi.")
+        verifica.vero("Studio 53: ne manca uno, entro fine anno",
+                      TestiStudio.piuIndietro(obiettivo(.nuoviClienti, 9, 10), mesi: 1) == "nuovi clienti, 9 su 10. Ne manca uno entro fine anno.")
+        verifica.vero("Studio 53: senza traguardo nessuna frase", TestiStudio.piuIndietro(obiettivo(.nuoviClienti, 9, nil), mesi: 2) == nil)
+        verifica.vero("Studio 53: numeri in lettere fino a dieci, poi in cifre",
+                      TestiStudio.inLettere(1) == "uno" && TestiStudio.inLettere(3) == "tre" && TestiStudio.inLettere(10) == "dieci"
+                        && TestiStudio.inLettere(12) == "12")
+        verifica.vero("Studio 53: i mesi in lettere",
+                      TestiStudio.inMesi(2) == "in due mesi" && TestiStudio.inMesi(12) == "in dodici mesi" && TestiStudio.inMesi(1) == "entro fine anno")
+
+        func punto(_ id: String, ore: Double, ricavi: Double, zona: Bool) -> CruscottoStudio.PuntoCliente {
+            CruscottoStudio.PuntoCliente(cliente: cliente(id, creato: d(2020, 1, 1)), ore: ore, ricavi: ricavi, inZona: zona)
+        }
+        func valore(_ punti: [CruscottoStudio.PuntoCliente]) -> CruscottoStudio.ValoreTempo {
+            CruscottoStudio.ValoreTempo(anno: 2026, punti: punti, sogliaOre: 2, sogliaRicavi: 100, ricaviParziali: false)
+        }
+        verifica.vero("Studio 53: zona vuota, nessun cliente più pesante",
+                      valore([punto("anna", ore: 9, ricavi: 900, zona: false)]).piuPesante == nil)
+        let pesanti = valore([punto("anna", ore: 9, ricavi: 50, zona: true), punto("bruno", ore: 9, ricavi: 20, zona: true),
+                              punto("carla", ore: 4, ricavi: 10, zona: true), punto("dario", ore: 20, ricavi: 900, zona: false)])
+        verifica.vero("Studio 53: il più pesante ha più ore, a pari merito meno ricavi", pesanti.piuPesante?.cliente.id == "bruno")
+        verifica.vero("Studio 53: il più pesante con il calcolo vero è dario", vt.piuPesante?.cliente.id == "dario")
+
         // 9. Deterministico: due calcoli uguali danno lo stesso cruscotto
         let ancora = MotoreStudio.calcola(clienti: clienti, posizioni: posizioni, appuntamenti: appuntamenti, incontri: incontri,
                                           studio: studio, oggi: oggi, cal: cal)

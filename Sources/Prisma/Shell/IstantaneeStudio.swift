@@ -65,7 +65,42 @@ extension Istantanee {
                 s.apriStudio(.cruscotto)
                 s.entraModoCliente(avviso: false)
             }),
+            // Migliorie d'uso 53, «Il cruscotto risponde a domande»: un mese degli incassi «sotto il puntatore» (la riga
+            // con le cifre del mese e la colonna schiarita) e gli obiettivi tutti raggiunti (nessuna riga «Il più indietro»)
+            ("1091-uso-cruscotto-mese", { s in
+                studioDiProva(s)
+                RichiestaIstantaneaCruscotto.chiedi(s, mese: 7)
+                s.apriStudio(.cruscotto)
+            }),
+            ("1091-uso-cruscotto-mese-scuro", { s in
+                studioDiProva(s)
+                RichiestaIstantaneaCruscotto.chiedi(s, mese: 7)
+                s.apriStudio(.cruscotto)
+            }),
+            ("1091-uso-cruscotto-obiettivi-raggiunti", { s in
+                obiettiviRaggiunti(s)
+                s.apriStudio(.cruscotto)
+            }),
         ]
+    }
+
+    /// Migliorie d'uso 53 (scena 1091): aliquote di prova e obiettivi pari a quanto è già fatto quest'anno, così sono
+    /// tutti raggiunti (una voce ancora a zero resta senza traguardo). Valori dimostrativi, mai dati veri.
+    nonisolated static func obiettiviRaggiunti(_ s: StatoShell) {
+        aliquoteDiProva(s)
+        let oggi = Date()
+        let anno = Calendar.current.component(.year, from: oggi)
+        let c = MotoreStudio.calcola(clienti: s.clienti, posizioni: s.posizioni, appuntamenti: s.appuntamenti,
+                                     incontri: s.dati.incontri, studio: s.dati.impostazioni.studio,
+                                     parcelle: s.ricaviConsulenzaStudio, oggi: oggi)
+        func fatto(_ v: VoceObiettivoStudio) -> Double? {
+            guard let f = c.obiettivi.voce(v)?.fatto, f > 0 else { return nil }
+            return f
+        }
+        s.dati.impostazioni.studio.obiettivi[anno] = ObiettiviStudio(
+            produzioneAlleanza: fatto(.produzioneAlleanza),
+            nuoviClienti: fatto(.nuoviClienti).map { Int($0.rounded(.down)) },
+            ricaviConsulenza: fatto(.ricaviConsulenza))
     }
 
     /// Aliquote e obiettivi di prova (scene 500, 570): valori dimostrativi del template, mai dati veri.

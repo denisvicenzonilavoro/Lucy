@@ -1760,3 +1760,21 @@ Fatto: ordine Cruscotto · Parcelle · Spese | Track record | Esame OCF · Pales
 - Verificare nell'istantanea che l'altezza del filo (riga del carattere × 1,2 più il padding, meno 12) e la pillola che
   scivola sopra il filo siano come nel template; la finestra di Studio al minimo con la riga in testa più larga.
 - Facoltativo: un segmentato con un filo nella vetrina «400-vetrina-apple».
+
+## 53. Il cruscotto risponde a domande
+
+Fatto (solo sul Mac, iPhone e iPad tengono titoli e didascalie di prima): i cinque titoli-domanda (`TestiStudio.domanda…`,
+che si stringono un poco se non ci stanno), la riga degli incassi con le due etichette e «Il mese più ricco» / le cifre del
+mese sotto il puntatore con i nomi dei canali scelti e la colonna schiarita (`Incassi.luceSopra`; lo stato del puntatore
+sta nella card), la stima dichiarata nel fumetto del titolo e il pulsante delle aliquote quando mancano, «Il più
+indietro» sotto gli anelli, la frase della dispersione senza nomi, l'asse «ricavi dell’anno ↑» e la mano su tutti i punti.
+Motore: `Incassi.piuRicco`, `Obiettivi.piuIndietro`, `Obiettivi.mesiAllaFine`, `ValoreTempo.piuPesante`, con le prove in
+`ProvaCalcoliStudio` (anche i testi). Istantanee nuove 1091 (mese sotto il puntatore, chiara e scura; obiettivi
+raggiunti); 570, 571, 572 e 574 cambiano da sole. Resta:
+- Guardare nelle istantanee 570 e 1091 che la card degli obiettivi (alta 300) tenga legenda con gli avvisi più la frase di
+  due righe senza tagliare il fondo; se non ci sta, ridurre gli anelli o portare la frase su una riga sola.
+- Provare a occhio `luceSopra` (0,06) chiara e scura, e le domande più lunghe alla larghezza minima della card con
+  «dati di prova» accanto.
+- «Il più indietro» nel mese di dicembre dice sempre «entro fine anno» (i mesi alla fine sono arrotondati per eccesso).
+- `--prova-fluidita`: nessuna prova nuova che il passaggio sulle colonne non rifaccia i motori (lo stato è nella card,
+  fuori dalla `ChiaveVista`).

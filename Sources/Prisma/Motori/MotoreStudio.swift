@@ -125,6 +125,25 @@ struct CruscottoStudio: Equatable {
         /// Nessun obiettivo impostato: la card mostra «Imposta gli obiettivi dell'anno».
         var nessunoImpostato: Bool { impostati.isEmpty }
         func voce(_ v: VoceObiettivoStudio) -> Obiettivo? { voci.first { $0.voce == v } }
+
+        /// Migliorie d'uso 53: l'obiettivo più indietro, fra gli impostati non ancora raggiunti (frazione < 1), quello
+        /// con la frazione più bassa (a pari merito il primo nell'ordine delle voci); nil se sono tutti raggiunti o se
+        /// nessuno è impostato.
+        var piuIndietro: Obiettivo? {
+            var scelto: Obiettivo?
+            for o in impostati {
+                guard let f = o.frazione, f < 1 else { continue }
+                if let s = scelto, let fs = s.frazione, fs <= f { continue }
+                scelto = o
+            }
+            return scelto
+        }
+
+        /// I mesi che mancano al 31 dicembre, arrotondati per eccesso: a gennaio 12, a metà novembre 2, a dicembre 1.
+        static func mesiAllaFine(oggi: Date, cal: Calendar = .current) -> Int {
+            let mese = cal.component(.month, from: oggi)
+            return min(12, max(1, 13 - mese))
+        }
     }
 
     /// L'imbuto delle proposte dell'anno (posizioni create nell'anno che sono o sono state proposte).
@@ -179,6 +198,16 @@ struct CruscottoStudio: Equatable {
         var totaleIndipendente: Double { mesi.reduce(0) { $0 + $1.indipendente } }
         var totale: Double { (totaleAlleanza ?? 0) + totaleIndipendente }
         var vuoto: Bool { totale <= 0 }
+
+        /// Migliorie d'uso 53: il mese con il totale più alto (a pari merito il primo); nil se sono tutti a zero.
+        var piuRicco: MeseIncasso? {
+            var scelto: MeseIncasso?
+            for m in mesi where m.totale > 0 {
+                if let s = scelto, s.totale >= m.totale { continue }
+                scelto = m
+            }
+            return scelto
+        }
     }
 
     /// Un cliente nel grafico «il valore e il tempo».
@@ -214,6 +243,19 @@ struct CruscottoStudio: Equatable {
 
         var vuoto: Bool { punti.isEmpty }
         var inZona: [PuntoCliente] { punti.filter(\.inZona) }
+
+        /// Migliorie d'uso 53: il cliente più pesante della zona «molto tempo, poco valore», cioè quello con più ore
+        /// (a pari merito quello con meno ricavi); nil se la zona è vuota.
+        var piuPesante: PuntoCliente? {
+            var scelto: PuntoCliente?
+            for p in inZona {
+                if let s = scelto {
+                    if p.ore < s.ore || (p.ore == s.ore && p.ricavi >= s.ricavi) { continue }
+                }
+                scelto = p
+            }
+            return scelto
+        }
     }
 
     /// Le frasi degli stati vuoti e dei dati mancanti (le cifre mancanti non si inventano).
