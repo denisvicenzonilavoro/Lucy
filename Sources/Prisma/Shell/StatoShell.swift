@@ -104,6 +104,9 @@ enum VoceConfronto: Hashable {
     private(set) var azioneAvviso: AzioneAvviso?
     var schermoIntero = false
     var schedaImpostazioni: SchedaImpostazioni = .panoramica
+    /// Migliorie d'uso 30: il testo del campo «Cerca nelle impostazioni» (solo in memoria; si svuota chiudendo
+    /// Impostazioni). Pieno, la pagina a destra mostra i risultati (IndiceImpostazioni.swift).
+    var cercaImpostazioni = ""
     var schedaCliente: SchedaCliente = .panoramica
     /// La scheda di Studio (Cruscotto, Parcelle e fatture, Track record, Esame OCF): resta finché l'app è aperta, così
     /// la scrivania e le novità possono aprire quella giusta (StudioApp.swift).
@@ -4033,7 +4036,13 @@ enum SchedaImpostazioni: String, CaseIterable, Hashable, Identifiable {
         case .profilo: return "Profilo"
         case .aspetto: return "Aspetto"
         case .ovunque: return "iPhone e iPad"
-        case .lavoro: return "Agenda e lavoro"
+        case .lavoro:
+            // Migliorie d'uso 30: sul Mac la parola del template; la pagina tiene anche festività e seguito delle proposte
+            #if os(macOS)
+            return "Agenda e orari"
+            #else
+            return "Agenda e lavoro"
+            #endif
         case .promemoria: return "Promemoria e occasioni"
         case .conformita: return "Conformità"
         case .proposte: return "Proposte e PDF"

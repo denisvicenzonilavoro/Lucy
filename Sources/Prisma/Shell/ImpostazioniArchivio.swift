@@ -83,6 +83,7 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-archivio-biblioteca")
             .cascataImpostazioni(6)
 
             GruppoImpostazioni(titolo: "Backup disponibili") {
@@ -96,6 +97,7 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-archivio-elenco")
             .cascataImpostazioni(7)
 
             if stato.copieNonLeggibili > 0 {
@@ -134,6 +136,7 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-archivio-mac")
             .cascataImpostazioni(9)
             HStack(spacing: Tema.Apple.Impostazioni.Backup.fraNumeri) {
                 numero(stato.clienti.count, "clienti")

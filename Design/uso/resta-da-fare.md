@@ -568,3 +568,26 @@ Resta:
 - **CLAUDE.md**: aggiornare la frase sull'ordine del dock («Nel dock dopo Agenda, Messaggi e Prospetti…») con i gruppi
   nuovi quando la miglioria entra in main.
 - `ProvaFluidita` apre ancora le app nell'ordine di `delDock` (lì l'ordine non conta).
+
+## 30. Le impostazioni si cercano, in gruppi con un nome
+
+Fatto (solo Mac; l'iPad resta com'era): la colonna con la Panoramica da sola e i gruppi «Prisma», «Il lavoro» (con
+Moduli, Pratiche, Portafogli modello, Sala e Territorio accanto alle pagine del template) e «Aiuto» (Scorciatoie,
+Strumenti) in `IndiceImpostazioni.gruppi`; «Per le prove» non c'è più; «Agenda e lavoro» si chiama «Agenda e orari»
+sul Mac; il campo «Cerca nelle impostazioni» (`CampoCercaImpostazioni`, `stato.cercaImpostazioni` in memoria, svuotato
+chiudendo Impostazioni; Esc svuota il campo pieno, nel campo vuoto chiude Impostazioni; ⌘F ci porta il cursore solo con
+Impostazioni in primo piano); l'indice delle voci (`IndiceImpostazioni.voci`, circa 150 righe delle pagine del Mac) e la
+pagina dei risultati con la pillola della pagina e «Apri» (svuota la ricerca, apre la pagina e scorre all'ancora); le
+ancore «imp-<pagina>-<voce>» risolte da `paginaDellAncora`; i token `Laterale.Cerca` e `Risultati`, l'occhiello dei gruppi
+13/4 come nel template; la prova `ProvaIndiceImpostazioni` in `--prova-calcoli`; le scene 1054 (chiara e scura) e 1055.
+
+Resta:
+- **Istantanee**: rigenerare sul Mac 470 (e scura), 471, 3, 90, 126, 134, 144, 85, 251, 516, 548 e guardare le nuove
+  1054-1055; controllare che l'occhiello a 13/4 non stringa troppo la colonna (altrimenti tornare a 16/8 nei token).
+- **L'indice è scritto a mano**: alcune righe che dipendono dai dati (l'elenco dei backup, le serie e le quote di
+  Mercato, le zone, i modelli, i documenti delle proposte, le compagnie dei sinistri) sono una voce sola per gruppo, con
+  la spiegazione nella forma fissa più utile; le righe di Ovunque solo del Mac acceso. Le migliorie 31, 37, 38 e 39, che
+  cambiano Panoramica («Da sistemare»), Strumenti («Dimostrazione») e altre pagine, aggiornano l'indice con loro.
+- **Ancore**: solo per gruppo (non per singola riga); nelle pagine senza ancora «Apri» porta in cima alla pagina.
+- **Da provare sul Mac vero**: che il campo non prenda il fuoco da solo all'apertura (se lo prende, Esc nel campo vuoto
+  chiude comunque Impostazioni, come sempre) e che ⌘F non disturbi la Biblioteca aperta dietro.

@@ -133,6 +133,69 @@ struct VoceLateraleImpostazioniApple: View {
     private static var trattiAttiva: AccessibilityTraits { [.isButton, .isSelected] }
 }
 
+// MARK: - Ricerca (Migliorie d'uso 30, solo Mac)
+
+#if os(macOS)
+/// Il campo «Cerca nelle impostazioni» in cima alla colonna (`.impQ`): alto 34, raggio 10, fondo `chip`, lente 15 e
+/// testo 13,5, senza il bordo di fuoco di sistema. Esc nel campo pieno lo svuota (e non chiude la finestra); nel campo
+/// vuoto fa quello che fa sempre (`escVuoto`: chiude Impostazioni).
+struct CampoCercaImpostazioni: View {
+    @Binding var testo: String
+    var fuoco: FocusState<Bool>.Binding
+    let escVuoto: () -> Void
+
+    private typealias C = Tema.Apple.Impostazioni.Laterale.Cerca
+
+    init(testo: Binding<String>, fuoco: FocusState<Bool>.Binding, escVuoto: @escaping () -> Void) {
+        self._testo = testo
+        self.fuoco = fuoco
+        self.escVuoto = escVuoto
+    }
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: C.raggio, style: .continuous)
+        HStack(spacing: C.spazio) {
+            Image(systemName: C.simbolo)
+                .carattereApple(C.lente)
+                .foregroundColor(C.coloreLente)
+                .accessibilityHidden(true)
+            TextField("", text: $testo, prompt: Text(TestiImpostazioni.cerca))
+                .textFieldStyle(.plain)
+                .carattereApple(C.testo)
+                .foregroundColor(C.coloreTesto)
+                .lineLimit(1)
+                .focused(fuoco)
+                .focusEffectDisabled()
+                .onExitCommand {
+                    if testo.isEmpty { escVuoto() } else { testo = "" }
+                }
+                .accessibilityLabel(TestiImpostazioni.cerca)
+        }
+        .padding(.horizontal, C.paddingOrizzontale)
+        .frame(height: C.altezza)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background { forma.fill(C.fondo) }
+    }
+}
+
+/// La pillola con il nome della pagina accanto a «Apri» nei risultati della ricerca (12 semibold, padding 4×10).
+struct EtichettaPaginaImpostazioni: View {
+    let testo: String
+
+    private typealias R = Tema.Apple.Impostazioni.Risultati
+
+    var body: some View {
+        Text(testo)
+            .carattereApple(R.pillola)
+            .foregroundColor(R.colorePillola)
+            .lineLimit(1)
+            .padding(R.paddingPillola)
+            .background { Capsule(style: .continuous).fill(R.fondoPillola) }
+            .fixedSize()
+    }
+}
+#endif
+
 // MARK: - Stato della riga
 
 /// Lo stato a destra di una riga nel tema Apple: pallino 8 nel colore del tono e testo 13 semibold («● Pronto»).

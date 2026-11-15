@@ -16,6 +16,9 @@ import SwiftUI
 //
 // - Barra laterale 260 (`.side`): le sezioni del template (Aspetto, Archivio e backup, Vera, Profilo) dopo la
 //   Panoramica, poi le altre pagine di Prisma sotto «Il lavoro» e Strumenti sotto «Per le prove». Voci `.rub`.
+//   Sul Mac (migliorie d'uso 30) in cima il campo «Cerca nelle impostazioni» e i gruppi hanno tutti un nome:
+//   la Panoramica da sola, poi «Prisma», «Il lavoro» e «Aiuto» (IndiceImpostazioni.gruppi); con un testo nel campo la
+//   pagina a destra mostra i risultati. L'iPad resta com'era.
 // - Pagina: titolo `.h2` (4 sopra, 14 sotto) e le righe come card senza ombra (`.impostazioniApple()`); cambiando
 //   sezione la cascata riparte con base 0. Aspetto, Archivio e backup, Vera e Profilo come nel template; le altre
 //   pagine sono quelle di sempre, nelle card del tema.
@@ -40,6 +43,31 @@ extension AppImpostazioni {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .impostazioniApple()
+        #if os(macOS)
+        .background {
+            // Migliorie d'uso 30: ⌘F porta nel campo della ricerca, solo con Impostazioni in primo piano (⌘K resta
+            // «Cerca ovunque»)
+            if stato.appAttiva == .impostazioni {
+                Button("") { fuocoCercaImpostazioni = true }
+                    .keyboardShortcut("f", modifiers: .command)
+                    .opacity(0)
+                    .frame(width: 0, height: 0)
+                    .accessibilityHidden(true)
+            }
+        }
+        // La ricerca resta in memoria finché Impostazioni è aperta
+        .onDisappear { stato.cercaImpostazioni = "" }
+        #endif
+    }
+
+    /// Migliorie d'uso 30: c'è un testo nel campo della ricerca (sul Mac): la pagina mostra i risultati e nessuna voce
+    /// della colonna è evidenziata.
+    private var inRicercaImpostazioni: Bool {
+        #if os(macOS)
+        return !stato.cercaImpostazioni.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+        #else
+        return false
+        #endif
     }
 
     // MARK: Barra laterale
@@ -47,14 +75,27 @@ extension AppImpostazioni {
     private var barraLateraleApple: some View {
         let l = Tema.Apple.Impostazioni.Laterale.self
         let forma = RoundedRectangle(cornerRadius: l.raggio, style: .continuous)
-        let principali = Self.sezioniPrincipali
-        let lavoro = Self.sezioniLavoro
         return VStack(alignment: .leading, spacing: 0) {
+            #if os(macOS)
+            // Migliorie d'uso 30: il campo della ricerca in cima, fuori dallo scorrimento
+            CampoCercaImpostazioni(testo: Bindable(stato).cercaImpostazioni, fuoco: $fuocoCercaImpostazioni,
+                                   escVuoto: { stato.chiudi(.impostazioni) })
+                .padding(.top, Tema.Apple.Impostazioni.Laterale.Cerca.sopra)
+                .padding(.bottom, Tema.Apple.Impostazioni.Laterale.Cerca.sotto)
+            #endif
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    gruppoLateraleApple(nil, principali, primo: 0)
-                    gruppoLateraleApple("Il lavoro", lavoro, primo: principali.count)
-                    gruppoLateraleApple("Per le prove", Self.sezioniProve, primo: principali.count + lavoro.count + 1)
+                    #if os(macOS)
+                    // Migliorie d'uso 30: la Panoramica da sola, poi «Prisma», «Il lavoro» e «Aiuto»
+                    ForEach(Array(IndiceImpostazioni.gruppi.enumerated()), id: \.offset) { i, g in
+                        gruppoLateraleApple(g.titolo, g.pagine, primo: Self.primoDelGruppo(i))
+                    }
+                    #else
+                    gruppoLateraleApple(nil, Self.sezioniPrincipali, primo: 0)
+                    gruppoLateraleApple("Il lavoro", Self.sezioniLavoro, primo: Self.sezioniPrincipali.count)
+                    gruppoLateraleApple("Per le prove", Self.sezioniProve,
+                                        primo: Self.sezioniPrincipali.count + Self.sezioniLavoro.count + 1)
+                    #endif
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
@@ -89,9 +130,19 @@ extension AppImpostazioni {
         }
     }
 
+    #if os(macOS)
+    /// L'indice della cascata della prima riga di un gruppo della colonna (le voci e gli occhielli prima di lui).
+    static func primoDelGruppo(_ indice: Int) -> Int {
+        IndiceImpostazioni.gruppi.prefix(indice).reduce(0) { $0 + $1.pagine.count + ($1.titolo == nil ? 0 : 1) }
+    }
+    #endif
+
     private func voceLateraleApple(_ p: SchedaImpostazioni) -> some View {
-        VoceLateraleImpostazioniApple(titolo: p.titolo, attiva: stato.schedaImpostazioni == p,
+        VoceLateraleImpostazioniApple(titolo: p.titolo, attiva: stato.schedaImpostazioni == p && !inRicercaImpostazioni,
                                       stato: statoVoceLaterale(p)) {
+            #if os(macOS)
+            stato.cercaImpostazioni = ""
+            #endif
             stato.schedaImpostazioni = p
         }
     }
@@ -140,9 +191,65 @@ extension AppImpostazioni {
 
     // MARK: Pagina
 
+    /// La pagina a destra: i risultati della ricerca quando il campo non è vuoto (solo Mac), altrimenti la sezione.
+    @ViewBuilder private var paginaApple: some View {
+        #if os(macOS)
+        if inRicercaImpostazioni {
+            paginaRisultatiApple
+        } else {
+            paginaSezioneApple
+        }
+        #else
+        paginaSezioneApple
+        #endif
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 30: «3 risultati per «backup»» e una riga per voce (titolo e spiegazione come nella pagina), con
+    /// a destra il nome della pagina e «Apri», che svuota la ricerca e porta alla riga. Nessun risultato: un invito a
+    /// provare un'altra parola.
+    private var paginaRisultatiApple: some View {
+        let testo = stato.cercaImpostazioni.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trovate = IndiceImpostazioni.cerca(testo)
+        let p = Tema.Apple.Impostazioni.Pagina.self
+        let spazio = Tema.Apple.Impostazioni.Risultati.spazio
+        return ScrollView {
+            VStack(alignment: .leading, spacing: 0) {
+                TitoloPaginaImpostazioni(testo: TestiImpostazioni.risultati(trovate.count, testo))
+                if trovate.isEmpty {
+                    NotaImpostazioni(TestiImpostazioni.provaAltraParola)
+                } else {
+                    GruppoImpostazioni {
+                        ForEach(Array(trovate.enumerated()), id: \.offset) { i, v in
+                            RigaImpostazione(titolo: v.titolo, sottotitolo: v.spiegazione, ultima: i == trovate.count - 1) {
+                                HStack(spacing: spazio) {
+                                    EtichettaPaginaImpostazioni(testo: v.pagina.titolo)
+                                    ValoreRiga(testo: TestiImpostazioni.apri) { apriVoceIndice(v) }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .frame(maxWidth: p.larghezzaMassima, alignment: .leading)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(p.margine)
+        }
+        .scrollIndicators(.hidden)
+    }
+
+    /// «Apri» su un risultato: svuota la ricerca, apre la pagina e scorre alla riga (`scorri`, con l'ancora).
+    private func apriVoceIndice(_ v: VoceIndiceImpostazioni) {
+        stato.cercaImpostazioni = ""
+        fuocoCercaImpostazioni = false
+        stato.ancoraImpostazioni = v.ancora
+        stato.schedaImpostazioni = v.pagina
+    }
+    #endif
+
     /// La sezione scelta: titolo `.h2` e righe, in una colonna leggibile (i rendimenti prendono tutta la larghezza).
     /// Cambiando sezione si riparte dall'alto e la cascata riparte (la pagina nasce di nuovo con il suo `.id`).
-    private var paginaApple: some View {
+    private var paginaSezioneApple: some View {
         let scelta = stato.schedaImpostazioni
         let p = Tema.Apple.Impostazioni.Pagina.self
         return ScrollViewReader { lettore in

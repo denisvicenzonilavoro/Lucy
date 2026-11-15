@@ -415,6 +415,7 @@ extension AppImpostazioni {
                     interruttore(Bindable(stato.dati).impostazioni.vera.conservaConversazioni)
                 }
             }
+            .id("imp-vera-come")
             .cascataImpostazioni(5)
             // Fase 2 del brief di Vera: memoria, lezioni, filo lungo e ricerca per significato
             GruppoImpostazioni(titolo: "Memoria") {
@@ -443,11 +444,13 @@ extension AppImpostazioni {
                 }
                 RigaMemoriaVera(memoria: stato.memoriaVera)
             }
+            .id("imp-vera-memoria")
             .cascataImpostazioni(6)
             // Fase 4 di Vera, funzione 15: «Il tuo stile» (regole, provenienza, interruttori, esempio; VisteStileVera.swift)
             GruppoImpostazioni(titolo: "Il tuo stile") {
                 GruppoStileVeraImpostazioni()
             }
+            .id("imp-vera-stile")
             .cascataImpostazioni(6)
             // Fase 5 di Vera: «Vera su misura», «Due velocità», «Il cervello grande» e l'etichetta sotto le risposte (regola
             // bloccata: niente interruttore). Le pagine si aprono sopra la chat di Vera (VisteSuMisuraVera, VisteMotoriVera)
@@ -474,9 +477,11 @@ extension AppImpostazioni {
                     EmptyView()
                 }
             }
+            .id("imp-vera-motori")
             .cascataImpostazioni(6)
             // Fase 4 di Vera, funzione 5: il tagliando dei dati (VisteTagliandoVera.swift)
             GruppoTagliandoImpostazioni()
+                .id("imp-vera-tagliando")
                 .cascataImpostazioni(6)
             GruppoImpostazioni(titolo: "Avanzate") {
                 rigaApri("Fornitore e indirizzo", "\(vera.fornitore.nome) · solo indirizzi del Mac",
@@ -497,6 +502,7 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-vera-avanzate")
             .cascataImpostazioni(7)
             NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Prisma. I dati non lasciano il Mac.")
                 .cascataImpostazioni(8)

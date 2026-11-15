@@ -27,6 +27,8 @@ struct AppImpostazioni: View {
     /// Vera › Avanzate (fornitore e indirizzo) e Strumenti › Parlare con Vera: chiusi finché non servono.
     @State var mostraAvanzateVera = false
     @State var mostraVoce = false
+    /// Migliorie d'uso 30: il campo «Cerca nelle impostazioni» (⌘F ci porta il cursore, solo Mac).
+    @FocusState var fuocoCercaImpostazioni: Bool
     /// «Riduci movimento» del sistema (per dire che è già acceso anche se quello di Prisma è spento).
     @Environment(\.accessibilityReduceMotion) var calmoSistema
 
@@ -189,7 +191,11 @@ struct AppImpostazioni: View {
         case TestiSpese.ancoraImpostazioni: return .studio
         case TestiFamiglie.ancoraImpostazioni: return .rendimenti
         case TestiNotte.ancoraImpostazioni: return .vera
-        default: return nil
+        default:
+            // Migliorie d'uso 30: le ancore dell'indice della ricerca si chiamano «imp-<pagina>-<voce>»
+            guard ancora.hasPrefix("imp-") else { return nil }
+            let nome = ancora.dropFirst(4).split(separator: "-", maxSplits: 1).first.map(String.init) ?? ""
+            return SchedaImpostazioni(rawValue: nome)
         }
     }
 
@@ -478,6 +484,7 @@ struct AppImpostazioni: View {
                 }
                 .cascataImpostazioni(7)
             }
+            .id("imp-aspetto-finestra")
             GruppoImpostazioni(titolo: "Aiuto") {
                 RigaImpostazione(titolo: "Guida per cominciare", sottotitolo: "Sulla scrivania, finché non è finita.") {
                     interruttore(Binding(get: { !stato.dati.impostazioni.guidaNascosta },
@@ -490,6 +497,7 @@ struct AppImpostazioni: View {
                 }
                 .cascataImpostazioni(9)
             }
+            .id("imp-aspetto-aiuto")
         }
     }
 
@@ -569,6 +577,7 @@ struct AppImpostazioni: View {
             GruppoImpostazioni(titolo: "Vera") {
                 rigaConfrontaModelli
             }
+            .id("imp-strumenti-vera")
             // Giro 0 di «Prisma istantaneo»: la prova della fluidità e i tempi di Vera su questo Mac (MisuraVelocita.swift)
             GruppoVelocita()
                 .id(MisuraVelocita.ancora)
@@ -583,12 +592,14 @@ struct AppImpostazioni: View {
                         .disabled(stato.permessoPromemoria == .negati || !stato.dati.impostazioni.promemoria.attivi)
                 }
             }
+            .id("imp-strumenti-promemoria")
             GruppoImpostazioni(titolo: "Parlare con Vera") {
                 rigaApri("Voce e ascolto", "Per ora Vera non parla", aperta: $mostraVoce, ultima: !mostraVoce)
                 if mostraVoce {
                     righeVoce
                 }
             }
+            .id("imp-strumenti-voce")
         }
     }
 }

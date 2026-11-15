@@ -36,8 +36,14 @@ extension Tema.Apple {
             /// Prisma ha più sezioni del template: sono raccolte sotto etichette `.lbl` (la prima senza).
             static let etichetta = Carattere.etichetta
             static let coloreEtichetta = Colore.inchiostro2
+            #if os(macOS)
+            /// Migliorie d'uso 30: occhiello dei gruppi come nel template (`.lbl.ig`: 13 sopra, 4 sotto).
+            static let sottoEtichetta: CGFloat = 4
+            static let sopraGruppo: CGFloat = 13
+            #else
             static let sottoEtichetta: CGFloat = 8
             static let sopraGruppo: CGFloat = 16
+            #endif
             static let rientroEtichetta: CGFloat = 12
             /// Piede: archivio locale e versione, `.k` piccolo, 12 sopra.
             static let piede = Carattere(dimensione: 11.5, peso: .regular)
@@ -47,6 +53,35 @@ extension Tema.Apple {
             /// Pallino verde dell'archivio locale nel piede.
             static let pallinoPiede: CGFloat = 6
             static let colorePallinoPiede = Colore.verde
+
+            /// Migliorie d'uso 30: il campo «Cerca nelle impostazioni» in cima alla colonna (`.impQ`): alto 34, raggio 10,
+            /// fondo `chip`, lente 15 `ink3`, testo 13,5; 2 sopra e 10 sotto (solo Mac).
+            enum Cerca {
+                static let altezza: CGFloat = 34
+                static let raggio: CGFloat = 10
+                static let fondo = Colore.chip
+                static let paddingOrizzontale: CGFloat = 11
+                static let spazio: CGFloat = 8
+                static let lente = Carattere(dimensione: 15, peso: .regular)
+                static let coloreLente = Colore.inchiostro3
+                static let testo = Carattere(dimensione: 13.5, peso: .regular)
+                static let coloreTesto = Colore.inchiostro
+                static let sopra: CGFloat = 2
+                static let sotto: CGFloat = 10
+                static let simbolo = "magnifyingglass"
+            }
+        }
+
+        // MARK: Risultati della ricerca
+
+        /// Migliorie d'uso 30: le righe dei risultati hanno a destra la pillola con il nome della pagina (12 semibold,
+        /// padding 4×10, fondo `chip`) e «Apri», 8 fra l'una e l'altro.
+        enum Risultati {
+            static let pillola = Carattere(dimensione: 12, peso: .semibold)
+            static let colorePillola = Colore.inchiostro2
+            static let fondoPillola = Colore.chip
+            static let paddingPillola = Misura.padding(4, 10)
+            static let spazio: CGFloat = 8
         }
 
         // MARK: Pagina

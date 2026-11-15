@@ -1342,6 +1342,8 @@ enum ProvaCalcoli {
         #if os(macOS)
         // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
         MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }
+        // Migliorie d'uso 30: l'indice della ricerca nelle Impostazioni (pagine, doppioni, ancore, maiuscole e accenti)
+        MainActor.assumeIsolated { ProvaIndiceImpostazioni.esegui(verificaEsterna) }
         #endif
 
         // Giro 7: glossario e guida. Ogni chiave ha la sua voce, le etichette puntano a voci vere, ogni app ha 3 passi
