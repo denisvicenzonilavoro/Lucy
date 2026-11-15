@@ -25,6 +25,65 @@ enum ProvaCalcoliMercato {
         richieste(verifica)
         scaricamentoDiProva(verifica)
         serieEArchivio(verifica)
+        usoMercato(verifica)
+    }
+
+    // MARK: - Migliorie d'uso 29: la frase del singolo cliente e l'azione di ogni avviso
+
+    private static func usoMercato(_ verifica: VerificaCalcoli) {
+        func evento(_ tipo: TipoEventoMercato, valore: Double, toccati: [ClienteToccato]) -> EventoMercato {
+            EventoMercato(id: "prova-\(tipo.rawValue)", tipo: tipo, titolo: "Evento di prova", dettaglio: "", valore: valore,
+                          soglia: 1, data: oggi, fonte: "Fonte: dati di prova", serieId: nil, isin: nil, posizioneId: nil,
+                          toccati: toccati)
+        }
+        // Con la cifra: «Il portafoglio di Marco perde circa …», con i canali separati se sono due
+        let conCifra = ClienteToccato(clienteId: "marco", posizioni: ["p1", "p2"], impatto: -1_150,
+                                      perCanale: [.alleanza: -400, .indipendente: -750], canali: [.alleanza, .indipendente])
+        let frase = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: -1.8, toccati: [conCifra]), toccato: conCifra,
+                                                 tipoSerie: .indiceAzionario, nome: "Marco Bianchi")
+        verifica.vero("Mercato uso: la frase del cliente con la cifra parla di lui",
+                      frase.hasPrefix("Il portafoglio di Marco perde circa ") && frase.hasSuffix(").") && !frase.contains("Bianchi"))
+        verifica.vero("Mercato uso: la frase del cliente separa i canali", frase.contains(Canale.alleanza.nomeBreve) && frase.contains(Canale.indipendente.nomeBreve))
+        let guadagna = ClienteToccato(clienteId: "marco", posizioni: ["p1"], impatto: 300, perCanale: [.indipendente: 300],
+                                      canali: [.indipendente])
+        let fraseSu = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: 1.2, toccati: [guadagna]), toccato: guadagna,
+                                                   tipoSerie: .indiceAzionario, nome: "Marco Bianchi")
+        verifica.vero("Mercato uso: con un canale solo niente parentesi", fraseSu.contains("guadagna circa") && !fraseSu.contains("("))
+        // Senza cifra: la frase qualitativa del tipo di serie, detta di lui
+        let senza = ClienteToccato(clienteId: "marco", posizioni: [], impatto: nil, perCanale: [:], canali: [])
+        let fraseTassi = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: 0.15, toccati: [senza]), toccato: senza,
+                                                      tipoSerie: .rendimentoStato, nome: "Marco Bianchi")
+        verifica.vero("Mercato uso: senza cifra la frase qualitativa", fraseTassi == "Marco ha titoli di Stato: il valore scende un po’, la cedola resta quella.")
+        let fraseCedola = TestiAppMercato.fraseToccato(evento(.cedolaInArrivo, valore: 12, toccati: [senza]), toccato: senza,
+                                                       tipoSerie: nil, nome: "Sofia Romano")
+        verifica.vero("Mercato uso: la cedola per il cliente", fraseCedola == "Per Sofia: la cedola arriva sul conto.")
+        // L'azione di ogni tipo di avviso: il nome dice dove porta
+        for tipo in TipoEventoMercato.allCases {
+            let una = AzioneAvvisoMercato.per(tipo: tipo, posizioni: 1)
+            let piu = AzioneAvvisoMercato.per(tipo: tipo, posizioni: 3)
+            switch tipo {
+            case .caloDalMassimo, .distanzaDalRiferimento:
+                verifica.vero("Mercato uso: \(tipo.rawValue), una posizione: «Apri la posizione»",
+                              una == .apriPosizione && TestiAppMercato.azioneAvviso(una) == TestiAppMercato.apriPosizione)
+                verifica.vero("Mercato uso: \(tipo.rawValue), più posizioni: «Apri le posizioni»",
+                              piu == .apriPosizioni && TestiAppMercato.azioneAvviso(piu) == "Apri le posizioni")
+                verifica.vero("Mercato uso: \(tipo.rawValue), il portafoglio: «Apri le posizioni»",
+                              AzioneAvvisoMercato.per(tipo: tipo, posizioni: 0) == .apriPosizioni)
+            case .cedolaInArrivo, .variazioneSerie:
+                verifica.vero("Mercato uso: \(tipo.rawValue): «Prepara un messaggio»",
+                              una == .preparaMessaggio && piu == .preparaMessaggio
+                                && TestiAppMercato.azioneAvviso(una) == TestiAppMercato.preparaMessaggio)
+            }
+        }
+        // L'etichetta della riservatezza dice solo il vero
+        verifica.vero("Mercato uso: etichetta spenta «Niente esce dal Mac»", TestiAppMercato.etichettaRiservatezza(attivo: false) == "Niente esce dal Mac")
+        verifica.vero("Mercato uso: etichetta accesa senza ISIN",
+                      TestiAppMercato.etichettaRiservatezza(attivo: true) == "Escono solo dati pubblici"
+                        && !TestiAppMercato.fascia(attivo: true).testo.contains("ISIN"))
+        verifica.vero("Mercato uso: titoli con il cliente",
+                      TestiAppMercato.titoloToccati(vecchi: false, cliente: "Marco Bianchi") == "Cosa tocca Marco oggi"
+                        && TestiAppMercato.titoloAvvisi(cliente: "Marco Bianchi") == "Avvisi per Marco"
+                        && TestiAppMercato.titoloToccati(vecchi: false, cliente: nil) == TestiAppMercato.titoloToccati(vecchi: false))
     }
 
     // MARK: - Esempi

@@ -117,6 +117,8 @@ extension Tema.Apple {
             static let vuoto = Carattere(dimensione: 13, peso: .regular, interlinea: 1.4)
             static let coloreVuoto = Colore.inchiostro2
             static let larghezzaVuoto: CGFloat = 340
+            /// Migliorie d'uso 29: «Soglie…» in alto a destra del riquadro degli avvisi (sul Mac).
+            static let spazioTitolo: CGFloat = 8
         }
 
         enum Toccati {
@@ -166,6 +168,32 @@ extension Tema.Apple {
             /// L'alone del pallino rosso che pulsa: 6 di rosso al 18%.
             static let alone: CGFloat = 6
             static let coloreAlone = Color(r: 229, g: 72, b: 77, a: 0.18)
+            /// Migliorie d'uso 29 (sul Mac): la riga silenziata resta in grigio al 60%, i pulsanti a 6 l'uno dall'altro.
+            static let opacitaSilenziato: Double = 0.6
+            static let spazioPulsanti: CGFloat = 6
+        }
+
+        // MARK: L'etichetta della riservatezza nella riga in testa (migliorie d'uso 29, `.chipC` del template)
+
+        enum Riservatezza {
+            /// Capsula `cardPiena` con il filo `separatore`: lucchetto 14, testo 13 semibold, padding 4×12×4×10.
+            static let simbolo = "lock.fill"
+            static let carattereSimbolo = Carattere(dimensione: 14, peso: .semibold)
+            static let testo = Carattere(dimensione: 13, peso: .semibold)
+            static let coloreTesto = Colore.inchiostro
+            /// Il lucchetto verde con «Dati di mercato» acceso (escono solo dati pubblici), grigio da spento (non esce niente).
+            static let coloreSimboloAcceso = Colore.verde
+            static let coloreSimboloSpento = Colore.inchiostro2
+            static let padding = EdgeInsets(top: 4, leading: 10, bottom: 4, trailing: 12)
+            static let spazio: CGFloat = 6
+            static let fondo = Colore.cardPiena
+            static let bordo = Colore.separatore
+            static let spessoreBordo = Misura.bordo
+            /// Sotto il puntatore si solleva di 2, come le pillole della riga in testa.
+            static let sollevamento: CGFloat = -2
+            /// La scheda «Riservatezza»: l'occhiello sopra il titolo.
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
         }
 
         // MARK: Ricerca per ISIN (§12.2.2, §12.1.7)

@@ -1187,3 +1187,38 @@ Resta:
 - Coordinarsi con la 52 (gruppo 09), che tocca la stessa riga in testa di Studio.
 - Rigenerare sul Mac 510-514 e guardare 1047-1050: altezza della colonna delle azioni nelle finestre basse (la scheda
   «A che punto è» aggiunge circa 110 punti sopra i pulsanti) e il filtro nella barra stretta a 300.
+
+## 29. Mercato segue il cliente, e ogni avviso ha la sua azione
+
+Fatto (solo Mac, `#if os(macOS)`; su iPad fascia verde, interruttore e «Soglie degli avvisi» blu restano come prima):
+- **Etichetta della riservatezza** `EtichettaRiservatezzaMercato` come primo elemento di `AzioniMercato`: lucchetto e
+  «Escono solo dati pubblici» (acceso) o «Niente esce dal Mac» (spento, il caso di base), si solleva di 2 sotto il
+  puntatore. Apre il foglio nuovo `FoglioMercato.riservatezza` (`FoglioRiservatezzaMercato`): «Riservatezza», il titolo
+  uguale all'etichetta, la frase di sempre (`TestiAppMercato.fascia`, senza gli ISIN) e, spento, «Impostazioni ›
+  Mercato». La fascia verde non c'è più sul Mac: la striscia sale.
+- **Il filtro per cliente**: con un cliente nella barra `RiquadroToccati` e `RiquadroAvvisi` prendono `cliente:` e
+  mostrano solo i suoi eventi e avvisi; titoli «Cosa tocca <Nome> oggi» / «… dall’ultimo aggiornamento» e «Avvisi per
+  <Nome>», vuoti «Oggi il mercato non tocca <Nome>.» e «Nessun avviso per <Nome>.». La scheda dice la frase sua
+  (`TestiAppMercato.fraseToccato`), senza avatar, con «Prepara un messaggio».
+- **Le righe degli avvisi**: via l'interruttore senza nome; il pulsante dell'azione per tipo (`AzioneAvvisoMercato`:
+  «Apri la posizione» / «Apri le posizioni» per calo dal massimo e distanza, «Prepara un messaggio» per cedola e
+  variazione) e «Silenzia». «Apri le posizioni» (`apriPosizioniAvvisoMercato`) sceglie il cliente in silenzio e apre
+  Posizioni sul suo quadro; il messaggio senza Messaggi consentito ripiega sull'apertura. Silenziato = `.visto` di sempre:
+  riga al 60%, «Silenziato: niente più notifiche» (nessun avviso entra nel «Da fare», §29.6), solo «Riattiva»; avvisi
+  «Silenziato: resta qui in grigio…» e «Riattivato: torna nelle notifiche». Il menu contestuale dice «Silenzia» /
+  «Riattiva».
+- **«Soglie…»** sobrio in alto a destra del riquadro degli avvisi apre il foglio delle soglie di sempre; «Soglie degli
+  avvisi» blu tolto dalla riga in testa del Mac.
+- Prove in `--prova-calcoli` (`ProvaCalcoliMercato.usoMercato`): `fraseToccato` con e senza cifra, con uno o due canali,
+  `AzioneAvvisoMercato` per ogni `TipoEventoMercato`, l'etichetta e i titoli. La prova delle richieste non cambia.
+- Istantanee: 540-547 ora su «Tutti i clienti» esplicito; nuove 1051-uso-mercato-cliente (Marco, anche scura),
+  1052-uso-mercato-riservatezza e 1053-uso-mercato-spento.
+
+Resta:
+- La frase per il singolo cliente non dice ancora la quota in azioni del template («ha il 38% in azioni»): il motore
+  non la porta in `ClienteToccato`.
+- I pulsanti degli avvisi usano `.apple` di misura normale (il tema non ha ancora una variante piccola 6×12).
+- Rigenerare sul Mac 540-547 e guardare 1051-1053: con i dati di prova Marco potrebbe non avere eventi o avvisi (allora
+  1051 mostra i due vuoti con il nome); la larghezza della riga degli avvisi con due pulsanti nelle finestre strette.
+- Se la miglioria 3 porterà gli avvisi `.nuovo` nel «Da fare», cambiare `TestiAppMercato.silenziato` in «Silenziato:
+  non entra più nel «Da fare»».

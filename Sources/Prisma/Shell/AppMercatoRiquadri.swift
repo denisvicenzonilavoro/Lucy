@@ -13,6 +13,9 @@ struct RiquadroToccati: View {
     let eventi: [EventoMercato]
     let vecchi: Bool
     let senzaDati: Bool
+    /// Migliorie d'uso 29 (sul Mac): il cliente scelto nella barra. Gli eventi arrivano già filtrati su di lui; il titolo
+    /// diventa «Cosa tocca <Nome> oggi» e ogni scheda parla di lui. nil = «Tutti i clienti» (e sempre su iPad).
+    var cliente: Cliente? = nil
     /// Le schede in una pila pigra (solo quelle in vista): quando il riquadro ha un'altezza sua (riquadri affiancati).
     /// Impilati, dentro lo scorrimento di tutta l'app, resta la pila normale (il riquadro prende l'altezza del contenuto).
     var pigro = false
@@ -23,7 +26,7 @@ struct RiquadroToccati: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         VStack(alignment: .leading, spacing: 0) {
-            Text(TestiAppMercato.titoloToccati(vecchi: vecchi))
+            Text(TestiAppMercato.titoloToccati(vecchi: vecchi, cliente: cliente?.nome))
                 .carattereApple(R.etichetta)
                 .foregroundColor(R.coloreEtichetta)
                 .lineLimit(1)
@@ -51,13 +54,14 @@ struct RiquadroToccati: View {
 
     private var schede: some View {
         ForEach(eventi) { e in
-            SchedaToccatiMercato(evento: e)
+            SchedaToccatiMercato(evento: e, cliente: cliente)
         }
     }
 
     private var vuoto: String {
         if senzaDati { return TestiAppMercato.toccatiSenzaDati }
         if stato.dati.impostazioni.mercato.senzaSoglie { return TestiAppMercato.toccatiSenzaSoglie }
+        if let cliente { return TestiAppMercato.nessunoToccatoPer(cliente.nome) }
         return TestiAppMercato.nessunoToccato
     }
 }
@@ -84,6 +88,8 @@ struct FraseVuotaMercato: View {
 struct SchedaToccatiMercato: View {
     @Environment(StatoShell.self) var stato
     let evento: EventoMercato
+    /// Migliorie d'uso 29: con un cliente scelto la frase è la sua, niente avatar e «Prepara un messaggio» senza nome.
+    var cliente: Cliente? = nil
 
     private typealias K = Tema.Apple.Mercato.Toccati
 
@@ -97,12 +103,19 @@ struct SchedaToccatiMercato: View {
         }
         let tipoSerie = e.serieId.flatMap { stato.dati.mercato.serie($0)?.tipo }
         let primo = e.toccati.first.flatMap { stato.cliente($0.clienteId) }
+        let suo: ClienteToccato? = cliente.flatMap { c in e.toccati.first { $0.clienteId == c.id } }
+        let frase: String = {
+            if let c = cliente, let t = suo {
+                return TestiAppMercato.fraseToccato(e, toccato: t, tipoSerie: tipoSerie, nome: c.nome)
+            }
+            return TestiAppMercato.fraseToccati(e, tipoSerie: tipoSerie, nomi: nomi)
+        }()
         return VStack(alignment: .leading, spacing: 0) {
             Text(e.titolo)
                 .carattereApple(K.titolo)
                 .foregroundColor(K.coloreTitolo)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(TestiAppMercato.fraseToccati(e, tipoSerie: tipoSerie, nomi: nomi))
+            Text(frase)
                 .carattereApple(K.frase)
                 .foregroundColor(K.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)
@@ -113,12 +126,24 @@ struct SchedaToccatiMercato: View {
                 .lineLimit(1)
                 .padding(.top, K.sottoTitolo)
             HStack(spacing: K.spazioPiede) {
-                GruppoAvatarMercato(clienti: e.toccati.compactMap { stato.cliente($0.clienteId) })
-                if let c = e.toccati.first?.canaleUnico {
-                    EtichettaCanaleApple(canale: c, compatta: true)
+                if let c = cliente {
+                    if let k = suo?.canaleUnico {
+                        EtichettaCanaleApple(canale: k, compatta: true)
+                    }
+                    Spacer(minLength: 0)
+                    Button(TestiAppMercato.preparaMessaggio) {
+                        stato.preparaMessaggioMercato(e, clienteId: c.id)
+                    }
+                    .buttonStyle(.apple)
+                    .disabled(!stato.appConsentita(.messaggi))
+                } else {
+                    GruppoAvatarMercato(clienti: e.toccati.compactMap { stato.cliente($0.clienteId) })
+                    if let c = e.toccati.first?.canaleUnico {
+                        EtichettaCanaleApple(canale: c, compatta: true)
+                    }
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
-                if let primo {
+                if cliente == nil, let primo {
                     Button(TestiAppMercato.preparaMessaggioA(primo.nome)) {
                         stato.preparaMessaggioMercato(e, clienteId: primo.id)
                     }
@@ -189,6 +214,8 @@ struct GruppoAvatarMercato: View {
 struct RiquadroAvvisi: View {
     @Environment(StatoShell.self) var stato
     let sessione: SessioneMercato
+    /// Migliorie d'uso 29 (sul Mac): il cliente scelto nella barra; «Avvisi per <Nome>» con solo i suoi.
+    var cliente: Cliente? = nil
     /// Le righe in una pila pigra: solo quelle in vista si costruiscono e pulsano (riquadri affiancati, con l'altezza
     /// della finestra). Impilati, dentro lo scorrimento di tutta l'app, resta la pila normale.
     var pigro = false
@@ -197,15 +224,27 @@ struct RiquadroAvvisi: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
-        let avvisi = stato.avvisiMercato
+        let tutti = stato.avvisiMercato
+        let avvisi: [AvvisoMercato] = cliente.map { c in tutti.filter { $0.clienteId == c.id } } ?? tutti
         return VStack(alignment: .leading, spacing: 0) {
-            Text(TestiAppMercato.avvisi)
-                .carattereApple(R.etichetta)
-                .foregroundColor(R.coloreEtichetta)
-                .textCase(.uppercase)
-                .lineLimit(1)
-                .padding(.bottom, R.sottoEtichetta)
-                .accessibilityAddTraits(.isHeader)
+            HStack(alignment: .firstTextBaseline, spacing: R.spazioTitolo) {
+                Text(TestiAppMercato.titoloAvvisi(cliente: cliente?.nome))
+                    .carattereApple(R.etichetta)
+                    .foregroundColor(R.coloreEtichetta)
+                    .textCase(.uppercase)
+                    .lineLimit(1)
+                    .accessibilityAddTraits(.isHeader)
+                #if os(macOS)
+                // Migliorie d'uso 29: le soglie si aprono da qui (le si cambia nel foglio di sempre)
+                if !stato.inModoCliente {
+                    Spacer(minLength: R.spazioTitolo)
+                    Button(TestiAppMercato.soglieBreve) { sessione.foglio = .soglie }
+                        .buttonStyle(.appleSobrio)
+                        .help(TestiAppMercato.soglieNota)
+                }
+                #endif
+            }
+            .padding(.bottom, R.sottoEtichetta)
             if let r = sessione.risultatoISIN {
                 RisultatoISINMercato(risultato: r)
                     .id(sessione.giroRicerca)
@@ -213,7 +252,8 @@ struct RiquadroAvvisi: View {
             }
             if avvisi.isEmpty {
                 FraseVuotaMercato(testo: stato.dati.impostazioni.mercato.senzaSoglie
-                                  ? TestiAppMercato.nessunAvviso : TestiAppMercato.nessunAvvisoConSoglie)
+                                  ? TestiAppMercato.nessunAvviso
+                                  : (cliente.map { TestiAppMercato.nessunAvvisoPer($0.nome) } ?? TestiAppMercato.nessunAvvisoConSoglie))
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
                     Group {
@@ -253,6 +293,11 @@ struct RigaAvvisoMercato: View {
         let a = avviso
         let cliente = stato.cliente(a.clienteId)
         let tono = stato.tonoAvvisoMercato(a)
+        #if os(macOS)
+        let silenziato = a.stato == .visto
+        #else
+        let silenziato = false
+        #endif
         return HStack(alignment: .center, spacing: A.spazio) {
             PallinoAvvisoMercato(colore: ColoriMercato.avviso(tono), pulsa: tono == .rosso)
             if let c = cliente {
@@ -273,7 +318,7 @@ struct RigaAvvisoMercato: View {
                     .foregroundColor(A.coloreDescrizione)
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(a.fonte)
+                Text(silenziato ? TestiAppMercato.silenziato : a.fonte)
                     .carattereApple(A.fonte)
                     .foregroundColor(A.coloreFonte)
                     .lineLimit(1)
@@ -282,12 +327,32 @@ struct RigaAvvisoMercato: View {
             .contentShape(Rectangle())
             .onTapGesture { stato.apriAvvisoMercato(a) }
             .help(a.dettaglio)
+            #if os(macOS)
+            // Migliorie d'uso 29: ogni avviso ha la sua azione, con il nome che dice dove porta, e «Silenzia»;
+            // silenziato, al posto dei pulsanti «Riattiva». Niente interruttore senza nome.
+            HStack(spacing: A.spazioPulsanti) {
+                if silenziato {
+                    Button(TestiAppMercato.riattiva) { stato.silenziaAvvisoMercato(a, silenzia: false) }
+                        .buttonStyle(.apple)
+                        .disabled(!stato.mercatoModificabile)
+                } else {
+                    Button(TestiAppMercato.azioneAvviso(a)) { stato.eseguiAzioneAvvisoMercato(a) }
+                        .buttonStyle(.apple)
+                    Button(TestiAppMercato.silenzia) { stato.silenziaAvvisoMercato(a, silenzia: true) }
+                        .buttonStyle(.apple)
+                        .disabled(!stato.mercatoModificabile)
+                }
+            }
+            .fixedSize()
+            #else
             Toggle(isOn: Binding(get: { a.stato == .nuovo }, set: { stato.segnaAvvisoMercato(a.id, visto: !$0) })) { EmptyView() }
                 .toggleStyle(.appleSenzaEtichetta)
                 .disabled(!stato.mercatoModificabile)
                 .accessibilityLabel(TestiAppMercato.daGuardare)
+            #endif
         }
         .padding(.vertical, A.paddingVerticale)
+        .opacity(silenziato ? A.opacitaSilenziato : 1)
         .overlay(alignment: .bottom) {
             Rectangle().fill(A.filo).frame(height: A.spessoreFilo)
         }
@@ -296,9 +361,16 @@ struct RigaAvvisoMercato: View {
                 Button(TestiAppMercato.preparaMessaggio) { stato.preparaMessaggioAvviso(a) }
             }
             Button(a.posizioni.count == 1 ? TestiAppMercato.apriPosizione : TestiAppMercato.apriDossier) { stato.apriAvvisoMercato(a) }
+            #if os(macOS)
+            Button(a.stato == .nuovo ? TestiAppMercato.silenzia : TestiAppMercato.riattiva) {
+                stato.silenziaAvvisoMercato(a, silenzia: a.stato == .nuovo)
+            }
+            .disabled(!stato.mercatoModificabile)
+            #else
             Button(a.stato == .nuovo ? TestiAppMercato.segnaVisto : TestiAppMercato.segnaNuovo) {
                 stato.segnaAvvisoMercato(a.id, visto: a.stato == .nuovo)
             }
+            #endif
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(TestiAppMercato.voceAvviso(a, cliente: cliente?.nome ?? ""))

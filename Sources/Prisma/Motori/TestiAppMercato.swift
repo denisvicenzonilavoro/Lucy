@@ -137,7 +137,12 @@ enum TestiAppMercato {
     // MARK: - Avvisi
 
     static let avvisi = "Avvisi"
+    #if os(macOS)
+    /// Sul Mac le soglie si aprono da «Soglie…» nel riquadro degli avvisi (migliorie d'uso 29).
+    static let nessunAvviso = "Nessun avviso. Scegli le soglie con «Soglie…»: senza soglie Prisma non ne crea."
+    #else
     static let nessunAvviso = "Nessun avviso. Scegli le soglie con «Soglie degli avvisi»: senza soglie Prisma non ne crea."
+    #endif
     static let nessunAvvisoConSoglie = "Nessun avviso: oggi nessuna soglia è superata."
     static let daGuardare = "Da guardare"
     static let segnaVisto = "Segna come visto"
@@ -287,4 +292,118 @@ extension TestiAppMercato {
 
 extension TestiAppMercato {
     static let isinInvito = "12 caratteri, come nel KID o nell'estratto conto"
+}
+
+// MARK: - Migliorie d'uso 29: Mercato segue il cliente, e ogni avviso ha la sua azione (Design/uso/gruppo-04.md §29)
+
+/// Il pulsante di un avviso, per tipo (§29.3 punto 4): gli avvisi sul portafoglio (calo dal massimo, distanza dal
+/// riferimento) aprono le posizioni, la cedola e la variazione di una serie preparano un messaggio. Puro, per le prove.
+enum AzioneAvvisoMercato: Equatable {
+    /// Una posizione sola: il suo dettaglio in Posizioni.
+    case apriPosizione
+    /// Più posizioni (o il portafoglio): il cliente nella barra e Posizioni sul suo quadro.
+    case apriPosizioni
+    case preparaMessaggio
+
+    static func per(tipo: TipoEventoMercato, posizioni: Int) -> AzioneAvvisoMercato {
+        switch tipo {
+        case .caloDalMassimo, .distanzaDalRiferimento:
+            return posizioni == 1 ? .apriPosizione : .apriPosizioni
+        case .cedolaInArrivo, .variazioneSerie:
+            return .preparaMessaggio
+        }
+    }
+
+    static func per(_ a: AvvisoMercato) -> AzioneAvvisoMercato { per(tipo: a.tipo, posizioni: a.posizioni.count) }
+}
+
+extension TestiAppMercato {
+    // MARK: L'etichetta della riservatezza
+
+    /// L'etichetta nella riga in testa: dice solo il vero. Acceso escono solo richieste di dati pubblici (BCE,
+    /// Eurostat), mai ISIN né dati dei clienti; spento non esce niente.
+    static func etichettaRiservatezza(attivo: Bool) -> String { attivo ? "Escono solo dati pubblici" : "Niente esce dal Mac" }
+    static let riservatezza = "Riservatezza"
+    static let aiutoRiservatezza = "Che cosa esce dal Mac per aggiornare il mercato"
+
+    // MARK: Con un cliente scelto
+
+    /// «Cosa tocca Marco oggi» (o «dall’ultimo aggiornamento» con i dati vecchi); senza cliente il titolo di sempre.
+    static func titoloToccati(vecchi: Bool, cliente: String?) -> String {
+        guard let cliente else { return titoloToccati(vecchi: vecchi) }
+        let nome = primoNome(cliente)
+        return vecchi ? "Cosa tocca \(nome) dall’ultimo aggiornamento" : "Cosa tocca \(nome) oggi"
+    }
+
+    /// «Avvisi per Marco»; senza cliente «Avvisi».
+    static func titoloAvvisi(cliente: String?) -> String {
+        guard let cliente else { return avvisi }
+        return "Avvisi per \(primoNome(cliente))"
+    }
+
+    static func nessunoToccatoPer(_ nome: String) -> String { "Oggi il mercato non tocca \(primoNome(nome))." }
+    static func nessunAvvisoPer(_ nome: String) -> String { "Nessun avviso per \(primoNome(nome))." }
+
+    /// La frase della scheda per un cliente solo: con la cifra «Il portafoglio di Marco perde circa 1.150 €» (con i
+    /// canali separati se sono due); senza cifra la frase qualitativa del tipo di serie, detta di lui.
+    static func fraseToccato(_ e: EventoMercato, toccato: ClienteToccato, tipoSerie: TipoSerieMercato?, nome: String) -> String {
+        let n = primoNome(nome)
+        if let impatto = toccato.impatto, abs(impatto) >= 1 {
+            let verbo = impatto < 0 ? "perde" : "guadagna"
+            var frase = "Il portafoglio di " + n + " " + verbo + " circa " + Formati.euro(abs(MotoreMercato.circa(impatto)))
+            let canali = Canale.allCases.filter { toccato.perCanale[$0] != nil }
+            if canali.count > 1 {
+                let parti = canali.compactMap { k -> String? in
+                    guard let v = toccato.perCanale[k] else { return nil }
+                    return "\(k.nomeBreve) " + Formati.euro(abs(MotoreMercato.circa(v)))
+                }
+                frase += " (" + parti.joined(separator: ", ") + ")"
+            }
+            return frase + "."
+        }
+        switch e.tipo {
+        case .variazioneSerie:
+            switch tipoSerie {
+            case .rendimentoStato?, .spread?:
+                return e.valore > 0
+                    ? "\(n) ha titoli di Stato: il valore scende un po’, la cedola resta quella."
+                    : "\(n) ha titoli di Stato: il valore sale un po’, la cedola resta quella."
+            case .tassoInterbancario?, .tassoUfficiale?:
+                return "\(n) ha liquidità o debiti: i tassi cambiano rendimenti e rate."
+            case .inflazione?:
+                return e.valore > 0
+                    ? "\(n) ha obiettivi lontani: il potere d’acquisto si riduce un po’."
+                    : "Buona notizia per \(n), che ha obiettivi lontani: il potere d’acquisto tiene."
+            default:
+                return "\(n) ha questa esposizione nel portafoglio."
+            }
+        case .caloDalMassimo, .distanzaDalRiferimento:
+            return "\(n) ha questa posizione nel portafoglio."
+        case .cedolaInArrivo:
+            return "Per \(n): la cedola arriva sul conto."
+        }
+    }
+
+    // MARK: Le azioni degli avvisi
+
+    static let apriPosizioni = "Apri le posizioni"
+    static let silenzia = "Silenzia"
+    static let riattiva = "Riattiva"
+    /// La riga di un avviso silenziato. Nessun avviso entra nel «Da fare» (MotoreDaFare non ne ha): vale la frase
+    /// onesta della proposta §29.6.
+    static let silenziato = "Silenziato: niente più notifiche"
+    static let avvisoSilenziato = "Silenziato: resta qui in grigio, e si riattiva quando vuoi"
+    static let avvisoRiattivato = "Riattivato: torna nelle notifiche"
+    static let soglieBreve = "Soglie…"
+
+    /// Il nome del pulsante dell'avviso: dice dove porta.
+    static func azioneAvviso(_ a: AvvisoMercato) -> String { azioneAvviso(AzioneAvvisoMercato.per(a)) }
+
+    static func azioneAvviso(_ azione: AzioneAvvisoMercato) -> String {
+        switch azione {
+        case .apriPosizione: return apriPosizione
+        case .apriPosizioni: return apriPosizioni
+        case .preparaMessaggio: return preparaMessaggio
+        }
+    }
 }
