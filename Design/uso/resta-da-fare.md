@@ -2040,3 +2040,32 @@ Resta:
   aprendo la ricerca, quindi oggi non serve.
 - Le azioni «Spazi di lavoro» e «Le tue app aperte» della ricerca escono con la miglioria 61 (61.3 punto 4); il pannello
   grande degli spazi e «Le tue app aperte» restano nel menu «Vai».
+
+## 68. Quello che Prisma prepara da solo si conferma allo stesso modo
+
+Fatto (solo sul Mac): i componenti comuni in DesignSystem/Apple/ConfermeApple.swift (`StatoConferma`,
+`RigaConfermaApple`, `AnnullaRimettiApple`, `CollegamentoConfermaApple`, `PulsanteChiusuraConferma`, `ScuotiConferma`;
+`ScuotiEffetto` spostato qui da VisteMotoriVera.swift, stesso nome per Inquadra e Aggiorna valori) con i token
+`Tema.Apple.Conferme` e la vetrina `VetrinaConferme`. Stanotte: «Più tardi» e «Va bene» sotto ✕ e ✓, il registro «COSA
+HAI DECISO» con la frase del vuoto, nella fine «La cosa rimandata è nel «Da fare» di oggi.» (con la miglioria 3 fatta, la
+frase dice già «Da fare»); la voce degli arrivi del «Da fare» dice «Stanotte: N cose rimandate» quando restano solo le
+rimandate, e un tocco riapre Stanotte come prima. Nota vocale: verde = «pronto, si fa con «Va bene così»» (proposta di
+68.6: nulla entra nel dossier senza la conferma, decisione 102 di «Luce»), «Annulla»/«Rimetti» sulle verdi, l'obiettivo e
+l'attività con la data da confermare in arancione («Aggiorna»/«No», «Va bene»/«Modifica»/«Annulla»), la capsula
+«Aggiornato»/«Lasciato com’era» con «Cambia», senza cliente la testa in arancione; un pulsante solo («Rispondi alla riga
+in arancione» → «Va bene così», con la frase che conta), la scossa e l'avviso «Prima rispondi alla riga in arancione»,
+«Scarta tutta la nota» come collegamento; «Va bene così» scarta e conferma in un solo `dati.carica` e chiude con «Nota di
+<Nome> a posto: la trovi nel suo dossier» (`confermaNota` ha i parametri `scarta` e `avviso`, `chiudiNotaVocale` sul Mac).
+Le decisioni prima di «Va bene così» stanno solo in memoria (`StatoNotaVocaleMac.annullate`, `risposte`). Prove in
+`--prova-vera` (ProvaNotaVocale: regole, «Va bene così», tutto annullato), `--prova-calcoli` (testi della notte, scossa
+ferma); istantanee nuove 1313 (chiara e scura), 1314, 1315 (chiara e scura); 760-766 e 771-773 cambiano da sole.
+
+Resta:
+- **Punto 3 di 68.3**: Inquadra (43), Aggiorna valori (44) e il documento (62) tengono ancora le loro righe «da
+  controllare»; passano a `RigaConfermaApple` e `PulsanteChiusuraConferma` con un lavoro a parte (le schermate sono
+  grandi e già provate: meglio non toccarle nello stesso giro).
+- Le parole sotto ✕ e ✓ spariscono insieme ai comandi quando la pila è finita (la pila lascia il posto alla carta
+  finale), senza la dissolvenza propria di 0,4 s del template.
+- Il tremolio dell'esame OCF (Tema.Apple+OCF.swift) resta a sé: ha passi diversi (−8, +8, −5).
+- **Da guardare nelle istantanee**: 771 (due righe in arancione nella nota del template, perché anche l'attività «a
+  gennaio» ha la data da confermare) e l'altezza della carta finale di 763 con la frase delle rimandate.

@@ -1742,6 +1742,8 @@ enum Istantanee {
         tutteLeScene += sceneParole
         // Migliorie d'uso 67: app aperte e spazi dal nome dell'app (IstantaneeMenuApp.swift)
         tutteLeScene += sceneMenuApp
+        // Migliorie d'uso 68: la regola delle conferme (IstantaneeConferme.swift)
+        tutteLeScene += sceneConferme
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu
@@ -1872,7 +1874,7 @@ enum Istantanee {
                 // Il foglio della fattura a grandezza piena (515): solo la carta, sempre chiara
                 let carta = cartaIstantanea(scena.nome, stato) ?? moduloAziendaIstantanea(scena.nome, stato)
                     ?? moduloProdottoClienteIstantanea(scena.nome, stato) ?? tavolaLuce(scena.nome)
-                    ?? tavolaParola(scena.nome)
+                    ?? tavolaParola(scena.nome) ?? tavolaConferme(scena.nome)
                 let vista = ZStack(alignment: .topTrailing) {
                     if vetrina {
                         VetrinaApple(intensita: stato.dati.impostazioni.pioggia.forza)

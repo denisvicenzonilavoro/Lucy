@@ -3,8 +3,8 @@ import SwiftUI
 import AppKit
 
 // La sovrapposizione «Stanotte ho lavorato per te.» («Luce» giro 14, Design/template-luce-specifica.md §6.1.1-6.1.4):
-// alone e velo, testata, pila di al più tre carte, timbri, comandi ✕ / contatore / ✓, registro «FATTO ADESSO» (clic su una
-// riga = annulla), fine con l'anello, stati (notte saltata, niente da preparare, lavoro in corso). Gesti: trascinamento
+// alone e velo, testata, pila di al più tre carte, timbri, comandi ✕ / contatore / ✓ con le parole sotto, registro «COSA HAI
+// DECISO» (clic su una riga = annulla; migliorie d'uso 68), fine con l'anello, stati (notte saltata, niente da preparare, lavoro in corso). Gesti: trascinamento
 // della carta davanti, scorrimento orizzontale a due dita sulla pila, → approva, ← più tardi, Esc chiude, Invio «Apri ›»,
 // ⌘Z annulla l'ultima. Con «Riduci movimento» tutto compare fermo; nelle istantanee pila ferma e anello pieno.
 // Valori grafici in `Tema.Apple.Notte` e `Tema.Apple.Moto.Notte`.
@@ -431,14 +431,32 @@ private struct ComandiNotte: View {
     private typealias K = Tema.Apple.Notte.Comandi
 
     var body: some View {
-        HStack(spacing: K.spazio) {
-            PulsanteTondoNotte(segno: "✕", colore: K.piuTardi, aiuto: TestiNotte.piuTardi, azione: piuTardi)
+        // Migliorie d'uso 68: sotto ✕ e ✓ le loro parole, «Più tardi» e «Va bene» (larghe come il pulsante); il contatore
+        // resta in mezzo, all'altezza dei pulsanti. L'aiuto del ✓ resta «Approva»
+        HStack(alignment: .top, spacing: K.spazio) {
+            VStack(spacing: K.sottoPulsanti) {
+                PulsanteTondoNotte(segno: "✕", colore: K.piuTardi, aiuto: TestiNotte.piuTardi, azione: piuTardi)
+                didascalia(TestiNotte.piuTardi)
+            }
             Text(TestiNotte.contatore(min(posizione, totale), di: totale))
                 .carattereApple(K.carattereContatore)
                 .foregroundColor(Tema.Apple.Notte.Carta.testo)
-                .frame(width: K.contatore)
-            PulsanteTondoNotte(segno: "✓", colore: K.approva, aiuto: TestiNotte.approva, azione: approva)
+                .frame(width: K.contatore, height: K.pulsante)
+            VStack(spacing: K.sottoPulsanti) {
+                PulsanteTondoNotte(segno: "✓", colore: K.approva, aiuto: TestiNotte.approva, azione: approva)
+                didascalia(TestiNotte.vaBene)
+            }
         }
+    }
+
+    private func didascalia(_ testo: String) -> some View {
+        Text(testo)
+            .carattereApple(K.didascalia)
+            .foregroundColor(K.coloreDidascalia)
+            .lineLimit(1)
+            .fixedSize()
+            .frame(width: K.pulsante)
+            .accessibilityHidden(true)
     }
 }
 
@@ -493,6 +511,15 @@ private struct RegistroNotte: View {
             Text(TestiNotte.registro)
                 .carattereApple(Tema.Apple.Carattere.etichetta)
                 .foregroundColor(Tema.Apple.Notte.Carta.testo2)
+            // Migliorie d'uso 68: vuoto, la frase che dice dove vanno le decisioni (sparisce alla prima)
+            if notte.registro.isEmpty {
+                Text(TestiNotte.registroVuoto)
+                    .carattereApple(R.vuoto)
+                    .foregroundColor(Tema.Apple.Notte.Carta.testo2)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, R.sopraVuoto)
+                    .transition(.opacity)
+            }
             ScrollView(.vertical, showsIndicators: false) {
                 LazyVStack(alignment: .leading, spacing: 0) {
                     ForEach(notte.registro) { r in
@@ -560,6 +587,15 @@ private struct FineNotte: View {
                 .foregroundColor(C.testo2)
                 .multilineTextAlignment(.center)
                 .padding(.top, F.spazio)
+            // Migliorie d'uso 68: dove sono finite le rimandate (la riga «Arrivati» del «Da fare»)
+            if conteggi.rimandate > 0 {
+                Text(TestiNotte.rimandateNelDaFare(conteggi.rimandate))
+                    .carattereApple(F.testo)
+                    .foregroundColor(C.testo2)
+                    .multilineTextAlignment(.center)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, F.spazio)
+            }
             Button(TestiNotte.vaiAllaScrivania) { stato.chiudiSovrapposizione() }
                 .buttonStyle(.applePrimarioGrande)
                 .padding(.top, F.sopraTitolo)

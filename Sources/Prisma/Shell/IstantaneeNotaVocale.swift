@@ -4,7 +4,8 @@ import Foundation
 /// Le istantanee della nota vocale sul Mac (Design/template-luce-specifica.md §6.2, «Luce» giro 13), nello stato finale:
 /// - 770: Incontri con il pulsante «Nota dall’iPhone» nella testata (chiara e scura);
 /// - 771: la scheda «Arriva sul Mac» con la nota del template su Giulia e le quattro voci proposte (chiara e scura);
-/// - 772: la stessa dopo «Conferma tutto» (titoli al passato); 773: due «Marco»: «Di chi si parla?»;
+/// - 772: la stessa con le voci confermate (titoli al passato, il messaggio ancora aperto); 773: due «Marco»: «Di chi si
+///   parla?» con la testa in arancione e il pulsante solo spento (migliorie d'uso 68);
 /// - 774: «Come funziona», il telefono disegnato in ascolto con il testo e l'onda al secondo 2 (chiara e scura).
 ///
 /// DATI DI PROVA DICHIARATI: la nota del template (`NotaVocaleDiProva`, id con il prefisso «nota-prova-»), il secondo

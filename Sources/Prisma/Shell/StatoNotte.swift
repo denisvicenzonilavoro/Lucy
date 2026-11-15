@@ -6,7 +6,7 @@ import Observation
 // del lavoro che non si osservano (compito, guardia dei 20 minuti, esecutore delle bozze, memoria, attività, pianificatore)
 // stanno in `LavoroNotte`, una classe normale (niente `#if` dentro la classe osservata). Compila su Mac e iOS.
 
-/// Una riga del registro «FATTO ADESSO».
+/// Una riga del registro «COSA HAI DECISO» (fino alle migliorie d'uso 68 «FATTO ADESSO»).
 struct RigaRegistroNotte: Identifiable, Equatable {
     /// L'id della carta.
     let id: String

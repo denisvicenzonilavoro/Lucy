@@ -3,8 +3,9 @@ import SwiftUI
 
 // La nota vocale sul Mac (Design/template-luce-specifica.md §6.2.1 §1.4, «Luce» giro 13):
 // - la scheda «Arriva sul Mac» (larga 470, in alto a destra sotto la barra, come le notifiche; non un velo): il cliente
-//   riconosciuto (o «Di chi si parla?»), il testo dettato e le quattro voci proposte, ciascuna con «Conferma» e
-//   «Scarta», più «Conferma tutto»; ✕ ed Esc la chiudono (la nota resta in Incontri › Oggi «da decidere»);
+//   riconosciuto (o «Di chi si parla?»), il testo dettato e le quattro voci proposte con la regola delle conferme
+//   (migliorie d'uso 68: verdi pronte con «Annulla», arancioni con una domanda, un pulsante solo «Va bene così»);
+//   ✕ ed Esc la chiudono (la nota resta in Incontri › Oggi «da decidere»);
 // - «Come funziona» (dal pulsante «Nota dall’iPhone» di Incontri e dal pannello Novità): la scena dimostrativa con il
 //   telefono disegnato in ascolto (dati di prova del template) e la scheda «Aspetto la nota…» con le ultime note;
 // - la voce «Nota dall’iPhone · 11:42» nella colonna «Oggi» di Incontri.
@@ -18,6 +19,43 @@ import SwiftUI
     /// L'obiettivo con la modifica proposta da una nota, evidenziato nel dossier su Obiettivi (si toglie lasciando la
     /// scheda Obiettivi).
     var obiettivoEvidenziato: String?
+
+    // MARK: Migliorie d'uso 68: le decisioni della scheda prima di «Va bene così» (solo in memoria)
+
+    /// La nota a cui appartengono le decisioni qui sotto (un'altra nota riparte pulita).
+    var decisioniDi: String?
+    /// Le voci pronte tolte con «Annulla» (si rimettono con «Rimetti»).
+    var annullate: Set<String> = []
+    /// Le risposte alle righe in arancione: vero «Aggiorna» / «Va bene», falso «No».
+    var risposte: [String: Bool] = [:]
+
+    func annullateDi(_ nota: String) -> Set<String> { decisioniDi == nota ? annullate : [] }
+    func risposteDi(_ nota: String) -> [String: Bool] { decisioniDi == nota ? risposte : [:] }
+
+    /// «Annulla» / «Rimetti» di una voce.
+    func alternaAnnullata(_ proposta: String, nota: String) {
+        prepara(nota)
+        if annullate.contains(proposta) { annullate.remove(proposta) } else { annullate.insert(proposta) }
+    }
+
+    /// La risposta a una riga in arancione (nil: «Cambia», di nuovo da decidere).
+    func rispondi(_ proposta: String, si: Bool?, nota: String) {
+        prepara(nota)
+        risposte[proposta] = si
+    }
+
+    func dimenticaDecisioni() {
+        decisioniDi = nil
+        annullate = []
+        risposte = [:]
+    }
+
+    private func prepara(_ nota: String) {
+        guard decisioniDi != nota else { return }
+        decisioniDi = nota
+        annullate = []
+        risposte = [:]
+    }
 }
 
 /// La voce «Nota dall’iPhone · 11:42» nella colonna «Oggi» di Incontri, con il pallino delle note da guardare.
@@ -81,12 +119,16 @@ struct StratoNotaVocaleArrivo: View {
             if let id = notaVocale.mostrata, !stato.inModoCliente, !stato.bloccato,
                let n = stato.dati.noteInArrivo.first(where: { $0.id == id }) {
                 SchedaNotaVocaleArrivo(nota: n, notaVocale: notaVocale)
+                    .id(n.id)
                     .padding(.top, S.sottoBarra)
                     .padding(.trailing, S.margineDestro)
                     .transition(transizione)
                 // Esc chiude la scheda, solo se non c'è una sovrapposizione aperta (due Esc si contenderebbero il tasto)
                 if stato.sovrapposizione == nil, notaVocale.inModifica == nil {
-                    Button("Chiudi la nota dall’iPhone") { notaVocale.mostrata = nil }
+                    Button("Chiudi la nota dall’iPhone") {
+                        notaVocale.mostrata = nil
+                        notaVocale.dimenticaDecisioni()
+                    }
                         .keyboardShortcut(.cancelAction)
                         .buttonStyle(StileSemplice())
                         .opacity(0)
@@ -106,20 +148,30 @@ struct StratoNotaVocaleArrivo: View {
     }
 }
 
-/// La scheda «Arriva sul Mac»: testata, cliente, testo dettato, voci proposte, «Conferma tutto».
+/// La scheda «Arriva sul Mac»: testata, cliente, testo dettato, voci con la regola delle conferme (migliorie d'uso 68:
+/// verdi pronte con «Annulla», arancioni con una domanda), un pulsante solo che non è blu finché resta dell'arancione.
 struct SchedaNotaVocaleArrivo: View {
     @Environment(StatoShell.self) var stato
     let nota: NotaInArrivo
     let notaVocale: StatoNotaVocaleMac
 
+    /// Il contatore della scossa della prima riga in arancione (si anima, niente Timer).
+    @State private var scosse: CGFloat = 0
+
     private typealias S = Tema.Apple.NotaVocale.Scheda
     private typealias L = Tema.Apple.NotaVocale.Cliente
+    private typealias K = Tema.Apple.Conferme
+
+    /// La chiave della testa quando è lei il dubbio (il cliente da scegliere).
+    private static let dubbioCliente = "cliente"
 
     var body: some View {
         let _ = ContaCorpi.segna()
+        let primo = primoDubbio
         VStack(alignment: .leading, spacing: 0) {
             testa
             cliente
+                .modifier(ScuotiConferma(scosse: scosse, attiva: primo == Self.dubbioCliente))
                 .padding(.top, L.sopra)
                 .padding(.bottom, L.sotto)
                 .overlay(alignment: .bottom) { Rectangle().fill(L.filo).frame(height: Tema.Apple.Misura.bordo) }
@@ -130,7 +182,8 @@ struct SchedaNotaVocaleArrivo: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, L.sotto)
             ForEach(Array(nota.proposte.enumerated()), id: \.element.id) { i, p in
-                VoceNotaVocale(nota: nota, proposta: p, indice: i, notaVocale: notaVocale)
+                VoceNotaVocale(nota: nota, proposta: p, indice: i, notaVocale: notaVocale, conferma: statoConferma(p),
+                               risposta: risposta(p), scosse: scosse, scuoti: primo == p.id)
             }
             piede
         }
@@ -146,7 +199,10 @@ struct SchedaNotaVocaleArrivo: View {
                 .carattereApple(S.etichetta)
                 .foregroundColor(S.coloreEtichetta)
             Spacer(minLength: 0)
-            Button { notaVocale.mostrata = nil } label: { Image(systemName: "xmark") }
+            Button {
+                notaVocale.mostrata = nil
+                notaVocale.dimenticaDecisioni()
+            } label: { Image(systemName: "xmark") }
                 .buttonStyle(.apple)
                 .help("Chiudi (Esc): la nota resta in Incontri › Oggi, da decidere")
                 .accessibilityLabel(Text("Chiudi"))
@@ -170,9 +226,10 @@ struct SchedaNotaVocaleArrivo: View {
                     .help("Apri il dossier di \(c.nome)")
                 }
                 Spacer(minLength: 0)
-                sceltaCliente(titolo: "Cambia")
+                sceltaCliente(titolo: TestiNotaVocale.cambia)
             }
         } else {
+            // Migliorie d'uso 68: senza cliente la testa è il dubbio, in arancione
             VStack(alignment: .leading, spacing: L.spazioCandidati) {
                 Text(nota.candidati.isEmpty ? "Non ho capito di chi si parla" : "Di chi si parla?")
                     .carattereApple(L.nome)
@@ -187,6 +244,9 @@ struct SchedaNotaVocaleArrivo: View {
                     sceltaCliente(titolo: "Scegli il cliente")
                 }
             }
+            .padding(K.paddingRiga)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(RoundedRectangle(cornerRadius: K.raggioRiga, style: .continuous).fill(K.fondoDubbio))
         }
     }
 
@@ -206,16 +266,19 @@ struct SchedaNotaVocaleArrivo: View {
     private var piede: some View {
         VStack(alignment: .leading, spacing: 0) {
             if nota.stato == .daGuardare {
-                HStack(spacing: S.spazioPulsanti) {
-                    Button("Conferma tutto") { stato.confermaNota(nota.id, proposte: nil) }
-                        .buttonStyle(.applePrimarioGrande)
-                        .keyboardShortcut(.defaultAction)
-                        .disabled(nota.clienteId == nil || nota.proposteAperte.isEmpty || stato.solaLettura)
-                        .help(nota.clienteId == nil ? "Scegli prima il cliente di cui si parla" : "Conferma tutte le voci proposte")
-                    Button("Scarta la nota") { stato.scartaNota(nota.id) }
-                        .buttonStyle(.appleGrande)
+                let n = dubbi
+                HStack(spacing: K.spazioPiede) {
+                    PulsanteChiusuraConferma(dubbi: n, testoDubbi: TestiConferme.rispondi(n), testoPronto: TestiConferme.vaBeneCosi,
+                                             azione: { stato.chiudiNotaVocale(nota.id) }, primoDubbio: { scuoti() })
+                        .disabled(stato.solaLettura)
+                    Text(conteggio)
+                        .carattereApple(K.frasePiede)
+                        .foregroundColor(K.coloreFrasePiede)
+                        .fixedSize(horizontal: false, vertical: true)
                 }
                 .padding(.top, S.pulsantiSopra)
+                CollegamentoConfermaApple(testo: TestiNotaVocale.scartaTutta) { stato.scartaNota(nota.id) }
+                    .padding(.top, K.spazioPiede)
             }
             Text(nota.conQwen ? "Capito con Qwen" : "Capito con le regole di Prisma")
                 .carattereApple(S.piede)
@@ -224,19 +287,89 @@ struct SchedaNotaVocaleArrivo: View {
         }
     }
 
+    // MARK: La regola
+
+    private var annullate: Set<String> { notaVocale.annullateDi(nota.id) }
+    private var risposte: [String: Bool] { notaVocale.risposteDi(nota.id) }
+
+    /// Le voci ancora aperte (da decidere nell'archivio).
+    private var aperte: [PropostaNota] { nota.proposte.filter { $0.stato == .proposta } }
+
+    private func risposta(_ p: PropostaNota) -> Bool? {
+        nota.clienteId == nil ? nil : risposte[p.id]
+    }
+
+    /// Lo stato della riga: le voci già decise prima restano verdi (o sbiadite), le annullate sbiadite, le arancioni
+    /// finché non hanno una risposta.
+    private func statoConferma(_ p: PropostaNota) -> StatoConferma {
+        switch p.stato {
+        case .confermata: return .fatta
+        case .scartata: return .annullata
+        case .proposta: break
+        }
+        if annullate.contains(p.id) { return .annullata }
+        guard MotoreNotaVocale.daDecidere(p, in: nota) else { return .fatta }
+        guard let r = risposta(p) else { return .daDecidere }
+        if p.tipo == .obiettivo {
+            return r ? .decisa(testo: TestiNotaVocale.aggiornato, tono: .ok) : .decisa(testo: TestiNotaVocale.lasciato, tono: .neutro)
+        }
+        return r ? .decisa(testo: TestiNotaVocale.confermata, tono: .ok) : .decisa(testo: TestiNotaVocale.lasciato, tono: .neutro)
+    }
+
+    /// Le righe in arancione senza risposta (le annullate non fermano il pulsante).
+    private var righeInArancione: [PropostaNota] {
+        aperte.filter { !annullate.contains($0.id) && statoConferma($0).daDecidere }
+    }
+
+    /// I dubbi del pulsante solo: senza cliente uno (la testa), altrimenti le righe in arancione.
+    private var dubbi: Int {
+        nota.clienteId == nil ? 1 : righeInArancione.count
+    }
+
+    private var primoDubbio: String? {
+        guard nota.stato == .daGuardare else { return nil }
+        if nota.clienteId == nil { return Self.dubbioCliente }
+        return righeInArancione.first?.id
+    }
+
+    /// «3 cose pronte, 1 annullata, una da decidere.»
+    private var conteggio: String {
+        let annullateAperte = aperte.filter { annullate.contains($0.id) }.count
+        let pronte = aperte.filter { p in
+            guard !annullate.contains(p.id) else { return false }
+            switch statoConferma(p) {
+            case .fatta: return true
+            case .decisa: return risposta(p) == true
+            case .daDecidere, .annullata: return false
+            }
+        }.count
+        return TestiNotaVocale.conteggio(fatte: pronte, annullate: annullateAperte, daDecidere: righeInArancione.count)
+    }
+
+    /// Premuto con dell'arancione: la prima riga trema e l'avviso dice cosa manca.
+    private func scuoti() {
+        withAnimation(K.animazioneScossa) { scosse += 1 }
+        stato.mostraAvviso(nota.clienteId == nil ? TestiNotaVocale.primaIlCliente : TestiConferme.primaRispondi)
+    }
+
     private func apriDossier(_ id: String) {
         stato.apriCliente(id)
     }
 }
 
-/// Una voce proposta: filo colorato a sinistra, titolo, riga, «Conferma» e «Scarta»; l'attività si modifica sul posto
-/// (testo e data), il messaggio apre Messaggi con la conferma, l'obiettivo apre il dossier su Obiettivi.
+/// Una voce: la riga di conferma con titolo e testo; a destra «Annulla» / «Rimetti» (pronte), «Aggiorna» e «No»
+/// (l'obiettivo), «Va bene» (l'attività con la data da confermare), «Cambia» (una risposta data). L'attività si modifica
+/// sul posto (testo e data), l'obiettivo si apre nel dossier su Obiettivi.
 private struct VoceNotaVocale: View {
     @Environment(StatoShell.self) var stato
     let nota: NotaInArrivo
     let proposta: PropostaNota
     let indice: Int
     let notaVocale: StatoNotaVocaleMac
+    let conferma: StatoConferma
+    let risposta: Bool?
+    let scosse: CGFloat
+    let scuoti: Bool
 
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.prismaScatto) private var scatto
@@ -249,31 +382,32 @@ private struct VoceNotaVocale: View {
 
     private var inModifica: Bool { notaVocale.inModifica == proposta.id }
 
+    /// La voce si decide ancora da questa scheda.
+    private var aperta: Bool {
+        proposta.stato == .proposta && nota.stato == .daGuardare && nota.clienteId != nil && !inModifica
+    }
+
     var body: some View {
-        let forma = RoundedRectangle(cornerRadius: V.raggio, style: .continuous)
         let dentro = entrata || calmo || scatto || istantanea
-        VStack(alignment: .leading, spacing: V.spazio) {
-            Text(proposta.titoloVoce)
-                .carattereApple(V.titolo)
-                .foregroundColor(V.coloreTitolo)
-            if inModifica {
-                modifica
-            } else {
-                Text(riga)
-                    .carattereApple(V.riga)
-                    .foregroundColor(V.coloreRiga)
-                    .fixedSize(horizontal: false, vertical: true)
-                if proposta.stato == .proposta, nota.stato == .daGuardare {
-                    pulsanti
+        RigaConfermaApple(conferma, contenuto: {
+            VStack(alignment: .leading, spacing: V.spazio) {
+                Text(proposta.titoloVoce)
+                    .carattereApple(V.titolo)
+                    .foregroundColor(V.coloreTitolo)
+                if inModifica {
+                    modifica
+                } else {
+                    Text(riga)
+                        .carattereApple(V.riga)
+                        .foregroundColor(V.coloreRiga)
+                        .fixedSize(horizontal: false, vertical: true)
+                    collegamenti
                 }
             }
-        }
-        .padding(V.padding)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(forma.fill(V.fondo))
-        .overlay(alignment: .leading) { Rectangle().fill(V.colore(proposta.tipo)).frame(width: V.filo) }
-        .clipShape(forma)
-        .opacity(proposta.stato == .scartata ? V.opacitaScartata : 1)
+        }, azioni: {
+            azioni
+        })
+        .modifier(ScuotiConferma(scosse: scosse, attiva: scuoti))
         .padding(.top, V.sopra)
         .offset(x: dentro ? 0 : Tema.Apple.Moto.NotaVocale.spostamento)
         .opacity(dentro ? 1 : 0)
@@ -282,37 +416,58 @@ private struct VoceNotaVocale: View {
             let m = Tema.Apple.Moto.NotaVocale.self
             withAnimation(m.voce.ritardoPrisma(Double(indice) * m.passo)) { entrata = true }
         }
-        .accessibilityElement(children: .contain)
     }
 
-    /// La riga della voce: la frase della nota fra virgolette basse, l'attività con il mese, il resto com'è.
+    /// La riga della voce: la frase della nota fra virgolette basse, l'attività con il mese, l'obiettivo con la risposta.
     private var riga: String {
         switch proposta.tipo {
         case .nota: return "«\(proposta.titolo)»"
         case .attivita:
             guard let s = proposta.scadenza, !proposta.titolo.contains(" · ") else { return proposta.titolo }
             return proposta.titolo + " · " + Formati.dataEstesa.string(from: s)
-        case .messaggio, .obiettivo: return proposta.titolo
+        case .obiettivo:
+            guard proposta.stato == .proposta, let r = risposta else { return proposta.titolo }
+            return TestiNotaVocale.rigaObiettivo(proposta.titolo, aggiorna: r)
+        case .messaggio: return proposta.titolo
         }
     }
 
-    private var pulsanti: some View {
-        HStack(spacing: V.spazioPulsanti) {
-            Button("Conferma") { stato.confermaNota(nota.id, proposte: [proposta.id]) }
-                .buttonStyle(.applePrimario)
-                .disabled(nota.clienteId == nil || stato.solaLettura)
-            Button("Scarta") { stato.scartaPropostaNota(nota.id, proposta: proposta.id) }
-                .buttonStyle(.apple)
+    /// I collegamenti sotto il testo: «Modifica» per l'attività, «Apri l’obiettivo» per l'obiettivo.
+    @ViewBuilder private var collegamenti: some View {
+        if aperta {
             switch proposta.tipo {
             case .attivita:
-                Button("Modifica") { apriModifica() }
-                    .buttonStyle(.appleSobrio)
+                if !conferma.annullata {
+                    CollegamentoConfermaApple(testo: TestiNotaVocale.modifica) { apriModifica() }
+                }
             case .obiettivo:
-                Button("Apri l’obiettivo") { apriObiettivo() }
-                    .buttonStyle(.appleSobrio)
-                    .disabled(nota.clienteId == nil)
+                CollegamentoConfermaApple(testo: TestiNotaVocale.apriObiettivo) { apriObiettivo() }
             case .nota, .messaggio:
                 EmptyView()
+            }
+        }
+    }
+
+    @ViewBuilder private var azioni: some View {
+        if aperta {
+            switch conferma {
+            case .fatta:
+                AnnullaRimettiApple(annullata: false) { notaVocale.alternaAnnullata(proposta.id, nota: nota.id) }
+            case .annullata:
+                AnnullaRimettiApple(annullata: true) { notaVocale.alternaAnnullata(proposta.id, nota: nota.id) }
+            case .daDecidere:
+                if proposta.tipo == .obiettivo {
+                    Button(TestiNotaVocale.aggiorna) { notaVocale.rispondi(proposta.id, si: true, nota: nota.id) }
+                        .buttonStyle(.applePrimario)
+                    Button(TestiNotaVocale.no) { notaVocale.rispondi(proposta.id, si: false, nota: nota.id) }
+                        .buttonStyle(.apple)
+                } else {
+                    Button(TestiNotaVocale.vaBene) { notaVocale.rispondi(proposta.id, si: true, nota: nota.id) }
+                        .buttonStyle(.applePrimario)
+                    AnnullaRimettiApple(annullata: false) { notaVocale.alternaAnnullata(proposta.id, nota: nota.id) }
+                }
+            case .decisa:
+                CollegamentoConfermaApple(testo: TestiNotaVocale.cambia) { notaVocale.rispondi(proposta.id, si: nil, nota: nota.id) }
             }
         }
     }
@@ -340,13 +495,15 @@ private struct VoceNotaVocale: View {
         notaVocale.inModifica = proposta.id
     }
 
+    /// Salvata la data, l'attività non è più da confermare: la riga torna verde (e la risposta di prima non serve più).
     private func salva() {
         let giorno = Calendar(identifier: .gregorian).startOfDay(for: data)
         stato.modificaPropostaNota(nota.id, proposta: proposta.id, titolo: titolo, scadenza: giorno)
+        notaVocale.rispondi(proposta.id, si: nil, nota: nota.id)
         notaVocale.inModifica = nil
     }
 
-    /// Il dossier su Obiettivi, con l'obiettivo da aggiornare (la modifica si conferma qui).
+    /// Il dossier su Obiettivi, con l'obiettivo da aggiornare (la risposta si dà qui).
     private func apriObiettivo() {
         guard let c = nota.clienteId else { return }
         notaVocale.obiettivoEvidenziato = proposta.obiettivoId

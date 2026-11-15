@@ -345,6 +345,12 @@ enum ProvaCalcoliNotte {
                       TestiNotte.sottotitolo(inizio: ora(2, 10), fine: ora(2, 14), carte: 8).hasPrefix("Tra le 2:10 e le 2:14 ho preparato 8 cose."))
         verifica.vero("Notte: la fine con il nome", TestiNotte.fine(approvate: 7, rimandate: 1, nome: "Denis") == "7 approvate, 1 per più tardi. Buona giornata, Denis.")
         verifica.vero("Notte: la fine senza nome", TestiNotte.fine(approvate: 7, rimandate: 1, nome: " ") == "7 approvate, 1 per più tardi. Buona giornata.")
+        // Migliorie d'uso 68: le rimandate nel «Da fare» di oggi (solo il numero, mai nomi)
+        verifica.vero("Notte: la cosa rimandata nel «Da fare»", TestiNotte.rimandateNelDaFare(1) == "La cosa rimandata è nel «Da fare» di oggi.")
+        verifica.vero("Notte: le cose rimandate nel «Da fare»", TestiNotte.rimandateNelDaFare(2) == "Le 2 cose rimandate sono nel «Da fare» di oggi.")
+        verifica.vero("Notte: la voce degli arrivi con le sole rimandate", TestiNotte.voceRimandate(2) == "Stanotte: 2 cose rimandate"
+                      && TestiNotte.voceRimandate(1) == "Stanotte: 1 cosa rimandata")
+        verifica.vero("Notte: il registro si chiama «COSA HAI DECISO»", TestiNotte.registro == "COSA HAI DECISO")
         let senza = TestiNotte.descrizioneDomani(incontri: 2, daPortare: 4, km: nil, partenza: nil)
         verifica.vero("Notte: la borsa senza giro non dice km né partenza", !senza.contains("km") && !senza.contains("Partenza"))
         // Il giro di prova: partenza dallo studio, prima visita alle 9:50 a 35 minuti di strada (dati di prova)

@@ -99,13 +99,16 @@ extension StatoShell {
     }
 
     /// Conferma le voci indicate (nil = «Conferma tutto»): una sola assegnazione ai dati. Il messaggio apre Messaggi.
-    func confermaNota(_ id: String, proposte ids: Set<String>?, oggi: Date = Date()) {
+    /// Migliorie d'uso 68: `scarta` sono le voci da scartare nello stesso passo («Va bene così»: annullate e «No») e
+    /// `avviso` sostituisce l'avviso di sempre; le altre chiamate non cambiano.
+    func confermaNota(_ id: String, proposte ids: Set<String>?, scarta: Set<String> = [], avviso: String? = nil, oggi: Date = Date()) {
         guard !solaLettura, let i = dati.noteInArrivo.firstIndex(where: { $0.id == id }) else { return }
         var n = dati.noteInArrivo[i]
         guard let clienteId = n.clienteId, let c = cliente(clienteId) else {
             mostraAvviso("Scegli prima il cliente di cui si parla.")
             return
         }
+        for pid in n.proposte.map(\.id) where scarta.contains(pid) { ApplicaNotaVocale.scarta(pid, nota: &n, oggi: oggi) }
         var d = dati.istantanea
         let esito = ApplicaNotaVocale.applica(ids, nota: &n, a: &d, oggi: oggi)
         if let k = d.noteInArrivo.firstIndex(where: { $0.id == id }) { d.noteInArrivo[k] = n }
@@ -116,7 +119,11 @@ extension StatoShell {
         if esito.note > 0 { parti.append("la nota") }
         if esito.attivita > 0 { parti.append(esito.attivita == 1 ? "un'attività" : "\(esito.attivita) attività") }
         if esito.obiettivi > 0 { parti.append("l'obiettivo aggiornato") }
-        if !parti.isEmpty { mostraAvviso("Nel dossier di \(c.nome): " + parti.joined(separator: ", ") + ".") }
+        if let avviso {
+            mostraAvviso(avviso)
+        } else if !parti.isEmpty {
+            mostraAvviso("Nel dossier di \(c.nome): " + parti.joined(separator: ", ") + ".")
+        }
         // Il messaggio non scrive nell'archivio: si apre Messaggi con l'occasione già pronta
         if let pid = esito.messaggi.first, let p = n.proposte.first(where: { $0.id == pid }) {
             preparaMessaggio(clienteId: c.id, occasione: ApplicaNotaVocale.occasioneMessaggio(p, nota: n, cliente: c))
@@ -190,6 +197,30 @@ extension StatoShell {
         apriApp(.incontri)
         #endif
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 68, «Va bene così»: scarta le annullate e i «No», conferma le pronte e le risposte «sì» in un solo
+    /// passo (un solo `dati.carica`), chiude la scheda con «Nota di <Nome> a posto…»; con tutto annullato equivale a
+    /// «Scarta la nota». Se fra le confermate c'è il messaggio si apre Messaggi con la bozza, come sempre (niente parte).
+    func chiudiNotaVocale(_ id: String, oggi: Date = Date()) {
+        guard !solaLettura, let n = dati.noteInArrivo.first(where: { $0.id == id }), n.stato == .daGuardare else { return }
+        guard let clienteId = n.clienteId, let c = cliente(clienteId) else {
+            mostraAvviso(TestiNotaVocale.primaIlCliente)
+            return
+        }
+        let esito = MotoreNotaVocale.esitoChiusura(n, annullate: notaVocale.annullateDi(id), risposte: notaVocale.risposteDi(id))
+        if esito.conferma.isEmpty {
+            scartaNota(id, oggi: oggi)
+        } else {
+            confermaNota(id, proposte: esito.conferma, scarta: esito.scarta, avviso: TestiNotaVocale.aPosto(ModelliMessaggi.primoNome(c.nome)),
+                         oggi: oggi)
+        }
+        if dati.noteInArrivo.first(where: { $0.id == id })?.stato != .daGuardare {
+            if notaVocale.mostrata == id { notaVocale.mostrata = nil }
+            notaVocale.dimenticaDecisioni()
+        }
+    }
+    #endif
 
     /// Apre la scheda «Arriva sul Mac» di una nota (dalla colonna Oggi di Incontri o da «Come funziona»).
     func mostraNotaVocale(_ id: String) {

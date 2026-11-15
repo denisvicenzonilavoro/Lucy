@@ -305,8 +305,11 @@ enum MotoreNotifiche {
         // cifre; in modalità cliente no). Il clic apre le carte
         let carteNotte = stato.carteDaDecidere
         if carteNotte > 0, let n = stato.notteDiOggi {
+            // Migliorie d'uso 68: quando restano solo le rimandate la voce («Arrivati» del «Da fare») lo dice, solo il numero
+            let rimandate = MotoreNotte.pila(n).filter { $0.stato == .rimandata }.count
+            let titolo = rimandate == carteNotte ? TestiNotte.voceRimandate(rimandate) : TestiNotte.voceNotifica(carteNotte)
             elenco.append(Notifica(id: "notte-\(n.giornoChiave)-\(carteNotte)", gruppo: .oggi, app: .studio,
-                                   titolo: TestiNotte.voceNotifica(carteNotte), dettaglio: TestiNotte.dettaglioNotifica,
+                                   titolo: titolo, dettaglio: TestiNotte.dettaglioNotifica,
                                    data: n.fine ?? n.giorno))
         }
         // «Luce» giro 15: le capsule del tempo pronte dei clienti visibili (solo dentro Prisma, decisione 29; mai il testo,

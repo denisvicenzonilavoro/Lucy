@@ -326,16 +326,8 @@ struct RegolaCervelloVista: View {
     }
 }
 
-/// Lo scuotimento orizzontale dell'interruttore bloccato (Animatable, niente Timer).
-struct ScuotiEffetto: GeometryEffect {
-    var ampiezza: CGFloat
-    var volte: CGFloat
-    var animatableData: CGFloat
-
-    func effectValue(size: CGSize) -> ProjectionTransform {
-        ProjectionTransform(CGAffineTransform(translationX: ampiezza * sin(animatableData * .pi * volte * 2), y: 0))
-    }
-}
+// Lo scuotimento orizzontale dell'interruttore bloccato (`ScuotiEffetto`) sta con le conferme, in
+// DesignSystem/Apple/ConfermeApple.swift (migliorie d'uso 68).
 
 /// L'interruttore acceso, grigio, con il lucchetto sulla manopola.
 struct InterruttoreBloccatoVista: View {

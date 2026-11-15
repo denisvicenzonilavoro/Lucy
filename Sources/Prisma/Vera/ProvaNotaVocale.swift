@@ -15,6 +15,7 @@ enum ProvaNotaVocale {
         cliente(controlla)
         proposte(controlla)
         conferma(controlla)
+        regolaConferme(controlla)
         coda(controlla)
         ovunqueENovita(controlla)
     }
@@ -165,6 +166,80 @@ enum ProvaNotaVocale {
         let e3 = ApplicaNotaVocale.applica(nil, nota: &senzaCliente, a: &d2, oggi: oggi)
         controlla(senzaCliente.clienteId == nil && e3 == EsitoNotaVocale() && senzaCliente.stato == .daGuardare,
                   "Nota: senza il cliente scelto non entra niente")
+    }
+
+    // MARK: - Migliorie d'uso 68: la regola delle conferme
+
+    private static func regolaConferme(_ controlla: (Bool, String) -> Void) {
+        let d = DatiPrisma.demo()
+        let n = NotaVocaleDiProva.inArrivo(d, oggi: oggi, id: NotaVocaleDiProva.prefisso + "regola")
+        let voce: (TipoPropostaNota) -> PropostaNota? = { t in n.proposte.first { $0.tipo == t } }
+        guard let nota = voce(.nota), let attivita = voce(.attivita), let messaggio = voce(.messaggio), let obiettivo = voce(.obiettivo) else {
+            return controlla(false, "Conferme: la nota del template ha le quattro voci")
+        }
+        controlla(MotoreNotaVocale.daDecidere(obiettivo, in: n) && MotoreNotaVocale.daDecidere(attivita, in: n)
+                  && !MotoreNotaVocale.daDecidere(nota, in: n) && !MotoreNotaVocale.daDecidere(messaggio, in: n),
+                  "Conferme: arancioni l'obiettivo e l'attività con la data da confermare; verdi la nota e il messaggio")
+        var certa = attivita
+        certa.scadenzaDaConfermare = false
+        controlla(!MotoreNotaVocale.daDecidere(certa, in: n), "Conferme: un'attività con la data certa è verde")
+        var senzaCliente = n
+        senzaCliente.clienteId = nil
+        controlla(senzaCliente.proposte.allSatisfy { MotoreNotaVocale.daDecidere($0, in: senzaCliente) },
+                  "Conferme: senza il cliente scelto tutte le voci sono da decidere")
+        // «Va bene così»: le verdi non annullate e le risposte «sì» entrano, le annullate e i «No» si scartano
+        let e = MotoreNotaVocale.esitoChiusura(n, annullate: [messaggio.id], risposte: [obiettivo.id: false, attivita.id: true])
+        controlla(e.conferma == [nota.id, attivita.id] && e.scarta == [messaggio.id, obiettivo.id],
+                  "Conferme: «Va bene così» conferma le verdi e i sì, scarta le annullate e i «No»")
+        let senzaRisposta = MotoreNotaVocale.esitoChiusura(n, annullate: [], risposte: [:])
+        controlla(!senzaRisposta.conferma.contains(obiettivo.id) && !senzaRisposta.scarta.contains(obiettivo.id),
+                  "Conferme: una riga in arancione senza risposta non si decide da sola")
+        controlla(TestiNotaVocale.conteggio(fatte: 3, annullate: 1, daDecidere: 1) == "3 cose pronte, 1 annullata, una da decidere."
+                  && TestiNotaVocale.conteggio(fatte: 1, annullate: 0, daDecidere: 0) == "1 cosa pronta."
+                  && TestiNotaVocale.conteggio(fatte: 0, annullate: 0, daDecidere: 2) == "2 da decidere."
+                  && TestiNotaVocale.conteggio(fatte: 0, annullate: 0, daDecidere: 1) == "Una da decidere.",
+                  "Conferme: la frase che conta («3 cose pronte, 1 annullata, una da decidere.»)")
+        controlla(TestiNotaVocale.rigaObiettivo("Casa: un anno prima · da confermare", aggiorna: true) == "Casa: un anno prima · aggiornato"
+                  && TestiNotaVocale.rigaObiettivo("Casa: un anno prima · da confermare", aggiorna: false) == "Casa: resta com’era",
+                  "Conferme: la riga dell'obiettivo dopo «Aggiorna» e dopo «No»")
+        #if os(macOS)
+        // Sul Mac: «Va bene così» con la scheda aperta (un'attività annullata, l'obiettivo aggiornato)
+        let s = StatoShell(persistente: false)
+        s.dati.noteInArrivo = [n]
+        s.notaVocale.mostrata = n.id
+        s.notaVocale.alternaAnnullata(attivita.id, nota: n.id)
+        // Anche il messaggio annullato: così la prova non apre Messaggi
+        s.notaVocale.alternaAnnullata(messaggio.id, nota: n.id)
+        s.notaVocale.rispondi(obiettivo.id, si: true, nota: n.id)
+        let attivitaPrima = s.dati.attivita.count
+        let scadenzaCasa = s.dati.obiettivi.first { $0.id == obiettivo.obiettivoId }?.scadenza
+        s.chiudiNotaVocale(n.id, oggi: oggi)
+        let dopo = s.dati.noteInArrivo.first { $0.id == n.id }
+        controlla(dopo?.stato == .confermata && dopo?.proposte.first { $0.id == attivita.id }?.stato == .scartata
+                  && dopo?.proposte.first { $0.id == messaggio.id }?.stato == .scartata
+                  && dopo?.proposte.first { $0.id == obiettivo.id }?.stato == .confermata
+                  && s.dati.attivita.count == attivitaPrima
+                  && s.dati.obiettivi.first { $0.id == obiettivo.obiettivoId }?.scadenza != scadenzaCasa
+                  && s.notaVocale.mostrata == nil && s.notaVocale.decisioniDi == nil,
+                  "Conferme: «Va bene così» scarta le annullate, aggiorna l'obiettivo e chiude la scheda")
+        // Tutto annullato o «No»: è come «Scarta la nota»
+        let t = StatoShell(persistente: false)
+        var tutta = n
+        tutta.id = NotaVocaleDiProva.prefisso + "tutta-annullata"
+        t.dati.noteInArrivo = [tutta]
+        t.notaVocale.mostrata = tutta.id
+        for p in tutta.proposte where p.tipo != .obiettivo { t.notaVocale.alternaAnnullata(p.id, nota: tutta.id) }
+        t.notaVocale.rispondi(obiettivo.id, si: false, nota: tutta.id)
+        let noteDossier = t.dati.note.count
+        t.chiudiNotaVocale(tutta.id, oggi: oggi)
+        let scartata = t.dati.noteInArrivo.first { $0.id == tutta.id }
+        controlla(scartata?.stato == .scartata && scartata?.proposte.allSatisfy { $0.stato == .scartata } == true
+                  && t.dati.note.count == noteDossier && t.notaVocale.mostrata == nil,
+                  "Conferme: con tutto annullato «Va bene così» scarta la nota")
+        // Le decisioni di una nota non valgono per un'altra
+        controlla(t.notaVocale.annullateDi("altra").isEmpty && t.notaVocale.risposteDi("altra").isEmpty,
+                  "Conferme: le decisioni della scheda valgono solo per la sua nota")
+        #endif
     }
 
     // MARK: - 7. La coda cifrata dell'iPhone
