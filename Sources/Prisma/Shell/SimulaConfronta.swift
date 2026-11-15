@@ -213,12 +213,30 @@ struct SimulaConfrontaMac: View {
             RigaVisteAnalisi360(vista: Bindable(stato).vistaAnalisi360, diProva: false, modoCliente: stato.inModoCliente,
                                 apriImpostazioni: {})
                 .testataColonna()
-            ColonneAffiancate(larghezza: S.larghezzaColonna) {
-                ColonnaSinistraSimula()
-            } flessibile: {
-                ColonnaDestraSimula()
+            if stato.modoSimula == .tfr {
+                // Migliorie d'uso 69: «Il TFR» (la SchedaTFR nelle colonne di «Simula e confronta», SimulaConfrontaTFR.swift)
+                SchedaTFR()
+            } else {
+                ColonneAffiancate(larghezza: S.larghezzaColonna) {
+                    ColonnaSinistraSimula()
+                } flessibile: {
+                    ColonnaDestraSimula()
+                }
             }
         }
+    }
+}
+
+/// Il segmentato in testa alla colonna di sinistra: «Una strada | Due a confronto | Il TFR» (migliorie d'uso 64 e 69).
+struct SegmentatoModoSimula: View {
+    @Environment(StatoShell.self) var stato
+    private typealias T = TestiSimulaConfronta
+
+    var body: some View {
+        let s = stato
+        SegmentatoPillola(selezione: Binding(get: { s.modoSimula }, set: { s.scegliModoSimula($0) }),
+                          voci: [(ModoSimula.una, T.unaStrada), (ModoSimula.due, T.dueAConfronto), (ModoSimula.tfr, T.ilTFR)])
+            .fixedSize()
     }
 }
 
@@ -236,9 +254,7 @@ private struct ColonnaSinistraSimula: View {
         let due = stato.modoSimula == .due
         ScrollView {
             VStack(alignment: .leading, spacing: S.spazioBlocchi) {
-                SegmentatoPillola(selezione: Bindable(stato).modoSimula,
-                                  voci: [(ModoSimula.una, T.unaStrada), (ModoSimula.due, T.dueAConfronto)])
-                    .fixedSize()
+                SegmentatoModoSimula()
                 occhiello(due ? T.leDueStrade : T.laStrada)
                 RigaStradaSimula(lettera: due ? "A" : nil, colore: S.serieA,
                                  opzione: stato.opzioneSimula(strade.a, in: opzioni), opzioni: opzioni, perA: true)

@@ -615,8 +615,10 @@ enum ProvaVera {
         provaNoteDossier(controlla)
         accorpate.schedaSimulazioni = .tfr
         accorpate.apri(.simulazioni)
-        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .tfr && accorpate.inPrimoPiano(.simulazioni),
-                  "Accorpate: Simulazioni (TFR) si apre negli strumenti di Analisi 360")
+        // Migliorie d'uso 69: sul Mac il TFR è la terza voce di «Simula e confronta»
+        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta && accorpate.modoSimula == .tfr
+                  && accorpate.inPrimoPiano(.simulazioni),
+                  "Accorpate: Simulazioni (TFR) si apre in Analisi 360, «Simula e confronta» su «Il TFR»")
         accorpate.apri(.confronti)
         // Migliorie d'uso 64: sul Mac simulatore, scenari e confronto sono «Simula e confronta»
         controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta
@@ -644,10 +646,18 @@ enum ProvaVera {
         controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta && accorpate.modoSimula == .una
                   && accorpate.inPrimoPiano(.simulazioni),
                   "Strumenti: i Collegati degli Scenari aprono «Simula e confronta» su «Una strada»")
-        controlla(StrumentoAnalisi.inVista == [.simulaConfronta, .tfr],
-                  "Strumenti: sul Mac la barra laterale ha «Simula e confronta» e il TFR")
+        controlla(StrumentoAnalisi.inVista == [.simulaConfronta],
+                  "Strumenti: sul Mac la barra laterale ha solo «Simula e confronta» (il TFR è la sua terza voce)")
         accorpate.apriStrumentoAnalisi(.tfr)
-        controlla(accorpate.strumentoAnalisi == .tfr && accorpate.inPrimoPiano(.simulazioni), "Strumenti: il TFR si apre in Analisi 360")
+        controlla(accorpate.strumentoAnalisi == .simulaConfronta && accorpate.modoSimula == .tfr && accorpate.schedaSimulazioni == .tfr
+                  && accorpate.inPrimoPiano(.simulazioni), "Strumenti: il TFR si apre in «Simula e confronta», su «Il TFR»")
+        accorpate.scegliModoSimula(.una)
+        controlla(accorpate.modoSimula == .una && accorpate.schedaSimulazioni == .simulatore && accorpate.strumentoAnalisi == .simulaConfronta,
+                  "Simula e confronta: dal TFR il segmentato torna a «Una strada»")
+        accorpate.scegliStrumentoAnalisi(.tfr)
+        accorpate.scegliStrumentoAnalisi(.simulaConfronta)
+        controlla(accorpate.modoSimula == .tfr && accorpate.schedaSimulazioni == .tfr,
+                  "Simula e confronta: la voce della barra laterale non lascia il TFR se non c'è una bozza da aprire")
         accorpate.scegliStrumentoAnalisi(nil)
         controlla(accorpate.strumentoAnalisi == nil && accorpate.accorpataMostrata(in: .analisi360) == nil,
                   "Strumenti: la panoramica di Analisi 360 chiude lo strumento")

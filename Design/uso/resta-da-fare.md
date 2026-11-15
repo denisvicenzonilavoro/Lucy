@@ -2269,3 +2269,38 @@ Resta:
 - **Nota appena scritta**: l'elenco aggiorna titolo e anteprima dopo la pausa di 0,3 s (`TestoRinviato`), non a ogni
   lettera come nel template (rischio accettato in 65.6).
 - **iPhone e iPad**: restano l'app Note, «Da ricordare» com'era e le note fissate «in cima» (più di una possibile).
+
+## 69. Il TFR: prima la risposta
+
+Fatto (solo Mac): il TFR è la terza voce del segmentato di «Simula e confronta» (`ModoSimula.tfr`,
+`StatoShell.scegliModoSimula`, `SegmentatoModoSimula`); la barra laterale di Analisi 360 sul Mac ha solo «Simula e
+confronta» e `scegliStrumentoAnalisi(.tfr)` / `apriStrumentoAnalisi(.tfr)` aprono «Il TFR». La vista è la stessa
+`SchedaTFR` (stessa bozza, stesso salvataggio dopo la pausa) con le colonne del Mac in `Shell/SimulaConfrontaTFR.swift`:
+tre cursori con le parole del template e la definizione di oggi nell'aiuto (69-a), le note dei ripieghi, «Altre ipotesi ⌄»
+con tutti gli altri comandi nei tre gruppi di oggi (69-b, stato in memoria `StatoShell.altreIpotesiTFR`), la riga grigia
+delle ipotesi con i valori veri; a destra la frase con le tre soglie (`TestiTFR.fraseRispostaParti`, 3% e otto anni,
+«a/ad»), la riga sotto con il contributo e i soldi di oggi, le strade, i tre riquadri, «Cosa cambia», la fila e il
+«Dettaglio ⌄» con grafico, tabella, semplificazioni, avvisi e metodo. Il non dipendente ha la sua schermata con la frase
+per tipo (69-d), «Apri il conto della pensione» e «Fai il conto lo stesso». Testi in `Motori/TestiTFRRisposta.swift`
+(`CifreDoc.euroArrotondato`), token in `Tema.Apple.SimulaConfronta.TFR`. `MotoreTFR` non è cambiato. Prove T17 in
+`ProvaCalcoliTFR`, `ProvaVera` aggiornata; istantanee nuove 1408-1410, la 204, la 207 e la 208 cambiano da sole.
+
+Resta:
+- **«Chiedi a Vera di spiegarlo» (69-f)**: non c'è uno `SpuntoVera.tfr` con le cifre di `EsitoTFR` nella fonte di Vera
+  (aggiungere un caso a `SpuntoVera` tocca molti `switch` di Vera, la sintesi e le prove). Per ora il pulsante apre Vera
+  e manda, in modalità lavoro sullo spunto della pensione, una domanda che porta la frase e la riga sotto di Prisma
+  (`TestiTFR.domandaVera`): le cifre restano di Prisma. Da fare: lo spunto vero con la fonte e il prompt in `Vera/`, e
+  la prova in `--prova-vera`.
+- **I nomi delle strade (69-c)**: «Lasciato in azienda», «Nel fondo pensione», «Nel fondo, con il contributo suo e
+  dell'azienda» valgono solo sullo schermo del Mac (`TestiTFR.stradaLasciata/…`). Prospetto e report (205, 206) e
+  iPhone/iPad tengono «TFR in azienda» e «Fondo con contributi»: il nome lungo non entra nelle colonne delle tabelle dei
+  PDF. Decidere guardando le istantanee 205-206.
+- **La cifra che si conta**: la cifra della frase è dentro il testo (in verde) e non si conta (`NumeroCheConta` non entra
+  in un `Text` composto); le barre delle strade non si disegnano con il movimento del tema.
+- **La nota del pubblico impiego (69-e)**: «Da verificare» mostra solo gli avvisi che l'app già dà (fondo che riceve già il
+  TFR, datore senza contributo del cliente, Tesoreria INPS); il dipendente pubblico (TFS) resta fuori.
+- **«Altro ⌄»**: prospetto per te / report per il cliente, Salva PDF, Stampa, Archivia e «Apri in Documenti» stanno nel
+  menu della fila (la vista non ha una testata propria); il nome del fondo non si vede più sullo schermo del Mac (resta nei
+  PDF).
+- **Istantanee**: rigenerare sul Mac e guardare 204, 207, 208 e 1408-1410 (chiare e scure), e aggiornare la pagina delle
+  anteprime.

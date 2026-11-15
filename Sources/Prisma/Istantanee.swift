@@ -1772,6 +1772,8 @@ enum Istantanee {
         tutteLeScene += sceneAnalisi360Apple
         // Migliorie d'uso 65: le note stanno con il cliente (IstantaneeNoteDossier.swift)
         tutteLeScene += sceneNoteDossier
+        // Migliorie d'uso 69: il TFR, prima la risposta (IstantaneeTFRUso.swift)
+        tutteLeScene += sceneTFRUso
         tutteLeScene += sceneAgendaApple
         // Migliorie d'uso 21: l'elenco di Incontri (IstantaneeElencoIncontri.swift)
         tutteLeScene += sceneElencoIncontri

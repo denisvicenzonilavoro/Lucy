@@ -47,9 +47,9 @@ enum StrumentoAnalisi: String, CaseIterable, Identifiable {
         }
     }
 
-    /// Le voci della barra laterale di Analisi 360 sul Mac (migliorie d'uso 64; il TFR finché non entra in «Simula e
-    /// confronta» con la miglioria 69).
-    static var delMac: [StrumentoAnalisi] { [.simulaConfronta, .tfr] }
+    /// Le voci della barra laterale di Analisi 360 sul Mac (migliorie d'uso 64): una sola, «Simula e confronta»; il TFR
+    /// ne è la terza voce del segmentato (miglioria 69).
+    static var delMac: [StrumentoAnalisi] { [.simulaConfronta] }
     /// Le voci di iPhone e iPad: le quattro di sempre.
     static var diIOS: [StrumentoAnalisi] { [.simulatore, .scenari, .confronto, .tfr] }
     /// Le voci della piattaforma.
@@ -370,7 +370,7 @@ enum VoceConfronto: Hashable {
     #endif
     #if os(macOS)
     // Migliorie d'uso 64 «Simula e confronta» (stato della vista, solo in memoria; SimulaConfronta.swift)
-    /// Una strada, due a confronto (il TFR con la miglioria 69).
+    /// Una strada, due a confronto o il TFR (miglioria 69).
     var modoSimula: ModoSimula = .una
     /// Le strade scelte (nil = quella di partenza, `MotoreSimulaConfronta.predefinitaA/B`).
     var stradaA: StradaSimula?
@@ -383,6 +383,8 @@ enum VoceConfronto: Hashable {
     var stradaLibera: IpotesiLibera?
     /// Il cliente per cui valgono strade, soldi e ipotesi (nil = nessuno: si parte da capo).
     var clienteSimula: String?
+    /// Migliorie d'uso 69: «Altre ipotesi» del TFR aperto (solo in memoria).
+    var altreIpotesiTFR = false
     #endif
     /// Ipotesi sul tavolo del simulatore.
     var bozzaSimulazione: Simulazione?

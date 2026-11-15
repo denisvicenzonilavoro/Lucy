@@ -6,9 +6,11 @@ import Foundation
 // mensile e anni comuni) e le stesse tasse e inflazione. Nessun calcolo nuovo: le cifre sono di `MotoreProiezione`
 // (calcola, scenari, impattoCosti), come nel simulatore di prima. Motore puro: niente stato, niente viste.
 
-/// La modalità di «Simula e confronta»: una strada o due a confronto («Il TFR» arriva con la miglioria 69).
+/// La modalità di «Simula e confronta»: una strada, due a confronto o il TFR.
 enum ModoSimula: Hashable {
     case una, due
+    /// Migliorie d'uso 69: «Il TFR», la terza voce del segmentato (SimulaConfrontaTFR.swift).
+    case tfr
 }
 
 /// Una strada di «Simula e confronta».

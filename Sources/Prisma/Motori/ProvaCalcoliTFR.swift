@@ -30,6 +30,7 @@ enum ProvaCalcoliTFR {
         maturato(verifica)
         lavoratore(verifica)
         costoContributi(verifica)
+        risposta(verifica)
     }
 
     // MARK: - Aiuti
@@ -486,5 +487,92 @@ enum ProvaCalcoliTFR {
         } else {
             verifica.vero("T16 TFR: esito calcolato", false)
         }
+    }
+
+    // MARK: - T17 La frase in testa (migliorie d'uso 69)
+
+    /// Le ipotesi della frase: 30.000 €, rendimento netto, senza contributi (le cifre sono di `MotoreTFR`).
+    private static func risposta(retribuzione: Double = 30_000, anni: Int, rendimento: Double) -> EsitoTFR? {
+        var i = IpotesiTFR()
+        i.retribuzione = retribuzione
+        i.anni = anni
+        i.rendimentoFondo = rendimento
+        i.rendimentoNetto = true
+        return MotoreTFR.calcola(i)
+    }
+
+    private static func risposta(_ verifica: VerificaCalcoli) {
+        // L'arrotondamento a voce: alle decine sotto 10.000 €, alle centinaia sopra
+        let cifre: [(String, String)] = [(CifreDoc.euroArrotondato(9_874), "9.870 €"), (CifreDoc.euroArrotondato(16_149), "16.100 €"),
+                                         (CifreDoc.euroArrotondato(9_996), "10.000 €"), (CifreDoc.euroArrotondato(-1_234), "\(CifreDoc.meno) 1.230 €")]
+        verifica.vero("T17 TFR: cifre arrotondate come a voce (decine sotto 10.000 €, centinaia sopra)", cifre.allSatisfy { $0.0 == $0.1 })
+        // Oltre il 3% del TFR in azienda: «Tra 5 anni, con il TFR nel fondo pensione…», la cifra in evidenza
+        if let e = risposta(anni: 5, rendimento: 2.5) {
+            let parti = TestiTFR.fraseRispostaParti(e, nome: "Marco")
+            verifica.vero("T17 TFR: differenza oltre il 3%, «Tra 5 anni, con il TFR nel fondo pensione»",
+                          e.differenza > e.azienda.netto * TestiTFR.sogliaDifferenzaPiccola
+                          && TestiTFR.fraseRisposta(e, nome: "Marco").hasPrefix("Tra 5 anni, con il TFR nel fondo pensione Marco avrebbe circa ")
+                          && parti.filter(\.evidenza).map(\.testo) == [CifreDoc.euroArrotondato(e.differenza)])
+        } else {
+            verifica.vero("T17 TFR: esito con la differenza oltre il 3%", false)
+        }
+        // Un anno solo: «Tra un anno»
+        if let e = risposta(anni: 1, rendimento: 0) {
+            verifica.vero("T17 TFR: «Tra un anno»", TestiTFR.fraseRisposta(e, nome: "Marco").hasPrefix("Tra un anno"))
+        }
+        // Fra 0 e 3%, con pochi anni: «la differenza è piccola … Mancano pochi anni»
+        if let e = risposta(anni: 6, rendimento: 0) {
+            let f = TestiTFR.fraseRisposta(e, nome: "Marco")
+            verifica.vero("T17 TFR: differenza piccola con pochi anni",
+                          e.differenza >= 0 && e.differenza <= e.azienda.netto * TestiTFR.sogliaDifferenzaPiccola
+                          && f.hasPrefix("Tra 6 anni la differenza è piccola: nel fondo pensione Marco avrebbe ")
+                          && f.hasSuffix("Mancano pochi anni: qui conta più la tranquillità che il conto."))
+        } else {
+            verifica.vero("T17 TFR: esito con la differenza piccola", false)
+        }
+        // Sotto zero: «conviene lasciarlo in azienda», con «ad» davanti a vocale
+        if let e = risposta(retribuzione: 40_000, anni: 20, rendimento: 0.5) {
+            let anna = TestiTFR.fraseRisposta(e, nome: "Anna")
+            let marco = TestiTFR.fraseRisposta(e, nome: "Marco")
+            verifica.vero("T17 TFR: fondo indietro, «ad Anna conviene lasciarlo in azienda»",
+                          e.differenza < 0 && anna.hasPrefix("Con queste ipotesi ad Anna conviene lasciarlo in azienda: nel fondo avrebbe ")
+                          && marco.hasPrefix("Con queste ipotesi a Marco conviene") && anna.hasSuffix(" in meno."))
+            verifica.vero("T17 TFR: il rendimento che serve al fondo dal pareggio",
+                          TestiTFR.valoreRendimento(e).hasSuffix("l'anno") && !TestiTFR.bastaZero(e))
+        } else {
+            verifica.vero("T17 TFR: esito con il fondo indietro", false)
+        }
+        // La riga sotto: il contributo «di tasca sua» e la differenza in soldi di oggi
+        do {
+            var i = IpotesiTFR()
+            i.retribuzione = 34_000
+            i.rendimentoFondo = 2.5
+            i.rendimentoNetto = true
+            i.contributoLavoratore = 1.5
+            i.contributoDatore = 1.5
+            if let e = MotoreTFR.calcola(i) {
+                let sotto = TestiTFR.sottoRisposta(e, nome: "Marco")
+                verifica.vero("T17 TFR: la riga sotto con il contributo, «altrettanto» e «di tasca sua»",
+                              sotto.hasPrefix("Se ci aggiunge l'1,5% di suo, ") && sotto.contains("l'azienda mette altrettanto")
+                              && sotto.contains("di tasca sua") && sotto.contains("In soldi di oggi la differenza è "))
+                verifica.vero("T17 TFR: il contributo dell'azienda all'anno", TestiTFR.valoreContributoAzienda(e).hasPrefix("+ "))
+                // «Chiedi a Vera di spiegarlo»: la domanda porta le cifre di Prisma (la frase e la riga sotto), nient'altro
+                let domanda = TestiTFR.domandaVera(e, nome: "Marco")
+                verifica.vero("T17 TFR: la domanda a Vera con le sole cifre di Prisma",
+                              domanda == "Spiegami il TFR di Marco: in azienda o nel fondo pensione? Le cifre di Prisma: "
+                                  + TestiTFR.fraseRisposta(e, nome: "Marco") + " " + sotto)
+            }
+        }
+        // Chi non lavora da dipendente: la frase per tipo (decisione 69-d)
+        let frasi: [(TipoLavoratore, String)] = [(.autonomo, "Marco lavora in proprio: il TFR non c'è."),
+                                                 (.gestioneSeparata, "Marco lavora in proprio: il TFR non c'è."),
+                                                 (.cassaProfessionale, "Marco lavora in proprio: il TFR non c'è."),
+                                                 (.collaboratore, "Marco è un collaboratore: il TFR non c'è."),
+                                                 (.dipendente, "Marco lavora da dipendente: il TFR c'è.")]
+        var tutteGiuste = frasi.count == TipoLavoratore.allCases.count
+        for (tipo, attesa) in frasi where TestiTFR.fraseSenzaTFR(tipo, nome: "Marco") != attesa { tutteGiuste = false }
+        verifica.vero("T17 TFR: la frase di chi non lavora da dipendente, per ogni tipo", tutteGiuste)
+        verifica.vero("T17 TFR: «fino al 9%» dalla regola fiscale", TestiTFR.testoTasse.hasSuffix("fino al \(Formati.percentuale(RegoleFiscali.previdenzaMinima)).")
+                      && TestiTFR.rigaIpotesi(IpotesiTFR()).contains("tre quarti dell'inflazione"))
     }
 }

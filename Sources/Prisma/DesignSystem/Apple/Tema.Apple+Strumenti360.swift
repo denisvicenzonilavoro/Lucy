@@ -224,6 +224,49 @@ extension Tema.Apple {
         static var serieA: Color { Colori.Strumenti.serie[0] }
         static var serieB: Color { Colori.Strumenti.serie[1] }
         static var versato: Color { Colori.Analisi.lineaTratteggiata }
+
+        /// Migliorie d'uso 69 «Il TFR: prima la risposta» (template righe 801-806: `.tfFr`, `.tfV`, `.tfB`, `.tfC`).
+        enum TFR {
+            /// La frase in testa: 21 bold, tracking −0,4, interlinea 1,33, nella card 16×22.
+            static let frase = Carattere(dimensione: 21, peso: .bold, tracking: -0.4, interlinea: 1.33)
+            static let paddingFrase = Misura.padding(16, 22)
+            static let paddingSenza = Misura.padding(22, 24)
+            /// Testo corrente della colonna e della riga sotto la frase (14,5, interlinea 1,5).
+            static let corpo = Carattere(dimensione: 14.5, peso: .regular, interlinea: 1.5)
+            static let coloreCorpo = Colore.inchiostro
+            static let nota = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
+            static let coloreNota = Colore.inchiostro2
+            static let spazioBlocchi: CGFloat = 10
+            static let spazioInterno: CGFloat = 5
+            /// Le strade: riga con nome e cifra, poi la barra alta 10 (al minimo il 4% della più lunga).
+            static let paddingStrade = Misura.padding(12, 20)
+            static let rigaStrada = Carattere(dimensione: 14, peso: .regular)
+            static let cifraStrada = Carattere(dimensione: 14, peso: .bold, tabellare: true)
+            static let barra: CGFloat = 10
+            static let barraMinima = 0.04
+            static let spazioBarra: CGFloat = 5
+            static let spazioStrade: CGFloat = 10
+            static let binario = Colore.binario
+            static var coloreAzienda: Color { Tema.Colore.TFR.azienda }
+            static var coloreFondo: Color { Tema.Colore.TFR.fondo }
+            static var coloreContributi: Color { Tema.Colore.TFR.fondoContributi }
+            /// I tre riquadri: cifra 20 bold (tracking −0,3) e testo breve.
+            static let paddingTessera = Misura.padding(13, 16)
+            static let cifraTessera = Carattere(dimensione: 20, peso: .bold, tracking: -0.3, tabellare: true)
+            static let testoTessera = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.42)
+            static let primaAliquota = Colore.inchiostro3
+            static let dopoAliquota = Colore.verde
+            /// «Cosa cambia»: righe 13,5 (interlinea 1,45) con il pallino di 5.
+            static let paddingCambia = Misura.padding(11, 20)
+            static let rigaCambia = Carattere(dimensione: 13.5, peso: .regular, interlinea: 1.45)
+            static let pallino: CGFloat = 5
+            static let spazioPallino: CGFloat = 9
+            static let altezzaPallino: CGFloat = 7
+            static let colorePallino = Colore.inchiostro3
+            /// «Altre ipotesi ⌄»: la freccia ruota di mezzo giro.
+            static let frecciaAltre = Carattere(dimensione: 11, peso: .semibold)
+            static let rotazioneAperta: Double = 180
+        }
     }
 
     /// Gettoni del TFR (Analisi 360 › TFR) nel tema Apple: solo superfici e caratteri, il resto com'è.
