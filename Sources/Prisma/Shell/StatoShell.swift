@@ -4517,7 +4517,6 @@ fileprivate struct NeutriNotifiche: Equatable {
     }
 }
 
-/// Il pulsante di un avviso: «Annulla» dopo una creazione rapida (Pratiche › Proposta, §7.1.4).
 /// Un avviso trattenuto mentre si mostra al cliente (migliorie d'uso 1): si mostra dopo «Fine».
 struct AvvisoTrattenuto {
     let testo: String
@@ -4525,6 +4524,7 @@ struct AvvisoTrattenuto {
     let azione: AzioneAvviso?
 }
 
+/// Il pulsante di un avviso: «Annulla» dopo una creazione rapida (Pratiche › Proposta, §7.1.4).
 struct AzioneAvviso {
     let titolo: String
     let esegui: () -> Void
