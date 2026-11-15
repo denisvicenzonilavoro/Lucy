@@ -2,7 +2,8 @@ import SwiftUI
 
 // L'app Studio (versione «Orizzonte», Design/template-novita-specifica.md §1.6 e §2): il lavoro del consulente visto
 // come un portafoglio. Testata «Il tuo studio. · Il tuo lavoro, come un portafoglio» (`AppPrisma.titoloIntestazione` e
-// `occhiello`) con il segmentato a pillola Cruscotto · Parcelle e fatture · Track record · Esame OCF a destra.
+// `occhiello`) con il segmentato a pillola a destra, in tre gruppi separati da un filo (Migliorie d'uso 52, «Lo Studio
+// in ordine»): i conti Cruscotto · Parcelle · Spese | i risultati Track record | l'allenamento Esame OCF · Palestra.
 // Cruscotto (StudioCruscotto.swift), Parcelle e fatture (StudioParcelle.swift), Track record (StudioTrackRecord.swift) ed
 // Esame OCF (StudioEsameOCF.swift); una scheda che non c'è ancora direbbe con una nota sobria cosa arriverà.
 //
@@ -13,22 +14,39 @@ import SwiftUI
 // - «Riduci movimento» e istantanee: tutto subito fermo nello stato finale.
 // Valori in DesignSystem/Apple/Tema.Apple+Studio.swift.
 
-/// Le schede di Studio, nell'ordine del segmentato.
+/// Le schede di Studio, nell'ordine del segmentato (Migliorie d'uso 52: le Spese salgono accanto alle Parcelle; i
+/// `rawValue` restano gli stessi).
 enum SchedaStudio: String, CaseIterable, Identifiable, Hashable {
-    case cruscotto, fatture, track, ocf, palestra, spese
+    case cruscotto, fatture, spese, track, ocf, palestra
 
     var id: String { rawValue }
 
     var titolo: String {
         switch self {
         case .cruscotto: return "Cruscotto"
-        // Con «Luce» i titoli si accorciano per farci stare le schede nuove (Design/template-luce-specifica.md, riga 2085)
+        // Con «Luce» «Parcelle e fatture» si accorcia in «Parcelle»; con le migliorie d'uso 52 «OCF» torna «Esame OCF»
         case .fatture: return "Parcelle"
         case .track: return "Track record"
-        case .ocf: return "OCF"
+        case .ocf: return "Esame OCF"
         case .palestra: return "Palestra"
         case .spese: return "Spese"
         }
+    }
+
+    /// Il gruppo della scheda nel segmentato (Migliorie d'uso 52): 0 i conti, 1 i risultati, 2 l'allenamento. Fra due
+    /// gruppi c'è un filo.
+    var gruppo: Int {
+        switch self {
+        case .cruscotto, .fatture, .spese: return 0
+        case .track: return 1
+        case .ocf, .palestra: return 2
+        }
+    }
+
+    /// Gli indici delle schede davanti alle quali va il filo: dove il gruppo cambia rispetto alla scheda prima (così,
+    /// senza le Spese, i fili restano giusti).
+    static func separatoriPrima(_ schede: [SchedaStudio]) -> Set<Int> {
+        Set(schede.indices.filter { $0 > 0 && schede[$0].gruppo != schede[$0 - 1].gruppo })
     }
 
     /// Studio › Spese c'è solo sul Mac: iPhone e iPad non la hanno (decisione 34), e le spese restano fuori da «Prisma
@@ -205,8 +223,11 @@ struct AzioniStudio: View {
                 .fixedSize()
                 .help("Il tuo anno da consulente, in un minuto")
             }
+            // Migliorie d'uso 52: tre gruppi separati da un filo
+            let schede = SchedaStudio.visibili(modoCliente: stato.inModoCliente)
             SegmentatoPillola(selezione: Bindable(stato).schedaStudio,
-                              valori: SchedaStudio.visibili(modoCliente: stato.inModoCliente), titolo: { $0.titolo })
+                              valori: schede, titolo: { $0.titolo },
+                              separatoriPrima: SchedaStudio.separatoriPrima(schede))
                 .fixedSize()
             #if os(macOS)
             // Migliorie d'uso 28: «＋ Nuova parcella» sta qui, dopo le schede, solo in Parcelle (come «Nuovo cliente»);

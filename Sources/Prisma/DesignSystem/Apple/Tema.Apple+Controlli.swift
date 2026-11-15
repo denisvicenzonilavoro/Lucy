@@ -28,6 +28,18 @@ extension Tema.Apple {
             /// La variante piccola (`.segP`, migliorie d'uso 45: le ipotesi dei simulatori): voci 4×11, testo 12,5.
             static let paddingVoceCompatta = Misura.padding(4, 11)
             static let testoCompatto = Carattere(dimensione: 12.5, peso: .semibold)
+            /// Il filo fra due gruppi di voci (`.seg .sgS`, Migliorie d'uso 52): largo 1, 6 di margine sopra, sotto e
+            /// ai lati, `--ink3` all'opacità 0,5. Non si sceglie e non ha pillola.
+            static let filo: CGFloat = 1
+            static let marginiFilo: CGFloat = 6
+            static let opacitaFilo: Double = 0.5
+            /// L'altezza del filo: quella di una voce (riga del carattere della barra più il padding) meno i margini.
+            /// Esplicita perché il segmentato sta spesso in `.fixedSize()`, dove un `Rectangle` prenderebbe 10 punti.
+            static var altezzaFilo: CGFloat {
+                let voce = Tema.Apple.Carattere.barra.dimensione * Tema.Apple.Carattere.interlineaSistema
+                    + Tema.Apple.Misura.Padding.voceSegmentato.top + Tema.Apple.Misura.Padding.voceSegmentato.bottom
+                return max(0, voce - 2 * marginiFilo)
+            }
         }
 
         /// `.sw` (§2.9).

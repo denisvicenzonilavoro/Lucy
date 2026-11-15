@@ -355,8 +355,12 @@ enum ProvaPalestraVera {
 
     private static func studio(_ controlla: (Bool, String) -> Void) {
         controlla(SchedaStudio.allCases.contains(.palestra) && SchedaStudio.palestra.titolo == "Palestra" && SchedaStudio.palestra.prossima == nil
-                  && SchedaStudio.ocf.titolo == "OCF" && SchedaStudio.fatture.titolo == "Parcelle",
-                  "Palestra: nuova scheda di Studio (Cruscotto · Parcelle · Track record · OCF · Palestra)")
+                  && SchedaStudio.ocf.titolo == "Esame OCF" && SchedaStudio.fatture.titolo == "Parcelle",
+                  "Palestra: nuova scheda di Studio (Cruscotto · Parcelle · Spese | Track record | Esame OCF · Palestra)")
+        // Migliorie d'uso 52: tre gruppi separati da un filo, giusti anche senza le Spese
+        controlla(SchedaStudio.separatoriPrima(SchedaStudio.allCases) == [3, 4]
+                  && SchedaStudio.separatoriPrima([.cruscotto, .fatture, .track, .ocf, .palestra]) == [2, 3],
+                  "Studio in ordine: i fili fra i conti, i risultati e l’allenamento")
         let s = StatoShell(persistente: false)
         s.apriVoceNovita(NovitaLuce.palestra)
         controlla(NovitaLuce.palestra.disponibile && s.appAttiva == .studio && s.schedaStudio == .palestra,

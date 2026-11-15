@@ -1751,3 +1751,12 @@ Resta:
   anni.
 - Istantanee da rigenerare sul Mac e pagina delle anteprime da aggiornare; il tocco sulla tappa e il pulsante chiedono
   uno screenshot.
+
+## 52. Lo Studio in ordine
+
+Fatto: ordine Cruscotto · Parcelle · Spese | Track record | Esame OCF · Palestra, «OCF» torna «Esame OCF», i fili
+(`separatoriPrima` di `SegmentatoPillola`, token `filo`, `marginiFilo`, `opacitaFilo`, `altezzaFilo`), prova in
+`ProvaPalestraVera`, istantanee 1090 (chiara, scura, modalità cliente). Resta:
+- Verificare nell'istantanea che l'altezza del filo (riga del carattere × 1,2 più il padding, meno 12) e la pillola che
+  scivola sopra il filo siano come nel template; la finestra di Studio al minimo con la riga in testa più larga.
+- Facoltativo: un segmentato con un filo nella vetrina «400-vetrina-apple».

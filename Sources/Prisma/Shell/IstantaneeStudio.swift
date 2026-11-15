@@ -51,6 +51,20 @@ extension Istantanee {
             }),
             ("576-impostazioni-studio", { s in preparaImpostazioniApple(s, sezione: .studio) }),
             ("576-impostazioni-studio-scuro", { s in preparaImpostazioniApple(s, sezione: .studio) }),
+            // Migliorie d'uso 52, «Lo Studio in ordine»: il segmentato in tre gruppi separati da un filo; in modalità
+            // cliente senza le Spese (due fili al posto giusto)
+            ("1090-uso-studio-in-ordine", { s in
+                studioDiProva(s)
+                s.apriStudio(.cruscotto)
+            }),
+            ("1090-uso-studio-in-ordine-scuro", { s in
+                studioDiProva(s)
+                s.apriStudio(.cruscotto)
+            }),
+            ("1090-uso-studio-in-ordine-modo-cliente", { s in
+                s.apriStudio(.cruscotto)
+                s.entraModoCliente(avviso: false)
+            }),
         ]
     }
 
