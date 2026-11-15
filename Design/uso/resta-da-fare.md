@@ -1673,3 +1673,43 @@ Resta:
 - Il passaggio «Preparo…» del pulsante: l'avvio è sincrono (le bozze nascono subito), quindi il pulsante passa
   direttamente a «Apri i messaggi preparati» mentre le righe si accendono una dopo l'altra.
 - Le istantanee non mostrano il lampo (stato finale) né «Mostra tutti» aperto: da guardare sul Mac.
+
+## 50. Il mese a tutta larghezza
+
+Fatto (solo Mac, dentro `#if os(macOS)` o nel file solo Mac `Shell/AgendaMeseUso.swift`; iPhone e iPad tengono la
+griglia di sempre con la colonna al 42%):
+- **La griglia** (`MeseAgenda.grigliaUso`): testata alta 26 «LUN … DOM» (11,5 semibold, maiuscolo, `inchiostro2`, a 10
+  dal bordo), celle come card (`CellaMeseUso`: raggio 14, fondo `card`, filo `separatore`, padding 7 × 8, 6 di spazio),
+  sabato e domenica sul fondo dei pannelli (`Colori.Agenda.festivo`), i giorni fuori mese senza fondo né bordo e senza
+  righe, il numero nel tondo 22 (oggi rosso pieno), il giorno scelto con l'anello d'accento di 2 fuori dalla cella,
+  passaggio `cardPiena`. Doppio clic: il giorno in «Giorno».
+- **Le righe della cella** (`RegoleMeseAgenda.righe`, regola pura): al più due impegni, uno solo se c'è una scadenza;
+  la pillola con l'ora in peso normale e il nome breve del cliente (il titolo senza cliente), filo e fondo **del canale**
+  (50-a); le scadenze scritte «Scade {posizione}» con il pallino arancio; poi «+N altro / altri». Se le righe non stanno
+  si tolgono prima le scadenze in più, poi gli impegni; con la cella troppo bassa tornano i segni (puntino degli impegni
+  e delle scadenze). I segni dei riesami, delle attività e delle occasioni restano (50-b). I nomi brevi vengono da un
+  dizionario in `ricavato` (`nomiBreviClienti`), non da `stato.cliente` per ogni pillola.
+- **La colonna del giorno** (`colonnaGiornoMese`): 304 a 14 dalla griglia (`Misure.AgendaMese.larghezzaColonna`, fino a
+  260 sotto la pagina minima), card piatta con padding 18 × 20. Occhiello «OGGI» in rosso o «NOVEMBRE 2026», titolo
+  «lunedì 2 novembre», «{n} impegni · {n} scadenze · solo {nome}» o «nessun impegno»; le righe `RigaMeseUso` (filo del
+  canale, fondo `chip`, raggio 4/10, ora in neretto larga 44, titolo in neretto, sotto il cliente o «Per te», «›»): il clic
+  apre la scheda dell'impegno come prima; le scadenze con «Scade» in arancio aprono la posizione. Sotto, in piccolo, le
+  attività rimaste indietro e del giorno (50-b); le occasioni restano nella vista «Occasioni». Vuoto: «Giornata
+  libera{ per Marco}.» e «È un buon posto per un impegno nuovo.». «Apri il giorno» (primario) e «＋ Impegno»; la legenda
+  con i quadratini dei due canali e il pallino arancio, e con un cliente scelto «Tutti i clienti» (`scegliCliente(nil)`).
+  Un appuntamento aperto da ricerca o notifiche si vede ancora nella colonna (`vistaScelta`, con «‹ data»).
+- Il cambio di giorno: la colonna entra da destra di 8 con l'opacità da 0,4 in 260 ms al ritmo (`EntrataGiornoMese`,
+  `.id(giorno)`); con «Riduci movimento» la dissolvenza di 0,15 s; nelle istantanee già ferma.
+- Prove A-U1…A-U7 in `ProvaCalcoliAgenda` (`--prova-calcoli`). Istantanee nuove 1152-uso-agenda-mese (chiara e scura),
+  1153-uso-agenda-mese-cliente (Marco), 1154-uso-agenda-mese-giorno-libero; 12, 124, 132 e 238 mostrano già il mese nuovo.
+
+Resta:
+- **Altezza delle righe**: le righe della cella sono stimate a 18 punti per la Dimensione del testo (`rigaCella`); con il
+  testo grande o una finestra 13" bassa guardare sul Mac che le pillole non vengano tagliate (la cella le ritaglia).
+- **«Da fare» della miglioria 3** nella colonna: le attività restano le righe di sempre (`RigaRegistroAttivita`, con il
+  loro rientro di 16), non ancora il «Da fare» unico.
+- Il doppio clic con `onTapGesture(count: 2)` ritarda un poco il clic singolo (come nella settimana): da sentire sul Mac.
+- `--prova-fluidita` con i 30 clienti fittizi sul mese: da guardare in CI che le celle non si rifacciano al passaggio
+  del puntatore sulla colonna (la colonna sta in `ParteAgenda`, la griglia resta `Equatable`).
+- Istantanee da rigenerare sul Mac e pagina delle anteprime da aggiornare; l'entrata della colonna e il passaggio del
+  puntatore chiedono uno screenshot.

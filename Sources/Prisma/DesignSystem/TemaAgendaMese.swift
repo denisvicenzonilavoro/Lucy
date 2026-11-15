@@ -72,10 +72,95 @@ extension Misure {
         // Riepilogo delle attività nella fascia in testa
         static let spazioRiepilogo: CGFloat = 8
         static let puntoRiepilogo: CGFloat = 6
+
+        // MARK: Migliorie d'uso 50 (solo Mac): il mese a tutta larghezza
+        // La griglia prende tutta la larghezza meno la colonna del giorno (304, a 14 dalla griglia); sotto la pagina
+        // minima la colonna si stringe fino a 260 prima di comprimere la griglia.
+
+        /// La colonna del giorno a destra della griglia e lo spazio fra le due.
+        static let colonnaGiorno: CGFloat = 304
+        static let colonnaGiornoMinima: CGFloat = 260
+        static let spazioColonna: CGFloat = 14
+        /// Al più due impegni per cella (uno solo se nel giorno c'è una scadenza).
+        static let pilloleMassime = RegoleMeseAgenda.pilloleMassime
+        /// L'anello d'accento del giorno scelto.
+        static let anelloScelto: CGFloat = 2
+        /// Testata dei giorni («LUN … DOM»), alta 26, con i nomi a 10 dal bordo della colonna.
+        static let testaGiorniUso: CGFloat = 26
+        static let rientroNomeGiorno: CGFloat = 10
+        /// Le celle: 6 di spazio, raggio 14, padding 7 × 8, 3 fra le righe.
+        static let spazioCelleUso: CGFloat = 6
+        static let raggioCellaUso: CGFloat = 14
+        static let margineCellaUso = EdgeInsets(top: 7, leading: 8, bottom: 7, trailing: 8)
+        static let spazioRigheCella: CGFloat = 3
+        /// Il numero del giorno in un tondo di 22 (oggi rosso pieno).
+        static let cerchioNumero: CGFloat = 22
+        /// Una riga della cella (pillola, scadenza, «+N altri»), sulla Dimensione del testo.
+        static var rigaCella: CGFloat { 18 * Tipo.fattore }
+        /// La pillola: filo sinistro di 3 nel colore del canale, raggio 5, padding 2 × 6, 5 fra l'ora e il nome.
+        static let filoPillola: CGFloat = 3
+        static let raggioPillolaUso: CGFloat = 5
+        static let marginePillolaUso = EdgeInsets(top: 2, leading: 6, bottom: 2, trailing: 6)
+        static let spazioOraPillola: CGFloat = 5
+        /// La scadenza: pallino di 6 a 2 dal bordo, il testo a 6 dal pallino.
+        static let pallinoScadenza: CGFloat = 6
+        static let rientroScadenza: CGFloat = 2
+        static let spazioScadenza: CGFloat = 4
+
+        /// Quante righe (pillole, scadenze, «+N») stanno in una cella alta `altezza` (0: solo numero e segni).
+        static func righeCella(altezza: CGFloat) -> Int {
+            let libero = altezza - margineCellaUso.top - margineCellaUso.bottom - cerchioNumero
+            guard libero > rigaCella else { return 0 }
+            return Int(libero / (rigaCella + spazioRigheCella))
+        }
+
+        /// La larghezza della colonna del giorno per la larghezza disponibile: 304 finché la griglia resta larga almeno
+        /// la pagina minima, poi si stringe fino a 260.
+        static func larghezzaColonna(_ totale: CGFloat) -> CGFloat {
+            let minima = Misure.AgendaImpaginazione.paginaMinima
+            guard totale - colonnaGiorno - spazioColonna < minima else { return colonnaGiorno }
+            return min(colonnaGiorno, max(colonnaGiornoMinima, totale - spazioColonna - minima))
+        }
+
+        // La colonna del giorno (card piatta, padding 18 × 20)
+        static let paddingColonna = EdgeInsets(top: 18, leading: 20, bottom: 18, trailing: 20)
+        static let spazioTitoloColonna: CGFloat = 2
+        static let sopraRighe: CGFloat = 12
+        static let spazioRigheColonna: CGFloat = 6
+        /// Una riga: padding 9 8 9 10, 10 fra l'ora (larga 44) e il titolo, raggio 4 a sinistra e 10 a destra.
+        static let paddingRiga = EdgeInsets(top: 9, leading: 10, bottom: 9, trailing: 8)
+        static let spazioRiga: CGFloat = 10
+        static let colonnaOraRiga: CGFloat = 44
+        static let raggioRigaSinistra: CGFloat = 4
+        static let raggioRigaDestra: CGFloat = 10
+        static let spazioTitoloRiga: CGFloat = 1
+        /// «Giornata libera»: 26 sopra e sotto.
+        static let vuotoVerticale: CGFloat = 26
+        static let spazioVuoto: CGFloat = 2
+        /// Le attività del giorno sotto gli impegni (decisione 50-b): l'occhiello a 10 sopra.
+        static let sopraAttivita: CGFloat = 10
+        /// I pulsanti a 10 sotto le righe, 8 fra l'uno e l'altro.
+        static let sopraPulsanti: CGFloat = 10
+        static let spazioPulsanti: CGFloat = 8
+        /// La legenda a 12 sotto i pulsanti, sopra un filo con 10 di respiro; quadratini di 9 (raggio 3).
+        static let sopraLegenda: CGFloat = 12
+        static let paddingLegenda: CGFloat = 10
+        static let spazioLegenda: CGFloat = 12
+        static let spazioVoceLegenda: CGFloat = 5
+        static let spazioQuadratini: CGFloat = 2
+        static let quadratinoLegenda: CGFloat = 9
+        static let raggioQuadratino: CGFloat = 3
+        /// Il cambio di giorno: la colonna entra da destra di 8 con l'opacità da 0,4.
+        static let entrataGiorno: CGFloat = 8
+        static let opacitaEntrataGiorno: Double = 0.4
     }
 }
 
 extension Colori.Agenda {
+    #if os(macOS)
+    /// Migliorie d'uso 50: sabato e domenica nel mese con il fondo dei pannelli (--panel).
+    static let festivo = Tema.Apple.Agenda.MeseUso.fondoFestivo
+    #endif
     /// Celle del mese: passaggio del puntatore, giorno scelto (accento), bordo.
     static let cellaPassaggio = Tema.Colore.rigaSopra
     static let cellaSelezione = Tema.Colore.selezione

@@ -8,7 +8,8 @@ import SwiftUI
 /// giorno con il dettaglio di sempre. Occasioni: le occasioni di 12 mesi (AgendaOccasioni.swift).
 /// Sul Mac (Migliorie d'uso 18) la barra ha «Giorno | Settimana | Mese» e il pulsante «Occasioni» con il numero; la
 /// vista di partenza è la settimana a sette colonne (AgendaSettimana.swift) e la striscia dei riesami non c'è più (sono
-/// voci del «Da fare»).
+/// voci del «Da fare»). Dalla miglioria 50 il mese prende tutta la larghezza: celle come card con due impegni e le
+/// scadenze scritte (AgendaMeseUso.swift) e la colonna del giorno stretta (304) con «Apri il giorno» e «＋ Impegno».
 /// Sul Mac Attività è accorpata qui: ogni attività sta nel giorno della sua scadenza («Da fare»), quelle rimaste
 /// indietro nella giornata di oggi. Nella giornata compaiono anche le posizioni in scadenza: ogni scadenza è
 /// l'occasione per rivedere la posizione del cliente. Toccando un impegno nella giornata si apre la sua traccia
@@ -344,6 +345,24 @@ struct AppAgenda: View {
         // Appuntamenti, attività, scadenze e occasioni dei giorni visibili, raggruppati una volta sola
         let indice = indiceGiorni(settimane.flatMap { $0 })
         let chiave = MeseAgenda.Chiave(vista: stato.chiaveVista, filtro: stato.filtroClienteAgenda)
+        #if os(macOS)
+        // Migliorie d'uso 50: la griglia a tutta larghezza, a destra la colonna del giorno stretta e fissa (304, a 14)
+        let nomi = nomiBreviClienti
+        return GeometryReader { geo in
+            let m = Misure.AgendaMese.self
+            HStack(alignment: .top, spacing: m.spazioColonna) {
+                MeseAgenda(settimane: settimane, giorno: giorno, indice: indice, strato: strato, chiave: chiave,
+                           canale: { stato.canaleAppuntamento($0) }, seleziona: { seleziona($0) },
+                           nomi: nomi, apriGiorno: { apriGiorno($0) })
+                    .equatable()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                ParteAgenda { colonnaGiornoMese(indice) }
+                    .frame(width: m.larghezzaColonna(geo.size.width))
+                    .frame(maxHeight: .infinity)
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+        }
+        #else
         return GeometryReader { geo in
             let larghezza = Misure.AgendaImpaginazione.dettaglio(geo.size.width)
             HStack(spacing: 0) {
@@ -357,7 +376,144 @@ struct AppAgenda: View {
             }
         }
         .cardAgendaApple()
+        #endif
     }
+
+    #if os(macOS)
+    /// I nomi brevi dei clienti per le pillole del mese, una volta sola finché non cambiano i dati dei calcoli (con 200
+    /// clienti la griglia non cerca il cliente pillola per pillola).
+    private var nomiBreviClienti: [String: String] {
+        stato.ricavato("agenda-mese-nomi-brevi") {
+            Dictionary(stato.clienti.map { ($0.id, StatoShell.nomeBreve($0)) }, uniquingKeysWith: { primo, _ in primo })
+        }
+    }
+
+    /// La colonna del giorno del mese (Migliorie d'uso 50): una card piatta con il giorno scelto oppure, scelta una riga,
+    /// il suo dettaglio (con il ritorno). Entra da destra a ogni cambio di giorno.
+    private func colonnaGiornoMese(_ indice: GiorniAgenda) -> some View {
+        let m = Misure.AgendaMese.self
+        return Group {
+            if let s = scelta(indice, elenco: [], ripiego: false) {
+                VStack(alignment: .leading, spacing: 0) {
+                    Button { azzeraScelta() } label: {
+                        Label(maiuscola(Formati.dataLunga.string(from: giorno)), systemImage: "chevron.left")
+                    }
+                    .buttonStyle(StileCollegamento())
+                    .fixedSize()
+                    .help("Torna alla giornata")
+                    .padding(.bottom, m.sopraRighe)
+                    vistaScelta(s)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                }
+            } else {
+                paginaGiornoMese(indice)
+            }
+        }
+        .padding(m.paddingColonna)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .modifier(EntrataGiornoMese())
+        .id(giorno)
+        .superficieApple(Tema.Apple.Agenda.MeseUso.superficie)
+    }
+
+    /// Il giorno scelto nel mese: occhiello («OGGI» o il mese), titolo, conteggio; le righe degli impegni e delle
+    /// scadenze; le attività del giorno sotto, in piccolo (decisione 50-b); «Giornata libera»; «Apri il giorno» e
+    /// «＋ Impegno»; la legenda.
+    private func paginaGiornoMese(_ indice: GiorniAgenda) -> some View {
+        let m = Misure.AgendaMese.self
+        let t = Tema.Apple.Agenda.MeseUso.self
+        let eventi = indice.appuntamenti(giorno)
+        let scadenze = indice.scadenze(giorno)
+        let delGiorno = indice.attivita(giorno)
+        let oggi = cal.isDateInToday(giorno)
+        let indietro = oggi ? stato.attivitaRimasteIndietro() : []
+        let mostrata = scelta(indice, elenco: [], ripiego: false)
+        let solo: String? = stato.filtroClienteAgenda.flatMap { stato.cliente($0) }.map { StatoShell.nomeBreve($0) }
+        let tutti: (() -> Void)? = solo != nil && !stato.inModoCliente ? { stato.scegliCliente(nil, avviso: true) } : nil
+        return VStack(alignment: .leading, spacing: 0) {
+            Text(RegoleMeseAgenda.occhiello(giorno, oggi: oggi))
+                .carattereApple(t.occhiello)
+                .foregroundColor(oggi ? t.coloreOcchielloOggi : t.coloreOcchiello)
+                .lineLimit(1)
+            Text(RegoleMeseAgenda.titolo(giorno))
+                .carattereApple(t.titolo)
+                .foregroundColor(t.coloreTitolo)
+                .lineLimit(1)
+                .minimumScaleFactor(Misure.AgendaImpaginazione.scalaNotaGiorno)
+                .padding(.top, m.spazioTitoloColonna)
+            Text(RegoleMeseAgenda.conteggio(impegni: eventi.count, scadenze: scadenze.count, solo: solo))
+                .carattereApple(t.conteggio)
+                .foregroundColor(t.coloreConteggio)
+                .lineLimit(2)
+                .fixedSize(horizontal: false, vertical: true)
+            ScrollView(showsIndicators: false) {
+                // Pigro: con molti clienti un giorno ha decine di impegni e scadenze
+                LazyVStack(alignment: .leading, spacing: m.spazioRigheColonna) {
+                    ForEach(eventi) { e in
+                        RigaMeseUso(ora: Formati.ora.string(from: e.inizio), titolo: e.titolo,
+                                    sotto: RegoleMeseAgenda.sottoRiga(cliente: stato.cliente(e.clienteId)?.nome),
+                                    colore: Colori.Agenda.pillola(stato.canaleAppuntamento(e)),
+                                    aiuto: "Apri la scheda dell'impegno") {
+                            stato.appuntamentoSelezionato = e.id
+                            stato.occasioneSelezionata = nil
+                            stato.attivitaSelezionata = nil
+                        }
+                    }
+                    ForEach(scadenze) { p in
+                        RigaMeseUso(ora: "Scade", titolo: p.nome,
+                                    sotto: RegoleMeseAgenda.sottoRiga(cliente: stato.cliente(p.clienteId)?.nome),
+                                    colore: t.pallinoScadenza, scadenza: true,
+                                    aiuto: "Apri la posizione in Posizioni") {
+                            stato.apriPosizione(p)
+                        }
+                    }
+                    if eventi.isEmpty && scadenze.isEmpty {
+                        VStack(spacing: m.spazioVuoto) {
+                            Text(RegoleMeseAgenda.giornataLibera(per: solo))
+                            Text(RegoleMeseAgenda.notaGiornataLibera)
+                        }
+                        .carattereApple(t.conteggio)
+                        .foregroundColor(t.coloreConteggio)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, m.vuotoVerticale)
+                    }
+                    if !indietro.isEmpty {
+                        occhielloAttivitaMese("RIMASTE INDIETRO", Colori.Agenda.occhielloIndietro)
+                        ForEach(indietro) { a in rigaAttivita(a, mostrata: mostrata, compatta: true) }
+                    }
+                    if !delGiorno.isEmpty {
+                        occhielloAttivitaMese("DA FARE", Colori.Agenda.occhielloDaFare)
+                        ForEach(delGiorno) { a in rigaAttivita(a, mostrata: mostrata, compatta: true) }
+                    }
+                }
+            }
+            .padding(.top, m.sopraRighe)
+            .frame(maxHeight: .infinity, alignment: .top)
+            HStack(spacing: m.spazioPulsanti) {
+                Button { apriGiorno(giorno) } label: { Text("Apri il giorno") }
+                    .buttonStyle(.applePrimario)
+                    .fixedSize()
+                    .help("Apri questo giorno nella vista «Giorno»")
+                Button { nuovoAppuntamento() } label: { Text("＋ Impegno") }
+                    .buttonStyle(.apple)
+                    .fixedSize()
+                    .help("Nuovo impegno in questo giorno")
+            }
+            .padding(.top, m.sopraPulsanti)
+            LegendaMeseUso(tuttiIClienti: tutti)
+                .padding(.top, m.sopraLegenda)
+        }
+    }
+
+    /// L'occhiello piccolo delle attività del giorno nella colonna del mese.
+    private func occhielloAttivitaMese(_ testo: String, _ colore: Color) -> some View {
+        Text(testo)
+            .carattereApple(Tema.Apple.Agenda.MeseUso.occhielloAttivita)
+            .foregroundColor(colore)
+            .padding(.top, Misure.AgendaMese.sopraAttivita)
+    }
+    #endif
 
     #if os(macOS)
     /// La settimana che si vede tutta (Migliorie d'uso 18): a sinistra il mese con i puntini e le cifre della settimana

@@ -82,6 +82,11 @@ struct MeseAgenda: View, Equatable {
     let chiave: Chiave
     let canale: (Appuntamento) -> Canale?
     let seleziona: (Date) -> Void
+    /// Migliorie d'uso 50 (Mac): i nomi brevi dei clienti per le pillole, preparati una volta per disegno. Cambiano solo
+    /// con i dati dei calcoli, che sono già nella chiave: restano fuori dal confronto.
+    var nomi: [String: String] = [:]
+    /// Migliorie d'uso 50 (Mac): il doppio clic su una cella apre quel giorno in «Giorno».
+    var apriGiorno: (Date) -> Void = { _ in }
 
     /// L'indice resta fuori dal confronto (è quello in cache per giorni, filtro e chiave), e le azioni pure: fanno
     /// sempre la stessa cosa con l'appuntamento o il giorno che ricevono.
@@ -90,8 +95,82 @@ struct MeseAgenda: View, Equatable {
     }
 
     var body: some View {
+        #if os(macOS)
+        grigliaUso
+        #else
+        griglia
+        #endif
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 50: la griglia a tutta larghezza. Testata alta 26 con «LUN … DOM» a 10 dal bordo, 6 di spazio fra
+    /// le celle; in ogni cella tante righe quante ne stanno (`Misure.AgendaMese.righeCella`).
+    private var grigliaUso: some View {
         let m = Misure.AgendaMese.self
-        GeometryReader { geo in
+        let t = Tema.Apple.Agenda.MeseUso.self
+        return GeometryReader { geo in
+            let righe = CGFloat(max(1, settimane.count))
+            let libero = geo.size.height - m.testaGiorniUso - m.spazioCelleUso * (righe - 1)
+            let altezza = max(m.cellaMinima, libero / righe)
+            let posto = m.righeCella(altezza: altezza)
+            VStack(spacing: 0) {
+                HStack(spacing: m.spazioCelleUso) {
+                    ForEach(CalendarioAgenda.nomiGiorni, id: \.self) { n in
+                        Text(n)
+                            .carattereApple(t.nomeGiorno)
+                            .foregroundColor(t.coloreNomeGiorno)
+                            .lineLimit(1)
+                            .padding(.leading, m.rientroNomeGiorno)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .frame(height: m.testaGiorniUso, alignment: .top)
+                VStack(spacing: m.spazioCelleUso) {
+                    ForEach(settimane, id: \.self) { s in
+                        HStack(spacing: m.spazioCelleUso) {
+                            ForEach(s, id: \.self) { g in
+                                cellaUso(g, posto: posto)
+                                    .frame(height: altezza)
+                            }
+                        }
+                    }
+                }
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
+        }
+    }
+
+    /// La cella a tutta larghezza di un giorno (a parte, per tenere leggero il controllo dei tipi della griglia).
+    private func cellaUso(_ g: Date, posto: Int) -> CellaMeseUso {
+        let cal = CalendarioAgenda.cal
+        let daFare = indice.daFare(g)
+        let scadute = !daFare.isEmpty && g < cal.startOfDay(for: Date())
+        let occasioni = strato ? SegniOccasioni(indice.occasioni(g)) : SegniOccasioni()
+        let giornoSettimana = cal.component(.weekday, from: g)
+        return CellaMeseUso(
+            giorno: g,
+            nelMese: cal.isDate(g, equalTo: giorno, toGranularity: .month),
+            selezionato: cal.isDate(g, inSameDayAs: giorno),
+            oggi: cal.isDateInToday(g),
+            festivo: giornoSettimana == 1 || giornoSettimana == 7,
+            appuntamenti: indice.appuntamenti(g),
+            scadenze: indice.scadenze(g),
+            daFare: daFare.count,
+            scadute: scadute,
+            occasioni: occasioni,
+            posto: posto,
+            nomi: nomi,
+            canale: canale,
+            azione: { seleziona(g) },
+            doppio: { apriGiorno(g) }
+        )
+    }
+    #endif
+
+    /// La griglia di sempre (iPhone e iPad): celle che mostrano tante pillole quante ne stanno, al massimo tre.
+    private var griglia: some View {
+        let m = Misure.AgendaMese.self
+        return GeometryReader { geo in
             let righe = CGFloat(max(1, settimane.count))
             let libero = geo.size.height - m.testaGiorni - m.spazioCelle * righe
             let altezza = max(m.cellaMinima, libero / righe)
