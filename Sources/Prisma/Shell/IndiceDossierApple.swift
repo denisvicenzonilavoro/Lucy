@@ -177,8 +177,8 @@ private struct VoceIndiceDossier: View {
     }
 }
 
-/// La riga cliccabile dell'indice con il fondo della scelta e del puntatore.
-private struct VoceIndiceCornice<Etichetta: View>: View {
+/// La riga cliccabile dell'indice con il fondo della scelta e del puntatore (anche nell'indice delle posizioni).
+struct VoceIndiceCornice<Etichetta: View>: View {
     let scelta: Bool
     let azione: () -> Void
     @ViewBuilder let etichetta: () -> Etichetta

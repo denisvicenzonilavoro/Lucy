@@ -471,3 +471,46 @@ Resta:
   Mac mostra la capsula al posto degli stati delle card), 1050 (l'elenco del dossier ha la frase nuova e la riga sotto
   ogni voce) e le nuove 1038-1039; controllare che la capsula non vada a capo accanto all'etichetta «di prova» delle
   famiglie in una finestra stretta.
+
+## 14. Le posizioni prima di tutto
+
+Fatto (solo sul Mac; l'iPad tiene la colonna con i filtri e la pagina lunga): con un cliente scelto la colonna di
+Posizioni è `IndicePosizioniApple` (Shell/IndicePosizioniApple.swift, larga 236, voci e testa dell'indice del dossier,
+`VoceIndiceCornice` ora non più privata): «‹ Tutto il portafoglio» (non in modalità cliente), la testa del cliente, «Le
+posizioni › Quadro e posizioni» con il numero delle sole posizioni in essere, «Le analisi» (cinque voci, una schermata
+ciascuna), «Collegati» (Il dossier, Analisi 360, Prodotti, Simulatore, Confronto, proposta 14.6) e «Archivio locale». Nel
+portafoglio resta la colonna di prima. La schermata è `@State` di `AppPosizioni` (`VistaPosizioniCliente`, decisione
+14.6): le ancore «patrimonio», «resistenza», «coerenza», «costi», «successione» la aprono e si consumano al giro dopo
+(dossier, notifiche, «Da sistemare» del portafoglio e istantanee funzionano senza toccarli); cambiando cliente si torna
+a «Quadro e posizioni» con i filtri azzerati; `areaPosizioniDaAprire` porta al quadro. Cambio di schermata come nel
+dossier (uscita y +6 in 0,13 s, poi cascata; calma e istantanee come lì). «Quadro e posizioni» è `QuadroPosizioniApple`
+(Shell/QuadroPosizioniApple.swift): le quattro tessere sempre del cliente intero (niente più riepilogo rifatto sul
+canale), con «all'anno · n contratti» / «nessun versamento a rate», «caso morte» (solo se le coperture sono tutte sulla
+vita, altrimenti «n coperture») / «nessuna copertura», «per x €» / «nessuna», «Debiti» solo se ci sono; la card «Le
+posizioni» con «{n} voci», segmentato «In essere | Proposte | Tutte», capsule dei canali (secondo clic toglie), capsula
+dell'area con «✕», l'elenco a righe (`RigaPosizioneApple`, pigro, che scorre nella card e rientra a ogni filtro) e il
+piede; a destra, larghe 392, «Ripartizione per area» con la legenda che filtra (`AppPosizioni.ripartizione(_:areaScelta:
+scegli:)`, `VoceAreaRipartizione`) e «Per canale» senza le righe in scadenza (sono nell'elenco) con «{n} da fare per
+{nome} ›» o «Niente da fare per {nome}.». Le cinque analisi sono `AnalisiPosizioniApple` (il pannello di oggi da solo, in
+cima; senza dati una riga che dice perché e «Aggiungi una posizione»). Nella riga in testa «Le posizioni di {nome}.» e
+«{n} in essere · {n} proposte · aggiornate adesso» (`TitoloRigaPosizioni`). Token in `Tema.Apple.Posizioni.Indice` e
+`Tema.Apple.Posizioni.Quadro`. Istantanee nuove 1040-uso-posizioni-quadro (chiara e scura), 1041-uso-posizioni-filtro-area,
+1042-uso-posizioni-coerenza, 1043-uso-posizioni-filtro-canale (1024-1027 erano già della scelta del cliente); 71 ora
+apre la schermata della resistenza. Nessun campo d'archivio nuovo.
+
+Resta:
+- **Vuoto delle analisi con «Completa»**: la proposta 14.6 vuole anche il pulsante che apre il dato mancante
+  (`stato.apriCompletamento` con la prima voce di `completezzaCliente(id)` che tocca quell'analisi); oggi c'è solo
+  «Aggiungi una posizione». Serve una mappa voce di completezza → analisi.
+- **Titolo grande delle analisi** (`PannelloAnalisi.titoloGrande`, 21 bold): non fatto, il pannello tiene il titolo 17
+  della card; da decidere guardando le istantanee.
+- **Altezza 92 delle tessere e 304 della ripartizione**: le tessere tengono l'altezza del loro contenuto e la colonna
+  destra scorre da sola; i due token non ci sono.
+- **«· x € l'anno» nella quarta tessera**: come nella miglioria 12, resta «per x €» (il valore non è annuo).
+- **Dopo la scheda di una posizione** aperta da «Peso dei costi» o «Passaggio generazionale» si torna alla stessa
+  schermata, ma lo scorrimento riparte dall'alto.
+- **Gruppi 07 e 08**: chi vuole aprire una schermata delle posizioni (radar, smontaggio, «Apri le posizioni di …») scrive
+  l'ancora di oggi (`stato.ancoraPosizioni = "coerenza"`), non una proprietà nuova.
+- **Istantanee e prove sul Mac**: rigenerare 2, 9, 10, 71, 74, 76, 79, 95-97 e le nuove 1040-1043; misurare un cliente
+  con 40 posizioni (l'elenco nella card) e `--prova-fluidita` con 200 clienti (il quadro non costruisce le analisi);
+  `ProvaDelFuocoApple` e `ProvaSeguito` leggono «seguito», che resta del portafoglio.

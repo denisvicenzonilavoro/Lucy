@@ -247,9 +247,13 @@ enum Istantanee {
             s.apri(.documenti)
         }),
         ("71-posizioni-resistenza", { s in
-            // Marco, profilo moderato: la prova di resistenza sotto la ripartizione
+            // Marco, profilo moderato: la prova di resistenza sotto la ripartizione (sul Mac la sua schermata,
+            // migliorie d'uso 14)
             s.clienteAttivoId = "marco"
             s.apri(.posizioni)
+            #if os(macOS)
+            s.ancoraPosizioni = "resistenza"
+            #endif
         }),
         ("72-vera-resistenza", { s in
             s.clienteAttivoId = "marco"

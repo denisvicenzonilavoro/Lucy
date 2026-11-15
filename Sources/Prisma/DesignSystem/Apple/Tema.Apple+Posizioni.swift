@@ -208,6 +208,89 @@ extension Tema.Apple {
             static let coloreNota = Colore.inchiostro2
         }
 
+        // MARK: Le posizioni prima di tutto (migliorie d'uso 14, solo Mac)
+
+        /// L'indice delle posizioni del cliente (`#posIdx`): largo 236, il contenuto parte a 252. Voci, testa del
+        /// cliente, etichette dei gruppi e numeri sono quelli dell'indice del dossier (`Clienti.Indice`).
+        enum Indice {
+            static let larghezza: CGFloat = 236
+        }
+
+        /// «Quadro e posizioni» (`posQuadroHTML`): le quattro tessere, la card «Le posizioni» a sinistra e, larghe
+        /// 392, «Ripartizione per area» e «Per canale» a destra.
+        enum Quadro {
+            static let larghezzaDestra: CGFloat = 392
+            static let spazio: CGFloat = 12
+            /// Margine del contenuto: come la pagina di prima (10 sopra, 12 ai lati, 16 sotto).
+            static let margine = EdgeInsets(top: 10, leading: 12, bottom: 16, trailing: 12)
+            /// Card «Le posizioni»: titolo 18 bold, «{n} voci» `.k`, filtri sulla stessa riga.
+            static let titoloCard = Carattere(dimensione: 18, peso: .bold, tracking: -0.3)
+            static let coloreTitolo = Colore.inchiostro
+            static let conto = Carattere.secondario
+            static let coloreConto = Colore.inchiostro2
+            static let spazioTesta: CGFloat = 10
+            static let spazioFiltri: CGFloat = 6
+            /// Piede sopra un filo: 12,5 `inchiostro2`.
+            static let piede = Carattere.secondario
+            static let colorePiede = Colore.inchiostro2
+            static let filo = Colore.separatore
+            static let paddingPiede: CGFloat = 10
+            /// Una riga dell'elenco: alta 52, segno dell'area 10 (attenuato per le proposte), nome 13,5 semibold,
+            /// sotto 12 `inchiostro2`; a destra l'importo largo almeno 104 e «›».
+            static let altezzaRiga: CGFloat = 52
+            static let paddingRiga: CGFloat = 10
+            static let raggioRiga: CGFloat = 10
+            static let spazioRiga: CGFloat = 10
+            static let segno: CGFloat = 10
+            static let raggioSegno: CGFloat = 3
+            static let opacitaSegnoProposta: Double = 0.45
+            static let nomeRiga = Carattere(dimensione: 13.5, peso: .semibold)
+            static let coloreNomeRiga = Colore.inchiostro
+            static let sottoRiga = Carattere(dimensione: 12, peso: .regular)
+            static let coloreSottoRiga = Colore.inchiostro2
+            static let spazioNomeSotto: CGFloat = 2
+            static let importo = Carattere(dimensione: 13.5, peso: .semibold, tabellare: true)
+            static let coloreImporto = Colore.inchiostro
+            static let unitaImporto = Carattere(dimensione: 11.5, peso: .regular)
+            static let larghezzaImporto: CGFloat = 104
+            static let avviso = Carattere(dimensione: 12, peso: .semibold)
+            static let coloreScadenza = Colore.arancioTesto
+            static let coloreScaduta = Colore.rosso
+            static let coloreDebito = Colore.rosso
+            /// Le proposte nel viola delle stime (lo stesso del delta «Con le proposte»).
+            static let coloreProposta = Colore.stima
+            static let fondoProposta = Color(r: 139, g: 92, b: 246, a: 0.13)
+            static let capsulaProposta = Carattere(dimensione: 11, peso: .bold)
+            static let paddingCapsula = Misura.padding(2, 8)
+            static let rigaSopra = Colore.chip
+            static let freccia = Carattere(dimensione: 12, peso: .semibold)
+            static let coloreFreccia = Colore.inchiostro3
+            /// I filtri: capsule dei canali (pallino e nome) e dell'area con «✕», su `chip`; scelta nel fondo del canale.
+            static let fondoFiltro = Colore.chip
+            static let testoFiltro = Colore.inchiostro2
+            static let filtro = Carattere(dimensione: 12, peso: .semibold)
+            static let paddingFiltro = Misura.padding(4, 10)
+            static let spazioFiltro: CGFloat = 5
+            static let segnoAreaFiltro: CGFloat = 8
+            static let simboloChiudi = Carattere(dimensione: 9, peso: .bold)
+            /// La legenda della ripartizione è il filtro per area: la voce scelta sul fondo accento al 13%.
+            static let fondoAreaScelta = Colore.selezioneVoce
+            static let raggioAreaScelta: CGFloat = 8
+            static let paddingAreaScelta: CGFloat = 6
+            /// A ogni cambio di filtro l'elenco rientra: opacità e y +6 in 0,24 s.
+            static let durataRientro = 0.24
+            static let spostamentoRientro: CGFloat = 6
+            static var rientro: Animation { .easeOut(duration: durataRientro * Tema.Apple.Moto.ritmo) }
+            /// «{n} da fare per {nome} ›» sopra un filo, in fondo a «Per canale».
+            static let daFare = Carattere(dimensione: 13, peso: .semibold)
+            static let coloreDaFare = Colore.accento
+            static let nienteDaFare = Carattere.secondario
+            static let coloreNienteDaFare = Colore.inchiostro2
+            static let sopraDaFare: CGFloat = 4
+            /// Le cinque analisi: il pannello di oggi da solo, in cima; spazio fra il pannello e il vuoto.
+            static let spazioAnalisi: CGFloat = 18
+        }
+
         // MARK: Il colore del cliente (avatar e grafico del dettaglio)
 
         /// Il colore del cliente nel tema: la tinta dell'avatar, con i toni degli impegni dell'Agenda.

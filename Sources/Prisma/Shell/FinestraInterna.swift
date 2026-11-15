@@ -250,11 +250,17 @@ private struct TestaFinestra: View {
     /// importazioni: li apre `stato`), quindi si può, come nell'intestazione di prima.
     private func riga(occhiello: Bool, destro: Bool, soloIcona: Bool) -> some View {
         HStack(alignment: .center, spacing: RigaTestaTema.spazio) {
-            Text(app.titoloIntestazione)
-                .carattereApple(RigaTestaTema.titolo)
-                .foregroundColor(attiva ? RigaTestaTema.coloreTitolo : RigaTestaTema.coloreTitoloSpento)
-                .lineLimit(1)
-            if occhiello {
+            if app == .posizioni {
+                // Migliorie d'uso 14: con un cliente scelto «Le posizioni di Marco.» e i conti delle sue posizioni
+                // (IndicePosizioniApple.swift)
+                TitoloRigaPosizioni(attiva: attiva, occhiello: occhiello)
+            } else {
+                Text(app.titoloIntestazione)
+                    .carattereApple(RigaTestaTema.titolo)
+                    .foregroundColor(attiva ? RigaTestaTema.coloreTitolo : RigaTestaTema.coloreTitoloSpento)
+                    .lineLimit(1)
+            }
+            if occhiello, app != .posizioni {
                 if app == .mercato {
                     // L'occhiello lo scrive il motore del mercato: «Aggiornato oggi alle 18:00» (AppMercato.swift)
                     OcchielloMercato()
