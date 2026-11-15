@@ -101,7 +101,7 @@ enum TestiAppMercato {
                 }
                 frase += " (" + parti.joined(separator: ", ") + ")"
             }
-            if tipoSerie == .indiceAzionario, let quota = toccato.quotaAzioni, quota > 0 {
+            if tipoSerie == .indiceAzionario, let quota = primo.quotaAzioni, quota > 0 {
                 frase += ": " + quotaInAzioni(quota)
             }
             return frase + "."
