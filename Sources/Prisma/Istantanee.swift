@@ -133,7 +133,9 @@ enum Istantanee {
         }),
         ("23-prodotti", { s in
             // Migliorie d'uso 63: il catalogo nella Biblioteca con Giulia scelta («Per Giulia, dal più adatto» e gli esiti)
+            #if os(macOS)
             s.scegliCliente("giulia")
+            #endif
             s.prodottoSelezionato = "prodotto-previdenza-pip"
             s.apri(.prodotti)
         }),
