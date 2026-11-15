@@ -51,6 +51,21 @@ extension Istantanee {
                       s.schedaCliente = .documenti
                       s.apri(.clienti)
                   })]
+        // Migliorie d'uso 12 «Più spazio al dossier»: Giulia su Documenti con nome, età e azioni nella riga in testa
+        // e l'elenco che parte subito in alto; in finestra stretta le ultime azioni passano in «Altro ⌄» (mai icone).
+        // (1036-1037: 1020-1022 sono già della barra del cliente, migliorie d'uso 2)
+        let rigaInTesta: (StatoShell) -> Void = { s in
+            s.clienteAttivoId = "giulia"
+            s.schedaCliente = .documenti
+            s.apri(.clienti)
+        }
+        tutte += [(nome: "1036-uso-dossier-riga-in-testa", prepara: rigaInTesta),
+                  (nome: "1036-uso-dossier-riga-in-testa-scuro", prepara: rigaInTesta),
+                  (nome: "1037-uso-dossier-riga-in-testa-stretta", prepara: { s in
+                      rigaInTesta(s)
+                      s.alternaIngrandimento(.clienti)
+                      s.ridimensiona(.clienti, dimensione: CGSize(width: 720, height: 680))
+                  })]
         return tutte
     }
 

@@ -401,11 +401,8 @@ regola. Token in `Tema.Apple.Clienti.Indice`. Prova `ProvaCalcoliIndiceDossier` 
 «431-clienti-dossier-altro» rinominata «431-clienti-dossier-in-regola». iPhone e iPad restano con segmentato e «Altro».
 
 Resta:
-- **«Aggiungi un'azienda…»**: per chi non è imprenditore oggi sta come pulsante nell'Anagrafica (accanto a «Modifica la
-  scheda») e apre la sezione «L'azienda» con il vuoto di sempre; con la miglioria 12 va nel menu «Altro ⌄» della riga in
-  testa, come dice la decisione 11.6.
-- **«Nuovo cliente» solo nella rubrica**: con un cliente scelto le azioni della riga in testa sono ancora quelle di Clienti
-  (`AzioniClienti`: «Nuovo cliente», Rubrica / Potenziali / Passaparola); diventano quelle del dossier con la miglioria 12.
+- ~~«Aggiungi un'azienda…»~~ e ~~«Nuovo cliente» solo nella rubrica~~: fatti con la miglioria 12 (menu «Altro ⌄» e azioni
+  del dossier nella riga in testa).
 - **La testata `sezT`** («Anagrafica · i dati della persona» con «Modifica», «Note · … si salvano da sole»…) non è stata
   portata sulle sezioni senza titolo proprio: da fare guardando le istantanee, sezione per sezione.
 - **La sfumatura in fondo all'indice** (come le altre colonne): il tema non ha ancora un modificatore comune; l'indice
@@ -417,3 +414,34 @@ Resta:
   434, 1023, 1032, 1050-1052 e le nuove 1028-1029; controllare che il nome lungo si tagli nella testa dell'indice e che
   con la finestra stretta compaia «Sezione: … ⌄». `--prova-fluidita`: guardare i corpi di `IndiceDossierApple` nel passo di
   Clienti (i conti sono in `ricavato`).
+
+## 12. Più spazio al dossier
+
+Fatto (solo sul Mac; l'iPad tiene testata, tessere e segmentato): con un cliente scelto nella Rubrica (o in modalità
+cliente) la riga in testa alla finestra di Clienti è `RigaTestaDossier` (Shell/RigaTestaDossier.swift, da
+`RigaTestaClienti` dentro `TestaFinestra`): «Il dossier di {nome di battesimo}.» (`StatoShell.nomeDiBattesimo`), «{età}
+anni · {professione}» e a destra i canali (o «Canale da scegliere»), «☆ Preferito» / «★ Preferito» (arancio delle scritte
+quando è preferito, avviso con il nome intero), «Modifica» (apre il modulo di oggi con `stato.richiestaModificaCliente`,
+che AppClienti consuma), «Altro ⌄» e «Prospetti» (primario). «Altro ⌄» c'è sempre (decisione 12.6): «Analisi 360», «Un
+anno insieme» e, per chi non ha «L'azienda» nell'indice, «Aggiungi un'azienda…» (tolto dall'Anagrafica). Le azioni non
+diventano mai icone: `ViewThatFits` toglie prima il sottotitolo, poi passa «Modifica» e infine «Preferito» in «Altro ⌄»
+(con le etichette dei canali compatte). ⌘N resta anche nel dossier (pulsante nascosto). La testata nella pagina non c'è
+più (`SchedeDossier.conRigaInTesta`); le quattro tessere stanno solo in Panoramica, in cima e ferme sopra la sezione che
+scorre (sotto 18, la sezione parte a 116); nelle altre sezioni il contenuto parte subito a 22. Cascata: tessere 0-3 e
+contenuto da 4 in Panoramica, da 0 altrove; con la capsula «Sezione: … ⌄» la capsula è 0 (token in
+`Tema.Apple.Clienti.Moto`, `primoIndiceSenzaSchede` tolto). Token della riga in `Tema.Apple.Clienti.RigaDossier`.
+Istantanee nuove 1036-uso-dossier-riga-in-testa (chiara e scura) e 1037-uso-dossier-riga-in-testa-stretta (1022 era già
+del pannello del cliente). Nessun campo d'archivio nuovo.
+
+Resta:
+- **«· x € l'anno» nella quarta tessera**: il template scrive «l'anno», ma `RiepilogoPosizioni.valoreProposte` è il
+  versamento iniziale più un anno di premi, non un valore annuo; la tessera resta «· x €» finché non c'è un motore che
+  dia il premio annuo delle proposte (o l'utente sceglie la parola).
+- **`TestataDossierApple`**: le varianti `compatti` con le icone restano, perché la testata ora serve solo all'iPad; si
+  tolgono con il giro dell'iPad.
+- **Le altre app**: le azioni della riga in testa delle altre app passano ancora alla sola icona quando lo spazio manca
+  (`TestaFinestra`, miglioria 4); «sempre con il nome» qui vale solo per il dossier.
+- **Istantanee**: rigenerare sul Mac tutte le scene del dossier (430-434, 1023, 1028-1029, 1032, 1050-1052) e le nuove
+  1036-1037; controllare che nella stretta compaia «Altro ⌄» con le azioni intere e che il titolo lungo non spinga fuori
+  «Prospetti»; la scena del report di fine anno (`IstantaneeAnnoInsieme`) parte da Prospetti e non tocca la testata.
+  `--prova-fluidita`: guardare i corpi di `RigaTestaDossier` (legge solo il cliente attivo e la vista di Clienti).

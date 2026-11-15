@@ -264,6 +264,9 @@ enum VoceConfronto: Hashable {
     var richiestaDalCatalogo: StatoPosizione?
     /// Il pulsante "Nuovo cliente" dell'intestazione chiede alla rubrica di aprire il modulo.
     var richiestaNuovoCliente = false
+    /// «Modifica» nella riga in testa del dossier (migliorie d'uso 12, Mac): l'id del cliente di cui aprire il modulo,
+    /// che Clienti apre e consuma subito (il modulo vive in AppClienti).
+    var richiestaModificaCliente: String?
     /// «Scrivi a mano» dalla scena del nuovo cliente («Luce» giro 13): la bozza con i dati letti, che Clienti apre nel
     /// modulo (si consuma appena letta).
     var bozzaNuovoCliente: Cliente?

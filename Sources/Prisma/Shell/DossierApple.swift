@@ -8,6 +8,8 @@ import SwiftUI
 //   animazione), il filtro dei preferiti di Prisma, le voci (avatar 38, nome, motto) e il piede.
 // - DossierApple: testata (avatar 56, «Dossier personale», nome, motto · età · professione; a destra canali,
 //   preferito, «Modifica», «Analisi 360» e «Prospetti»), le quattro tessere che contano, le schede e il contenuto.
+//   Sul Mac (migliorie d'uso 12) la testata sta nella riga in testa alla finestra (RigaTestaDossier.swift) e le
+//   tessere solo in Panoramica; la testata qui sotto resta per l'iPad.
 // - Le schede: le quattro del template nel segmentato a pillola, quelle di Prisma nel menu «Altro ▾».
 //   Le schede del template (Shell/Dossier<Nome>.swift) disegnano da sé le loro card; quelle di Prisma entrano nella
 //   cornice del tema (`corniceSchedaDossier()`), con il contenuto di prima.
@@ -380,9 +382,27 @@ enum SchedeDossier {
     /// La capsula «Sezione: Panoramica ⌄» (Mac, finestra stretta: l'indice non ci sta).
     case menu
 
-    /// Da dove parte la cascata del contenuto quando entra con il cliente (dopo testata, tessere e, se c'è, la scelta).
+    /// Da dove parte la cascata del contenuto quando entra con il cliente: sull'iPad dopo testata, tessere e
+    /// segmentato; sul Mac (migliorie d'uso 12) la testata non c'è e le tessere stanno solo in Panoramica, quindi
+    /// subito (o dopo la capsula «Sezione: … ⌄»). Le tessere della Panoramica le aggiunge `DossierApple`.
     var primoIndice: Int {
-        self == .nessuna ? Tema.Apple.Clienti.Moto.primoIndiceSenzaSchede : Tema.Apple.Clienti.Moto.primoIndiceScheda
+        let m = Tema.Apple.Clienti.Moto.self
+        switch self {
+        case .segmentato: return m.primoIndiceScheda
+        case .nessuna: return m.primoIndiceSenzaTestata
+        case .menu: return m.primoIndiceSenzaTestataConSezione
+        }
+    }
+
+    /// Sul Mac nome, età, professione, canali e azioni del cliente stanno nella riga in testa alla finestra
+    /// (migliorie d'uso 12, RigaTestaDossier.swift): la pagina non ha più la testata e le quattro tessere stanno solo in
+    /// Panoramica. L'iPad (segmentato) resta com'è.
+    var conRigaInTesta: Bool {
+        #if os(macOS)
+        return self != .segmentato
+        #else
+        return false
+        #endif
     }
 }
 
@@ -446,10 +466,13 @@ struct DossierApple<Contenuto: View>: View {
     private func dossier(_ c: Cliente, scheda: SchedaCliente) -> some View {
         let k = Tema.Apple.Clienti.self
         return VStack(alignment: .leading, spacing: 0) {
-            TestataDossierApple(cliente: c, modifica: { modifica(c) })
-                .entrataCascata(0, base: baseDossier)
-            TessereDossierApple(clienteId: c.id, base: baseDossier)
-                .padding(.top, k.Tessere.sopra)
+            // Migliorie d'uso 12: sul Mac la testata va nella riga in testa alla finestra e le tessere in Panoramica
+            if !schede.conRigaInTesta {
+                TestataDossierApple(cliente: c, modifica: { modifica(c) })
+                    .entrataCascata(0, base: baseDossier)
+                TessereDossierApple(clienteId: c.id, base: baseDossier)
+                    .padding(.top, k.Tessere.sopra)
+            }
             switch schede {
             case .segmentato:
                 SchedeDossierApple(selezione: Bindable(stato).schedaCliente, cliente: c)
@@ -458,16 +481,16 @@ struct DossierApple<Contenuto: View>: View {
                     .padding(.bottom, k.Schede.sotto)
             case .menu:
                 #if os(macOS)
+                // Senza testata la capsula sta in cima al dossier (migliorie d'uso 12)
                 MenuSezioneDossier(cliente: c)
-                    .entrataCascata(k.Moto.indiceSchede, base: baseDossier)
-                    .padding(.top, k.Schede.sopra)
+                    .entrataCascata(k.Moto.indiceSezioneSenzaTestata, base: baseDossier)
                     .padding(.bottom, k.Schede.sotto)
                 #else
                 EmptyView()
                 #endif
             case .nessuna:
-                // L'indice sta accanto: il contenuto a 18 sotto le tessere
-                Color.clear.frame(height: k.Schede.sopra)
+                // L'indice sta accanto e la testata è nella riga in testa: il contenuto parte subito in alto (a 22)
+                EmptyView()
             }
             schedaCorrente(c, scheda: scheda)
         }
@@ -481,7 +504,17 @@ struct DossierApple<Contenuto: View>: View {
     /// Il contenuto della scheda: scorre dentro il dossier (tranne Documenti e Nel tempo); le schede di Prisma
     /// nella cornice del tema, come un solo blocco della cascata.
     private func schedaCorrente(_ c: Cliente, scheda: SchedaCliente) -> some View {
-        Group {
+        // Migliorie d'uso 12 (Mac): le quattro tessere solo in Panoramica, in cima e ferme sopra la sezione che scorre;
+        // entrano per prime e il contenuto le segue nella cascata
+        let tessere = schede.conRigaInTesta && scheda == .panoramica
+        let k = Tema.Apple.Clienti.self
+        let avvioScheda = AvvioCascataDossier(primoIndice: avvio.primoIndice + (tessere ? k.Moto.blocchiTessere : 0),
+                                              base: avvio.base)
+        return VStack(alignment: .leading, spacing: 0) {
+            if tessere {
+                TessereDossierApple(clienteId: c.id, base: avvio.base, primoIndice: avvio.primoIndice)
+                    .padding(.bottom, k.Tessere.sopra)
+            }
             if scheda.scorreNelDossier {
                 ScrollView(.vertical, showsIndicators: true) {
                     vistaScheda(c, scheda: scheda)
@@ -492,7 +525,8 @@ struct DossierApple<Contenuto: View>: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
         }
-        .environment(\.avvioCascataDossier, avvio)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .environment(\.avvioCascataDossier, avvioScheda)
         // Un'altra scheda: il contenuto si rifà ed entra a cascata
         .id(scheda)
         .opacity(esceScheda ? 0 : 1)
@@ -720,6 +754,9 @@ struct TessereDossierApple: View {
     @Environment(StatoShell.self) var stato
     let clienteId: String
     var base: Double = Tema.Apple.Clienti.Moto.baseCambio
+    /// L'indice della prima tessera nella cascata: 1 sotto la testata (iPad), dove parte la scheda sul Mac (migliorie
+    /// d'uso 12, solo in Panoramica).
+    var primoIndice: Int = Tema.Apple.Clienti.Moto.indiceTessere
 
     var body: some View {
         let _ = ContaCorpi.segna()
@@ -760,7 +797,7 @@ struct TessereDossierApple: View {
         .padding(t.padding)
         .frame(minWidth: t.larghezzaMinima, maxWidth: .infinity, minHeight: t.altezza, alignment: .topLeading)
         .superficieApple(Tema.Apple.Superficie.tile)
-        .entrataCascata(Tema.Apple.Clienti.Moto.indiceTessere + i, base: base)
+        .entrataCascata(primoIndice + i, base: base)
     }
 
     @ViewBuilder private func valore(_ i: Int, _ r: RiepilogoPosizioni) -> some View {

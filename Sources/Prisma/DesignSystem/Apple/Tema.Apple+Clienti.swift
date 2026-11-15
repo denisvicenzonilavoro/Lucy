@@ -154,7 +154,8 @@ extension Tema.Apple {
         // MARK: Tessere
 
         enum Tessere {
-            /// Quattro tessere 258×76 con spazio 12, a 18 sotto la testata.
+            /// Quattro tessere 258×76 con spazio 12, a 18 sotto la testata. Sul Mac (migliorie d'uso 12) le tessere stanno
+            /// solo in Panoramica, in cima, e `sopra` è lo spazio fra le tessere e la Panoramica (la sezione parte a 116).
             static let altezza: CGFloat = 76
             static let spazio: CGFloat = 12
             static let sopra: CGFloat = 18
@@ -211,9 +212,29 @@ extension Tema.Apple {
             static let indiceTessere = 1
             static let indiceSchede = 5
             static let primoIndiceScheda = 6
-            /// Sul Mac con l'indice accanto (migliorie d'uso 11) il segmentato non c'è: il contenuto entra subito dopo le
-            /// tessere, senza aspettare un blocco che non c'è più.
-            static let primoIndiceSenzaSchede = 5
+            /// Migliorie d'uso 12 (Mac): niente testata nella pagina. Con l'indice accanto il contenuto parte da 0; con la
+            /// capsula «Sezione: … ⌄» (finestra stretta) la capsula è 0 e il contenuto parte da 1. In Panoramica le
+            /// quattro tessere vengono prima del contenuto e lo spostano di `blocchiTessere`.
+            static let primoIndiceSenzaTestata = 0
+            static let indiceSezioneSenzaTestata = 0
+            static let primoIndiceSenzaTestataConSezione = 1
+            static let blocchiTessere = 4
+        }
+
+        // MARK: Riga in testa del dossier (migliorie d'uso 12, Mac)
+
+        /// Con un cliente scelto la riga in testa alla finestra dice «Il dossier di Marco.» con «45 anni · Libero
+        /// professionista» e, a destra, `dossierAzioni` del template: i canali, «☆ Preferito» (arancio delle scritte
+        /// quando è preferito, 6 dopo i canali), «Modifica», «Altro ⌄» e «Prospetti» (primario). Titolo e sottotitolo
+        /// sono quelli della riga (`Tema.Apple.RigaTesta`). I pulsanti tengono sempre il nome: quando non ci stanno,
+        /// gli ultimi passano nel menu «Altro ⌄».
+        enum RigaDossier {
+            static let spazioAzioni: CGFloat = 6
+            static let margineDopoCanali: CGFloat = 6
+            static let colorePreferito = Colore.arancioTesto
+            /// «Altro ⌄»: la freccia come quella del vecchio «Altro ▾» del segmentato.
+            static let spazioFreccia: CGFloat = Schede.spazioFreccia
+            static let freccia = Schede.freccia
         }
     }
 }

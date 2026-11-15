@@ -57,7 +57,10 @@ struct AppClienti: View {
             controllaCompletamento(stato.richiestaCompletamento)
             controllaPotenziale(stato.richiestaClienteDaPotenziale)
             controllaBozza(stato.bozzaNuovoCliente)
+            controllaModifica(stato.richiestaModificaCliente)
         }
+        // Migliorie d'uso 12: «Modifica» nella riga in testa del dossier (Mac) apre il modulo di oggi
+        .onChange(of: stato.richiestaModificaCliente) { controllaModifica($0) }
         .onChange(of: stato.richiestaNuovoCliente) { controllaRichiesta($0) }
         .onChange(of: stato.richiestaClienteDaPotenziale) { controllaPotenziale($0) }
         // «Luce» giro 13: «Scrivi a mano» dalla scena del nuovo cliente apre il modulo con i dati letti
@@ -76,6 +79,17 @@ struct AppClienti: View {
         case .passaparola: VistaPassaparola()
         case .rubrica: conDettaglio
         }
+    }
+
+    /// «Modifica» dalla riga in testa del dossier (migliorie d'uso 12): il modulo della scheda del cliente, come il
+    /// «Modifica» della testata di prima. La richiesta si consuma subito.
+    private func controllaModifica(_ id: String?) {
+        guard let id else { return }
+        stato.richiestaModificaCliente = nil
+        guard modulo == nil, let c = stato.cliente(id) else { return }
+        // La nota «Da ricordare» in attesa entra prima nella scheda: il modulo la salverebbe com'era
+        TestiRinviati.scriviOra()
+        modulo = stato.cliente(id) ?? c
     }
 
     /// Il modulo del nuovo cliente già compilato dal potenziale arrivato in «Cliente».
@@ -329,19 +343,8 @@ struct AppClienti: View {
                     Label("Modifica la scheda", systemImage: "pencil")
                 }
                     .buttonStyle(StileCuoioChiaro())
-                #if os(macOS)
-                // Migliorie d'uso 11: «L'azienda» sta nell'indice solo per chi ce l'ha o fa l'imprenditore; per gli altri
-                // la strada di prima («Altro › Azienda») resta da qui, finché la riga in testa non ha il suo menu (12)
-                if !SchedaCliente.mostraAzienda(per: c), !stato.inModoCliente, !stato.solaLettura {
-                    Button {
-                        stato.schedaCliente = .azienda
-                    } label: {
-                        Label("Aggiungi un'azienda…", systemImage: "building.2")
-                    }
-                        .buttonStyle(StileCuoioChiaro())
-                        .help("Apre «L'azienda»: quota, ruolo, dipendenti e fatturato li scrivi tu")
-                }
-                #endif
+                // Migliorie d'uso 12: sul Mac «Aggiungi un'azienda…» (per chi non ha «L'azienda» nell'indice) sta nel
+                // menu «Altro ⌄» della riga in testa (RigaTestaDossier.swift)
             }
         }
     }

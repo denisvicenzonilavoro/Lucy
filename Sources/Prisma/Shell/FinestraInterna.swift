@@ -229,6 +229,15 @@ private struct TestaFinestra: View {
     let attiva: Bool
 
     var body: some View {
+        if app == .clienti {
+            // Migliorie d'uso 12: con un cliente scelto la riga è quella del suo dossier (RigaTestaDossier.swift)
+            RigaTestaClienti(attiva: attiva) { righeApp }
+        } else {
+            righeApp
+        }
+    }
+
+    private var righeApp: some View {
         ViewThatFits(in: .horizontal) {
             riga(occhiello: true, destro: true, soloIcona: false)
             riga(occhiello: false, destro: true, soloIcona: false)
