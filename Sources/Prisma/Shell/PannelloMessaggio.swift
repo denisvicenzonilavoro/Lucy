@@ -6,11 +6,12 @@ import SwiftUI
 //   ◉  A: Giulia Rossi · giulia.rossi@example.com              [Perché adesso: Incontro di ieri alle 17:30]
 //      Il riepilogo dell'incontro di ieri
 //   [Cordiale · Formale · Breve] [Mail · Messaggi]                       ◎ Vera scrive con i dati del dossier
+//   (sul Mac: Tono [Cordiale · Formale · Breve]  Invia con [Mail · Messaggi]      Vera ha usato 5 dati del dossier ›)
 //   Oggetto: Il riepilogo del nostro incontro
 //   ──────────────────────────────────────────────────────────────────────────────────────────────
 //   Ciao Giulia, …   (parola per parola mentre Vera scrive, poi modificabile; con Messaggi nella nuvoletta blu)
 //   [Decisioni · …] [Prossimo incontro · 3 dicembre 2026]
-//   Le cifre vengono da Prisma · Scritto da Vera con qwen3.5:4b
+//   Le cifre vengono da Prisma · Scritto da Vera con qwen3.5:4b          (queste due righe non sul Mac)
 //   [Apri in Mail] [Salva nel dossier] [↻ Riscrivi]                                  Lo controlli e lo spedisci tu
 //
 // - Il testo lo scrive Qwen sul Mac (SessioneMessaggi, MessaggiVera): mentre arriva compare parola per parola
@@ -25,6 +26,11 @@ import SwiftUI
 //   testo come testo (senza il campo), nessun puntino.
 // - Il testo in arrivo da Vera e le correzioni li leggono solo il testo (TestoMessaggioSessione, CampoTestoMessaggio) e
 //   gli avvisi dello stile (AvvisiStileSessione): un pezzo del flusso o un tasto rifanno loro, non tutto il pannello.
+// - Migliorie d'uso 26 (solo Mac): i selettori hanno un nome, «Tono» e «Invia con»; a destra «Vera ha usato N dati del
+//   dossier ›» apre la scheda «Da dove vengono le cifre» (FoglioDatiMessaggio). Sotto il testo non ci sono più le
+//   etichette delle cifre né la riga dell'autore, e nella fila non c'è più la sfera con «Vera scrive con i dati del
+//   dossier»: Vera che scrive si vede dai puntini e dalle parole, il testo di Prisma dall'avviso che resta. iPhone e
+//   iPad tengono la fila e le cifre di prima.
 // Valori in DesignSystem/Apple/Tema.Apple+Messaggi.swift.
 
 @MainActor
@@ -43,11 +49,15 @@ struct PannelloMessaggio: View {
     var primoIndice = 0
     /// Solo nelle istantanee: il testo già pronto (nessuna scrittura parte).
     var scrittoIstantanea: TestoScrittoMessaggio? = nil
+    /// Solo nelle istantanee del Mac (migliorie d'uso 26): la scheda «Da dove vengono le cifre» già aperta.
+    var datiIstantanea = false
 
     @Environment(\.prismaScatto) private var scatto
     @State private var chiediConsenso = false
     /// «La seconda lettura» (fase 3 di Vera): gli avvisi prima di aprire Mail o Messaggi; decide il consulente.
     @State private var lettura: EsitoSecondaLettura?
+    /// Migliorie d'uso 26 (Mac): la scheda «Da dove vengono le cifre».
+    @State private var datiAperti = false
 
     private typealias P = Tema.Apple.Messaggi.Pannello
     private typealias T = Tema.Apple.Messaggi.Testo
@@ -116,7 +126,7 @@ struct PannelloMessaggio: View {
         .padding(compatto ? P.paddingCompatto : P.padding)
         .frame(maxWidth: .infinity, maxHeight: incorniciato ? .infinity : nil, alignment: .topLeading)
         .superficieApple(P.superficie, raggio: P.raggio)
-        return contenuto
+        return conDatiUsati(contenuto)
             .task(id: k) {
                 // Nelle istantanee il testo è già pronto: nessuna scrittura, nessuna verifica di Qwen
                 guard scrittoIstantanea == nil, !scatto else { return }
@@ -134,6 +144,39 @@ struct PannelloMessaggio: View {
                 Text(TestiMessaggi.confermaConsenso(cliente.nome))
             }
     }
+
+    // MARK: La scheda dei dati usati (migliorie d'uso 26, Mac)
+
+    /// Sul Mac: la scheda «Da dove vengono le cifre» come foglio; nelle istantanee disegnata sopra il pannello, sul velo
+    /// (i fogli di sistema non entrano nell'immagine). iPhone e iPad: il pannello com'è.
+    @ViewBuilder private func conDatiUsati<V: View>(_ v: V) -> some View {
+        #if os(macOS)
+        v
+            .sheet(isPresented: $datiAperti) {
+                foglioDati(chiudi: nil)
+            }
+            .overlay {
+                if datiIstantanea && !occasione.cifre.isEmpty {
+                    ZStack {
+                        Tema.Apple.Messaggi.FoglioDati.velo
+                        foglioDati(chiudi: {})
+                            .superficieApple(Tema.Apple.Messaggi.FoglioDati.superficie,
+                                             raggio: Tema.Apple.Messaggi.FoglioDati.raggio)
+                    }
+                    .clipShape(RoundedRectangle(cornerRadius: P.raggio, style: .continuous))
+                }
+            }
+        #else
+        v
+        #endif
+    }
+
+    #if os(macOS)
+    private func foglioDati(chiudi: (() -> Void)?) -> some View {
+        FoglioDatiMessaggio(titolo: occasione.titolo, nomeCliente: cliente.nome, cifre: occasione.cifre,
+                            autore: pronto.map { TestiMessaggi.scrittoDa($0) }, chiudi: chiudi)
+    }
+    #endif
 
     // MARK: Testata
 
@@ -218,6 +261,79 @@ struct PannelloMessaggio: View {
     }
 
     @ViewBuilder private var controlli: some View {
+        #if os(macOS)
+        controlliMac
+        #else
+        controlliComuni
+        #endif
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 26: «Tono» e «Invia con» davanti ai segmentati, a destra i dati usati (se ce ne sono). Se la
+    /// fila non sta, le etichette restano e il collegamento va a capo sotto.
+    @ViewBuilder private var controlliMac: some View {
+        if compatto {
+            VStack(alignment: .leading, spacing: P.spazioControlli) {
+                gruppoControllo(TestiMessaggi.tono) { segmentatoTono }
+                gruppoControllo(TestiMessaggi.inviaCon) { segmentatoCanale }
+                pulsanteDatiUsati
+            }
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .center, spacing: 0) {
+                    gruppiControlli
+                    Spacer(minLength: P.spazioControlli)
+                    pulsanteDatiUsati
+                }
+                VStack(alignment: .leading, spacing: P.spazioControlli) {
+                    gruppiControlli
+                    pulsanteDatiUsati
+                }
+            }
+        }
+    }
+
+    private var gruppiControlli: some View {
+        HStack(alignment: .center, spacing: P.fraGruppiControlli) {
+            gruppoControllo(TestiMessaggi.tono) { segmentatoTono.fixedSize() }
+            gruppoControllo(TestiMessaggi.inviaCon) { segmentatoCanale.fixedSize() }
+        }
+        .fixedSize()
+    }
+
+    /// L'etichetta `.k` davanti al segmentato; il segmentato prende l'etichetta per VoiceOver.
+    private func gruppoControllo<C: View>(_ etichetta: String, @ViewBuilder _ controllo: () -> C) -> some View {
+        HStack(alignment: .center, spacing: P.spazioEtichetta) {
+            Text(etichetta)
+                .carattereApple(P.etichettaControllo)
+                .foregroundColor(P.coloreEtichettaControllo)
+                .lineLimit(1)
+                .fixedSize()
+                .accessibilityHidden(true)
+            controllo()
+                .accessibilityLabel(Text(etichetta))
+        }
+    }
+
+    /// «Vera ha usato N dati del dossier ›»: apre la scheda «Da dove vengono le cifre». Nessun collegamento se il
+    /// messaggio non usa cifre (un augurio).
+    @ViewBuilder private var pulsanteDatiUsati: some View {
+        if !occasione.cifre.isEmpty {
+            Button { datiAperti = true } label: {
+                Text(TestiMessaggi.datiUsati(occasione.cifre.count))
+                    .carattereApple(P.datiUsati)
+                    .foregroundColor(P.coloreDatiUsati)
+                    .lineLimit(1)
+                    .fixedSize()
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .help(TestiMessaggi.daDoveCifre)
+        }
+    }
+    #endif
+
+    @ViewBuilder private var controlliComuni: some View {
         if compatto {
             VStack(alignment: .leading, spacing: P.spazioControlli) {
                 segmentatoTono
@@ -291,8 +407,11 @@ struct PannelloMessaggio: View {
             TestoMessaggioSessione(sessione: sessione, chiave: chiave, scrittoIstantanea: scrittoIstantanea, scrive: scrive,
                                    compatto: compatto)
                 .padding(.top, T.sopra)
+            #if !os(macOS)
+            // Sul Mac (migliorie d'uso 26) le cifre stanno nella scheda «Da dove vengono le cifre»
             cifre
             nota
+            #endif
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }

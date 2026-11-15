@@ -36,11 +36,11 @@ enum MessaggiDiProva {
 
     /// Prepara i dati, chiede l'occasione, il tono, il canale e chi scrive, e apre Messaggi.
     static func apri(_ s: StatoShell, tipo: TipoOccasioneMessaggio, cliente: String, tono: TonoMessaggio = .cordiale,
-                     canale: CanaleMessaggio = .mail, vera: Bool = true) {
+                     canale: CanaleMessaggio = .mail, vera: Bool = true, datiAperti: Bool = false) {
         prepara(s)
         if !vera { s.disponibilitaLocale = .nonDisponibile(motivoNonPronta) }
         RichiestaIstantaneaMessaggi.chiedi(s, tipo: tipo, cliente: cliente, tono: tono, canale: canale, vera: vera,
-                                           motivoNonPronta: vera ? nil : motivoNonPronta)
+                                           motivoNonPronta: vera ? nil : motivoNonPronta, datiAperti: datiAperti)
         s.apri(.messaggi)
     }
 
@@ -62,6 +62,8 @@ enum MessaggiDiProva {
 /// - 494: Vera non è pronta: il testo di Prisma con la riga che lo spiega;
 /// - 495: Marco senza indirizzo email: la testata lo dice e il pulsante porta al dossier;
 /// - 496: nessuna occasione.
+/// Migliorie d'uso 26: nelle scene del Mac la fila ha «Tono», «Invia con» e «Vera ha usato N dati del dossier ›», e
+/// sotto il testo non ci sono più le cifre né la riga dell'autore; 1044 apre la scheda «Da dove vengono le cifre».
 extension Istantanee {
     nonisolated static var sceneMessaggi: [(nome: String, prepara: (StatoShell) -> Void)] {
         [
@@ -87,6 +89,12 @@ extension Istantanee {
             ("495-messaggi-recapito-mancante-scuro", { s in senzaEmailMarco(s) }),
             ("496-messaggi-vuoto", { s in MessaggiDiProva.vuoto(s) }),
             ("496-messaggi-vuoto-scuro", { s in MessaggiDiProva.vuoto(s) }),
+            ("1044-uso-messaggi-dati-usati", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", datiAperti: true)
+            }),
+            ("1044-uso-messaggi-dati-usati-scuro", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", datiAperti: true)
+            }),
         ]
     }
 

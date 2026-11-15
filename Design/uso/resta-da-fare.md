@@ -1050,3 +1050,28 @@ Resta:
   nel pannello del tavolo.
 - `--prova-tavolo` (a mano) e le istantanee 460 (chiara e scura), 461, 236 da rigenerare sul Mac: il menu «Altro» aperto
   non si vede nelle istantanee.
+
+## 26. Il messaggio senza rumore: «Tono», «Invia con», i dati usati in una riga
+
+Fatto (solo Mac, `#if os(macOS)`; iPhone e iPad tengono la fila con la sfera e le cifre sotto il testo):
+- **La fila dei controlli** (`controlliMac` in `PannelloMessaggio.swift`): «Tono» e «Invia con» (`.k`) davanti ai
+  segmentati, che prendono quel nome per VoiceOver; a destra «Vera ha usato N dati del dossier ›» (singolare con un dato),
+  solo se l'occasione ha cifre. `ViewThatFits`: se la fila non sta, il collegamento va a capo sotto; nella versione
+  compatta tutto in colonna. Via la sfera con «Vera scrive con i dati del dossier» (Vera che scrive si vede dai puntini e
+  dalle parole; il testo di Prisma dall'avviso, che resta).
+- **Sotto il testo** niente più etichette delle cifre né «Le cifre vengono da Prisma · Scritto da Vera».
+- **La scheda «Da dove vengono le cifre»** (`FoglioDatiMessaggio`, nuovo, solo Mac): occhiello, titolo dell'occasione, la
+  frase, una riga per ogni `CifraMessaggio` vera (filo fra le righe), in fondo «Scritto da Vera» o «Testo di Prisma»
+  (`TestiMessaggi.scrittoDa`, senza modello) e «Chiudi» (anche Esc). Token in `Tema.Apple.Messaggi.Pannello`
+  (`etichettaControllo`, `spazioEtichetta`, `fraGruppiControlli`, `datiUsati`) e nel nuovo `Tema.Apple.Messaggi.FoglioDati`.
+- La riga «Dati di prova…» resta come la lascia la 37: spenta in dimostrazione (dove la barra dice già «Dimostrazione»),
+  accesa sui clienti di prova caricati nell'archivio vero.
+- Istantanea nuova `1044-uso-messaggi-dati-usati` (chiara e scura): la scheda disegnata sopra il pannello, sul velo
+  (`RichiestaIstantaneaMessaggi.datiAperti`), perché i fogli di sistema non entrano nell'immagine.
+
+Resta:
+- Rigenerare sul Mac 490-495 (chiare e scure) e guardare la 1044; controllare che 494 mostri ancora l'avviso del testo
+  di Prisma e che la fila non vada a capo nella finestra normale.
+- La 25 rifà la barra in basso dello stesso pannello («L'hai spedito?», «Mandati oggi»): partire da `controlliMac` così
+  com'è.
+- La 49 (campagna in tre passi) riusa «Tono» e «Invia con»: i testi stanno in `TestiMessaggi.tono` e `inviaCon`.

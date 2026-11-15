@@ -248,6 +248,29 @@ enum TestiMessaggi {
     static let confermaConsensoTitolo = "Manca il consenso commerciale"
     static let confermaConsensoApri = "Apri lo stesso"
     static let confermaConsensoNo = "Non ora"
+    /// Migliorie d'uso 26 (Mac): i nomi dei due selettori («Canale» in Prisma vuol dire Alleanza o indipendente).
+    static let tono = "Tono"
+    static let inviaCon = "Invia con"
+    static let daDoveCifre = "Da dove vengono le cifre"
+    static let chiudi = "Chiudi"
+
+    /// «Vera ha usato 1 dato del dossier ›» / «Vera ha usato 5 dati del dossier ›».
+    static func datiUsati(_ n: Int) -> String {
+        "Vera ha usato \(n) \(n == 1 ? "dato" : "dati") del dossier ›"
+    }
+
+    /// La frase della scheda «Da dove vengono le cifre».
+    static func cifreDelDossier(_ nome: String) -> String {
+        "Vera ha scritto il testo con questi dati del dossier di \(nome): le cifre le dà Prisma."
+    }
+
+    /// Chi ha scritto il testo, senza il nome del modello (regola 9): «Scritto da Vera» o «Testo di Prisma».
+    static func scrittoDa(_ s: TestoScrittoMessaggio) -> String {
+        switch s.autore {
+        case .vera: return "Scritto da Vera"
+        case .modelloFisso: return "Testo di Prisma"
+        }
+    }
 
     /// «Perché adesso: Scadenza tra 45 giorni».
     static func perche(_ o: OccasioneMessaggio) -> String { "Perché adesso: \(o.perche)" }

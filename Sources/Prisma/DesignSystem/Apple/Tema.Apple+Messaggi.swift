@@ -113,6 +113,14 @@ extension Tema.Apple {
             static let spazioSfera: CGFloat = 6
             static let notaVera = Carattere.secondario
             static let coloreNotaVera = Colore.inchiostro2
+            /// Migliorie d'uso 26 (solo Mac): le etichette «Tono» e «Invia con» (`.k` 12,5 `inchiostro2`), 8 dal
+            /// segmentato, 14 fra i due gruppi; a destra «Vera ha usato N dati del dossier ›» (`.lnk` 13 semibold accento).
+            static let etichettaControllo = Carattere.secondario
+            static let coloreEtichettaControllo = Colore.inchiostro2
+            static let spazioEtichetta: CGFloat = 8
+            static let fraGruppiControlli: CGFloat = 14
+            static let datiUsati = Carattere(dimensione: 13, peso: .semibold)
+            static let coloreDatiUsati = Colore.accento
             /// Riga dell'oggetto: 14, `padding:10px 0`, filetto basso `separatore`.
             static let oggetto = Carattere(dimensione: 14, peso: .regular)
             static let oggettoForte = Carattere(dimensione: 14, peso: .bold)
@@ -175,6 +183,44 @@ extension Tema.Apple {
             static let nota = Carattere.secondario
             static let coloreNota = Colore.inchiostro3
             static let sopraNota: CGFloat = 8
+        }
+
+        // MARK: La scheda «Da dove vengono le cifre» (migliorie d'uso 26, solo Mac)
+
+        enum FoglioDati {
+            /// Larga 440, `padding:22px 24px`; occhiello `.lbl`; titolo 23 bold tracking −0,4 (`margin:4px 0 6px`);
+            /// frase 13,5 `inchiostro2`; righe chiave/valore 14 (`.kvr`: `padding:9px 0`, alte almeno 40, filo
+            /// `separatore` fra le righe, chiave `inchiostro2` larga al massimo 210, valore in grassetto tabellare).
+            static let larghezza: CGFloat = 440
+            static let padding = Misura.padding(22, 24)
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let titolo = Carattere(dimensione: 23, peso: .bold, tracking: -0.4)
+            static let coloreTitolo = Colore.inchiostro
+            static let sopraTitolo: CGFloat = 4
+            static let frase = Carattere(dimensione: 13.5, peso: .regular, interlinea: 1.4)
+            static let coloreFrase = Colore.inchiostro2
+            static let sopraFrase: CGFloat = 6
+            static let sopraRighe: CGFloat = 8
+            static let chiave = Carattere(dimensione: 14, peso: .regular)
+            static let coloreChiave = Colore.inchiostro2
+            static let larghezzaChiave: CGFloat = 210
+            static let valore = Carattere(dimensione: 14, peso: .bold, tabellare: true)
+            static let coloreValore = Colore.inchiostro
+            static let spazioRiga: CGFloat = 16
+            static let paddingRiga: CGFloat = 9
+            static let altezzaRiga: CGFloat = 40
+            static let filo = Colore.separatore
+            static let spessoreFilo = Misura.bordo
+            /// «Scritto da Vera» / «Testo di Prisma» in fondo, `.k` `inchiostro3`, 12 sopra; «Chiudi» 16 sopra.
+            static let nota = Carattere.secondario
+            static let coloreNota = Colore.inchiostro3
+            static let sopraNota: CGFloat = 12
+            static let sopraPulsanti: CGFloat = 16
+            /// Nelle istantanee la scheda si disegna sopra il pannello, sul velo, come il dettaglio.
+            static let velo = Colore.velo
+            static let superficie = Superficie.dettaglio
+            static let raggio = Raggio.dettaglioAperto
         }
 
         // MARK: Barra dei pulsanti (§2.2)

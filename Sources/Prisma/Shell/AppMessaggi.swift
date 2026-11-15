@@ -38,9 +38,11 @@ final class RichiestaIstantaneaMessaggi {
     let canale: CanaleMessaggio
     let vera: Bool
     let motivoNonPronta: String?
+    /// Migliorie d'uso 26 (solo Mac): la scheda «Da dove vengono le cifre» aperta.
+    let datiAperti: Bool
 
     private init(stato: StatoShell, tipo: TipoOccasioneMessaggio?, clienteId: String?, tono: TonoMessaggio,
-                 canale: CanaleMessaggio, vera: Bool, motivoNonPronta: String?) {
+                 canale: CanaleMessaggio, vera: Bool, motivoNonPronta: String?, datiAperti: Bool) {
         self.stato = stato
         self.tipo = tipo
         self.clienteId = clienteId
@@ -48,12 +50,14 @@ final class RichiestaIstantaneaMessaggi {
         self.canale = canale
         self.vera = vera
         self.motivoNonPronta = motivoNonPronta
+        self.datiAperti = datiAperti
     }
 
     static func chiedi(_ s: StatoShell, tipo: TipoOccasioneMessaggio? = nil, cliente: String? = nil, tono: TonoMessaggio = .cordiale,
-                       canale: CanaleMessaggio = .mail, vera: Bool = true, motivoNonPronta: String? = nil) {
+                       canale: CanaleMessaggio = .mail, vera: Bool = true, motivoNonPronta: String? = nil,
+                       datiAperti: Bool = false) {
         attuale = RichiestaIstantaneaMessaggi(stato: s, tipo: tipo, clienteId: cliente, tono: tono, canale: canale, vera: vera,
-                                              motivoNonPronta: motivoNonPronta)
+                                              motivoNonPronta: motivoNonPronta, datiAperti: datiAperti)
     }
 
     static func per(_ s: StatoShell) -> RichiestaIstantaneaMessaggi? {
@@ -171,7 +175,8 @@ struct AppMessaggi: View {
                               scrittoIstantanea: scatto ? (richiesta?.scritto(o, cliente: c, stato: stato)
                                   ?? RichiestaIstantaneaMessaggi.testo(o, cliente: c, stato: stato, tono: sessione.tono,
                                                                        canale: sessione.canale, vera: false,
-                                                                       motivo: stato.disponibilitaLocale.motivo)) : nil)
+                                                                       motivo: stato.disponibilitaLocale.motivo)) : nil,
+                              datiIstantanea: scatto && (richiesta?.datiAperti ?? false))
                 .id(o.id)
                 .opacity(esce ? 0 : 1)
                 .offset(x: esce ? M.spostamentoCambio : 0)
