@@ -298,6 +298,9 @@ enum VoceConfronto: Hashable {
     var importazionePosizioni: ImportazionePosizioni?
     /// Il pannello «Aggiorna i valori» in Posizioni (elenco della compagnia o griglia dei valori fermi).
     var aggiornaValori: AggiornaValori.Sessione?
+    /// Migliorie d'uso 44: il ricordo per «Annulla la registrazione» dei valori, solo in memoria; si cancella con
+    /// «Fatto», con una sessione nuova e al blocco (`puoAnnullareValori` lo vale solo per la sessione aperta).
+    @ObservationIgnored var annullaValori: AnnullaValori?
 
     // Agenda e Attività (stato delle viste, non salvato)
     /// Giornata aperta in agenda.

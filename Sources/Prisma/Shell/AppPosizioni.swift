@@ -195,7 +195,12 @@ struct AppPosizioni: View {
                 DettaglioPosizione(posizione: p, modifica: { modulo = p })
             } else if let s = stato.aggiornaValori {
                 // Il pannello «Aggiorna i valori»: sopra portafoglio e dossier, sotto il dettaglio («Apri ↗»)
+                #if os(macOS)
+                // Migliorie d'uso 44: sul Mac prima i dubbi, poi i pronti, con l'annullamento
+                PannelloAggiornaValoriMac(sessione: s).id(s.id)
+                #else
                 PannelloAggiornaValori(sessione: s).id(s.id)
+                #endif
             } else if stato.portafoglio {
                 // Come nel dossier: gli indicatori contano in essere e proposte, lo stato filtra solo l'elenco.
                 // La testata sceglie fra il Portafoglio e la Prova del fuoco (ProvaDelFuocoApple.swift)

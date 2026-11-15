@@ -967,7 +967,8 @@ enum Istantanee {
         }),
         // Giro 5 · aggiornamento dei valori in blocco (180–183)
         ("180-posizioni-aggiorna-elenco", { s in
-            // «Aggiorna i valori» sull'elenco della compagnia: indicatori, righe per canale, tutte le pillole
+            // «Aggiorna i valori» sull'elenco della compagnia (migliorie d'uso 44 sul Mac): in alto i dubbi con la domanda
+            // (il calo di Laura, la polizza che Marco non ha, quella di chi non è fra i clienti), sotto i pronti
             s.portafoglio = true
             s.aggiornaValori = AggiornaValori.sessione(tabella: ImportaClienti.righeCSV(DatiAggiornaValoriDemo.elenco(oggi: Date())),
                                                        file: "Valori Alleanza e indipendenti.xlsx", dataComune: Date())
@@ -981,14 +982,38 @@ enum Istantanee {
             s.apri(.posizioni)
         }),
         ("182-posizioni-aggiorna-registrati", { s in
-            // Il riepilogo dopo «Registra»: prima e dopo, righe per canale, elenco delle posizioni
+            // Il riepilogo dopo «Registra» (migliorie d'uso 44): «N valori registrati.», prima, dopo e variazione,
+            // «Fatto» e «Annulla la registrazione»; il calo detto giusto e la polizza nuova di Marco
             s.portafoglio = true
-            s.aggiornaValori = AggiornaValori.sessione(tabella: ImportaClienti.righeCSV(DatiAggiornaValoriDemo.elenco(oggi: Date())),
-                                                       file: "Valori Alleanza e indipendenti.xlsx", dataComune: Date())
+            s.aggiornaValori = DatiAggiornaValoriDemo.sessione()
             if let sessione = s.aggiornaValori {
+                let d = DatiAggiornaValoriDemo.decisioni(s, sessione: sessione)
                 let e = AggiornaValori.esiti(sessione.righe, posizioni: s.posizioni, clienti: s.clienti,
-                                             dataComune: sessione.dataComune, oggi: Date())
-                s.applicaValoriInBlocco(e, esclusi: AggiornaValori.esclusiIniziali(e))
+                                             dataComune: sessione.dataComune, oggi: Date(), scelte: d.scelte)
+                let fuori = AggiornaValori.esclusiPerRegistrare(e, decisioni: d.decisioni, esclusi: AggiornaValori.esclusiIniziali(e))
+                s.applicaValoriInBlocco(e, esclusi: fuori, nuove: AggiornaValori.nuove(e, decisioni: d.decisioni, clienti: d.clienti))
+            }
+            s.apri(.posizioni)
+        }),
+        ("184-posizioni-aggiorna-decisi", { s in
+            // Migliorie d'uso 44: i dubbi decisi (righe con la spunta verde e «Cambia»), il pulsante blu «Registra N valori»
+            s.portafoglio = true
+            if var sessione = DatiAggiornaValoriDemo.sessione() {
+                let d = DatiAggiornaValoriDemo.decisioni(s, sessione: sessione)
+                sessione.decisioni = d.decisioni
+                sessione.clientiNuove = d.clienti
+                sessione.scelte = d.scelte
+                s.aggiornaValori = sessione
+            }
+            s.apri(.posizioni)
+        }),
+        ("185-posizioni-aggiorna-cliente", { s in
+            // Migliorie d'uso 44: con Marco scelto l'elenco mostra solo le sue righe; «righe di altri clienti restano fuori»
+            s.portafoglio = false
+            s.clienteAttivoId = "marco"
+            if var sessione = DatiAggiornaValoriDemo.sessione() {
+                sessione.soloCliente = "marco"
+                s.aggiornaValori = sessione
             }
             s.apri(.posizioni)
         }),
@@ -1381,6 +1406,17 @@ enum Istantanee {
             s.portafoglio = true
             s.aggiornaValori = AggiornaValori.sessione(tabella: ImportaClienti.righeCSV(DatiAggiornaValoriDemo.elenco(oggi: Date())),
                                                        file: "Valori Alleanza e indipendenti.xlsx", dataComune: Date())
+            s.apri(.posizioni)
+        }),
+        ("184-posizioni-aggiorna-decisi-scuro", { s in
+            s.portafoglio = true
+            if var sessione = DatiAggiornaValoriDemo.sessione() {
+                let d = DatiAggiornaValoriDemo.decisioni(s, sessione: sessione)
+                sessione.decisioni = d.decisioni
+                sessione.clientiNuove = d.clienti
+                sessione.scelte = d.scelte
+                s.aggiornaValori = sessione
+            }
             s.apri(.posizioni)
         }),
         ("191-clienti-documenti-confronto-kid-impatto-scuro", { s in

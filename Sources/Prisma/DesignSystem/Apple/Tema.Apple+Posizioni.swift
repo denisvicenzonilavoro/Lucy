@@ -365,3 +365,102 @@ extension Tema.Apple {
         }
     }
 }
+
+// MARK: - Aggiorna i valori: prima i dubbi (migliorie d'uso 44, solo Mac)
+// Il pannello «Aggiorna i valori» del Mac (Shell/AggiornaValoriMac.swift, CSS `.aggD`, `.aggOk`, `.aggT` del template
+// delle migliorie d'uso): in alto le righe in dubbio in riquadri arancio tenue, sotto i «Pronti» in quattro colonne, in
+// fondo le righe che non si registrano. I token di `Tema.Misura.AggiornaValori` e `Tema.Colore.AggiornaValori` restano
+// per l'iPad, che tiene il pannello di prima finché non arriva il suo giro.
+
+extension Tema.Apple.Posizioni {
+    enum AggiornaValori {
+        typealias K = Tema.Apple.Carattere
+        typealias C = Tema.Apple.Colore
+
+        // MARK: Disposizione
+        static let margine: CGFloat = 22
+        /// Spazio fra i blocchi (16), fra i riquadri dei dubbi (8), fra la capsula e le righe (6).
+        static let spazioSezioni: CGFloat = 16
+        static let spazioDubbi: CGFloat = 8
+        static let spazioTesta: CGFloat = 6
+        static let spazioComandi: CGFloat = 10
+        static let larghezzaMassima: CGFloat = 980
+        static let superficie = Tema.Apple.Superficie.cardPiatta
+        static let raggioCard = Tema.Apple.Raggio.card
+        static let paddingCard = Tema.Apple.Misura.Padding.cardMedia
+
+        // MARK: Testata
+        static let occhiello = K.etichetta
+        static let coloreOcchiello = C.accento
+        static let titolo = K.h2
+        static let coloreTitolo = C.inchiostro
+        static let sotto = K.corpo
+        static let coloreSotto = C.inchiostro2
+        static let link = K(dimensione: 14, peso: .semibold)
+        static let coloreLink = C.accento
+        static let spazioTitolo: CGFloat = 2
+        static let segmenti: CGFloat = 380
+
+        // MARK: Riquadro del dubbio (`.aggD`)
+        static let raggioDubbio: CGFloat = 16
+        static let paddingDubbio = Tema.Apple.Misura.padding(12, 14)
+        static let fondoDubbio = C.arancio.opacity(0.10)
+        static let bordoDubbio = C.arancio.opacity(0.25)
+        static let avatar: CGFloat = 34
+        static let spazioDubbio: CGFloat = 12
+        static let titoloDubbio = K(dimensione: 14, peso: .semibold)
+        static let domanda = K(dimensione: 13.5, peso: .regular, interlinea: 1.45)
+        static let coloreDomanda = C.inchiostro2
+        static let canaleDubbio = K(dimensione: 12, peso: .medium)
+        /// L'avatar della riga intestata a chi non è fra i clienti: cerchio grigio con il punto di domanda.
+        static let fondoAvatarVuoto = C.chip
+        static let simboloAvatarVuoto = K(dimensione: 14, peso: .semibold)
+        static let coloreAvatarVuoto = C.inchiostro2
+        /// La scossa del primo dubbio (0 → −6 → 6 → 0 in 0,3 s); niente con «Riduci movimento».
+        static let ampiezzaScossa: CGFloat = 6
+        static let volteScossa: CGFloat = 1
+        static var scossa: Animation { .linear(duration: 0.30 * Tema.Apple.Moto.ritmo) }
+
+        // MARK: Dubbio deciso (`.aggOk`)
+        static let paddingDeciso = Tema.Apple.Misura.padding(8, 4)
+        static let spazioDeciso: CGFloat = 8
+        static let deciso = K(dimensione: 13.5, peso: .regular)
+        static let decisoForte = K(dimensione: 13.5, peso: .semibold)
+        static let spunta = K(dimensione: 16, peso: .semibold)
+        static let coloreSpunta = C.verde
+
+        // MARK: Pronti (`.aggT`: 1fr · 130 · 200 · 86)
+        static let colonnaCliente: CGFloat = 130
+        static let colonnaPrimaDopo: CGFloat = 200
+        static let colonnaVariazione: CGFloat = 86
+        static let colonnaSpunta: CGFloat = 26
+        static let spazioColonne: CGFloat = 12
+        static let paddingRiga = Tema.Apple.Misura.padding(8, 4)
+        static let riga = K(dimensione: 13.5, peso: .regular, tabellare: true)
+        static let rigaForte = K(dimensione: 13.5, peso: .semibold, tabellare: true)
+        static let variazione = K(dimensione: 13.5, peso: .semibold, tabellare: true)
+        static let totale = K(dimensione: 14, peso: .bold, tabellare: true)
+        static let nota = K.secondario
+        static let coloreNota = C.inchiostro2
+        static let coloreSalita = C.verde
+        static let coloreDiscesa = C.rosso
+        static let opacitaTolta = 0.45
+        static let filo = C.separatore
+        /// «Non si registrano · n»: la testata che apre e chiude l'elenco.
+        static let testaSezione = K(dimensione: 13.5, peso: .semibold)
+        static let freccia = K(dimensione: 11, peso: .bold)
+        static let coloreFreccia = C.inchiostro3
+
+        // MARK: Piede e riepilogo
+        static let paddingPiede = Tema.Apple.Misura.padding(14, 22)
+        static let cifraRiquadro = K.valore
+        static let etichettaRiquadro = K.etichetta
+        static let paddingRiquadro = Tema.Apple.Misura.padding(16, 18)
+        static let spazioRiquadri: CGFloat = 12
+
+        /// Verde se sale, rosso se scende, il colore del testo se è zero.
+        static func segno(_ v: Double) -> Color {
+            abs(v) < 0.5 ? C.inchiostro : (v > 0 ? coloreSalita : coloreDiscesa)
+        }
+    }
+}

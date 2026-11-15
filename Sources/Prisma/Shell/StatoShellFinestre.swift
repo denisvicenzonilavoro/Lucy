@@ -497,6 +497,8 @@ extension StatoShell {
         // Le carte d'identità arrivate dall'iPhone si scartano sempre, anche senza la scena aperta («Luce» giro 13,
         // decisione 25); il riposo del Mac passa da qui
         scartaCarteInArrivo()
+        // Il ricordo per annullare la registrazione dei valori non sopravvive al blocco (migliorie d'uso 44)
+        annullaValori = nil
         // Le copie da spedire delle cose date al cliente si tolgono al blocco («Luce» giro 15)
         CartellaUscite.svuota()
         guard movimento else {

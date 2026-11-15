@@ -1489,3 +1489,38 @@ Resta:
   vero: serve uno screenshot sul Mac.
 - Un documento conservato con il valore scritto ma senza voci calcolate e senza posizione collegata si riapre senza
   valore («Con la tua proposta» e il confronto restano «—»), perché il testo non è conservato (decisione 42.6).
+
+## 44. Aggiorna valori: prima i dubbi
+
+Fatto (solo Mac, `Shell/AggiornaValoriMac.swift`; l'iPad tiene `PannelloAggiornaValori`):
+- Pannello nuovo nel tema Apple: testata «Aggiorna i valori · {nome}» con «Dall’elenco della compagnia.», ««file»: N righe
+  lette» e «Scegli un altro file»; «Da decidere · n» / «Deciso» con i riquadri arancio (avatar 34, domanda in chiaro,
+  «È giusto» / «È nuova» / «Scegli la posizione ⌄» e «Salta»; decisa: spunta verde e «Cambia»); «Pronti · n» in quattro
+  colonne (1fr · 130 · 200 · 86) con la spunta in fondo alla riga e il totale colorato; «ⓘ … Va solo nello storico.»;
+  «Non si registrano · n» chiusa di base. Filtro e indicatori di prima tolti; «Importa come nuove» uscito dal piede.
+- Motore: `AggiornaValori.dubbio`, `daDecidere`, `pronte`, `esclusiPerRegistrare`, `soloStorico`, `nonSiRegistrano`,
+  `nuove`, `posizioniNuove`, `canaleNuova`, `zero`; `Sessione.decisioni` e `clientiNuove` (solo memoria);
+  `Riepilogo.nuove`.
+- Pulsante: «Decidi la riga / le N righe in arancione» (non blu: il primo dubbio trema, avviso «Prima decidi le righe in
+  arancione») oppure «Registra N valori» blu, con «Prima di registrare Prisma salva una copia: si può annullare.».
+- «È nuova»: la posizione nasce alla registrazione (lettura dell'importazione, canale riconosciuto mostrato nella riga),
+  insieme ai valori con una sola assegnazione; per chi non è fra i clienti «È nuova: di chi è? ⌄» chiede prima il cliente.
+- Annullamento: `StatoShell.annullaValori` (in memoria, `@ObservationIgnored`), `puoAnnullareValori` (vale solo se le
+  posizioni toccate sono ancora quelle di subito dopo), `annullaRegistrazioneValori()`; si cancella con «Fatto», con una
+  sessione nuova e al blocco. Riepilogo con «N valori registrati.», le frasi, «Prima», «Dopo», «Variazione»
+  (`NumeroCheConta`), «Fatto» e «Annulla la registrazione».
+- Con un cliente scelto l'elenco da file mostra solo le sue righe («N righe di altri clienti restano fuori», «Mostra tutto
+  l’elenco»), e le righe nascoste non si registrano.
+- Dati di prova: il calo del fondo pensione di Laura (18.000 → 13.100) e la temporanea AL-2024-077120 di Marco; la
+  polizza di Sofia ora a 41.640 (prima 52.000, che con la regola nuova sarebbe stata un terzo tipo di domanda).
+- Istantanee: 180 (e scura), 182 rifatte; nuove 184 (decisi, chiara e scura) e 185 (Marco). Prove AV37-AV42.
+
+Resta:
+- Nella scena 180 le righe da decidere sono 3, non 2 come nel testo della specifica: anche la polizza di «Paolo Neri» (chi
+  non è fra i clienti) ha la sua domanda (44.3 punto 1).
+- La griglia dei valori fermi ha solo le pillole a segmento e la tabella nel tema Apple (`.strumentiApple()`): le righe
+  (`RigaGriglia`, condivisa con l'iPad) restano nei caratteri di prima.
+- Il pulsante «Aggiorna valori» della barra di Posizioni resta nello stile di prima (tocca alle migliorie 4 e 6).
+- L'annullamento dopo aver chiuso il pannello non c'è (proposta 44.6): resta il backup fatto prima di registrare.
+- Le istantanee 180-185 vanno guardate, in particolare l'altezza dei riquadri dei dubbi e la colonna «prima → dopo» con
+  importi a sei cifre.
