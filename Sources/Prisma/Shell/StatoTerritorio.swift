@@ -152,9 +152,25 @@ extension StatoShell {
         return (v, x.attenzioni)
     }
 
+    /// Le voci per il Territorio: sul Mac il «Da fare» (Migliorie d'uso 3) aggiunge scadenze, compleanni e voci «Per te»,
+    /// che «Qualcosa da fare» (decisione 99) non conta: qui si tolgono, così la mappa, l'anello e Oggi restano com'erano.
+    func vociDaFareTerritorio() -> (voci: [VoceDaFare], attenzioni: [Attenzione]) {
+        #if os(macOS)
+        let tutte: (voci: [VoceDaFare], attenzioni: [Attenzione]) = ricavato("da-fare-territorio-\(DerivatiDati.ora())") {
+            var x = ingressiDaFare(adesso: Date())
+            x.conScadenze = false
+            x.perTe = nil
+            return (MotoreDaFare.voci(x), x.attenzioni)
+        }
+        return tutte
+        #else
+        return vociDaFareTutte()
+        #endif
+    }
+
     /// «Qualcosa da fare» per cliente (decisione 99).
     func daFareTerritorio() -> [String: DaFareCliente] {
-        let tutte = vociDaFareTutte()
+        let tutte = vociDaFareTerritorio()
         return MotoreTerritorio.daFare(tutte.voci, attenzioni: tutte.attenzioni,
                                        attenzioniAlte: Set(dati.impostazioni.territorio.attenzioniAlte))
     }

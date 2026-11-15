@@ -604,6 +604,8 @@ struct CorpoShell: View {
                          calmo: calmo, sotto: sotto)
                     .opacity(fuoriVista ? 0 : 1)
                     .allowsHitTesting(!fuoriVista)
+                    // …e le loro scorciatoie da tastiera (Esc compreso) non scattano mentre sono nascoste
+                    .disabled(fuoriVista)
             }
         }
         .frame(width: area.width, height: area.height, alignment: .topLeading)

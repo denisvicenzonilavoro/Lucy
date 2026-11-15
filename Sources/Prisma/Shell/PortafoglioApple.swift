@@ -895,21 +895,27 @@ struct DettaglioDaFareApple: View {
     private var piede: some View {
         let d = Tema.Apple.Posizioni.Dettaglio.self
         let preparando = nastro.preparando == voce.id
+        // Migliorie d'uso 3: le voci «Per te» (senza cliente, id vuoto) non hanno incontro né dossier da aprire
+        let conCliente = !voce.cliente.id.isEmpty
         return HStack(spacing: d.spazioPulsanti) {
-            Button(action: prepara) {
-                Text("Preparami l'incontro")
+            if conCliente {
+                Button(action: prepara) {
+                    Text("Preparami l'incontro")
+                }
+                .buttonStyle(StilePulsanteApple(.principale, grande: true))
+                .disabled(preparando)
             }
-            .buttonStyle(StilePulsanteApple(.principale, grande: true))
-            .disabled(preparando)
             Button(action: fatto) {
                 Text(voce.fatto == .apriInRegola ? "Apri «In regola»" : "Segna come fatto")
             }
             .buttonStyle(.appleGrande)
             .disabled(stato.solaLettura || preparando)
-            Button(action: dossier) {
-                Text("Apri il dossier")
+            if conCliente {
+                Button(action: dossier) {
+                    Text("Apri il dossier")
+                }
+                .buttonStyle(.appleGrande)
             }
-            .buttonStyle(.appleGrande)
             Spacer(minLength: 0)
             Text(TestiPortafoglioApple.cifreDaiMotori)
                 .carattereApple(d.nota)

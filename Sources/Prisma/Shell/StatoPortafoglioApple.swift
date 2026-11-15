@@ -113,6 +113,8 @@ extension StatoShell {
 
     /// «Preparami l'incontro»: il fascicolo con i report adatti, in Prospetti (come la mossa del giorno).
     func preparaIncontroDaFare(_ v: VoceDaFare) {
+        // Le voci «Per te» non hanno cliente: la selezione non passa in silenzio a «Tutti i clienti»
+        guard !v.cliente.id.isEmpty else { return }
         if let a = appuntamentoDaFare(v) {
             preparaFascicolo(per: a)
             return
@@ -125,6 +127,7 @@ extension StatoShell {
 
     /// «Apri il dossier»: Clienti › Panoramica sul cliente della scheda.
     func apriDossierDaFare(_ v: VoceDaFare) {
+        guard !v.cliente.id.isEmpty else { return }
         clienteAttivoId = v.cliente.id
         schedaCliente = .panoramica
         apri(.clienti)
