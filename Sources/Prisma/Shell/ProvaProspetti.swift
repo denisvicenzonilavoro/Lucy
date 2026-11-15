@@ -544,7 +544,7 @@ enum ProvaProspetti {
                 let primaPagina = spazi(StampaCarta.testo(pdf).first ?? "")
                 verifica("fascicolo-marco: l'indice è sulla copertina, nell'ordine scelto",
                          StatoShell.indiceInCopertina(parti.count)
-                         && primaPagina.lowercased().contains(TestiFascicolo.dentro.lowercased())
+                         && primaPagina.lowercased().replacingOccurrences(of: " ", with: "").contains(TestiFascicolo.dentro.lowercased().replacingOccurrences(of: " ", with: ""))  // l'occhiello è spaziato
                          && Self.inOrdine(parti.map { spazi($0.titolo) }, in: primaPagina), primaPagina)
                 verifica("fascicolo-marco: le pagine dei report contate come nel PDF",
                          [TipoProspetto.resoconto, .patrimonio, .successione].map { stato.pagineFascicolo($0) ?? -1 } == parti.map(\.pagine.count))
