@@ -215,7 +215,8 @@ struct ListaTiPreparo: View {
 }
 
 /// Una riga della lista: cerchietto (vuoto o verde con la spunta bianca) e testo.
-private struct VoceTiPreparoApple: View {
+/// Una voce di «Ti preparo» (anche, spuntata a mano, nei «Punti toccati» della scheda di un impegno concluso).
+struct VoceTiPreparoApple: View {
     let testo: String
     let fatta: Bool
     let animazione: Animation?

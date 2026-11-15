@@ -5,7 +5,8 @@ import CoreGraphics
 /// Le istantanee dell'Agenda nel tema Apple (§4.4): la settimana a sette colonne (Migliorie d'uso 18: barra laterale
 /// con il mese a puntini, «Questa settimana» e «Da non dimenticare», la testata dei giorni, gli impegni al loro posto
 /// con «da chiudere» e «✓ concluso», la riga dell'ora ferma alle 10:24), in chiaro e in scuro; la vista Giorno con la
-/// colonna del giorno; la traccia dell'impegno di Giulia già aperta; la settimana di un cliente scelto e la finestra
+/// colonna del giorno; la traccia di un impegno ancora da venire (Marco) e, dalla miglioria 19, quella di un impegno
+/// passato con la proposta da chiudere (Laura) e senza proposta (Giulia); la settimana di un cliente scelto e la finestra
 /// stretta senza barra laterale. Le cifre vengono dai motori di Prisma sui dati di prova (date relative a oggi).
 /// Il menu del pulsante «Occasioni» è un popover (una finestra a sé): le istantanee non lo vedono, serve uno screenshot.
 extension Istantanee {
@@ -14,8 +15,10 @@ extension Istantanee {
             ("450-agenda-apple", { s in preparaAgendaApple(s, vista: .settimana) }),
             ("450-agenda-apple-scuro", { s in preparaAgendaApple(s, vista: .settimana) }),
             ("451-agenda-giornata", { s in preparaAgendaApple(s, vista: .giorno) }),
+            // L'impegno di Marco delle 11: ancora da venire alle 10:24 (stato «prima»). Quello di Giulia delle 9:30 è
+            // passato: dalle Migliorie d'uso 19 la sua scheda chiede com'è andato (scena 457)
             ("452-agenda-traccia-impegno", { s in
-                RichiestaIstantaneaAgenda.chiedi(s, impegno: "event-giulia")
+                RichiestaIstantaneaAgenda.chiedi(s, impegno: "event-marco")
                 preparaAgendaApple(s, vista: .settimana)
             }),
             ("453-agenda-settimana-cliente", { s in preparaAgendaApple(s, vista: .settimana, cliente: "giulia") }),
@@ -24,7 +27,32 @@ extension Istantanee {
                 s.alternaIngrandimento(.agenda)
                 s.ridimensiona(.agenda, dimensione: CGSize(width: 860, height: 640))
             }),
+            // Migliorie d'uso 19: la presentazione della proposta di Laura passata e ancora da chiudere (le quattro
+            // capsule della proposta) e l'incontro di Giulia senza proposta (la capsula «Concluso», «Non ancora scritto»)
+            ("456-agenda-impegno-concluso", { s in preparaImpegnoConcluso(s) }),
+            ("456-agenda-impegno-concluso-scuro", { s in preparaImpegnoConcluso(s) }),
+            ("457-agenda-impegno-concluso-senza-proposta", { s in
+                RichiestaIstantaneaAgenda.chiedi(s, impegno: "event-giulia")
+                preparaAgendaApple(s, vista: .settimana)
+            }),
         ]
+    }
+
+    /// Una presentazione della proposta di infortuni di Laura stamattina (8:30-9:15), passata alle 10:24 e ancora
+    /// pianificata: la scheda chiede l'esito con le quattro scelte della proposta.
+    nonisolated static func preparaImpegnoConcluso(_ s: StatoShell) {
+        let id = "event-istantanea-proposta"
+        let cal = Calendar.current
+        if !s.dati.appuntamenti.contains(where: { $0.id == id }),
+           let inizio = cal.date(bySettingHour: 8, minute: 30, second: 0, of: cal.startOfDay(for: Date())) {
+            s.dati.appuntamenti.append(Appuntamento(id: id, clienteId: "laura", titolo: "La proposta per gli infortuni",
+                                                    inizio: inizio, durataMinuti: 45, luogo: "In studio",
+                                                    note: "Rivedere insieme capitali e premio della proposta.",
+                                                    stato: .pianificato, tipo: .proposta, canale: .indipendente,
+                                                    posizioneId: "pos-laura-infortuni-e-invalidità-professionale"))
+        }
+        RichiestaIstantaneaAgenda.chiedi(s, impegno: id)
+        preparaAgendaApple(s, vista: .settimana)
     }
 
     /// L'Agenda aperta su oggi, con una cosa rimasta indietro (Marco) nella fascia della giornata. Alle 10:24 l'incontro

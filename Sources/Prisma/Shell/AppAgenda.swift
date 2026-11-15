@@ -76,7 +76,35 @@ struct AppAgenda: View {
         // Sul Mac «Nuova attività» arriva qui: Attività è accorpata nell'Agenda (su iPad la apre Attività)
         .onAppear { controllaRichiesta(stato.richiestaNuovaAttivita) }
         .onChange(of: stato.richiestaNuovaAttivita) { controllaRichiesta($0) }
+        // Migliorie d'uso 19: «Modifica» e «Attività collegata» dal menu «Altro» della scheda di un impegno concluso
+        .onChange(of: stato.richiestaModuloImpegno) { _, r in apriModuloImpegno(r) }
         #endif
+    }
+
+    #if os(macOS)
+    /// Il modulo chiesto dalla scheda dell'impegno: la modifica dell'appuntamento o l'attività collegata, come dal
+    /// dettaglio di sempre.
+    private func apriModuloImpegno(_ r: RichiestaModuloImpegno?) {
+        guard let r else { return }
+        stato.richiestaModuloImpegno = nil
+        switch r {
+        case .modifica(let id):
+            guard let e = stato.appuntamento(id) else { return }
+            spiegazioneModulo = nil
+            modulo = e
+        case .attivita(let id):
+            guard let e = stato.appuntamento(id) else { return }
+            moduloAttivita = Self.attivitaCollegata(e)
+        }
+    }
+    #endif
+
+    /// L'attività collegata a un appuntamento («Attività collegata»).
+    static func attivitaCollegata(_ e: Appuntamento) -> Attivita {
+        var t = Attivita.nuova(clienteId: e.clienteId, scadenza: e.inizio)
+        t.titolo = "Preparare: \(e.titolo)"
+        t.appuntamentoId = e.id
+        return t
     }
 
     /// La striscia «Riesami del mese» sopra il calendario: solo su iPad (sul Mac i riesami stanno nel «Da fare»).
@@ -826,12 +854,7 @@ struct AppAgenda: View {
                     spiegazioneModulo = nil
                     modulo = e
                 },
-                nuovaAttivita: {
-                    var t = Attivita.nuova(clienteId: e.clienteId, scadenza: e.inizio)
-                    t.titolo = "Preparare: \(e.titolo)"
-                    t.appuntamentoId = e.id
-                    moduloAttivita = t
-                }
+                nuovaAttivita: { moduloAttivita = Self.attivitaCollegata(e) }
             )
         case .attivita(let t):
             DettaglioAttivita(attivita: t) { moduloAttivita = t }
@@ -1081,6 +1104,7 @@ struct RigaScadenzaAgenda: View {
 
 struct DettaglioAppuntamento: View {
     @Environment(StatoShell.self) var stato
+    @Environment(\.modoIstantanea) private var istantanea
     let evento: Appuntamento
     let modifica: () -> Void
     let nuovaAttivita: () -> Void
@@ -1211,53 +1235,83 @@ struct DettaglioAppuntamento: View {
             // L'ultima riga sfuma sopra le azioni invece di finire tagliata a metà
             .sfumaturaBordiScorrimento(sotto: Misure.AgendaImpaginazione.sfumaturaDettaglio)
 
-            // Le azioni in due gruppi: le principali in alto, le altre in una fila sola se c'è posto,
-            // altrimenti due per riga (o una sotto l'altra): i titoli non si troncano mai
-            // Nessun blu nel dettaglio (il blu è «Appuntamento» nella barra): per prima l'azione consigliata,
-            // «Prepara l'incontro», in vetro dell'accento; l'analisi viene prima di Vera.
-            let spazio = Misure.AgendaImpaginazione.spazioAzioni
-            VStack(spacing: spazio) {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: spazio) {
-                        azioneIncontro(aperto)
-                        azioneVera
-                    }
-                    VStack(spacing: spazio) {
-                        azioneIncontro(aperto)
-                        azioneVera
-                    }
-                }
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: spazio) {
-                        azioneConcluso(concluso)
-                        azioneModifica
-                        azioneAttivita
-                        azioneFascicolo(archiviato)
-                    }
-                    VStack(spacing: spazio) {
-                        HStack(spacing: spazio) {
-                            azioneConcluso(concluso)
-                            azioneModifica
-                        }
-                        HStack(spacing: spazio) {
-                            azioneAttivita
-                            azioneFascicolo(archiviato)
-                        }
-                    }
-                    VStack(spacing: spazio) {
-                        azioneConcluso(concluso)
-                        azioneModifica
-                        azioneAttivita
-                        azioneFascicolo(archiviato)
-                    }
-                }
-            }
-            .padding(.top, 7)
-            .bordoAlto(Colori.Agenda.azioniBordo)
+            azioni(aperto: aperto, concluso: concluso, archiviato: archiviato, cliente: cliente)
+                .padding(.top, 7)
+                .bordoAlto(Colori.Agenda.azioniBordo)
         }
     }
 
     // MARK: - Azioni del dettaglio
+
+    /// Migliorie d'uso 19: sul Mac, per un impegno passato o chiuso, le azioni dicono le stesse cose della scheda
+    /// dell'impegno: «Scrivi il verbale» e «Altro ⌄». Prima dell'ora (e sull'iPad) restano quelle di sempre.
+    @ViewBuilder private func azioni(aperto: Bool, concluso: Bool, archiviato: Documento?, cliente: Cliente?) -> some View {
+        #if os(macOS)
+        if cliente != nil && MomentoImpegno.di(evento, adesso: istantanea ? OraIstantanee.data() : Date()) != .prima {
+            azioniDopo
+        } else {
+            azioniPrima(aperto: aperto, concluso: concluso, archiviato: archiviato)
+        }
+        #else
+        azioniPrima(aperto: aperto, concluso: concluso, archiviato: archiviato)
+        #endif
+    }
+
+    #if os(macOS)
+    private var azioniDopo: some View {
+        HStack(spacing: Misure.AgendaImpaginazione.spazioAzioni) {
+            PulsanteAzione(titolo: TestiAgendaApple.scriviIlVerbale, principale: true, simbolo: "list.bullet.rectangle") {
+                stato.apriIncontro(per: evento, scheda: .passi)
+            }
+            .help("Il verbale dell'incontro, in Incontri nel momento «Dopo»")
+            MenuAltroImpegno(evento: evento, modifica: modifica, attivita: nuovaAttivita)
+        }
+    }
+    #endif
+
+    // Le azioni in due gruppi: le principali in alto, le altre in una fila sola se c'è posto,
+    // altrimenti due per riga (o una sotto l'altra): i titoli non si troncano mai
+    // Nessun blu nel dettaglio (il blu è «Appuntamento» nella barra): per prima l'azione consigliata,
+    // «Prepara l'incontro», in vetro dell'accento; l'analisi viene prima di Vera.
+    private func azioniPrima(aperto: Bool, concluso: Bool, archiviato: Documento?) -> some View {
+        let spazio = Misure.AgendaImpaginazione.spazioAzioni
+        return VStack(spacing: spazio) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: spazio) {
+                    azioneIncontro(aperto)
+                    azioneVera
+                }
+                VStack(spacing: spazio) {
+                    azioneIncontro(aperto)
+                    azioneVera
+                }
+            }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: spazio) {
+                    azioneConcluso(concluso)
+                    azioneModifica
+                    azioneAttivita
+                    azioneFascicolo(archiviato)
+                }
+                VStack(spacing: spazio) {
+                    HStack(spacing: spazio) {
+                        azioneConcluso(concluso)
+                        azioneModifica
+                    }
+                    HStack(spacing: spazio) {
+                        azioneAttivita
+                        azioneFascicolo(archiviato)
+                    }
+                }
+                VStack(spacing: spazio) {
+                    azioneConcluso(concluso)
+                    azioneModifica
+                    azioneAttivita
+                    azioneFascicolo(archiviato)
+                }
+            }
+        }
+    }
 
     private var azioneVera: some View {
         PulsanteAzione(titolo: "Prepara con Vera", simbolo: "sparkles") {

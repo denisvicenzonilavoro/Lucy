@@ -313,6 +313,9 @@ enum VoceConfronto: Hashable {
     var filtroPrioritaAttivita: Attivita.Priorita?
     /// Il pulsante dell'intestazione di Attività chiede di aprire il modulo.
     var richiestaNuovaAttivita = false
+    /// Migliorie d'uso 19: la traccia di un impegno concluso chiede all'Agenda il modulo di modifica o dell'attività
+    /// collegata («Altro ⌄»); l'Agenda lo apre e lo azzera (solo in memoria).
+    var richiestaModuloImpegno: RichiestaModuloImpegno?
 
     // Strumenti di analisi (stato delle viste, non salvato)
     /// Area aperta in Analisi 360 (nil = panoramica).
@@ -2300,19 +2303,22 @@ enum VoceConfronto: Hashable {
 
     /// Apre l'incontro legato a un appuntamento. Sul Mac (Migliorie d'uso 21) se manca non lo crea: Incontri mostra
     /// «Prima» dall'appuntamento e l'incontro nasce al primo gesto che scrive. Su iPhone e iPad lo crea subito.
-    func apriIncontro(per a: Appuntamento) {
+    /// `scheda`: il momento su cui aprire (Migliorie d'uso 19, «Scrivi il verbale» → «Dopo»); nil = quello di sempre
+    /// («Prossimi passi» per un incontro concluso, altrimenti «Preparazione»).
+    func apriIncontro(per a: Appuntamento, scheda: SchedaIncontro? = nil) {
         clienteAttivoId = a.clienteId
         if let i = dati.incontri.first(where: { $0.appuntamentoId == a.id }) {
             incontroAperto = i.id
             appuntamentoIncontro = nil
-            schedaIncontro = i.stato == .concluso ? .passi : .preparazione
+            schedaIncontro = scheda ?? (i.stato == .concluso ? .passi : .preparazione)
         } else {
             #if os(macOS)
             incontroAperto = nil
             appuntamentoIncontro = a.id
-            schedaIncontro = .preparazione
+            schedaIncontro = scheda ?? .preparazione
             #else
             nuovoIncontro(cliente: a.clienteId, appuntamento: a)
+            if let scheda { schedaIncontro = scheda }
             #endif
         }
         apri(.incontri)

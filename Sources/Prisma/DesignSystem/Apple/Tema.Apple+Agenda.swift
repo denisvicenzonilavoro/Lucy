@@ -412,6 +412,38 @@ extension Tema.Apple {
             static let spazioPulsanti: CGFloat = 8
             static let nota = Carattere.secondario
             static let coloreNota = Colore.inchiostro2
+
+            // Migliorie d'uso 19: la scheda di un impegno passato («Incontro concluso», «Com'è andata?»)
+            /// L'etichetta «Incontro concluso · martedì 3 novembre» in verde.
+            static let coloreConcluso = Colore.verde
+            /// Le scelte a capsula (`.fch`, alte 36, padding 0×16, 13,5 semibold, a 8): spente `chip` col testo
+            /// `inchiostro2`, accese `cardPiena` col testo `inchiostro` e l'ombra della pillola.
+            static let altezzaScelta: CGFloat = 36
+            static let paddingScelta = EdgeInsets(top: 0, leading: 16, bottom: 0, trailing: 16)
+            static let carattereScelta = Carattere(dimensione: 13.5, peso: .semibold)
+            static let spazioScelte: CGFloat = 8
+            static let fondoScelta = Colore.chip
+            static let fondoSceltaAccesa = Colore.cardPiena
+            static let testoScelta = Colore.inchiostro2
+            static let testoSceltaAccesa = Colore.inchiostro
+            static let ombraSceltaAccesa = Ombra.pillola
+            /// Sotto l'occhiello «Com'è andata?» 8; «Punti toccati» a 20 dalle scelte, i punti a 2.
+            static let sottoOcchiello: CGFloat = 8
+            static let sopraPuntiToccati: CGFloat = 20
+            static let sottoPuntiToccati: CGFloat = 2
+            /// «Pronto, da confermare» 15 semibold nel riquadro del verbale.
+            static let statoVerbale = Carattere(dimensione: 15, peso: .semibold)
+            static let coloreStatoVerbale = Colore.inchiostro
+            /// «Cosa succede adesso»: il testo `.k` in `inchiostro` (interlinea 1,45) a 4 dal nome.
+            static let testoAdesso = Carattere(dimensione: 13, peso: .regular, interlinea: 1.45)
+            static let coloreTestoAdesso = Colore.inchiostro
+            static let sopraTestoAdesso: CGFloat = 4
+            /// La sfumatura in fondo alla colonna dei punti, quando «Com'è andata?» apre i passi della proposta.
+            static let sfumaturaColonna: CGFloat = 16
+            /// La freccia di «Altro ⌄» (attenuata) a 4 dal nome.
+            static let frecciaAltro = Carattere(dimensione: 11, peso: .semibold)
+            static let opacitaFrecciaAltro = 0.6
+            static let spazioFrecciaAltro: CGFloat = 4
         }
 
         // MARK: Il colore di un impegno

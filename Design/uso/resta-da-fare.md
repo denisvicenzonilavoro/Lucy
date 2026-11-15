@@ -899,3 +899,45 @@ Resta:
   spunta al passaggio chiedono uno screenshot.
 - Le modifiche a `chiudiIncontro` e `riapriIncontro` (StatoShell.swift) sono finite nel commit della miglioria 37, fatto
   in parallelo sullo stesso albero.
+
+## 19. Un impegno passato chiede com'è andato
+
+Fatto (solo sul Mac, `#if os(macOS)`; sull'iPad la traccia e il dettaglio restano quelli di sempre), con le proposte di
+19-a (gli esiti della proposta, senza proposta la capsula «Concluso»), 19-b (punti toccati in memoria), 19-c («Il
+prossimo passo si decide nel verbale.») e 19-d (la voce del «Da fare» resta e apre «Giorno»):
+- **La traccia** (TracciaImpegnoApple, corpo in Shell/ImpegnoConcluso.swift): con `MomentoImpegno` `daChiudere` o
+  `chiuso` (e un cliente) l'etichetta diventa «Incontro concluso · <giorno>» in verde, a sinistra «Com'è andata?» e «Punti
+  toccati» (dentro uno ScrollView con la sfumatura), a destra «Il verbale» e «Cosa succede adesso», nel piede «Scrivi il
+  verbale» (Incontri, momento «Dopo»: `apriIncontro(per:scheda:)`), «Apri il dossier» e «Altro ⌄» (Riapri l'incontro se è
+  concluso, Modifica, Attività collegata, Prepara/Apri il fascicolo). Il momento usa l'ora ferma nelle istantanee.
+- **«Com'è andata?»**: con una proposta aperta (`propostaCollegata`, come `propostaDaChiudere` ma anche per un impegno
+  ancora pianificato) il modulo di sempre a capsule (`FormEsitoProposta(capsule: true)`): ogni scelta prima segna concluso
+  l'impegno pianificato (`preparaEsitoImpegno`: la proposta diventa presentata), poi il passo (accettazione con decorrenza
+  e valori, rinvio con la data; «Ci deve pensare» subito). A esito dato la capsula dell'esito resta accesa, senza tocco
+  (`RegoleImpegnoConcluso.sceltaAccesa`). Senza proposta la capsula «Concluso» (`segnaConclusoImpegno`, «Segnato:
+  concluso»).
+- **«Il verbale»** (`RegoleImpegnoConcluso.verbale`): «Confermato» se l'incontro è concluso o il resoconto firmato,
+  «Pronto, da confermare» con schede o verbale del copilota di quell'incontro da confermare (o un resoconto da firmare),
+  altrimenti «Non ancora scritto».
+- **«Modifica» e «Attività collegata»** dalla traccia passano dall'Agenda (`StatoShell.richiestaModuloImpegno`, solo in
+  memoria): la scheda si chiude, l'Agenda va in «Giorno» sull'appuntamento e apre il modulo.
+- **Il dettaglio di «Giorno»** (`DettaglioAppuntamento`): per un impegno passato o chiuso le due file di pulsanti diventano
+  «Scrivi il verbale» + «Altro ⌄» (lo stesso menu); prima dell'ora restano quelle di sempre.
+- Token in `Tema.Apple.Agenda.Traccia` (scelte a capsula, colore del concluso, riquadri), testi in `TestiAgendaApple`.
+  Prove in `ProvaSeguito` (`--prova-carico`): la capsula «Concluso» non tocca le proposte, la scelta su un impegno
+  pianificato lo segna concluso prima dell'esito, a esito dato nessun modulo e la capsula accesa, il riquadro del verbale.
+  Istantanee: 452 ora sull'impegno di Marco delle 11 (ancora «prima» alle 10:24), nuove 456-agenda-impegno-concluso
+  (chiara e scura: la presentazione della proposta di Laura alle 8:30, da chiudere) e
+  457-agenda-impegno-concluso-senza-proposta (Giulia, «Concluso» spenta e «Non ancora scritto»).
+
+Resta:
+- **Dal «Da fare»** la voce «Com'è andato «…»?» apre «Giorno» con il dettaglio (che ora dice «Scrivi il verbale» e
+  «Altro ⌄»), non la traccia della 19 sopra la settimana: aprire la traccia da `vai(.appuntamento(id))` chiede un modo
+  per far nascere il dettaglio dell'Agenda dallo stato (oggi lo apre solo il tocco su un impegno).
+- **«Prepara con Vera»** sparisce dalla scheda concluso; la richiesta a Vera per l'incontro passa dalla decisione 20-e
+  (nel dettaglio di «Giorno» per un impegno «prima» il pulsante resta finché la miglioria 10 non lo rinomina).
+- **«Presenta al cliente»** nella traccia «prima» resta finché la miglioria 1 non porta «Mostra al cliente».
+- La traccia aperta non si rifà da sola quando l'impegno finisce mentre la si guarda (si rifà alla prossima apertura).
+- **Istantanee da rigenerare sul Mac**: 452, 456 (chiara e scura), 457, 11-agenda e 11b-agenda-giorno (il dettaglio di un
+  impegno passato alle 10:24 ferme, con «Scrivi il verbale» e «Altro ⌄»); il menu «Altro ⌄» e i passi
+  dell'accettazione aperti nella scheda chiedono uno screenshot. Aggiornare la pagina delle anteprime.
