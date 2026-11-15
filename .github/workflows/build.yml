@@ -17,12 +17,12 @@ jobs:
   build:
     permissions:
       contents: read
-    # Su main (e per la release) Prisma universale, Apple Silicon e Intel. Sugli altri branch solo l'architettura del
-    # runner (Intel): la compilazione dura circa la metà e le prove girano lo stesso.
+    # Dal 15 novembre 2026 (scelta dell'utente) Prisma per Mac è solo per Apple Silicon, su tutti i branch e su main:
+    # niente più versione Intel né universale. Il runner è Apple Silicon, così le prove e le istantanee girano sulla
+    # stessa architettura della release.
     env:
-      ARCHITETTURE: ${{ github.ref == 'refs/heads/main' && '--arch arm64 --arch x86_64' || '--arch x86_64' }}
-    # Non usare macos-latest: le code dei runner Apple Silicon gratuiti vanno in timeout.
-    runs-on: macos-15-intel
+      ARCHITETTURE: '--arch arm64'
+    runs-on: macos-15
     # La pubblicazione sul branch anteprime la fa il job «pubblica» (Mac e iOS insieme)
     outputs:
       anteprime: ${{ steps.anteprime.outputs.ok }}
@@ -49,7 +49,7 @@ jobs:
           swift --version
           xcrun --show-sdk-version
 
-      - name: Compila (Apple Silicon + Intel)
+      - name: Compila (Apple Silicon)
         run: swift build -c release $ARCHITETTURE
 
       - name: Genera AppIcon.icns
@@ -183,8 +183,7 @@ jobs:
           APP=Prisma.app
           set -e
           test -x "$APP/Contents/MacOS/Prisma"
-          lipo -info "$APP/Contents/MacOS/Prisma" | tee /dev/stderr | grep -q x86_64
-          if [ "$GITHUB_REF" = refs/heads/main ]; then lipo -info "$APP/Contents/MacOS/Prisma" | grep -q arm64; fi
+          lipo -info "$APP/Contents/MacOS/Prisma" | tee /dev/stderr | grep -q arm64
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleExecutable' "$APP/Contents/Info.plist")" = Prisma
           test "$(/usr/libexec/PlistBuddy -c 'Print :CFBundleIdentifier' "$APP/Contents/Info.plist")" = local.prisma
           if [ -f Design/Icone/AppIcon.png ]; then
@@ -769,7 +768,7 @@ jobs:
           test -f rilascio/Prisma.ipa
           NOTE="Prisma al commit ${GITHUB_SHA::7} del $(date -u '+%d/%m/%Y %H:%M') UTC.
 
-          - Prisma.zip: Prisma per Mac (Apple Silicon e Intel). Si apre il zip, si trascina Prisma.app in Applicazioni; la prima volta clic destro → Apri.
+          - Prisma.zip: Prisma per Mac con Apple Silicon (M1 e successivi). Si apre il zip, si trascina Prisma.app in Applicazioni; la prima volta clic destro → Apri.
           - Prisma.ipa: Prisma per iPhone e iPad, da installare con AltStore o Sideloadly (ID Apple gratuito)."
           gh release delete ultima --yes --cleanup-tag 2>/dev/null || true
           gh release create ultima rilascio/Prisma.zip rilascio/Prisma.ipa \
