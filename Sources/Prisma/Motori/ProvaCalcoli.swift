@@ -1331,6 +1331,8 @@ enum ProvaCalcoli {
         ProvaCalcoliCapsule.esegui(verificaEsterna)
         ProvaCalcoliBiglietto.esegui(verificaEsterna)
         ProvaCalcoliSinistri.esegui(verificaEsterna)
+        // Migliorie d'uso 13: se l'obiettivo ci arriva (in tempo, in ritardo, senza versamenti, già raggiunto) e la durata
+        ProvaCalcoliArrivoObiettivo.esegui(verificaEsterna)
         #if os(macOS)
         // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
         MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }

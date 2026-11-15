@@ -26,7 +26,43 @@ extension Istantanee {
             }),
         ]
         tutte += sceneQuadroDossier
+        tutte += sceneArrivoObiettivi
         return tutte
+    }
+
+    /// Migliorie d'uso 13 «Obiettivi: si vede se ci arriva», chiara e scura: gli obiettivi di Giulia con uno stato per
+    /// tono. Il margine di serenità con un versamento sopra il necessario (in tempo), l'anticipo casa con meno del
+    /// necessario (in ritardo) e un obiettivo nuovo senza nulla da parte né versamenti (senza versamenti). I versamenti
+    /// li ricava la scena dalla curva di ogni obiettivo (`CurvaObiettivo.versamentoNecessario`), non scritti a mano.
+    nonisolated private static var sceneArrivoObiettivi: [(nome: String, prepara: (StatoShell) -> Void)] {
+        let prepara: (StatoShell) -> Void = { s in
+            let posizioni = s.posizioniCliente("giulia")
+            let passo = Tema.Apple.Clienti.DettaglioObiettivo.passoCursore
+            var elenco = s.dati.obiettivi.map { o -> Obiettivo in
+                guard o.clienteId == "giulia" else { return o }
+                var nuovo = o
+                let necessario = CurvaObiettivo(o, posizioni: posizioni).versamentoNecessario ?? 0
+                if o.id == "obiettivo-giulia-casa" {
+                    nuovo.versamentoMensile = (necessario * 0.75 / passo).rounded(.down) * passo
+                } else if o.id == "obiettivo-giulia-riserva" {
+                    nuovo.versamentoMensile = (necessario * 1.15 / passo).rounded(.up) * passo
+                }
+                return nuovo
+            }
+            if !elenco.contains(where: { $0.id == "obiettivo-giulia-uso-13" }) {
+                let tra = Calendar.current.date(byAdding: .year, value: 6, to: Date()) ?? Date()
+                var pensione = Obiettivo(clienteId: "giulia", titolo: "Una pensione più serena", area: .pensione,
+                                         importo: 25_000, scadenza: tra)
+                pensione.id = "obiettivo-giulia-uso-13"
+                elenco.append(pensione)
+            }
+            s.dati.obiettivi = elenco
+            s.clienteAttivoId = "giulia"
+            s.schedaCliente = .obiettivi
+            s.apri(.clienti)
+        }
+        return [(nome: "1023-uso-obiettivi-stato", prepara: prepara),
+                (nome: "1023-uso-obiettivi-stato-scuro", prepara: prepara)]
     }
 
     /// Migliorie d'uso 5 «Il dossier parte dal quadro» (DossierQuadro.swift), chiare e scure: l'elenco dei dati da

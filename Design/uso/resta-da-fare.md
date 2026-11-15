@@ -341,3 +341,24 @@ Resta:
 - **Istantanee**: generarle sul Mac (1010-1019, 70, 693) e guardare in particolare il quadro con il testo «Grande»
   (altezza 548 dei riquadri con frasi lunghe), la colonna delle posizioni e il grafico «Nel tempo»; aggiornare la pagina
   delle anteprime.
+
+## 13. Obiettivi: si vede se ci arriva
+
+Fatto: `ArrivoObiettivo` (già raggiunto, in tempo, in ritardo, senza versamenti, «Con questo versamento non ci arriva»)
+dai mesi di `CurvaObiettivo`, i testi in `TestiObiettivoApple` (`rigaScadenza`, `durata(mesi:)`, `notaScadenza`), la
+capsula `StatoArrivoObiettivo` (DesignSystem/Apple, token in `Tema.Apple.Clienti.Obiettivi`), la card con «… al mese ·
+scadenza …» e lo stato, il dettaglio con l'anello «oggi» (la quota della card, fermo col cursore), lo stato che segue il
+cursore e la nota sulla scadenza; lo scarto non ripete più la scadenza. Tutto solo sul Mac (`Obiettivi.mostraStato`):
+iPhone e iPad tengono la riga e l'anello di prima. Il conteggio per l'indice `StatoShell.obiettiviNonInTempo(_:)`,
+ricordato nella voce del cliente di `CacheClienti`. Prova in `--prova-calcoli` (`ProvaCalcoliArrivoObiettivo`),
+istantanea nuova `1023-uso-obiettivi-stato` (chiara e scura).
+
+Resta:
+- **Indice del dossier (miglioria 11)**: il numero arancio accanto a «Obiettivi» va messo in `ContiIndiceDossier` leggendo
+  `stato.obiettiviNonInTempo(id)` (non c'era ancora l'indice in questo giro).
+- **Istantanee**: rigenerare sul Mac 432, 433, 282, 283, 98 e la nuova 1023 (chiara e scura) e aggiornare la pagina
+  delle anteprime; nella 1023 controllare che l'anticipo casa risulti davvero «In ritardo» (il versamento lo ricava la
+  scena dal 75% del necessario: se il conto collegato basta già, resta verde).
+- **Carico**: controllare con `--prova-carico` che le curve dei molti obiettivi non svuotino di continuo la memoria di 24
+  curve (il conteggio è ricordato per cliente, quindi le curve si chiedono una volta per cambio).
+- La riga facoltativa «Alla scadenza copre il 78%» nel dettaglio (13.6) non è stata aggiunta: solo se l'utente la vuole.

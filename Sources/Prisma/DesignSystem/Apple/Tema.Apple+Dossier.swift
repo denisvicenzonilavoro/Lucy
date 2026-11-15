@@ -196,6 +196,26 @@ extension Tema.Apple.Clienti {
         static let coloreCollegamento = Tema.Apple.Colore.accento
         static let sopraCollegamento: CGFloat = 12
 
+        /// Migliorie d'uso 13 «Obiettivi: si vede se ci arriva»: sotto la riga grigia («550 € al mese · scadenza …»)
+        /// lo stato scritto e colorato (`.st2` del template: capsula 12,5 bold, padding 4×11, a 10). Solo sul Mac:
+        /// iPhone e iPad tengono la riga di prima fino al loro aggiornamento.
+        #if os(macOS)
+        static let mostraStato = true
+        #else
+        static let mostraStato = false
+        #endif
+        static let statoArrivo = Tema.Apple.Carattere(dimensione: 12.5, peso: .bold)
+        static let paddingStato = Tema.Apple.Misura.padding(4, 11)
+        static let sopraStato: CGFloat = 10
+        /// I toni dello stato: verde «In tempo» e «Già raggiunto», arancio delle scritte «In ritardo», rosso «Non ci
+        /// arriva», sui fondi tenui del template (`.st2.ok`, `.avv`, `.ko`).
+        static let testoStatoOk = Color.dinamico(chiaro: Color(hex: "#1F7A41"), scuro: Color(hex: "#6FD08E"))
+        static let fondoStatoOk = Color(r: 47, g: 163, b: 90, a: 0.15)
+        static let testoStatoAttenzione = Tema.Apple.Colore.arancioTesto
+        static let fondoStatoAttenzione = Color(r: 224, g: 138, b: 0, a: 0.16)
+        static let testoStatoErrore = Color.dinamico(chiaro: Color(hex: "#C2333A"), scuro: Color(hex: "#FF8A8F"))
+        static let fondoStatoErrore = Color(r: 229, g: 72, b: 77, a: 0.13)
+
         /// Il posto libero: card trasparente tratteggiata, «＋» 30 e il testo 14 `inchiostro2`.
         static let segnoPostoLibero = Tema.Apple.Carattere(dimensione: 30, peso: .regular)
         static let testoPostoLibero = Tema.Apple.Carattere.corpo
@@ -292,5 +312,10 @@ extension Tema.Apple.Clienti {
         static let spazioNota: CGFloat = 14
         static let nota = Tema.Apple.Carattere.secondario
         static let coloreNota = Tema.Apple.Colore.inchiostro2
+        /// Migliorie d'uso 13: lo stato che segue il cursore a 12 sotto lo scarto, poi la nota sulla scadenza a 8
+        /// (12,5 `inchiostro2`). Sul Mac l'anello mostra la quota di oggi, come la card.
+        static let sopraStato: CGFloat = 12
+        static let sopraNotaScadenza: CGFloat = 8
+        static let notaScadenza = Tema.Apple.Carattere(dimensione: 12.5, peso: .regular)
     }
 }
