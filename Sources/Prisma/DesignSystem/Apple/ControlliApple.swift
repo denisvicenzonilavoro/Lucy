@@ -21,6 +21,8 @@ struct SegmentatoPillola<Valore: Hashable>: View {
     let voci: [(Valore, String)]
     /// Voci di uguale larghezza che riempiono lo spazio (settimana dell'Agenda).
     var larghezzaPiena: Bool
+    /// La variante piccola (voci 4×11, testo 12,5: le ipotesi dei simulatori di Analisi 360, migliorie d'uso 45).
+    var compatto: Bool
     /// Un'icona prima del titolo (avatar 24 dei clienti di Analisi 360).
     var icona: ((Valore) -> AnyView)?
     /// Il numerino dopo il titolo di una voce (Migliorie d'uso 33: le pratiche ferme su «Dopo la firma»); nil o zero:
@@ -31,20 +33,22 @@ struct SegmentatoPillola<Valore: Hashable>: View {
     @Environment(\.modoIstantanea) private var istantanea
     @Namespace private var spazio
 
-    init(selezione: Binding<Valore>, voci: [(Valore, String)], larghezzaPiena: Bool = false,
+    init(selezione: Binding<Valore>, voci: [(Valore, String)], larghezzaPiena: Bool = false, compatto: Bool = false,
          icona: ((Valore) -> AnyView)? = nil, numero: ((Valore) -> NumeroVoceSegmentato?)? = nil) {
         self._selezione = selezione
         self.voci = voci
         self.larghezzaPiena = larghezzaPiena
+        self.compatto = compatto
         self.icona = icona
         self.numero = numero
     }
 
     /// Le voci da un elenco di valori e da come si chiamano.
     init(selezione: Binding<Valore>, valori: [Valore], titolo: (Valore) -> String, larghezzaPiena: Bool = false,
-         icona: ((Valore) -> AnyView)? = nil, numero: ((Valore) -> NumeroVoceSegmentato?)? = nil) {
+         compatto: Bool = false, icona: ((Valore) -> AnyView)? = nil,
+         numero: ((Valore) -> NumeroVoceSegmentato?)? = nil) {
         self.init(selezione: selezione, voci: valori.map { ($0, titolo($0)) },
-                  larghezzaPiena: larghezzaPiena, icona: icona, numero: numero)
+                  larghezzaPiena: larghezzaPiena, compatto: compatto, icona: icona, numero: numero)
     }
 
     private var indiceScelto: Int? {
@@ -102,10 +106,11 @@ struct SegmentatoPillola<Valore: Hashable>: View {
                     .padding(.leading, c.spazioNumero)
             }
         }
-        .carattereApple(Tema.Apple.Carattere.barra)
+        .carattereApple(compatto ? c.testoCompatto : Tema.Apple.Carattere.barra)
         .foregroundColor(attiva ? Tema.Apple.Colore.inchiostro : Tema.Apple.Colore.inchiostro2)
         .animation(animazioneTesto, value: attiva)
-        .padding(icona == nil ? Tema.Apple.Misura.Padding.voceSegmentato : c.paddingVoceIcona)
+        .padding(icona != nil ? c.paddingVoceIcona
+                 : (compatto ? c.paddingVoceCompatta : Tema.Apple.Misura.Padding.voceSegmentato))
         .frame(maxWidth: larghezzaPiena ? .infinity : nil)
         .contentShape(Capsule(style: .continuous))
         .matchedGeometryEffect(id: i, in: spazio, properties: .frame, isSource: true)

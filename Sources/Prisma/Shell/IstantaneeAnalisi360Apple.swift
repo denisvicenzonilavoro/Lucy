@@ -22,6 +22,15 @@ extension Istantanee {
             // Migliorie d'uso 16 «Un solo avviso sulle stime»: l'elenco dei dati aperto dalla capsula (Giulia) e la
             // capsula verde di un cliente senza stime (le voci da completare segnate non pertinenti).
             // (1038-1039: 1030-1031 sono già del pannello «Da fare», migliorie d'uso 3)
+            // Migliorie d'uso 45: il passo verso Posizioni sotto le ipotesi (Giulia: la coerenza e la riserva)
+            ("1142-uso-investimenti-passo", { s in
+                RichiestaIstantaneaAnalisi360.chiedi(s, area: .investimenti)
+                preparaAree360Apple(s)
+            }),
+            ("1143-uso-liquidita-passo", { s in
+                RichiestaIstantaneaAnalisi360.chiedi(s, area: .risparmio)
+                preparaAree360Apple(s)
+            }),
             ("1038-uso-analisi360-stime-aperte", { s in
                 RichiestaIstantaneaAnalisi360.chiediStime(s)
                 preparaAree360Apple(s)

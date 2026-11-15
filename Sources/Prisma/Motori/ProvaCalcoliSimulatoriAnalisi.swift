@@ -8,6 +8,61 @@ enum ProvaCalcoliSimulatoriAnalisi {
     static func esegui(_ verifica: VerificaCalcoli) {
         previdenza(verifica)
         protezione(verifica)
+        primaEDopo(verifica)
+    }
+
+    /// Migliorie d'uso 45: gli articoli, la frase prima e dopo, i rendimenti da scegliere e l'aliquota scelta.
+    private static func primaEDopo(_ verifica: VerificaCalcoli) {
+        let t = TestiSimulatoriAnalisi.self
+        verifica.vero("Simulatore: «il 42%»", t.articolo(42) == "il 42%")
+        verifica.vero("Simulatore: «l'80%»", t.articolo(80) == "l'80%")
+        verifica.vero("Simulatore: «l'1%» e «l'8%»", t.articolo(1) == "l'1%" && t.articolo(8) == "l'8%")
+        verifica.vero("Simulatore: «il 18%» non si elide", t.articolo(18) == "il 18%")
+        verifica.vero("Simulatore: «all'11%»", t.al(11) == "all'11%")
+        verifica.vero("Simulatore: «al 100%» e «allo 0%»", t.al(100) == "al 100%" && t.al(0) == "allo 0%")
+
+        var i = IpotesiPrevidenza()
+        i.eta = 40; i.etaPensione = 67; i.redditoDesiderato = 2_200; i.pensionePubblica = 1_400
+        i.capitale = 0; i.versamentoMensile = 0; i.rendimentoReale = 1.5; i.anniIntegrazione = 25
+        let fermo = MotoreSimulatoriAnalisi.previdenza(i, versamento: 0, reddito: nil)
+        let senza = t.testo(t.previdenza(nome: "Marco", oggi: 0, versamento: 0, coperturaOggi: fermo.copertura, passo: fermo))
+        verifica.vero("Simulatore: nessun versamento, divario tutto scoperto",
+                      senza == "Oggi Marco non versa niente: il divario è tutto scoperto. " + t.invito)
+        // Un versamento che chiude il divario
+        let pieno = MotoreSimulatoriAnalisi.previdenza(i, versamento: 5_000, reddito: nil)
+        let chiuso = t.testo(t.previdenza(nome: "Marco", oggi: 0, versamento: 5_000, coperturaOggi: 0, passo: pieno))
+        verifica.vero("Simulatore: divario chiuso", chiuso.hasSuffix("arriva al 100%: il divario è chiuso."))
+        var senzaDivario = i
+        senzaDivario.pensionePubblica = 2_500
+        let nessuno = MotoreSimulatoriAnalisi.previdenza(senzaDivario, versamento: 100, reddito: nil)
+        verifica.vero("Simulatore: senza divario solo com'è oggi",
+                      t.testo(t.previdenza(nome: "Marco", oggi: 0, versamento: 100, coperturaOggi: 1, passo: nessuno)).hasPrefix("Oggi Marco non ha divario"))
+
+        // Protezione senza premio: niente «per circa … al mese»
+        let p = MotoreSimulatoriAnalisi.PassoProtezione(aggiunta: 50_000, fabbisogno: 221_000, giaAssicurato: 150_000,
+                                                        scoperto: 21_000, copertura: 200_000.0 / 221_000, premioAnnuo: nil)
+        let frase = t.testo(t.protezione(p))
+        verifica.vero("Simulatore protezione: premio mancante, nessuna cifra inventata",
+                      !frase.contains("per circa") && frase.contains("Resterebbero scoperti"))
+        verifica.vero("Simulatore protezione: com'è oggi", frase.hasPrefix("Oggi è protetto il 68% di quello che servirebbe"))
+
+        // Rendimenti a ±0,5 punti, mai sotto 0
+        verifica.vero("Simulatore: rendimenti attorno a quello dell'analisi",
+                      MotoreSimulatoriAnalisi.rendimentiDaScegliere(1.5) == [1.0, 1.5, 2.0])
+        verifica.vero("Simulatore: rendimento mai negativo",
+                      MotoreSimulatoriAnalisi.rendimentiDaScegliere(0.3) == [0.0, 0.3, 0.8])
+        verifica.vero("Simulatore: senza doppioni a zero", MotoreSimulatoriAnalisi.rendimentiDaScegliere(0) == [0.0, 0.5])
+
+        // Aliquota scelta = IRPEF quando la deduzione resta tutta nello stesso scaglione: 200 € al mese (2.400 € l'anno)
+        // su 40.000 € di reddito stanno tutti nel 33%
+        var j = i
+        j.versamentoMensile = 0
+        let conReddito = MotoreSimulatoriAnalisi.previdenza(j, versamento: 200, reddito: 40_000)
+        let conAliquota = MotoreSimulatoriAnalisi.previdenza(j, versamento: 200,
+                                                             aliquota: RegoleFiscali.aliquotaMarginale(reddito: 40_000))
+        verifica("Simulatore: risparmio con l'aliquota scelta come l'IRPEF", conAliquota.risparmioFiscale ?? -1,
+                 conReddito.risparmioFiscale ?? -2)
+        verifica("Simulatore: aliquota scelta, stesse cifre del resto", conAliquota.montante, conReddito.montante)
     }
 
     private static func previdenza(_ verifica: VerificaCalcoli) {

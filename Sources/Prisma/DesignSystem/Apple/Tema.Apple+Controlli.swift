@@ -25,6 +25,9 @@ extension Tema.Apple {
             static let numero = Carattere(dimensione: 11, peso: .bold, tabellare: true)
             static let paddingNumero = Misura.padding(1, 7)
             static let spazioNumero: CGFloat = 2
+            /// La variante piccola (`.segP`, migliorie d'uso 45: le ipotesi dei simulatori): voci 4×11, testo 12,5.
+            static let paddingVoceCompatta = Misura.padding(4, 11)
+            static let testoCompatto = Carattere(dimensione: 12.5, peso: .semibold)
         }
 
         /// `.sw` (§2.9).

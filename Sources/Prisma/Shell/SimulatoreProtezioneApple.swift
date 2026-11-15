@@ -19,6 +19,10 @@ import SwiftUI
 //   archivio nessuna copertura ha capitale e premio, il premio resta «—» e le ipotesi dicono perché. Niente premio
 //   `v·0,0012·età/37` del template (§4.9.17).
 // - Ricalcolo leggero: fabbisogno e tariffa una volta per disegno della cornice; a ogni passo solo somme.
+// - Sul Mac (migliorie d'uso 45): il segno «oggi» all'inizio del binario, la frase prima e dopo («Oggi è protetto…
+//   Con 100.000 € in più…») al posto delle ipotesi scritte, la riga «LE IPOTESI» con da dove viene il premio (niente
+//   «Fuma»: la tariffa viene dall'archivio, decisione 45-c; le ipotesi intere nel suggerimento) e «Sono stime, non
+//   garanzie.» nel piede.
 // - Movimento come la Previdenza: le cifre contano all'apertura, poi cambiano subito; l'anello insegue.
 
 private typealias SQ = Tema.Apple.SimulatoriAnalisi.Protezione
@@ -98,8 +102,20 @@ private struct CorpoSimulatoreProtezioneApple: View {
             }
             .padding(.top, s.sopraCorpo)
             Spacer(minLength: 0)
+            #if os(macOS)
+            FraseSimulatoreApple(pezzi: TestiSimulatoriAnalisi.protezione(p))
+                .padding(.top, s.sopraFrase)
+            HStack(alignment: .center, spacing: s.spazioScelte) {
+                EtichettaIpotesiSimulatoreApple()
+                TestoIpotesiSimulatoreApple(TestiSimulatoriAnalisi.premioProtezione(quadro.tariffa, eta: quadro.eta))
+                Spacer(minLength: 0)
+            }
+            .help(ipotesi)
+            .padding(.top, s.sopraScelte)
+            #else
             IpotesiSimulatoreApple(testo: ipotesi)
                 .padding(.top, s.sopraIpotesi)
+            #endif
             piede
                 .padding(.top, s.sopraPiede)
         }
@@ -125,11 +141,22 @@ private struct CorpoSimulatoreProtezioneApple: View {
                 Text("Capitale da aggiungere con una temporanea caso morte")
                     .carattereApple(s.etichettaCursore)
                     .foregroundColor(s.coloreEtichetta)
+                #if os(macOS)
+                // Migliorie d'uso 45: il segno «oggi» all'inizio (oggi nessun capitale in più)
+                VStack(alignment: .leading, spacing: 0) {
+                    CursoreApple(valore: $aggiunta, intervallo: 0...massimo, passo: SQ.passo,
+                                 etichetta: "Capitale da aggiungere con una temporanea caso morte", formato: .euro,
+                                 carattereValore: s.valoreCursore, coloreValore: colore)
+                    SegnoOggiCursore(frazione: 0)
+                }
+                .frame(maxWidth: s.larghezzaCursore)
+                #else
                 CursoreApple(valore: $aggiunta, intervallo: 0...massimo, passo: SQ.passo,
                              etichetta: "Capitale da aggiungere con una temporanea caso morte", formato: .euro,
                              carattereValore: s.valoreCursore, coloreValore: colore)
                     .frame(maxWidth: s.larghezzaCursore)
                     .padding(.vertical, s.margineCursore)
+                #endif
             }
             .padding(.top, s.sopraCursore)
             HStack(alignment: .top, spacing: s.spazioCifre) {
@@ -190,6 +217,9 @@ private struct CorpoSimulatoreProtezioneApple: View {
             Button("Chiedi a Vera di spiegarlo", action: chiediVera)
                 .buttonStyle(.appleGrande)
                 .disabled(stato.veraInCorso)
+            #if os(macOS)
+            AvvisoSimulatoreApple()
+            #endif
             Spacer(minLength: s.spazioPiede)
             CanaleSimulatoreApple(canale: $canale)
         }

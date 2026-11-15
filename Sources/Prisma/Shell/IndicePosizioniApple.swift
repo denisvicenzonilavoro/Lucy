@@ -42,7 +42,22 @@ enum VistaPosizioniCliente: Hashable, CaseIterable {
         case "costi": self = .costi
         case "successione": self = .successione
         case "smontaggio": self = .smontaggio
+        // Migliorie d'uso 45: «Vedi dove sono i suoi soldi» dalla liquidità di Analisi 360 torna al quadro
+        case "quadro": self = .quadro
         default: return nil
+        }
+    }
+
+    /// L'ancora che apre questa schermata da fuori (`stato.ancoraPosizioni`).
+    var ancora: String {
+        switch self {
+        case .quadro: return "quadro"
+        case .patrimonio: return "patrimonio"
+        case .resistenza: return "resistenza"
+        case .coerenza: return "coerenza"
+        case .costi: return "costi"
+        case .smontaggio: return "smontaggio"
+        case .successione: return "successione"
         }
     }
 
@@ -60,6 +75,20 @@ enum VistaPosizioniCliente: Hashable, CaseIterable {
 
     /// Le analisi, nell'ordine dell'indice: lo smontaggio di un documento prima del passaggio generazionale.
     static let analisi: [VistaPosizioniCliente] = [.patrimonio, .resistenza, .coerenza, .costi, .smontaggio, .successione]
+}
+
+// MARK: - Da fuori
+
+extension StatoShell {
+    /// Migliorie d'uso 45: apre Posizioni del cliente sulla schermata chiesta (il passo di Investimenti e Liquidità in
+    /// Analisi 360). Sceglie il cliente in silenzio se non è già quello scelto; la schermata arriva con l'ancora di sempre,
+    /// che `AppPosizioni` consuma.
+    func apriPosizioniCliente(_ id: String, vista: VistaPosizioniCliente) {
+        posizioneInDettaglio = nil
+        ancoraPosizioni = vista.ancora
+        if clienteAttivoId != id { scegliCliente(id) }
+        apri(.posizioni)
+    }
 }
 
 // MARK: - Indice

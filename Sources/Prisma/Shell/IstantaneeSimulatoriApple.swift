@@ -23,7 +23,33 @@ extension Istantanee {
                 RichiestaIstantaneaSimulatore.chiedi(s, area: .protezione, valore: 100_000)
                 s.apri(.analisi360)
             }),
+            // Migliorie d'uso 45 «Il simulatore mostra prima e dopo»: Marco con il cursore sul versamento di oggi (la frase
+            // con «Sposta il cursore…» e il segno «oggi» sotto la manopola), in chiaro e in scuro; un cliente senza reddito
+            // lordo nella scheda (il segmentato dell'aliquota). Il passo di Investimenti e Liquidità: 1142-1143 in
+            // IstantaneeAnalisi360Apple.swift.
+            ("1140-uso-simulatore-previdenza-oggi", { s in prepara1140(s) }),
+            ("1140-uso-simulatore-previdenza-oggi-scuro", { s in prepara1140(s) }),
+            ("1141-uso-simulatore-previdenza-senza-reddito", { s in
+                if var c = s.cliente("marco") {
+                    c.profilo.redditoLordoAnnuo = nil
+                    s.salvaCliente(c)
+                }
+                s.clienteAttivoId = "marco"
+                s.areaAnalisi = nil
+                let oggi = s.analisi360("marco").previdenza.versamentoMensile
+                let passo = Tema.Apple.SimulatoriAnalisi.Previdenza.passo
+                RichiestaIstantaneaSimulatore.chiedi(s, area: .previdenza, valore: ((oggi + 100) / passo).rounded() * passo)
+                s.apri(.analisi360)
+            }),
         ]
+    }
+
+    /// Il simulatore della previdenza di Marco aperto con il cursore sul versamento di oggi.
+    nonisolated static func prepara1140(_ s: StatoShell) {
+        s.clienteAttivoId = "marco"
+        s.areaAnalisi = nil
+        RichiestaIstantaneaSimulatore.chiedi(s, area: .previdenza, valore: s.analisi360("marco").previdenza.versamentoMensile)
+        s.apri(.analisi360)
     }
 }
 #endif

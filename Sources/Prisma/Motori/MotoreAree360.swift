@@ -370,3 +370,32 @@ enum TestiAree360 {
         "Proposta salvata nel dossier di \(nome): completala in Posizioni"
     }
 }
+
+// MARK: - Il passo verso Posizioni (migliorie d'uso 45)
+
+extension TestiAree360 {
+    static let pulsanteCoerenza = "Apri la coerenza nelle posizioni"
+    static let pulsanteQuadro = "Vedi dove sono i suoi soldi"
+
+    /// La frase del passo di Investimenti: nil senza profilo o senza posizioni di investimento; «in linea» solo se
+    /// niente è fuori profilo (decisione 45-b, nessuna soglia), altrimenti la quota fuori profilo.
+    static func passoInvestimenti(entroProfilo: Double?) -> String? {
+        guard let entro = entroProfilo else { return nil }
+        let fuori = Int(100 - MotoreAree360.quotaEntroProfilo(entro))
+        if fuori <= 0 { return "Il portafoglio è in linea con il profilo: niente da sistemare." }
+        let quota = TestiSimulatoriAnalisi.maiuscola(TestiSimulatoriAnalisi.articolo(fuori))
+        return "\(quota) del capitale rischia più del profilo scelto: si vede posizione per posizione."
+    }
+
+    /// La frase del passo della liquidità: nil senza spese indicate; la soglia è quella delle ipotesi (non sei mesi fissi).
+    static func passoLiquidita(_ l: Liquidita360) -> String? {
+        guard let mesi = l.mesi else { return nil }
+        let soglia = l.soglia == 1 ? "1 mese" : "\(l.soglia) mesi"
+        if mesi >= Double(l.soglia) {
+            let oltre = l.soglia == 1 ? "oltre un mese" : "oltre i \(l.soglia) mesi"
+            return "La riserva c'è: \(oltre) di spese."
+        }
+        let manca = max(100, ((l.riservaNecessaria - l.liquidita) / 100).rounded() * 100)
+        return "Per arrivare a \(soglia) servono ancora circa \(Formati.euro(manca))."
+    }
+}

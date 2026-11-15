@@ -23,10 +23,23 @@ extension Tema.Apple.Misura {
         /// Scheda «Da fare».
         static let daFare = CGSize(width: 880, height: 520)
         static let obiettivo = CGSize(width: 920, height: 520)
-        /// Aree Previdenza e Protezione di Analisi 360.
-        static let previdenzaProtezione = CGSize(width: 940, height: 540)
+        /// Area Previdenza di Analisi 360: sul Mac 940×560 (migliorie d'uso 45: la frase prima e dopo e le ipotesi
+        /// da scegliere), su iPhone e iPad 940×540.
+        #if os(macOS)
+        static let previdenza = CGSize(width: 940, height: 560)
+        #else
+        static let previdenza = CGSize(width: 940, height: 540)
+        #endif
+        /// Area Protezione di Analisi 360.
+        static let protezione = CGSize(width: 940, height: 540)
+        /// Investimenti e Risparmio e liquidità: sul Mac 56 in più per il passo verso Posizioni (migliorie d'uso 45).
+        #if os(macOS)
+        static let investimenti = CGSize(width: 900, height: 536)
+        static let liquidita = CGSize(width: 900, height: 496)
+        #else
         static let investimenti = CGSize(width: 900, height: 480)
         static let liquidita = CGSize(width: 900, height: 440)
+        #endif
         /// Impegno dell'agenda.
         static let impegno = CGSize(width: 860, height: 500)
 

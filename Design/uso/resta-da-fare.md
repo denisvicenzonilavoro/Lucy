@@ -1524,3 +1524,35 @@ Resta:
 - L'annullamento dopo aver chiuso il pannello non c'è (proposta 44.6): resta il backup fatto prima di registrare.
 - Le istantanee 180-185 vanno guardate, in particolare l'altezza dei riquadri dei dubbi e la colonna «prima → dopo» con
   importi a sei cifre.
+
+## 45. Il simulatore mostra prima e dopo
+
+Fatto (solo Mac, dentro `#if os(macOS)`; iPhone e iPad restano come prima):
+- Previdenza (940×560) e Protezione (940×540): anello 190/19 con la percentuale 40, valore del cursore 40 (carattere
+  proprio, quello da 44 resta alla Sala dei giochi), corpo e cursore a 14. Il segno «oggi» sotto il binario
+  (`SegnoOggiCursore`, posizione corretta per metà manopola; protezione all'inizio). Lo scarto «+150 € al mese rispetto
+  a oggi» a destra del valore (`TestiSimulatoriAnalisi.scarto`; «Nessun anno di accumulo…» al suo posto).
+- La frase prima e dopo (`FraseSimulatoreApple`, testi in `Motori/TestiSimulatoriAnalisi.swift` con `articolo(_:)` e
+  `al(_:)`), con i casi «non versa niente», «non ha divario» e il premio mancante (niente «per circa … al mese»).
+- «LE IPOTESI»: rendimento da scegliere (quello dell'analisi e ±0,5 punti, mai sotto 0, solo nello stato della vista;
+  la copertura di oggi si rifà solo al cambio di rendimento), aliquota dal reddito della scheda oppure segmentato quando
+  manca, «deduzione fino a …»; protezione con da dove viene il premio (niente «Fuma», decisione 45-c). Le ipotesi intere
+  nel suggerimento della riga. `SegmentatoPillola` ha la variante `compatto`.
+- Piede con «Sono stime, non garanzie.» (`TestiSimulatoriAnalisi.avviso`); la nota della proposta ricorda il rendimento
+  scelto se diverso da quello dell'analisi.
+- Investimenti e Liquidità: `PassoDettaglioArea360` sopra il piede (testi in `TestiAree360.passoInvestimenti` e
+  `passoLiquidita`, nessuna soglia dell'80%, soglia della riserva dalle ipotesi), che chiude il dettaglio e apre
+  Posizioni con `StatoShell.apriPosizioniCliente(_:vista:)` (in `IndicePosizioniApple.swift`; nuova ancora «quadro»).
+  I due dettagli crescono di 56 sul Mac (900×536 e 900×496).
+- Istantanee 1140 (e scura), 1141, 1142, 1143; 441-444 mostrano già le novità. Prove in `ProvaCalcoliSimulatoriAnalisi`
+  e `ProvaCalcoliAree360`.
+
+Resta:
+- Le aliquote da scegliere sono quelle degli scaglioni IRPEF di oggi (23 | 33 | 43, `RegoleFiscali.scaglioniIrpef`), non
+  il «23% | 35% | 43%» del template: il 35% non c'è più dal 2026. Da confermare con l'utente.
+- La frase non entra con la cascata del dettaglio: compare con il contenuto (che il dettaglio già fa entrare).
+- Le altezze nuove (previdenza 560, investimenti 536, liquidità 496) vanno verificate nelle istantanee e a finestra bassa
+  su 13": la frase a tre righe e la riga delle ipotesi senza reddito sono le parti più lunghe (il testo a destra si
+  riduce fino all'80% e poi si tronca).
+- «Sono stime, non garanzie.» non è ancora coordinato con la capsula delle stime della miglioria 16 (un solo testo,
+  `TestiSimulatoriAnalisi.avviso`, pronto per essere riusato).

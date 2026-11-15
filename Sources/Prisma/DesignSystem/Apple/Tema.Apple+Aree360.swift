@@ -225,6 +225,12 @@ extension Tema.Apple {
             static let vuoto = Carattere.corpoGrande
             static let coloreVuoto = Colore.inchiostro2
             static let vuotoSopra: CGFloat = 26
+            /// Il passo verso Posizioni (migliorie d'uso 45, solo Mac): frase 14,5 a sinistra, pulsante a 12, a 12 sotto
+            /// le ipotesi.
+            static let frasePasso = Carattere(dimensione: 14.5, peso: .regular, interlinea: 1.35)
+            static let coloreFrasePasso = Colore.inchiostro
+            static let spazioPasso: CGFloat = 12
+            static let passoSopra: CGFloat = 12
         }
 
         // MARK: Composizione (Investimenti)

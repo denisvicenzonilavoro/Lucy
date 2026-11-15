@@ -45,7 +45,7 @@ enum DettagliAree360 {
     static func misura(_ a: AreaAnalisi) -> CGSize {
         let d = Tema.Apple.Aree360.Dettaglio.self
         switch a {
-        case .previdenza, .protezione: return SimulatoriAnalisiApple.misura
+        case .previdenza, .protezione: return SimulatoriAnalisiApple.misura(a)
         case .investimenti: return d.misuraInvestimenti
         case .risparmio: return d.misuraLiquidita
         }
