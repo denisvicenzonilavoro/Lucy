@@ -2237,3 +2237,35 @@ Resta:
 - **Cambio di cliente**: strade, soldi e ipotesi valgono per `clienteSimula`; tornando a un cliente già visto si ritrova
   quello che si era lasciato (in memoria), invece di ripartire.
 - **iPhone e iPad**: restano simulatore, scenari e confronto di prima.
+
+## 65. Le note stanno con il cliente
+
+Fatto (solo Mac): la sezione Note del dossier è un elenco solo con la nota a fianco (`NoteDossierMac`,
+`Shell/DossierNote.swift`): testata «Note · un elenco solo · si salvano da sole» con «Nuova nota», a sinistra le note del
+cliente (in cima quella in evidenza con la stella, poi per data di modifica; «Senza titolo», «Nota vuota», «oggi», la
+pillola «Nel Da fare»; menu della riga con «Esporta .txt…» ed «Elimina») e la riga «Da ricordare» (`Cliente.nota`, id
+fisso, mai copiata in una nota); a destra titolo e testo con `TestoRinviato` (Invio nel titolo porta al testo, il fuoco nel
+titolo per la nota nuova), «Metti in evidenza / In evidenza» (una sola per cliente), «Fanne un «Da fare»» (attività per
+oggi salvata subito, con «Annulla», legata con il campo nuovo `Attivita.daNota`), «Elimina» con «Annulla» (o «Svuota» per
+«Da ricordare») e la riga grigia del template. `Nota.inEvidenza` / `stato.notaInEvidenza` (la fissata più recente,
+altrimenti «Da ricordare») per Panoramica (`DaRicordareApple`, con il titolo della nota sopra il testo), la scheda di Vera
+(`ContestoVera`) e la traccia dell'incontro (`MotoreSintesi`). `AppPrisma.note.ospite = .clienti` sul Mac: `apri(.note)` e
+`vai(a: .nota)` portano al dossier del cliente della nota; «Note» sparisce da `altreApp`. In modalità cliente solo la nota
+in evidenza, in sola lettura (decisione presa). I messaggi del dossier restano sotto la griglia. `daNota` in «Prisma
+ovunque» (campi dell'attività), `ProvaOvunque` e `ProvaBackupArchivioPezzi` aggiornate; prova `ProvaVera.provaNoteDossier`;
+istantanee nuove 1405-1407, 60 e 61 cambiano da sole.
+
+Resta:
+- **Istantanee**: rigenerare sul Mac e guardare 60, 61, 64 (Note non ha più una finestra), le Panoramiche di Giulia e Marco
+  (ora mostrano la nota del taccuino fissata dei dati di prova al posto di `Cliente.nota`), 1405-1407; aggiornare la
+  pagina delle anteprime. Valutare se nei dati di prova le note di Giulia e Marco debbano restare fissate (oggi lo sono:
+  quindi sono loro «in evidenza», non «Da ricordare»; il template parte da «Da ricordare»).
+- **«Prima dell'incontro» (miglioria 20)**: non ho trovato una vista che legga `Cliente.nota` oltre alla traccia di Vera
+  (`MotoreSintesi`, già aggiornata); se la 20 mostra «Da ricordare» altrove, va portata su `notaInEvidenza`.
+- **La nota vocale (771, 772)**: arriva come `Nota` del taccuino e quindi compare già nell'elenco del cliente; le istantanee
+  non sono state rifatte per mostrarla nella sezione Note.
+- **Le note di partenza** del template («Da ricordare» e una seconda nota per ogni cliente) non sono state aggiunte ai dati
+  di prova.
+- **Nota appena scritta**: l'elenco aggiorna titolo e anteprima dopo la pausa di 0,3 s (`TestoRinviato`), non a ogni
+  lettera come nel template (rischio accettato in 65.6).
+- **iPhone e iPad**: restano l'app Note, «Da ricordare» com'era e le note fissate «in cima» (più di una possibile).

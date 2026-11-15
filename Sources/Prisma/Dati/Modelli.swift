@@ -570,9 +570,12 @@ struct Attivita: Identifiable, Codable, Hashable {
     var note = ""
     /// Appuntamento da cui è nata l'attività.
     var appuntamentoId: String?
+    /// Migliorie d'uso 65: la nota del dossier da cui è nata («Fanne un «Da fare»»), per mostrare «Nel Da fare».
+    /// Facoltativa: gli archivi di prima e i dispositivi non aggiornati non la conoscono.
+    var daNota: String?
 
     init(id: String, clienteId: String, titolo: String, scadenza: Date, priorita: Priorita, completata: Bool,
-         note: String = "", appuntamentoId: String? = nil) {
+         note: String = "", appuntamentoId: String? = nil, daNota: String? = nil) {
         self.id = id
         self.clienteId = clienteId
         self.titolo = titolo
@@ -581,6 +584,7 @@ struct Attivita: Identifiable, Codable, Hashable {
         self.completata = completata
         self.note = note
         self.appuntamentoId = appuntamentoId
+        self.daNota = daNota
     }
 
     static func nuova(clienteId: String, scadenza: Date = Date()) -> Attivita {
@@ -598,6 +602,7 @@ struct Attivita: Identifiable, Codable, Hashable {
         completata = try c.decodeIfPresent(Bool.self, forKey: .completata) ?? false
         note = try c.decodeIfPresent(String.self, forKey: .note) ?? ""
         appuntamentoId = try c.decodeIfPresent(String.self, forKey: .appuntamentoId)
+        daNota = try c.decodeIfPresent(String.self, forKey: .daNota)
     }
 }
 

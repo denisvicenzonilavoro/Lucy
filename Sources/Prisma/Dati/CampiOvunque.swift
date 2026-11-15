@@ -86,7 +86,7 @@ enum CampiOvunque {
             return Regole(campi: ["clienteId", "titolo", "testo", "fissata", "aggiornataIl"], servizio: ["aggiornataIl"],
                           creabile: true, eliminabile: true, conCliente: true)
         case .attivita:
-            return Regole(campi: ["clienteId", "titolo", "scadenza", "priorita", "completata", "note", "appuntamentoId"], servizio: [],
+            return Regole(campi: ["clienteId", "titolo", "scadenza", "priorita", "completata", "note", "appuntamentoId", "daNota"], servizio: [],
                           creabile: true, eliminabile: true, conCliente: true)
         case .appuntamento:
             return Regole(campi: ["clienteId", "titolo", "inizio", "durataMinuti", "luogo", "note", "stato", "tipo", "canale", "posizioneId",

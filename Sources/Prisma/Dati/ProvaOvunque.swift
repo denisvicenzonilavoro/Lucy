@@ -751,8 +751,9 @@ enum ProvaOvunque {
         var prima = tel
         let notaTel = Nota(id: "nota-telefono-1", clienteId: cid, titolo: "Dal cliente", testo: testoSegreto, creataIl: ora(4), aggiornataIl: ora(4))
         tel.note.append(notaTel)
+        // Migliorie d'uso 65: l'attività nata da una nota porta il legame (`daNota`), che arriva intatto sul Mac
         let attivitaTel = Attivita(id: "task-telefono-1", clienteId: cid, titolo: "Richiamare per la casa", scadenza: ora(600),
-                                   priorita: .alta, completata: false)
+                                   priorita: .alta, completata: false, daNota: notaTel.id)
         tel.attivita.append(attivitaTel)
         try controlla(RegistroOvunque.registra(prima: prima, dopo: &tel, adesso: ora(4)) == 2
                       && tel.giornaleOvunque.map(\.seq) == [1, 2] && tel.giornaleOvunque.map(\.tipo) == [.crea, .crea]
@@ -785,6 +786,8 @@ enum ProvaOvunque {
                       && mac.attivita.filter { $0.id == attivitaTel.id }.count == 1, "la copia del giornale ha dato doppioni")
         try controlla(mac.note.first { $0.id == notaTel.id } == notaTel && mac.attivita.first { $0.id == attivitaTel.id } == attivitaTel,
                       "la nota o l'attività dell'iPhone non arrivano uguali sul Mac")
+        try controlla(mac.attivita.first { $0.id == attivitaTel.id }?.daNota == notaTel.id,
+                      "l'attività nata da una nota perde il legame con la nota nel giornale")
         try controlla(!(try icloud.elenca()).contains { $0.nome == copia }, "la copia del giornale non è stata eliminata")
         try controlla(em.istantaneaScritta && mac.impostazioni.ovunque.generazione == 2
                       && mac.impostazioni.ovunque.vistoFinoA[idTelefono] == 2 && mac.arriviOvunque.count == 2,

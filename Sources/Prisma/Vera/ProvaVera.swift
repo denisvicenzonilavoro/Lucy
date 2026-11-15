@@ -427,8 +427,9 @@ enum ProvaVera {
                   && AppPrisma.allCases.filter { !$0.nelDock }.allSatisfy { $0.ospite?.nelDock == true || ($0.ospite == nil && $0.fuoriDalDock) },
                   "Dock: 15 app con icona propria, le accorpate ospitate da un'app del dock, le altre con una finestra propria")
         // Migliorie d'uso 63: sul Mac Prodotti è il catalogo della Biblioteca (accorpata), su iPhone e iPad resta un'app a sé
+        // Migliorie d'uso 65: sul Mac anche Note (le note stanno nella sezione Note del dossier)
         #if os(macOS)
-        let altreAppAttese: [AppPrisma] = [.note, .ricerca]
+        let altreAppAttese: [AppPrisma] = [.ricerca]
         #else
         let altreAppAttese: [AppPrisma] = [.prodotti, .note, .ricerca]
         #endif
@@ -611,6 +612,7 @@ enum ProvaVera {
                   "Accorpate: Documenti si apre in Clienti, scheda Documenti, sul cliente scelto")
         accorpate.apri(.obiettivi)
         controlla(accorpate.appAttiva == .clienti && accorpate.schedaCliente == .obiettivi, "Accorpate: Obiettivi si apre in Clienti, scheda Obiettivi")
+        provaNoteDossier(controlla)
         accorpate.schedaSimulazioni = .tfr
         accorpate.apri(.simulazioni)
         controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .tfr && accorpate.inPrimoPiano(.simulazioni),
@@ -809,8 +811,13 @@ enum ProvaVera {
                   "Cerca ovunque trova le note anche nel testo")
         taccuino.filtroClienteNote = "giulia"
         taccuino.vai(a: .nota("nota-laura"))
-        controlla(taccuino.appAttiva == .note && taccuino.notaSelezionata == "nota-laura" && taccuino.noteFiltrate.contains { $0.id == "nota-laura" },
+        // Sul Mac (migliorie d'uso 65) «Note» è la sezione Note del dossier del cliente della nota
+        controlla(taccuino.inPrimoPiano(.note) && taccuino.notaSelezionata == "nota-laura" && taccuino.noteFiltrate.contains { $0.id == "nota-laura" },
                   "Il risultato della ricerca apre la nota in Note, anche con un altro filtro")
+        #if os(macOS)
+        controlla(taccuino.appAttiva == .clienti && taccuino.schedaCliente == .note && taccuino.clienteAttivoId == "laura",
+                  "Note: sul Mac il risultato della ricerca apre il dossier del cliente sulla sezione Note")
+        #endif
         let rilette = try? Archivio.decodifica(Archivio.codificatore.encode(taccuino.dati.istantanea))
         controlla(rilette?.note == taccuino.dati.note, "Le note restano nell'archivio")
         taccuino.eliminaCliente("laura")
@@ -1559,6 +1566,68 @@ enum ProvaVera {
                   "Incolla da Excel: righe di contatti in Clienti")
         return esiti
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 65 «Le note stanno con il cliente»: la nota in evidenza (la fissata più recente, altrimenti «Da
+    /// ricordare»), una sola per cliente, «Fanne un «Da fare»» con il legame, «Elimina» con «Annulla» e la scheda di Vera.
+    static func provaNoteDossier(_ controlla: (Bool, String) -> Void) {
+        let s = StatoShell(persistente: false)
+        guard let marco = s.cliente("marco"), !marco.nota.isEmpty else {
+            controlla(false, "Note del dossier: Marco con la sua nota «Da ricordare» nei dati di prova")
+            return
+        }
+        // Nessuna nota fissata: in evidenza «Da ricordare»
+        for n in s.dati.note where n.clienteId == "marco" && n.fissata { s.modificaNota(n.id) { $0.fissata = false } }
+        let dr = s.notaInEvidenza(marco)
+        controlla(dr?.daRicordare == true && dr?.testo == marco.nota.trimmingCharacters(in: .whitespacesAndNewlines),
+                  "Note del dossier: senza note in evidenza vale «Da ricordare»")
+        controlla(s.righeNoteDossier(marco).first?.id == StatoShell.idDaRicordare("marco"),
+                  "Note del dossier: «Da ricordare» in evidenza sta in cima all'elenco")
+        // Due note fissate (archivio di prima): vale la più recente; «Metti in evidenza» ne lascia una sola
+        let vecchia = Nota(id: "nota-prova-vecchia", clienteId: "marco", titolo: "Vecchia", testo: "Prima nota",
+                           fissata: true, creataIl: Date(timeIntervalSinceNow: -86_400 * 3), aggiornataIl: Date(timeIntervalSinceNow: -86_400 * 3))
+        let nuova = Nota(id: "nota-prova-nuova", clienteId: "marco", titolo: "Nuova", testo: "Seconda nota",
+                         fissata: true, creataIl: Date(timeIntervalSinceNow: -86_400), aggiornataIl: Date(timeIntervalSinceNow: -86_400))
+        s.dati.note.append(vecchia)
+        s.dati.note.append(nuova)
+        controlla(s.notaInEvidenza(marco)?.id == nuova.id, "Note del dossier: con più note fissate vale la più recente")
+        s.mettiInEvidenza(vecchia.id, cliente: "marco")
+        controlla(s.dati.note.filter { $0.clienteId == "marco" && $0.fissata }.map(\.id) == [vecchia.id]
+                  && s.notaInEvidenza(marco)?.id == vecchia.id && s.righeNoteDossier(marco).first?.id == vecchia.id,
+                  "Note del dossier: «Metti in evidenza» ne lascia una sola, in cima all'elenco")
+        if let fonte = s.fonteVera("marco") {
+            controlla(ContestoVera.scheda(fonte).contains("Da ricordare: «Vecchia»: Prima nota"),
+                      "Note del dossier: Vera riceve la nota in evidenza come «Da ricordare»")
+        } else {
+            controlla(false, "Note del dossier: la fonte di Vera per Marco")
+        }
+        s.togliEvidenza(cliente: "marco")
+        controlla(s.notaInEvidenza(marco)?.daRicordare == true, "Note del dossier: «Tolta dall'evidenza» rimette «Da ricordare»")
+        // «Fanne un «Da fare»»: un'attività per oggi con il legame; completata, la nota torna libera
+        let attivitaPrima = s.dati.attivita.count
+        s.notaNelDaFare(nuova.id)
+        let creata = s.dati.attivita.first { $0.daNota == nuova.id }
+        controlla(s.dati.attivita.count == attivitaPrima + 1 && creata?.titolo == "Nuova" && creata?.clienteId == "marco"
+                  && creata.map { Calendar.current.isDateInToday($0.scadenza) } == true
+                  && s.righeNoteDossier(marco).first { $0.id == nuova.id }?.nelDaFare == true,
+                  "Note del dossier: «Fanne un «Da fare»» crea l'attività per oggi e la riga dice «Nel Da fare»")
+        if let a = creata { s.alternaCompletata(a.id) }
+        controlla(s.righeNoteDossier(marco).first { $0.id == nuova.id }?.nelDaFare == false,
+                  "Note del dossier: completata l'attività, la nota non è più «Nel Da fare»")
+        // «Elimina» con «Annulla»
+        let primaDiEliminare = s.nota(nuova.id)
+        s.eliminaNotaDossier(nuova.id)
+        controlla(s.nota(nuova.id) == nil && s.azioneAvviso != nil, "Note del dossier: «Elimina» toglie la nota e offre «Annulla»")
+        s.eseguiAzioneAvviso()
+        controlla(primaDiEliminare != nil && s.nota(nuova.id) == primaDiEliminare, "Note del dossier: «Annulla» rimette la nota com'era")
+        // L'app Note sul Mac è la sezione Note del dossier
+        s.scegliNota(nuova.id)
+        s.apri(.note)
+        controlla(s.appAttiva == .clienti && s.schedaCliente == .note && s.clienteAttivoId == "marco" && s.inPrimoPiano(.note)
+                  && !s.finestre.contains { $0.app == .note },
+                  "Note del dossier: apri(.note) porta al dossier del cliente della nota, senza una finestra Note")
+    }
+    #endif
 }
 
 // MARK: - Finti per le prove dell'ascolto

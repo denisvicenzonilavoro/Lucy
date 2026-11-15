@@ -10,6 +10,15 @@ enum ContestoVera {
     /// Spazio per le cifre di uno spunto (bozza o calcoli pertinenti) passate al modello con la domanda.
     static let limiteCalcoli = 1_800
 
+    /// Migliorie d'uso 65: il testo della nota in evidenza per Vera. «Da ricordare» com'è; una nota del taccuino con il
+    /// titolo e il testo su una riga, entro `Nota.limiteVera` caratteri come le altre note.
+    static func testoInEvidenza(_ e: NotaInEvidenza) -> String {
+        guard !e.daRicordare else { return e.testo }
+        let testo = String(e.testo.split(whereSeparator: { $0.isWhitespace }).joined(separator: " ").prefix(Nota.limiteVera))
+        if e.titolo.isEmpty { return testo }
+        return testo.isEmpty ? "«\(e.titolo)»" : "«\(e.titolo)»: \(testo)"
+    }
+
     static func scheda(_ f: FonteVera) -> String {
         var righe: [String] = []
         let c = f.cliente
@@ -35,7 +44,12 @@ enum ContestoVera {
         if !c.profilo.obiettivi.isEmpty { profilo.append("obiettivi: \(c.profilo.obiettivi)") }
         if !profilo.isEmpty { righe.append("Profilo: \(profilo.joined(separator: ", ")).") }
         if !c.canali.isEmpty { righe.append("Seguito sul canale: \(c.canali.map(\.nomeBreve).joined(separator: " e ")).") }
+        #if os(macOS)
+        // Migliorie d'uso 65: «Da ricordare» è la nota in evidenza (una del taccuino fissata, o la nota di sempre)
+        if let e = Nota.inEvidenza(f.note, cliente: c) { righe.append("Da ricordare: \(ContestoVera.testoInEvidenza(e))") }
+        #else
         if !c.nota.isEmpty { righe.append("Da ricordare: \(c.nota)") }
+        #endif
         // Le aziende del cliente imprenditore («Luce» giro 7): i dati scritti dal consulente e le aree valutate da Prisma
         for a in c.elencoAziende.prefix(2) {
             let aree = MotoreAzienda.valuta(a, cliente: c, posizioni: f.posizioni, oggi: f.oggi)

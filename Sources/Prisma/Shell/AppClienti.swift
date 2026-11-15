@@ -435,7 +435,26 @@ struct AppClienti: View {
         }
     }
 
-    private func note(_ c: Cliente) -> some View {
+    @ViewBuilder private func note(_ c: Cliente) -> some View {
+        #if os(macOS)
+        // Migliorie d'uso 65: sul Mac un elenco solo con la nota a fianco (Shell/DossierNote.swift); i messaggi del
+        // dossier restano sotto, a tutta larghezza (decisione 65-e), ma non davanti al cliente
+        VStack(alignment: .leading, spacing: Tema.Apple.Clienti.NoteDossier.sopraMessaggi) {
+            NoteDossierMac(cliente: c)
+            if !stato.inModoCliente {
+                VStack(alignment: .leading, spacing: 8) {
+                    MessaggiNoteDossier(cliente: c)
+                }
+                .corniceSchedaDossier()
+                .entrataDossier(2, sfocatura: false)
+            }
+        }
+        #else
+        noteDiPrima(c)
+        #endif
+    }
+
+    private func noteDiPrima(_ c: Cliente) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             OcchielloSezione(titolo: "Da ricordare", nota: "Si salva da sola")
             // Si scrive nel campo e passa all'archivio poco dopo l'ultimo tasto: una lettera non rifà tutta Prisma

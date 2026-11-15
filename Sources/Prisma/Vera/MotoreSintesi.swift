@@ -132,7 +132,12 @@ struct MotoreSintesi: MotoreVera {
         if !punti.isEmpty {
             parti.append("Punti da toccare:\n" + punti.map { "• " + $0.prefix(1).uppercased() + String($0.dropFirst()) }.joined(separator: "\n"))
         }
+        #if os(macOS)
+        // Migliorie d'uso 65: «Da ricordare» è la nota in evidenza
+        if let e = Nota.inEvidenza(f.note, cliente: f.cliente) { parti.append("Da ricordare: \(ContestoVera.testoInEvidenza(e))") }
+        #else
         if !f.cliente.nota.isEmpty { parti.append("Da ricordare: \(f.cliente.nota)") }
+        #endif
         if !f.note.isEmpty {
             parti.append("Dal tuo taccuino:\n" + f.note.prefix(2).map { "• «\($0.titoloMostrato)», \(Formati.giornoMese.string(from: $0.aggiornataIl)): \($0.anteprima)" }.joined(separator: "\n"))
         }

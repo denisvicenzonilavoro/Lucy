@@ -492,6 +492,7 @@ enum Istantanee {
             s.pannelloSpazi = true
         }),
         ("60-note", { s in
+            // Sul Mac (migliorie d'uso 65) apre il dossier di Giulia sulla sezione Note, con la sua nota
             s.scegliNota("nota-giulia")
             s.apri(.note)
         }),
@@ -1769,6 +1770,8 @@ enum Istantanee {
         tutteLeScene += sceneDossierApple
         tutteLeScene += sceneSimulatoriApple
         tutteLeScene += sceneAnalisi360Apple
+        // Migliorie d'uso 65: le note stanno con il cliente (IstantaneeNoteDossier.swift)
+        tutteLeScene += sceneNoteDossier
         tutteLeScene += sceneAgendaApple
         // Migliorie d'uso 21: l'elenco di Incontri (IstantaneeElencoIncontri.swift)
         tutteLeScene += sceneElencoIncontri
