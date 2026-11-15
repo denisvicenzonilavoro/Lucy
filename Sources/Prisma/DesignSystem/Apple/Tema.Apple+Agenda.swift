@@ -194,7 +194,13 @@ extension Tema.Apple {
             static let paddingImpegno = Misura.padding(8, 12)
             static let bordoImpegno: CGFloat = 4
             static let opacitaFondo: Double = 0.13
+            #if os(macOS)
+            /// Migliorie d'uso 18: un impegno passato (da chiudere, chiuso o un blocco «Non disponibile» finito) è
+            /// attenuato a 0,62, nella giornata come nella settimana (`.ev.pas`, `.evS.pas` del template).
+            static let opacitaConcluso: Double = 0.62
+            #else
             static let opacitaConcluso: Double = 0.55
+            #endif
             /// Nome 13,5 bold, ora e luogo `.k`, titolo 12 `inchiostro2` se l'impegno è più alto di 50.
             static let nome = Carattere(dimensione: 13.5, peso: .bold)
             static let coloreNome = Colore.inchiostro
@@ -221,6 +227,106 @@ extension Tema.Apple {
             static let vuoto = Carattere(dimensione: 15, peso: .regular)
             static let coloreVuoto = Colore.inchiostro2
             static let spazioVuoto: CGFloat = 8
+        }
+
+        // MARK: La settimana a sette colonne (Migliorie d'uso 18, solo Mac)
+
+        /// La settimana che si vede tutta (Shell/AgendaSettimana.swift): la testata dei sette giorni, le ore a sinistra
+        /// e sette colonne con gli impegni al loro posto. Il nome `Settimana` resta alla settimana a pillola.
+        enum SettimanaSette {
+            /// La testata dei giorni, alta 48; le ore rientrano di 54 (la colonna delle ore).
+            static let altezzaTesta: CGFloat = 48
+            /// Fra la testata e la card delle ore (la card sta a 56 dall'alto).
+            static let spazioTesta: CGFloat = 8
+            static let rientroOre: CGFloat = 54
+            /// Lo spazio a destra delle colonne (`margin-right` 12 della griglia).
+            static let margineDestro: CGFloat = 12
+            /// Righe di 52 per ora (la giornata resta a 46); la prima linea a 16 dall'alto della card, 8 sotto l'ultima.
+            static let altezzaOra: CGFloat = 52
+            static let lineaSopra: CGFloat = 16
+            static let sottoUltima: CGFloat = 8
+            /// Le ore: 11,5 tabellari `inchiostro3`, a 12 dal bordo e 8 sopra la loro linea.
+            static let ora = Giornata.ora
+            static let coloreOra = Giornata.coloreOra
+            static let oraDalBordo: CGFloat = 12
+            static let oraSopraLinea: CGFloat = 8
+            static let linea = Colore.separatore
+            /// Sabato e domenica sono colonne più strette: 0,62 di una feriale.
+            static let quotaFestivo: CGFloat = 0.62
+            /// L'intestazione di un giorno: raggio 12, margine 3 ai lati, passaggio in `chip`.
+            static let raggioIntestazione: CGFloat = 12
+            static let margineIntestazione: CGFloat = 3
+            static let paddingIntestazione: CGFloat = 5
+            static let fondoPassaggio = Colore.chip
+            static var animazionePassaggio: Animation { .easeInOut(duration: Moto.tempo(0.2)) }
+            /// «Oggi · lun 2» 13,5 bold (oggi in rosso), sotto «2 impegni» 11,5 `inchiostro2`.
+            static let intestazioneGiorno = Carattere(dimensione: 13.5, peso: .bold)
+            static let coloreGiorno = Colore.inchiostro
+            static let coloreOggi = Colore.rosso
+            static let notaGiorno = Carattere(dimensione: 11.5, peso: .regular)
+            static let coloreNotaGiorno = Colore.inchiostro2
+            /// La card delle ore: senza ombra.
+            static let superficie = Superficie.cardPiatta
+            static let raggio: CGFloat = Raggio.card
+            /// Le colonne: separate da un filo; oggi su rosso al 5%, sabato e domenica un grigio leggerissimo.
+            static let filoColonna = Colore.separatore
+            static let fondoOggi = Colore.rosso.opacity(0.05)
+            static let fondoFestivo = Color.dinamico(chiaro: Color(r: 0, g: 0, b: 0, a: 0.02),
+                                                     scuro: Color(r: 255, g: 255, b: 255, a: 0.025))
+            /// Gli impegni: a 4 dal filo sinistro e 5 dal destro, 2 sotto la loro ora, alti max(38, durata·52 − 4).
+            static let margineSinistro: CGFloat = 4
+            static let margineDestroImpegno: CGFloat = 5
+            static let impegnoSopra: CGFloat = 2
+            static let impegnoMinimo: CGFloat = 38
+            static let impegnoStacco: CGFloat = 4
+            static let spazioCorsie = Giornata.spazioCorsie
+            /// Raggio 10, filo sinistro 3 nel colore del cliente, fondo nel colore al 13%, padding 4×8.
+            static let raggioImpegno: CGFloat = 10
+            static let filoImpegno: CGFloat = 3
+            static let opacitaFondo = Giornata.opacitaFondo
+            static let paddingImpegno = Misura.padding(4, 8)
+            /// Nome 12,5 bold su una riga, sotto «09:30 · In studio» 11 `inchiostro2`.
+            static let nomeImpegno = Carattere(dimensione: 12.5, peso: .bold)
+            static let coloreNome = Colore.inchiostro
+            static let sottoImpegno = Carattere(dimensione: 11, peso: .regular)
+            static let coloreSotto = Colore.inchiostro2
+            /// Un impegno passato o chiuso: lo stesso 0,62 della giornata.
+            static let opacitaPassato = Giornata.opacitaConcluso
+            /// L'etichetta del canale solo se l'impegno è largo almeno quanto nella giornata.
+            static let larghezzaConCanale = Giornata.larghezzaConCanale
+            static let inclinazione = Giornata.inclinazione
+            /// La riga rossa dell'ora: alta 2, con il pallino 8 a sinistra.
+            static let coloreLinea = Giornata.coloreLinea
+            static let spessoreLinea = Giornata.spessoreLinea
+            static let pallinoOraSettimana: CGFloat = 8
+            /// Sotto questa larghezza della vista la barra laterale non si mostra: la finestra stretta tiene la settimana.
+            static let sogliaLaterale: CGFloat = 1040
+            /// Gli impegni entrano dal basso di 14, 45 ms l'uno dall'altro (al ritmo del tema), al più 24 in cascata.
+            static let cascataSpostamento: CGFloat = 14
+            static let cascataBase = 0.14
+            static let cascataPasso = 0.045
+            static let cascataDurata = 0.52
+            static let massimoCascata = 24
+            static let entrataImpegno = Moto.StileEntrata(durata: cascataDurata, curva: .uscita, spostamentoX: 0,
+                                                          spostamentoY: cascataSpostamento, scala: 1, sfocatura: 0)
+            static func ritardoImpegno(_ i: Int) -> Double { cascataBase + Double(min(i, massimoCascata)) * cascataPasso }
+            /// Il numero accanto a «Occasioni» (`.bN2`): 11 bold `inchiostro2` su `chip`, capsula 1×7.
+            static let numeroOccasioni = Carattere(dimensione: 11, peso: .bold, tabellare: true)
+            static let coloreNumeroOccasioni = Colore.inchiostro2
+            static let fondoNumeroOccasioni = Colore.chip
+            static let paddingNumeroOccasioni = Misura.padding(1, 7)
+            static let spazioNumeroOccasioni: CGFloat = 6
+            /// Il menu delle occasioni: largo al più 420, righe 13 con il nome in neretto, 8 fra l'una e l'altra.
+            static let larghezzaMenu: CGFloat = 420
+            static let paddingMenu = Misura.padding(12, 14)
+            static let spazioMenu: CGFloat = 8
+            static let rigaMenu = Carattere(dimensione: 13, peso: .regular)
+            static let nomeMenu = Carattere(dimensione: 13, peso: .semibold)
+            static let coloreRigaMenu = Colore.inchiostro
+            static let coloreVuotoMenu = Colore.inchiostro2
+            static let coloreTutte = Colore.accento
+            /// Al più tante righe nel menu (le altre in «Tutte le occasioni ›»).
+            static let massimoMenu = 8
         }
 
         // MARK: Fascia «Da fare» sopra le ore (Prisma: le attività stanno nella giornata)

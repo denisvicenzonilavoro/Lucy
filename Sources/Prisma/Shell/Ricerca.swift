@@ -721,6 +721,10 @@ extension StatoShell {
             filtroClienteAgenda = nil
             giornoAgenda = Calendar.current.startOfDay(for: a.inizio)
             appuntamentoSelezionato = a.id
+            #if os(macOS)
+            // Migliorie d'uso 18: la settimana non ha la colonna del dettaglio, l'appuntamento si mostra in «Giorno»
+            if vistaAgenda == .settimana { vistaAgenda = .giorno }
+            #endif
             apri(.agenda)
         case .attivita(let id):
             guard let a = attivita.first(where: { $0.id == id }) else { return }

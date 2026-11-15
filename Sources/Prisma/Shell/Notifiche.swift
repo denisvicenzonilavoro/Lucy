@@ -74,6 +74,10 @@ enum MotoreNotifiche {
             if proposteAperte[p.id] == nil { proposteAperte[p.id] = p }
         }
         for a in dati.appuntamenti where a.stato == .pianificato && a.fine <= oggi && a.fine > cal.date(byAdding: .day, value: -giorniAvanti, to: inizio) ?? inizio {
+            #if os(macOS)
+            // Migliorie d'uso 18: un blocco «Non disponibile» passato non chiede l'esito (come `MomentoImpegno`)
+            if a.tipo == .nonDisponibile { continue }
+            #endif
             var proposta: Posizione?
             if MotoreSeguitoProposte.tipiConEsito.contains(a.tipo), let pid = a.posizioneId { proposta = proposteAperte[pid] }
             let dettaglioEsito: String

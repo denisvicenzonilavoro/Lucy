@@ -752,3 +752,42 @@ Resta:
 - **Istantanee**: rigenerare sul Mac 85, 86 (chiara e scura), le pagine di Vera, Promemoria e Archivio (righe nuove in
   fondo), la rubrica vuota e il piede della rubrica (senza «+ 30 clienti di prova»), guardare 1060-1063 e aggiornare la
   pagina delle anteprime; controllare che le scene dello Studio, di Messaggi e della Sala con «dati di prova» non cambino.
+
+## 18. La settimana si vede tutta
+
+Fatto (solo sul Mac, `#if os(macOS)`; l'iPad tiene le quattro viste, la striscia e la settimana a pillola):
+- **Il momento di un impegno** (Motori/MomentoImpegno.swift): `prima`, `daChiudere` (pianificato, `fine <= adesso`, non
+  «Non disponibile», con un cliente), `chiuso`; `attenuato` (passato o chiuso), `esitoBreve` (l'esito della proposta chiesto
+  in quell'impegno, altrimenti «concluso»), `fini` (gli istanti in cui la vista di oggi si rifà) e `notaGiorno`.
+  Le notifiche non chiedono più l'esito di un blocco «Non disponibile».
+- **La barra**: «Giorno | Settimana | Mese», poi il pulsante «Occasioni» con il numero (le occasioni da oggi a oggi +
+  `anticipoGiorni` del cliente scelto, in `ricavato`) e il menu in un popover («<nome> · <occasione>», «Nessuna occasione,
+  per ora», «Tutte le occasioni ›»); una riga apre la vista «Occasioni» senza azzerare il cliente
+  (`apriOccasioneDaPulsante`). La vista di partenza è «Settimana». La striscia «Riesami del mese» non c'è più.
+- **La settimana** (Shell/AgendaSettimana.swift): testata dei sette giorni («Oggi · lun 2» in rosso, «libero / 1 impegno /
+  N impegni», tocco → «Giorno»), card delle ore 08-19 (allargate su tutta la settimana) con sette colonne in un solo
+  scorrimento, sabato e domenica a 0,62, fondo di oggi e del fine settimana, riga dell'ora nella colonna di oggi, impegni
+  con le corsie, «09:30 · da chiudere» / «09:30 · ✓ concluso», attenuati a 0,62, cascata dal basso (14, 45 ms), traccia
+  dell'impegno al tocco. Senza barra laterale sotto i 1040 punti. Il mese piccolo apre il giorno in «Giorno».
+- **La giornata**: « · da chiudere» o « · ✓ <esito>» dopo l'orario, opacità del passato 0,62 (`Giornata.opacitaConcluso`).
+  Le righe di oggi si rifanno solo alla fine di un impegno (`TimelineView(.explicit)`), non ogni minuto.
+- **Apertura di un appuntamento** (ricerca, notifiche, «Da fare», «Apri in Agenda») con la settimana: passa a «Giorno».
+- Token in `Tema.Apple.Agenda.SettimanaSette`, testi in `TestiAgendaApple`. Prove: A-M1…A-M9 in `ProvaCalcoliAgenda`
+  (`--prova-calcoli`), `ProvaSettimanaAgenda` in `--prova-vera`. Istantanee: 450 (chiara e scura) e 452 ora sulla settimana
+  (con un impegno chiuso di Sofia alle 8:15; quello di Giulia alle 9:30 è «da chiudere» alle 10:24), nuove
+  453-agenda-settimana-cliente e 455-agenda-settimana-stretta; le scene pensate sul mese (11a, 11c, 114, 115, 125, 213,
+  238) chiedono ora il mese.
+
+Resta:
+- **454-agenda-occasioni-pulsante**: il menu è un popover (finestra a sé), le istantanee non lo vedono: chiedere uno
+  screenshot all'utente.
+- **Colonna a sinistra**: «Da non dimenticare» resta; il template mette lì il «Da fare» (con `RigaDaFare(filoAgenda: true,
+  conCanali: false)`). Nella giornata la fascia «Da fare e da ricordare» non è ancora «Da fare oggi» (miglioria 3).
+- **Scala al passaggio** (1,03) non messa: basta l'inclinazione (come chiede 18.3 punto 3).
+- **`--prova-fluidita`**: guardare in CI che la settimana con 30 clienti non faccia crescere i corpi rifatti (ogni colonna
+  di oggi ha una `TimelineView` della riga dell'ora e una degli impegni); `ProvaRiesamiAgenda` non tocca la vista e resta.
+- **Istantanee da rigenerare sul Mac**: 450 (chiara e scura), 451, 452, 453, 455, 11-agenda, 11b-agenda-giorno (« · da
+  chiudere»), 130/131 (si arriva dal pulsante), 1027-agenda-solo-cliente (ora la settimana); aggiornare la pagina delle
+  anteprime. Il passaggio sull'intestazione e la cascata chiedono uno screenshot.
+- Le corsie nella settimana usano ancora l'altezza minima della giornata per le sovrapposizioni (`CorsieImpegni`):
+  con tre corsie strette l'impegno mostra solo il nome; da guardare con i clienti fittizi.

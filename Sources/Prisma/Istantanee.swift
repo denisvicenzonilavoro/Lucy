@@ -60,6 +60,8 @@ enum Istantanee {
         // L'Agenda a vista mensile con Attività accorpata: la griglia, le pillole, la giornata di oggi a destra
         ("11a-agenda-mese", { s in
             Istantanee.attivitaRimastaIndietro(s)
+            // Sul Mac l'Agenda apre sulla settimana (Migliorie d'uso 18): il mese si chiede
+            s.vistaAgenda = .mese
             s.apri(.agenda)
         }),
         ("11b-agenda-giorno", { s in
@@ -70,6 +72,7 @@ enum Istantanee {
             s.apri(.agenda)
         }),
         ("11c-agenda-mese-stretta", { s in
+            s.vistaAgenda = .mese
             s.apri(.agenda)
             s.alternaIngrandimento(.agenda)
             s.ridimensiona(.agenda, dimensione: CGSize(width: 860, height: 640))
@@ -706,6 +709,7 @@ enum Istantanee {
         ("114-agenda-esito-proposta", { s in
             // Laura: la proposta presentata ieri, il riquadro «Com'è andata…» con le quattro scelte
             Istantanee.concludiIeri(s, "event-laura", ore: 10)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("115-agenda-firma-decorrenza", { s in
@@ -714,6 +718,7 @@ enum Istantanee {
                 s.dati.appuntamenti[i].tipo = .firma
             }
             Istantanee.concludiIeri(s, "event-giulia-previdenza", ore: 18)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("116-portafoglio-seguito", { s in
@@ -772,6 +777,7 @@ enum Istantanee {
             // «Pianifica» per Laura: il riesame nel primo spazio libero, con canale e ordine del giorno
             ProvaRiesamiAgenda.prepara(s)
             if let p = s.pianificaRiesame("laura") { s.salvaAppuntamento(p.appuntamento) }
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("126-impostazioni-orari", { s in
@@ -1154,6 +1160,7 @@ enum Istantanee {
             // Le note dell'appuntamento si aprono con «Cosa è cambiato dal riesame del …»
             DatiMemoriaDemo.prepara(s)
             if let a = s.bozzaRiesame("giulia") { s.salvaAppuntamento(a) }
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("214-clienti-riesami-primo", { s in
@@ -1254,6 +1261,8 @@ enum Istantanee {
             s.ridimensiona(.clienti, dimensione: CGSize(width: 820, height: 680))
         }),
         ("238-agenda-finestra-stretta", { s in
+            // Il mese stretto (la settimana stretta è la scena 455)
+            s.vistaAgenda = .mese
             s.apri(.agenda)
             s.alternaIngrandimento(.agenda)
             s.ridimensiona(.agenda, dimensione: CGSize(width: 820, height: 680))
@@ -1292,10 +1301,12 @@ enum Istantanee {
         }),
         ("11a-agenda-mese-scuro", { s in
             Istantanee.attivitaRimastaIndietro(s)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("114-agenda-esito-proposta-scuro", { s in
             Istantanee.concludiIeri(s, "event-laura", ore: 10)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("116-portafoglio-seguito-scuro", { s in

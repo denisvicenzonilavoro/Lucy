@@ -294,7 +294,12 @@ enum VoceConfronto: Hashable {
     // Agenda e Attività (stato delle viste, non salvato)
     /// Giornata aperta in agenda.
     var giornoAgenda = Calendar.current.startOfDay(for: Date())
+    #if os(macOS)
+    /// Sul Mac l'Agenda apre sulla settimana a sette colonne (Migliorie d'uso 18, decisione 18-a).
+    var vistaAgenda: VistaAgenda = .settimana
+    #else
     var vistaAgenda: VistaAgenda = .mese
+    #endif
     var appuntamentoSelezionato: String?
     /// nil = tutti i clienti.
     var filtroClienteAgenda: String?
@@ -3095,6 +3100,10 @@ enum VoceConfronto: Hashable {
         occasioneSelezionata = nil
         // L'elenco delle occasioni non mostra gli appuntamenti: si torna al mese
         if vistaAgenda == .occasioni { vistaAgenda = .mese }
+        #if os(macOS)
+        // La settimana a sette colonne non ha la colonna del dettaglio: l'appuntamento si mostra in «Giorno»
+        if vistaAgenda == .settimana { vistaAgenda = .giorno }
+        #endif
         if filtroClienteAgenda != nil && filtroClienteAgenda != a.clienteId { filtroClienteAgenda = nil }
         apri(.agenda)
     }

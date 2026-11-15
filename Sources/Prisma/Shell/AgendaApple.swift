@@ -34,6 +34,35 @@ enum TestiAgendaApple {
     static let questaSettimana = "Questa settimana"
     static let daNonDimenticare = "Da non dimenticare"
     static let puntiDaToccare = "Punti da toccare"
+    // Migliorie d'uso 18: la settimana a sette colonne e il pulsante «Occasioni»
+    static let libero = "libero"
+    static let unImpegno = "1 impegno"
+    static func impegni(_ n: Int) -> String { "\(n) impegni" }
+    static let daChiudere = "da chiudere"
+    static let occasioni = "Occasioni"
+    static let nessunaOccasione = "Nessuna occasione, per ora"
+    static let tutteLeOccasioni = "Tutte le occasioni"
+    static func oggiGiorno(_ giorno: String) -> String { "Oggi · \(giorno)" }
+
+    /// «lun 2»: il giorno nella testata della settimana.
+    static func giornoSettimana(_ g: Date) -> String {
+        let colonna = (CalendarioAgenda.cal.component(.weekday, from: g) + 5) % 7
+        return "\(CalendarioAgenda.nomiGiorni[colonna].lowercased()) \(Formati.giorno.string(from: g))"
+    }
+
+    /// L'intestazione di un giorno: «Oggi · lun 2» o «mar 3».
+    static func intestazioneGiorno(_ g: Date) -> String {
+        CalendarioAgenda.cal.isDateInToday(g) ? oggiGiorno(giornoSettimana(g)) : giornoSettimana(g)
+    }
+
+    /// Dopo l'orario, il momento: «09:30 · da chiudere», «09:30 · ✓ accettata», altrimenti il luogo.
+    static func dopoOrario(_ momento: MomentoImpegno, esito: String?, luogo: String) -> String? {
+        switch momento {
+        case .daChiudere: return daChiudere
+        case .chiuso: return "✓ " + (esito ?? MomentoImpegno.concluso)
+        case .prima: return luogo.isEmpty ? nil : luogo
+        }
+    }
 
     static func maiuscola(_ s: String) -> String { s.prefix(1).uppercased() + s.dropFirst() }
 
@@ -554,30 +583,8 @@ private struct OreGiornataApple: View {
         .frame(width: larghezza, height: altezza, alignment: .topLeading)
     }
 
-    /// Dalle 8 alle 19, allargato se un impegno esce dall'orario.
-    static func intervallo(_ eventi: [Appuntamento]) -> (prima: Int, ultima: Int) {
-        let g = Tema.Apple.Agenda.Giornata.self
-        let cal = Calendar.current
-        var prima = g.primaOra
-        var ultima = g.ultimaOra
-        for e in eventi {
-            prima = min(prima, cal.component(.hour, from: e.inizio))
-            let fine = e.fine
-            if cal.isDate(fine, inSameDayAs: e.inizio) {
-                let extra = cal.component(.minute, from: fine) > 0 ? 1 : 0
-                ultima = max(ultima, cal.component(.hour, from: fine) + extra)
-            } else {
-                ultima = 24
-            }
-        }
-        return (prima, min(24, max(ultima, prima + 1)))
-    }
-
-    /// L'ora come numero (10:24 = 10,4).
-    static func ora(_ d: Date) -> Double {
-        let cal = Calendar.current
-        return Double(cal.component(.hour, from: d)) + Double(cal.component(.minute, from: d)) / 60
-    }
+    static func intervallo(_ eventi: [Appuntamento]) -> (prima: Int, ultima: Int) { OreAgendaApple.intervallo(eventi) }
+    static func ora(_ d: Date) -> Double { OreAgendaApple.ora(d) }
 
     private func y(_ ora: Double, _ ore: (prima: Int, ultima: Int)) -> CGFloat {
         let g = Tema.Apple.Agenda.Giornata.self
@@ -604,7 +611,25 @@ private struct OreGiornataApple: View {
         }
     }
 
-    private func impegni(_ ore: (prima: Int, ultima: Int)) -> some View {
+    /// Gli impegni: sul Mac quelli di oggi si rifanno solo quando uno di loro finisce (Migliorie d'uso 18: «da
+    /// chiudere» compare alla fine dell'impegno), gli altri giorni leggono l'ora una volta (il passato non cambia).
+    @ViewBuilder private func impegni(_ ore: (prima: Int, ultima: Int)) -> some View {
+        #if os(macOS)
+        if istantanea {
+            impegni(ore, adesso: OraIstantanee.data())
+        } else if CalendarioAgenda.cal.isDateInToday(giorno) {
+            TimelineView(.explicit(MomentoImpegno.fini(eventi, dopo: Date()))) { _ in
+                impegni(ore, adesso: Date())
+            }
+        } else {
+            impegni(ore, adesso: Date())
+        }
+        #else
+        impegni(ore, adesso: nil)
+        #endif
+    }
+
+    private func impegni(_ ore: (prima: Int, ultima: Int), adesso: Date?) -> some View {
         let g = Tema.Apple.Agenda.Giornata.self
         let posti = CorsieImpegni.disponi(eventi)
         let libera = max(0, larghezza - g.impegnoSinistra - g.impegnoDestra)
@@ -615,7 +640,7 @@ private struct OreGiornataApple: View {
                 let x = g.impegnoSinistra + CGFloat(p.corsia) * (w + g.spazioCorsie)
                 let alto = y(Self.ora(p.evento.inizio), ore) + g.impegnoSopra
                 let h = max(g.impegnoMinimo, CGFloat(p.evento.durataMinuti) / 60 * g.altezzaOra - g.impegnoStacco)
-                ImpegnoGiornataApple(evento: p.evento, larghezza: w, altezza: h)
+                ImpegnoGiornataApple(evento: p.evento, larghezza: w, altezza: h, adesso: adesso)
                     .entrataLaterale(i)
                     .padding(.leading, x)
                     .padding(.top, alto)
@@ -628,20 +653,9 @@ private struct OreGiornataApple: View {
         let g = Tema.Apple.Agenda.Giornata.self
         if ora >= Double(ore.prima) && ora <= Double(ore.ultima) {
             let alto = g.lineaSopra + y(ora, ore)
-            ZStack(alignment: .leading) {
-                Rectangle()
-                    .fill(g.coloreLinea)
-                    .frame(height: g.spessoreLinea)
-                Circle()
-                    .fill(g.coloreLinea)
-                    .frame(width: g.pallinoOra, height: g.pallinoOra)
-                    .offset(x: -g.pallinoOra / 2)
-            }
-            .frame(width: max(0, larghezza - g.lineaOraDalBordo), height: g.pallinoOra)
-            .padding(.leading, g.lineaOraDalBordo)
-            .padding(.top, max(0, alto - g.pallinoOra / 2))
-            .allowsHitTesting(false)
-            .accessibilityHidden(true)
+            LineaOraAgendaApple(larghezza: max(0, larghezza - g.lineaOraDalBordo), pallino: g.pallinoOra)
+                .padding(.leading, g.lineaOraDalBordo)
+                .padding(.top, max(0, alto - g.pallinoOra / 2))
         }
     }
 
@@ -658,6 +672,57 @@ private struct OreGiornataApple: View {
         }
         .padding(.leading, g.impegnoSinistra / 2)
         .allowsHitTesting(false)
+    }
+}
+
+/// Le ore della giornata e della settimana (Migliorie d'uso 18: la stessa regola per le due viste).
+enum OreAgendaApple {
+    /// Dalle 8 alle 19, allargato se un impegno esce dall'orario (nella settimana: gli impegni di tutti i sette giorni,
+    /// così le colonne si allargano insieme).
+    static func intervallo(_ eventi: [Appuntamento]) -> (prima: Int, ultima: Int) {
+        let g = Tema.Apple.Agenda.Giornata.self
+        let cal = Calendar.current
+        var prima = g.primaOra
+        var ultima = g.ultimaOra
+        for e in eventi {
+            prima = min(prima, cal.component(.hour, from: e.inizio))
+            let fine = e.fine
+            if cal.isDate(fine, inSameDayAs: e.inizio) {
+                let extra = cal.component(.minute, from: fine) > 0 ? 1 : 0
+                ultima = max(ultima, cal.component(.hour, from: fine) + extra)
+            } else {
+                ultima = 24
+            }
+        }
+        return (prima, min(24, max(ultima, prima + 1)))
+    }
+
+    /// L'ora come numero (10:24 = 10,4).
+    static func ora(_ d: Date) -> Double {
+        let cal = Calendar.current
+        return Double(cal.component(.hour, from: d)) + Double(cal.component(.minute, from: d)) / 60
+    }
+}
+
+/// La linea rossa dell'ora con il pallino a sinistra: la stessa nella giornata (pallino 10) e nella settimana (8).
+struct LineaOraAgendaApple: View {
+    let larghezza: CGFloat
+    let pallino: CGFloat
+
+    var body: some View {
+        let g = Tema.Apple.Agenda.Giornata.self
+        return ZStack(alignment: .leading) {
+            Rectangle()
+                .fill(g.coloreLinea)
+                .frame(height: g.spessoreLinea)
+            Circle()
+                .fill(g.coloreLinea)
+                .frame(width: pallino, height: pallino)
+                .offset(x: -pallino / 2)
+        }
+        .frame(width: larghezza, height: pallino)
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
@@ -707,6 +772,9 @@ struct ImpegnoGiornataApple: View {
     let evento: Appuntamento
     let larghezza: CGFloat
     let altezza: CGFloat
+    /// L'ora con cui si legge il momento dell'impegno (Migliorie d'uso 18, solo Mac): nil = come prima, solo il concluso
+    /// attenuato e nessuna scritta dopo l'orario.
+    var adesso: Date? = nil
     @Environment(StatoShell.self) var stato
     @Environment(\.statoDettaglioApple) private var dettaglio
 
@@ -716,7 +784,19 @@ struct ImpegnoGiornataApple: View {
         let cliente = stato.cliente(evento.clienteId)
         let colore = Tema.Apple.Agenda.colore(cliente)
         let canale = stato.canaleAppuntamento(evento)
-        let concluso = evento.stato == .concluso
+        let attenuato: Bool
+        let quando: String
+        if let adesso {
+            // « · da chiudere» o « · ✓ <esito>» dopo l'orario; passato o chiuso, attenuato
+            let momento = MomentoImpegno.di(evento, adesso: adesso)
+            attenuato = MomentoImpegno.attenuato(evento, adesso: adesso)
+            let esito = momento == .chiuso ? MomentoImpegno.esitoBreve(evento, proposta: proposta) : nil
+            let dopo = TestiAgendaApple.dopoOrario(momento, esito: esito, luogo: evento.luogo)
+            quando = dopo.map { "\(TestiAgendaApple.orario(evento)) · \($0)" } ?? TestiAgendaApple.orario(evento)
+        } else {
+            attenuato = evento.stato == .concluso
+            quando = TestiAgendaApple.quando(evento)
+        }
         let forma = RoundedRectangle(cornerRadius: g.raggioImpegno, style: .continuous)
         return VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .firstTextBaseline, spacing: g.spazioRiga) {
@@ -725,7 +805,7 @@ struct ImpegnoGiornataApple: View {
                     .foregroundColor(g.coloreNome)
                     .lineLimit(1)
                     .layoutPriority(1)
-                Text(TestiAgendaApple.quando(evento))
+                Text(quando)
                     .carattereApple(g.quando)
                     .foregroundColor(g.coloreQuando)
                     .lineLimit(1)
@@ -761,7 +841,7 @@ struct ImpegnoGiornataApple: View {
             }
             .clipShape(forma)
         }
-        .opacity(concluso ? g.opacitaConcluso : 1)
+        .opacity(attenuato ? g.opacitaConcluso : 1)
         .contentShape(forma)
         .onTapGesture(perform: apri)
         .inclinazione(massimo: g.inclinazione, raggio: g.raggioImpegno)
@@ -769,6 +849,12 @@ struct ImpegnoGiornataApple: View {
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { apri() }
+    }
+
+    /// La proposta collegata, dalle posizioni del cliente (già tenute da parte): solo per un impegno chiuso.
+    private var proposta: Posizione? {
+        guard evento.stato == .concluso, let pid = evento.posizioneId else { return nil }
+        return stato.posizioniCliente(evento.clienteId).first { $0.id == pid }
     }
 
     private func apri() {
