@@ -451,6 +451,9 @@ enum VoceConfronto: Hashable {
     var menuUscitaMostra = false
     @ObservationIgnored var appPrimaDellaVista: AppPrisma?
     @ObservationIgnored var avvisoVistaVisto = false
+    #else
+    /// Migliorie d'uso 37: su iPhone e iPad la dimostrazione non c'è, resta sempre falsa.
+    let inDimostrazione = false
     #endif
     /// «Le routine» di Vera (fase 4, CollegaRoutineShell.swift): la pagina delle routine aperta sopra Vera e la routine scelta.
     var paginaRoutineVera = false
@@ -2368,7 +2371,8 @@ enum VoceConfronto: Hashable {
             }
         }
         let attivita = i.prossimaAttivita.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !attivita.isEmpty {
+        // Migliorie d'uso 20: un incontro riaperto e richiuso non crea due volte l'attività e il seguito
+        if !attivita.isEmpty, i.attivitaCreataId == nil || !dati.attivita.contains(where: { $0.id == i.attivitaCreataId }) {
             var t = Attivita.nuova(clienteId: i.clienteId, scadenza: scadenza)
             t.titolo = attivita
             t.appuntamentoId = i.appuntamentoId
@@ -2377,7 +2381,8 @@ enum VoceConfronto: Hashable {
             dati.attivita.append(t)
             i.attivitaCreataId = t.id
         }
-        if let quando = i.prossimoIncontro {
+        if let quando = i.prossimoIncontro,
+           i.appuntamentoCreatoId == nil || !dati.appuntamenti.contains(where: { $0.id == i.appuntamentoCreatoId }) {
             var a = Appuntamento.nuovo(clienteId: i.clienteId, giorno: quando)
             a.inizio = Appuntamento.alMinuto(quando)
             a.titolo = "Seguito · \(i.titolo)"
@@ -2397,6 +2402,16 @@ enum VoceConfronto: Hashable {
         salvaIncontro(i)
         proposteIncontro[id] = nil
         mostraAvviso("Incontro archiviato: profilo, attività e agenda aggiornati")
+    }
+
+    /// Migliorie d'uso 20 (decisione 20-b), «Riapri»: l'incontro archiviato torna in preparazione e il suo appuntamento
+    /// torna pianificato. Attività, appuntamenti creati e dossier già aggiornati restano (e `attivitaCreataId` /
+    /// `appuntamentoCreatoId` restano, così una nuova chiusura non li crea due volte).
+    func riapriIncontro(_ id: String) {
+        guard var i = incontro(id), i.stato == .concluso else { return }
+        i.stato = .preparazione
+        salvaIncontro(i)
+        if let a = appuntamento(i.appuntamentoId), a.stato == .concluso { alternaConcluso(a.id) }
     }
 
     // MARK: - Profilo dei bisogni
