@@ -749,7 +749,7 @@ struct PresentatoreDettaglioDossier<Contenuto: View>: View {
         #if os(macOS)
         // Migliorie d'uso 62: il documento chiesto da fuori (o da una scena delle istantanee) nasce già aperto nel lettore;
         // la richiesta la azzera `consumaLettore` all'apparire
-        if let doc = stato.vistaDocumenti.lettore, stato.documento(doc) != nil {
+        if let doc = stato.vistaDocumenti.lettore, stato.documento(doc)?.clienteId == stato.clienteAttivoId {
             return StatoDettaglio(aperto: LettoreDocumento.idDettaglio(doc), misura: Tema.Apple.Lettore.misura)
         }
         #endif
@@ -803,7 +803,8 @@ struct PresentatoreDettaglioDossier<Contenuto: View>: View {
     private func consumaLettore() {
         guard let doc = stato.vistaDocumenti.lettore else { return }
         stato.vistaDocumenti.lettore = nil
-        guard stato.documento(doc) != nil else { return }
+        // Solo un documento del cliente attivo: mai il lettore su quello di un altro cliente
+        guard stato.documento(doc)?.clienteId == stato.clienteAttivoId else { return }
         let id = LettoreDocumento.idDettaglio(doc)
         guard dettaglio.idAperto != id else { return }
         dettaglio.chiudi(subito: true)

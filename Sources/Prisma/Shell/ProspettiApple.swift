@@ -376,7 +376,11 @@ extension AppProspetti {
                 collegamento(AppPrisma.prodotti.titolo) { stato.apri(.prodotti) }
             }
             HStack(spacing: l.spazioCollegati) {
-                collegamento(AppPrisma.documenti.titolo) { stato.apri(.documenti) }
+                collegamento(AppPrisma.documenti.titolo) {
+                    stato.apri(.documenti)
+                    // Migliorie d'uso 62: qui si chiede l'elenco, non il documento scelto l'ultima volta
+                    stato.vistaDocumenti.lettore = nil
+                }
                 collegamento(StrumentoAnalisi.confronto.titolo) { stato.apriStrumentoAnalisi(.confronto) }
             }
             Text(Self.notaStato)

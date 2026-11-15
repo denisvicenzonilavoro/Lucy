@@ -689,7 +689,11 @@ enum ProvaVera {
         }
         if let incontro = SpazioLavoro.predefiniti.first {
             apriSpazio(incontro)
+            #if os(macOS)
             controlla(spazi.finestreVisibili.map(\.app) == [.vera, .incontri], "Spazio «\(incontro.nome)»: Incontri in primo piano, Vera accanto")
+            #else
+            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .clienti], "Spazio «\(incontro.nome)»: Vera e Clienti in primo piano")
+            #endif
             controlla(!sovrapposte(spazi) && dentro(spazi), "Spazio «\(incontro.nome)»: finestre affiancate, dentro lo schermo")
             controlla(spazi.finestreVisibili.allSatisfy { spazi.cornice(di: $0).width >= Misure.Finestra.minima.width && spazi.cornice(di: $0).height >= Misure.Finestra.minima.height },
                       "Spazio «\(incontro.nome)»: nessuna finestra sotto la misura minima")

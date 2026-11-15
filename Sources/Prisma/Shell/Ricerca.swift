@@ -78,6 +78,17 @@ enum AzioneRicerca: String, CaseIterable, Hashable {
         #endif
     }
 
+    /// In modalità cliente restano solo le azioni che lì servono: niente «Modalità cliente» (ci si è già) né le azioni
+    /// del Mac che davanti al cliente non fanno nulla («Mostra al cliente», «Aggiorna i valori») o non vanno mostrate
+    /// («Nuovo cliente», «Inquadra»).
+    var ammessaInModoCliente: Bool {
+        switch self {
+        case .modoCliente, .mostraAlCliente, .aggiornaValori, .nuovoCliente, .inquadra: return false
+        case .nuovoAppuntamento, .nuovaAttivita, .nuovaNota, .creaBackup, .spaziLavoro, .appAperte, .notifiche, .scrivania:
+            return true
+        }
+    }
+
     #if os(macOS)
     /// Le cinque azioni del pannello vuoto, come nel template (le altre si trovano scrivendo).
     static let delPannelloVuoto: [AzioneRicerca] = [.nuovoCliente, .nuovoAppuntamento, .aggiornaValori, .mostraAlCliente, .inquadra]
@@ -654,7 +665,7 @@ enum MotoreRicerca {
         }
         #endif
 
-        candidati[.azioni] = AzioneRicerca.disponibili.filter { $0 != .modoCliente || !firma.modoCliente }.map { a in
+        candidati[.azioni] = AzioneRicerca.disponibili.filter { !firma.modoCliente || $0.ammessaInModoCliente }.map { a in
             CandidatoRicerca(RisultatoRicerca(destinazione: .app(.ricerca), gruppo: .azioni, titolo: a.titolo,
                                               dettaglio: a.dettaglio, azione: a),
                              campi: [("Azione", a.paroleChiave)])

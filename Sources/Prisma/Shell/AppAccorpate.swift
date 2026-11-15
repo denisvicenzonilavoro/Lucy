@@ -11,8 +11,9 @@ extension StatoShell {
         case .documenti:
             if schedaCliente != .documenti { schedaCliente = .documenti }
             #if os(macOS)
-            // Migliorie d'uso 62: il documento scelto da fuori si apre nel lettore grande
-            if let id = documentoSelezionato { vistaDocumenti.lettore = id }
+            // Migliorie d'uso 62: il documento scelto da fuori si apre nel lettore grande, solo se è del cliente attivo
+            // (`documentoSelezionato` non si azzera cambiando cliente: mai il lettore su un documento di un altro)
+            if let id = documentoSelezionato, documento(id)?.clienteId == clienteAttivoId { vistaDocumenti.lettore = id }
             #endif
         case .simulazioni: scegliStrumentoAnalisi(StatoShell.strumento(per: schedaSimulazioni))
         case .confronti: scegliStrumentoAnalisi(.confronto)

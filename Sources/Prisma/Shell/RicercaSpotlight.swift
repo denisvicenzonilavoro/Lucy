@@ -88,7 +88,7 @@ final class StatoSpotlight: ObservableObject {
             guard let c = stato.cliente(id) else { return nil }
             return RisultatoRicerca(destinazione: .cliente(c.id), gruppo: .clienti, titolo: c.nome, dettaglio: c.tema)
         }
-        let azioni = AzioneRicerca.delPannelloVuoto.map { a in
+        let azioni = AzioneRicerca.delPannelloVuoto.filter { !stato.inModoCliente || $0.ammessaInModoCliente }.map { a in
             RisultatoRicerca(destinazione: .app(.ricerca), gruppo: .azioni, titolo: a.titolo, dettaglio: a.dettaglio, azione: a)
         }
         return (recenti, azioni)
