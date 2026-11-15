@@ -149,7 +149,7 @@ struct SchedaRecita: Equatable {
     var dettagli: [String] = []
     /// Le cifre calcolate da Prisma (obiettivi, proposte, aliquote): le sole che Vera e le suggerite possono usare.
     var cifre: [String] = []
-    /// Il genere dal codice fiscale (`MotoreAree360.femminile`), calcolato una volta con la scheda: «recitato» o
+    /// Il genere dal codice fiscale (`TestiAree360.femminile`), calcolato una volta con la scheda: «recitato» o
     /// «recitata» da Vera (migliorie d'uso 56). nil: non si sa (e il profilo inventato).
     var femminile: Bool?
 
@@ -277,7 +277,7 @@ enum PalestraVera {
     static func scheda(_ f: FonteVera) -> SchedaRecita {
         let c = f.cliente
         var s = SchedaRecita(clienteId: c.id, nome: c.nome, iniziali: c.iniziali)
-        s.femminile = MotoreAree360.femminile(c)
+        s.femminile = TestiAree360.femminile(c)
         var chi: [String] = []
         if let eta = c.eta { chi.append("\(eta) anni") }
         if !c.professione.isEmpty { chi.append(c.professione.lowercased()) }
