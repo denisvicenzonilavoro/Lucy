@@ -19,6 +19,7 @@ enum TestiDocumenti {
     static let sriFuoriScala = "L’indicatore di rischio va da 1 a 7: controlla."
     static let isinNonValido = "Il codice ISIN non torna con la sua cifra di controllo."
     static let codiceFiscaleNonValido = "Il codice fiscale non ha la forma giusta."
+    static let dueValori = "Nel documento ci sono due valori diversi."
 
     /// Un dato che il tipo di documento dovrebbe avere e che non c'è.
     static func mancante(_ c: CampoDocumento) -> String {

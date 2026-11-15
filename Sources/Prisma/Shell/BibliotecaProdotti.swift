@@ -452,8 +452,9 @@ extension AppProdotti {
         .superficieApple(KC.superficieTile)
     }
 
-    /// Le cifre: il peso dei costi in parole, «Quanto rischia» e «Per quanto tempo». Per la protezione solo «Per quanto
-    /// tempo» (decisione 63-d: niente premio indicativo fisso; la stima dalle polizze in archivio resta da fare).
+    /// Le cifre: il peso dei costi in parole, «Quanto rischia» e «Per quanto tempo». Per la protezione «Quanto costa, per
+    /// dare un'idea» (solo con una stima dalle polizze in archivio, decisione 63-d: niente premio fisso) e «Per quanto
+    /// tempo».
     @ViewBuilder func cifreCatalogo(_ p: Prodotto, cifre c: CifreScheda) -> some View {
         if p.area.proiettabile {
             HStack(alignment: .top, spacing: KC.spazioBlocchi) {
@@ -467,11 +468,49 @@ extension AppProdotti {
             .fixedSize(horizontal: false, vertical: true)
         } else {
             HStack(alignment: .top, spacing: KC.spazioBlocchi) {
+                if let premio = MotoreSchedaProdotto.premioIndicativo(p, tariffa: tariffaProtezione) {
+                    tesseraCostoProtezione(premio)
+                        .frame(width: KC.larghezzaTesseraPiccola)
+                }
                 tesseraTempoCatalogo(p)
                     .frame(width: KC.larghezzaTesseraPiccola)
                 Spacer(minLength: 0)
             }
+            .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    /// La tariffa caso morte dalle polizze in archivio (prima quelle del cliente scelto), tenuta fra i dati ricavati: in
+    /// modalità cliente `stato.posizioni` sono solo le sue, e la media dell'archivio non esce dal dossier.
+    private var tariffaProtezione: MotoreSimulatoriAnalisi.TariffaCasoMorte? {
+        let s = stato
+        let clienteId = s.clienteAttivo?.id
+        return s.ricavato("catalogo-tariffa-protezione|\(clienteId ?? "")") { () -> MotoreSimulatoriAnalisi.TariffaCasoMorte? in
+            let mie = clienteId.map { s.posizioniCliente($0) } ?? []
+            return MotoreSimulatoriAnalisi.tariffaCasoMorte(cliente: mie, archivio: s.posizioni)
+        }
+    }
+
+    /// 63-d: «Quanto costa, per dare un'idea» con il premio stimato per 100.000 € di capitale.
+    func tesseraCostoProtezione(_ premio: Double) -> some View {
+        VStack(alignment: .leading, spacing: Tema.Misura.Prodotti.spazioTessera) {
+            Text(TestiCatalogo.quantoCosta)
+                .font(Tema.Testo.Prodotti.etichetta)
+                .foregroundColor(KC.secondario)
+                .fixedSize(horizontal: false, vertical: true)
+            Text(TestiCatalogo.circaAllAnno(premio))
+                .carattereApple(KC.cifraTessera)
+                .foregroundColor(KC.testo)
+                .lineLimit(1)
+                .minimumScaleFactor(KC.scalaMinimaCifra)
+            Text(TestiCatalogo.perCapitale(MotoreSchedaProdotto.capitaleIndicativo))
+                .carattereApple(KC.notaTessera)
+                .foregroundColor(KC.secondario)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(KC.paddingTile)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .superficieApple(KC.superficieTile)
     }
 
     func tesseraTempoCatalogo(_ p: Prodotto) -> some View {

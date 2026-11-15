@@ -96,4 +96,18 @@ enum MotoreSchedaProdotto {
         if g.contains("nessuna") || g.contains("non garantit") || g.contains("senza garanzi") { return false }
         return g.contains("garanti") || g.contains("garanzia") || g.contains("protett")
     }
+
+    // MARK: - 63-d «Quanto costa, per dare un'idea» (protezione)
+
+    /// Il capitale del premio indicativo della protezione.
+    static let capitaleIndicativo: Double = 100_000
+
+    /// Il premio annuo indicativo di una scheda di protezione per `capitaleIndicativo` di capitale, dalla tariffa delle
+    /// coperture caso morte in archivio (`MotoreSimulatoriAnalisi.tariffaCasoMorte`), arrotondato a 10 €. nil se la scheda
+    /// non è di protezione o non c'è una stima: allora il riquadro non c'è (decisione 63-d, niente premio fisso).
+    static func premioIndicativo(_ p: Prodotto, tariffa: MotoreSimulatoriAnalisi.TariffaCasoMorte?) -> Double? {
+        guard p.area == .protezione, let t = tariffa, t.perMille > 0 else { return nil }
+        let premio = t.perMille * capitaleIndicativo / 1_000
+        return max(10, (premio / 10).rounded() * 10)
+    }
 }

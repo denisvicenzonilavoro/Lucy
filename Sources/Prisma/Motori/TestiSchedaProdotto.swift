@@ -46,6 +46,12 @@ enum TestiCatalogo {
     static let perQuantoTempo = "Per quanto tempo"
     static let almeno = "almeno, per dare il meglio"
     static let nonIndicato = "non indicato"
+    /// 63-d: il premio indicativo della protezione, solo con una stima dalle coperture in archivio.
+    static let quantoCosta = "Quanto costa, per dare un’idea"
+    static func circaAllAnno(_ premio: Double) -> String { "circa \(Formati.euro(premio)) l’anno" }
+    static func perCapitale(_ capitale: Double) -> String {
+        "per \(Formati.euro(capitale)) di capitale: stima dalle polizze in archivio"
+    }
 
     static let garanzia = "Garanzia"
     static let uscitaPrima = "Uscita prima"

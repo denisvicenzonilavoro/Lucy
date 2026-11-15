@@ -239,6 +239,8 @@ extension Tema.Apple {
         static let spazioBlocchi: CGFloat = 12
         /// «Quanto rischia» e «Per quanto tempo» accanto al riquadro dei costi (il template: `1,5fr 1fr 1fr`).
         static let larghezzaTesseraPiccola: CGFloat = 170
+        /// 63-d: la cifra «circa 190 € l’anno» si stringe un poco piuttosto che andare a capo nella tessera da 170.
+        static let scalaMinimaCifra: CGFloat = 0.7
         static let spazioTestataFonte: CGFloat = 16
         static let spazioPiede: CGFloat = 10
         static let spazioTestata: CGFloat = 6

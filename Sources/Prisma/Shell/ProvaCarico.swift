@@ -34,6 +34,8 @@ enum ProvaCarico {
     static let limiteFascicolo = 8.0 * fattoreTempo
     static let limitePortafoglio = 8.0 * fattoreTempo
     static let limiteCache = 0.05 * fattoreTempo
+    /// Migliorie d'uso 70: spuntare una riga del fascicolo rifà solo la copertina (i report vengono da `ricavato`).
+    static let limiteSpuntaFascicolo = 0.2 * fattoreTempo
 
     static func esegui() -> Int32 {
         var errori = 0
@@ -153,6 +155,35 @@ enum ProvaCarico {
         print("INFO Fascicolo: \(fascicolo?.pagine.count ?? 0) pagine in \(secondi(fascicoloPrimo)), dalla cache in \(secondi(fascicoloSecondo))")
         controlla(fascicolo != nil && fascicoloPrimo < limiteFascicolo, "Fascicolo impaginato in \(secondi(fascicoloPrimo)) (limite \(secondi(limiteFascicolo)))")
         controlla(fascicoloSecondo < limiteCache, "Fascicolo dalla cache in \(secondi(fascicoloSecondo)) (limite \(secondi(limiteCache)))")
+        // Migliorie d'uso 70: la scheda del fascicolo per un cliente che non l'ha ancora aperta (come fa la vista: le
+        // pagine di ogni report e il documento composto), poi una spunta, che rifà solo la copertina
+        if let altro = stato.clienti.dropFirst().first {
+            let attivo = stato.clienteAttivoId
+            stato.clienteAttivoId = altro.id
+            var righe: [TipoProspetto] = []
+            var composto: DocumentoStampabile?
+            let primaApertura = tempo {
+                righe = stato.sceltaFascicoloCompleta.ordine.filter { stato.pagineFascicolo($0) != nil }
+                composto = stato.documentoFascicolo()
+            }
+            print("INFO Scheda del fascicolo: \(righe.count) report, \(composto?.pagine.count ?? 0) pagine, la prima apertura in \(secondi(primaApertura))")
+            controlla(!righe.isEmpty && primaApertura < limiteFascicolo,
+                      "Scheda del fascicolo aperta la prima volta in \(secondi(primaApertura)) (limite \(secondi(limiteFascicolo)))")
+            if let riga = righe.first(where: { !stato.sceltaFascicoloCompleta.scelti.contains($0) }) ?? righe.first {
+                let impaginatePrima = StatoShell.partiFascicoloImpaginate
+                let spunta = tempo {
+                    stato.sceltaFascicoloCompleta.alterna(riga)
+                    _ = righe.map { stato.pagineFascicolo($0) }
+                    composto = stato.documentoFascicolo()
+                }
+                controlla(StatoShell.partiFascicoloImpaginate == impaginatePrima,
+                          "Una spunta nel fascicolo non impagina di nuovo i report (solo la copertina)")
+                controlla(spunta < limiteSpuntaFascicolo,
+                          "Fascicolo ricomposto dopo una spunta in \(secondi(spunta)) (limite \(secondi(limiteSpuntaFascicolo)))")
+                stato.sceltaFascicoloCompleta.alterna(riga)
+            }
+            stato.clienteAttivoId = attivo
+        }
         var clientiPortafoglio = 0
         let portafoglioPrimo = tempo {
             clientiPortafoglio = stato.riepilogoPortafoglio(canale: nil, area: nil).clienti.count

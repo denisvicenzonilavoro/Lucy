@@ -108,6 +108,10 @@ struct SceltaFascicolo: Equatable {
 }
 
 extension StatoShell {
+    /// Quante volte un report del fascicolo è stato impaginato (`parteFascicolo`): lo legge `--prova-carico` per
+    /// verificare che spuntare una riga rifaccia solo la copertina. Solo un contatore, nessun dato.
+    nonisolated(unsafe) private(set) static var partiFascicoloImpaginate = 0
+
     /// Di chi è il fascicolo: sul Mac del cliente attivo, altrove uno solo per tutti.
     private var chiaveFascicolo: String {
         #if os(macOS)
@@ -149,8 +153,9 @@ extension StatoShell {
     /// la copertina. I report del fascicolo non leggono le note né lo stato delle viste.
     private func parteFascicolo(_ t: TipoProspetto, cliente idCliente: String, ora: Int) -> DocumentoStampabile? {
         guard let scelta = t.report else { return nil }
-        let parte: ParteFascicolo = ricavato("fascicolo|\(t.rawValue)|\(idCliente)|\(ora)") {
-            ParteFascicolo(documento: documentoProspetto(scelta))
+        let parte: ParteFascicolo = ricavato("fascicolo|\(t.rawValue)|\(idCliente)|\(ora)") { () -> ParteFascicolo in
+            StatoShell.partiFascicoloImpaginate += 1
+            return ParteFascicolo(documento: documentoProspetto(scelta))
         }
         return parte.documento
     }

@@ -47,15 +47,8 @@ final class RichiestaIstantaneaLettore {
 /// Ciò che il lettore ricava da un documento (in cache con `stato.ricavato`, valida finché il documento non cambia):
 /// i dati incerti con il perché, gli attesi che mancano e le differenze per bersaglio.
 struct LetturaLettore {
-    struct Gruppo {
-        let bersaglio: BersaglioConfronto
-        /// «posizione|id» o «prodotto|id».
-        let chiave: String
-        let nome: String
-        let scheda: Bool
-        /// Solo le righe da portare in Prisma (diverse o nuove).
-        let righe: [RigaDossier]
-    }
+    /// Il gruppo di differenze di un bersaglio (il tipo puro di `DecisioniLettore`, MotoreDocumenti.swift).
+    typealias Gruppo = GruppoDifferenzeDocumento
 
     let incerti: [CampoDocumento: String]
     let mancanti: [CampoDocumento]
@@ -66,7 +59,8 @@ struct LetturaLettore {
     /// Il confronto si fa sul documento come sarà dopo «Fatto»: i dati certi contano già come confermati, quelli incerti
     /// solo se confermati. Così il passo 3 mostra subito tutte le differenze da decidere.
     static func calcola(_ d: Documento, stato: StatoShell) -> LetturaLettore {
-        let incerti = MotoreDocumenti.incerti(d)
+        // Con le pagine vale anche la regola dei due valori diversi nel testo (§62.3 punto 1)
+        let incerti = MotoreDocumenti.incerti(d, pagine: d.genere == .prisma ? [] : stato.testoDocumento(d))
         var gruppi: [Gruppo] = []
         var cliente = false
         if MotoreDocumenti.delCliente(d) {
@@ -101,7 +95,7 @@ struct LetturaLettore {
     }
 
     /// La chiave di una scelta del passo 3.
-    static func chiaveScelta(_ g: Gruppo, _ r: RigaDossier) -> String { "\(g.chiave)|\(r.voce.rawValue)" }
+    static func chiaveScelta(_ g: Gruppo, _ r: RigaDossier) -> String { DecisioniLettore.chiaveScelta(g, r) }
 }
 
 /// Il contenuto del dettaglio «documento:<id>»: il documento di oggi dall'archivio e il lettore, che riparte da capo a
@@ -208,29 +202,28 @@ struct LettoreDocumento: View {
     }
 
     /// Un dubbio aperto: incerto e non ancora confermato.
+    // Il conto sta nel tipo puro `DecisioniLettore` (MotoreDocumenti.swift), provato in --prova-calcoli.
     private func dubbioAperto(_ c: CampoEstratto, _ l: LetturaLettore) -> Bool {
-        l.incerti[c.chiave] != nil && !c.confermato
+        DecisioniLettore.dubbioAperto(c, incerti: l.incerti)
     }
 
-    private var conNonConfermati: Bool { d.campi.contains { !$0.confermato } }
+    private var conNonConfermati: Bool { DecisioniLettore.conNonConfermati(d) }
 
     /// I mancanti contano come dubbi solo finché il documento ha dati da confermare.
     private func mancantiAperti(_ l: LetturaLettore) -> [CampoDocumento] {
-        conNonConfermati ? l.mancanti.filter { !mancantiVisti.contains($0) } : []
+        DecisioniLettore.mancantiAperti(d, mancanti: l.mancanti, visti: mancantiVisti)
     }
 
     private func datiDubbi(_ l: LetturaLettore) -> Int {
-        d.campi.filter { dubbioAperto($0, l) }.count + mancantiAperti(l).count
+        DecisioniLettore.datiDubbi(d, incerti: l.incerti, mancanti: l.mancanti, visti: mancantiVisti)
     }
 
     private func differenzeAperte(_ l: LetturaLettore) -> Int {
-        l.gruppi.reduce(0) { conto, g in
-            conto + g.righe.filter { scelte[LetturaLettore.chiaveScelta(g, $0)] == nil }.count
-        }
+        DecisioniLettore.differenzeAperte(l.gruppi, scelte: scelte)
     }
 
     /// Già salvato: nessun dato da confermare e nessuna differenza aperta (si ricava, nessun campo nuovo).
-    private func salvato(_ l: LetturaLettore) -> Bool { !conNonConfermati && l.gruppi.isEmpty }
+    private func salvato(_ l: LetturaLettore) -> Bool { DecisioniLettore.salvato(d, gruppi: l.gruppi) }
 
     // MARK: Corpo
 
@@ -868,25 +861,13 @@ struct LettoreDocumento: View {
             dettaglio?.chiudi()
             return
         }
-        guard !stato.solaLettura else { return }
+        guard !stato.solaLettura,
+              let piano = DecisioniLettore.piano(d, incerti: l.incerti, mancanti: l.mancanti, visti: mancantiVisti,
+                                                 gruppi: l.gruppi, scelte: scelte) else { return }
         TestiRinviati.scriviOra()
-        let id = d.id
         let titolo = d.titolo
         let cliente = nomeCliente
-        // Arriva qui solo senza dubbi aperti: i dati da confermare sono i certi
-        for c in d.campi where !c.confermato && l.incerti[c.chiave] == nil {
-            stato.confermaCampo(id, c.chiave, true)
-        }
-        for g in l.gruppi {
-            let dalDocumento = Set(g.righe.filter { scelte[LetturaLettore.chiaveScelta(g, $0)] == true }.map(\.voce))
-            let comeInPrisma = Set(g.righe.filter { scelte[LetturaLettore.chiaveScelta(g, $0)] == false }.map(\.voce))
-            if !dalDocumento.isEmpty {
-                stato.aggiornaDalDocumento(id, bersaglio: g.bersaglio, voci: dalDocumento, ancheProposte: g.scheda)
-            }
-            if !comeInPrisma.isEmpty {
-                stato.alternaVociTenute(id, bersaglio: g.bersaglio, voci: comeInPrisma)
-            }
-        }
+        stato.applicaFattoLettore(d.id, piano: piano)
         stato.mostraAvviso(TestiDocumenti.salvato(titolo, cliente: cliente))
         dettaglio?.chiudi()
     }
@@ -1008,6 +989,24 @@ struct OrigineLettore: ViewModifier {
             content.origineDettaglio(id: id)
         } else {
             content
+        }
+    }
+}
+/// «Fatto: salva nel dossier» sui dati: conferma i certi e applica le scelte del passo 3 con lo storico di oggi
+/// (`aggiornaDalDocumento`, `alternaVociTenute`). Il piano viene da `DecisioniLettore.piano`: mai un dato incerto.
+extension StatoShell {
+    func applicaFattoLettore(_ id: String, piano: DecisioniLettore.Piano) {
+        guard !solaLettura else { return }
+        for k in piano.conferma {
+            confermaCampo(id, k, true)
+        }
+        for a in piano.applica {
+            if !a.dalDocumento.isEmpty {
+                aggiornaDalDocumento(id, bersaglio: a.bersaglio, voci: a.dalDocumento, ancheProposte: a.scheda)
+            }
+            if !a.comeInPrisma.isEmpty {
+                alternaVociTenute(id, bersaglio: a.bersaglio, voci: a.comeInPrisma)
+            }
         }
     }
 }

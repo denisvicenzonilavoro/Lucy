@@ -62,6 +62,18 @@ enum ProvaCalcoliSchedaProdotto {
         let fRisparmio = MotoreSchedaProdotto.proposta(risparmio)
         verifica.vero("Scheda 63: una garanzia sul capitale dà «Chi vuole il capitale protetto»",
                       fRisparmio.perChi.contains("Chi vuole il capitale protetto"))
+        // 63-d: il premio indicativo della protezione, solo con una stima dalle polizze in archivio
+        let tariffa = MotoreSimulatoriAnalisi.TariffaCasoMorte(perMille: 1.87, coperture: 3, fonte: .archivio)
+        verifica("Scheda 63-d: 1,87 € per mille su 100.000 € fanno circa 190 € l'anno",
+                 MotoreSchedaProdotto.premioIndicativo(tcm, tariffa: tariffa) ?? -1, 190)
+        verifica.vero("Scheda 63-d: senza una stima il riquadro non c'è", MotoreSchedaProdotto.premioIndicativo(tcm, tariffa: nil) == nil)
+        verifica.vero("Scheda 63-d: solo per la protezione", MotoreSchedaProdotto.premioIndicativo(pip, tariffa: tariffa) == nil)
+        verifica.vero("Scheda 63-d: il testo dice da dove viene la stima",
+                      TestiCatalogo.perCapitale(MotoreSchedaProdotto.capitaleIndicativo).hasSuffix("stima dalle polizze in archivio"))
+        let archivio = DatiDemo.posizioni()
+        let stimaDemo = MotoreSimulatoriAnalisi.tariffaCasoMorte(cliente: [], archivio: archivio)
+        verifica.vero("Scheda 63-d: con i dati di prova la stima viene dalle polizze in archivio",
+                      stimaDemo == nil || MotoreSchedaProdotto.premioIndicativo(tcm, tariffa: stimaDemo) != nil)
         verifica.vero("Scheda 63: al più tre righe per parte",
                       [fTcm, fPip, fEtf, fRisparmio].allSatisfy {
                           $0.perChi.count <= MotoreSchedaProdotto.righeMassime && $0.nonPerChi.count <= MotoreSchedaProdotto.righeMassime

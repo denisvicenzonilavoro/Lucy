@@ -133,7 +133,11 @@ final class StatoSpotlight: ObservableObject {
 /// I tasti del pannello: il monitor di AppKit decide subito quali tenere per sé, la vista li esegue
 /// sul thread principale (come `FrecceRicerca`).
 final class TastiSpotlight: @unchecked Sendable {
-    enum Tasto { case su, giu, invio, esc, tab }
+    enum Tasto {
+        case su, giu, invio, esc, tab
+        /// Migliorie d'uso 61 (solo Mac): una lettera scritta con il fuoco fuori dal campo torna nel campo.
+        case carattere(String)
+    }
 
     /// Il pannello è davanti (nessun modulo aperto sopra di lui).
     var attivo = false
@@ -141,6 +145,8 @@ final class TastiSpotlight: @unchecked Sendable {
     var conSuggerimenti = false
     /// Si scrive il nome della ricerca da salvare: Invio e frecce vanno a quel campo, Esc annulla.
     var inNome = false
+    /// Il cursore è nel campo della ricerca (lo aggiorna la vista dal suo `@FocusState`).
+    var nelCampo = true
     var esegui: (@MainActor (Tasto) -> Void)?
 
     #if os(macOS)
@@ -156,12 +162,22 @@ final class TastiSpotlight: @unchecked Sendable {
         case 126: tasto = inNome || !conRisultati ? nil : .su
         case 36, 76: tasto = inNome || !conRisultati ? nil : .invio
         case 48: tasto = inNome || !conSuggerimenti ? nil : .tab
-        default: tasto = nil
+        default: tasto = inNome || nelCampo ? nil : Self.stampabile(evento).map { Tasto.carattere($0) }
         }
         guard let tasto else { return false }
         let esegui = esegui
         Task { @MainActor in esegui?(tasto) }
         return true
+    }
+
+    /// I caratteri di un tasto che scrive (lettere, cifre, punteggiatura, spazio): niente tasti di controllo né tasti
+    /// funzione (che AppKit dà nell'area privata da U+F700).
+    static func stampabile(_ evento: NSEvent) -> String? {
+        guard let c = evento.characters, !c.isEmpty else { return nil }
+        let scrive = c.unicodeScalars.allSatisfy { u in
+            !CharacterSet.controlCharacters.contains(u) && !(0xF700...0xF8FF).contains(u.value)
+        }
+        return scrive ? c : nil
     }
     #endif
 }
@@ -282,6 +298,8 @@ struct RicercaSpotlight: View {
         .onChange(of: moduloAppuntamento != nil) { _ in aggiornaTasti() }
         .onChange(of: moduloAttivita != nil) { _ in aggiornaTasti() }
         .onChange(of: stato.richiestaFuocoRicerca) { _ in fuoco = true }
+        // Migliorie d'uso 61: il monitor dei tasti sa se il cursore è nel campo
+        .onChange(of: fuoco) { valore in tasti.nelCampo = valore }
         // Blocco, modalità cliente e presentazione chiudono il pannello
         .onChange(of: sistema.bloccato) { if $0 { chiudi() } }
         .onChange(of: stato.inModoCliente) { if $0 { chiudi() } }
@@ -327,6 +345,9 @@ struct RicercaSpotlight: View {
             guard !tasti.inNome, tasti.conSuggerimenti else { return .ignored }
         case .esc:
             break
+        case .carattere:
+            // Su iPad la lettera la scrive il campo
+            return .ignored
         }
         esegui(tasto)
         return .handled
@@ -747,6 +768,10 @@ struct RicercaSpotlight: View {
             case .esc:
                 // Esc annulla il nome della ricerca da salvare; altrimenti chiude, come Spotlight
                 if motore.nomeDaSalvare != nil { motore.nomeDaSalvare = nil } else { chiudi() }
+            case .carattere(let c):
+                // Migliorie d'uso 61: la lettera scritta altrove si aggiunge al testo e il cursore torna nel campo
+                motore.testo += c
+                fuoco = true
             }
         }
         #if os(macOS)

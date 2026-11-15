@@ -258,9 +258,11 @@ private struct ColonnaSinistraSimula: View {
                 occhiello(due ? T.leDueStrade : T.laStrada)
                 RigaStradaSimula(lettera: due ? "A" : nil, colore: S.serieA,
                                  opzione: stato.opzioneSimula(strade.a, in: opzioni), opzioni: opzioni, perA: true)
+                    .equatable()
                 if due {
                     RigaStradaSimula(lettera: "B", colore: S.serieB,
                                      opzione: stato.opzioneSimula(strade.b, in: opzioni), opzioni: opzioni, perA: false)
+                        .equatable()
                 }
                 occhiello(due ? T.iSoldiUguali : T.iSoldi)
                     .padding(.top, S.spazioOcchiello)
@@ -344,7 +346,9 @@ private struct EditorIpotesiSimula: View {
 
 /// Una strada come riga che si tocca: tondino col colore (e la lettera con due strade), nome, provenienza, rendimento e
 /// costo, etichetta compatta del canale, freccia. Il tocco apre il menu delle strade.
-private struct RigaStradaSimula: View {
+/// Equatable (con `.equatable()` dove si usa): trascinando un cursore la colonna si rifà, ma le righe delle strade, che
+/// non cambiano, non si ridisegnano (resta-da-fare 64, fluidità).
+private struct RigaStradaSimula: View, Equatable {
     @Environment(StatoShell.self) var stato
     let lettera: String?
     let colore: Color
@@ -355,6 +359,11 @@ private struct RigaStradaSimula: View {
     @State private var modificaMia = false
     private typealias S = Tema.Apple.SimulaConfronta
     private typealias T = TestiSimulaConfronta
+
+    nonisolated static func == (a: RigaStradaSimula, b: RigaStradaSimula) -> Bool {
+        guard a.lettera == b.lettera, a.perA == b.perA, a.colore == b.colore else { return false }
+        return a.opzione == b.opzione && a.opzioni == b.opzioni
+    }
 
     var body: some View {
         Button {

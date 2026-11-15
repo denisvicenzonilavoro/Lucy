@@ -2198,8 +2198,9 @@ Resta:
 - **Il velo sfocato** (scrim con sfocatura 8 del template, con il ripiego senza sfocatura nelle istantanee): oggi resta il
   velo di sempre senza sfocatura (token `Tema.Apple.AltreApp.Ricerca.Mac.velo` pronto).
 - **L'entrata** resta quella del pannello delle notifiche (`Tema.Moto.Spotlight`), non i 380 ms da 14 punti del template.
-- **Una lettera scritta altrove torna nel campo**: il fuoco va nel campo all'apertura e dopo ogni filtro, ma un tasto
-  premuto con il fuoco altrove (per esempio dopo un clic su una riga) non viene riportato nel campo.
+- ~~**Una lettera scritta altrove torna nel campo**~~: fatto nella rifinitura 61-70. `TastiSpotlight` sa se il cursore è
+  nel campo (`nelCampo`, dal `@FocusState` della vista); con il fuoco altrove un tasto che scrive, senza ⌘⌃⌥ e non mentre
+  si scrive il nome della ricerca, diventa `.carattere`: la lettera si aggiunge al testo e il fuoco torna nel campo.
 - **Al più 40 risultati in tutto**: non c'è un tetto unico (taglierebbe gruppi interi, come la Biblioteca in fondo); restano
   5 righe per gruppo, 40 con un tipo scelto.
 - **Documento: «Apri il documento»** apre Documenti come oggi; il lettore in grande arriva con la miglioria 62.
@@ -2236,11 +2237,16 @@ Resta:
   passo 3, 191 e 194 l'impatto e lo storico dentro «Apri il confronto completo», che nelle scene è chiuso: se serve,
   aggiungere a `RichiestaIstantaneaLettore` l'apertura del confronto completo). Le scene che mostrano solo l'elenco ma
   hanno un documento scelto ora mostrano anche il lettore: se serve, togliere da quelle scene `documentoSelezionato`.
-- **Regola dei «due valori diversi nel testo»** (§62.3 punto 1): non fatta, perché chiede le pagine del documento dentro
-  il motore puro; da aggiungere a `MotoreDocumenti.incerti` con le pagine come parametro.
-- **«Fatto non conferma un dato incerto» e «Nel documento» con lo storico** (§62.5): la logica del pulsante sta nella
-  vista; le prove pure coprono solo le regole e i testi. Portare il conto dei dubbi e l'applicazione delle scelte in una
-  funzione pura per provarli.
+- ~~**Regola dei «due valori diversi nel testo»**~~ (§62.3 punto 1): fatta nella rifinitura 61-70.
+  `MotoreDocumenti.incerti(_:pagine:oggi:)` riceve le pagine (il lettore le passa da `testoDocumento`) e
+  `EstrattoreDocumento.valoriDiversi` cerca tutte le occorrenze, ma solo per i campi che hanno un valore unico per natura
+  (SRI, periodo, ISIN, codice fiscale, numero e rilascio del documento, orizzonte): premi, importi, date del contratto e
+  nomi compaiono spesso con valori diversi (saldo iniziale e finale, premio e rata) e darebbero falsi dubbi. Se l'utente
+  vuole la regola su altri campi, si allarga `campiAValoreUnico`. Prove U62 «due valori».
+- ~~**«Fatto non conferma un dato incerto» e «Nel documento» con lo storico**~~ (§62.5): fatto nella rifinitura 61-70. Il
+  conto dei dubbi e il piano di «Fatto» stanno nel tipo puro `DecisioniLettore` (MotoreDocumenti.swift, con
+  `GruppoDifferenzeDocumento`), l'applicazione in `StatoShell.applicaFattoLettore`; prove U62 «Fatto» (pure) e «Fatto nel
+  dossier» (sul Mac: la polizza di Marco, capitale dal documento con lo storico, `ripristina` lo riporta).
 - **Il collegamento mancante non conta come dubbio**: la riga «Non è collegato» è arancione ma non ferma il pulsante (un
   documento senza candidate non si potrebbe mai salvare). Decidere se contarlo quando c'è un suggerimento.
 - **Menu e collegamenti duplicati**: `vociMenu` e `vociCollega` del lettore ripetono quelli (privati) di
@@ -2279,9 +2285,12 @@ con la nota «Scritte da Prisma dai dati della scheda».
 Resta:
 - **Istantanee**: rigenerarle sul Mac e guardarle (23, 32, 4, 192, 878, 1400-1402, chiare e scure); controllare che la
   griglia delle cifre (costi + due tessere da 170) stia nella finestra a 1100 e che il piede non tagli i pulsanti.
-- **«Quanto costa, per dare un’idea» della protezione** (63-d): non fatto. Va mostrato solo con una stima da
-  `MotoreSimulatoriAnalisi.tariffaCasoMorte` sulle coperture in archivio («stima dalle polizze in archivio»); oggi la
-  protezione ha solo «Per quanto tempo».
+- ~~**«Quanto costa, per dare un’idea» della protezione**~~ (63-d): fatto nella rifinitura 61-70. La tessera
+  «circa N € l’anno · per 100.000 € di capitale: stima dalle polizze in archivio» c'è solo con una tariffa di
+  `MotoreSimulatoriAnalisi.tariffaCasoMorte` (prima le coperture del cliente scelto, poi l'archivio; in modalità cliente
+  solo le sue), tenuta fra i dati ricavati; premio da `MotoreSchedaProdotto.premioIndicativo` (arrotondato a 10 €), prova
+  in `ProvaCalcoliSchedaProdotto`. Da guardare nell'istantanea 1401 (la scheda di protezione ora ha due riquadri se i
+  dati di prova danno una tariffa).
 - ~~**«Confronta con quello che ha»**~~: fatto con la miglioria 64 (`confrontaProdottoInSimula`: «Due a confronto» con
   la scheda in A e la prima posizione in essere della stessa area in B, o il conto). Se il cliente ha già quel prodotto,
   la scheda non è fra le strade «dal catalogo» e A resta quella di partenza.
@@ -2328,8 +2337,9 @@ Resta:
   del presentatore delle aree (`Analisi360Apple`), che qui non c'è.
 - **1404 «quasi pari»**: la seconda strada è un'ipotesi mia, che non ha un SRI: la frase dice «quasi allo stesso punto»
   ma senza il confronto del rischio. Con due strade vere quasi pari compare anche il rischio.
-- **Fluidità**: trascinando un cursore si rifà il corpo della colonna di sinistra (i comandi sono `.equatable()`, ma le
-  righe delle strade no); da misurare con `--prova-fluidita` e, se serve, rendere `RigaStradaSimula` Equatable.
+- **Fluidità**: `RigaStradaSimula` è Equatable con `.equatable()` (rifinitura 61-70): trascinando un cursore le righe
+  delle strade non si ridisegnano. Resta da misurare prima e dopo con `--prova-fluidita` sul runner (qui non si può
+  eseguire): confrontare i corpi contati della colonna di sinistra.
 - **Il conto**: rende 0% (decisione 64-b); l'alternativa con un tasso in Impostazioni › Analisi non è fatta.
 - **Altri collegamenti** che dicono ancora «Simulatore» e «Confronto» (Posizioni, indice delle posizioni, Prospetti,
   `CollegatiStrumenti`): portano già a «Simula e confronta», ma i nomi sono quelli di prima.
@@ -2425,9 +2435,11 @@ Resta:
 - **«1413-uso-fascicolo-un-report»**: con i motori di oggi ogni cliente di prova ha più report pronti (check-up,
   liquidità, patrimonio… si impaginano sempre), quindi il caso «un solo report» non si vede con i dati di prova. Il testo
   c'è (`TestiFascicolo.unSoloReport`); serve un cliente di prova adatto o una scena con dati costruiti.
-- **Prova di carico** («spuntare una riga non impagina altro che la copertina»): non aggiunta a `--prova-carico`; la
-  scheda impagina tutti i report del cliente alla prima apertura (per contare le pagine, nella cache `fascicolo|…`):
-  se su M1 l'apertura si sente lenta, contare le pagine in un secondo passaggio con un segnaposto «— pagine».
+- ~~**Prova di carico**~~: fatta nella rifinitura 61-70. `--prova-carico` apre la scheda per un cliente nuovo (pagine di
+  ogni report e documento composto, limite `limiteFascicolo`) e verifica con il contatore
+  `StatoShell.partiFascicoloImpaginate` che una spunta non impagini di nuovo i report, e il tempo della ricomposizione
+  (`limiteSpuntaFascicolo`). Resta da leggere il tempo della prima apertura nel registro del workflow (riga «INFO Scheda
+  del fascicolo»): solo se è lento, contare le pagine in un secondo passaggio con il segnaposto «— pagine».
 - **La card dopo la chiusura**: chiusa la scheda aperta dall'Agenda, l'anteprima di Prospetti resta sul documento del
   fascicolo (con le azioni di sempre); nessuna voce dell'elenco è scelta. Valutare guardando le istantanee.
 - **Istantanee**: rigenerare sul Mac e guardare 81, 81-scuro, 82, 460, 1411 e 1412 (l'indice sulla copertina: righe,
