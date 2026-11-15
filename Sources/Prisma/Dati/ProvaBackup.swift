@@ -210,6 +210,16 @@ enum ProvaBackup {
                 print("ERRORE: rotazione, attesi \(GestoreBackup.massimo) backup, trovati \(elenco.count)")
                 return 1
             }
+            // Migliorie d'uso 31: dopo «Crea backup» la voce «Nessun backup ancora» di «Da sistemare» sparisce
+            let fattiPrima = FattiDaSistemare()
+            var fattiDopo = fattiPrima
+            fattiDopo.backupUltimo = elenco.first?.data ?? Date()
+            guard MotoreDaSistemare.calcola(fattiPrima).daSistemare.contains(where: { $0.id == "backup-mai" }),
+                  !MotoreDaSistemare.calcola(fattiDopo).daSistemare.contains(where: { $0.id == "backup-mai" }),
+                  MotoreDaSistemare.calcola(fattiDopo).aPosto.contains(where: { $0.id == "backup-fatto" }) else {
+                print("ERRORE: «Da sistemare» non segue il backup creato")
+                return 1
+            }
 
             // Le copie automatiche hanno la loro rotazione: non le consumano i backup fatti a mano
             // (una sola copia: due backup nello stesso secondo hanno lo stesso nome)

@@ -70,6 +70,35 @@ extension Tema.Apple {
                 static let sotto: CGFloat = 10
                 static let simbolo = "magnifyingglass"
             }
+
+            /// Migliorie d'uso 31: l'etichetta accanto alla voce (`.impSt`): 11 semibold, padding 2×7, capsula; attenzione
+            /// arancio al 16% con il testo `arancioTesto`, errore rosso al 13% con il testo rosso. Il numero di «Da
+            /// sistemare» sta nella stessa pillola; a zero la spunta verde 16.
+            enum EtichettaStato {
+                static let carattere = Carattere(dimensione: 11, peso: .semibold, tabellare: true)
+                static let padding = Misura.padding(2, 7)
+                static let fondoAttenzione = Colore.arancio.opacity(0.16)
+                static let testoAttenzione = Colore.arancioTesto
+                static let fondoErrore = Colore.rosso.opacity(0.13)
+                static let testoErrore = Colore.rosso
+            }
+            static let spunta = Carattere(dimensione: 16, peso: .regular)
+            static let coloreSpunta = Colore.verde
+            static let simboloSpunta = "checkmark.circle.fill"
+        }
+
+        // MARK: Da sistemare
+
+        /// Migliorie d'uso 31: la pagina «Da sistemare» (titolo `.h2`, 4 sotto; la frase 13,5 `inchiostro2`, 14 sotto;
+        /// l'occhiello «A posto» 18 sopra e 8 sotto; la spunta verde 20 nelle righe a posto).
+        enum DaSistemare {
+            static let sottoTitolo: CGFloat = 4
+            static let frase = Carattere(dimensione: 13.5, peso: .regular)
+            static let coloreFrase = Colore.inchiostro2
+            static let sottoFrase: CGFloat = 14
+            static let sopraOcchiello: CGFloat = 18
+            static let spunta = Carattere(dimensione: 20, peso: .regular)
+            static let coloreSpunta = Colore.verde
         }
 
         // MARK: Risultati della ricerca

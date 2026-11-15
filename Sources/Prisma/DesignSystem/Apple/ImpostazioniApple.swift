@@ -72,11 +72,12 @@ private struct CardImpostazioniApple: ViewModifier {
 // MARK: - Voce della barra laterale
 
 /// Voce `.rub` della barra laterale: titolo 14 bold con padding 11×12 e raggio 14; sotto il puntatore il fondo
-/// `chip`, scelta `rgba(0,122,255,.13)` (0,25 s). Uno stato facoltativo a destra (il pallino).
+/// `chip`, scelta `rgba(0,122,255,.13)` (0,25 s). Un segno facoltativo a destra: il pallino (iPad), oppure sul Mac
+/// (migliorie d'uso 31) l'etichetta di cosa manca, il numero di «Da sistemare» o la spunta verde.
 struct VoceLateraleImpostazioniApple: View {
     let titolo: String
     let attiva: Bool
-    var stato: Pillola.Tono? = nil
+    var segno: SegnoVoceImpostazioni? = nil
     let azione: () -> Void
 
     @Environment(\.modoIstantanea) private var istantanea
@@ -85,10 +86,10 @@ struct VoceLateraleImpostazioniApple: View {
 
     private typealias L = Tema.Apple.Impostazioni.Laterale
 
-    init(titolo: String, attiva: Bool, stato: Pillola.Tono? = nil, azione: @escaping () -> Void) {
+    init(titolo: String, attiva: Bool, segno: SegnoVoceImpostazioni? = nil, azione: @escaping () -> Void) {
         self.titolo = titolo
         self.attiva = attiva
-        self.stato = stato
+        self.segno = segno
         self.azione = azione
     }
 
@@ -102,11 +103,21 @@ struct VoceLateraleImpostazioniApple: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
                 Spacer(minLength: 0)
-                if let stato {
-                    Circle()
-                        .fill(StatoRigaApple.colore(stato))
-                        .frame(width: Tema.Apple.Impostazioni.Stato.pallino, height: Tema.Apple.Impostazioni.Stato.pallino)
-                        .accessibilityHidden(true)
+                if let segno {
+                    switch segno {
+                    case .pallino(let tono):
+                        Circle()
+                            .fill(StatoRigaApple.colore(tono))
+                            .frame(width: Tema.Apple.Impostazioni.Stato.pallino, height: Tema.Apple.Impostazioni.Stato.pallino)
+                            .accessibilityHidden(true)
+                    case .etichetta(let testo, let errore):
+                        PillolaColonnaImpostazioni(testo: testo, errore: errore)
+                    case .spunta:
+                        Image(systemName: L.simboloSpunta)
+                            .carattereApple(L.spunta)
+                            .foregroundColor(L.coloreSpunta)
+                            .accessibilityHidden(true)
+                    }
                 }
             }
             .padding(L.paddingVoce)
@@ -120,8 +131,17 @@ struct VoceLateraleImpostazioniApple: View {
             withAnimation(Tema.Apple.Moto.animazione(L.animazioneFondo, calmo: calmo)) { sopra = dentro }
         }
         .animation(Tema.Apple.Moto.animazione(L.animazioneFondo, calmo: calmo, istantanea: istantanea), value: attiva)
-        .accessibilityLabel(Text(titolo))
+        .accessibilityLabel(Text(etichettaAccessibile))
         .accessibilityAddTraits(attiva ? Self.trattiAttiva : Self.trattiVoce)
+    }
+
+    /// Il titolo e, se c'è, cosa manca («Archivio e backup, mai fatto»).
+    private var etichettaAccessibile: String {
+        switch segno {
+        case .etichetta(let testo, _)?: return "\(titolo), \(testo)"
+        case .spunta?: return "\(titolo), tutto a posto"
+        default: return titolo
+        }
     }
 
     private var fondo: Color {
@@ -131,6 +151,40 @@ struct VoceLateraleImpostazioniApple: View {
 
     private static var trattiVoce: AccessibilityTraits { .isButton }
     private static var trattiAttiva: AccessibilityTraits { [.isButton, .isSelected] }
+}
+
+/// Il segno a destra di una voce della colonna delle Impostazioni.
+enum SegnoVoceImpostazioni: Equatable {
+    /// Il pallino nel colore del tono (iPad).
+    case pallino(Pillola.Tono)
+    /// Migliorie d'uso 31: l'etichetta breve di cosa manca («mai fatto», «spenti») o il numero di «Da sistemare».
+    case etichetta(String, errore: Bool)
+    /// Migliorie d'uso 31: «Da sistemare» a zero.
+    case spunta
+}
+
+/// Migliorie d'uso 31: la pillola della colonna (`.impSt`): 11 semibold in capsula, arancio al 16% con il testo
+/// `arancioTesto`, o rosso al 13% con il testo rosso per gli errori.
+struct PillolaColonnaImpostazioni: View {
+    let testo: String
+    var errore = false
+
+    private typealias E = Tema.Apple.Impostazioni.Laterale.EtichettaStato
+
+    init(testo: String, errore: Bool = false) {
+        self.testo = testo
+        self.errore = errore
+    }
+
+    var body: some View {
+        Text(testo)
+            .carattereApple(E.carattere)
+            .foregroundColor(errore ? E.testoErrore : E.testoAttenzione)
+            .lineLimit(1)
+            .padding(E.padding)
+            .background { Capsule(style: .continuous).fill(errore ? E.fondoErrore : E.fondoAttenzione) }
+            .fixedSize()
+    }
 }
 
 // MARK: - Ricerca (Migliorie d'uso 30, solo Mac)

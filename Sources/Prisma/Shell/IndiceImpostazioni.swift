@@ -3,7 +3,7 @@ import Foundation
 
 // Migliorie d'uso 30 «Le impostazioni si cercano, in gruppi con un nome» (Design/uso/gruppo-04.md §30), solo Mac.
 //
-// - I gruppi della colonna: la Panoramica da sola in cima, poi «Prisma», «Il lavoro» e «Aiuto» (`gruppi`).
+// - I gruppi della colonna: «Da sistemare» (la Panoramica, migliorie d'uso 31) da sola in cima, poi «Prisma», «Il lavoro» e «Aiuto» (`gruppi`).
 // - L'indice delle voci: una voce per ogni riga delle pagine del Mac (titolo e spiegazione scritti come nella riga; per
 //   le spiegazioni che cambiano con lo stato la forma fissa più utile), con la pagina, l'ancora a cui scorrere e qualche
 //   sinonimo. La ricerca guarda solo questi testi dell'interfaccia, mai i dati scritti dall'utente (nomi dei clienti,
@@ -96,9 +96,15 @@ enum IndiceImpostazioni {
 
     /// Le righe delle pagine del Mac, pagina per pagina nell'ordine della colonna.
     static let voci: [VoceIndiceImpostazioni] = [
-        aspetto, ovunque, archivio, vera, profilo, studio, mercato, lavoro, promemoria, conformita, proposte, moduli,
+        daSistemare, aspetto, ovunque, archivio, vera, profilo, studio, mercato, lavoro, promemoria, conformita, proposte, moduli,
         pratiche, portafogli, rendimenti, sala, territorio, scorciatoie, strumenti,
     ].flatMap { $0 }
+
+    /// Migliorie d'uso 31: la prima voce della colonna.
+    private static let daSistemare: [V] = [
+        V(titolo: "Da sistemare", spiegazione: "Cosa manca perché Prisma sia a posto, con «Sistema» per ogni cosa.",
+          pagina: .panoramica, parole: ["panoramica", "stato", "problemi", "a posto"]),
+    ]
 
     private static let aspetto: [V] = [
         V(titolo: "Aspetto", spiegazione: "Chiaro, scuro o automatico come il Mac.", pagina: .aspetto,

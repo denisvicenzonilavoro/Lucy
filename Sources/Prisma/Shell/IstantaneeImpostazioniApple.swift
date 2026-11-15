@@ -6,6 +6,7 @@ import Foundation
 /// testo) in chiaro e in scuro; poi Archivio e backup con la card dell'anello pieno («Backup creato adesso»), il
 /// backup automatico settimanale, «Dove salvare» e «Ripristina…». Ferme nello stato finale (`\.modoIstantanea`).
 /// Migliorie d'uso 30: la colonna con il campo «Cerca nelle impostazioni» e i gruppi con un nome; 1054 e 1055 la ricerca.
+/// Migliorie d'uso 31: la colonna con «Da sistemare» e le etichette; 1056-1058 la pagina «Da sistemare».
 extension Istantanee {
     nonisolated static var sceneImpostazioniApple: [(nome: String, prepara: (StatoShell) -> Void)] {
         [
@@ -30,7 +31,42 @@ extension Istantanee {
                 preparaImpostazioniApple(s, sezione: .aspetto)
                 s.cercaImpostazioni = "xyz"
             }),
+            // Migliorie d'uso 31: «Da sistemare» (backup mai fatto, promemoria spenti, dati per le fatture incompleti,
+            // Vera pronta in «A posto»), «Tutto a posto» con la spunta nella colonna, e Vera non pronta con l'archivio in
+            // sola lettura
+            ("1056-uso-da-sistemare", { s in preparaDaSistemare(s) }),
+            ("1056-uso-da-sistemare-scuro", { s in preparaDaSistemare(s) }),
+            ("1057-uso-tutto-a-posto", { s in
+                s.dati.impostazioni.backup.ultimo = Date()
+                s.dati.impostazioni.backup.ultimoErrore = nil
+                s.dati.impostazioni.backup.cartella = cartellaBackupDiProva
+                s.dati.impostazioni.promemoria.attivi = true
+                s.dati.impostazioni.studio.fatturazione = ProvaBackup.fatturazioneDiProva()
+                s.disponibilitaLocale = .pronto
+                preparaImpostazioniApple(s, sezione: .panoramica)
+            }),
+            ("1058-uso-da-sistemare-vera", { s in
+                preparaDaSistemare(s)
+                s.disponibilitaLocale = .nonDisponibile("Ollama non è aperto.")
+                s.segnaSolaLetturaPerIstantanea()
+            }),
         ]
+    }
+
+    /// Una cartella di backup scelta (inventata): i backup non sono «sullo stesso Mac».
+    nonisolated static let cartellaBackupDiProva = "/Volumes/Backup/Prisma"
+
+    /// Migliorie d'uso 31: le tre cose del template (backup mai fatto, promemoria spenti, dati per le fatture da
+    /// completare) e Vera pronta.
+    nonisolated static func preparaDaSistemare(_ s: StatoShell) {
+        s.dati.impostazioni.backup.ultimo = nil
+        s.dati.impostazioni.backup.ultimoErrore = nil
+        s.dati.impostazioni.backup.ultimoTentativo = nil
+        s.dati.impostazioni.backup.cartella = cartellaBackupDiProva
+        s.dati.impostazioni.promemoria.attivi = false
+        s.dati.impostazioni.studio.fatturazione = DatiFatturazione()
+        s.disponibilitaLocale = .pronto
+        preparaImpostazioniApple(s, sezione: .panoramica)
     }
 
     /// Le Impostazioni aperte sulla sezione data.

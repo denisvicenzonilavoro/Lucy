@@ -486,7 +486,7 @@ enum VoceConfronto: Hashable {
     /// letto in attesa che il consulente scelga di chi è. Solo in memoria, come la copia nella cartella temporanea.
     var scelteClienteCaduto: [String: SceltaClienteCaduto] = [:]
     /// Qwen sul Mac (Ollama): pronto o perché no. Si aggiorna con `verificaMotoreLocale()`.
-    var disponibilitaLocale = DisponibilitaVera.nonDisponibile("Ollama non ancora verificato.")
+    var disponibilitaLocale = DisponibilitaVera.nonDisponibile(StatoShell.veraNonVerificata)
     /// La risposta di Vera mentre arriva (osservata solo dalla bolla in arrivo).
     let flussoVera = FlussoVera()
     /// La mini finestra di Vera (⌥ Spazio, sfera nella barra): osservata solo dal suo pannello e dalla sfera.
@@ -601,6 +601,12 @@ enum VoceConfronto: Hashable {
     private(set) var solaLettura = false
     /// Archivio di una versione più recente: neanche il ripristino di un backup è sicuro.
     private(set) var ripristinoBloccato = false
+
+    /// Migliorie d'uso 31: solo per le istantanee di «Da sistemare» (1058), l'archivio in sola lettura. Mai nell'app.
+    func segnaSolaLetturaPerIstantanea() {
+        guard !persistente else { return }
+        solaLettura = true
+    }
 
     init(persistente: Bool = true) {
         self.persistente = persistente
@@ -4032,7 +4038,13 @@ enum SchedaImpostazioni: String, CaseIterable, Hashable, Identifiable {
 
     var titolo: String {
         switch self {
-        case .panoramica: return "Panoramica"
+        case .panoramica:
+            // Migliorie d'uso 31: sul Mac la prima voce dice cosa resta da sistemare
+            #if os(macOS)
+            return "Da sistemare"
+            #else
+            return "Panoramica"
+            #endif
         case .profilo: return "Profilo"
         case .aspetto: return "Aspetto"
         case .ovunque: return "iPhone e iPad"

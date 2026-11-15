@@ -1339,6 +1339,8 @@ enum ProvaCalcoli {
         ProvaCalcoliIndiceDossier.esegui(verificaEsterna)
         // Migliorie d'uso 15: la frase della scheda di una posizione non inventa cifre, i dati vuoti pertinenti al tipo
         ProvaCalcoliDettaglioPosizione.esegui(verificaEsterna)
+        // Migliorie d'uso 31: «Da sistemare» (ordine di gravità, etichette della colonna, «A posto» solo per ciò che è attivo)
+        ProvaMotoreDaSistemare.esegui(verificaEsterna)
         #if os(macOS)
         // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
         MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }

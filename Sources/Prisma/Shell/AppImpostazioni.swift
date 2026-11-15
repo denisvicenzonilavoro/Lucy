@@ -134,7 +134,13 @@ struct AppImpostazioni: View {
 
     @ViewBuilder func contenuto(_ pagina: SchedaImpostazioni) -> some View {
         switch pagina {
-        case .panoramica: panoramica
+        case .panoramica:
+            // Migliorie d'uso 31: sul Mac «Da sistemare» al posto delle quattro tessere
+            #if os(macOS)
+            PaginaDaSistemare()
+            #else
+            panoramica
+            #endif
         case .profilo: profilo
         case .aspetto: aspetto
         case .ovunque: PaginaImpostazioniOvunque()

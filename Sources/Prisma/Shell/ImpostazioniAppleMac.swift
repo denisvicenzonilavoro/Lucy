@@ -75,6 +75,8 @@ extension AppImpostazioni {
     private var barraLateraleApple: some View {
         let l = Tema.Apple.Impostazioni.Laterale.self
         let forma = RoundedRectangle(cornerRadius: l.raggio, style: .continuous)
+        // Migliorie d'uso 31: cosa resta da sistemare, letto una volta per disegno (solo letture)
+        let esito = Self.esitoColonna(stato)
         return VStack(alignment: .leading, spacing: 0) {
             #if os(macOS)
             // Migliorie d'uso 30: il campo della ricerca in cima, fuori dallo scorrimento
@@ -88,13 +90,13 @@ extension AppImpostazioni {
                     #if os(macOS)
                     // Migliorie d'uso 30: la Panoramica da sola, poi «Prisma», «Il lavoro» e «Aiuto»
                     ForEach(Array(IndiceImpostazioni.gruppi.enumerated()), id: \.offset) { i, g in
-                        gruppoLateraleApple(g.titolo, g.pagine, primo: Self.primoDelGruppo(i))
+                        gruppoLateraleApple(g.titolo, g.pagine, primo: Self.primoDelGruppo(i), esito: esito)
                     }
                     #else
-                    gruppoLateraleApple(nil, Self.sezioniPrincipali, primo: 0)
-                    gruppoLateraleApple("Il lavoro", Self.sezioniLavoro, primo: Self.sezioniPrincipali.count)
+                    gruppoLateraleApple(nil, Self.sezioniPrincipali, primo: 0, esito: esito)
+                    gruppoLateraleApple("Il lavoro", Self.sezioniLavoro, primo: Self.sezioniPrincipali.count, esito: esito)
                     gruppoLateraleApple("Per le prove", Self.sezioniProve,
-                                        primo: Self.sezioniPrincipali.count + Self.sezioniLavoro.count + 1)
+                                        primo: Self.sezioniPrincipali.count + Self.sezioniLavoro.count + 1, esito: esito)
                     #endif
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -108,7 +110,8 @@ extension AppImpostazioni {
         .superficieApple(l.superficie, raggio: l.raggio)
     }
 
-    private func gruppoLateraleApple(_ titolo: String?, _ pagine: [SchedaImpostazioni], primo: Int) -> some View {
+    private func gruppoLateraleApple(_ titolo: String?, _ pagine: [SchedaImpostazioni], primo: Int,
+                                     esito: EsitoDaSistemare?) -> some View {
         let l = Tema.Apple.Impostazioni.Laterale.self
         return VStack(alignment: .leading, spacing: l.fraVoci) {
             if let titolo {
@@ -124,7 +127,7 @@ extension AppImpostazioni {
             ForEach(Array(pagine.enumerated()), id: \.element) { i, p in
                 // Il pallino di «Prisma ovunque» legge `stato.ovunque.problema`: StatoOvunque è @Observable, quindi
                 // un errore della sincronizzazione in background lo accende da solo
-                voceLateraleApple(p)
+                voceLateraleApple(p, esito: esito)
                 .entrataCascata(primo + i + (titolo == nil ? 0 : 1), sfocatura: false)
             }
         }
@@ -137,9 +140,9 @@ extension AppImpostazioni {
     }
     #endif
 
-    private func voceLateraleApple(_ p: SchedaImpostazioni) -> some View {
+    private func voceLateraleApple(_ p: SchedaImpostazioni, esito: EsitoDaSistemare?) -> some View {
         VoceLateraleImpostazioniApple(titolo: p.titolo, attiva: stato.schedaImpostazioni == p && !inRicercaImpostazioni,
-                                      stato: statoVoceLaterale(p)) {
+                                      segno: segnoVoceLaterale(p, esito: esito)) {
             #if os(macOS)
             stato.cercaImpostazioni = ""
             #endif
@@ -147,7 +150,29 @@ extension AppImpostazioni {
         }
     }
 
-    /// Un pallino accanto alla sezione solo quando c'è da guardare (backup, archivio, Vera non pronta).
+    /// Migliorie d'uso 31: sul Mac l'esito di «Da sistemare» per la colonna; sull'iPad nessuno (restano i pallini).
+    private static func esitoColonna(_ stato: StatoShell) -> EsitoDaSistemare? {
+        #if os(macOS)
+        return stato.daSistemare()
+        #else
+        return nil
+        #endif
+    }
+
+    /// Il segno accanto alla sezione. Sul Mac (migliorie d'uso 31): accanto a «Da sistemare» il numero, o la spunta
+    /// verde a zero; accanto alle altre l'etichetta della cosa più grave da sistemare in quella pagina («mai fatto»,
+    /// «spenti», «da completare»…). Sull'iPad il pallino di sempre.
+    private func segnoVoceLaterale(_ p: SchedaImpostazioni, esito: EsitoDaSistemare?) -> SegnoVoceImpostazioni? {
+        guard let esito else { return statoVoceLaterale(p).map { SegnoVoceImpostazioni.pallino($0) } }
+        if p == .panoramica {
+            return esito.conteggio == 0 ? .spunta : .etichetta("\(esito.conteggio)", errore: false)
+        }
+        guard let v = esito.etichetta(per: p) else { return nil }
+        return .etichetta(v.etichettaColonna, errore: v.tono == .errore)
+    }
+
+    /// Un pallino accanto alla sezione solo quando c'è da guardare (backup, archivio, Vera non pronta). Sull'iPad; sul
+    /// Mac le stesse condizioni sono voci di `MotoreDaSistemare`.
     private func statoVoceLaterale(_ p: SchedaImpostazioni) -> Pillola.Tono? {
         switch p {
         case .archivio:
@@ -255,8 +280,10 @@ extension AppImpostazioni {
         return ScrollViewReader { lettore in
             ScrollView {
                 VStack(alignment: .leading, spacing: 0) {
-                    TitoloPaginaImpostazioni(testo: scelta.titolo)
-                        .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+                    if !Self.titoloProprio(scelta) {
+                        TitoloPaginaImpostazioni(testo: scelta.titolo)
+                            .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+                    }
                     contenutoApple(scelta)
                 }
                 .frame(maxWidth: scelta == .rendimenti || scelta == .ovunque ? .infinity : p.larghezzaMassima, alignment: .leading)
@@ -270,6 +297,15 @@ extension AppImpostazioni {
         }
     }
 
+    /// Migliorie d'uso 31: «Da sistemare» (sul Mac) scrive da sé il titolo, che cambia in «Tutto a posto», e la frase.
+    static func titoloProprio(_ pagina: SchedaImpostazioni) -> Bool {
+        #if os(macOS)
+        return pagina == .panoramica
+        #else
+        return false
+        #endif
+    }
+
     /// Le quattro sezioni del template hanno le righe a cascata una per una; le altre entrano tutte insieme.
     @ViewBuilder private func contenutoApple(_ pagina: SchedaImpostazioni) -> some View {
         switch pagina {
@@ -277,6 +313,9 @@ extension AppImpostazioni {
             contenuto(pagina)
         case .profilo:
             profiloApple
+        case .panoramica where Self.titoloProprio(pagina):
+            // Migliorie d'uso 31: «Da sistemare» ha la sua cascata, riga per riga
+            contenuto(pagina)
         default:
             VStack(alignment: .leading, spacing: M.spazioGruppi) {
                 contenuto(pagina)

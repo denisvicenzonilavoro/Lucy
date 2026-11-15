@@ -591,3 +591,32 @@ Resta:
 - **Ancore**: solo per gruppo (non per singola riga); nelle pagine senza ancora «Apri» porta in cima alla pagina.
 - **Da provare sul Mac vero**: che il campo non prenda il fuoco da solo all'apertura (se lo prende, Esc nel campo vuoto
   chiude comunque Impostazioni, come sempre) e che ⌘F non disturbi la Biblioteca aperta dietro.
+
+## 31. Si vede cosa resta da sistemare
+
+Fatto (solo sul Mac): il motore puro `MotoreDaSistemare` (Motori/MotoreDaSistemare.swift, con `FattiDaSistemare`,
+`VoceDaSistemare`, `EsitoDaSistemare` e i testi `TestiDaSistemare`), i fatti letti in `StatoShell.fattiDaSistemare()`
+(Shell/StatoDaSistemare.swift: solo letture; i mancanti delle fatture con `ricavato("impostazioni-da-sistemare-fatture")`),
+la pagina `PaginaDaSistemare` al posto delle quattro tessere della Panoramica («Da sistemare» / «Tutto a posto», «Tre cose,
+poi Prisma è a posto.», «Sistema» blu che apre la pagina e la riga, occhiello «A posto» con la spunta verde), il titolo
+della voce sul Mac «Da sistemare», nella colonna il numero in pillola arancio (o la spunta verde a zero) e accanto alle
+pagine l'etichetta della cosa più grave al posto del pallino («mai fatto», «spenti», «da completare», «non pronta»…; in
+rosso gli errori). Le condizioni dei pallini di prima (archivio, Vera, iPhone e iPad, Mercato) sono voci del motore. Vera
+conta solo dopo la prima verifica (`StatoShell.veraNonVerificata`). In più, come proposto in §31.6: la riga del tagliando
+dei dati quando l'elenco di oggi ha trovato qualcosa, e i backup «sullo stesso Mac» come cosa da sistemare. Voce «Da
+sistemare» nell'indice della ricerca. Prove: `ProvaMotoreDaSistemare` in `--prova-calcoli`, e in `--prova-backup` la voce
+«Nessun backup ancora» che sparisce dopo il backup. Istantanee nuove 1056 (chiara e scura), 1057, 1058 (per la sola
+lettura `StatoShell.segnaSolaLetturaPerIstantanea()`, che nell'app non fa nulla). L'iPad tiene la Panoramica di prima.
+
+Resta:
+- **Istantanee**: rigenerare sul Mac 470/471, 1054/1055, «250-impostazioni-panoramica» (ora «Da sistemare») e le nuove
+  1056-1058; guardare che l'etichetta più lunga («sullo stesso Mac», «non aggiornato») non stringa troppo il titolo delle
+  voci della colonna (il titolo si riduce fino all'85%), e aggiornare la pagina delle anteprime.
+- **§31.3 punto 6**, da controllare guardando le istantanee: le righe sotto un interruttore spento in Mercato («Dati di
+  mercato»), «Prisma ovunque» e Notte devono essere attenuate, non nascoste (i promemoria lo fanno già).
+- **«Lasciali spenti»** per i promemoria (§31.6): non fatto, servirebbe un campo in `Impostazioni`; i promemoria spenti
+  contano come nel template.
+- **La card del tagliando** resta anche nella pagina di Vera (l'uscita dalla colonna di Vera è della miglioria 27).
+- **«N su M» dei dati per le fatture**: la frase dice «ne mancano N»; il totale richiederebbe un conteggio dei dati
+  richiesti in `MotoreFattura`.
+- I token vecchi della Panoramica (`Tema.Misura.Impostazioni`, `Tema.Apple.Impostazioni.Tessera`) restano per l'iPad.
