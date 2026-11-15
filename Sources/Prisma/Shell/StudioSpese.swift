@@ -209,8 +209,11 @@ struct SpeseStudioVista: View {
                                             fineSerie: MotoreChilometri.fineSerie(scelto: mese, oggi: oggi))
         let spese = MotoreSpese.delMese(stato.dati.speseStudio.spese, mese: mese)
         let archivio = stato.dati.speseStudio
-        // Le parcelle emesse nel mese: un filtro piccolo, lo stesso elenco che entra nel pacchetto
-        let parcelle = PacchettoCommercialista.parcelleDelMese(stato.dati.parcelle, mese: mese).count
+        // Le parcelle emesse nel mese, lo stesso elenco che entra nel pacchetto: tenute fra i dati ricavati (il filtro
+        // legge tutte le parcelle, non va rifatto a ogni ridisegno); le parcelle entrano in `versioneCalcoli`
+        let parcelle = stato.ricavato("spese-parcelle-\(mese.timeIntervalSinceReferenceDate)") {
+            PacchettoCommercialista.parcelleDelMese(stato.dati.parcelle, mese: mese).count
+        }
         let avanti = s.puoAvanzare(oggi: oggi, impostazioni: imp)
         return GeometryReader { geo in
             ScrollView(.vertical, showsIndicators: false) {
