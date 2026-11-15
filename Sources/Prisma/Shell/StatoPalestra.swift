@@ -52,10 +52,17 @@ import Observation
 
     var inCorso: Bool { fase == .veraScrive || fase == .tuoTurno }
 
-    /// Il cliente scelto, o quello attivo della shell.
+    /// Il cliente scelto, o quello attivo della shell. Sul Mac (migliorie d'uso 56) vale prima il cliente della barra;
+    /// `clienteId` conta solo con la barra su «Tutti i clienti».
     func clienteScelto(_ stato: StatoShell) -> Cliente? {
+        #if os(macOS)
+        if !stato.tuttiIClienti, let c = stato.clienteAttivo { return c }
+        if let id = clienteId, let c = stato.cliente(id) { return c }
+        return nil
+        #else
         if let id = clienteId, let c = stato.cliente(id) { return c }
         return stato.clienteAttivo
+        #endif
     }
 
     /// La scheda della recita per la scelta di adesso (nil: nessun cliente e nessun profilo inventato).
@@ -79,6 +86,22 @@ import Observation
         clienteId = id
         azzera()
     }
+
+    #if os(macOS)
+    /// «Cambia» (migliorie d'uso 56): con un cliente nella barra sceglierne un altro cambia il cliente di tutta Prisma;
+    /// con «Tutti i clienti» cambia solo quello della palestra. Mai durante l'allenamento.
+    func cambia(cliente id: String, stato: StatoShell) {
+        guard !inCorso else { return }
+        if stato.tuttiIClienti {
+            scegli(cliente: id)
+        } else {
+            usaInventato = false
+            clienteId = nil
+            stato.scegliCliente(id, avviso: true)
+            azzera()
+        }
+    }
+    #endif
 
     func scegliInventato() {
         guard !inCorso else { return }
@@ -198,7 +221,7 @@ import Observation
                 // La replica resta un momento, poi l'obiezione dopo
                 try? await Task.sleep(nanoseconds: UInt64(Tema.Apple.Moto.Palestra.pausaTurno * 1_000_000_000))
                 guard !Task.isCancelled, fase == .veraScrive else { return }
-                turni.append(TurnoPalestra(id: turni.count, obiezione: prossima, suggerite: r.suggerite))
+                turni.append(TurnoPalestra(id: turni.count, obiezione: prossima, suggerite: r.suggerite, migliore: migliore(r)))
                 fase = .tuoTurno
             }
         } catch is CancellationError {
@@ -217,7 +240,7 @@ import Observation
         if let st = r.strumento { strumenti.append(st) }
         if turni.isEmpty {
             convinta = difficolta.convinzioneIniziale
-            turni = [TurnoPalestra(id: 0, obiezione: r.prossimaObiezione ?? "", suggerite: r.suggerite)]
+            turni = [TurnoPalestra(id: 0, obiezione: r.prossimaObiezione ?? "", suggerite: r.suggerite, migliore: migliore(r))]
             fase = .tuoTurno
             return
         }
@@ -233,6 +256,12 @@ import Observation
         if turni.count >= PalestraVera.obiezioni || (r.prossimaObiezione ?? "").isEmpty {
             concludi()
         }
+    }
+
+    /// La suggerita più efficace della risposta, solo in Facile (migliorie d'uso 56).
+    private func migliore(_ r: RispostaPalestra) -> Int? {
+        guard difficolta == .facile, let m = r.migliore, r.suggerite.indices.contains(m) else { return nil }
+        return m
     }
 
     /// La fine: punteggio e registro leggero (mai la conversazione).

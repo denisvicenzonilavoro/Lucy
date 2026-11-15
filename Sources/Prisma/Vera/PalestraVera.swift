@@ -49,8 +49,22 @@ enum DifficoltaPalestra: String, Codable, CaseIterable, Identifiable {
         }
     }
 
-    /// La regola per Qwen, nell'ultimo messaggio.
+    /// La regola per Qwen, nell'ultimo messaggio. Sul Mac (migliorie d'uso 56) Facile chiede anche il segno sulla
+    /// suggerita più efficace e Difficile insiste quando la risposta non è ottima.
     var regola: String {
+        #if os(macOS)
+        switch self {
+        case .facile: return regolaBase + " " + PalestraVera.regolaMigliore
+        case .realistica: return regolaBase
+        case .difficile: return regolaBase + " " + PalestraVera.regolaInsiste
+        }
+        #else
+        return regolaBase
+        #endif
+    }
+
+    /// La regola di base, uguale su tutti i dispositivi.
+    private var regolaBase: String {
         switch self {
         case .facile:
             return "Facile: sei abbastanza convinto e una risposta buona ti basta per passare oltre."
@@ -135,6 +149,9 @@ struct SchedaRecita: Equatable {
     var dettagli: [String] = []
     /// Le cifre calcolate da Prisma (obiettivi, proposte, aliquote): le sole che Vera e le suggerite possono usare.
     var cifre: [String] = []
+    /// Il genere dal codice fiscale (`MotoreAree360.femminile`), calcolato una volta con la scheda: «recitato» o
+    /// «recitata» da Vera (migliorie d'uso 56). nil: non si sa (e il profilo inventato).
+    var femminile: Bool?
 
     var nomeBreve: String { nome.split(separator: " ").first.map(String.init) ?? nome }
 
@@ -166,6 +183,9 @@ struct RispostaPalestra: Equatable {
     var prossimaObiezione: String?
     var suggerite: [String]
     var strumento: StrumentoPalestra?
+    /// La suggerita più efficace secondo Qwen (indice in `suggerite`), chiesta solo in Facile (migliorie d'uso 56):
+    /// nil se Qwen non la indica o l'indice non è valido. Mai inventata dal codice.
+    var migliore: Int? = nil
 }
 
 /// Un turno dell'allenamento: l'obiezione, le suggerite, la risposta del consulente, il giudizio e la replica.
@@ -177,6 +197,8 @@ struct TurnoPalestra: Identifiable, Equatable {
     var giudizio: GiudizioPalestra?
     var motivo: String?
     var replica: String?
+    /// La suggerita più efficace (indice in `suggerite`), solo in Facile: la pillola «la più efficace».
+    var migliore: Int?
 }
 
 enum PalestraVera {
@@ -193,10 +215,23 @@ enum PalestraVera {
     /// Allenamenti ricordati nelle impostazioni.
     static let massimoEsiti = 50
 
+    // MARK: - Migliorie d'uso 56
+
+    /// In Facile: il segno sulla suggerita più efficace lo dà Qwen, mai il codice.
+    static let regolaMigliore = "Indica in \"migliore\" l'indice (0, 1 o 2) della risposta suggerita più efficace."
+    /// In Difficile: il cliente insiste, con parole sue, quando la risposta non è ottima.
+    static let regolaInsiste = "Se il giudizio non è \"ottima\", la replica torna sullo stesso dubbio e chiede di vederlo con i suoi numeri, prima della prossima obiezione."
+
+    /// L'ultimo allenamento con un cliente (il più recente; a parità di data l'ultimo registrato), nil se non ce n'è.
+    static func ultimo(_ esiti: [EsitoPalestra], cliente: String) -> EsitoPalestra? {
+        let suoi = esiti.enumerated().filter { $0.element.clienteId == cliente }
+        return suoi.max { ($0.element.data, $0.offset) < ($1.element.data, $1.offset) }?.element
+    }
+
     // MARK: - Istruzioni e schema
 
     static var istruzioni: String {
-        IstruzioniVera.testo("palestra") ?? "Reciti un cliente di un consulente finanziario italiano, in prima persona, frasi brevi. Rispondi solo con un oggetto JSON: giudizio (ottima, buona, debole, nessuno), motivo, replica, convinta (0-100), prossimaObiezione, suggerite (tre risposte), strumento (lineaVita, lanciaAnno, film, provaFuoco, nessuno). Usa solo le cifre della scheda."
+        IstruzioniVera.testo("palestra") ?? "Reciti un cliente di un consulente finanziario italiano, in prima persona, frasi brevi. Rispondi solo con un oggetto JSON: giudizio (ottima, buona, debole, nessuno), motivo, replica, convinta (0-100), prossimaObiezione, suggerite (tre risposte), strumento (lineaVita, lanciaAnno, film, provaFuoco, nessuno), migliore (solo se la difficoltà lo chiede: l'indice 0-2 della suggerita più efficace). Usa solo le cifre della scheda."
     }
 
     /// Lo schema di Vera/Schemi/palestra.json dal pacchetto (in sviluppo: quello nel codice).
@@ -218,6 +253,8 @@ enum PalestraVera {
         p["prossimaObiezione"] = ["type": "string"]
         p["suggerite"] = ["type": "array", "items": ["type": "string"], "maxItems": 3] as [String: Any]
         p["strumento"] = ["type": "string", "enum": ["lineaVita", "lanciaAnno", "film", "provaFuoco", "nessuno"]]
+        // Migliorie d'uso 56: facoltativo, chiesto solo in Facile
+        p["migliore"] = ["type": "integer", "minimum": 0, "maximum": 2]
         let richiesti = ["giudizio", "motivo", "replica", "convinta", "prossimaObiezione", "suggerite", "strumento"]
         return ["type": "object", "properties": p, "required": richiesti]
     }()
@@ -240,6 +277,7 @@ enum PalestraVera {
     static func scheda(_ f: FonteVera) -> SchedaRecita {
         let c = f.cliente
         var s = SchedaRecita(clienteId: c.id, nome: c.nome, iniziali: c.iniziali)
+        s.femminile = MotoreAree360.femminile(c)
         var chi: [String] = []
         if let eta = c.eta { chi.append("\(eta) anni") }
         if !c.professione.isEmpty { chi.append(c.professione.lowercased()) }
@@ -373,10 +411,18 @@ enum PalestraVera {
             }
         }
         var suggerite: [String] = []
+        // La suggerita più efficace: un intero fra 0 e 2; segue la sua suggerita se le altre si tolgono, sparisce con lei
+        var indiceMigliore: Int?
+        if let n = j["migliore"] as? NSNumber, CFGetTypeID(n) != CFBooleanGetTypeID(), n.doubleValue == n.doubleValue.rounded(),
+           n.doubleValue >= 0, n.doubleValue < Double(Self.suggerite) {
+            indiceMigliore = n.intValue
+        }
+        var migliore: Int?
         if !ultimo {
-            for s in (j["suggerite"] as? [Any]) ?? [] {
+            for (i, s) in ((j["suggerite"] as? [Any]) ?? []).enumerated() {
                 guard let t = (s as? String)?.trimmingCharacters(in: .whitespacesAndNewlines), !t.isEmpty,
                       !suggerite.contains(t), CommentoVera.numeriConservati(bozza: ammesse, testo: t) else { continue }
+                if i == indiceMigliore { migliore = suggerite.count }
                 suggerite.append(t)
                 if suggerite.count == Self.suggerite { break }
             }
@@ -388,7 +434,7 @@ enum PalestraVera {
         return .valida(RispostaPalestra(giudizio: GiudizioPalestra(rawValue: stringa("giudizio").lowercased()),
                                         motivo: stringa("motivo"), replica: primo ? "" : replica, convinta: convinta,
                                         prossimaObiezione: ultimo ? nil : obiezione, suggerite: suggerite,
-                                        strumento: StrumentoPalestra(rawValue: stringa("strumento"))))
+                                        strumento: StrumentoPalestra(rawValue: stringa("strumento")), migliore: migliore))
     }
 
     /// Un turno con Qwen: chiede, legge e, se la risposta è da scartare, richiede una volta dicendo perché.

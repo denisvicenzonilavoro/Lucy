@@ -59,6 +59,23 @@ extension Tema.Apple {
         static let nota = C(dimensione: 12.5, peso: .regular, interlinea: 1.45)
         static let coloreNota = K.inchiostro2
 
+        // MARK: Migliorie d'uso 56
+
+        /// La riga sotto la difficoltà («Facile: la risposta più efficace ha un segno.»): `.k`, 8 sopra, interlinea 1,4.
+        static let sopraSpiega: CGFloat = 8
+        static let spiega = C(dimensione: 12.5, peso: .regular, interlinea: 1.4)
+        static let coloreSpiega = K.inchiostro2
+        /// La tessera «L’ultima volta con …» sotto la barra, 16 sopra: `.k` e il valore 13,5 bold.
+        static let sopraUltima: CGFloat = 16
+        static let ultimaEtichetta = C(dimensione: 12.5, peso: .regular)
+        static let coloreUltimaEtichetta = K.inchiostro2
+        static let ultimaValore = C(dimensione: 13.5, peso: .bold)
+        static let coloreUltimaValore = K.inchiostro
+        static let fraUltima: CGFloat = 2
+        /// La pillola «la più efficace» sulla suggerita migliore, in Facile (la pillola di stato del tema, verde).
+        static let tonoMigliore = TonoPillola.ok
+        static let spazioMigliore: CGFloat = 8
+
         // MARK: Conversazione
 
         /// La conversazione: 18 sopra; le risposte 18 dal fondo.

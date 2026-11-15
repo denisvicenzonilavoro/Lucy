@@ -1819,3 +1819,25 @@ Istantanee nuove 1093 (bilancio chiara e scura, tutte giuste, ultima domanda); 5
 - Il bilancio entra da destra con la stessa transizione della domanda; non c'è la cascata delle righe (il template non
   la chiede).
 - `--prova-fluidita`: nessuna prova nuova (gli esiti sono della sessione della vista, fuori dalla `ChiaveVista`).
+
+## 56. La palestra si fa sul cliente che vedrai
+
+Fatto (solo sul Mac): Vera recita il cliente della barra (`StatoPalestra.clienteScelto`: prima la barra, poi il cliente
+scelto nella palestra con «Tutti i clienti»), e cambiare cliente nella barra rifà la palestra se l'allenamento non è in
+corso; «Cambia» (menu con la rubrica in ordine e «Profilo inventato…», `StatoPalestra.cambia(cliente:stato:)`) con un
+cliente nella barra cambia tutta Prisma, con «Tutti i clienti» solo la palestra, sempre bloccato durante l'allenamento;
+sotto la difficoltà la riga che dice cosa cambia (`TestiPalestra.spiega`); il campo facoltativo `migliore` nello schema
+(cartella e `schemaInterno`), nel ripiego, nelle istruzioni e in `RispostaPalestra`/`TurnoPalestra`, chiesto solo in
+Facile e mostrato con la pillola verde «la più efficace» (mai inventato dal codice; segue la sua suggerita se un'altra si
+toglie); in Difficile la regola dell'insistenza per Qwen; sotto la barra la tessera «L’ultima volta con <Nome>» /
+«Con <Nome> · Primo allenamento» (`PalestraVera.ultimo` sul registro che c'è già); «recitato» per i clienti uomini dal
+codice fiscale (`SchedaRecita.femminile`). Prove «Palestra 56» in `ProvaPalestraVera` (`--prova-vera`). Istantanee: 720,
+721 (Facile, «la più efficace»), 722 (l'esito di oggi) aggiornate; nuove 1094-uso-palestra-primo-allenamento e
+1094-uso-palestra-difficile; 726 cambia da sola («Cambia»). Resta:
+- «Cambia» usa il pulsante `.apple` del tema (padding 7×14) attraverso `.menuStyle(.button)`, non il padding 5×12 del
+  template: un menu del Mac non prende un'etichetta con un fondo proprio in modo affidabile. Se le istantanee lo mostrano
+  troppo grande accanto al nome, serve una variante piccola di `StilePulsanteApple`.
+- Le istruzioni `Vera/Istruzioni/palestra.md` (comuni) parlano già di `migliore` e dell'insistenza; su iPhone e iPad la
+  regola della difficoltà resta quella di prima, quindi Qwen non li riceve dalla scheda.
+- Gli esempi `Vera/Esempi/palestra.json` non mostrano `migliore` (non servono alle prove delle regole).
+- Guardare con un Qwen vero (qwen3.5:4b) che in Facile `migliore` arrivi e che la risposta non diventi troppo lunga.

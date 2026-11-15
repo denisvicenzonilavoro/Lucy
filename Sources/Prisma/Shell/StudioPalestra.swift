@@ -24,6 +24,9 @@ import SwiftUI
 // - Qwen non pronto: la palestra lo dice e non parte. Esc interrompe Vera mentre scrive.
 // - «Riduci movimento»: tutto fermo con la dissolvenza di 0,15 s. Istantanee: conversazione scritta nel codice
 //   dell'istantanea, stato finale.
+// - Migliorie d'uso 56 (solo Mac): Vera recita il cliente della barra; «Cambia» sceglie un altro cliente (per tutta
+//   Prisma, o solo per la palestra con «Tutti i clienti»); sotto la difficoltà una riga dice cosa cambia; in Facile la
+//   suggerita più efficace secondo Vera porta «la più efficace»; sotto la barra «L’ultima volta con <Nome>».
 // Valori in DesignSystem/Apple/Tema.Apple+Palestra.swift; stato in StatoPalestra.swift.
 
 // MARK: - Testi
@@ -66,7 +69,14 @@ enum TestiPalestra {
     static let bloccata = "La difficoltà si sceglie prima di cominciare: per cambiarla, rifai l’allenamento."
 
     static func panni(_ s: SchedaRecita) -> String { "Vera nei panni di \(s.nomeBreve)" }
-    static func recitata(_ s: SchedaRecita) -> String { "\(s.nomeBreve) · recitata da Vera" }
+    static func recitata(_ s: SchedaRecita) -> String {
+        #if os(macOS)
+        // Migliorie d'uso 56: «recitato» per un cliente uomo (dal codice fiscale); con il genere sconosciuto «recitata»
+        return "\(s.nomeBreve) · \(s.femminile == false ? "recitato" : "recitata") da Vera"
+        #else
+        return "\(s.nomeBreve) · recitata da Vera"
+        #endif
+    }
     static func scarno(_ s: SchedaRecita) -> String { "Di \(s.nomeBreve) Prisma sa poco: l’allenamento sarà generico." }
     static func obiezione(_ k: Int) -> String { "Obiezione \(k) di \(PalestraVera.obiezioni)" }
 
@@ -82,6 +92,38 @@ enum TestiPalestra {
         case 1: return "1 risposta che ha fatto vedere i numeri di Prisma."
         default: return "\(ottime) risposte che hanno fatto vedere i numeri di Prisma."
         }
+    }
+
+    // MARK: Migliorie d'uso 56
+
+    static let cambia = "Cambia"
+    static let piuEfficace = "la più efficace"
+    static let primoAllenamento = "Primo allenamento"
+    static func ultimaVolta(_ nome: String) -> String { "L’ultima volta con \(nome)" }
+    static func conCliente(_ nome: String) -> String { "Con \(nome)" }
+
+    /// Cosa cambia con la difficoltà scelta.
+    static func spiega(_ d: DifficoltaPalestra) -> String {
+        switch d {
+        case .facile: return "Facile: la risposta più efficace ha un segno."
+        case .realistica: return "Realistica: tre obiezioni, senza aiuti."
+        case .difficile: return "Difficile: se la risposta è debole, insiste."
+        }
+    }
+
+    /// «78% · 28 ottobre», «78% · oggi», «78% · ieri»; l'anno solo se non è quello di oggi.
+    static func esito(_ punteggio: Int, data: Date, oggi: Date = Date(), cal: Calendar = .current) -> String {
+        let quando: String
+        if cal.isDate(data, inSameDayAs: oggi) {
+            quando = "oggi"
+        } else if let ieri = cal.date(byAdding: .day, value: -1, to: oggi), cal.isDate(data, inSameDayAs: ieri) {
+            quando = "ieri"
+        } else if cal.component(.year, from: data) == cal.component(.year, from: oggi) {
+            quando = Formati.giornoMese.string(from: data)
+        } else {
+            quando = Formati.dataEstesa.string(from: data)
+        }
+        return "\(punteggio)% · \(quando)"
     }
 
     static func strumenti(_ s: [StrumentoPalestra]) -> String {
@@ -119,6 +161,10 @@ struct PalestraStudioVista: View {
         }
         #if os(macOS)
         .onExitCommand { palestra.annulla() }
+        // Migliorie d'uso 56: il cliente della barra cambia, la palestra riparte da capo (non durante l'allenamento)
+        .onChange(of: stato.clienteAttivoId) { _ in
+            if !palestra.inCorso && palestra.fase != .attesa { palestra.azzera() }
+        }
         #endif
     }
 
@@ -177,12 +223,25 @@ private struct ColonnaPalestra: View {
                 .opacity(palestra.inCorso ? 0.55 : 1)
                 .allowsHitTesting(!palestra.inCorso)
                 .help(palestra.inCorso ? TestiPalestra.bloccata : "")
+            #if os(macOS)
+            Text(TestiPalestra.spiega(palestra.difficolta))
+                .carattereApple(P.spiega)
+                .foregroundColor(P.coloreSpiega)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, P.sopraSpiega)
+            #endif
             Text(TestiPalestra.obiezione(numero))
                 .carattereApple(Tema.Apple.Carattere.secondario)
                 .foregroundColor(P.coloreNota)
                 .padding(.top, P.sopraAvanzamento)
             BarraAvanzamentoPalestra(frazione: frazione)
                 .padding(.top, P.sottoTestoAvanzamento)
+            #if os(macOS)
+            if let s = scheda, let id = s.clienteId {
+                UltimaVoltaPalestra(stato: stato, clienteId: id, nome: s.nomeBreve)
+                    .padding(.top, P.sopraUltima)
+            }
+            #endif
             Spacer(minLength: P.sopraAvanzamento)
             Text(palestra.usaInventato ? TestiPalestra.notaInventato : TestiPalestra.nota)
                 .carattereApple(P.nota)
@@ -291,6 +350,25 @@ private struct SelettorePalestra: View {
     private typealias P = Tema.Apple.Palestra
 
     var body: some View {
+        #if os(macOS)
+        // Migliorie d'uso 56: «Cambia», con i clienti nell'ordine della rubrica; con un cliente nella barra la scelta
+        // vale per tutta Prisma
+        Menu {
+            ForEach(stato.rubricaOrdinata) { c in
+                Button(c.nome) { palestra.cambia(cliente: c.id, stato: stato) }
+            }
+            Divider()
+            Button(TestiPalestra.inventato) { palestra.scegliInventato() }
+        } label: {
+            Text(TestiPalestra.cambia)
+        }
+        .menuStyle(.button)
+        .menuIndicator(.hidden)
+        .buttonStyle(.apple)
+        .fixedSize()
+        .disabled(palestra.inCorso)
+        .help(TestiPalestra.allenatiCon)
+        #else
         Menu {
             ForEach(stato.clienti) { c in
                 Button(c.nome) { palestra.scegli(cliente: c.id) }
@@ -307,8 +385,38 @@ private struct SelettorePalestra: View {
         .fixedSize()
         .disabled(palestra.inCorso)
         .help(TestiPalestra.allenatiCon)
+        #endif
     }
 }
+
+#if os(macOS)
+/// «L’ultima volta con <Nome>» (migliorie d'uso 56): l'ultimo allenamento con il cliente dal registro leggero delle
+/// impostazioni (al più 50 voci), oppure «Primo allenamento». Una vista a parte: si iscrive solo alle impostazioni e, a
+/// fine allenamento, si aggiorna da sé con l'esito appena registrato.
+private struct UltimaVoltaPalestra: View {
+    let stato: StatoShell
+    let clienteId: String
+    let nome: String
+
+    private typealias P = Tema.Apple.Palestra
+
+    var body: some View {
+        let ultimo = PalestraVera.ultimo(stato.dati.impostazioni.palestra.allenamenti, cliente: clienteId)
+        VStack(alignment: .leading, spacing: P.fraUltima) {
+            Text(ultimo == nil ? TestiPalestra.conCliente(nome) : TestiPalestra.ultimaVolta(nome))
+                .carattereApple(P.ultimaEtichetta)
+                .foregroundColor(P.coloreUltimaEtichetta)
+            Text(ultimo.map { TestiPalestra.esito($0.punteggio, data: $0.data) } ?? TestiPalestra.primoAllenamento)
+                .carattereApple(P.ultimaValore)
+                .foregroundColor(P.coloreUltimaValore)
+        }
+        .padding(P.paddingTile)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(P.tile)
+        .accessibilityElement(children: .combine)
+    }
+}
+#endif
 
 /// L'avatar del cliente recitato (iniziali nella sua tinta; il profilo inventato in blu).
 private struct AvatarPalestra: View {
@@ -531,7 +639,9 @@ private struct ConversazionePalestra: View {
                         .foregroundColor(P.coloreEtichetta)
                         .padding(.bottom, P.sottoRispondi - P.fraOpzioni)
                     ForEach(Array(t.suggerite.enumerated()), id: \.offset) { i, testo in
-                        OpzionePalestra(indice: i, testo: testo) { palestra.rispondi(testo, stato: stato) }
+                        OpzionePalestra(indice: i, testo: testo, migliore: palestra.difficolta == .facile && t.migliore == i) {
+                            palestra.rispondi(testo, stato: stato)
+                        }
                     }
                     #if os(macOS)
                     if !campoAttivo {
@@ -694,6 +804,8 @@ private struct EntrataGiudizioPalestra: ViewModifier {
 private struct OpzionePalestra: View {
     let indice: Int
     let testo: String
+    /// Migliorie d'uso 56: in Facile la suggerita più efficace secondo Vera porta la pillola «la più efficace».
+    var migliore = false
     let azione: () -> Void
 
     @Environment(\.prismaCalmo) private var calmo
@@ -721,6 +833,12 @@ private struct OpzionePalestra: View {
                     .multilineTextAlignment(.leading)
                     .fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
+                #if os(macOS)
+                if migliore {
+                    PillolaStatoApple(testo: TestiPalestra.piuEfficace, tono: P.tonoMigliore)
+                        .padding(.leading, P.spazioMigliore)
+                }
+                #endif
             }
             .padding(P.paddingOpzione)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -741,7 +859,7 @@ private struct OpzionePalestra: View {
             guard !istantanea, !dentro else { return }
             withAnimation(calmo ? Tema.Moto.dissolvenzaCalma : Tema.Apple.Moto.Palestra.opzione(indice: indice)) { dentro = true }
         }
-        .accessibilityLabel(Text("\(lettera). \(testo)"))
+        .accessibilityLabel(Text("\(lettera). \(testo)" + (migliore ? ", " + TestiPalestra.piuEfficace : "")))
     }
 }
 
