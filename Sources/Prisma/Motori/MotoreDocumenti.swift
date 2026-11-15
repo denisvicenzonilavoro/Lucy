@@ -93,6 +93,97 @@ enum MotoreDocumenti {
                           categoria: d.genere, nonLetto: d.lettura == .daLeggere)
     }
 
+    // MARK: - Dati certi e incerti (migliorie d'uso 62)
+
+    /// I dati da controllare di un documento, con il perché (Design/uso/gruppo-11.md §62.3 punto 1). Solo regole, niente
+    /// stato: un dato è incerto se è stato letto da Qwen e non dalle regole, se non ha la riga d'origine, se il valore non
+    /// si rilegge nel formato del suo campo (importo, data, percentuale, anni, SRI fra 1 e 7, ISIN con la cifra di
+    /// controllo, codice fiscale) o se è una data nel futuro dove non può esserlo. Un dato scritto a mano non è mai
+    /// incerto. La conferma non conta: chi chiama guarda `confermato` per sapere se il dubbio è ancora aperto.
+    static func incerti(_ d: Documento, oggi: Date = Date()) -> [CampoDocumento: String] {
+        guard d.genere != .prisma else { return [:] }
+        var esito: [CampoDocumento: String] = [:]
+        for c in d.campi {
+            if let perche = perche(c, oggi: oggi) { esito[c.chiave] = perche }
+        }
+        return esito
+    }
+
+    /// Il perché di un dato incerto, nil se il dato è certo.
+    static func perche(_ c: CampoEstratto, oggi: Date) -> String? {
+        if c.origine == TestiDocumenti.origineAMano { return nil }
+        let v = c.valore.trimmingCharacters(in: .whitespacesAndNewlines)
+        if c.origine.localizedCaseInsensitiveContains("qwen") { return TestiDocumenti.lettoConQwen }
+        if c.estratto.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty { return TestiDocumenti.senzaRiga }
+        if c.chiave.data {
+            guard let giorno = EstrattoreDocumento.data(v) else { return TestiDocumenti.dataIlleggibile }
+            if datePassate.contains(c.chiave), giorno > oggi { return TestiDocumenti.dataNelFuturo }
+            return nil
+        }
+        switch c.chiave {
+        case .sri:
+            guard let n = Int(v), (1...7).contains(n) else { return TestiDocumenti.sriFuoriScala }
+            return nil
+        case .isin:
+            return isinValido(v) ? nil : TestiDocumenti.isinNonValido
+        case .codiceFiscale:
+            return codiceFiscaleValido(v) ? nil : TestiDocumenti.codiceFiscaleNonValido
+        default:
+            break
+        }
+        switch c.chiave.unita {
+        case "€":
+            guard let n = EstrattoreDocumento.numero(v), n >= 0 else { return TestiDocumenti.importoIlleggibile }
+        case "%":
+            guard EstrattoreDocumento.numero(v) != nil else { return TestiDocumenti.percentualeIlleggibile }
+        case "anni":
+            guard let n = EstrattoreDocumento.numero(v), n > 0, n <= 100 else { return TestiDocumenti.anniIlleggibili }
+        default:
+            break
+        }
+        return nil
+    }
+
+    /// Le date che non possono essere nel futuro (quella del documento, del rilascio, del valore).
+    private static let datePassate: Set<CampoDocumento> = [.dataDocumento, .dataRilascio, .dataValore]
+
+    /// Due lettere, nove caratteri e la cifra di controllo (ISO 6166: lettere in numeri, poi Luhn).
+    static func isinValido(_ s: String) -> Bool {
+        let c = compatto(s)
+        guard c.count == 12, let ultimo = c.last, ultimo.isNumber,
+              c.prefix(2).allSatisfy({ $0.isLetter && $0.isASCII }), c.allSatisfy({ $0.isASCII }) else { return false }
+        var cifre: [Int] = []
+        for ch in c {
+            if let n = ch.wholeNumberValue {
+                cifre.append(n)
+            } else if let a = ch.asciiValue {
+                let valore = Int(a) - 55 // A = 10
+                guard (10...35).contains(valore) else { return false }
+                cifre.append(valore / 10)
+                cifre.append(valore % 10)
+            } else {
+                return false
+            }
+        }
+        var somma = 0
+        for (i, n) in cifre.reversed().enumerated() {
+            if i % 2 == 1 {
+                let doppio = n * 2
+                somma += doppio > 9 ? doppio - 9 : doppio
+            } else {
+                somma += n
+            }
+        }
+        return somma % 10 == 0
+    }
+
+    /// La forma del codice fiscale delle persone (16 caratteri, con le cifre che possono essere lettere di omocodia).
+    static func codiceFiscaleValido(_ s: String) -> Bool {
+        let c = compatto(s)
+        return c.range(of: #"^[A-Z]{6}[0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{2}[A-Z][0-9LMNPQRSTUV]{3}[A-Z]$"#,
+                       options: .regularExpression) != nil
+    }
+
     // MARK: - Collegamento
 
     /// Identità e questionari sono del cliente per natura: non si collegano a posizioni o schede.

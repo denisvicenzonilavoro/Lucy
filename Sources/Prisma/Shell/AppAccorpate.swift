@@ -8,7 +8,12 @@ extension StatoShell {
     func preparaOspite(per app: AppPrisma) {
         switch app {
         case .obiettivi: if schedaCliente != .obiettivi { schedaCliente = .obiettivi }
-        case .documenti: if schedaCliente != .documenti { schedaCliente = .documenti }
+        case .documenti:
+            if schedaCliente != .documenti { schedaCliente = .documenti }
+            #if os(macOS)
+            // Migliorie d'uso 62: il documento scelto da fuori si apre nel lettore grande
+            if let id = documentoSelezionato { vistaDocumenti.lettore = id }
+            #endif
         case .simulazioni: scegliStrumentoAnalisi(StatoShell.strumento(per: schedaSimulazioni))
         case .confronti: scegliStrumentoAnalisi(.confronto)
         case .attivita: selezionaAttivitaInAgenda(attivitaSelezionata)

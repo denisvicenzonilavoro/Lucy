@@ -1747,6 +1747,8 @@ enum Istantanee {
         tutteLeScene += sceneConferme
         // Migliorie d'uso 61: cerca ovunque, e fa (IstantaneeRicercaUso.swift)
         tutteLeScene += sceneRicercaUso
+        // Migliorie d'uso 62: il documento si apre in grande (IstantaneeLettore.swift)
+        tutteLeScene += sceneLettore
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu

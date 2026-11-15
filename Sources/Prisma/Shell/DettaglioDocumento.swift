@@ -1256,7 +1256,7 @@ struct ConfrontoClienteVista: View {
 // MARK: - Scheda «Testo»
 
 /// Il testo letto, pagina per pagina (la stessa pagina dell'anteprima), con le righe dei dati letti evidenziate.
-private struct SchedaTestoDocumento: View {
+struct SchedaTestoDocumento: View {
     @Environment(StatoShell.self) var stato
     let documento: Documento
 

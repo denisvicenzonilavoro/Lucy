@@ -48,4 +48,8 @@ struct VistaDocumenti: Equatable {
     /// `Tema.Misura.Documenti.elencoAutomatico` o se un filtro è attivo, purché alla pagina resti `anteprimaMinima`
     /// (con il pannello dei dati accanto); altrimenti stretto (le sole tessere).
     var elenco: Bool?
+    /// Migliorie d'uso 62 (solo Mac): il documento da aprire nel lettore, chiesto da fuori (ricerca, notifiche, Vera,
+    /// Prodotti: chi sceglie `documentoSelezionato` e apre Documenti). Lo consuma il presentatore dei dettagli di
+    /// Clienti, che apre il lettore e lo azzera. Solo in memoria.
+    var lettore: String?
 }

@@ -16,6 +16,15 @@ struct AnteprimaDocumento: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.modoIstantanea) private var modoIstantanea
     let documento: Documento
+    /// Migliorie d'uso 62 (lettore del Mac): il dato sotto il puntatore nei passi. Accende la sua riga solo se è sulla
+    /// pagina mostrata e ha la riga d'origine, senza cambiare pagina né far scorrere il foglio; nil = la riga di
+    /// `vistaDocumenti.evidenzia` (il clic su «p. N»), come sempre.
+    var evidenziaSopra: CampoDocumento? = nil
+    /// Il colore della riga accesa (nil = l'azzurro di sempre; il lettore del Mac usa il giallo del template).
+    var coloreEvidenza: Color? = nil
+    /// false (lettore del Mac): sulla stessa pagina la riga accesa non sposta il foglio, così il passaggio del puntatore
+    /// e la sua fine non lo fanno scorrere; i cambi di pagina portano sempre alla pagina.
+    var seguiRiga = true
 
     /// Lo zoom rispetto alla larghezza: 1 = il foglio largo quanto l'anteprima. Torna a 1 a ogni documento.
     @State private var zoom: CGFloat = 1
@@ -64,8 +73,10 @@ struct AnteprimaDocumento: View {
         case .pdf(let u):
             VistaPDF(url: u,
                      pagina: Binding(get: { stato.vistaDocumenti.pagina }, set: { stato.vistaDocumenti.pagina = $0 }),
-                     evidenzia: estrattoEvidenziato(pagina: nil),
-                     zoom: zoom)
+                     evidenzia: estrattoSopra(pagina) ?? estrattoEvidenziato(pagina: nil),
+                     zoom: zoom,
+                     seguiEvidenza: seguiRiga,
+                     coloreEvidenza: coloreEvidenza ?? Tema.Colore.Documenti.evidenziaPDF)
         case .video(let u):
             VideoDocumento(url: u)
                 .padding(m.margineTavolo)
@@ -82,16 +93,24 @@ struct AnteprimaDocumento: View {
             }
         case .testo:
             FoglioRicostruito(testo: pagina <= pagine.count ? pagine[pagina - 1] : "",
-                              estratto: estrattoEvidenziato(pagina: pagina),
+                              estratto: estrattoSopra(pagina) ?? estrattoEvidenziato(pagina: pagina),
                               nota: notaFoglio(vuoto: pagine.isEmpty),
                               pagina: pagina,
-                              zoom: zoom)
+                              zoom: zoom,
+                              segui: seguiRiga,
+                              colore: coloreEvidenza ?? Tema.Colore.Documenti.evidenziaFoglio)
         }
     }
 
     /// Ingrandito, il foglio scorre anche di lato.
     static func assi(_ zoom: CGFloat) -> Axis.Set {
         zoom > 1 ? [.vertical, .horizontal] : .vertical
+    }
+
+    /// La riga del dato sotto il puntatore (lettore del Mac), solo se è sulla pagina mostrata e ha la riga d'origine.
+    private func estrattoSopra(_ pagina: Int) -> String? {
+        guard let chiave = evidenziaSopra, let c = documento.campo(chiave), !c.estratto.isEmpty, c.pagina == pagina else { return nil }
+        return c.estratto
     }
 
     /// La riga del documento da cui viene il dato da evidenziare (sulla pagina mostrata, per il foglio ricostruito).
@@ -143,6 +162,9 @@ private struct FoglioRicostruito: View {
     let nota: String
     let pagina: Int
     let zoom: CGFloat
+    /// false: la riga si accende senza portarla al centro (il passaggio del puntatore nel lettore del Mac).
+    var segui = true
+    var colore: Color = Tema.Colore.Documenti.evidenziaFoglio
 
     var body: some View {
         let m = Tema.Misura.Documenti.self
@@ -152,13 +174,14 @@ private struct FoglioRicostruito: View {
             let scala: CGFloat = max(min(larghezza / m.foglioRiferimento, m.scalaFoglioMassima * zoom), m.scalaFoglioMinima * zoom)
             ScrollViewReader { lettore in
                 ScrollView(AnteprimaDocumento.assi(zoom)) {
-                    PaginaTestoDocumento(testo: testo, estratto: estratto, nota: nota, larghezza: larghezza, scala: scala)
+                    PaginaTestoDocumento(testo: testo, estratto: estratto, nota: nota, larghezza: larghezza, scala: scala,
+                                         colore: colore)
                         .padding(m.margineTavolo)
                         .padding(.bottom, m.spazioSottoFoglio)
                         .frame(minWidth: geo.size.width)
                 }
                 .onAppear { vaiAllaRiga(lettore) }
-                .onChange(of: estratto ?? "") { _ in vaiAllaRiga(lettore) }
+                .onChange(of: estratto ?? "") { _ in if segui { vaiAllaRiga(lettore) } }
                 .onChange(of: pagina) { _ in vaiAllaRiga(lettore) }
             }
         }
@@ -304,6 +327,8 @@ struct PaginaTestoDocumento: View {
     let larghezza: CGFloat
     /// Lo zoom del foglio: testo e margini crescono con la larghezza (1 = misure del tema).
     var scala: CGFloat = 1
+    /// Il colore della riga evidenziata (l'azzurro di sempre; il giallo nel lettore del Mac).
+    var colore: Color = Tema.Colore.Documenti.evidenziaFoglio
 
     /// L'identità di una riga, per portarla al centro (`ScrollViewReader`).
     static func idRiga(_ i: Int) -> String { "riga-foglio-\(i)" }
@@ -338,7 +363,7 @@ struct PaginaTestoDocumento: View {
             .padding(.horizontal, Tema.Misura.Documenti.margineRigaFoglio * scala)
             .background {
                 if Self.evidenziata(riga, estratto: estratto) {
-                    FormaVetro.arrotondata(Tema.Raggio.Documenti.evidenza).fill(Tema.Colore.Documenti.evidenziaFoglio)
+                    FormaVetro.arrotondata(Tema.Raggio.Documenti.evidenza).fill(colore)
                 }
             }
     }
@@ -371,6 +396,10 @@ struct VistaPDF {
     let evidenzia: String?
     /// Lo zoom rispetto alla larghezza: 1 = le pagine si adattano da sole alla vista.
     var zoom: CGFloat = 1
+    /// false: un cambio della sola riga sulla stessa pagina la accende senza spostare la vista (il passaggio del
+    /// puntatore nel lettore del Mac); i cambi di pagina portano sempre alla pagina.
+    var seguiEvidenza = true
+    var coloreEvidenza: Color = Tema.Colore.Documenti.evidenziaPDF
 
     final class Coordinatore: NSObject {
         var url: URL?
@@ -378,6 +407,7 @@ struct VistaPDF {
         var ultimaPagina = 0
         var ultimaEvidenza: String?
         var ultimoZoom: CGFloat = 1
+        var colore: Color = Tema.Colore.Documenti.evidenziaPDF
         /// Mentre Prisma sposta la vista, i cambi di pagina non tornano allo stato.
         var muove = false
         weak var vista: PDFView?
@@ -413,13 +443,31 @@ struct VistaPDF {
                     ?? doc.findString(cercato, withOptions: .caseInsensitive).first { $0.pages.contains(pg) }
             }
             if let s = trovata {
-                s.color = ColorePiattaforma(Tema.Colore.Documenti.evidenziaPDF)
+                s.color = ColorePiattaforma(colore)
                 v.highlightedSelections = [s]
                 v.go(to: s)
             } else {
                 v.go(to: pg)
             }
             DispatchQueue.main.async { self.muove = false }
+        }
+
+        /// Accende la riga sulla pagina mostrata senza spostare la vista (cerca solo in quella pagina: niente
+        /// `findString` su tutto il documento a ogni passaggio del puntatore).
+        func accendi(_ pagina: Int, evidenzia: String?, in v: PDFView) {
+            guard let doc = v.document, doc.pageCount > 0 else { return }
+            let indice = min(max(pagina - 1, 0), doc.pageCount - 1)
+            guard let pg = doc.page(at: indice) else { return }
+            var trovata: PDFSelection?
+            if let e = evidenzia?.trimmingCharacters(in: .whitespacesAndNewlines), !e.isEmpty {
+                trovata = Self.cercaNellaPagina(String(e.prefix(40)), in: pg)
+            }
+            if let s = trovata {
+                s.color = ColorePiattaforma(colore)
+                v.highlightedSelections = [s]
+            } else {
+                v.highlightedSelections = nil
+            }
         }
 
         /// La prima volta che `testo` compare nella pagina (senza badare alle maiuscole), solo se la selezione copre
@@ -458,10 +506,16 @@ struct VistaPDF {
             c.ultimaPagina = 0
             c.ultimaEvidenza = nil
         }
+        c.colore = coloreEvidenza
         if c.ultimaPagina != pagina || c.ultimaEvidenza != evidenzia {
+            let soloRiga: Bool = !seguiEvidenza && c.ultimaPagina == pagina
             c.ultimaPagina = pagina
             c.ultimaEvidenza = evidenzia
-            c.mostra(pagina, evidenzia: evidenzia, in: v)
+            if soloRiga {
+                c.accendi(pagina, evidenzia: evidenzia, in: v)
+            } else {
+                c.mostra(pagina, evidenzia: evidenzia, in: v)
+            }
         } else if c.muove {
             DispatchQueue.main.async { c.muove = false }
         }

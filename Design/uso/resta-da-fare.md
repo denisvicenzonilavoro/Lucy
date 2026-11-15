@@ -2109,3 +2109,46 @@ Resta:
 - **Istantanee da rigenerare e guardare sul Mac**: 53 (e scura), 54, 103, 104, 154, 879 e le nuove 1300-1303; aggiornare la
   pagina delle anteprime. In 1303 controllare che la prima riga sia davvero la parola «Interesse composto».
 - `--prova-carico` e `--prova-fluidita`: confrontare i tempi di apertura della ricerca con i 30 clienti di prova.
+
+## 62. Il documento si apre in grande
+
+Fatto (solo Mac): nella scheda Documenti del dossier l'elenco prende tutta la larghezza e il documento toccato si apre nel
+lettore (`Shell/LettoreDocumento.swift`), un dettaglio del tema che nasce dalla sua riga (`.origineDettaglio(id:
+"documento:<id>")`) con il presentatore che Clienti ha già (`PresentatoreDettaglioDossier`): velo, ✕, Esc, clic sul velo,
+«Riduci movimento» e istantanee come gli altri dettagli; misura `Tema.Apple.Lettore.misura` 1220×790 ristretta alla
+finestra. A sinistra l'anteprima di sempre (carta sempre chiara) con la capsula «pagina N · data»; il puntatore su un dato
+accende la sua riga in giallo (`evidenziaSopra:` di `AnteprimaDocumento`, mai scritto in `vistaDocumenti`; sulla stessa
+pagina il foglio non si sposta, nel PDF si cerca solo nella pagina mostrata), e anche «p. N» accende in giallo. A destra
+la testata (occhiello, titolo rinominabile, data, canale, menu «⋯» con «Mostra il testo», Vera, collega, crea, «Aggiorna
+il valore», tipo, Anteprima, Finder, rileggi, scollega, elimina) e i tre passi: «I dati letti» (incerti prima, con il
+perché delle regole `MotoreDocumenti.incerti`, correggibili sul posto e confermati con «Va bene»; i mancanti dell'attesa
+del tipo come dubbi finché ci sono dati da confermare, poi righe grigie «Non trovato» con «Aggiungi»; i certi in una riga
+con «Mostra»), «A cosa è collegato» (con «Cambia»; senza collegamento il suggerimento di oggi e «Collega»), «Cosa non
+torna» (due riquadri da toccare per ogni differenza, applicati solo da «Fatto» con `aggiornaDalDocumento` o
+`alternaVociTenute`). Il piede con `PulsanteChiusuraConferma`: «Controlla…» → «Decidi…» → «Fatto: salva nel dossier» →
+«Chiudi», la scossa e l'avviso sul primo dubbio, «Chiedi a Vera». La ricerca, le notifiche, Vera, Prodotti e le scene
+delle istantanee che scelgono un documento e aprono Documenti lo aprono nel lettore (`vistaDocumenti.lettore`, messo da
+`preparaOspite`). Prove `U62` in `--prova-calcoli` (ProvaCalcoliDocumenti); istantanee 1304-1307.
+
+Resta:
+- **Istantanee**: rigenerarle sul Mac e guardarle. Le scene di prima della scheda Documenti (26, 68, 161-166, 190-194, 237,
+  281, 290, 903 e le altre che scelgono un documento con `apri(.documenti)`) ora si aprono nel lettore: controllare che
+  dicano ancora quello che il nome promette (163 mostra il testo dal menu, 165 il confronto del documento d'identità nel
+  passo 3, 191 e 194 l'impatto e lo storico dentro «Apri il confronto completo», che nelle scene è chiuso: se serve,
+  aggiungere a `RichiestaIstantaneaLettore` l'apertura del confronto completo). Le scene che mostrano solo l'elenco ma
+  hanno un documento scelto ora mostrano anche il lettore: se serve, togliere da quelle scene `documentoSelezionato`.
+- **Regola dei «due valori diversi nel testo»** (§62.3 punto 1): non fatta, perché chiede le pagine del documento dentro
+  il motore puro; da aggiungere a `MotoreDocumenti.incerti` con le pagine come parametro.
+- **«Fatto non conferma un dato incerto» e «Nel documento» con lo storico** (§62.5): la logica del pulsante sta nella
+  vista; le prove pure coprono solo le regole e i testi. Portare il conto dei dubbi e l'applicazione delle scelte in una
+  funzione pura per provarli.
+- **Il collegamento mancante non conta come dubbio**: la riga «Non è collegato» è arancione ma non ferma il pulsante (un
+  documento senza candidate non si potrebbe mai salvare). Decidere se contarlo quando c'è un suggerimento.
+- **Menu e collegamenti duplicati**: `vociMenu` e `vociCollega` del lettore ripetono quelli (privati) di
+  `DettaglioDocumento`, che resta per iPhone e iPad. Con l'aggiornamento di iPhone e iPad spostarli in un tipo comune.
+- **«Aggiorna il valore» come differenza «Valore» del passo 3** (§62.3 punto 9): per ora è una voce del menu «⋯».
+- **L'app Documenti** (`AppDocumenti`, di iPhone e iPad) non ha il lettore: sul Mac Documenti vive nel dossier.
+- **«Vedi chi»** dell'impatto di un nuovo KID: sta dentro «Apri il confronto completo» (la tabella di prima), non come riga
+  propria in fondo al passo 3.
+- **Collegamento esterno con un documento già scelto**: `apri(.documenti)` senza un documento nuovo (per esempio il
+  collegamento «Documenti» di Prospetti) riapre nel lettore l'ultimo documento scelto.

@@ -76,6 +76,7 @@ enum ProvaCalcoliDocumenti {
         schedaLeggibile(verifica)
         documentiDelCliente(verifica)
         archivio(verifica)
+        datiIncerti(verifica)
     }
 
     // MARK: - Aiuti
@@ -104,6 +105,40 @@ enum ProvaCalcoliDocumenti {
     private static var nuovi: [CampoDocumento] {
         [.isin, .dataDocumento, .rendimentoPrimaCosti, .numeroDocumento, .intestatario, .codiceFiscale, .dataRilascio,
          .profiloRischio, .orizzonte]
+    }
+
+    // MARK: - Migliorie d'uso 62: dati certi e incerti
+
+    /// Le regole di `MotoreDocumenti.incerti` (Design/uso/gruppo-11.md §62.5): riga d'origine vuota, importo illeggibile,
+    /// data futura, Qwen, SRI fuori scala, ISIN e codice fiscale; un dato scritto a mano non è mai incerto.
+    private static func datiIncerti(_ verifica: VerificaCalcoli) {
+        func dato(_ k: CampoDocumento, _ valore: String, estratto: String = "riga del documento",
+                   origine: String = "Regole di Prisma") -> CampoEstratto {
+            CampoEstratto(chiave: k, valore: valore, pagina: 1, estratto: estratto, origine: origine)
+        }
+        func perche(_ c: CampoEstratto) -> String? { MotoreDocumenti.perche(c, oggi: oggi) }
+        verifica.vero("U62 incerti: senza riga d'origine", perche(dato(.contraente, "Marco Bianchi", estratto: "")) == TestiDocumenti.senzaRiga)
+        verifica.vero("U62 incerti: a mano mai incerto",
+                      perche(dato(.premio, "abc", estratto: "", origine: TestiDocumenti.origineAMano)) == nil)
+        verifica.vero("U62 incerti: importo illeggibile", perche(dato(.premio, "mille euro")) == TestiDocumenti.importoIlleggibile)
+        verifica.vero("U62 incerti: importo leggibile", perche(dato(.premio, "1.200,00 €")) == nil)
+        verifica.vero("U62 incerti: data del documento nel futuro", perche(dato(.dataDocumento, "12/03/2027")) == TestiDocumenti.dataNelFuturo)
+        verifica.vero("U62 incerti: scadenza nel futuro va bene", perche(dato(.scadenza, "12/03/2040")) == nil)
+        verifica.vero("U62 incerti: data illeggibile", perche(dato(.decorrenza, "31/02/2026")) == TestiDocumenti.dataIlleggibile)
+        verifica.vero("U62 incerti: letto con Qwen", perche(dato(.premio, "1.200", estratto: "", origine: "Qwen")) == TestiDocumenti.lettoConQwen)
+        verifica.vero("U62 incerti: SRI fuori scala", perche(dato(.sri, "9")) == TestiDocumenti.sriFuoriScala)
+        verifica.vero("U62 incerti: SRI 4", perche(dato(.sri, "4")) == nil)
+        verifica.vero("U62 incerti: ISIN con la cifra di controllo", MotoreDocumenti.isinValido("US0378331005"))
+        verifica.vero("U62 incerti: ISIN sbagliato", !MotoreDocumenti.isinValido("US0378331006"))
+        verifica.vero("U62 incerti: codice fiscale di Giulia", MotoreDocumenti.codiceFiscaleValido("RSSGLI89C54A944H"))
+        verifica.vero("U62 incerti: codice fiscale troppo corto", perche(dato(.codiceFiscale, "RSSGLI89C54")) == TestiDocumenti.codiceFiscaleNonValido)
+        let kid = documento("doc-prova-kid", cliente: "marco", titolo: "KID", tipo: .kid, pagine: kidMultiramo)
+        verifica.vero("U62 incerti: il KID letto dalle regole è tutto certo", MotoreDocumenti.incerti(kid, oggi: oggi).isEmpty)
+        var conDubbio = kid
+        if let i = conDubbio.campi.firstIndex(where: { $0.chiave == .sri }) { conDubbio.campi[i].valore = "12" }
+        verifica.vero("U62 incerti: un SRI sbagliato nel KID", MotoreDocumenti.incerti(conDubbio, oggi: oggi)[.sri] == TestiDocumenti.sriFuoriScala)
+        verifica.vero("U62 pulsante: «Controlla i 2 dati in arancione»", TestiDocumenti.controlla(2) == "Controlla i 2 dati in arancione")
+        verifica.vero("U62 pulsante: «Decidi la differenza»", TestiDocumenti.decidi(1) == "Decidi la differenza")
     }
 
     // MARK: - D1–D6 Lettura

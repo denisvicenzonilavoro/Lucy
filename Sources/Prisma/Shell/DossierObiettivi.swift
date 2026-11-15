@@ -746,6 +746,13 @@ struct PresentatoreDettaglioDossier<Contenuto: View>: View {
     }
 
     private static func dettaglioIniziale(_ stato: StatoShell) -> StatoDettaglio {
+        #if os(macOS)
+        // Migliorie d'uso 62: il documento chiesto da fuori (o da una scena delle istantanee) nasce già aperto nel lettore;
+        // la richiesta la azzera `consumaLettore` all'apparire
+        if let doc = stato.vistaDocumenti.lettore, stato.documento(doc) != nil {
+            return StatoDettaglio(aperto: LettoreDocumento.idDettaglio(doc), misura: Tema.Apple.Lettore.misura)
+        }
+        #endif
         guard let id = RichiestaIstantaneaDossier.per(stato)?.dettaglio else { return StatoDettaglio() }
         #if os(macOS)
         // Migliorie d'uso 5: l'elenco dei dati da completare nato dalla riga del quadro
@@ -758,14 +765,51 @@ struct PresentatoreDettaglioDossier<Contenuto: View>: View {
     }
 
     var body: some View {
+        #if os(macOS)
+        presentato
+            // Migliorie d'uso 62: il lettore chiesto da fuori (ricerca, notifiche, Vera, Prodotti)
+            .onAppear { consumaLettore() }
+            .onChange(of: stato.vistaDocumenti.lettore) { _ in consumaLettore() }
+        #else
+        presentato
+        #endif
+    }
+
+    private var presentato: some View {
         contenuto
             .presentatoreDettaglio(dettaglio) { id in
                 DettaglioDossierApple(id: id)
             }
-            .onChange(of: stato.clienteAttivoId) { _ in dettaglio.chiudi(subito: true) }
-            .onChange(of: stato.schedaCliente) { _ in dettaglio.chiudi(subito: true) }
+            .onChange(of: stato.clienteAttivoId) { _ in chiudiSeNonServe() }
+            .onChange(of: stato.schedaCliente) { _ in chiudiSeNonServe() }
             .onDisappear { dettaglio.chiudi(subito: true) }
     }
+
+    /// Cambiando cliente o scheda il dettaglio si chiude; sul Mac resta il lettore del documento chiesto insieme al
+    /// cambio (la ricerca sceglie il cliente, la scheda Documenti e il documento nello stesso momento).
+    private func chiudiSeNonServe() {
+        #if os(macOS)
+        if let id = dettaglio.idAperto, let doc = LettoreDocumento.documentoDi(id), stato.schedaCliente == .documenti,
+           stato.documento(doc)?.clienteId == stato.clienteAttivoId {
+            return
+        }
+        #endif
+        dettaglio.chiudi(subito: true)
+    }
+
+    #if os(macOS)
+    /// Apre nel lettore il documento chiesto da fuori e azzera la richiesta. Se il lettore è già aperto su quel
+    /// documento (nato aperto, istantanee comprese) non si riapre.
+    private func consumaLettore() {
+        guard let doc = stato.vistaDocumenti.lettore else { return }
+        stato.vistaDocumenti.lettore = nil
+        guard stato.documento(doc) != nil else { return }
+        let id = LettoreDocumento.idDettaglio(doc)
+        guard dettaglio.idAperto != id else { return }
+        dettaglio.chiudi(subito: true)
+        dettaglio.apri(id, misura: Tema.Apple.Lettore.misura)
+    }
+    #endif
 }
 
 /// Il contenuto del dettaglio aperto, secondo l'id dell'elemento da cui è nato.
@@ -779,6 +823,9 @@ struct DettaglioDossierApple: View {
         if id == QuadroDossier.idDati {
             // Migliorie d'uso 5: «Dati per l'analisi · <Nome>», nato dalla riga del quadro (DossierQuadro.swift)
             DettaglioDatiAnalisiApple()
+        } else if let doc = LettoreDocumento.documentoDi(id) {
+            // Migliorie d'uso 62: il documento aperto in grande, nato dalla sua riga nell'elenco (LettoreDocumento.swift)
+            LettoreDocumentoContenitore(documentoId: doc)
         } else {
             dettaglioComune
         }
