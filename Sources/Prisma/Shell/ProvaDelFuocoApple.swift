@@ -603,7 +603,11 @@ struct ProvaDelFuocoApple: View, Equatable {
                                 solaLettura: solaLettura,
                                 prepara: {
                                     d.chiudi(subito: true)
-                                    scrivi(riga, canali: suoi, scenario: e.scenario)
+                                    // Rifinitura 41: la bozza si salva e Messaggi si apre su di lei
+                                    let o = MotoreProvaFuoco.occasioneMessaggio(riga, scenario: e.scenario,
+                                                                                canale: suoi.count == 1 ? suoi.first : nil,
+                                                                                oggi: Date())
+                                    stato.apriBozzaProvaFuoco(riga, scenario: e.scenario, occasione: o)
                                 },
                                 segna: {
                                     stato.segnaDaChiamare(riga: riga, scenario: e.scenario)

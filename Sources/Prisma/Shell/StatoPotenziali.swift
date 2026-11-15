@@ -260,7 +260,11 @@ extension StatoShell {
         guard !potenzialiInSolaLettura, !inModoCliente,
               let c = dati.clienti.first(where: { $0.id == clienteId }) else { return }
         guard !ringraziamentoPreparato(clienteId: clienteId) else {
-            mostraAvviso(TestiPassaparola.ringraziamentoPronto(c.nome))
+            let giorno = Calendar.current.startOfDay(for: Date())
+            let gia = dati.messaggi.last { m in
+                m.clienteId == clienteId && m.origine.tipo == .ringraziamentoPresentazione && m.creatoIl >= giorno
+            }
+            mostraAvviso(TestiPassaparola.ringraziamentoPronto(c.nome), azione: azioneApriGrazie(gia))
             return
         }
         let o = MotorePassaparola.occasioneRingraziamento(cliente: c, posizioni: dati.posizioni, oggi: Date())
@@ -272,7 +276,21 @@ extension StatoShell {
                                      canale: canale, oggetto: canale == .mail ? t.oggetto : nil, testo: t.completo, cifre: o.cifre,
                                      autore: .modelloFisso, modello: nil, creatoIl: MessaggioCliente.adesso)
         dati.messaggi = dati.messaggi + [bozza]
-        mostraAvviso(TestiPassaparola.ringraziamentoPronto(c.nome))
+        mostraAvviso(TestiPassaparola.ringraziamentoPronto(c.nome), azione: azioneApriGrazie(bozza))
+    }
+
+    /// Rifinitura 48 (solo Mac): «Apri in Messaggi» nell'avviso del grazie porta Messaggi sulla bozza. nil senza bozza
+    /// (e su iPhone e iPad, dove l'avviso resta com'era).
+    private func azioneApriGrazie(_ bozza: MessaggioCliente?) -> AzioneAvviso? {
+        #if os(macOS)
+        guard let bozza else { return nil }
+        let clienteId = bozza.clienteId, occasioneId = bozza.occasioneId, messaggioId = bozza.id
+        return AzioneAvviso(titolo: TestiPassaparola.apriGrazieInMessaggi) { [weak self] in
+            self?.preparaMessaggio(clienteId: clienteId, occasioneId: occasioneId, messaggioId: messaggioId)
+        }
+        #else
+        return nil
+        #endif
     }
 
     /// Il grazie di oggi esiste già (bozza, aperto o salvato): il pulsante diventa «✓ Messaggio pronto».

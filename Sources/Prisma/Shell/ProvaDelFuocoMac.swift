@@ -399,7 +399,8 @@ extension StatoShell {
     /// cliente, scenario e giorno, e chi ha già un messaggio con quell'occasione si salta. Niente si apre né parte.
     /// Restituisce quante bozze ha creato.
     @discardableResult
-    func preparaMessaggiProvaFuoco(_ righe: [RigaProvaFuoco], scenario: ScenarioFuoco, oggi: Date = Date()) -> Int {
+    func preparaMessaggiProvaFuoco(_ righe: [RigaProvaFuoco], scenario: ScenarioFuoco, oggi: Date = Date(),
+                                   avvisa: Bool = true) -> Int {
         guard !solaLettura, !inModoCliente, !righe.isEmpty else { return 0 }
         let ids = Set(righe.map(\.clienteId))
         let canali = ProvaDelFuocoApple.canaliInEssere(dati.posizioni.filter { ids.contains($0.clienteId) })
@@ -426,8 +427,30 @@ extension StatoShell {
                                           autore: .modelloFisso, modello: nil, creatoIl: adesso))
         }
         if !nuovi.isEmpty { dati.messaggi = dati.messaggi + nuovi }
-        mostraAvviso(TestiProvaFuoco.avvisoPreparati(nuovi.count, gia: gia))
+        if avvisa { mostraAvviso(TestiProvaFuoco.avvisoPreparati(nuovi.count, gia: gia)) }
         return nuovi.count
+    }
+
+    /// La bozza di una sola riga (rifinitura 41, «Prepara il messaggio» del dettaglio): la crea con
+    /// `preparaMessaggiProvaFuoco` (idempotente sull'occasione) o ritrova quella che c'è già. Niente si apre.
+    /// nil in sola lettura, in modalità cliente o senza il cliente.
+    func bozzaProvaFuoco(_ riga: RigaProvaFuoco, scenario: ScenarioFuoco, oggi: Date = Date()) -> MessaggioCliente? {
+        guard !solaLettura, !inModoCliente else { return nil }
+        preparaMessaggiProvaFuoco([riga], scenario: scenario, oggi: oggi, avvisa: false)
+        let canali = ProvaDelFuocoApple.canaliInEssere(dati.posizioni.filter { $0.clienteId == riga.clienteId })
+        let suoi = canali[riga.clienteId] ?? []
+        let o = MotoreProvaFuoco.occasioneMessaggio(riga, scenario: scenario, canale: suoi.count == 1 ? suoi.first : nil, oggi: oggi)
+        return dati.messaggi.last { $0.clienteId == riga.clienteId && $0.occasioneId == o.id }
+    }
+
+    /// «Prepara il messaggio» del dettaglio: salva la bozza (o riprende quella che c'è) e apre Messaggi su di lei. Se la
+    /// bozza non si può salvare (sola lettura), apre l'occasione come prima.
+    func apriBozzaProvaFuoco(_ riga: RigaProvaFuoco, scenario: ScenarioFuoco, occasione: OccasioneMessaggio) {
+        if let m = bozzaProvaFuoco(riga, scenario: scenario) {
+            preparaMessaggio(clienteId: m.clienteId, occasioneId: m.occasioneId, messaggioId: m.id)
+        } else {
+            preparaMessaggio(clienteId: riga.clienteId, occasione: occasione)
+        }
     }
 
     /// «Segna «da chiamare»»: un'attività per oggi, priorità alta, con scenario e coperture nelle note. Idempotente: l'id

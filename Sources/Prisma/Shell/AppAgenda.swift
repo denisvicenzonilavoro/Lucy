@@ -803,13 +803,20 @@ struct AppAgenda: View {
 
     /// Una cosa da fare: spunta, titolo, cliente, scadenza e priorità (le righe di Attività).
     private func rigaAttivita(_ t: Attivita, mostrata: Scelta?, compatta: Bool) -> some View {
-        RigaRegistroAttivita(
+        // Rifinitura 50 (solo Mac): la spunta passa dal «Da fare» unico, così vale in tutta Prisma e si annulla dal pannello
+        let id = t.id
+        #if os(macOS)
+        let spunta: () -> Void = { stato.spuntaAttivitaAgenda(id) }
+        #else
+        let spunta: () -> Void = { stato.alternaCompletata(id) }
+        #endif
+        return RigaRegistroAttivita(
             attivita: t,
             cliente: stato.cliente(t.clienteId)?.nome ?? "Cliente",
             daAppuntamento: t.appuntamentoId != nil,
             selezionata: idAttivita(mostrata) == t.id,
             compatta: compatta,
-            spunta: { stato.alternaCompletata(t.id) },
+            spunta: spunta,
             seleziona: { stato.scegliAttivitaInAgenda(t.id) }
         )
     }

@@ -1486,8 +1486,10 @@ Resta:
   (finestra stretta: la legenda può troncarsi) e 596 (il quarto gruppo «Senza obiettivo»).
 - `--prova-carico` e `--prova-fluidita` non hanno un passo nuovo per le testate e il riordino a gruppi con 200 clienti:
   da guardare sul Mac (il calcolo dei gruppi è lineare sulle righe mostrate).
-- «Prepara il messaggio» del dettaglio apre Messaggi come prima (`preparaMessaggio`): la bozza non si salva da sola; il
-  template la crea e apre Messaggi su quel messaggio.
+- ~~«Prepara il messaggio» del dettaglio apre Messaggi come prima~~ **Fatto (rifinitura 40-51):** il dettaglio salva la
+  bozza con `bozzaProvaFuoco` (riusa `preparaMessaggiProvaFuoco`, idempotente sull'occasione, senza avviso) e apre Messaggi
+  su di lei (`apriBozzaProvaFuoco` → `preparaMessaggio(clienteId:occasioneId:messaggioId:)`); se la bozza c'è già si apre
+  quella, in sola lettura si apre l'occasione come prima. Prova in P18 di `ProvaCalcoliProvaFuoco`: due tocchi, una bozza.
 
 ## 43. Prima di aggiungere, si controlla (Inquadra e Nuovo cliente)
 
@@ -1717,7 +1719,9 @@ Resta / da decidere:
   so che hai parlato di me a persone a cui tieni…»; formale con il lei; breve «grazie per aver parlato di me…»).
 - La bozza del grazie è sempre nel tono cordiale e con il canale dal telefono (Messaggi con un cellulare, altrimenti
   Mail); si cambia in Messaggi prima di aprirla.
-- L'avviso del template non ha un collegamento diretto a Messaggi: la bozza si trova nel dossier e in Messaggi.
+- ~~L'avviso non ha un collegamento diretto a Messaggi~~ **Fatto (rifinitura 40-51, solo Mac):** l'avviso del grazie ha
+  «Apri in Messaggi» (`TestiPassaparola.apriGrazieInMessaggi`), che apre Messaggi sulla bozza appena creata o su quella di
+  oggi già pronta (`preparaMessaggio(clienteId:occasioneId:messaggioId:)`).
 
 ## 49. La campagna in tre passi
 
@@ -1778,8 +1782,13 @@ griglia di sempre con la colonna al 42%):
 Resta:
 - **Altezza delle righe**: le righe della cella sono stimate a 18 punti per la Dimensione del testo (`rigaCella`); con il
   testo grande o una finestra 13" bassa guardare sul Mac che le pillole non vengano tagliate (la cella le ritaglia).
-- **«Da fare» della miglioria 3** nella colonna: le attività restano le righe di sempre (`RigaRegistroAttivita`, con il
-  loro rientro di 16), non ancora il «Da fare» unico.
+- **«Da fare» della miglioria 3** nella colonna, **in parte fatto (rifinitura 40-51):** la spunta delle attività
+  nell'Agenda (colonna del mese e giorno) passa dal «Da fare» unico (`spuntaAttivitaAgenda` → `fattoDaFare` sulla voce
+  del nastro, `voceDaFare(attivitaId:)`): vale in tutta Prisma e si annulla dal pannello con «Annulla l’ultima»; le
+  riprese delle proposte e le attività già fatte si alternano come prima. Prova in `ProvaDaFareShell` (`--prova-vera`).
+  Resta l'aspetto: le attività restano le righe di sempre (`RigaRegistroAttivita`, con il
+  loro rientro di 16), non ancora la riga comune `RigaDaFare`: è un cambio di aspetto (niente selezione, scadenza e
+  priorità nella riga) da far vedere all'utente prima di farlo.
 - Il doppio clic con `onTapGesture(count: 2)` ritarda un poco il clic singolo (come nella settimana): da sentire sul Mac.
 - `--prova-fluidita` con i 30 clienti fittizi sul mese: da guardare in CI che le celle non si rifacciano al passaggio
   del puntatore sulla colonna (la colonna sta in `ParteAgenda`, la griglia resta `Equatable`).

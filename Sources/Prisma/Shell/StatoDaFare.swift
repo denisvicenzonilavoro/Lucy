@@ -210,6 +210,23 @@ extension StatoShell {
         mostraAvviso(TestiDaFare.fatto(v))
     }
 
+    /// Rifinitura 50: la voce del nastro di un'attività aperta (nil se è completata, se è la ripresa di una proposta,
+    /// già sul nastro con la proposta, o se il suo cliente non c'è più).
+    func voceDaFare(attivitaId id: String) -> VoceDaFare? {
+        vociDaFareTutte().voci.first { $0.fatto == .attivita(id: id) }
+    }
+
+    /// Rifinitura 50: la spunta delle attività nella colonna dell'Agenda. Un'attività aperta che è una voce del nastro si
+    /// segna con «Segna come fatto» del «Da fare» unico (vale in tutta Prisma e si annulla dal pannello con «Annulla
+    /// l’ultima»); le altre, e una già fatta da riaprire, si alternano come prima.
+    func spuntaAttivitaAgenda(_ id: String) {
+        if let a = dati.attivita.first(where: { $0.id == id }), !a.completata, let v = voceDaFare(attivitaId: id) {
+            fattoDaFare(v)
+        } else {
+            alternaCompletata(id)
+        }
+    }
+
     /// «Annulla l’ultima»: rimette da fare l'ultima cosa segnata dal «Da fare».
     func annullaUltimoFattoDaFare() {
         guard !solaLettura else {
@@ -336,6 +353,26 @@ enum ProvaDaFareShell {
             controlla(dopo?.conformita == cliente.conformita && dopo?.consensi == cliente.consensi,
                       "Da fare: «Annulla l’ultima» rimette la conformità di prima")
         }
+
+        // Rifinitura 50: le attività dell'Agenda sono le voci del nastro; la spunta dell'Agenda si annulla dal pannello
+        s.salvaAttivita(Attivita(id: "prova-agenda", clienteId: primoCliente, titolo: "Mandare il KID", scadenza: oggi,
+                                 priorita: .normale, completata: false))
+        let aperte = Set(s.dati.attivita.filter { !$0.completata }.map(\.id))
+        let vociAttivita = s.vociDaFareTutte().voci.compactMap { v -> String? in
+            if case .attivita(let id) = v.fatto { return id } else { return nil }
+        }
+        controlla(vociAttivita.contains("prova-agenda") && vociAttivita.allSatisfy { aperte.contains($0) },
+                  "Da fare: le voci delle attività sono le attività aperte dell'Agenda")
+        s.fatteDaFare.removeAll()
+        s.spuntaAttivitaAgenda("prova-agenda")
+        controlla(s.dati.attivita.first { $0.id == "prova-agenda" }?.completata == true && s.fatteDaFare.count == 1
+                  && s.voceDaFare(attivitaId: "prova-agenda") == nil,
+                  "Da fare: la spunta dell'Agenda segna la voce come fatta in tutta Prisma")
+        s.annullaUltimoFattoDaFare()
+        controlla(s.dati.attivita.first { $0.id == "prova-agenda" }?.completata == false
+                  && s.voceDaFare(attivitaId: "prova-agenda") != nil,
+                  "Da fare: «Annulla l’ultima» riapre l'attività spuntata nell'Agenda")
+        s.eliminaAttivita("prova-agenda")
 
         // «+ Aggiungi»: con «Tutti i clienti» è «Per te», con un cliente scelto è sua
         s.aggiungiDaFare("  Rinnovare l'iscrizione all'albo  ")

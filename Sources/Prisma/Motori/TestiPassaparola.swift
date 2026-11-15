@@ -308,6 +308,9 @@ enum TestiPassaparola {
     static let oggettoRingraziamento = "Grazie di cuore"
 
     /// L'avviso dopo «Ringrazia…»: la bozza è in Messaggi, la spedisce il consulente.
+    /// Rifinitura 48: l'azione dell'avviso del grazie.
+    static let apriGrazieInMessaggi = "Apri in Messaggi"
+
     static func ringraziamentoPronto(_ nome: String) -> String {
         "Per \(TestiTraguardi.primoNome(nome)): un grazie per le persone che ti ha presentato. Lo trovi in Messaggi"
     }

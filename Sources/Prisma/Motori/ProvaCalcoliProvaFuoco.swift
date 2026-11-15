@@ -229,6 +229,21 @@ enum ProvaCalcoliProvaFuoco {
                               bozza?.stato == .bozza && bozza?.autore == .modelloFisso && bozza?.canale == .mail && bozza?.clienteId == c.id)
                 verifica("P18 Prepara di nuovo: nessuna bozza", Double(s.preparaMessaggiProvaFuoco([r], scenario: scenario, oggi: oggi)), 0)
                 verifica("P18 Prepara di nuovo: nessun messaggio in più", Double(s.dati.messaggi.count - prima), 1)
+                // Rifinitura 41: «Prepara il messaggio» del dettaglio, due tocchi, una bozza sola (quella già preparata)
+                let primaBozza = s.bozzaProvaFuoco(r, scenario: scenario, oggi: oggi)
+                let secondaBozza = s.bozzaProvaFuoco(r, scenario: scenario, oggi: oggi)
+                verifica.vero("P18 Dettaglio: due tocchi, la stessa bozza", primaBozza != nil && primaBozza?.id == secondaBozza?.id
+                              && primaBozza?.id == bozza?.id)
+                verifica("P18 Dettaglio: due tocchi, nessun messaggio in più", Double(s.dati.messaggi.count - prima), 1)
+                if let altro = s.dati.clienti.dropFirst().first {
+                    let r2 = RigaProvaFuoco(clienteId: altro.id, nome: altro.nome, telefono: "", obiettivoId: "o", titoloObiettivo: "Casa",
+                                            coperturaOggi: 0.8, coperturaDopo: 0.6, perdita: 8_000, voci: [], collegateAssenti: false)
+                    let uno = s.bozzaProvaFuoco(r2, scenario: scenario, oggi: oggi)
+                    let due = s.bozzaProvaFuoco(r2, scenario: scenario, oggi: oggi)
+                    verifica.vero("P18 Dettaglio nuovo: la bozza nasce al primo tocco e il secondo la ritrova",
+                                  uno != nil && uno?.id == due?.id && uno?.stato == .bozza)
+                    verifica("P18 Dettaglio nuovo: una bozza sola", Double(s.dati.messaggi.count - prima), 2)
+                }
                 verifica.vero("P18 Segna: l'attività di oggi", s.segnaDaChiamare(riga: r, scenario: scenario, oggi: oggi))
                 verifica.vero("P18 Segna di nuovo: niente doppione", !s.segnaDaChiamare(riga: r, scenario: scenario, oggi: oggi))
                 let id = StatoShell.idAttivitaFuoco(clienteId: c.id, oggi: oggi)
