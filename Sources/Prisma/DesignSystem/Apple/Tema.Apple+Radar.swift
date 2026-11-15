@@ -141,6 +141,43 @@ extension Tema.Apple.Posizioni {
             static let colonnaDistanza: CGFloat = 62
             static let rigaLontani = EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0)
             static let distanzaLontani = K(dimensione: 13.5, peso: .bold, tabellare: true)
+
+            // MARK: Migliorie d'uso 40 («Il radar dice chi e perché», solo sul Mac)
+
+            /// La card dei modelli: padding 16×22, il nome largo 92 accanto alla barra.
+            static let paddingModelli = Tema.Apple.Misura.padding(16, 22)
+            static let larghezzaNomeModello: CGFloat = 92
+            static let spazioNomeBarra: CGFloat = 10
+            /// La legenda a colori: quadratini 9×9 con raggio 3, 6 fra quadratino e nome, 12 fra una voce e l'altra
+            /// (anche fra le righe, quando va a capo), 4 sopra la legenda oltre lo spazio fra i modelli.
+            static let quadratinoLeggenda: CGFloat = 9
+            static let raggioLeggenda: CGFloat = 3
+            static let spazioQuadratino: CGFloat = 6
+            static let spazioVociLeggenda: CGFloat = 12
+            static let sopraLeggenda: CGFloat = 4
+            static let leggenda = K(dimensione: 12, peso: .regular)
+            static let coloreLeggenda = C.inchiostro2
+            /// La card «chi»: padding 16×22×14, il numero 34 arancio, «fuori tolleranza» 15 bold.
+            static let paddingChi = EdgeInsets(top: 16, leading: 22, bottom: 14, trailing: 22)
+            static let numeroChi = K(dimensione: 34, peso: .bold, tracking: -1, tabellare: true)
+            static let etichettaChi = K(dimensione: 15, peso: .bold)
+            static let spazioTestaChi: CGFloat = 8
+            static let spiegazioneChi = K(dimensione: 12.5, peso: .regular, interlinea: 1.45)
+            static let sottoSpiegazioneChi: CGFloat = 8
+            /// Le righe dei fuori tolleranza: avatar 26, padding 5×6, raggio 10, fondo `chip` al passaggio.
+            static let avatarChi: CGFloat = 26
+            static let rigaChi = Tema.Apple.Misura.padding(5, 6)
+            static let spazioRigaChi: CGFloat = 10
+            static let fondoRigaSopra = C.chip
+            static let raggioRiga: CGFloat = 10
+            static let freccia = C.inchiostro3
+            static let spazioPulsanteChi: CGFloat = 12
+            static let spazioSottoPulsante: CGFloat = 8
+            /// L'alone bianco del punto acceso da una riga (`drop-shadow(0 0 7px)`): raggio 7, opacità 0,9.
+            static let aloneSopra: CGFloat = 7
+            static let opacitaAlone: Double = 0.9
+            /// L'anello bianco dell'alone, 2 oltre il bordo del punto.
+            static let margineAlone: CGFloat = 2
         }
 
         // MARK: Impostazioni › Portafogli modello

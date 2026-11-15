@@ -57,7 +57,13 @@ struct RadarPortafoglioApple: View, Equatable {
                     }
                 } dossier: {
                     d.chiudi(subito: true)
+                    #if os(macOS)
+                    // Migliorie d'uso 40: le Posizioni del cliente sulla coerenza con il profilo (il dossier resta
+                    // con il doppio clic sul punto)
+                    stato.apriPosizioniDalRadar(v.clienteId)
+                    #else
                     stato.apriClienteDalRadar(v.clienteId)
+                    #endif
                 }
             }
         }
@@ -74,10 +80,23 @@ private struct CorpoRadar: View {
     let apri: (String) -> Void
 
     @State private var aperto: String?
+    /// Il punto sotto il puntatore, condiviso fra la tela e le righe della card «chi» (migliorie d'uso 40). Lo legge
+    /// solo il fumetto del radar: passare sulla tela o sulle righe non rifà né la tela né la colonna.
+    @State private var puntatore: PuntatoreRadar
     @Environment(\.modoIstantanea) private var istantanea
 
     private typealias R = Tema.Apple.Posizioni.Radar
     private typealias K = Tema.Apple.Posizioni.Radar.Colonna
+
+    init(stato: StatoShell, radar: RadarPortafoglio, solaLettura: Bool, apri: @escaping (String) -> Void) {
+        self.stato = stato
+        self.radar = radar
+        self.solaLettura = solaLettura
+        self.apri = apri
+        // Nelle istantanee («898-posizioni-radar-riga-accesa») il punto acceso da una riga è già scritto
+        let acceso = stato.radarPuntatoreIstantanea
+        _puntatore = State(initialValue: PuntatoreRadar(sopra: acceso, daRiga: acceso != nil))
+    }
 
     var body: some View {
         GeometryReader { g in
@@ -92,10 +111,16 @@ private struct CorpoRadar: View {
                         radarVista
                             .frame(width: larghezza - colonna - K.spazio, height: altezza)
                             .entrataCascata(0, base: R.Moto.baseCascata)
+                        #if os(macOS)
+                        // La card «chi» occupa l'altezza che resta e il suo elenco scorre dentro
+                        colonnaUso(riempie: true)
+                            .frame(width: colonna, height: altezza, alignment: .top)
+                        #else
                         ScrollView(.vertical, showsIndicators: false) {
                             colonnaVista
                         }
                         .frame(width: colonna, height: altezza)
+                        #endif
                     }
                 } else {
                     ScrollView(.vertical, showsIndicators: false) {
@@ -103,7 +128,11 @@ private struct CorpoRadar: View {
                             radarVista
                                 .frame(width: larghezza, height: max(R.latoMinimo, min(larghezza, altezza)))
                                 .entrataCascata(0, base: R.Moto.baseCascata)
+                            #if os(macOS)
+                            colonnaUso(riempie: false)
+                            #else
                             colonnaVista
+                            #endif
                         }
                     }
                 }
@@ -113,7 +142,7 @@ private struct CorpoRadar: View {
     }
 
     private var radarVista: some View {
-        RadarModelli(radar: radar, aperto: aperto, sistema: stato.sistema) { id in
+        RadarModelli(radar: radar, aperto: aperto, puntatore: puntatore, sistema: stato.sistema) { id in
             aperto = id
             apri(id)
         } modello: { _ in
@@ -140,6 +169,27 @@ private struct CorpoRadar: View {
         }
     }
 
+    #if os(macOS)
+    /// La colonna delle migliorie d'uso 40: i modelli con la legenda a colori e la card «chi».
+    private func colonnaUso(riempie: Bool) -> some View {
+        VStack(alignment: .leading, spacing: K.spazio) {
+            CardModelliRadar(modelli: radar.modelli) { _ in stato.apriImpostazioniModelli() }
+                .entrataCascata(1, base: R.Moto.baseCascata)
+            CardChiRadar(radar: radar, puntatore: puntatore, solaLettura: solaLettura, riempie: riempie) {
+                stato.preparaBozzeRiequilibrio(radar.daRiequilibrare)
+            } assegna: {
+                stato.apriImpostazioniModelli()
+            } apri: { id in
+                aperto = id
+                apri(id)
+            }
+            .frame(maxHeight: riempie ? .infinity : nil, alignment: .top)
+            .entrataCascata(2, base: R.Moto.baseCascata)
+        }
+    }
+    #endif
+
+    #if !os(macOS)
     private var colonnaVista: some View {
         VStack(alignment: .leading, spacing: K.spazio) {
             CardModelliRadar(modelli: radar.modelli) { _ in stato.apriImpostazioniModelli() }
@@ -168,6 +218,7 @@ private struct CorpoRadar: View {
             .entrataCascata(4, base: R.Moto.baseCascata)
         }
     }
+    #endif
 }
 
 // MARK: - Il radar
@@ -177,6 +228,9 @@ struct RadarModelli: View {
     let radar: RadarPortafoglio
     /// Il punto da cui è nato il dettaglio aperto: sotto di lui c'è l'ancora del dettaglio.
     let aperto: String?
+    /// Il punto sotto il puntatore, di chi contiene il radar (le righe della card «chi» lo scrivono anche loro). Lo
+    /// legge solo il fumetto (FumettoRadar).
+    let puntatore: PuntatoreRadar
     /// Le finestre di Prisma: il movimento si ferma quando Posizioni non si vede (MovimentoRadar).
     var sistema: StatoFinestre? = nil
     let apri: (String) -> Void
@@ -184,8 +238,6 @@ struct RadarModelli: View {
     /// Doppio clic su un punto: il dossier del cliente.
     var dossier: (String) -> Void = { _ in }
 
-    /// Il punto sotto il puntatore: fuori dallo stato della vista, lo legge solo il fumetto (FumettoRadar).
-    @State private var puntatore = PuntatoreRadar()
     /// L'ultima geometria calcolata, per misura e radar.
     @State private var memoria = MemoriaGeometriaRadar()
     @State private var visibile = false
@@ -251,7 +303,10 @@ struct RadarModelli: View {
                 case .active(let p): nuovo = geo.punto(vicinoA: p)?.id
                 case .ended: nuovo = nil
                 }
-                if puntatore.sopra != nuovo { puntatore.sopra = nuovo }
+                if puntatore.sopra != nuovo {
+                    puntatore.daRiga = false
+                    puntatore.sopra = nuovo
+                }
             }
             .accessibilityElement(children: .contain)
             .accessibilityLabel("Radar del portafoglio")
@@ -363,6 +418,7 @@ struct RadarModelli: View {
         } else {
             tastiera = ordine[0]
         }
+        puntatore.daRiga = false
         puntatore.sopra = tastiera
     }
 
@@ -411,6 +467,13 @@ struct RadarModelli: View {
 /// sfiora e lo legge solo il fumetto, così passare sul radar non rifà geometria, le due tele e le 200 ancore.
 @Observable final class PuntatoreRadar {
     var sopra: String?
+    /// Il punto è acceso da una riga della card «chi» (migliorie d'uso 40): il fumetto aggiunge l'alone bianco.
+    var daRiga = false
+
+    init(sopra: String? = nil, daRiga: Bool = false) {
+        self.sopra = sopra
+        self.daRiga = daRiga
+    }
 }
 
 /// Il fumetto del punto sotto il puntatore: nome, modello e distanza. È l'unica vista che legge il puntatore.
@@ -424,6 +487,17 @@ private struct FumettoRadar: View {
     var body: some View {
         if let id = puntatore.sopra, let v = radar.voci.first(where: { $0.id == id }) {
             let p = geo.posizione(v)
+            if puntatore.daRiga {
+                // L'alone bianco del punto acceso da una riga (`drop-shadow(0 0 7px)` del template)
+                let k = Tema.Apple.Posizioni.Radar.Colonna.self
+                let r = (geo.conAvatar.contains(v.id) ? R.puntoGrande : R.puntoPiccolo) + k.margineAlone
+                Circle()
+                    .stroke(Color.white, lineWidth: R.spessoreAnelloTastiera)
+                    .frame(width: 2 * r, height: 2 * r)
+                    .shadow(color: Color.white.opacity(k.opacitaAlone), radius: k.aloneSopra)
+                    .position(p)
+                    .allowsHitTesting(false)
+            }
             VStack(alignment: .leading, spacing: 2) {
                 Text(v.nome).carattereApple(Tema.Apple.Carattere.barra)
                 Text("\(v.modello.nome) · \(TestiRadar.puntiConNome(v.distanza))" + (v.bozzaPronta ? " · proposta pronta" : ""))
@@ -657,6 +731,23 @@ private struct CardModelliRadar: View {
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
             }
             ForEach(Array(modelli.enumerated()), id: \.element.id) { i, m in
+                #if os(macOS)
+                // Migliorie d'uso 40: una riga sola, il nome nel colore del modello e la barra; i pesi nell'aiuto
+                HStack(spacing: K.spazioNomeBarra) {
+                    Text(m.nome)
+                        .carattereApple(K.nomeModello)
+                        .foregroundColor(Tema.Apple.Posizioni.Radar.colore(m.colore))
+                        .lineLimit(1)
+                        .frame(width: K.larghezzaNomeModello, alignment: .leading)
+                    barra(m, indice: i)
+                }
+                .contentShape(Rectangle())
+                .onTapGesture { apri(m.id) }
+                .help(TestiRadar.aiutoModello(m))
+                .accessibilityElement(children: .ignore)
+                .accessibilityLabel(Text("\(m.nome): \(TestiRadar.pesi(m.pesi))"))
+                .accessibilityAddTraits(.isButton)
+                #else
                 VStack(alignment: .leading, spacing: K.sottoNome) {
                     HStack {
                         Text(m.nome)
@@ -668,27 +759,230 @@ private struct CardModelliRadar: View {
                             .foregroundColor(Tema.Apple.Colore.inchiostro2)
                             .monospacedDigit()
                     }
-                    BarraPienaSegmenti(pezzi: ComposizioneInvestimenti360.Classe.allCases.map {
-                        PezzoBarraPiena(id: $0.rawValue, peso: m.pesi[$0], colore: Tema.Apple.Posizioni.Radar.colore($0))
-                    }, indice: i * 4, altezza: K.altezzaBarra, spazio: K.spazioBarra, raggioPezzo: K.raggioBarra,
-                       raggioContenitore: K.raggioBarra)
+                    barra(m, indice: i)
                 }
                 .contentShape(Rectangle())
                 .onTapGesture { apri(m.id) }
                 .help("Apri il modello in Impostazioni › Portafogli modello")
+                #endif
             }
             if !modelli.isEmpty {
+                #if os(macOS)
+                LeggendaClassiRadar()
+                    .padding(.top, K.sopraLeggenda)
+                #else
                 Text(TestiRadar.leggendaClassi)
                     .carattereApple(Tema.Apple.Carattere.secondario)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                #endif
             }
         }
+        #if os(macOS)
+        .padding(K.paddingModelli)
+        #else
         .padding(K.padding)
+        #endif
         .frame(maxWidth: .infinity, alignment: .leading)
         .superficieApple(Tema.Apple.Superficie.cardPiatta)
     }
+
+    private func barra(_ m: PortafoglioModello, indice i: Int) -> some View {
+        BarraPienaSegmenti(pezzi: ComposizioneInvestimenti360.Classe.allCases.map {
+            PezzoBarraPiena(id: $0.rawValue, peso: m.pesi[$0], colore: Tema.Apple.Posizioni.Radar.colore($0))
+        }, indice: i * 4, altezza: K.altezzaBarra, spazio: K.spazioBarra, raggioPezzo: K.raggioBarra,
+           raggioContenitore: K.raggioBarra)
+    }
 }
 
+#if os(macOS)
+/// La legenda a colori delle quattro classi (migliorie d'uso 40): quadratino 9×9 nel colore della classe e il nome,
+/// a capo se la colonna è stretta.
+private struct LeggendaClassiRadar: View {
+    private typealias K = Tema.Apple.Posizioni.Radar.Colonna
+
+    var body: some View {
+        FlussoEtichette(spazio: K.spazioVociLeggenda) {
+            ForEach(ComposizioneInvestimenti360.Classe.allCases, id: \.self) { c in
+                HStack(spacing: K.spazioQuadratino) {
+                    RoundedRectangle(cornerRadius: K.raggioLeggenda, style: .continuous)
+                        .fill(Tema.Apple.Posizioni.Radar.colore(c))
+                        .frame(width: K.quadratinoLeggenda, height: K.quadratinoLeggenda)
+                    Text(TestiRadar.nomeClasse(c))
+                        .carattereApple(K.leggenda)
+                        .foregroundColor(K.coloreLeggenda)
+                        .lineLimit(1)
+                        .fixedSize()
+                }
+            }
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// La card «chi» (migliorie d'uso 40, `#radChi` del template): quanti sono fuori tolleranza su quanti, che cosa vuol
+/// dire «punti», l'elenco di tutti i fuori dal più lontano (la riga accende il suo punto sulla tela, il clic apre il
+/// dettaglio dal punto) e il pulsante che prepara le proposte. Dopo il pulsante il numero dice quanti resterebbero
+/// fuori accettando le proposte; i punti restano al loro posto con il trattino (decisione 2 di «Luce»).
+private struct CardChiRadar: View {
+    let radar: RadarPortafoglio
+    let puntatore: PuntatoreRadar
+    let solaLettura: Bool
+    /// Con la colonna accanto alla tela la card occupa l'altezza che resta e l'elenco scorre dentro.
+    let riempie: Bool
+    let riequilibra: () -> Void
+    let assegna: () -> Void
+    let apri: (String) -> Void
+
+    private typealias K = Tema.Apple.Posizioni.Radar.Colonna
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            if radar.modelli.isEmpty {
+                // Senza modelli l'invito sta sopra la tela: qui solo il pulsante
+                Button("Imposta i modelli", action: assegna)
+                    .buttonStyle(StilePulsanteApple(.principale, grande: true))
+                    .frame(maxWidth: .infinity)
+            } else {
+                testa
+                elencoContenitore
+                piede
+            }
+        }
+        .padding(K.paddingChi)
+        .frame(maxWidth: .infinity, maxHeight: riempie ? .infinity : nil, alignment: .topLeading)
+        .superficieApple(Tema.Apple.Superficie.cardPiatta)
+    }
+
+    private var conProposte: Bool { radar.fuori.contains(where: \.bozzaPronta) }
+
+    @ViewBuilder private var testa: some View {
+        let numero = conProposte ? radar.daRiequilibrare.count : radar.fuori.count
+        HStack(alignment: .firstTextBaseline, spacing: K.spazioTestaChi) {
+            NumeroCheConta(Double(numero), formato: .intero)
+                .carattereApple(K.numeroChi)
+                .foregroundColor(numero == 0 ? K.coloreTutti : K.coloreFuori)
+            Text(TestiRadar.etichettaFuori(conProposte: conProposte))
+                .carattereApple(K.etichettaChi)
+                .foregroundColor(Tema.Apple.Colore.inchiostro)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            Spacer(minLength: 6)
+            Text(TestiRadar.suSeguiti(radar.voci.count))
+                .carattereApple(Tema.Apple.Carattere.secondario)
+                .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                .lineLimit(1)
+                .help(TestiRadar.previdenzaEsclusa)
+        }
+        Text(spiegazione)
+            .carattereApple(K.spiegazioneChi)
+            .foregroundColor(Tema.Apple.Colore.inchiostro2)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.bottom, K.sottoSpiegazioneChi)
+    }
+
+    private var spiegazione: String {
+        if conProposte && radar.daRiequilibrare.isEmpty { return TestiRadar.dopoLeProposte }
+        return TestiRadar.cosaSonoIPunti(radar.tolleranzaGenerale) ?? TestiRadar.senzaTolleranza
+    }
+
+    @ViewBuilder private var elencoContenitore: some View {
+        if riempie {
+            ScrollView(.vertical, showsIndicators: false) { elenco }
+                .frame(maxHeight: .infinity, alignment: .top)
+        } else {
+            elenco
+        }
+    }
+
+    /// Tutti i fuori tolleranza dal più lontano: pigro, per i 200 clienti di `--prova-carico`.
+    private var elenco: some View {
+        LazyVStack(alignment: .leading, spacing: 0) {
+            ForEach(radar.fuori) { v in
+                RigaChiRadar(voce: v, puntatore: puntatore) { apri(v.id) }
+            }
+        }
+    }
+
+    @ViewBuilder private var piede: some View {
+        let fuori = radar.fuori.count
+        let daFare = radar.daRiequilibrare.count
+        Button(action: riequilibra) {
+            Text(fuori == 0 ? TestiRadar.tuttiDentro
+                 : daFare == 0 ? TestiRadar.proposteFatte
+                 : TestiRadar.pulsanteRiequilibra(daFare))
+                .frame(maxWidth: .infinity)
+        }
+        .buttonStyle(StilePulsanteApple(.principale, grande: true))
+        .disabled(daFare == 0 || solaLettura)
+        .padding(.top, K.spazioPulsanteChi)
+        Text(TestiRadar.spiegaRiequilibra)
+            .carattereApple(Tema.Apple.Carattere.secondario)
+            .foregroundColor(Tema.Apple.Colore.inchiostro2)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.top, K.spazioSottoPulsante)
+        if !radar.senzaModello.isEmpty {
+            Button(TestiRadar.senzaModello(radar.senzaModello.count) + " ›", action: assegna)
+                .buttonStyle(.plain)
+                .carattereApple(Tema.Apple.Carattere.secondario)
+                .foregroundColor(Tema.Apple.Colore.accento)
+                .padding(.top, K.spazioSottoPulsante)
+        }
+    }
+}
+
+/// Una riga della card «chi»: avatar, nome e modello, capsula dei punti (o «Proposta pronta»), «›». Passandoci sopra
+/// il suo punto si accende sulla tela: la riga scrive il puntatore ma non lo legge, così non si ridisegna altro.
+private struct RigaChiRadar: View {
+    let voce: VoceRadar
+    let puntatore: PuntatoreRadar
+    let apri: () -> Void
+
+    @State private var sopra = false
+    private typealias K = Tema.Apple.Posizioni.Radar.Colonna
+
+    var body: some View {
+        let v = voce
+        HStack(spacing: K.spazioRigaChi) {
+            AvatarCliente(iniziali: v.iniziali, tinta: v.tinta.colori, lato: K.avatarChi)
+            (Text(v.nome).bold().foregroundColor(Tema.Apple.Colore.inchiostro)
+                + Text(" · \(v.modello.nome)").foregroundColor(Tema.Apple.Colore.inchiostro2))
+                .carattereApple(Tema.Apple.Carattere.voceLista)
+                .lineLimit(1)
+            Spacer(minLength: 6)
+            if v.bozzaPronta {
+                CapsulaStatoApple(testo: TestiRadar.propostaPronta, tono: .ok)
+            } else {
+                CapsulaStatoApple(testo: TestiRadar.puntiConNome(v.distanza), tono: .attenzione)
+            }
+            Text("›")
+                .carattereApple(Tema.Apple.Carattere.voceLista)
+                .foregroundColor(K.freccia)
+        }
+        .padding(K.rigaChi)
+        .background {
+            RoundedRectangle(cornerRadius: K.raggioRiga, style: .continuous)
+                .fill(sopra ? K.fondoRigaSopra : Color.clear)
+        }
+        .overlay(alignment: .bottom) { Rectangle().fill(Tema.Apple.Colore.separatore).frame(height: 1) }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: apri)
+        .onHover { dentro in
+            sopra = dentro
+            if dentro {
+                puntatore.daRiga = true
+                puntatore.sopra = v.id
+            } else if puntatore.sopra == v.id {
+                puntatore.sopra = nil
+            }
+        }
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel(TestiRadar.accessibilita(v))
+        .accessibilityAddTraits(.isButton)
+    }
+}
+#endif
+
+#if !os(macOS)
 private struct CardConteggioRadar: View {
     let radar: RadarPortafoglio
     let solaLettura: Bool
@@ -726,7 +1020,7 @@ private struct CardConteggioRadar: View {
             }
             .buttonStyle(StilePulsanteApple(.principale, grande: true))
             .disabled(daFare == 0 || solaLettura)
-            Text(TestiRadar.spiegaRiequilibra)
+            Text(TestiRadar.spiegaRiequilibraClienti)
                 .carattereApple(Tema.Apple.Carattere.secondario)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -745,7 +1039,7 @@ private struct CardConteggioRadar: View {
     private func titolo(fuori: Int, daFare: Int, pronte: Int) -> String {
         if fuori == 0 { return "Tutti entro la tolleranza" }
         if daFare == 0 { return "✓ " + TestiRadar.bozzePronte(pronte) }
-        return TestiRadar.pulsanteRiequilibra(daFare)
+        return TestiRadar.riequilibraClienti(daFare)
     }
 }
 
@@ -790,6 +1084,8 @@ private struct CardLontaniRadar: View {
         .superficieApple(Tema.Apple.Superficie.cardPiatta)
     }
 }
+
+#endif
 
 // MARK: - Il dettaglio di un cliente
 
@@ -861,8 +1157,14 @@ struct DettaglioRadar: View {
                 Button(v.bozzaPronta ? "✓ Proposta pronta" : "Prepara la proposta", action: prepara)
                     .buttonStyle(StilePulsanteApple(.principale, grande: true))
                     .disabled(v.bozzaPronta || v.spostamenti.isEmpty || solaLettura)
+                #if os(macOS)
+                // Migliorie d'uso 40: le Posizioni del cliente sulla coerenza con il profilo
+                Button(TestiRadar.apriPosizioni(v.nome), action: dossier)
+                    .buttonStyle(StilePulsanteApple(.secondaria, grande: true))
+                #else
                 Button("Apri il dossier", action: dossier)
                     .buttonStyle(StilePulsanteApple(.secondaria, grande: true))
+                #endif
             }
         }
         .padding(Tema.Apple.Misura.Padding.dettaglio)
@@ -974,7 +1276,19 @@ extension StatoShell {
         apriApp(.posizioni)
     }
 
-    /// Il dossier del cliente sulle posizioni, dal dettaglio del radar.
+    #if os(macOS)
+    /// «Apri le posizioni di …» dal dettaglio del radar (migliorie d'uso 40): le Posizioni del cliente sulla vista
+    /// «Coerenza con il profilo».
+    func apriPosizioniDalRadar(_ id: String) {
+        // Scegliere il cliente lascia «Tutti i clienti» (sul Mac `portafoglio` è la stessa scelta della barra)
+        scegliCliente(id)
+        posizioneInDettaglio = nil
+        ancoraPosizioni = "coerenza"
+        apri(.posizioni)
+    }
+    #endif
+
+    /// Il dossier del cliente, dal doppio clic su un punto del radar.
     func apriClienteDalRadar(_ id: String) {
         clienteAttivoId = id
         schedaCliente = .panoramica

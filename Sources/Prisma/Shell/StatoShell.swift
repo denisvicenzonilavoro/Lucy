@@ -143,6 +143,8 @@ enum VoceConfronto: Hashable {
     var ancoraPosizioni: String?
     /// Solo per le istantanee: il cliente del radar con il dettaglio già aperto (Posizioni › Radar, «Luce» giro 2).
     @ObservationIgnored var radarDettaglioIstantanea: String?
+    /// Solo per le istantanee: il cliente del radar acceso da una riga della card «chi» (migliorie d'uso 40).
+    @ObservationIgnored var radarPuntatoreIstantanea: String?
     /// Solo per le istantanee: la pratica con il dettaglio già aperto (Pratiche › Dopo la firma, «Luce» giro 3).
     @ObservationIgnored var praticaDettaglioIstantanea: String?
     #if os(macOS)

@@ -1359,3 +1359,29 @@ Resta:
   si vede solo collegando a mano un documento (come fanno 1120-1122). Decide l'utente se `caricaEsempiBiblioteca`
   debba collegarli ai prodotti con lo stesso nome.
 - Le domande del documento non si sollevano al passaggio del puntatore come le pillole: guardare sul Mac se serve.
+
+## 40. Il radar dice chi e perché
+
+Fatto (solo sul Mac; iPhone e iPad tengono la colonna di prima, con i testi `riequilibraClienti` e
+`spiegaRiequilibraClienti`, fino al loro aggiornamento):
+- Card dei modelli a riga unica (nome largo 92 e barra), pesi nell'aiuto della riga, legenda a colori
+  (`LeggendaClassiRadar`).
+- Card «chi» (`CardChiRadar`) al posto del conteggio e dei «più lontani»: numero, «fuori tolleranza», «su N seguiti con
+  un modello» (aiuto: previdenza esclusa), «punti» spiegato con la tolleranza delle impostazioni, elenco pigro di tutti
+  i fuori dal più lontano con capsula dei punti o «Proposta pronta», pulsante «Prepara le N proposte di riequilibrio»;
+  dopo il pulsante il numero dice quanti resterebbero fuori accettando le proposte, i punti restano col trattino. Via
+  la nota in fondo.
+- `PuntatoreRadar` sale a `CorpoRadar`: la riga accende il punto (alone bianco nel fumetto, che resta l'unica vista che
+  legge il puntatore).
+- Capsula di stato comune `CapsulaStatoApple` (token in `Tema.Apple+CapsulaStato.swift`: `Tema.Apple+Capsula.swift` è
+  della capsula del tempo).
+- Dettaglio: «Apri le posizioni di …» → `apriPosizioniDalRadar` (cliente scelto, ancora «coerenza»); il doppio clic sul
+  punto apre ancora il dossier.
+- Istantanea nuova 898-posizioni-radar-riga-accesa (chiara e scura); prove dei testi in `ProvaCalcoliRadar`.
+
+Resta:
+- `--prova-fluidita`: il passo che conta i corpi passando sulle righe (`ContaCorpi`) non c'è; il passaggio del puntatore
+  non si simula dal codice. Da guardare sul Mac (passare sulle righe non deve rifare la tela).
+- La card «chi» che occupa l'altezza va guardata nelle istantanee 890, 895 (elenco lungo che scorre dentro) e 897
+  (finestra stretta: l'elenco si allunga nello scorrimento della pagina).
+- Il nome sotto i punti piccoli al passaggio (`.rNm2`): il fumetto mostra già nome e distanza, non si è aggiunto altro.
