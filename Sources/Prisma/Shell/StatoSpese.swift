@@ -249,6 +249,53 @@ extension StatoShell {
         apri(.agenda)
     }
 
+    #if os(macOS)
+    /// Rifinitura 57: le scadenze dello Studio da fare nei giorni mostrati dalla vista mese dell'Agenda, per giorno. Mai in
+    /// modalità cliente (sono del consulente) né con un cliente scelto nell'Agenda (il filtro mostra solo quel cliente).
+    /// Fra i dati ricavati con le scadenze come ingresso: `speseStudio` è esclusa da `stessiCalcoli`.
+    func scadenzeStudioAgenda(_ giorni: [Date]) -> [Date: [ScadenzaStudio]] {
+        guard !inModoCliente, filtroClienteAgenda == nil, let primo = giorni.min(), let ultimo = giorni.max() else { return [:] }
+        let cal = Calendar.current
+        let inizio = cal.startOfDay(for: primo)
+        let fine = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: ultimo)) ?? inizio
+        let scadenze = dati.speseStudio.scadenze
+        return ricavato("agenda-scadenze-studio|\(inizio.timeIntervalSinceReferenceDate)|\(fine.timeIntervalSinceReferenceDate)",
+                        ingresso: scadenze) {
+            MotoreSpese.perGiorno(scadenze, da: inizio, a: fine, calendario: cal)
+        }
+    }
+
+    /// Rifinitura 57: le scadenze dello Studio nella vista mese dell'Agenda: la scadenza da fare c'è nel suo giorno, la
+    /// fatta no; con un cliente scelto nell'Agenda o in modalità cliente non c'è; cambiata la scadenza (dato fuori dai
+    /// calcoli) l'Agenda la rilegge. Da chiamare in `Prisma --prova-fluidita` (solo stato, niente finestre).
+    static func provaScadenzeStudioAgenda(_ controlla: (Bool, String) -> Void) {
+        let s = StatoShell(persistente: false)
+        let cal = Calendar.current
+        let giorno = cal.startOfDay(for: Date())
+        let giorni = CalendarioAgenda.settimane(meseDi: giorno).flatMap { $0 }
+        s.modoCliente = nil
+        s.filtroClienteAgenda = nil
+        s.dati.speseStudio.scadenze = [
+            ScadenzaStudio(id: "prova-agenda-f24", titolo: "F24", data: giorno, tipo: .fiscale),
+            ScadenzaStudio(id: "prova-agenda-rc", titolo: "Polizza RC professionale", data: giorno, tipo: .polizza,
+                           fattaIl: giorno),
+        ]
+        let prima = s.scadenzeStudioAgenda(giorni)[giorno]?.map(\.id) ?? []
+        controlla(prima == ["prova-agenda-f24"], "Agenda 57: la scadenza dello Studio da fare c'è nel suo giorno, la fatta no")
+        s.dati.speseStudio.scadenze[0].titolo = "Saldo delle imposte"
+        controlla(s.scadenzeStudioAgenda(giorni)[giorno]?.first?.titolo == "Saldo delle imposte",
+                  "Agenda 57: cambiata una scadenza dello Studio, l'Agenda la rilegge (fuori da versioneCalcoli)")
+        if let c = s.dati.clienti.first?.id {
+            s.filtroClienteAgenda = c
+            controlla(s.scadenzeStudioAgenda(giorni).isEmpty, "Agenda 57: con un cliente scelto le scadenze dello Studio non ci sono")
+            s.filtroClienteAgenda = nil
+            s.modoCliente = c
+            controlla(s.scadenzeStudioAgenda(giorni).isEmpty, "Agenda 57: in modalità cliente le scadenze dello Studio non ci sono")
+            s.modoCliente = nil
+        }
+    }
+    #endif
+
     /// Migliorie d'uso 57: apre l'Agenda sul giorno di una scadenza dello Studio, nella vista mese.
     func apriAgendaMese(_ giorno: Date) {
         vistaAgenda = .mese
@@ -315,7 +362,7 @@ extension StatoShell {
         let testi = TestiRiepilogoSpese(mese: mese, riepilogo: riepilogo, spese: spese, nomi: nomi,
                                         consulente: dati.impostazioni.studio.fatturazione.nome.isEmpty
                                             ? nomeUtente : dati.impostazioni.studio.fatturazione.nome,
-                                        euroPerKm: imp.euroPerKm)
+                                        euroPerKm: imp.euroPerKm, parcelle: parcelle)
         return PacchettoCommercialista.Contenuto(
             nome: PacchettoCommercialista.nome(mese: mese), suffisso: PacchettoCommercialista.suffisso(mese: mese),
             csvChilometri: PacchettoCommercialista.csvChilometri(riepilogo.giri, nomi: nomi, euroPerKm: imp.euroPerKm),

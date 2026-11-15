@@ -183,11 +183,22 @@ enum TestiSpese {
             : "\(k) spese sono senza scontrino: partono lo stesso, segnate."
     }
 
+    /// Rifinitura 57: sotto «Scade F24» nella colonna del giorno dell'Agenda, e l'aiuto della riga.
+    static let sottoScadenzaAgenda = "Studio › Spese"
+    static let aiutoScadenzaAgenda = "Apri le scadenze in Studio › Spese"
+
     /// «Prepara il pacchetto di ottobre».
     static func pacchettoDi(_ mese: Date) -> String { "Prepara il pacchetto di \(Self.mese(mese))" }
 }
 
 // MARK: - La scheda
+
+/// Ciò che il riepilogo dei km legge fuori dai dati dei calcoli: la voce fra i dati ricavati vale finché resta uguale.
+struct IngressoKmSpese: Equatable {
+    let impostazioni: ImpostazioniSpese
+    let kmClienti: [String: Double]
+    let visiteTolte: [VisitaTolta]
+}
 
 struct SpeseStudioVista: View {
     let stato: StatoShell
@@ -201,14 +212,22 @@ struct SpeseStudioVista: View {
         let imp = stato.dati.impostazioni.studio.spese
         let oggi = Date()
         let mese = s.mese(oggi: oggi, impostazioni: imp)
-        // I motori sono puri e leggeri (un mese di appuntamenti): si calcolano qui, sui campi osservati dell'archivio.
         // Migliorie d'uso 57: la serie delle colonne resta ferma (finisce col mese di oggi se il mese scelto è fra gli
-        // ultimi 10)
-        let km = MotoreChilometri.riepilogo(mese: mese, appuntamenti: stato.dati.appuntamenti, impostazioni: imp,
-                                            kmClienti: stato.dati.kmClienti, visiteTolte: stato.dati.speseStudio.visiteTolte,
-                                            fineSerie: MotoreChilometri.fineSerie(scelto: mese, oggi: oggi))
-        let spese = MotoreSpese.delMese(stato.dati.speseStudio.spese, mese: mese)
+        // ultimi 10). Rifinitura 57: i motori (dieci mesi di giri su tutti gli appuntamenti) non girano a ogni ridisegno:
+        // stanno fra i dati ricavati, con ciò che leggono fuori dai dati dei calcoli (km per cliente, visite tolte, spese
+        // e impostazioni dello Studio, esclusi da `stessiCalcoli`) come ingresso; gli appuntamenti sono in `versioneCalcoli`
         let archivio = stato.dati.speseStudio
+        let kmClienti = stato.dati.kmClienti
+        let fine = MotoreChilometri.fineSerie(scelto: mese, oggi: oggi)
+        let km = stato.ricavato("spese-km-\(mese.timeIntervalSinceReferenceDate)-\(fine.timeIntervalSinceReferenceDate)",
+                                ingresso: IngressoKmSpese(impostazioni: imp, kmClienti: kmClienti,
+                                                          visiteTolte: archivio.visiteTolte)) {
+            MotoreChilometri.riepilogo(mese: mese, appuntamenti: stato.dati.appuntamenti, impostazioni: imp,
+                                       kmClienti: kmClienti, visiteTolte: archivio.visiteTolte, fineSerie: fine)
+        }
+        let spese = stato.ricavato("spese-mese-\(mese.timeIntervalSinceReferenceDate)", ingresso: archivio.spese) {
+            MotoreSpese.delMese(archivio.spese, mese: mese)
+        }
         // Le parcelle emesse nel mese, lo stesso elenco che entra nel pacchetto: tenute fra i dati ricavati (il filtro
         // legge tutte le parcelle, non va rifatto a ogni ridisegno); le parcelle entrano in `versioneCalcoli`
         let parcelle = stato.ricavato("spese-parcelle-\(mese.timeIntervalSinceReferenceDate)") {

@@ -21,6 +21,8 @@ extension StatoShell {
 /// copione non ridisegna la testata.
 struct AzioniPalco: View {
     let sala: StatoSala
+    /// Rifinitura 59/60: nelle finestre strette solo l'icona (il nome resta nell'aiuto e nell'accessibilità).
+    var compatta = false
 
     private typealias K = Tema.Apple.SalaEsperienze.Copione
 
@@ -31,11 +33,14 @@ struct AzioniPalco: View {
             HStack(spacing: K.spazioPulsante) {
                 Image(systemName: "info.circle")
                     .carattereApple(K.glifoPulsante)
-                Text(TestiCopione.pulsante)
+                if !compatta {
+                    Text(TestiCopione.pulsante)
+                }
             }
         }
         .buttonStyle(.apple)
-        .help(TestiCopione.aiutoPulsante)
+        .help(compatta ? TestiCopione.pulsante + ". " + TestiCopione.aiutoPulsante : TestiCopione.aiutoPulsante)
+        .accessibilityLabel(Text(TestiCopione.pulsante))
         .accessibilityAddTraits(sala.copioneAperto ? .isSelected : [])
     }
 }
@@ -48,6 +53,13 @@ struct AzioniFattaPalco: View {
     @Environment(StatoShell.self) var stato
     let esperienza: EsperienzaSala
     let cliente: Cliente
+    /// Rifinitura 59/60: nelle finestre strette «Prossima» è solo la freccia (il titolo resta nell'aiuto e
+    /// nell'accessibilità)…
+    var prossimaBreve = false
+    /// …e più strette ancora anche «Segna come fatta» e «✓ Fatta oggi» passano al solo segno.
+    var compatta = false
+
+    private typealias K = Tema.Apple.SalaEsperienze.Copione
 
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
@@ -55,20 +67,38 @@ struct AzioniFattaPalco: View {
     var body: some View {
         let fatta = stato.esperienzaFattaOggi(esperienza, cliente: cliente.id)
         if fatta {
-            CapsulaStatoApple(testo: TestiEsperienzeFatte.fattaOggi, tono: .ok)
+            CapsulaStatoApple(testo: compatta ? "✓" : TestiEsperienzeFatte.fattaOggi, tono: .ok)
+                .help(TestiEsperienzeFatte.fattaOggi)
                 .accessibilityLabel(Text(TestiEsperienzeFatte.fattaOggi))
             if let prossima = stato.prossimaEsperienza(dopo: esperienza, cliente: cliente.id) {
-                Button(TestiEsperienzeFatte.prossima(prossima)) { apri(prossima) }
-                    .buttonStyle(.applePrimario)
-                    .help(TestiEsperienzeFatte.aiutoProssima(prossima))
+                Button { apri(prossima) } label: {
+                    if prossimaBreve {
+                        Image(systemName: "chevron.forward")
+                            .carattereApple(K.glifoPulsante)
+                    } else {
+                        Text(TestiEsperienzeFatte.prossima(prossima))
+                    }
+                }
+                .buttonStyle(.applePrimario)
+                .help(prossimaBreve ? TestiEsperienzeFatte.prossima(prossima) + " " + TestiEsperienzeFatte.aiutoProssima(prossima)
+                      : TestiEsperienzeFatte.aiutoProssima(prossima))
+                .accessibilityLabel(Text(TestiEsperienzeFatte.prossima(prossima)))
             }
         } else {
-            Button(TestiEsperienzeFatte.segna) {
+            Button {
                 stato.segnaEsperienza(esperienza, cliente: cliente.id, avviso: true)
+            } label: {
+                if compatta {
+                    Image(systemName: "checkmark.circle")
+                        .carattereApple(K.glifoPulsante)
+                } else {
+                    Text(TestiEsperienzeFatte.segna)
+                }
             }
             .buttonStyle(.apple)
             .disabled(stato.solaLettura)
-            .help(TestiEsperienzeFatte.aiutoSegna)
+            .help(compatta ? TestiEsperienzeFatte.segna + ". " + TestiEsperienzeFatte.aiutoSegna : TestiEsperienzeFatte.aiutoSegna)
+            .accessibilityLabel(Text(TestiEsperienzeFatte.segna))
         }
     }
 

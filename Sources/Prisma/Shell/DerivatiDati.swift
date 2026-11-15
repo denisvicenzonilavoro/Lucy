@@ -7,6 +7,11 @@ import Foundation
 /// aggiorna dai getter senza pubblicare StatoShell. Ogni voce si calcola alla prima richiesta dopo un
 /// cambiamento, non tutte insieme. Si usa solo dal thread principale.
 final class DerivatiDati {
+    /// Una voce di `altri` con ciò da cui dipende oltre ai dati dei calcoli (`StatoShell.ricavato(_:ingresso:_:)`).
+    struct VoceConIngresso<E: Equatable, T> {
+        let ingresso: E
+        let valore: T
+    }
     /// Il radar del portafoglio (Posizioni › Radar): con Observation la vista lo chiede a ogni rivalutazione.
     var radar: RadarPortafoglio?
     /// La copia dell'archivio per i motori che vogliono tutto `DatiPrisma` (StatoShell.datiDeiCalcoli).
@@ -268,6 +273,19 @@ extension StatoShell {
         let v = calcola()
         if d.altri.count >= DerivatiDati.vociMassimeAltri { d.altri.removeAll(keepingCapacity: true) }
         d.altri[chiave] = v
+        return v
+    }
+
+    /// Come `ricavato(_:_:)`, per un calcolo che legge anche dati fuori da quelli dei calcoli (esclusi da
+    /// `DatiPrisma.stessiCalcoli`, come le spese dello Studio, i km per cliente e le loro impostazioni): `ingresso` li
+    /// raccoglie e la voce vale finché resta uguale (`==`), oltre a `versioneCalcoli`, il giorno e la modalità cliente.
+    /// Migliorie d'uso, rifinitura 57: così un motore pesante esce dal body senza mettere nella chiave tutto l'archivio.
+    func ricavato<E: Equatable, T>(_ chiave: String, ingresso: E, _ calcola: () -> T) -> T {
+        let d = derivatiValidi()
+        if let voce = d.altri[chiave] as? DerivatiDati.VoceConIngresso<E, T>, voce.ingresso == ingresso { return voce.valore }
+        let v = calcola()
+        if d.altri.count >= DerivatiDati.vociMassimeAltri { d.altri.removeAll(keepingCapacity: true) }
+        d.altri[chiave] = DerivatiDati.VoceConIngresso(ingresso: ingresso, valore: v)
         return v
     }
 

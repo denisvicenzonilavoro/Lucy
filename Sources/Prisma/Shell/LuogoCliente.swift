@@ -66,6 +66,7 @@ extension StatoShell {
         tavoloInArrivo = false
         tavoloTocca = false
         documentoSeguito = nil
+        cursoreSeguito = nil
         if luogoCliente != .tavolo { luogoCliente = .tavolo }
         mostraAvviso(testo)
     }
@@ -79,6 +80,7 @@ extension StatoShell {
         luogoCliente = .schermo
         tavoloTocca = false
         documentoSeguito = nil
+        cursoreSeguito = nil
         if cifreLuogoDaConfermare { cifreLuogoDaConfermare = false }
         if sala.copioneAperto { sala.copioneAperto = false }
         if sala.confermaCifreTavolo != nil { sala.confermaCifreTavolo = nil }
@@ -93,6 +95,7 @@ extension StatoShell {
         menuLuogo = false
         tavoloTocca.toggle()
         documentoSeguito = nil
+        cursoreSeguito = nil
         mostraAvviso(tavoloTocca ? TestiLuogo.avvisoTocca : TestiLuogo.avvisoGuidi)
     }
 
@@ -143,6 +146,8 @@ extension StatoShell {
             return
         }
         documentoSeguito = nil
+        // Fuori da «Nel tempo» il cursore non è più quello seguito (si rimanda tornandoci)
+        if capitolo != .tempo { cursoreSeguito = nil }
         if capitolo == .sala, let e = sala.esperienza {
             seguiEsperienza(e, cliente: c)
             return
@@ -154,6 +159,16 @@ extension StatoShell {
             return
         }
         guard cifreConfermate(c) else { return }
+        // Rifinitura 58: «Nel tempo» con «può toccare: sì» è dal vivo: il cursore del versamento mensile (lo muove il
+        // cliente sull'iPad, il Mac ricalcola), mandato una volta per cliente finché si resta qui con il tocco acceso
+        if capitolo == .tempo && tavoloTocca {
+            let chiave = "tempo|\(c.id)"
+            guard cursoreSeguito != chiave || tavolo.cursore == nil else { return }
+            cursoreSeguito = chiave
+            tavolo.lasciaCursore(ContestoTavolo(documento: nil, pagina: 0, clienteId: c.id))
+            return
+        }
+        cursoreSeguito = nil
         mandaImmagineVista(CapitoloClienteFermo(capitolo: capitolo, cliente: c), titolo: capitolo.titolo, cliente: c, cifre: true)
     }
 

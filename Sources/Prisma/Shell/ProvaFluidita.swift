@@ -336,6 +336,7 @@ enum ProvaFluidita {
         misuraLuce(s, banco, stato)
         // Migliorie d'uso 32 e 33: il cambio di cliente non rifà i motori di Territorio e Pratiche
         if !pesanti { controllaCacheCliente(s, stato) }
+        if !pesanti { controllaCacheSpese(s, stato) }
 
         s.misura(banco, [
             PassoFluidita(nome: "apri gli spazi di lavoro", azione: { stato.pannelloSpazi = true },
@@ -411,6 +412,39 @@ enum ProvaFluidita {
         s.controlla(stato.cacheStatiPratiche.calcoli == calcoli, "fluidità · Pratiche: la testata non rifà MotorePratiche a ogni disegno")
 
         stato.scegliCliente(primaCliente.isEmpty ? nil : primaCliente)
+    }
+
+    /// Migliorie d'uso 57 (rifinitura 52-60): Studio › Spese non rifà il riepilogo dei km (dieci mesi di giri su tutti gli
+    /// appuntamenti) a ogni ridisegno. Letto tre volte con lo stesso ingresso si calcola una volta; con le impostazioni
+    /// dello Studio cambiate (escluse da `stessiCalcoli`, quindi fuori da `versioneCalcoli`) si rifà. Solo lo stato.
+    private static func controllaCacheSpese(_ s: SessioneFluidita, _ stato: StatoShell) {
+        let giorno = Calendar.current.startOfDay(for: Date())
+        let mese = MotoreChilometri.inizioMese(giorno, Calendar.current)
+        let imp = stato.dati.impostazioni.studio.spese
+        let kmClienti = stato.dati.kmClienti
+        let tolte = stato.dati.speseStudio.visiteTolte
+        let chiave = "prova-fluidita-spese-km-\(mese.timeIntervalSinceReferenceDate)"
+        var calcoli = 0
+        func leggi(_ impostazioni: ImpostazioniSpese) {
+            _ = stato.ricavato(chiave, ingresso: IngressoKmSpese(impostazioni: impostazioni, kmClienti: kmClienti,
+                                                                 visiteTolte: tolte)) {
+                calcoli += 1
+                return MotoreChilometri.riepilogo(mese: mese, appuntamenti: stato.dati.appuntamenti,
+                                                  impostazioni: impostazioni, kmClienti: kmClienti, visiteTolte: tolte)
+            }
+        }
+        let prima = stato.derivatiValidi()
+        for _ in 0..<3 { leggi(imp) }
+        var altre = imp
+        altre.contaVisiteSenzaCliente.toggle()
+        leggi(altre)
+        guard stato.derivatiValidi() === prima, Calendar.current.startOfDay(for: Date()) == giorno else {
+            print("PASSO fluidità · Spese: controllo della cache saltato (è cambiato il giorno)")
+            return
+        }
+        s.controlla(calcoli == 2, "fluidità · Spese: il riepilogo dei km si calcola una volta e si rifà solo se cambia ciò che legge")
+        // Le scadenze dello Studio nella vista mese dell'Agenda (con uno stato a parte, che non tocca questo)
+        StatoShell.provaScadenzeStudioAgenda { s.controlla($0, "fluidità · " + $1) }
     }
 
     /// Le azioni nuove di «Luce» (Design/template-luce-specifica.md): ognuna si apre e si richiude, e lo stato torna

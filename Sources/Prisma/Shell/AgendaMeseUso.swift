@@ -18,6 +18,8 @@ struct CellaMeseUso: View {
     let festivo: Bool
     let appuntamenti: [Appuntamento]
     let scadenze: [Posizione]
+    /// Rifinitura 57: le scadenze dello Studio da fare in questo giorno («Scade F24», dopo quelle delle posizioni).
+    var scadenzeStudio: [ScadenzaStudio] = []
     /// Le attività ancora da fare con scadenza in questo giorno (il segno arancio resta: decisione 50-b).
     let daFare: Int
     /// Il giorno è passato e ha attività non fatte: il segno diventa rosso.
@@ -35,7 +37,7 @@ struct CellaMeseUso: View {
     var body: some View {
         let m = Misure.AgendaMese.self
         let forma = RoundedRectangle(cornerRadius: m.raggioCellaUso, style: .continuous)
-        let r = RegoleMeseAgenda.righe(appuntamenti: appuntamenti.count, scadenze: scadenze.count, posto: posto)
+        let r = RegoleMeseAgenda.righe(appuntamenti: appuntamenti.count, scadenze: tutteLeScadenze, posto: posto)
         VStack(alignment: .leading, spacing: m.spazioRigheCella) {
             testa
             if nelMese {
@@ -49,6 +51,9 @@ struct CellaMeseUso: View {
                 }
                 ForEach(scadenze.prefix(r.scadenze)) { p in
                     ScadenzaMeseUso(testo: RegoleMeseAgenda.scadenza(p.nome))
+                }
+                ForEach(scadenzeStudio.prefix(max(0, r.scadenze - scadenze.count))) { s in
+                    ScadenzaMeseUso(testo: RegoleMeseAgenda.scadenza(s.titolo))
                 }
                 if r.altri > 0 && posto > 0 {
                     Text(RegoleMeseAgenda.altri(r.altri))
@@ -108,8 +113,8 @@ struct CellaMeseUso: View {
                     segno(scadute ? Tema.Apple.Agenda.Segno.attivitaScaduta : Tema.Apple.Agenda.Segno.attivita,
                           conteggio: daFare)
                 }
-                if posto == 0 && !scadenze.isEmpty {
-                    segno(t.pallinoScadenza, conteggio: scadenze.count)
+                if posto == 0 && tutteLeScadenze > 0 {
+                    segno(t.pallinoScadenza, conteggio: tutteLeScadenze)
                 }
                 if !occasioni.vuoto {
                     AnelliOccasioni(segni: occasioni, selezionato: false)
@@ -144,13 +149,16 @@ struct CellaMeseUso: View {
         }
     }
 
+    /// Le scadenze del giorno: delle posizioni e dello Studio.
+    private var tutteLeScadenze: Int { scadenze.count + scadenzeStudio.count }
+
     /// Gli appuntamenti di revisione del giorno (i riesami).
     private var riesami: Int { appuntamenti.filter { $0.tipo == .revisione }.count }
 
     private var descrizione: String {
         var parti = [Formati.dataLunga.string(from: giorno)]
         if oggi { parti.append("oggi") }
-        parti.append(RegoleMeseAgenda.conteggio(impegni: appuntamenti.count, scadenze: scadenze.count, solo: nil))
+        parti.append(RegoleMeseAgenda.conteggio(impegni: appuntamenti.count, scadenze: tutteLeScadenze, solo: nil))
         if riesami > 0 { parti.append("\(riesami) \(riesami == 1 ? "riesame" : "riesami")") }
         if daFare > 0 { parti.append("\(daFare) da fare") }
         if occasioni.numero > 0 { parti.append("\(occasioni.numero) \(occasioni.numero == 1 ? "occasione" : "occasioni")") }

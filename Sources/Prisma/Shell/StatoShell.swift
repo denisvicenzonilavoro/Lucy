@@ -542,6 +542,9 @@ enum VoceConfronto: Hashable {
     @ObservationIgnored var avvisoRischioToccoVisto = false
     /// Il prospetto già mandato da sfogliare (con «può toccare: sì»): non si rimanda a ogni pagina.
     @ObservationIgnored var documentoSeguito: String?
+    /// Rifinitura 58: il cursore di «Nel tempo» già lasciato al cliente (con «può toccare: sì»): non si rimanda a ogni
+    /// cambio che `OsservatoreLuogo` segnala.
+    @ObservationIgnored var cursoreSeguito: String?
     /// Quante prese visione dall'iPad erano archiviate quando la scheda l'ha chiesta (si accende «Registra» al cambio).
     @ObservationIgnored var presaVisioneConteggio = 0
     /// Solo istantanee: la scheda della presa visione sul Mac con il tratto di prova.

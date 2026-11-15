@@ -87,11 +87,15 @@ struct MeseAgenda: View, Equatable {
     var nomi: [String: String] = [:]
     /// Migliorie d'uso 50 (Mac): il doppio clic su una cella apre quel giorno in «Giorno».
     var apriGiorno: (Date) -> Void = { _ in }
+    /// Rifinitura 57 (Mac): le scadenze dello Studio da fare, per giorno (`StatoShell.scadenzeStudioAgenda`). Non sono
+    /// dati dei calcoli: entrano nel confronto.
+    var scadenzeStudio: [Date: [ScadenzaStudio]] = [:]
 
     /// L'indice resta fuori dal confronto (è quello in cache per giorni, filtro e chiave), e le azioni pure: fanno
     /// sempre la stessa cosa con l'appuntamento o il giorno che ricevono.
     nonisolated static func == (a: MeseAgenda, b: MeseAgenda) -> Bool {
         a.settimane == b.settimane && a.giorno == b.giorno && a.strato == b.strato && a.chiave == b.chiave
+            && a.scadenzeStudio == b.scadenzeStudio
     }
 
     var body: some View {
@@ -155,6 +159,7 @@ struct MeseAgenda: View, Equatable {
             festivo: giornoSettimana == 1 || giornoSettimana == 7,
             appuntamenti: indice.appuntamenti(g),
             scadenze: indice.scadenze(g),
+            scadenzeStudio: scadenzeStudio[cal.startOfDay(for: g)] ?? [],
             daFare: daFare.count,
             scadute: scadute,
             occasioni: occasioni,

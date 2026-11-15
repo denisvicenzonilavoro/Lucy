@@ -1949,16 +1949,27 @@ Fatto (Studio › Spese c'è solo sul Mac, `SchedaStudio.speseSulDispositivo`):
 - Prove «Spese 57» in `ProvaCalcoliSpese` (`--prova-calcoli`). Istantanee nuove 1095-uso-spese-mese-prima (chiara e scura),
   1095-uso-spese-mese-di-oggi, 1095-uso-spese-senza-scontrino; 780-788 cambiano da sole.
 
+Fatto nella rifinitura 52-60:
+- **Le scadenze dello Studio nell'Agenda**: fatto (solo Mac). Non nell'indice dell'Agenda (la sua cache segue solo
+  `versioneCalcoli`) ma accanto: `StatoShell.scadenzeStudioAgenda(_:)` (Shell/StatoSpese.swift) con `MotoreSpese.perGiorno`
+  (le da fare, per giorno e titolo; le ricorrenti come in `segnaFatta`: c'è solo la data da fare), fra i dati ricavati con
+  le scadenze come ingresso (`StatoShell.ricavato(_:ingresso:_:)`, nuovo in DerivatiDati.swift: la voce vale finché
+  l'ingresso resta `==`). `MeseAgenda.scadenzeStudio` (nel confronto), `CellaMeseUso.scadenzeStudio` («Scade F24» col
+  pallino arancio dopo quelle delle posizioni, contate con loro in `RegoleMeseAgenda.righe`, nel segno e nella
+  descrizione) e, nella colonna del giorno del mese, la riga «Scade … · Studio › Spese» che apre Studio › Spese. Mai in
+  modalità cliente né con un cliente scelto nell'Agenda. Prove: `MotoreSpese.perGiorno` in `--prova-calcoli` («Spese
+  57»), stato, cache, filtro e modalità cliente in `--prova-fluidita` (`StatoShell.provaScadenzeStudioAgenda`).
+- **Il PDF del riepilogo**: fatto. La sezione «Le parcelle» in `TestiRiepilogoSpese` (parametro `parcelle:`, lo stesso
+  elenco di `parcelleDelMese` del CSV): data, «Parcella n. … · imponibile … · stato» (il cliente solo con «nomi nel
+  pacchetto») e il totale. Prove in `--prova-calcoli` («Spese 57»).
+- **I calcoli fuori dal body**: fatto. Il riepilogo dei km e le spese del mese in `stato.ricavato(_:ingresso:_:)` con mese
+  e fine della serie nella chiave e `IngressoKmSpese` (impostazioni, km per cliente, visite tolte) / le spese come
+  ingresso; caso nuovo in `--prova-fluidita` (`controllaCacheSpese`: tre letture, un calcolo; impostazioni cambiate, si
+  rifà).
+
 Resta:
-- **Le scadenze dello Studio nell'Agenda** (proposta di 57.6): oggi il tocco apre l'Agenda sul giorno, nella vista mese,
-  ma la vista mese non le mostra ancora. Va aggiunto all'indice dell'Agenda (`scadenzePerGiorno` in Dati/Modelli.swift è
-  solo di posizioni) un elenco di scadenze dello Studio per giorno, disegnate come «Scade …» col pallino arancio nelle celle
-  (`CellaMeseUso`, `RegoleMeseAgenda.righe`) e nella colonna del giorno, solo sul Mac e mai in modalità cliente; la chiave
-  della cache deve contenere `speseStudio` (esclusa da `stessiCalcoli`). Da coordinare con il «Da fare» della miglioria 3.
-- **Il PDF del riepilogo** non elenca ancora le parcelle (sono solo nel CSV).
-- I calcoli restano nel body come prima (dieci mesi di giri, la tessera non aggiunge motori); se `--prova-fluidita` lo
-  chiede, portarli in `stato.ricavato` con la chiave che contiene mese scelto, fine della serie,
-  `impostazioni.studio.spese`, `speseStudio` e `kmClienti`.
+- Le scadenze dello Studio non ci sono ancora nelle viste Giorno e Settimana dell'Agenda (solo nel mese, dove apre il
+  tocco della scheda); l'istantanea del mese con una scadenza dello Studio è da aggiungere e guardare sul Mac.
 - Istantanee da rigenerare sul Mac (780, 781, 782 con «almeno … km» nella tessera, 785, 788 in colonna: la tessera non
   deve tagliarsi) e pagina delle anteprime da aggiornare; il passaggio sulle colonne chiede uno screenshot.
 
@@ -1983,12 +1994,17 @@ Fatto (solo Mac):
   e la chiusura del copione nella vista pulita in `ProvaMostraAlCliente` (`--prova-vera`).
 - Istantanee nuove 684-sala-copione e 685-sala-copione-senza-durata (chiare e scure); 691-sala-palco cambia da sola.
 
+Fatto nella rifinitura 52-60:
+- **Il cliente guarda l'iPad (58)**: già fatto (verificato): `consulenteVede` vale anche nella vista del cliente con
+  `luogoCliente == .tavolo`, e `tornaSulloSchermo` chiude il copione.
+- **Finestre strette**: fatto (solo Mac). La testata del palco è un `ViewThatFits` di quattro righe: tutti i testi; poi
+  «Prossima» (freccia) e «✦ Aggiungi al Prisma» (solo il segno); poi anche «Cosa dire» (icona), «Segna come fatta»
+  (icona) e «✓ Fatta oggi» («✓»); solo all'ultimo il nome dell'esperienza si taglia. Il testo intero resta nell'aiuto e
+  nell'etichetta di accessibilità (`AzioniPalco(compatta:)`, `AzioniFattaPalco(prossimaBreve:compatta:)`).
+
 Resta:
-- **Il cliente guarda l'iPad (58)**: `consulenteVede` va esteso con «o nella vista del cliente con `luogoCliente ==
-  .tavolo`» quando arriva la 58, e il copione si chiude quando il cliente torna a guardare il Mac.
-- **Finestre strette**: la testata del palco non riduce ancora i pulsanti a icone con `ViewThatFits` (l'`HStack` dei
-  pulsanti è `.fixedSize()`, il titolo si accorcia per primo). Da fare insieme alla 60, che aggiunge «Segna come fatta»;
-  verificare con 618-app-nuove-sala e una scena stretta del palco.
+- Da guardare a occhio sul Mac: 618-app-nuove-sala, 691-sala-palco e una scena stretta del palco (non c'è ancora
+  un'istantanea della testata stretta).
 - Istantanee da rigenerare sul Mac (684, 685, 691; controllare che 693-sala-modo-cliente non mostri «Cosa dire»; 681 con
   la 58) e pagina delle anteprime da aggiornare; l'entrata a molla chiede uno screenshot.
 
@@ -2032,7 +2048,9 @@ Resta:
   aperta (il luogo scelto prima resta e la pagina segue). Nel template il prospetto è un capitolo della vista.
 - **Le immagini dei capitoli** sono alla misura fissa del palco (1280×800): un capitolo più lungo (il quadro con testo
   «Grande», molte posizioni) si taglia in basso. Da guardare sull'iPad vero; eventualmente più pagine.
-- **«Nel tempo» con «può toccare: sì»**: il cursore del versamento (`lasciaCursore`) non è collegato; resta l'immagine.
+- **«Nel tempo» con «può toccare: sì»**: fatto nella rifinitura 52-60. `seguiSulTavolo` nel capitolo «Nel tempo» con il
+  tocco acceso e le cifre confermate chiama `TavoloMac.lasciaCursore` (una volta per cliente: `cursoreSeguito`, rimandato
+  se il cursore non c'è più); con «può toccare: no» torna l'immagine ferma. Prova in `--prova-tavolo`.
 - **Il Prisma del cliente sull'iPad** (decisione 58-f): va controllato nell'immagine del palco che non compaia la password;
   se compare, nasconderla con `inSala`.
 - **Il menu del luogo** è disegnato (come quello dell'avatar), non un menu del Mac; l'iPad collegato si vede dal testo
@@ -2067,9 +2085,9 @@ ripristino, archivio di prima, esperienza sconosciuta scartata, cliente tolto, s
 Resta:
 - **CLAUDE.md**: aggiungere all'elenco di ciò che il backup comprende «da «Migliorie d'uso» le esperienze della Sala fatte
   con il cliente: data ed esperienza, mai il contenuto» (non toccato da questo giro: lo decide l'utente).
-- **Istantanee**: generarle sul Mac (686-688) e guardare che «✓ Fatta oggi» sulla scheda grande non copra il saluto e che la
-  testata del palco con «Prossima: … ›» non tagli il nome dell'esperienza alla larghezza minima; rigenerare 690 e 691
-  (ora con «Segna come fatta») e aggiornare la pagina delle anteprime.
+- **Istantanee**: generarle sul Mac (686-688) e guardare che «✓ Fatta oggi» sulla scheda grande non copra il saluto
+  (la testata del palco stretta passa ai segni: rifinitura 52-60, vedi 59); rigenerare 690 e 691 (ora con «Segna come
+  fatta») e aggiornare la pagina delle anteprime.
 - **`--prova-fluidita`**: nessun caso nuovo; la griglia legge le fatte una volta (ricavato) e passa il booleano alle schede.
 - Il riquadro «In Sala» c'è solo nella Panoramica del Mac (con il quadro); nella cronologia degli incontri e in Documenti
   non c'è una riga (alternative di 60-a non fatte).

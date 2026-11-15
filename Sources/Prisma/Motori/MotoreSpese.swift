@@ -97,6 +97,19 @@ enum MotoreSpese {
         scadenze.filter { $0.fattaIl == nil }.sorted { ($0.data, $0.titolo) < ($1.data, $1.titolo) }
     }
 
+    /// Rifinitura 57: le scadenze da fare dei giorni da `inizio` (compreso) a `fine` (escluso), per giorno, in ordine di
+    /// titolo, per la vista mese dell'Agenda. Le ricorrenti come qui sopra: la volta dopo esiste solo quando quella di
+    /// prima è segnata fatta (`segnaFatta`), quindi nel calendario c'è solo la data da fare.
+    static func perGiorno(_ scadenze: [ScadenzaStudio], da inizio: Date, a fine: Date,
+                          calendario cal: Calendar = .current) -> [Date: [ScadenzaStudio]] {
+        var r: [Date: [ScadenzaStudio]] = [:]
+        for s in scadenze where s.fattaIl == nil && s.data >= inizio && s.data < fine {
+            r[cal.startOfDay(for: s.data), default: []].append(s)
+        }
+        for k in r.keys { r[k]?.sort { ($0.titolo, $0.id) < ($1.titolo, $1.id) } }
+        return r
+    }
+
     /// Le scadenze fatte, la più recente prima.
     static func fatte(_ scadenze: [ScadenzaStudio]) -> [ScadenzaStudio] {
         scadenze.filter { $0.fattaIl != nil }.sorted { ($0.fattaIl ?? $0.data, $0.data) > ($1.fattaIl ?? $1.data, $1.data) }

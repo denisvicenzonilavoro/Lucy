@@ -359,6 +359,24 @@ enum ProvaTavolo {
         stato.seguiSulTavolo()
         controlla(attendi(10) { mostrato(ipad)?.titolo == CapitoloCliente.sala.titolo } && stato.sala.tavoloEsperienza == nil,
                   "Tavolo: tornati alla griglia della Sala, l'iPad mostra la griglia")
+        // Rifinitura 58: «Nel tempo» con «può toccare: sì» lascia al cliente il cursore del versamento (dal vivo), una volta
+        // sola; con «può toccare: no» torna l'immagine ferma
+        stato.cambiaCapitolo(.tempo)
+        stato.cambiaTocco()
+        stato.seguiSulTavolo()
+        let cursoreTempo = attendi(5) { cursore(ipad)?.risultato != nil }
+        let idCursore = tavolo.cursore?.id
+        controlla(cursoreTempo && idCursore != nil, "Tavolo: «Nel tempo» con «può toccare: sì» manda il cursore del versamento all'iPad")
+        stato.seguiSulTavolo()
+        controlla(tavolo.cursore?.id == idCursore, "Tavolo: il cursore di «Nel tempo» non si rimanda a ogni cambio")
+        stato.cambiaTocco()
+        stato.seguiSulTavolo()
+        controlla(attendi(10) { mostrato(ipad)?.titolo == CapitoloCliente.tempo.titolo && mostrato(ipad)?.genere == .pagina }
+                  && tavolo.cursore == nil,
+                  "Tavolo: «Nel tempo» con «può toccare: no» torna l'immagine ferma, senza cursore")
+        stato.cambiaCapitolo(.sala)
+        stato.seguiSulTavolo()
+        _ = attendi(10) { mostrato(ipad)?.titolo == CapitoloCliente.sala.titolo }
         // La presa visione dell'immagine sull'iPad: la pagina su carta e la pagina della presa visione
         if let tratto = TrattoProvaTavolo.immagine(), let png = ProtocolloTavolo.png(tratto) {
             let prima = stato.dati.documenti.count

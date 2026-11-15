@@ -353,7 +353,8 @@ struct AppAgenda: View {
             HStack(alignment: .top, spacing: m.spazioColonna) {
                 MeseAgenda(settimane: settimane, giorno: giorno, indice: indice, strato: strato, chiave: chiave,
                            canale: { stato.canaleAppuntamento($0) }, seleziona: { seleziona($0) },
-                           nomi: nomi, apriGiorno: { apriGiorno($0) })
+                           nomi: nomi, apriGiorno: { apriGiorno($0) },
+                           scadenzeStudio: stato.scadenzeStudioAgenda(settimane.flatMap { $0 }))
                     .equatable()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 ParteAgenda { colonnaGiornoMese(indice) }
@@ -424,6 +425,8 @@ struct AppAgenda: View {
         let t = Tema.Apple.Agenda.MeseUso.self
         let eventi = indice.appuntamenti(giorno)
         let scadenze = indice.scadenze(giorno)
+        // Rifinitura 57: le scadenze dello Studio del giorno (dalla stessa cache della griglia: stessi giorni)
+        let studio = stato.scadenzeStudioAgenda(CalendarioAgenda.settimane(meseDi: giorno).flatMap { $0 })[cal.startOfDay(for: giorno)] ?? []
         let delGiorno = indice.attivita(giorno)
         let oggi = cal.isDateInToday(giorno)
         let indietro = oggi ? stato.attivitaRimasteIndietro() : []
@@ -441,7 +444,7 @@ struct AppAgenda: View {
                 .lineLimit(1)
                 .minimumScaleFactor(Misure.AgendaImpaginazione.scalaNotaGiorno)
                 .padding(.top, m.spazioTitoloColonna)
-            Text(RegoleMeseAgenda.conteggio(impegni: eventi.count, scadenze: scadenze.count, solo: solo))
+            Text(RegoleMeseAgenda.conteggio(impegni: eventi.count, scadenze: scadenze.count + studio.count, solo: solo))
                 .carattereApple(t.conteggio)
                 .foregroundColor(t.coloreConteggio)
                 .lineLimit(2)
@@ -467,7 +470,14 @@ struct AppAgenda: View {
                             stato.apriPosizione(p)
                         }
                     }
-                    if eventi.isEmpty && scadenze.isEmpty {
+                    ForEach(studio) { sc in
+                        RigaMeseUso(ora: "Scade", titolo: sc.titolo, sotto: TestiSpese.sottoScadenzaAgenda,
+                                    colore: t.pallinoScadenza, scadenza: true,
+                                    aiuto: TestiSpese.aiutoScadenzaAgenda) {
+                            stato.apriSpese()
+                        }
+                    }
+                    if eventi.isEmpty && scadenze.isEmpty && studio.isEmpty {
                         VStack(spacing: m.spazioVuoto) {
                             Text(RegoleMeseAgenda.giornataLibera(per: solo))
                             Text(RegoleMeseAgenda.notaGiornataLibera)

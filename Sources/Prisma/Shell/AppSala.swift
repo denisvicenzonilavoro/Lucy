@@ -558,7 +558,22 @@ private struct PalcoSala: View {
         }
     }
 
-    private var testata: some View {
+    @ViewBuilder private var testata: some View {
+        #if os(macOS)
+        // Rifinitura 59/60: con la finestra stretta i pulsanti passano dai testi alle icone (prima «Prossima» e «Aggiungi
+        // al Prisma», poi tutti), così il nome dell'esperienza resta intero; solo all'ultimo passo il nome si taglia
+        ViewThatFits(in: .horizontal) {
+            rigaTestata(.piena, titoloIntero: true)
+            rigaTestata(.breve, titoloIntero: true)
+            rigaTestata(.icone, titoloIntero: true)
+            rigaTestata(.icone, titoloIntero: false)
+        }
+        #else
+        rigaTestata(.piena, titoloIntero: false)
+        #endif
+    }
+
+    private func rigaTestata(_ livello: LivelloTestataPalco, titoloIntero: Bool) -> some View {
         let nome = StatoShell.nomeBreve(cliente)
         return HStack(spacing: P.spazioTestata) {
             Button { torna() } label: { Text("‹ Sala") }
@@ -574,14 +589,16 @@ private struct PalcoSala: View {
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
             }
             .lineLimit(1)
+            .fixedSize(horizontal: titoloIntero, vertical: false)
             Spacer(minLength: P.spazioTestata)
             HStack(spacing: P.spazioPulsanti) {
                 #if os(macOS)
                 // Migliorie d'uso 59: i pulsanti del consulente («Cosa dire»), solo quando il cliente non guarda il Mac
                 if stato.consulenteVede {
-                    AzioniPalco(sala: stato.sala)
+                    AzioniPalco(sala: stato.sala, compatta: livello == .icone)
                     // Migliorie d'uso 60: «Segna come fatta» o «✓ Fatta oggi» e «Prossima: … ›»
-                    AzioniFattaPalco(esperienza: esperienza, cliente: cliente)
+                    AzioniFattaPalco(esperienza: esperienza, cliente: cliente, prossimaBreve: livello != .piena,
+                                     compatta: livello == .icone)
                 }
                 #endif
                 // Migliorie d'uso 58: «▣ Mostra sul tavolo» non c'è più, sul Mac l'iPad lo sceglie l'etichetta del luogo
@@ -590,14 +607,16 @@ private struct PalcoSala: View {
                     // Giro 15: accende la voce nel file del cliente (Shell/StatoPrismaCliente.swift); il disegno entra
                     // nel file solo come obiettivo salvato (decisione 7)
                     let aggiunta = stato.voceAggiunta(esperienza, cliente: cliente)
+                    let intero = aggiunta ? "✓ Nel Prisma di \(nome)" : "✦ Aggiungi al Prisma di \(nome)"
                     Button { stato.aggiungiAlPrismaCliente(esperienza, cliente: cliente) } label: {
-                        Text(aggiunta ? "✓ Nel Prisma di \(nome)" : "✦ Aggiungi al Prisma di \(nome)")
+                        // Rifinitura 59/60: nelle finestre strette solo il segno (il testo intero resta nell'aiuto e
+                        // nell'etichetta di accessibilità)
+                        Text(livello == .piena ? intero : (aggiunta ? "✓" : "✦"))
                     }
                     .buttonStyle(.apple)
                     .disabled(esperienza == .disegna || !esperienza.disponibile || !EsperienzaSala.prismaCliente.disponibile)
-                    .help(esperienza == .disegna
-                          ? "Il disegno entra nel file quando lo salvi come obiettivo"
-                          : "Nel file personale del cliente (Il Prisma del cliente). Prisma non manda nulla da solo")
+                    .help(aiutoAggiungi(intero: intero, breve: livello != .piena))
+                    .accessibilityLabel(Text(intero))
                 }
                 // Migliorie d'uso 58: sul Mac «▶︎ Presenta» lo sostituisce «Mostra al cliente» nella testata della Sala (la vista
                 // del cliente sul capitolo «La Sala», con il palco aperto); su iPhone e iPad resta
@@ -610,6 +629,19 @@ private struct PalcoSala: View {
             .fixedSize()
         }
     }
+
+    /// L'aiuto di «✦ Aggiungi al Prisma»: con il solo segno comincia con il testo intero del pulsante.
+    private func aiutoAggiungi(intero: String, breve: Bool) -> String {
+        if esperienza == .disegna { return "Il disegno entra nel file quando lo salvi come obiettivo" }
+        let spiegazione = "Nel file personale del cliente (Il Prisma del cliente). Prisma non manda nulla da solo"
+        return breve ? intero + ". " + spiegazione : spiegazione
+    }
+}
+
+/// Rifinitura 59/60: quanto testo mettono i pulsanti della testata del palco. `piena`: tutti i testi; `breve`: «Prossima»
+/// e «Aggiungi al Prisma» con il solo segno; `icone`: anche «Cosa dire» e «Segna come fatta» con la sola icona.
+private enum LivelloTestataPalco {
+    case piena, breve, icone
 }
 
 /// Dentro la card del palco: la vista dell'esperienza. Finché un'esperienza non c'è, lo stato «in arrivo».

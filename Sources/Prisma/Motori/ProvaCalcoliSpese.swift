@@ -444,6 +444,18 @@ enum ProvaCalcoliSpese {
         let senza = SpesaStudio(data: AiutiProva.data(2026, 10, 14), descrizione: "Parcheggio", importo: 6.5, categoria: .parcheggio)
         let csv = PacchettoCommercialista.csvSpese([senza], scontrini: [:], nomi: nil)
         verifica.vero("Spese 57: la spesa senza scontrino è segnata «manca» nel CSV", csv.contains(";6,50;;;manca;"))
+        // Rifinitura 57: le scadenze dello Studio per giorno nella vista mese dell'Agenda (solo le da fare, nel mese)
+        let scadAgenda = [ScadenzaStudio(id: "sa", titolo: "Saldo", data: AiutiProva.data(2026, 10, 16)),
+                          ScadenzaStudio(id: "sb", titolo: "F24", data: AiutiProva.data(2026, 10, 16)),
+                          ScadenzaStudio(id: "sc", titolo: "RC", data: AiutiProva.data(2026, 10, 20), fattaIl: AiutiProva.data(2026, 10, 2)),
+                          ScadenzaStudio(id: "sd", titolo: "Acconto", data: AiutiProva.data(2026, 11, 30))]
+        let fineOttobre = cal.date(byAdding: .month, value: 1, to: ottobre) ?? ottobre
+        let perGiorno = MotoreSpese.perGiorno(scadAgenda, da: ottobre, a: fineOttobre, calendario: cal)
+        verifica.vero("Spese 57: in Agenda le scadenze da fare del mese, per giorno e per titolo",
+                      perGiorno.count == 1 && perGiorno[cal.startOfDay(for: AiutiProva.data(2026, 10, 16))]?.map(\.id) == ["sb", "sa"])
+        let righeCella = RegoleMeseAgenda.righe(appuntamenti: 1, scadenze: 2, posto: 4)
+        verifica.vero("Spese 57: la cella del mese conta le scadenze dello Studio con le altre",
+                      righeCella.scadenze + righeCella.pillole + (righeCella.altri > 0 ? 1 : 0) <= 4 && righeCella.scadenze >= 1)
         // Il CSV delle parcelle emesse nel mese: bozze, annullate e altri mesi fuori
         func parcella(_ id: String, _ giorno: Int, mese: Int = 10, stato: StatoParcella, numero: String?, cliente: String = "a",
                       importo: Double = 500) -> Parcella {
@@ -469,6 +481,23 @@ enum ProvaCalcoliSpese {
         verifica.vero("Spese 57: «=2/2026» non diventa una formula", senzaNomi.contains("'=2/2026"))
         let conNomi = PacchettoCommercialista.csvParcelle(delMese, nomi: nomi)
         verifica.vero("Spese 57: il cliente solo con i nomi accesi", conNomi.contains(";Pagata;Cliente Prova Due"))
+        // Rifinitura 57: le stesse parcelle nel PDF del riepilogo, nella sezione «Le parcelle», con il cliente solo con i nomi
+        let rVuoto = MotoreChilometri.riepilogo(mese: ottobre, appuntamenti: [], impostazioni: ImpostazioniSpese(),
+                                                kmClienti: [:], calendario: cal)
+        let pdfSenzaNomi = TestiRiepilogoSpese(mese: ottobre, riepilogo: rVuoto, spese: [], nomi: nil,
+                                               consulente: "Consulente di prova", euroPerKm: nil, parcelle: delMese)
+        let righeParcelle = pdfSenzaNomi.righe.filter { $0.riga.testo.hasPrefix("Parcella") }
+        verifica("Spese 57: il PDF ha una riga per parcella del mese", Double(righeParcelle.count), Double(delMese.count))
+        verifica.vero("Spese 57: la sezione «Le parcelle» nel PDF, con numero, imponibile, stato e totale",
+                      righeParcelle.first?.sezione == "Le parcelle"
+                          && righeParcelle.first?.riga.testo == "Parcella n. 1/2026 · imponibile \(Formati.euroDecimali(500)) · Pagata"
+                          && righeParcelle.first?.riga.numero == Formati.euroDecimali(500))
+        verifica.vero("Spese 57: nessun nome nel PDF delle parcelle con i nomi spenti",
+                      !pdfSenzaNomi.righe.contains { r in nomi.values.contains { r.riga.testo.contains($0) } })
+        let pdfConNomi = TestiRiepilogoSpese(mese: ottobre, riepilogo: rVuoto, spese: [], nomi: nomi,
+                                             consulente: "Consulente di prova", euroPerKm: nil, parcelle: delMese)
+        verifica.vero("Spese 57: il cliente nel PDF delle parcelle solo con i nomi accesi",
+                      pdfConNomi.righe.contains { $0.riga.testo.hasSuffix("· Cliente Prova Due") })
         // La descrizione del file pronto e i testi della tessera
         verifica.vero("Spese 57: descrizione con il numero degli scontrini e «lo mandi tu»",
                       PacchettoCommercialista.descrizione(scontrini: 6, pdf: true)
