@@ -1225,6 +1225,8 @@ enum ProvaVera {
         ProvaDaFareShell.esegui(controlla)
         // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (MostraAlCliente.swift, solo sul Mac)
         ProvaMostraAlCliente.esegui(controlla)
+        // Migliorie d'uso 61: cerca ovunque, e fa (filtri da toccare, Parole, azioni, apertura pulita; ProvaRicercaUso.swift)
+        ProvaRicercaUso.esegui(controlla)
         #endif
         // Le domande dei passi con il loro seguito, «Rifai i calcoli», il piano vuoto evitato
         StatoShell.provaPassiSeguito(controlla)

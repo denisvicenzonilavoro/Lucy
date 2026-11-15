@@ -2069,3 +2069,43 @@ Resta:
 - Il tremolio dell'esame OCF (Tema.Apple+OCF.swift) resta a sé: ha passi diversi (−8, +8, −5).
 - **Da guardare nelle istantanee**: 771 (due righe in arancione nella nota del template, perché anche l'attività «a
   gennaio» ha la data da confermare) e l'altezza della carta finale di 763 con la frase delle rimandate.
+
+## 61. Cerca ovunque, e fa
+
+Fatto (solo sul Mac, sotto la soglia del pannello stretto resta il pannello di sempre): la scatola del template (900, a 84
+punti dall'alto, raggio 26, corpo alto 392, colonna dell'elenco 420; token in `Tema.Apple.AltreApp.Ricerca.Mac`); il campo
+con l'invito «Cerca un cliente, una posizione, un documento… o scrivi cosa vuoi fare», la ✕ con del testo e il pulsante
+«esc»; la fila dei filtri da toccare (`EtichettaFiltroRicerca`, `PallinoCanale`: «Tutto», «Clienti», «Posizioni»,
+«Documenti», filetto, i due canali che si spengono con un secondo tocco) con «Salva questa ricerca» a destra, che salva
+subito (nome = il testo, niente doppioni con lo stesso nome, `salvaRicercaSubito`); `LimitiRicerca` in
+`MotoreRicerca.cercaCompleta` (predefinito vuoto: iPhone, iPad e `AppRicerca` cercano come prima; il canale con lo stesso
+`FiltriRicerca.rispetta` del filtro scritto); il codice `tipo:` e i codici `canale:` che riaprendo una ricerca salvata
+tornano etichette (`FiltriRicerca.etichette`, `conCodici`: `RicercaSalvata` non cambia forma); i filtri scritti restano
+capiti e mostrati come pillole, ma niente più invito con «scade:2027», «Cerca per criterio» e «Tab per completare»; il
+pannello vuoto a due colonne (clienti recenti da `clientiRecenti`, poi i primi della rubrica; le cinque azioni del
+template; ricerche salvate con la ✕; la frase) con frecce e Invio; le azioni nuove (`nuovoCliente`, `aggiornaValori`,
+`mostraAlCliente`, `inquadra`), «Nuovo impegno», «Da fare» al posto del centro notifiche, fuori sul Mac «Modalità
+cliente», «Spazi di lavoro», «Le tue app aperte»; il gruppo «Parole» dal glossario (`DestinazioneRicerca.parola`, anche
+nel testo dei promemoria) solo senza filtri; i gruppi nell'ordine fisso del template; l'anteprima del cliente con
+«Patrimonio netto», «Prossimo incontro» («non fissato»), «Da fare» (dalle cache), avatar 48, «Apri il dossier»,
+«Posizioni», «Mostra al cliente» e «Resoconto», «Fissa un appuntamento», «Crea un'attività» nel menu «⋯»; gli occhielli
+(«Proposta», «Posizione in essere», «Documento», «Le parole» azzurro, «Azioni», «App») e «Apri la scheda», «Fai»,
+«Apri», «Apri il glossario»; «Nessun risultato per «…».» con «Chiedilo a Vera»; il piede con «Cerca solo su questo Mac»;
+l'apertura pulita in `alternaRicerca()` (lente, ⌘K, menu) e non in `cercaOvunque()` (notifiche di conformità e Biblioteca).
+Prove in `--prova-vera` (ProvaRicercaUso); istantanee nuove 1300 (chiara e scura), 1301, 1302, 1303; 103 ora con
+`tipo:posizioni canale:alleanza` accesi come etichette.
+
+Resta:
+- **Il velo sfocato** (scrim con sfocatura 8 del template, con il ripiego senza sfocatura nelle istantanee): oggi resta il
+  velo di sempre senza sfocatura (token `Tema.Apple.AltreApp.Ricerca.Mac.velo` pronto).
+- **L'entrata** resta quella del pannello delle notifiche (`Tema.Moto.Spotlight`), non i 380 ms da 14 punti del template.
+- **Una lettera scritta altrove torna nel campo**: il fuoco va nel campo all'apertura e dopo ogni filtro, ma un tasto
+  premuto con il fuoco altrove (per esempio dopo un clic su una riga) non viene riportato nel campo.
+- **Al più 40 risultati in tutto**: non c'è un tetto unico (taglierebbe gruppi interi, come la Biblioteca in fondo); restano
+  5 righe per gruppo, 40 con un tipo scelto.
+- **Documento: «Apri il documento»** apre Documenti come oggi; il lettore in grande arriva con la miglioria 62.
+- **Avatar e tessere 30 con raggio 10**: le righe usano `Misure.Spotlight.icona` (30) e la tessera delle azioni con il
+  raggio delle icone delle app; `avatarRecente` è pronto nei token.
+- **Istantanee da rigenerare e guardare sul Mac**: 53 (e scura), 54, 103, 104, 154, 879 e le nuove 1300-1303; aggiornare la
+  pagina delle anteprime. In 1303 controllare che la prima riga sia davvero la parola «Interesse composto».
+- `--prova-carico` e `--prova-fluidita`: confrontare i tempi di apertura della ricerca con i 30 clienti di prova.

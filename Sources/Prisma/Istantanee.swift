@@ -636,8 +636,9 @@ enum Istantanee {
             }
         }),
         ("103-ricerca-filtri", { s in
-            // Ricerca per criterio: filtri riconosciuti, totali per canale e anteprima della prima posizione
-            s.testoRicerca = "sri>3 canale:alleanza"
+            // Ricerca per criterio: filtri riconosciuti, totali per canale e anteprima della prima posizione. Migliorie d'uso 61:
+            // sul Mac «tipo:» e «canale:» si accendono come etichette («Posizioni», «Alleanza»), «sri>3» resta scritto
+            s.testoRicerca = "sri>3 tipo:posizioni canale:alleanza"
             s.cercaOvunque()
         }),
         ("104-ricerca-salvate", { s in
@@ -1744,6 +1745,8 @@ enum Istantanee {
         tutteLeScene += sceneMenuApp
         // Migliorie d'uso 68: la regola delle conferme (IstantaneeConferme.swift)
         tutteLeScene += sceneConferme
+        // Migliorie d'uso 61: cerca ovunque, e fa (IstantaneeRicercaUso.swift)
+        tutteLeScene += sceneRicercaUso
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu
