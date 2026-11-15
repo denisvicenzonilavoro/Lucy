@@ -641,8 +641,14 @@ Resta:
 - **Istantanee**: rigenerare sul Mac 470/471, 1054/1055, «250-impostazioni-panoramica» (ora «Da sistemare») e le nuove
   1056-1058; guardare che l'etichetta più lunga («sullo stesso Mac», «non aggiornato») non stringa troppo il titolo delle
   voci della colonna (il titolo si riduce fino all'85%), e aggiornare la pagina delle anteprime.
-- **§31.3 punto 6**, da controllare guardando le istantanee: le righe sotto un interruttore spento in Mercato («Dati di
-  mercato»), «Prisma ovunque» e Notte devono essere attenuate, non nascoste (i promemoria lo fanno già).
+- ~~**§31.3 punto 6**~~: fatto nella rifinitura 25-31 per Mercato e Notte. Il modificatore `attenuatoSeSpento(_:)`
+  (DesignSystem/TemaRifiniture1.swift: `.disabled`, `opacitaDisabilitato`, `saturazioneSpento`) raccoglie lo schema dei
+  promemoria, che ora lo usano; in Impostazioni › Mercato serie, soglie e riferimenti si attenuano con «Dati di mercato»
+  spento (solo sul Mac: su iPhone e iPad la pagina si legge soltanto), in «Stanotte» ora d'inizio, bozze, apertura,
+  notifica e «Cosa preparare» con la notte spenta; gli interruttori restano attivi. Resta «Prisma ovunque», che con lo
+  spazio spento **nasconde** le righe (`if o.acceso`) invece di attenuarle: è un altro disegno (le righe dipendono anche
+  dalla cartella e dalla chiave), da decidere guardando le istantanee. Da guardare sul Mac: 250-… di Mercato e la pagina
+  di Vera con la notte spenta (il caso di base, quindi le righe ora sono grigie anche nelle istantanee di sempre).
 - **«Lasciali spenti»** per i promemoria (§31.6): non fatto, servirebbe un campo in `Impostazioni`; i promemoria spenti
   contano come nel template.
 - **La card del tagliando** resta anche nella pagina di Vera (l'uscita dalla colonna di Vera è della miglioria 27).
@@ -1163,10 +1169,13 @@ Resta:
   `Tema.Apple.Messaggi.Colonna`; se lo usano altre app conviene spostarli in un enum comune.
 - **iPhone e iPad**: la barra a tre stati e «Mandati oggi» arriveranno con il loro aggiornamento (l'iPhone non segna
   spediti e il giornale di «Prisma ovunque» non porta il segno).
-- **Modalità cliente su iPhone e iPad**: sul Mac le occasioni del cliente si filtrano nel motore prima del limite di 8
-  per gruppo (`soloCliente`); su iPhone e iPad `occasioniMessaggi` e il dossier filtrano ancora dopo il limite, come
-  prima (dentro `#if os(macOS)`), e perdono le occasioni del cliente fuori dalle prime 8 di tutti. Portare la stessa
-  correzione con l'aggiornamento di iPhone e iPad.
+- ~~**Modalità cliente su iPhone e iPad**~~: fatto nella rifinitura 25-31. `occasioniMessaggi` e il dossier non hanno più
+  i rami `#if os(macOS)`: anche su iPhone e iPad il filtro del cliente sta nel motore, prima del limite di 8. Il codice
+  iOS si compila solo su main o lanciando il workflow a mano: **lanciarlo** prima di unire.
+- ~~**«Scrivi a …» del dossier fuori dalle prime 8**~~ (trovato nella rifinitura 25-31): fuori dalla modalità cliente il
+  dossier cercava l'occasione nell'elenco di tutti, già tagliato a 8 per gruppo. Ora, se l'elenco in cache non la
+  comprende, `MessaggiNoteDossier` la cerca con `occasioniMessaggi(cliente:)` (prima volta e istantanee) o con il calcolo
+  fuori dal thread principale con `soloCliente`. Caso «M13 Dossier» in `--prova-calcoli`.
 
 ## 27. Vera dice cosa sa fare
 
@@ -1196,7 +1205,10 @@ Fatto (solo Mac, `#if os(macOS)`; iPhone e iPad tengono la colonna di prima e la
 Resta:
 - **«La giornata» con un cliente scelto** («Cosa ho oggi?»): non c'è, perché non è provato che la Vera grande la tenga
   nella conversazione del cliente (passa da `smistaVera` e dai comandi dell'agenda). Provarla con `--prova-vera` e, se
-  resta nel dossier, aggiungerla come primo esempio con un caso in `ProvaEsempiVera`.
+  resta nel dossier, aggiungerla come primo esempio con un caso in `ProvaEsempiVera`. Rimandata anche nella rifinitura
+  25-31: `SpuntoVera` non ha uno spunto per «Cosa ho oggi?» e la prova degli esempi vuole che ogni riquadro porti a uno
+  spunto riconosciuto, quindi servirebbe uno spunto nuovo (o un esempio a testo libero) instradato da `smistaVera`
+  prima di routine, sussurro e comandi dell'agenda: senza poter lanciare `--prova-vera` qui era un cambio alla cieca.
 - Il passo della cascata è quello del tema (0,048 s) e non 0,07 del template: serve un `ritardo` con passo proprio in
   `EntrataApple` se lo si vuole esatto.
 - I token di «Oggi», dell'avviso e delle tessere in `Tema.Apple.Vera.Colonna` restano: li usano ancora iPhone e iPad.
@@ -1265,8 +1277,12 @@ Fatto (solo Mac, `#if os(macOS)`; su iPad fascia verde, interruttore e «Soglie 
   1052-uso-mercato-riservatezza e 1053-uso-mercato-spento.
 
 Resta:
-- La frase per il singolo cliente non dice ancora la quota in azioni del template («ha il 38% in azioni»): il motore
-  non la porta in `ClienteToccato`.
+- ~~La frase per il singolo cliente non dice la quota in azioni~~: fatto nella rifinitura 25-31. `ClienteToccato.quotaAzioni`
+  (facoltativa, nil di base) la porta per gli indici azionari: pesata per valore su tutte le posizioni del cliente di cui
+  si conosce la composizione (immobili esclusi), non solo su quelle toccate, così un cliente con un ETF e molte
+  obbligazioni non risulta «tutto in azioni». `fraseToccato` aggiunge «: ha il 38% in azioni.» (o «ha tutto in
+  azioni») dopo la cifra, solo per gli indici azionari. Casi in `ProvaCalcoliMercato.usoMercato`; la prova delle
+  richieste non cambia (nessun dato esce).
 - I pulsanti degli avvisi usano `.apple` di misura normale (il tema non ha ancora una variante piccola 6×12).
 - Rigenerare sul Mac 540-547 e guardare 1051-1053: con i dati di prova Marco potrebbe non avere eventi o avvisi (allora
   1051 mostra i due vuoti con il nome); la larghezza della riga degli avvisi con due pulsanti nelle finestre strette.

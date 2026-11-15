@@ -17,6 +17,8 @@ struct GruppoImpostazioniNotte: View {
                                  aiuto: TestiNotte.notaImpostazioni) {
                     interruttore(n.attivo) { v in stato.impostaNotte { $0.attivo = v } }
                 }
+                // Con la notte spenta le scelte che ne dipendono si attenuano (migliorie d'uso 31); l'interruttore resta attivo
+                Group {
                 RigaImpostazione(titolo: TestiNotte.rigaInizio, sottotitolo: TestiNotte.fineFinestra) {
                     MenuTendina(selezione: Binding(get: { n.inizio }, set: { v in stato.impostaNotte { $0.inizio = v } }),
                                 opzioni: ImpostazioniNotte.oreScelta.map { ($0, TestiNotte.oraInizio($0)) }, larghezza: M.menuStretto)
@@ -34,6 +36,8 @@ struct GruppoImpostazioniNotte: View {
                                  aiuto: TestiNotte.aiutoNotifica, ultima: true) {
                     interruttore(n.notificaAlMattino) { v in stato.impostaNotte { $0.notificaAlMattino = v } }
                 }
+                }
+                .attenuatoSeSpento(!n.attivo)
             }
             GruppoImpostazioni(titolo: "Cosa preparare") {
                 let tipi = TipoCartaNotte.allCases.filter { $0 != .daFinire }
@@ -51,6 +55,7 @@ struct GruppoImpostazioniNotte: View {
                     }
                 }
             }
+            .attenuatoSeSpento(!n.attivo)
             NotaImpostazioni(TestiNotte.notaImpostazioni)
         }
     }

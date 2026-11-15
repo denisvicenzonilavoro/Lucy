@@ -595,48 +595,40 @@ private struct MessaggiNoteDossier: View {
         }
     }
 
-    /// Dalla cache se le occasioni ci sono; altrimenti quella di prima, finché il calcolo fuori non porta la nuova; la
-    /// prima volta e nelle istantanee calcolate qui, come `occasioniMessaggi()`.
+    /// Dalla cache se le occasioni ci sono e comprendono il cliente; altrimenti quella di prima, finché il calcolo fuori
+    /// non porta la nuova; la prima volta e nelle istantanee calcolate qui, come `occasioniMessaggi(cliente:)`.
+    /// Rifinitura 25-31: le occasioni di tutti si fermano a 8 per gruppo, quindi un cliente che non c'è fra le prime di
+    /// tutti si cerca con il filtro del cliente nel motore, prima del limite (come Messaggi dalla migliorie d'uso 25).
     private func primaOccasione(_ d: DerivatiDati) -> OccasioneMessaggio? {
-        if let pronte = d.occasioniMessaggi { return Self.prima(pronte, cliente: cliente.id) }
+        if let pronte = d.occasioniMessaggi, let p = Self.prima(pronte, cliente: cliente.id) { return p }
         if !scatto, let t = trovata { return t.occasione }
-        return Self.prima(stato.occasioniMessaggi(), cliente: cliente.id)
+        return Self.prima(stato.occasioniMessaggi(cliente: cliente.id), cliente: cliente.id)
     }
 
     private static func prima(_ o: OccasioniMessaggi, cliente id: String) -> OccasioneMessaggio? {
         o.tutte.first { $0.clienteId == id }
     }
 
-    /// Le occasioni per la chiave di adesso: dalla cache se ci sono, altrimenti calcolate fuori dal thread principale.
+    /// La prima occasione per la chiave di adesso: dalla cache se la comprende, altrimenti calcolata fuori dal thread
+    /// principale con il filtro del cliente (in modalità cliente il cliente mostrato, che è lo stesso del dossier).
     private func aggiorna() async {
         guard !scatto else { return }
         let d = stato.derivatiValidi()
         guard let k = d.chiave, trovata?.chiave != k else { return }
         let id = cliente.id
-        if let pronte = d.occasioniMessaggi {
-            trovata = (k, Self.prima(pronte, cliente: id))
+        if let pronte = d.occasioniMessaggi, let p = Self.prima(pronte, cliente: id) {
+            trovata = (k, p)
             return
         }
-        // Come `occasioniMessaggi()`: tutto il portafoglio, in modalità cliente solo le sue (filtrate dal motore prima del
-        // limite per gruppo, migliorie d'uso 25)
         let dati = stato.datiDeiCalcoli()
-        let modo = stato.modoCliente
+        let solo = stato.modoCliente ?? id
         let oggi = Date()
-        #if os(macOS)
         let tutte = await Task.detached(priority: .userInitiated) {
-            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi, soloCliente: modo)
+            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi, soloCliente: solo)
         }.value
         // Nel frattempo i dati, il giorno o la modalità sono cambiati: vale il calcolo della chiave nuova
         guard !Task.isCancelled, stato.derivatiValidi().chiave == k else { return }
         trovata = (k, Self.prima(tutte, cliente: id))
-        #else
-        // iPhone e iPad come prima: il filtro della modalità cliente dopo il limite per gruppo
-        let tutte = await Task.detached(priority: .userInitiated) {
-            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi)
-        }.value
-        guard !Task.isCancelled, stato.derivatiValidi().chiave == k else { return }
-        trovata = (k, Self.prima(modo.map { tutte.soloCliente($0) } ?? tutte, cliente: id))
-        #endif
     }
 }
 

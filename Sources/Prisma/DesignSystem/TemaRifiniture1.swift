@@ -19,3 +19,15 @@ extension Tema.Misura {
         static let saturazioneSpento: Double = 0
     }
 }
+
+extension View {
+    /// Impostazioni (migliorie d'uso 31, §31.3 punto 6): le righe che dipendono da un interruttore spento si
+    /// disattivano, si attenuano e perdono il colore, così non sembrano più attive. L'interruttore resta fuori.
+    /// Lo stesso schema dei promemoria (ImpostazioniPagine), raccolto qui perché resti uguale ovunque.
+    func attenuatoSeSpento(_ spento: Bool) -> some View {
+        self
+            .disabled(spento)
+            .opacity(spento ? Tema.Misura.Shell.opacitaDisabilitato : 1)
+            .saturation(spento ? Tema.Misura.RifinitureScrivania.saturazioneSpento : 1)
+    }
+}
