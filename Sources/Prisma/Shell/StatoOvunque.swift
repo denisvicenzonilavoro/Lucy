@@ -384,6 +384,8 @@ extension StatoShell {
             var operazioni: [OperazioneOvunque] = []
             var nomi: [String: String] = [:]
             var viste = Set<String>()
+            // Migliorie d'uso 39: i dispositivi dei giornali, con la data del file, per «I tuoi dispositivi»
+            let dispositivi = lettura.giornali.map { (id: $0.dispositivo, nome: $0.nomeDispositivo, data: $0.scrittoIl) }
             for g in lettura.giornali {
                 nomi[g.dispositivo] = g.nomeDispositivo
                 for op in g.operazioni where op.dispositivo == g.dispositivo && op.seq > (visto[op.dispositivo] ?? 0)
@@ -397,6 +399,11 @@ extension StatoShell {
                 self.ovunque.inArrivo = operazioni
                 self.ovunque.nomiDispositivi.merge(nomi) { _, nuovo in nuovo }
                 self.ovunque.attesaICloud = !lettura.inAttesa.isEmpty
+                #if os(macOS)
+                self.dispositivi.annotaOvunque(dispositivi)
+                #else
+                _ = dispositivi
+                #endif
             }
         }
     }

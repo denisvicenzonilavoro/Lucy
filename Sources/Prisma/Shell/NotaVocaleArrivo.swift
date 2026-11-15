@@ -447,6 +447,13 @@ struct ComeFunzionaNotaVocale: View {
                 .carattereApple(D.frase)
                 .foregroundColor(D.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)
+            #if os(macOS)
+            // Migliorie d'uso 39: senza collegamento (o con «Nota a voce» spenta) il rimando a Impostazioni › iPhone e iPad
+            if !stato.ponteNotaAcceso, !stato.inModoCliente {
+                RimandoCollegaDispositivo { stato.chiudiSovrapposizione() }
+                    .padding(.top, D.fraseSopra)
+            }
+            #endif
             if !note.isEmpty, !stato.inModoCliente {
                 Text("Le ultime note")
                     .carattereApple(D.titoloElenco)

@@ -251,6 +251,11 @@ enum VoceConfronto: Hashable {
     /// spazio in memoria e i lavori della sincronizzazione. Un oggetto a parte: i pallini e i controlli non pubblicano
     /// StatoShell. Non si salva (le impostazioni dello spazio stanno in `dati.impostazioni.ovunque`).
     let ovunque = StatoOvunque()
+    #if os(macOS)
+    /// Migliorie d'uso 39: i dispositivi che si sono fatti vivi (ponte, tavolo, giornali di «Prisma ovunque») e la scheda
+    /// «Collega con un codice» (DispositiviCollegati.swift). Solo in memoria: mai nell'archivio, nei backup o nello spazio.
+    let dispositivi = RegistroDispositivi()
+    #endif
     /// Modalità cliente: lo schermo girato verso il cliente mostra solo il suo dossier (id del cliente).
     var modoCliente: String? {
         didSet {
@@ -745,7 +750,15 @@ enum VoceConfronto: Hashable {
         // I messaggi nuovi del ponte (giro 5): schede del copilota dall'iPad, testi inquadrati dall'iPhone
         ServerPonteVera.condiviso.consegnaArrivi { [weak self] arrivo in
             guard let stato = self else { return .rifiutata("Prisma sul Mac si sta chiudendo.") }
-            return await MainActor.run { stato.riceviDalPonte(arrivo) }
+            return await MainActor.run { () -> RicevutaPonte in
+                // Migliorie d'uso 39: il nome del dispositivo, per «I tuoi dispositivi»
+                stato.dispositivi.annotaPonte(nome: arrivo.nomeDispositivo)
+                return stato.riceviDalPonte(arrivo)
+            }
+        }
+        // Migliorie d'uso 39: ogni busta aperta annota «un dispositivo» (le chiamate al modello non portano il nome)
+        ServerPonteVera.condiviso.annotaContatti { [weak self] in
+            DispatchQueue.main.async { [weak self] in self?.dispositivi.annotaPonte(nome: nil) }
         }
         // Inquadra e capisci: con la scena in attesa, il testo dell'iPhone entra da solo (StatoInquadra.swift)
         osservaInquadrature()

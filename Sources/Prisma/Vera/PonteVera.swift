@@ -81,6 +81,17 @@ struct ImpostazioniPonte: Codable, Equatable {
     var condividi = false
     /// Il codice di abbinamento (vuoto = nessun abbinamento).
     var codice = ""
+    // Migliorie d'uso 39 («iPhone e iPad: un collegamento solo»): che cosa fanno iPhone e iPad insieme al Mac. Sono
+    // filtri sotto `condividi`, accesi di base: da soli non accendono mai l'ascolto in rete (serve `condividi` con un
+    // codice, come prima). Li decide il Mac, che è il server.
+    /// «Vera»: le chiamate al modello e le schede del copilota.
+    var modello = true
+    /// «Inquadra un documento»: i testi inquadrati e la carta d'identità.
+    var inquadra = true
+    /// «Nota a voce»: le note dettate all'iPhone (spento, restano nella coda cifrata dell'iPhone).
+    var nota = true
+    /// «Al tavolo»: l'iPad davanti al cliente (il tavolo ha il suo ascolto e non dipende da `condividi`).
+    var tavolo = true
 
     init() {}
 
@@ -88,9 +99,37 @@ struct ImpostazioniPonte: Codable, Equatable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         condividi = (try? c.decodeIfPresent(Bool.self, forKey: .condividi)) ?? false
         codice = (try? c.decodeIfPresent(String.self, forKey: .codice)) ?? ""
+        // Un archivio di prima non ha i quattro filtri: accesi (il ponte resta spento se `condividi` lo è)
+        modello = (try? c.decodeIfPresent(Bool.self, forKey: .modello)) ?? true
+        inquadra = (try? c.decodeIfPresent(Bool.self, forKey: .inquadra)) ?? true
+        nota = (try? c.decodeIfPresent(Bool.self, forKey: .nota)) ?? true
+        tavolo = (try? c.decodeIfPresent(Bool.self, forKey: .tavolo)) ?? true
     }
 
     var abbinato: Bool { PonteVera.normalizza(codice) != nil }
+
+    /// Il collegamento con iPhone e iPad è acceso: `condividi` e un codice valido (l'ascolto del ponte).
+    var collegato: Bool { condividi && abbinato }
+
+    /// Perché il Mac rifiuta un messaggio di questo percorso (nil = lo accetta): con «Vera» spento il modello e il
+    /// copilota, con «Inquadra un documento» spento i testi inquadrati e la carta, con «Nota a voce» spento le note.
+    /// «prisma/stato» passa sempre (il telefono deve sapere a chi è collegato).
+    func rifiuto(percorso: String) -> String? {
+        switch percorso {
+        case BustaPonte.copilota, BustaPonte.precarica:
+            return modello ? nil : Self.veraSpenta
+        case BustaPonte.inquadra, BustaPonte.carta:
+            return inquadra ? nil : "Sul Mac «Inquadra un documento» è spento per iPhone e iPad: accendilo in Impostazioni › iPhone e iPad."
+        case BustaPonte.nota:
+            return nota ? nil : "Sul Mac «Nota a voce» è spenta per iPhone e iPad: la nota resta sull’iPhone finché non la accendi."
+        case let p where PonteVera.percorsiAmmessi.contains(p):
+            return modello ? nil : Self.veraSpenta
+        default:
+            return nil
+        }
+    }
+
+    static let veraSpenta = "Sul Mac «Vera» è spenta per iPhone e iPad: accendila in Impostazioni › iPhone e iPad."
 }
 
 /// Cosa c'è dentro una busta: quando è partita, il percorso e il corpo per il modello.

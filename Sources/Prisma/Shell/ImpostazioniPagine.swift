@@ -352,6 +352,16 @@ extension AppImpostazioni {
                         .fixedSize()
                 }
                 .cascataImpostazioni(1)
+                #if os(macOS)
+                // Migliorie d'uso 39: il collegamento con iPhone e iPad sta in un posto solo, Impostazioni › iPhone e iPad
+                RigaImpostazione(titolo: "iPhone e iPad", sottotitolo: TestiCollegamenti.rimandoVera,
+                                 aiuto: "Il codice, i dispositivi collegati e che cosa fanno insieme al Mac (Vera, Inquadra, la nota a voce, il tavolo)") {
+                    Button("Apri") { stato.schedaImpostazioni = .ovunque }
+                        .buttonStyle(StilePulsanteRigaImpostazioni())
+                        .fixedSize()
+                }
+                .cascataImpostazioni(2)
+                #else
                 RigaImpostazione(titolo: "iPhone e iPad", sottotitolo: "Usano Vera del Mac attraverso la rete di casa, cifrata. Mai internet.",
                                  aiuto: "iPhone e iPad usano Qwen di questo Mac attraverso la rete di casa o dello studio, cifrato con un codice") {
                     interruttore(Binding(get: { vera.ponte.condividi }, set: { attivo in
@@ -374,6 +384,7 @@ extension AppImpostazioni {
                     }
                     .cascataImpostazioni(3)
                 }
+                #endif
                 RigaImpostazione(titolo: "Scorciatoia", sottotitolo: "Apri la mini Vera; tienila premuta per parlare.", ultima: true) {
                     TastiScorciatoia(tasti: ["⌥", "Spazio"])
                 }

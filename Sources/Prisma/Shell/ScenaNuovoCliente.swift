@@ -338,7 +338,7 @@ private struct SchedaNuovoClienteMac: View {
                 .padding(.top, Tema.Apple.Inquadra.Zona.sopra)
         case .trascina:
             ZonaNuovoCliente(nuovoCliente: nuovoCliente, testo: "Trascina qui una foto o un PDF del documento",
-                             nota: "Per usare l’iPhone accendi il collegamento in Impostazioni › Vera › iPhone e iPad")
+                             nota: "Per usare l’iPhone collegalo in Impostazioni › iPhone e iPad")
                 .padding(.top, Tema.Apple.Inquadra.Zona.sopra)
         case .lettura:
             EmptyView()

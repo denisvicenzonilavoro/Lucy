@@ -141,6 +141,12 @@ enum ProvaTavolo {
         stato.dati.impostazioni.vera.ponte.codice = codice
         let tavolo = stato.tavolo
         controlla(tavolo.porta == nil && !tavolo.acceso, "Tavolo: chiuso finché il consulente non lo apre (nessun ascolto in rete)")
+        // Migliorie d'uso 39: con «Al tavolo» spento in Impostazioni › iPhone e iPad il tavolo non si apre
+        stato.dati.impostazioni.vera.ponte.tavolo = false
+        tavolo.avvia(porta: 0, annuncia: false, tempi: tempi)
+        controlla(!tavolo.acceso && tavolo.porta == nil && !tavolo.permesso,
+                  "Tavolo: con «Al tavolo» spento non si apre (nessun ascolto in rete)")
+        stato.dati.impostazioni.vera.ponte.tavolo = true
         tavolo.avvia(porta: 0, annuncia: false, tempi: tempi)
         guard attendi(5, { tavolo.porta != nil }), let porta = tavolo.porta else {
             return controlla(false, "Tavolo: il Mac ascolta in rete locale")
@@ -164,6 +170,9 @@ enum ProvaTavolo {
         controlla(abbinati, "Tavolo: con il codice giusto Mac e iPad si abbinano (\(ipad.collegamento) · \(tavolo.descrizione))")
         guard abbinati else { return }
         controlla(ipad.schermo == .neutra, "Tavolo: appena collegato l'iPad mostra la schermata neutra")
+        // Migliorie d'uso 39: l'iPad del tavolo compare in «I tuoi dispositivi», con il nome del saluto (solo in memoria)
+        controlla(stato.dispositivi.elenco.contains { $0.via == .tavolo && $0.nome == "iPad di prova" && stato.dispositivi.collegato($0) },
+                  "Tavolo: l'iPad collegato è in «I tuoi dispositivi» con il suo nome")
 
         // Una pagina della presentazione
         guard let d = stato.documentoProspetto(.checkUp(report: true)), !d.pagine.isEmpty else {

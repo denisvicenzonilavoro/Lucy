@@ -6,7 +6,8 @@ import Network
 /// Il Mac nel ponte di Vera (PonteVera.swift): ascolta in rete locale sulla porta 47620, si annuncia con Bonjour
 /// e passa a Qwen, sul Mac stesso, le buste cifrate di iPhone e iPad. Le righe della risposta tornano cifrate,
 /// una per pezzo, mentre Qwen scrive. Senza il codice di abbinamento non si apre nessuna busta.
-/// Acceso solo con «iPhone e iPad» attivo in Impostazioni › Vera; leggero: nessun lavoro quando nessuno chiede.
+/// Acceso solo con il collegamento acceso in Impostazioni › iPhone e iPad (Migliorie d'uso 39); leggero: nessun lavoro
+/// quando nessuno chiede.
 final class ServerPonteVera: @unchecked Sendable {
     static let condiviso = ServerPonteVera()
 
@@ -21,6 +22,9 @@ final class ServerPonteVera: @unchecked Sendable {
     /// Chi riceve i messaggi nuovi (schede del copilota, testi inquadrati): sul Mac lo stato dell'app
     /// (`StatoShell.riceviDalPonte`), nelle prove una raccolta. nil = il Mac non riceve ancora (ricevuta rifiutata).
     private var consegna: ((ArrivoPonte) async -> RicevutaPonte)?
+    /// Migliorie d'uso 39: chi annota che un dispositivo si è fatto vivo (busta aperta con il codice giusto): sul Mac il
+    /// registro dei dispositivi (`RegistroDispositivi`, in memoria). Leggero: una chiamata per busta, niente altro.
+    private var contatto: (() -> Void)?
 
     /// La porta su cui ascolta davvero (nelle prove una porta libera qualsiasi).
     private(set) var porta: UInt16?
@@ -45,6 +49,18 @@ final class ServerPonteVera: @unchecked Sendable {
         blocco.lock()
         consegna = f
         blocco.unlock()
+    }
+
+    /// Chi annota i contatti (Migliorie d'uso 39); nil = nessuno.
+    func annotaContatti(_ f: (() -> Void)?) {
+        blocco.lock()
+        contatto = f
+        blocco.unlock()
+    }
+
+    private func annotatore() -> (() -> Void)? {
+        blocco.lock(); defer { blocco.unlock() }
+        return contatto
     }
 
     private func destinatario() -> ((ArrivoPonte) async -> RicevutaPonte)? {
@@ -113,6 +129,21 @@ final class ServerPonteVera: @unchecked Sendable {
         guard testa.hasPrefix("POST /\(PonteVera.percorso) ") else { return await rispondi(c, 404, "percorso sconosciuto") }
         let (e, k, s) = impostazioni()
         guard let k, let busta = BustaPonte.apri(corpo, k) else { return await rispondi(c, 403, "codice di abbinamento diverso") }
+        annotatore()?()
+        // Migliorie d'uso 39: ciò che l'utente ha spento in Impostazioni › iPhone e iPad si rifiuta (i messaggi nuovi con
+        // la ricevuta, il modello con un errore breve in chiaro, come lo darebbe Ollama)
+        if let motivo = e.ponte.rifiuto(percorso: busta.percorso) {
+            switch busta.percorso {
+            case BustaPonte.copilota, BustaPonte.inquadra, BustaPonte.carta, BustaPonte.nota:
+                guard let dati = try? PonteVera.sigilla(JSONEncoder().encode(RicevutaPonte.rifiutata(motivo)), k) else {
+                    return await rispondi(c, 500, "errore")
+                }
+                await scrivi(c, Self.testata(200) + dati)
+                return
+            default:
+                return await rispondi(c, 403, motivo)
+            }
+        }
         let fornitore = FornitoriVera.crea(e, sessione: s)
         switch busta.percorso {
         case BustaPonte.stato:

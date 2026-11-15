@@ -209,6 +209,11 @@ extension StatoShell {
     /// «Sull’iPad sul tavolo»: il tavolo resta quello dei Prospetti, con il cliente già scelto.
     func tavoloDalPannello() {
         sceltaMostra = false
+        // Migliorie d'uso 39: con «Al tavolo» spento si va a Impostazioni › iPhone e iPad
+        guard dati.impostazioni.vera.ponte.tavolo else {
+            apriCollegamenti()
+            return
+        }
         guard let c = clienteAttivo else { return }
         apri(.presentazioni)
         mostraAvviso(TestiMostra.tavoloAvviso(TestiTraguardi.primoNome(c.nome)))

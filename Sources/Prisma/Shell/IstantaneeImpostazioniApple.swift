@@ -8,6 +8,7 @@ import Foundation
 /// Migliorie d'uso 30: la colonna con il campo «Cerca nelle impostazioni» e i gruppi con un nome; 1054 e 1055 la ricerca.
 /// Migliorie d'uso 31: la colonna con «Da sistemare» e le etichette; 1056-1058 la pagina «Da sistemare».
 /// Migliorie d'uso 38: 1064-1066 le tre domande del primo avvio, 1067 Profilo con i nomi dei canali, 1068 i nomi scelti.
+/// Migliorie d'uso 39: 1069 iPhone e iPad in un collegamento solo, 1070 la scheda del codice, 1071 Vera con il rimando.
 extension Istantanee {
     nonisolated static var sceneImpostazioniApple: [(nome: String, prepara: (StatoShell) -> Void)] {
         [
@@ -67,7 +68,29 @@ extension Istantanee {
                 s.clienteAttivoId = "giulia"
                 s.apri(.posizioni)
             }),
+            // Migliorie d'uso 39: iPhone e iPad in un collegamento solo (un dispositivo annotato per l'istantanea,
+            // «Cosa fanno insieme al Mac», «Modifiche in attesa»), la scheda del codice e Impostazioni › Vera con il rimando
+            ("1069-uso-impostazioni-iphone-ipad", { s in preparaCollegamenti(s) }),
+            ("1069-uso-impostazioni-iphone-ipad-scuro", { s in preparaCollegamenti(s) }),
+            ("1070-uso-collega-dispositivo", { s in
+                preparaCollegamenti(s)
+                s.apriCodiceDispositivo()
+            }),
+            ("1071-uso-impostazioni-vera-rimando", { s in preparaImpostazioniApple(s, sezione: .vera) }),
         ]
+    }
+
+    /// Un codice fisso per le istantanee (valido per `PonteVera.normalizza`, mai usato davvero).
+    nonisolated static let codicePonteDiProva = "PRSM-4K7Q-2XHN"
+
+    /// Migliorie d'uso 39: lo spazio acceso sul Mac (dati di prova di «Prisma ovunque»), il collegamento acceso con il
+    /// codice di prova e un dispositivo del ponte visto 2 minuti fa (solo nel registro in memoria dell'istantanea).
+    nonisolated static func preparaCollegamenti(_ s: StatoShell) {
+        s.dati.impostazioni.vera.ponte.codice = codicePonteDiProva
+        s.dati.impostazioni.vera.ponte.condividi = true
+        s.dispositivi.annotaPerIstantanea(RegistroDispositivi.Dispositivo(
+            id: "ponte-istantanea", nome: RegistroDispositivi.generico, visto: Date().addingTimeInterval(-120), via: .ponte))
+        preparaOvunque(s)
     }
 
     /// Una cartella di backup scelta (inventata): i backup non sono «sullo stesso Mac».

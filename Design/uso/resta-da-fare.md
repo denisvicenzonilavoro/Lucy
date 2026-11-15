@@ -666,3 +666,35 @@ Resta:
   pagina dei nomi deve stare in 640 con l'etichetta accanto al campo) e aggiornare la pagina delle anteprime.
 - **Da provare sul Mac vero**: che Invio nel campo dei nomi non faccia anche «Avanti» (se lo fa, il nome si salva
   comunque quando la pagina cambia) e che il fuoco perso salvi il nome anche cliccando fuori dal campo.
+
+## 39. iPhone e iPad: un collegamento solo
+
+Fatto (solo Mac): Impostazioni › iPhone e iPad sotto lo schema ha «I tuoi dispositivi» (una card con una riga per
+dispositivo, «visto …» e «Collegato» se visto da quando Prisma è aperta; in fondo «Un altro iPhone o iPad» con «Collega
+con un codice» e, a collegamento acceso, «Scollega»), «Cosa fanno insieme al Mac» con le cinque righe del template («I
+dati» = «Prisma ovunque», con sotto, rientrate e solo a copia accesa, «Lavora anche con il Mac spento», «Porta anche i
+potenziali clienti», «Cartella» e «Passphrase»; «Vera», «Inquadra un documento», «Nota a voce», «Al tavolo» con i
+quattro filtri nuovi), «Modifiche in attesa» con «Da decidere» e la nota dei due segreti (decisione 3). La scheda del
+codice (`SchedaCollegaDispositivo`, sopra barra e dock come le tre domande) mostra il codice del ponte di oggi in grande,
+senza scadenza (decisione 2), con «Nuovo codice». Campi nuovi `ImpostazioniPonte.modello/inquadra/nota/tavolo` (accesi
+di base, letti con tolleranza, in `impostazioni.eve.ponte`, nei backup): `condividi` resta il collegamento generale e
+l'ascolto si accende solo con lui e un codice, come prima; il server rifiuta i messaggi delle righe spente
+(`ImpostazioniPonte.rifiuto`). Il registro dei dispositivi (`RegistroDispositivi`, solo in memoria) prende i nomi dagli
+arrivi del ponte, l'iPad del tavolo dal saluto e i giornali di «Prisma ovunque» con la loro data. Impostazioni › Vera:
+la riga «iPhone e iPad» rimanda qui con «Apri». «Inquadra con l'iPhone» (fase trascina), «Come funziona» della nota,
+«Apri il tavolo» e «Sull’iPad sul tavolo» portano qui quando il collegamento o la funzione è spenta. Voci della ricerca
+del template. Prove: filtri e server in `--prova-vera` (ProvaCopilota), tavolo spento in `--prova-tavolo`, i quattro
+campi nel backup e un archivio senza in `--prova-backup`. Istantanee nuove 1069 (chiara e scura), 1070, 1071.
+
+Resta:
+- **iPhone e iPad** (con il loro giro): il nome vero del dispositivo nelle chiamate al modello (campo facoltativo
+  `dispositivo` in `BustaPonte`, compatibile con il protocollo 3): oggi quelle righe dicono «iPhone o iPad»; i testi del
+  telefono che dicono ancora «Impostazioni › Vera sul Mac» (PonteVera.swift, AppLetturaTelefono, TavoloiPad,
+  NotaVocaleTelefono, AperturaBackup); con «Nota a voce» spenta sul Mac l'iPhone riceve «rifiutata»: va verificato che la
+  nota resti nella coda cifrata come quando il Mac non risponde (oggi la coda scatta solo senza collegamento).
+- **Il codice breve che scade** (decisione 2): richiede un abbinamento nuovo su Mac, iPhone e iPad.
+- **La scheda del codice** resta aperta se si blocca Prisma o si chiudono le Impostazioni (sotto la schermata di
+  benvenuto non si vede); se serve, chiuderla in `blocca()` e alla chiusura di Impostazioni.
+- **Istantanee**: rigenerare sul Mac 560-566 (la pagina ha il nuovo ordine), 251 (riga che rimanda), le scene di
+  Inquadra senza ponte e «Come funziona» della nota (compare «Collega l’iPhone»), guardare 1069-1071 chiare e scure e
+  aggiornare la pagina delle anteprime.

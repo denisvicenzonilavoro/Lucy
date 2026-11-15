@@ -437,6 +437,17 @@ struct CorpoShell: View {
             .animation(curvaPannello(stato.primoAvvio != nil, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
                        value: stato.primoAvvio != nil)
             .opacity(nascosti ? 0 : 1)
+            // Migliorie d'uso 39: la scheda «Collega con un codice» (DispositiviCollegati.swift), con il velo
+            ZStack {
+                if stato.dispositivi.schedaCodice {
+                    SchedaCollegaDispositivo()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                }
+            }
+            .animation(curvaPannello(stato.dispositivi.schedaCodice, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
+                       value: stato.dispositivi.schedaCodice)
+            .opacity(nascosti ? 0 : 1)
             #endif
 
             ZStack {

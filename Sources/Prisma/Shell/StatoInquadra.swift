@@ -224,7 +224,12 @@ extension StatoShell {
     /// Il ponte con iPhone e iPad è acceso e ha un codice (Impostazioni › Vera).
     var ponteInquadraAcceso: Bool {
         let p = dati.impostazioni.vera.ponte
+        #if os(macOS)
+        // Migliorie d'uso 39: anche «Inquadra un documento» acceso in Impostazioni › iPhone e iPad
+        return p.condividi && p.abbinato && p.inquadra
+        #else
         return p.condividi && p.abbinato
+        #endif
     }
 
     /// Apre la scena (testata di Posizioni, Novità). Mai in modalità cliente, sotto il benvenuto o in presentazione.
