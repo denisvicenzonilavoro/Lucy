@@ -10,7 +10,6 @@ enum TestiSimulaConfronta {
     static let dueAConfronto = "Due a confronto"
     /// Migliorie d'uso 69: la terza voce del segmentato.
     static let ilTFR = "Il TFR"
-    static let ilTFR = "Il TFR"
     static let laStrada = "La strada"
     static let leDueStrade = "Le due strade"
     static let iSoldi = "I soldi"

@@ -100,14 +100,10 @@ struct SchedaTFR: View {
         .onDisappear { salvaBozza() }
     }
 
-    /// Le cifre delle ipotesi sul tavolo. Sul Mac (migliorie d'uso 69) in un dato ricavato con le ipotesi nella chiave:
-    /// un ridisegno che non cambia le ipotesi non rifà il conto; su iPhone e iPad come sempre.
+    /// Le cifre delle ipotesi sul tavolo, calcolate direttamente: le ipotesi cambiano a ogni passo dei cursori e una
+    /// voce nella cache comune (`stato.ricavato`) per ogni passo la riempirebbe e la svuoterebbe tutta.
     func esito(_ i: IpotesiTFR) -> EsitoTFR? {
-        #if os(macOS)
-        return stato.ricavato("tfr-esito|\(cliente)|\(String(describing: i))") { MotoreTFR.calcola(i) }
-        #else
-        return MotoreTFR.calcola(i)
-        #endif
+        MotoreTFR.calcola(i)
     }
 
     /// Le due colonne: sul Mac quelle di «Simula e confronta › Il TFR» (SimulaConfrontaTFR.swift), su iPhone e iPad
