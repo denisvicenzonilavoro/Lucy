@@ -689,7 +689,7 @@ enum ProvaVera {
         }
         if let incontro = SpazioLavoro.predefiniti.first {
             apriSpazio(incontro)
-            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .clienti], "Spazio «\(incontro.nome)»: Vera e Clienti in primo piano")
+            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .incontri], "Spazio «\(incontro.nome)»: Incontri in primo piano, Vera accanto")
             controlla(!sovrapposte(spazi) && dentro(spazi), "Spazio «\(incontro.nome)»: finestre affiancate, dentro lo schermo")
             controlla(spazi.finestreVisibili.allSatisfy { spazi.cornice(di: $0).width >= Misure.Finestra.minima.width && spazi.cornice(di: $0).height >= Misure.Finestra.minima.height },
                       "Spazio «\(incontro.nome)»: nessuna finestra sotto la misura minima")
@@ -721,6 +721,40 @@ enum ProvaVera {
             controlla(spazi.cornice(di: vera).maxX <= spazi.cornice(di: agenda).minX + 1 && spazi.appAttiva == .vera && !sovrapposte(spazi),
                       "◫ affianca Vera (a sinistra) e Agenda (a destra)")
         }
+
+        #if os(macOS)
+        // Migliorie d'uso 67: il menu della pillola dell'app, con le app aperte tranne quella davanti e gli spazi pronti
+        let menu = StatoShell(persistente: false)
+        controlla(SpazioLavoro.predefiniti.map(\.nome) == ["Preparo un incontro", "Faccio un’analisi", "Comincio la giornata"]
+                  && SpazioLavoro.predefiniti.map(TestiMenuApp.appDelloSpazio) == ["Incontri + Vera", "Analisi 360 + Posizioni", "Agenda + Messaggi"],
+                  "Menu delle app: i tre spazi pronti con i nomi del template e le loro app")
+        controlla(menu.appRecentiMenu.isEmpty, "Menu delle app: dalla scrivania nessun’altra app aperta")
+        menu.scegliCliente("giulia")
+        menu.apri(.clienti)
+        menu.apri(.agenda)
+        controlla(menu.appRecentiMenu == [.clienti] && menu.clienteNelMenu(per: .clienti) == "Giulia"
+                  && menu.clienteNelMenu(per: .impostazioni) == nil,
+                  "Menu delle app: Clienti (con Giulia) sotto Agenda, senza l'app davanti")
+        for app in [AppPrisma.posizioni, .analisi360, .messaggi, .pratiche] { menu.apri(app) }
+        controlla(menu.appRecentiMenu.count == 4 && !menu.appRecentiMenu.contains(.pratiche) && menu.appRecentiMenu.first == .messaggi,
+                  "Menu delle app: al più quattro, dalla più vicina")
+        menu.alternaMenuApp()
+        controlla(menu.menuApp, "Menu delle app: il nome dell'app lo apre")
+        menu.alternaMenuApp()
+        controlla(!menu.menuApp, "Menu delle app: un secondo tocco lo chiude")
+        menu.alternaMenuApp()
+        menu.apriSceltaCliente()
+        controlla(!menu.menuApp && menu.pannelloCliente, "Menu delle app: la scelta del cliente lo chiude")
+        menu.pannelloCliente = false
+        menu.scegliCliente(nil)
+        menu.alternaMenuApp()
+        controlla(menu.clienteNelMenu(per: .clienti) == nil, "Menu delle app: con «Tutti i clienti» niente nome accanto")
+        menu.entraModoCliente(avviso: false)
+        controlla(!menu.menuApp, "Menu delle app: la modalità cliente lo chiude")
+        menu.alternaMenuApp()
+        controlla(!menu.menuApp, "Menu delle app: in modalità cliente non si apre")
+        menu.esciModoCliente()
+        #endif
 
         // Note: il taccuino legato ai clienti
         let taccuino = StatoShell(persistente: false)

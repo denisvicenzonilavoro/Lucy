@@ -118,14 +118,23 @@ struct BarraSuperiore: View {
         }
     }
 
-    /// La pillola con il nome dell'app in primo piano («Scrivania» se non ce n'è): apre gli spazi di lavoro.
-    private var appCorrente: some View {
+    /// La pillola con il nome dell'app in primo piano («Scrivania» se non ce n'è). Sul Mac (migliorie d'uso 67) apre il
+    /// menu delle app aperte e degli spazi di lavoro (MenuAppBarra.swift), senza freccia come nel template; su iPhone e
+    /// iPad il pannello degli spazi di lavoro.
+    @ViewBuilder private var appCorrente: some View {
+        #if os(macOS)
+        PulsanteBarra(aiuto: TestiMenuApp.aiutoPillola, forma: .pillola, azione: { stato.alternaMenuApp() }) {
+            TitoloAppAttiva()
+        }
+        .anchorPreference(key: AncoraPillolaApp.self, value: .bounds) { $0 }
+        #else
         PulsanteBarra(aiuto: "Spazi di lavoro", forma: .pillola, azione: {
             if stato.pannelloNotifiche { stato.pannelloNotifiche = false }
             if !stato.inModoCliente { stato.pannelloSpazi.toggle() }
         }) {
             TitoloAppAttiva()
         }
+        #endif
     }
 
     #if os(macOS)

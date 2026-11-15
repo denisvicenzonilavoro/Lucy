@@ -2020,3 +2020,23 @@ Resta:
   collegamenti d'accento, la parola resta azzurra: accettabile, è il colore del passaggio nel template); 227 e 228 con la
   frase nuova; le etichette con il filo in Prodotti, Rubrica e Multiramo («106-posizioni-multiramo»).
 - `InfoTermine` resta nel codice (oggi non la usa più nessuno sul Mac): serve dove l'etichetta è un simbolo.
+
+## 67. App aperte e spazi dal nome dell'app
+
+Fatto (solo sul Mac): il menu sotto la pillola dell'app (`MenuAppBarra`, Shell/MenuAppBarra.swift) con le finestre aperte
+tranne quella davanti (al più quattro, dalla più vicina, con il nome di battesimo del cliente accanto alle app che lo
+seguono), i tre spazi pronti con i nomi del template («Preparo un incontro», «Faccio un’analisi», «Comincio la
+giornata», stessi `id`), gli spazi dell'utente con «Elimina lo spazio» nel clic destro, «Salva le finestre aperte come
+spazio…» (il modulo al posto delle voci, spento senza finestre) e «Torna alla scrivania». Stato in memoria
+(`StatoFinestre.menuApp`, `menuAppSalva`), ancora dal layout (`AncoraPillolaApp`), token `Tema.Apple.MenuApp` e
+`Tema.Apple.Moto.MenuApp`; chiusura con un clic fuori, Esc (monitor di EscFinestra), secondo tocco, modalità cliente,
+blocco, ricerca, «Da fare», notifiche, guida, novità, scelta del cliente e «Mostra al cliente». Prove in `--prova-vera`
+e `--prova-fluidita`; istantanee 1310 (chiara e scura), 1311, 1312; 55, 57 e 58 cambiano da sole con gli spazi nuovi.
+
+Resta:
+- **Da guardare nelle istantanee**: «57-spazio-analisi» con Posizioni al 42% (decisione 67.6: se non si legge, Posizioni
+  principale e Analisi 360 accanto).
+- `ProvaGuidata` (stato iniziale dei pannelli) e le frecce di `AppRicerca` non conoscono il menu: si chiude da sé
+  aprendo la ricerca, quindi oggi non serve.
+- Le azioni «Spazi di lavoro» e «Le tue app aperte» della ricerca escono con la miglioria 61 (61.3 punto 4); il pannello
+  grande degli spazi e «Le tue app aperte» restano nel menu «Vai».

@@ -624,6 +624,7 @@ extension StatoShell {
         // Un pannello alla volta, come in macOS
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }
+        if menuApp { menuApp = false }
         if pannelloAppAperte { pannelloAppAperte = false }
         if sistema.pannelloNovita { sistema.pannelloNovita = false }
         if !pannelloRicerca { pannelloRicerca = true }

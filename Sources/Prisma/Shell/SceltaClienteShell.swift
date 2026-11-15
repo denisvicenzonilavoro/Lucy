@@ -115,6 +115,7 @@ extension StatoShell {
         guard !inModoCliente else { return }
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }
+        if menuApp { menuApp = false }
         pannelloCliente = true
     }
 }

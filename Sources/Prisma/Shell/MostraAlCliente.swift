@@ -119,6 +119,7 @@ extension StatoShell {
         guard !inVistaCliente, !inModoCliente, !bloccato, presentazione == nil else { return }
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }
+        if menuApp { menuApp = false }
         if pannelloCliente { pannelloCliente = false }
         if pannelloAppAperte { pannelloAppAperte = false }
         chiudiRicerca()

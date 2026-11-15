@@ -35,7 +35,7 @@ extension StatoShell {
     /// La scrivania è libera: nessuna finestra davanti, niente blocco, pannelli, ricerca, guida o presentazione.
     /// Solo così il gesto apre o chiude Vera.
     var scrivaniaPerVera: Bool {
-        !bloccato && finestreVisibili.isEmpty && presentazione == nil && !pannelloRicerca && !pannelloSpazi
+        !bloccato && finestreVisibili.isEmpty && presentazione == nil && !pannelloRicerca && !pannelloSpazi && !menuApp
             && !pannelloNotifiche && !sistema.pannelloNovita && !pannelloAppAperte && sistema.guida == nil && appConsentita(.vera)
     }
 

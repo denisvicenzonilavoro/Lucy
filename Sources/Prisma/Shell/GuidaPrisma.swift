@@ -379,6 +379,7 @@ extension StatoShell {
         withTransaction(Transaction(animation: nil)) {
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
             chiudiRicerca()

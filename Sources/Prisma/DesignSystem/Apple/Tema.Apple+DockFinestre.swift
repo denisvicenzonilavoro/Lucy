@@ -127,3 +127,69 @@ extension Tema.Apple {
         static let altezzaFilo: CGFloat = 16
     }
 }
+
+// MARK: - Il menu della pillola dell'app (migliorie d'uso 67, solo sul Mac)
+
+extension Tema.Apple {
+    /// Il menu sotto il nome dell'app nella barra (`#menuP` del template delle migliorie d'uso, righe 465-477 e 3098-3103):
+    /// le app aperte, gli spazi di lavoro con il loro nome, «Salva le finestre aperte come spazio…» e «Torna alla
+    /// scrivania». La vista sta in Shell/MenuAppBarra.swift.
+    enum MenuApp {
+        /// `min-width: 236px; padding: 8px`, 8 punti sotto la pillola.
+        static let larghezzaMinima: CGFloat = 236
+        static let larghezzaMassima: CGFloat = 340
+        static let margine: CGFloat = 8
+        static let distanzaPillola: CGFloat = 8
+        /// Non scende sul dock e non tocca i bordi della shell.
+        static let bordo: CGFloat = 12
+        static let raggio: CGFloat = Raggio.tile
+        static let superficie = Superficie.vetroSopra
+        /// Le voci (`#menuP .vo`): alte 36, `padding: 0 10px`, `gap: 10px`, raggio 12, 13,5 semibold.
+        static let altezzaRiga: CGFloat = 36
+        static let rigaPadding = EdgeInsets(top: 7, leading: 10, bottom: 7, trailing: 10)
+        static let spazioRiga: CGFloat = 10
+        static let raggioRiga: CGFloat = 12
+        static let voce = Carattere(dimensione: 13.5, peso: .semibold)
+        static let coloreVoce = Colore.inchiostro
+        static let coloreVoceSpenta = Colore.inchiostro2
+        static let sopra = Colore.chip
+        /// L'icona dell'app 20 con raggio 5; il glifo dello schermo degli spazi 16.
+        static let icona: CGFloat = 20
+        static let raggioIcona: CGFloat = 5
+        static let glifo = Carattere(dimensione: 14, peso: .medium)
+        static let latoGlifo: CGFloat = 20
+        static let coloreGlifo = Colore.inchiostro2
+        /// A destra, in piccolo: il nome del cliente o le app dello spazio (`.vo small`: 11,5 secondario su `chip`).
+        static let notaCliente = Carattere(dimensione: 11.5, peso: .medium)
+        static let coloreNota = Colore.inchiostro2
+        static let fondoNota = Colore.chip
+        static let paddingNota = EdgeInsets(top: 1, leading: 7, bottom: 1, trailing: 7)
+        /// Il filetto fra i gruppi: 1 punto, `margin: 5px 8px`.
+        static let filetto = Colore.separatore
+        static let spessoreFiletto: CGFloat = 1
+        static let paddingFiletto = EdgeInsets(top: 5, leading: 8, bottom: 5, trailing: 8)
+        /// Il modulo per salvare lo spazio: titolo 15 bold, campo alto 32 su `chip`, raggio 10.
+        static let larghezzaModulo: CGFloat = 300
+        static let titoloModulo = Carattere(dimensione: 15, peso: .bold)
+        static let testoModulo = Carattere(dimensione: 12.5, peso: .regular)
+        static let campo = Carattere(dimensione: 13, peso: .regular)
+        static let altezzaCampo: CGFloat = 32
+        static let raggioCampo: CGFloat = 10
+        static let fondoCampo = Colore.chip
+        static let paddingCampo: CGFloat = 10
+        static let spazioModulo: CGFloat = 10
+        static let paddingModulo: CGFloat = 8
+        /// Le voci spente («Nessun’altra app aperta, per ora», «Salva…» senza finestre).
+        static let opacitaSpenta: Double = 0.5
+    }
+}
+
+extension Tema.Apple.Moto {
+    /// Il menu della pillola dell'app entra in 320 ms da 8 punti più su, con la scala 0,97 e la molla (riga 3101).
+    enum MenuApp {
+        static let durata = 0.32
+        static let spostamento: CGFloat = -8
+        static let scala: CGFloat = 0.97
+        static var animazione: Animation { Curva.molla.animazione(durata) }
+    }
+}

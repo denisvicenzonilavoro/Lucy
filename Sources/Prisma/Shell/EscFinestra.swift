@@ -81,6 +81,11 @@ final class MonitorEscFinestra {
             }
             return s.escMostra() ? nil : e
         }
+        // Migliorie d'uso 67: il menu della pillola dell'app si chiude (anche sulla scrivania, senza finestre)
+        if !s.bloccato, s.menuApp {
+            s.menuApp = false
+            return nil
+        }
         guard let app = s.appAttiva else { return e }
         // Qualcosa sopra la finestra che usa Esc a modo suo
         guard nienteSopra(s, app: app) else { return e }
@@ -100,7 +105,7 @@ final class MonitorEscFinestra {
     private func nienteSopra(_ s: StatoShell, app: AppPrisma) -> Bool {
         let sistema = s.sistema
         guard !s.bloccato, s.presentazione == nil, sistema.sovrapposizione == nil, sistema.guida == nil,
-              !s.pannelloRicerca, !s.pannelloSpazi, !s.pannelloNotifiche, !s.pannelloAppAperte, !s.pannelloCliente,
+              !s.pannelloRicerca, !s.pannelloSpazi, !s.pannelloNotifiche, !s.pannelloAppAperte, !s.pannelloCliente, !s.menuApp,
               !sistema.pannelloNovita, s.notaVocale.mostrata == nil, s.notaVocale.inModifica == nil,
               // Migliorie d'uso 3: il dettaglio di una voce del «Da fare» al centro chiude da sé (✕, velo, Esc)
               s.voceDaFareAperta == nil,

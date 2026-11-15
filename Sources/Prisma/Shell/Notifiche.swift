@@ -448,6 +448,7 @@ extension StatoShell {
         pannelloNotifiche.toggle()
         guard pannelloNotifiche else { return }
         if pannelloSpazi { pannelloSpazi = false }
+        if menuApp { menuApp = false }
         // Novità e notifiche si escludono a vicenda (come notifiche, spazi e ricerca)
         if sistema.pannelloNovita { sistema.pannelloNovita = false }
         guard persistente else {

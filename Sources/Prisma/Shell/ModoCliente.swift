@@ -53,6 +53,7 @@ extension StatoShell {
         pannelloCliente = false
         if sistema.pannelloNovita { sistema.pannelloNovita = false }
         pannelloSpazi = false
+        menuApp = false
         pannelloAppAperte = false
         portafoglio = false
         veraPortafoglio = false

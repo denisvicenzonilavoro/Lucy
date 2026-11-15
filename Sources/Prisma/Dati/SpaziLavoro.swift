@@ -55,18 +55,19 @@ struct FinestraSpazio: Codable, Hashable {
 }
 
 extension SpazioLavoro {
-    /// Le disposizioni pronte: due app affiancate, la principale più larga e in primo piano.
-    /// Non di più: le app hanno bisogno di spazio e le finestre una misura minima. Posizioni e
-    /// Prospetti non si affiancano: su uno schermo da 13″ rendono solo a schermo pieno. Vera sta bene
-    /// nella colonna stretta.
+    /// Le disposizioni pronte (migliorie d'uso 67, i nomi del template): due app affiancate, la principale (la prima del
+    /// nome) a sinistra al 58% e in primo piano, l'altra a destra. Non di più: le app hanno bisogno di spazio e le
+    /// finestre una misura minima. Prospetti non si affianca; Posizioni sì, nella colonna di destra di «Faccio
+    /// un’analisi» (decisione 67.6: al 42% di uno schermo da 13″ resta sopra la misura minima della finestra; se non si
+    /// legge, diventa lei la principale). Gli `id` restano quelli di prima: nell'archivio non cambia nulla.
     static let predefiniti: [SpazioLavoro] = [
-        SpazioLavoro(id: "pronto-incontro", nome: "Incontro con il cliente",
-                     finestre: [.destra(.vera), .sinistra(.clienti)], predefinito: true),
-        SpazioLavoro(id: "pronto-analisi", nome: "Analisi 360 con Vera",
-                     finestre: [.destra(.vera), .sinistra(.analisi360)], predefinito: true),
-        // Le attività ora vivono nell'Agenda (vista mese, con la colonna del giorno): accanto la scheda del cliente
-        SpazioLavoro(id: "pronto-giornata", nome: "La giornata",
-                     finestre: [.destra(.clienti), .sinistra(.agenda)], predefinito: true),
+        SpazioLavoro(id: "pronto-incontro", nome: "Preparo un incontro",
+                     finestre: [.destra(.vera), .sinistra(.incontri)], predefinito: true),
+        SpazioLavoro(id: "pronto-analisi", nome: "Faccio un’analisi",
+                     finestre: [.destra(.posizioni), .sinistra(.analisi360)], predefinito: true),
+        // Le attività vivono nell'Agenda (vista mese, con la colonna del giorno): accanto i messaggi da mandare
+        SpazioLavoro(id: "pronto-giornata", nome: "Comincio la giornata",
+                     finestre: [.destra(.messaggi), .sinistra(.agenda)], predefinito: true),
     ]
 
     /// Le app, dalla principale (l'ultima, in primo piano) alle altre.

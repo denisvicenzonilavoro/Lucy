@@ -55,6 +55,16 @@ extension StatoShell {
         set { sistema.pannelloCliente = newValue }
     }
 
+    /// Il menu delle app aperte e degli spazi sotto la pillola dell'app (migliorie d'uso 67, solo sul Mac). Chiudendolo
+    /// si chiude anche il suo modulo per salvare lo spazio.
+    var menuApp: Bool {
+        get { sistema.menuApp }
+        set {
+            sistema.menuApp = newValue
+            if !newValue && sistema.menuAppSalva { sistema.menuAppSalva = false }
+        }
+    }
+
     var finestreVisibili: [Finestra] { sistema.visibili }
 
     /// App in primo piano (nil = scrivania).
@@ -475,6 +485,7 @@ extension StatoShell {
         Movimenti.anima(Tema.Moto.Blocco.scrivania, durata: Tema.Moto.Blocco.durata, animato: movimento) {
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             if pannelloCliente { pannelloCliente = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
@@ -755,6 +766,7 @@ extension StatoShell {
         guard persistente else {
             diColpo(implicite: false) {
                 if pannelloSpazi { pannelloSpazi = false }
+                if menuApp { menuApp = false }
                 finestre = nuove
                 sistema.spente.removeAll()
             }
@@ -768,6 +780,7 @@ extension StatoShell {
             // Nessuna finestra resta in vista: le vecchie si chiudono e quelle dello spazio si aprono insieme
             Movimenti.anima(Tema.Moto.Finestre.chiusura, durata: Tema.Moto.Finestre.durataChiusura) {
                 if pannelloSpazi { pannelloSpazi = false }
+                if menuApp { menuApp = false }
                 finestre = nuove
                 sistema.inArrivo.formUnion(restano)
                 if !sistema.spente.isEmpty { sistema.spente.removeAll() }
@@ -781,6 +794,7 @@ extension StatoShell {
         }
         Movimenti.anima(Tema.Moto.Finestre.chiusura, durata: Tema.Moto.Finestre.durataChiusura) {
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             finestre.removeAll { !restano.contains($0.app) }
             // Le finestre dello spazio tornano tutte in vista: i loro controlli si riaccendono
             if !sistema.spente.isEmpty { sistema.spente.removeAll() }

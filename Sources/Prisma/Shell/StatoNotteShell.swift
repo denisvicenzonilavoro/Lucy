@@ -99,7 +99,7 @@ extension StatoShell {
         let attesa = max(0, Tema.Apple.Moto.PannelloNovita.aperturaAutomatica - Tema.Moto.Sblocco.durataEntrata)
         Movimenti.dopo(attesa) { [weak self] in
             guard let self, !self.bloccato, self.presentazione == nil, !self.inModoCliente,
-                  self.sistema.guida == nil, !self.pannelloRicerca, !self.pannelloSpazi, !self.pannelloAppAperte,
+                  self.sistema.guida == nil, !self.pannelloRicerca, !self.pannelloSpazi, !self.menuApp, !self.pannelloAppAperte,
                   !self.sistema.pannelloNovita, self.sistema.sovrapposizione == nil else { return }
             self.segnaNotteApertaDaSola(giorno: giorno, saltata: daDecidere == 0)
             self.apriNotte()

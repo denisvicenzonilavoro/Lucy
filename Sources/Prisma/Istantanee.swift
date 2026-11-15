@@ -1740,6 +1740,8 @@ enum Istantanee {
         tutteLeScene += sceneMostra
         // Migliorie d'uso 66: le parole si spiegano dove sono (IstantaneeParole.swift)
         tutteLeScene += sceneParole
+        // Migliorie d'uso 67: app aperte e spazi dal nome dell'app (IstantaneeMenuApp.swift)
+        tutteLeScene += sceneMenuApp
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu

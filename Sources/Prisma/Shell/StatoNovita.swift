@@ -130,6 +130,7 @@ extension StatoShell {
         withTransaction(Transaction(animation: nil)) {
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if menuApp { menuApp = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             chiudiRicerca()
             if sistema.guida != nil { sistema.guida = nil }
@@ -306,7 +307,7 @@ extension StatoShell {
         let attesa = max(0, Tema.Apple.Moto.PannelloNovita.aperturaAutomatica - Tema.Moto.Sblocco.durataEntrata)
         Movimenti.dopo(attesa) { [weak self] in
             guard let self, !self.bloccato, self.presentazione == nil, !self.inModoCliente,
-                  self.sistema.guida == nil, !self.pannelloRicerca, !self.pannelloSpazi, !self.pannelloAppAperte,
+                  self.sistema.guida == nil, !self.pannelloRicerca, !self.pannelloSpazi, !self.menuApp, !self.pannelloAppAperte,
                   !self.sistema.pannelloNovita,
                   self.dati.impostazioni.novitaViste != NovitaLuce.versione else { return }
             self.apriNovita()

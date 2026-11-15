@@ -342,6 +342,14 @@ enum ProvaFluidita {
                           verifica: { !stato.pannelloSpazi }),
         ])
 
+        // Migliorie d'uso 67: il menu della pillola dell'app non ridisegna la shell (colonna «avvisi StatoFinestre»)
+        s.misura(banco, [
+            PassoFluidita(nome: "apri il menu delle app", azione: { stato.alternaMenuApp() },
+                          verifica: { stato.menuApp }),
+            PassoFluidita(nome: "chiudi il menu delle app", azione: { stato.menuApp = false },
+                          verifica: { !stato.menuApp }),
+        ])
+
         s.misura(banco, [
             PassoFluidita(nome: "apri «Le tue app aperte»", azione: { stato.pannelloAppAperte = true },
                           verifica: { stato.pannelloAppAperte }),
