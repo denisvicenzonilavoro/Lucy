@@ -585,7 +585,7 @@ glossario si trova anche dalla lente (61, gruppo «Parole»).
    chiavi di oggi: `sri` (`\bSRI\b`), `kid`, `gestioneSeparata`, `riscatto` (`riscatt[oi]`), `capitaleMorte` («caso
    morte»), `divarioPrevidenziale` (nuova), `multiramo`, `tfr`, `caricamento` (`caricament[oi]`), `deducibilita`
    («deduzion[ei]», «deducibil[ei]»), `adeguatezza`, `consolidamento`, `plusvalenza` (nuova, «plusvalenz[ae]»),
-   `patrimonioNetto`, `rendita`, `premio` (`premi[oi]`). Nell'ordine del template (il primo che corrisponde vince);
+   `patrimonioNetto`, `rendita`, `premio` (`premio?`: «premio» e «premi»; `premi[oi]` del template non trova «premi»). Nell'ordine del template (il primo che corrisponde vince);
    le sigle SRI, KID e TFR solo in maiuscolo, le altre senza badare a maiuscole e minuscole, sempre a parola intera
    (`\b`). Due
    voci nuove in `Glossario.voci`: `plusvalenza` (categoria «Previdenza e tasse») e `divarioPrevidenziale` («Le parole

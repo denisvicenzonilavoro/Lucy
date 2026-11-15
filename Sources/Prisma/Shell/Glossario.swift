@@ -423,7 +423,7 @@ extension Glossario {
             (.plusvalenza, #"\bplusvalenz[ae]\b"#, true),
             (.patrimonioNetto, #"\bpatrimonio netto\b"#, true),
             (.rendita, #"\brendita\b"#, true),
-            (.premio, #"\bpremi[oi]\b"#, true),
+            (.premio, #"\bpremio?\b"#, true),
         ]
         return elenco.compactMap { chiave, schema, senzaMaiuscole in
             guard let re = try? NSRegularExpression(pattern: schema, options: senzaMaiuscole ? [.caseInsensitive] : [])
