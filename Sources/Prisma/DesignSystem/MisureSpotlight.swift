@@ -135,7 +135,7 @@ extension Colori {
         static let filtro = A.selezioneVoce
         static let filtroTesto = A.accento
         static let incompleto = A.avvisoFondo
-        static let incompletoTesto = A.arancio
+        static let incompletoTesto = A.arancioTesto
     }
 }
 

@@ -15,7 +15,9 @@ extension StatoShell {
     // MARK: - Domanda
 
     /// Cerca nella Biblioteca. `subito`: ricerca sincrona e niente Vera (istantanee e prove, con `applicaEsitoBiblioteca`).
-    func chiediBiblioteca(_ testo: String, subito: Bool = false) {
+    /// `solo` (migliorie d'uso 35): l'id del documento aperto, per cercare solo lì («Vera risponde solo con il testo di
+    /// questo documento»); nil cerca in tutti.
+    func chiediBiblioteca(_ testo: String, subito: Bool = false, solo: String? = nil) {
         let domanda = testo.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !domanda.isEmpty else { return }
         let t = trovaPagina
@@ -23,15 +25,17 @@ extension StatoShell {
         t.compito = nil
         t.domanda = domanda
         t.aperta = nil
-        t.cerca(domanda) { [weak self] trovati, indice in
+        let pagineSolo = solo.flatMap { documentoBiblioteca($0)?.numeroPagine }
+        t.cerca(domanda, solo: solo) { [weak self] trovati, indice in
             guard let self, t.domanda == domanda else { return }
+            let cercate = pagineSolo ?? indice.pagine
             guard let primo = trovati.first else {
                 t.risultato = RisultatoBiblioteca(domanda: domanda, stato: .nonTrovata, trovati: [], passo: nil,
-                                                  pagineCercate: indice.pagine)
+                                                  pagineCercate: cercate)
                 return
             }
             t.risultato = RisultatoBiblioteca(domanda: domanda, stato: .cerca, trovati: trovati, passo: primo.passo,
-                                              pagineCercate: indice.pagine)
+                                              pagineCercate: cercate)
             t.nuovoGiro()
             guard !subito, !self.rispostePreparate else { return }
             self.rispondiBiblioteca(domanda, trovati: trovati)
@@ -106,22 +110,24 @@ extension StatoShell {
     }
 
     /// Le domande di prova del template (con i fac-simile), oppure dalle intestazioni dei documenti dell'utente. In
-    /// modalità cliente senza nomi (decisione 5).
-    var suggerimentiBiblioteca: [String] {
+    /// modalità cliente senza nomi (decisione 5). Migliorie d'uso 35: con `documento` (l'id del documento aperto) solo le
+    /// domande su quel documento; con un cliente scelto, le domande che nominano un altro cliente di prova non ci sono.
+    func suggerimentiBiblioteca(documento: String? = nil) -> [String] {
         let documenti = biblioteca.tutti
+        let modo = inModoCliente
+        let cliente = clienteBiblioteca?.id
+        if let id = documento {
+            guard let d = documenti.first(where: { $0.id == id }) else { return [] }
+            if d.diProva == true {
+                return MotoreBiblioteca.domandeEsempio(documento: d.titolo, cliente: cliente, modoCliente: modo)
+            }
+            guard !d.illeggibile else { return [] }
+            return MotoreBiblioteca.rubriche(trovaPagina.indice.passi.filter { $0.documentoId == id }).map(TestiBiblioteca.rubrica)
+        }
         if documenti.contains(where: { $0.diProva == true }) {
-            return ["Il riscatto nei primi anni ha penali?", "Quanto si deduce del fondo pensione?",
-                    inModoCliente ? "Se il cliente non paga la temporanea?" : "Se Marco non paga la temporanea?"]
+            return MotoreBiblioteca.domandeEsempio(documento: nil, cliente: cliente, modoCliente: modo)
         }
-        var visti = Set<String>()
-        var r: [String] = []
-        for p in trovaPagina.indice.passi where !p.intestazione.isEmpty {
-            let rubrica = p.intestazioneVista.components(separatedBy: " · ").dropFirst().joined(separator: " · ")
-            guard !rubrica.isEmpty, rubrica.count <= 40, visti.insert(rubrica.lowercased()).inserted else { continue }
-            r.append("Cosa dicono i documenti su «\(rubrica)»?")
-            if r.count == 3 { break }
-        }
-        return r
+        return MotoreBiblioteca.rubriche(trovaPagina.indice.passi).map { "Cosa dicono i documenti su «\($0)»?" }
     }
 
     /// Dal pannello Novità: la Biblioteca sulla domanda (niente documento aperto davanti alla risposta).
@@ -139,6 +145,10 @@ extension StatoShell {
     /// Apre un documento intero nel vassoio (alla prima pagina, o a quella data).
     func apriDocumentoBiblioteca(_ id: String, pagina: Int = 1) {
         guard let d = documentoBiblioteca(id) else { return }
+        #if os(macOS)
+        // Migliorie d'uso 35: un documento nuovo svuota il campo, che ora chiede «Chiedi qualcosa su «…»…»
+        if trovaPagina.aperta?.documentoId != id { trovaPagina.domanda = "" }
+        #endif
         trovaPagina.aperta = PaginaAperta(documentoId: id, pagina: min(max(1, pagina), max(1, d.numeroPagine)))
     }
 
@@ -150,6 +160,8 @@ extension StatoShell {
     /// I PDF e le immagini trascinati o scelti: copiati nella cartella della Biblioteca, letti sul Mac pagina per pagina
     /// (PDFKit, Vision per le scansioni) con l'avanzamento nella barra. Genere, canale ed edizione li propone Prisma.
     func importaInBiblioteca(_ urls: [URL]) {
+        // Migliorie d'uso 37: durante la dimostrazione la Biblioteca non cambia (decisione 3)
+        guard !inDimostrazione else { return mostraAvviso(TestiDimostrazione.nonDurante) }
         let t = trovaPagina
         let persistente = self.persistente
         for url in urls where LetturaDocumenti.estensioniAccettate.contains(url.pathExtension.lowercased()) {

@@ -17,6 +17,8 @@ extension ProvaBackup {
         mail.id = "messaggio-prova-mail"
         mail.stato = .apertoInMail
         mail.apertoIl = AiutiProva.data(2026, 11, 5)
+        // Migliorie d'uso 25: segnato come spedito dal consulente
+        mail.speditoIl = AiutiProva.data(2026, 11, 5).addingTimeInterval(12 * 60)
         var sms = MessaggioCliente(clienteId: clienteId, occasioneId: "scadenzaPosizione-\(clienteId)-pos-prova-20261219",
                                    origine: OrigineMessaggio(tipo: .scadenzaPosizione, riferimento: "pos-prova-20261219"),
                                    canaleLavoro: .alleanza, tono: .breve, canale: .messaggi, oggetto: nil,
@@ -52,6 +54,8 @@ extension ProvaBackup {
         guard estratto.messaggi == originale.messaggi, estratto.impostazioni.messaggi == originale.impostazioni.messaggi,
               estratto.messaggi.first(where: { $0.id == "messaggio-prova-mail" })?.stato == .apertoInMail,
               estratto.messaggi.first(where: { $0.id == "messaggio-prova-mail" })?.modello == "qwen3.5:4b",
+              estratto.messaggi.first(where: { $0.id == "messaggio-prova-mail" })?.speditoIl == AiutiProva.data(2026, 11, 5).addingTimeInterval(12 * 60),
+              estratto.messaggi.first(where: { $0.id == "messaggio-prova-sms" })?.speditoIl == nil,
               estratto.messaggi.first(where: { $0.id == "messaggio-prova-sms" })?.oggetto == nil,
               estratto.messaggi.first(where: { $0.id == "messaggio-prova-sms" })?.cifre.count == 3,
               estratto.impostazioni.messaggi.giorniScadenza == 30 else {
@@ -90,6 +94,16 @@ extension ProvaBackup {
               illeggibile.messaggi.first?.stato == .salvato, illeggibile.messaggi.first?.testo == originale.messaggi.first?.testo,
               illeggibile.impostazioni.messaggi == ImpostazioniMessaggi(), illeggibile.clienti.count == originale.clienti.count else {
             return "messaggi illeggibili: archivio non aperto tenendo solo quelli buoni"
+        }
+        // 3b. Migliorie d'uso 25: un messaggio senza `speditoIl` (archivi di prima) si legge, senza il segno
+        var senzaSegno = primo
+        senzaSegno.removeValue(forKey: "speditoIl")
+        guard primo["speditoIl"] != nil else { return "il messaggio di prova non ha il segno «spedito» nell'archivio" }
+        radice["messaggi"] = [senzaSegno] as [Any]
+        let senza = try Archivio.decodifica(JSONSerialization.data(withJSONObject: radice))
+        guard senza.messaggi.count == 1, senza.messaggi.first?.speditoIl == nil,
+              senza.messaggi.first?.apertoIl == originale.messaggi.first?.apertoIl else {
+            return "un messaggio senza il segno «spedito» non si legge come prima"
         }
         // 4. La versione dell'archivio resta la 26
         guard DatiPrisma.versioneAttuale >= 26 else {

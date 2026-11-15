@@ -60,6 +60,11 @@ enum ProvaBackup {
             originale.impostazioni.acquaDellaScrivania = false
             // «Riduci movimento» di Prisma acceso (spento di base): deve tornare acceso dal backup
             originale.impostazioni.riduciMovimento = true
+            // Migliorie d'uso 38: i nomi scelti per i due canali (campo letto con tolleranza): devono tornare dal backup
+            originale.impostazioni.nomiCanali = NomiCanali(primo: "Agenzia", secondo: "Studio")
+            // Migliorie d'uso 39: due dei quattro filtri del ponte spenti (accesi di base): devono tornare spenti
+            originale.impostazioni.vera.ponte.inquadra = false
+            originale.impostazioni.vera.ponte.tavolo = false
             // E gli orari di lavoro dell'agenda (nelle impostazioni)
             originale.impostazioni.orari.giorni = [2, 3, 4]
             originale.impostazioni.orari.margineMinuti = 30
@@ -208,6 +213,16 @@ enum ProvaBackup {
             let elenco = GestoreBackup.elenca(backup)
             guard elenco.count == GestoreBackup.massimo else {
                 print("ERRORE: rotazione, attesi \(GestoreBackup.massimo) backup, trovati \(elenco.count)")
+                return 1
+            }
+            // Migliorie d'uso 31: dopo «Crea backup» la voce «Nessun backup ancora» di «Da sistemare» sparisce
+            let fattiPrima = FattiDaSistemare()
+            var fattiDopo = fattiPrima
+            fattiDopo.backupUltimo = elenco.first?.data ?? Date()
+            guard MotoreDaSistemare.calcola(fattiPrima).daSistemare.contains(where: { $0.id == "backup-mai" }),
+                  !MotoreDaSistemare.calcola(fattiDopo).daSistemare.contains(where: { $0.id == "backup-mai" }),
+                  MotoreDaSistemare.calcola(fattiDopo).aPosto.contains(where: { $0.id == "backup-fatto" }) else {
+                print("ERRORE: «Da sistemare» non segue il backup creato")
                 return 1
             }
 
@@ -448,6 +463,18 @@ enum ProvaBackup {
                 print("ERRORE: «Riduci movimento» acceso non torna acceso dal backup")
                 return 1
             }
+            // Migliorie d'uso 38: i nomi scelti per i canali tornano uguali
+            guard estratto.dati.impostazioni.nomiCanali == NomiCanali(primo: "Agenzia", secondo: "Studio") else {
+                print("ERRORE: i nomi scelti per i canali non tornano uguali dal backup")
+                return 1
+            }
+            // Migliorie d'uso 39: i filtri del ponte tornano come erano
+            let ponteTornato = estratto.dati.impostazioni.vera.ponte
+            guard !ponteTornato.inquadra, !ponteTornato.tavolo, ponteTornato.modello, ponteTornato.nota,
+                  ponteTornato == originale.impostazioni.vera.ponte else {
+                print("ERRORE: i filtri del ponte (Vera, Inquadra, Nota a voce, Al tavolo) non tornano uguali dal backup")
+                return 1
+            }
             // Esperienza per tipo di prodotto (versione 21): griglia e capacità di Giulia identiche dal backup
             guard let g = estratto.dati.clienti.first(where: { $0.id == "giulia" })?.profilo.esperienzaProdotti,
                   g == originale.clienti.first(where: { $0.id == "giulia" })?.profilo.esperienzaProdotti,
@@ -556,6 +583,33 @@ enum ProvaBackup {
             guard !lettoSenzaCalma.impostazioni.riduciMovimento, lettoSenzaCalma.impostazioni == attesoSenzaCalma.impostazioni,
                   lettoSenzaCalma.clienti.count == originale.clienti.count, lettoSenzaCalma.versione == originale.versione else {
                 print("ERRORE: archivio senza «Riduci movimento» non letto correttamente (atteso: movimento normale)")
+                return 1
+            }
+            // Migliorie d'uso 38: un archivio (o un backup) di prima, senza i nomi dei canali, si apre con quelli di base
+            guard let senzaNomi = try ProvaBackup.senzaCampo("nomiCanali", in: Archivio.codificatore.encode(originale)) else {
+                print("ERRORE: archivio di prova senza i nomi dei canali non preparato")
+                return 1
+            }
+            let lettoSenzaNomi = try Archivio.decodifica(senzaNomi)
+            var attesoSenzaNomi = try Archivio.decodifica(Archivio.codificatore.encode(originale))
+            attesoSenzaNomi.impostazioni.nomiCanali = nil
+            guard lettoSenzaNomi.impostazioni.nomiCanali == nil, lettoSenzaNomi.impostazioni == attesoSenzaNomi.impostazioni,
+                  lettoSenzaNomi.clienti.count == originale.clienti.count else {
+                print("ERRORE: archivio senza i nomi dei canali non letto correttamente (attesi i nomi di base)")
+                return 1
+            }
+
+            // Migliorie d'uso 39: un archivio di prima, senza i quattro filtri del ponte, li legge accesi (e il collegamento
+            // resta com'era)
+            guard let senzaFiltri = try ProvaBackup.senzaFiltriPonte(in: Archivio.codificatore.encode(originale)) else {
+                print("ERRORE: archivio di prova senza i filtri del ponte non preparato")
+                return 1
+            }
+            let lettoSenzaFiltri = try Archivio.decodifica(senzaFiltri).impostazioni.vera.ponte
+            guard lettoSenzaFiltri.modello, lettoSenzaFiltri.inquadra, lettoSenzaFiltri.nota, lettoSenzaFiltri.tavolo,
+                  lettoSenzaFiltri.condividi == originale.impostazioni.vera.ponte.condividi,
+                  lettoSenzaFiltri.codice == originale.impostazioni.vera.ponte.codice else {
+                print("ERRORE: archivio senza i filtri del ponte non letto correttamente (attesi accesi)")
                 return 1
             }
 
@@ -707,6 +761,11 @@ enum ProvaBackup {
             }
             // I dati a pezzi: istantanea completa, modifiche annidate salvate, contatori delle cache, carica (ProvaBackupDatiVivi.swift)
             if let errore = provaDatiVivi() {
+                print("ERRORE: \(errore)")
+                return 1
+            }
+            // Migliorie d'uso 37: la dimostrazione non tocca i dati veri e non li mostra (ProvaBackupDimostrazione.swift)
+            if let errore = provaDimostrazione() {
                 print("ERRORE: \(errore)")
                 return 1
             }

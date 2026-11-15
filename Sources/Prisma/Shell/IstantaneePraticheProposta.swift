@@ -12,6 +12,9 @@ import Foundation
 /// - 805: adeguatezza rossa, niente moduli né riquadro finale;
 /// - 806: la sostituzione «costi più bassi» costruita, con il prospetto di sostituzione e i costi da … a …, chiaro e scuro;
 /// - 807: nessun bisogno scoperto;
+/// - 1105 e 1106 (Migliorie d'uso 33): un cliente scelto nella barra con i suoi bisogni («Bisogni scoperti per …», i
+///   passi spenti con la riga di cosa conterranno) e un cliente senza bisogni («Nessun bisogno scoperto per …» con «Apri
+///   Analisi 360»), chiare e scure; le 800-807 sono su «Tutti i clienti»;
 /// - 809: «Proponi una key man ›» dal dossier di Marco: il bisogno della persona chiave di Bianchi Serramenti (azienda di
 ///   prova) con il capitale che manca, costruito, chiaro e scuro.
 /// La 806 usa il bisogno di sostituzione dei motori dei costi se i dati di prova ne hanno uno; altrimenti la prima
@@ -31,20 +34,24 @@ extension Istantanee {
             una(nome + "-scuro", prepara)
         }
         coppia("800-pratiche-vuota") { s in
+            s.scegliCliente(nil)
             s.dati.clienti = []
             s.dati.posizioni = []
             s.apriPratiche(.proposta)
         }
         coppia("801-pratiche-proposta") { s in
+            s.scegliCliente(nil)
             s.apriPratiche(.proposta)
         }
         coppia("802-pratiche-proposta-pronta") { s in
+            s.scegliCliente(nil)
             // I due fac-simile di Prisma (dati di prova, in memoria): la tappa 5 elenca i moduli del canale indipendente
             s.caricaEsempiModuli()
             s.apriPratiche(.proposta)
             costruisciFinoInFondo(s)
         }
         una("803-pratiche-proposta-scegli-prodotto") { s in
+            s.scegliCliente(nil)
             s.apriPratiche(.proposta)
             guard let b = s.bisogniProposta().first(where: { b in
                 b.origine == "protezione-vita" && Set(s.cliente(b.clienteId)?.canali ?? []).count == 2
@@ -53,6 +60,7 @@ extension Istantanee {
             s.costruisciProposta(b, animato: false)
         }
         una("804-pratiche-proposta-bloccata") { s in
+            s.scegliCliente(nil)
             s.dati.prodotti.removeAll { $0.area == .protezione && MotoreProposta.rischioNominato($0) == .vita }
             s.apriPratiche(.proposta)
             guard let b = s.bisogniProposta().first(where: { $0.origine == "protezione-vita" }) else { return }
@@ -60,10 +68,12 @@ extension Istantanee {
             s.costruisciProposta(b, animato: false)
         }
         una("805-pratiche-proposta-non-adeguata") { s in
+            s.scegliCliente(nil)
             s.apriPratiche(.proposta)
             costruisciNonAdeguata(s)
         }
         coppia("806-pratiche-proposta-sostituzione") { s in
+            s.scegliCliente(nil)
             s.apriPratiche(.proposta)
             costruisciSostituzione(s)
         }
@@ -76,6 +86,7 @@ extension Istantanee {
             s.costruisciProposta(b, animato: false)
         }
         una("807-pratiche-proposta-vuota") { s in
+            s.scegliCliente(nil)
             s.dati.obiettivi = []
             // Senza catalogo nessuna sostituzione «costi più bassi»: il vuoto è quello dei bisogni delle analisi
             s.dati.prodotti = []
@@ -88,6 +99,31 @@ extension Istantanee {
                     p.esito = .presentata
                     s.dati.posizioni.append(p)
                 }
+            }
+            s.apriPratiche(.proposta)
+        }
+        // Migliorie d'uso 33: con un cliente scelto nella barra solo i suoi bisogni; i passi spenti dicono cosa conterranno
+        coppia("1105-uso-pratiche-proposta-cliente") { s in
+            if let b = s.bisogniProposta().first { s.scegliCliente(b.clienteId) }
+            s.apriPratiche(.proposta)
+        }
+        coppia("1106-uso-pratiche-proposta-cliente-vuota") { s in
+            let conBisogni = Set(s.bisogniProposta().map(\.clienteId))
+            if let c = s.dati.clienti.first(where: { !conBisogni.contains($0.id) }) {
+                s.scegliCliente(c.id)
+            } else if let c = s.dati.clienti.first {
+                // Tutti i clienti di prova hanno un bisogno: per il primo si aprono proposte presentate (come la 807)
+                s.dati.prodotti = []
+                s.dati.obiettivi.removeAll { $0.clienteId == c.id }
+                for (area, rischio) in [(AreaPosizione.protezione, RischioCoperto.vita), (.protezione, .invalidita),
+                                        (.liquidita, nil), (.previdenza, nil), (.investimento, nil)] {
+                    var p = Posizione(clienteId: c.id, canale: c.canali.first ?? .alleanza, stato: .proposta, area: area,
+                                      nome: "Proposta di prova presentata")
+                    p.rischio = rischio
+                    p.esito = .presentata
+                    s.dati.posizioni.append(p)
+                }
+                s.scegliCliente(c.id)
             }
             s.apriPratiche(.proposta)
         }

@@ -51,6 +51,8 @@ import Observation
         /// Gli obiettivi del cliente in ordine (priorità, scadenza) e il loro avanzamento per id.
         var obiettivi: [Obiettivo]?
         var avanzamenti: [String: AvanzamentoObiettivo]?
+        /// Migliorie d'uso 13: quanti obiettivi non ci arrivano in tempo (in ritardo, senza versamenti, non ci arriva).
+        var obiettiviNonInTempo: Int?
 
         init(chiave: Chiave) { self.chiave = chiave }
     }
@@ -272,6 +274,26 @@ extension StatoShell {
         for o in obiettiviCliente(id) { a[o.id] = AvanzamentoObiettivo(o, posizioni: mie) }
         v.avanzamenti = a
         return a
+    }
+
+    /// Migliorie d'uso 13: quanti obiettivi del cliente non ci arrivano in tempo con il versamento di oggi (in ritardo,
+    /// senza versamenti o non ci arriva; i già raggiunti no), lo stesso `ArrivoObiettivo` delle card. Ricordato nella
+    /// voce del cliente: si rifà solo quando cambiano i suoi obiettivi o le sue posizioni, o il giorno, così le curve
+    /// (`CacheMotoriAnalisi.curva`, al più 24) si chiedono una volta sola. Il numero arancio dell'indice del dossier
+    /// (migliorie d'uso 11) lo legge da qui.
+    func obiettiviNonInTempo(_ id: String) -> Int {
+        let v = voceCliente(id)
+        if let n = v.obiettiviNonInTempo { return n }
+        let mie = posizioniCliente(id)
+        let avanzamenti = avanzamentiObiettivi(id)
+        var n = 0
+        for o in obiettiviCliente(id) {
+            let attivi = avanzamenti[o.id]?.versamentiAttivi ?? AvanzamentoObiettivo(o, posizioni: mie).versamentiAttivi
+            let curva = CacheMotoriAnalisi.curva(o, posizioni: mie)
+            if !ArrivoObiettivo(curva: curva, versamento: o.versamentoMensile, attivi: attivi).arrivaInTempo { n += 1 }
+        }
+        v.obiettiviNonInTempo = n
+        return n
     }
 
     /// L'avanzamento di un obiettivo dalla cache del suo cliente (calcolato al momento se l'obiettivo non è salvato).

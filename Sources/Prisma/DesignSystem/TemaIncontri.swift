@@ -26,10 +26,10 @@ extension Tema.Colore {
         static let temaNonScelto = A.inchiostro3
         /// Stato dei dati di un tema: confermati (verde) o da verificare (arancio).
         static let datiConfermati = A.verde
-        static let datiDaVerificare = A.arancio
+        static let datiDaVerificare = A.arancioTesto
         /// Cifre del dossier: scadenze vicine (rosso) e proposte aperte (arancio), quando ce ne sono.
         static let cifraScadenze = A.rosso
-        static let cifraProposte = A.arancio
+        static let cifraProposte = A.arancioTesto
         static let filo = A.separatore
         /// Proposta spuntata nei prossimi passi.
         static let propostaScelta = A.selezioneVoce

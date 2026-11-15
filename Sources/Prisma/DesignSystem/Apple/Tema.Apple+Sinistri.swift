@@ -19,7 +19,7 @@ extension Tema.Apple.Pratiche {
         static let tinta = C.arancio
         static let sottotitolo = K.voceLista
         static let coloreSottotitolo = C.inchiostro2
-        static let coloreDaCollegare = C.arancio
+        static let coloreDaCollegare = C.arancioTesto
         static let spazioTestata: CGFloat = 14
         /// Le card: piatte, raggio 22; la spedizione con padding 24/26 e 16 sotto.
         static let superficie = Tema.Apple.Superficie.cardPiatta
@@ -52,7 +52,7 @@ extension Tema.Apple.Pratiche {
         static let fondoNodo = C.cardPiena
         static let spuntaNodo = C.spuntaSuVerde
         static let etichettaFatta = C.inchiostro2
-        static let etichettaAdesso = C.arancio
+        static let etichettaAdesso = C.arancioTesto
         static let etichettaFutura = C.inchiostro3
         static let etichettaRespinta = C.rosso
         /// Le tre cifre: 46 sotto la linea, spazio 24; sopra l'etichetta 12,5, sotto la cifra 17 grassetto.
@@ -65,7 +65,7 @@ extension Tema.Apple.Pratiche {
         static let spazioCifra: CGFloat = 2
         /// «Fermo» accanto all'«Aperto da».
         static let fermo = K(dimensione: 11, peso: .semibold)
-        static let coloreFermo = C.arancio
+        static let coloreFermo = C.arancioTesto
         /// Le due card affiancate (1,2 e 1, spazio 14, 14 sotto): padding 18/20, data larga 52, righe 13,5 con 7 sopra e sotto.
         static let proporzioneCard: CGFloat = 1.2
         static let spazioCard: CGFloat = 14

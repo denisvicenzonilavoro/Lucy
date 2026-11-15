@@ -38,7 +38,7 @@ extension Tema.Apple {
         static let dettaglioDocumento = K(dimensione: 12, peso: .regular)
         static let coloreTitolo = C.inchiostro
         static let coloreDettaglio = C.inchiostro2
-        static let coloreAvviso = C.arancio
+        static let coloreAvviso = C.arancioTesto
         static let didascalia = K(dimensione: 12.5, peso: .regular, interlinea: 1.45)
         static let coloreDidascalia = C.inchiostro2
         static let anelloLettura: CGFloat = 14
@@ -140,6 +140,35 @@ extension Tema.Apple {
         /// I passi trovati quando Vera non c'è: lo stesso giallo, più tenue.
         static let evidenziaPasso = Color(r: 255, g: 214, b: 10, a: 0.30)
         static let frecciaPagina = K(dimensione: 13, peso: .semibold)
+
+        // MARK: Migliorie d'uso 35: i documenti del cliente e il documento aperto
+
+        /// Lo spazio sopra la seconda intestazione della colonna («Gli altri documenti»).
+        static let sopraGruppo: CGFloat = 14
+        static let sottoGruppo: CGFloat = 8
+        /// La tile del documento aperto (a sinistra, larga come la risposta).
+        static let paddingTileDocumento = Tema.Apple.Misura.padding(18, 20)
+        static let titoloDocumentoAperto = K(dimensione: 21, peso: .bold, tracking: -0.4, interlinea: 1.2)
+        static let sottoEtichettaDocumento: CGFloat = 4
+        static let sottoTitoloDocumentoAperto: CGFloat = 6
+        static let dettaglioDocumentoAperto = K(dimensione: 13, peso: .regular, interlinea: 1.45)
+        static let coloreDettaglioAperto = C.inchiostro2
+        /// «Domande su questo documento»: 16 sopra, 8 sotto, le domande una sotto l'altra a 8.
+        static let sopraDomandeDocumento: CGFloat = 16
+        static let sottoEtichettaDomande: CGFloat = 8
+        static let spazioDomandeDocumento: CGFloat = 8
+        static let raggioDomandaDocumento: CGFloat = 14
+        static let paddingDomandaDocumento = Tema.Apple.Misura.padding(11, 14)
+        static let rientroEtichettaDomande: CGFloat = 4
+        /// Le domande come le pillole dei suggerimenti, ma a capo e con gli angoli a 14.
+        static let testoDomandaDocumento = K(dimensione: 13, peso: .medium, interlinea: 1.4)
+        static let coloreDomandaDocumento = Tema.Apple.Vera.Campo.coloreSuggerimento
+        static let fondoDomandaDocumento = Tema.Apple.Vera.Campo.fondoSuggerimento
+        static let bordoDomandaDocumento = Tema.Apple.Vera.Campo.bordoSuggerimento
+        /// Il documento aperto entra salendo di 8 con la dissolvenza in 0,32 s (fermo con «Riduci movimento» e nelle
+        /// istantanee).
+        static let entrataDocumento = Tema.Apple.Moto.StileEntrata(durata: 0.32, curva: .uscita, spostamentoX: 0,
+                                                                   spostamentoY: 8, scala: 1, sfocatura: 0)
 
         // MARK: Mostra al cliente
 

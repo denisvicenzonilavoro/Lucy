@@ -760,7 +760,9 @@ extension ArchivioPezzi {
             guard let p = sezioniLette[s.nome] else { continue }
             for k in s.chiavi { copia(k, da: p, in: &dati) }
         }
-        if ricostruito, dati.clienteAttivoId.isEmpty || !dati.clienti.contains(where: { $0.id == dati.clienteAttivoId }) {
+        // Il valore vuoto dell'indice (o della sua riserva) è «Tutti i clienti» (migliorie d'uso 2): resta com'è; si
+        // sostituisce solo un cliente che non c'è più
+        if ricostruito, !dati.clienteAttivoId.isEmpty, !dati.clienti.contains(where: { $0.id == dati.clienteAttivoId }) {
             dati.clienteAttivoId = dati.clienti.first?.id ?? ""
         }
         return (LetturaArchivio(dati: dati, indice: indice), problemi, scartati)

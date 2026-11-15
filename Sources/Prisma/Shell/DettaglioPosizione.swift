@@ -4,17 +4,19 @@ import SwiftUI
 /// o, per le coperture, il quadro della protezione. Si apre dentro la finestra, come su iOS 5.
 struct DettaglioPosizione: View {
     @Environment(StatoShell.self) var stato
-    @Environment(\.modoIstantanea) private var modoIstantanea
+    @Environment(\.modoIstantanea) var modoIstantanea
     let posizione: Posizione
     let modifica: () -> Void
     @State var confermaEliminazione = false
     @State var mostraMetodo = false
     @State var moduloRilevazione = false
+    /// Migliorie d'uso 15 (solo Mac): la scheda scelta nel segmentato; torna a «In breve» quando cambia la posizione.
+    @State var scheda: SchedaPosizione = .inBreve
 
-    private var orizzonteCliente: Int? { stato.cliente(posizione.clienteId)?.profilo.orizzonteAnni }
+    var orizzonteCliente: Int? { stato.cliente(posizione.clienteId)?.profilo.orizzonteAnni }
 
     /// SRI massimo del profilo del cliente (nil senza propensione), per la riga sull'SRI dei fondi di una multiramo.
-    private var sriMassimoProfilo: Int? {
+    var sriMassimoProfilo: Int? {
         stato.cliente(posizione.clienteId)?.profilo.propensione.map(MotoreCoerenza.sriMassimo)
     }
 
@@ -28,6 +30,34 @@ struct DettaglioPosizione: View {
         let calcoli: CalcoliDettaglio = stato.ricavato("dettaglio-posizione|\(p.id)") {
             CalcoliDettaglio(p, prodotto: stato.prodotto(p.prodottoId), orizzonteCliente: orizzonteCliente)
         }
+        pagina(calcoli)
+            .alert("Eliminare \(posizione.nome)?", isPresented: $confermaEliminazione) {
+                Button("Annulla", role: .cancel) {}
+                Button("Elimina", role: .destructive) {
+                    stato.posizioneInDettaglio = nil
+                    stato.eliminaPosizione(posizione.id)
+                }
+            } message: {
+                Text("La posizione verrà tolta dal dossier del cliente. Se serve, potrai recuperarla da un backup.")
+            }
+            .sheet(isPresented: $moduloRilevazione) {
+                ModuloRilevazione(posizione: posizione) { stato.aggiungiRilevazione($0, a: posizione.id) }
+            }
+    }
+
+    /// Sul Mac la scheda che si legge dall'alto (frase, cifre, schede: SchedeDettaglioPosizione.swift); su iPhone e iPad
+    /// la pagina lunga di sempre.
+    @ViewBuilder private func pagina(_ calcoli: CalcoliDettaglio) -> some View {
+        #if os(macOS)
+        paginaMac(calcoli)
+        #else
+        paginaLunga(calcoli)
+        #endif
+    }
+
+    /// La pagina lunga: contratto, costi e rischio, adeguatezza, andamento, riscatto, proiezione o copertura, «Elimina».
+    @ViewBuilder private func paginaLunga(_ calcoli: CalcoliDettaglio) -> some View {
+        let p = posizione
         let andamentoPosizione = calcoli.andamento
         let voce = calcoli.voce
         let gestione = calcoli.gestione
@@ -112,18 +142,6 @@ struct DettaglioPosizione: View {
                 .onAppear { scorri(lettore) }
                 .onChange(of: stato.ancoraPosizioni) { _ in scorri(lettore) }
             }
-        }
-        .alert("Eliminare \(posizione.nome)?", isPresented: $confermaEliminazione) {
-            Button("Annulla", role: .cancel) {}
-            Button("Elimina", role: .destructive) {
-                stato.posizioneInDettaglio = nil
-                stato.eliminaPosizione(posizione.id)
-            }
-        } message: {
-            Text("La posizione verrà tolta dal dossier del cliente. Se serve, potrai recuperarla da un backup.")
-        }
-        .sheet(isPresented: $moduloRilevazione) {
-            ModuloRilevazione(posizione: posizione) { stato.aggiungiRilevazione($0, a: posizione.id) }
         }
     }
 
@@ -222,11 +240,11 @@ struct DettaglioPosizione: View {
     }
 
     /// Dove vanno l'etichetta del canale e la pillola dello stato nella testata.
-    private enum PostoEtichetta { case completa, compatta, sotto }
+    enum PostoEtichetta { case completa, compatta, sotto }
 
     /// Il canale accanto al nome se c'è posto, poi compatto, poi sotto il titolo: in una finestra
     /// stretta il nome non si stringe mai fino a una lettera per riga.
-    private var intestazione: some View {
+    var intestazione: some View {
         ViewThatFits(in: .horizontal) {
             rigaIntestazione(.completa)
             rigaIntestazione(.compatta)
@@ -268,7 +286,7 @@ struct DettaglioPosizione: View {
 
     // MARK: - Contratto
 
-    private var contratto: some View {
+    var contratto: some View {
         let p = posizione
         return PannelloAnalisi(titolo: "Dati del contratto") { EmptyView() } contenuto: {
             VStack(spacing: 0) {
@@ -303,7 +321,7 @@ struct DettaglioPosizione: View {
         }
     }
 
-    private func costiERischio(_ calcoli: CalcoliDettaglio) -> some View {
+    func costiERischio(_ calcoli: CalcoliDettaglio) -> some View {
         let p = posizione
         let l = Tema.Misura.MotoriPosizioni.etichettaRiga
         // Il RIY come nel KID: calcolato da Prisma e, se c'è, quello dichiarato (solo nelle schermate)
@@ -381,7 +399,7 @@ struct DettaglioPosizione: View {
     }
 
     /// Le incoerenze con il profilo del cliente che nascono da questa proposta (SRI o periodo raccomandato).
-    private var incoerenzeProposta: [Incoerenza] {
+    var incoerenzeProposta: [Incoerenza] {
         guard posizione.stato == .proposta, let c = stato.cliente(posizione.clienteId) else { return [] }
         let esito = stato.coerenzaCliente(c)
         return esito.incoerenze.filter { $0.posizione?.id == posizione.id }
@@ -409,7 +427,7 @@ struct DettaglioPosizione: View {
     }
 
     /// Imposte e netto se si chiudesse oggi; per la previdenza l'aliquota per causa.
-    private func fiscalita(_ f: EsitoFiscale, voce: VoceResoconto?) -> some View {
+    func fiscalita(_ f: EsitoFiscale, voce: VoceResoconto?) -> some View {
         PannelloAnalisi(titolo: "Se si chiudesse oggi") { EmptyView() } contenuto: {
             VStack(alignment: .leading, spacing: 0) {
                 RigaDato("Regime", f.regime.nome, larghezza: 118)
@@ -449,7 +467,7 @@ struct DettaglioPosizione: View {
     }
 
     /// I valori rilevati nel tempo: si arricchisce da solo a ogni aggiornamento del controvalore.
-    private func storico(_ voceCalcolata: VoceResoconto?) -> some View {
+    func storico(_ voceCalcolata: VoceResoconto?) -> some View {
         let punti = Array(posizione.storicoValori.reversed())
         let voce = voceCalcolata ?? MotoreResoconto.voce(posizione)
         // In cima c'è il valore attuale: si cambia con «Modifica», non si toglie da qui
@@ -488,7 +506,7 @@ struct DettaglioPosizione: View {
     // MARK: - Andamento
 
     /// Com'è andata davvero: il valore rilevato, il versato e dove sarebbe all'atteso netto.
-    private func andamento(_ a: AndamentoPosizione, voce: VoceResoconto?) -> some View {
+    func andamento(_ a: AndamentoPosizione, voce: VoceResoconto?) -> some View {
         let annuo = a.rendimentoAnnuo != nil
         // Il rendimento dei versamenti (XIRR) accanto a quello del prodotto, se la posizione ha un anno
         let versamenti: (lordo: Double, netto: Double?)? = voce.flatMap { v in v.rendimentoAnnuo.map { (lordo: $0, netto: v.rendimentoNettoAnnuo) } }
@@ -551,7 +569,7 @@ struct DettaglioPosizione: View {
         }
     }
 
-    private func periodiTabella(_ a: AndamentoPosizione) -> some View {
+    func periodiTabella(_ a: AndamentoPosizione) -> some View {
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 testa("Periodo", nil)
@@ -590,7 +608,7 @@ struct DettaglioPosizione: View {
 
     // MARK: - Proiezione
 
-    private func proiezione(_ x: ProiezioneDettaglio) -> some View {
+    func proiezione(_ x: ProiezioneDettaglio) -> some View {
         let parametri = x.parametri
         let scenari = x.scenari
         let atteso = scenari[1].esito
@@ -717,7 +735,7 @@ struct DettaglioPosizione: View {
 
     // MARK: - Protezione
 
-    private var protezione: some View {
+    var protezione: some View {
         let p = posizione
         let capitale = p.capitaleAssicurato ?? 0
         let premioAnnuo = p.premioAnnuo > 0 ? p.premioAnnuo : p.versamentoIniziale
@@ -734,7 +752,7 @@ struct DettaglioPosizione: View {
 
     // MARK: - Piccoli elementi
 
-    private func legenda(_ colore: Color, _ testo: String, tratteggio: Bool = false) -> some View {
+    func legenda(_ colore: Color, _ testo: String, tratteggio: Bool = false) -> some View {
         HStack(spacing: 6) {
             Path { p in
                 p.move(to: CGPoint(x: 0, y: 4))
@@ -766,7 +784,7 @@ struct DettaglioPosizione: View {
 
 /// I calcoli del dettaglio di una posizione, fatti insieme una volta (`StatoShell.ricavato`): ognuno solo dove il
 /// dettaglio lo mostra, come prima nel corpo.
-private struct CalcoliDettaglio {
+struct CalcoliDettaglio {
     let andamento: AndamentoPosizione?
     let voce: VoceResoconto?
     /// Il Ramo I o, per una multiramo a due parti, la sola parte in gestione separata.
@@ -796,7 +814,7 @@ private struct CalcoliDettaglio {
 }
 
 /// La proiezione del dettaglio: parametri, i tre scenari e quanto tolgono i costi.
-private struct ProiezioneDettaglio {
+struct ProiezioneDettaglio {
     let parametri: ParametriProiezione
     let scenari: [(nome: String, rendimento: Double, esito: EsitoProiezione)]
     let impatto: Double

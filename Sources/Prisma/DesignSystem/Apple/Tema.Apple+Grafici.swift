@@ -91,7 +91,8 @@ extension Tema.Apple {
         enum Portafoglio {
             static let larghezza: CGFloat = 818
             static let altezza: CGFloat = 92
-            static let coloreStoria = Colore.anello2
+            /// La linea del totale (Migliorie d'uso 8); area e punto di oggi la seguono.
+            static let coloreStoria = Colore.totale
             static let spessoreStoria: CGFloat = 2.6
             /// Area della storia: gradiente da 0,22 a 0.
             static let opacitaArea: Double = 0.22

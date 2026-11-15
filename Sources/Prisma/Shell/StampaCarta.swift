@@ -226,8 +226,10 @@ enum StampaCarta {
         return pulito + ".pdf"
     }
 
-    @MainActor
-    static func salva(_ dati: Data, nome: String) {
+    /// Salva il PDF dove sceglie l'utente. true se il file è stato scritto (sul Mac; su iPhone e iPad se il foglio
+    /// di condivisione è partito).
+    @MainActor @discardableResult
+    static func salva(_ dati: Data, nome: String) -> Bool {
         #if os(macOS)
         let pannello = NSSavePanel()
         pannello.allowedContentTypes = [.pdf]
@@ -235,13 +237,15 @@ enum StampaCarta {
         pannello.canCreateDirectories = true
         pannello.message = "Il PDF resta dove lo salvi: Prisma non lo invia a nessuno."
         if pannello.runModal() == .OK, let url = pannello.url {
-            try? dati.write(to: url)
+            return (try? dati.write(to: url)) != nil
         }
+        return false
         #elseif os(iOS)
         // Su iPhone e iPad il modulo usa `.fileExporter` e `ShareLink` (ModuloSalvaPDF): qui resta il ripiego
         // del foglio di condivisione (Salva su File, AirDrop…), da una copia temporanea.
-        guard let url = try? copiaDaCondividere(dati, nome: nome) else { return }
+        guard let url = try? copiaDaCondividere(dati, nome: nome) else { return false }
         condividi(url)
+        return true
         #endif
     }
 

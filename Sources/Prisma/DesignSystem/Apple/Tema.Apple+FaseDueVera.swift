@@ -105,7 +105,7 @@ extension Tema.Apple {
         static let titoloCitazione = Carattere(dimensione: 13.5, peso: .semibold)
         static let dettaglioCitazione = Carattere.secondario
         static let paddingCitazione = Misura.padding(10, 12)
-        static let nonRisponde = Colore.arancio
+        static let nonRisponde = Colore.arancioTesto
 
         // MARK: 👍 e 👎
 

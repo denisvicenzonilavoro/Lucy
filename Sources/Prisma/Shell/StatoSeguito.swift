@@ -23,6 +23,17 @@ extension StatoShell {
         return MotoreSeguitoProposte.richiedeEsito(a, posizione: p) ? p : nil
     }
 
+    /// Migliorie d'uso 19: la proposta collegata all'impegno ancora da chiudere, con le stesse condizioni di
+    /// `propostaDaChiudere` ma anche per un impegno passato e ancora pianificato (la scheda dell'impegno chiede
+    /// «Com'è andata?» prima che sia segnato concluso). Nil quando l'esito di questo impegno è già dato.
+    func propostaCollegata(_ a: Appuntamento) -> Posizione? {
+        guard MotoreSeguitoProposte.tipiConEsito.contains(a.tipo), let pid = a.posizioneId,
+              let p = dati.posizioni.first(where: { $0.id == pid }) else { return nil }
+        var concluso = a
+        concluso.stato = .concluso
+        return MotoreSeguitoProposte.richiedeEsito(concluso, posizione: p) ? p : nil
+    }
+
     /// Appuntamento appena concluso: proposta presentata, attività di ripresa completata, richiesta per Incontri.
     func segnaConclusione(_ appuntamentoId: String, origine: AppPrisma? = nil) {
         guard let a = dati.appuntamenti.first(where: { $0.id == appuntamentoId }), a.stato == .concluso,

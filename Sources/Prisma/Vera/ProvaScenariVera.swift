@@ -341,7 +341,7 @@ enum ProvaScenariVera {
             RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         }
         let ultimo = s.conversazione("marco").last
-        controlla(partita && ultimo?.titolo == "Qwen non è pronto" && ultimo?.scenario == nil && !s.veraInCorso,
+        controlla(partita && TestiStatoVera.eTitoloNonPronta(ultimo?.titolo) && ultimo?.scenario == nil && !s.veraInCorso,
                   "Scenari: se Qwen non è pronto Vera lo dice e non risponde («\(ultimo?.testo.prefix(60) ?? "")…»)")
     }
     #endif

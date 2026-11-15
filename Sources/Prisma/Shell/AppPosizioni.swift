@@ -19,6 +19,14 @@ struct AppPosizioni: View {
     @State var moduloAppuntamento: Appuntamento?
     /// Il campo su cui si apre il modulo della posizione (completezza dei dati); si toglie alla chiusura.
     @State var fuocoPosizione: FuocoModulo?
+    #if os(macOS)
+    /// Migliorie d'uso 14: la schermata scelta nell'indice (`vistaScelta`, accesa subito) e quella mostrata, che cambia
+    /// dopo l'uscita del contenuto (`esceVista`). Stato in memoria: da fuori si chiede con l'ancora di sempre.
+    @State var vistaScelta: VistaPosizioniCliente = .quadro
+    @State var vistaMostrata: VistaPosizioniCliente = .quadro
+    @State var esceVista = false
+    @Environment(\.prismaCalmo) private var calmo
+    #endif
 
     /// Il filtro dello stato con etichette brevi: nella colonna laterale non si troncano.
     static let opzioniStato: [(FiltroStato, String)] = [(.inEssere, "Attive"), (.proposte, "Proposte"), (.tutte, "Tutte")]
@@ -26,7 +34,7 @@ struct AppPosizioni: View {
     /// L'aiuto di una voce del canale: il secondo clic sulla voce scelta toglie il filtro.
     static func aiutoCanale(_ c: Canale, attivo: Bool) -> String {
         if attivo { return "Clic di nuovo per vedere tutti i canali" }
-        return c == .alleanza ? "Solo le posizioni Alleanza" : "Solo le posizioni indipendenti"
+        return c == .alleanza ? "Solo le posizioni \(c.nomeBreve)" : "Solo le posizioni \(c.nomeInFrase == "indipendente" ? "indipendenti" : c.nomeInFrase)"
     }
 
     /// Le posizioni del cliente attivo, o di tutti i clienti nella vista Portafoglio.
@@ -71,9 +79,20 @@ struct AppPosizioni: View {
             }
             #elseif os(macOS)
             HStack(spacing: 0) {
-                rail
-                    .frame(width: Misure.Analisi.rail)
-                    .bordoDestro(Colori.Analisi.railFilo)
+                if !stato.portafoglio, let c = stato.clienteAttivo {
+                    // Migliorie d'uso 14: con un cliente scelto la colonna è l'indice delle sue posizioni (i filtri
+                    // stanno nella card «Le posizioni» del quadro); nel portafoglio resta la colonna di sempre
+                    IndicePosizioniApple(cliente: c,
+                                         scelta: stato.posizioneInDettaglio == nil ? vistaScelta : nil,
+                                         scegli: scegliVista)
+                        .frame(width: Tema.Apple.Posizioni.Indice.larghezza)
+                        .background(Colori.Analisi.railAlto)
+                        .bordoDestro(Colori.Analisi.railFilo)
+                } else {
+                    rail
+                        .frame(width: Misure.Analisi.rail)
+                        .bordoDestro(Colori.Analisi.railFilo)
+                }
                 corpo
             }
             #endif
@@ -88,8 +107,36 @@ struct AppPosizioni: View {
             area = nuova
             filtroStato = .inEssere
             filtroCanale = nil
+            #if os(macOS)
+            // Il filtro si vede nel quadro. Consumata al giro dopo: se cambia anche il cliente, il suo azzeramento
+            // la trova ancora
+            mostraVista(.quadro)
+            DispatchQueue.main.async {
+                if stato.areaPosizioniDaAprire == nuova { stato.areaPosizioniDaAprire = nil }
+            }
+            #else
             stato.areaPosizioniDaAprire = nil
+            #endif
         }
+        #if os(macOS)
+        // Le ancore delle analisi (dossier, notifiche, istantanee) aprono la loro schermata; consumate al giro dopo,
+        // così l'azzeramento al cambio di cliente le trova ancora. «attenzioni» e «seguito» restano del portafoglio
+        .onChange(of: stato.ancoraPosizioni, initial: true) { _, ancora in
+            guard let ancora, let v = VistaPosizioniCliente(ancora: ancora) else { return }
+            stato.posizioneInDettaglio = nil
+            mostraVista(v)
+            DispatchQueue.main.async {
+                if stato.ancoraPosizioni == ancora { stato.ancoraPosizioni = nil }
+            }
+        }
+        // Cambiando cliente si torna sempre a «Quadro e posizioni», filtri azzerati (o alla schermata chiesta)
+        .onChange(of: stato.clienteAttivoId) { _ in
+            mostraVista(stato.ancoraPosizioni.flatMap { VistaPosizioniCliente(ancora: $0) } ?? .quadro)
+            filtroStato = .inEssere
+            filtroCanale = nil
+            area = stato.areaPosizioniDaAprire
+        }
+        #endif
         // «Tutti i campi…»: a modulo chiuso la stessa posizione si apre nel modulo intero
         .sheet(item: $dalCatalogo, onDismiss: {
             if let p = dopoCatalogo { dopoCatalogo = nil; modulo = p }
@@ -123,6 +170,10 @@ struct AppPosizioni: View {
         .onAppear {
             controllaRichiesta(stato.richiestaNuovaPosizione)
             controllaCompletamento(stato.richiestaCompletamento)
+            #if os(macOS)
+            // Istantanee: il filtro di canale già acceso (le tessere non cambiano)
+            if let c = RichiestaIstantaneaPosizioni.per(stato)?.canale { filtroCanale = c }
+            #endif
         }
         .onChange(of: stato.richiestaNuovaPosizione) { controllaRichiesta($0) }
         .onChange(of: stato.richiestaDalCatalogo, initial: true) { _, r in
@@ -153,7 +204,15 @@ struct AppPosizioni: View {
                 // Il cliente non ha niente (e nessun filtro è attivo): il vuoto spiega che cosa fare
                 vuotoPosizioni(c)
             } else {
+                #if os(macOS)
+                if let c = stato.clienteAttivo {
+                    schermataCliente(c)
+                } else {
+                    principale
+                }
+                #else
                 principale
+                #endif
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -162,6 +221,54 @@ struct AppPosizioni: View {
         // (vista Cliente, dettagli delle posizioni e pannelli del Portafoglio, senza perdere contenuti)
         .superficiApple()
     }
+
+    #if os(macOS)
+    // MARK: - Le schermate del cliente (migliorie d'uso 14)
+
+    /// «Quadro e posizioni» o una delle cinque analisi; al cambio esce (y +6) e la nuova entra a cascata, in cima.
+    private func schermataCliente(_ c: Cliente) -> some View {
+        Group {
+            if vistaMostrata == .quadro {
+                QuadroPosizioniApple(cliente: c, filtroStato: $filtroStato, filtroCanale: $filtroCanale, area: $area,
+                                     elenco: elenco, apri: { stato.posizioneInDettaglio = $0.id })
+            } else {
+                AnalisiPosizioniApple(vista: vistaMostrata, cliente: c)
+            }
+        }
+        .id(vistaMostrata)
+        .opacity(esceVista ? 0 : 1)
+        .offset(y: esceVista ? Tema.Apple.Moto.CambioScheda.spostamento : 0)
+    }
+
+    /// Un clic su una voce dell'indice: la scheda di una posizione aperta si chiude; la voce già scelta non fa altro.
+    private func scegliVista(_ nuova: VistaPosizioniCliente) {
+        stato.posizioneInDettaglio = nil
+        guard nuova != vistaScelta || nuova != vistaMostrata else { return }
+        vistaScelta = nuova
+        if modoIstantanea || calmo {
+            if modoIstantanea {
+                mostraVista(nuova)
+            } else {
+                withAnimation(Tema.Moto.dissolvenzaCalma) { mostraVista(nuova) }
+            }
+            return
+        }
+        withAnimation(Tema.Apple.Moto.CambioScheda.uscita) { esceVista = true }
+        Movimenti.dopo(Tema.Apple.Moto.tempo(Tema.Apple.Moto.CambioScheda.durataUscita)) {
+            // Un altro clic nel frattempo: entra quella
+            guard vistaScelta == nuova else { return }
+            vistaMostrata = nuova
+            esceVista = false
+        }
+    }
+
+    /// La schermata subito, senza uscita (ancore, cambio di cliente, istantanee).
+    private func mostraVista(_ v: VistaPosizioniCliente) {
+        vistaScelta = v
+        vistaMostrata = v
+        esceVista = false
+    }
+    #endif
 
     private func controllaRichiesta(_ richiesta: StatoPosizione?) {
         guard let richiesta else { return }
@@ -207,6 +314,20 @@ struct AppPosizioni: View {
             // sotto il bordo (le due colonne finiscono con lo stesso margine di Clienti)
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 6) {
+                    #if os(macOS)
+                    // Migliorie d'uso 2: il cliente si sceglie nella barra; con un cliente scelto, in cima
+                    // «‹ Tutto il portafoglio» riporta a «Tutti i clienti»
+                    if stato.portafoglio {
+                        TestataPortafoglioRail(clienti: stato.clienti.count)
+                    } else if !stato.inModoCliente {
+                        Button { stato.scegliCliente(nil, avviso: true) } label: {
+                            Text("‹ " + TestiSceltaCliente.tuttoIlPortafoglio)
+                        }
+                        .buttonStyle(.appleSobrio)
+                        .help(TestiSceltaCliente.aiutoTuttoIlPortafoglio)
+                        .padding(.top, 2)
+                    }
+                    #else
                     if !stato.inModoCliente {
                         SegmentiAnalisi(opzioni: [(false, "Cliente"), (true, "Portafoglio")], selezione: Bindable(stato).portafoglio)
                             .padding(.top, 2)
@@ -217,6 +338,7 @@ struct AppPosizioni: View {
                     } else {
                         DossierRail()
                     }
+                    #endif
 
                     EtichettaRail(testo: "Stato")
                     SegmentiAnalisi(opzioni: Self.opzioniStato, selezione: $filtroStato)
@@ -433,8 +555,10 @@ struct AppPosizioni: View {
         }
     }
 
-    /// L'anello delle aree con le righe dei valori (dossier e Portafoglio).
-    static func ripartizione(_ r: RiepilogoPosizioni) -> some View {
+    /// L'anello delle aree con le righe dei valori (dossier e Portafoglio). Con `scegli` (il quadro del cliente sul Mac,
+    /// migliorie d'uso 14) la legenda è il filtro per area: un clic sceglie l'area, `areaScelta` ha il fondo accento.
+    static func ripartizione(_ r: RiepilogoPosizioni, areaScelta: AreaPosizione? = nil,
+                             scegli: ((AreaPosizione) -> Void)? = nil) -> some View {
         let aree = AreaPosizione.allCases.filter { !$0.passivo && (r.perArea[$0] ?? 0) > 0 }
         return HStack(alignment: .center, spacing: 22) {
             GraficoAnello(
@@ -448,7 +572,7 @@ struct AppPosizioni: View {
                 }
                 ForEach(aree) { a in
                     let v = r.perArea[a] ?? 0
-                    HStack(spacing: 8) {
+                    let riga = HStack(spacing: 8) {
                         RoundedRectangle(cornerRadius: Tema.Raggio.Dossier.quadratinoArea).fill(Colori.Analisi.area(a)).frame(width: 10, height: 10)
                         Text(a.nome).font(Tipo.tabellaCella).foregroundColor(Colori.Analisi.tabellaTesto).lineLimit(1)
                         Spacer()
@@ -460,7 +584,12 @@ struct AppPosizioni: View {
                             .frame(width: 34, alignment: .trailing)
                     }
                     .padding(.vertical, 6)
-                    .bordoBasso(Colori.Analisi.tabellaRiga)
+                    if let scegli {
+                        VoceAreaRipartizione(area: a, scelta: areaScelta == a, scegli: scegli) { riga }
+                            .bordoBasso(Colori.Analisi.tabellaRiga)
+                    } else {
+                        riga.bordoBasso(Colori.Analisi.tabellaRiga)
+                    }
                 }
                 if r.debiti > 0 {
                     HStack(spacing: 8) {
@@ -479,7 +608,9 @@ struct AppPosizioni: View {
 
     /// Le attività per canale e le posizioni in scadenza entro 90 giorni (dossier e Portafoglio).
     /// `massimo`: le righe in scadenza al massimo, poi «…e altre N» (nil = tutte); `apri`: il tocco su una riga.
-    static func canali(_ r: RiepilogoPosizioni, massimo: Int? = nil, apri: @escaping (Posizione) -> Void) -> some View {
+    /// `scadenze: false`: niente righe in scadenza (il quadro del cliente sul Mac le mostra già nell'elenco).
+    static func canali(_ r: RiepilogoPosizioni, massimo: Int? = nil, scadenze mostraScadenze: Bool = true,
+                       apri: @escaping (Posizione) -> Void) -> some View {
         let scadenze = massimo.map { Array(r.inScadenza.prefix($0)) } ?? r.inScadenza
         let nascoste = r.inScadenza.count - scadenze.count
         return VStack(alignment: .leading, spacing: 10) {
@@ -493,7 +624,7 @@ struct AppPosizioni: View {
                         .font(Tipo.chip).foregroundColor(Colori.Analisi.kpiNota).frame(width: 34, alignment: .trailing)
                 }
             }
-            if !r.inScadenza.isEmpty {
+            if mostraScadenze, !r.inScadenza.isEmpty {
                 Text("IN SCADENZA ENTRO \(RiepilogoPosizioni.giorniScadenza) GIORNI")
                     .font(Tipo.railEtichetta)
                     .foregroundColor(Colori.Analisi.attenzioneTesto)
@@ -645,6 +776,29 @@ struct TabellaPosizioni: View {
     }
 }
 
+/// Una voce della legenda della ripartizione che filtra per area (il quadro del cliente sul Mac, migliorie d'uso 14):
+/// un clic sceglie l'area, un secondo clic la toglie; la scelta sul fondo accento al 13%.
+struct VoceAreaRipartizione<Riga: View>: View {
+    let area: AreaPosizione
+    let scelta: Bool
+    let scegli: (AreaPosizione) -> Void
+    @ViewBuilder let riga: () -> Riga
+
+    var body: some View {
+        let k = Tema.Apple.Posizioni.Quadro.self
+        let forma = RoundedRectangle(cornerRadius: k.raggioAreaScelta, style: .continuous)
+        return Button { scegli(area) } label: {
+            riga()
+                .padding(.horizontal, k.paddingAreaScelta)
+                .background { if scelta { forma.fill(k.fondoAreaScelta) } }
+                .contentShape(Rectangle())
+        }
+        .buttonStyle(StileSemplice())
+        .help(scelta ? "Clic di nuovo per vedere tutte le aree" : "Solo le posizioni di \(area.nome)")
+        .accessibilityAddTraits(scelta ? AccessibilityTraits.isSelected : AccessibilityTraits())
+    }
+}
+
 /// Pillola di stato di una posizione.
 struct PillolaStato: View {
     let posizione: Posizione
@@ -670,9 +824,23 @@ struct PillolaStato: View {
                 Pillola(testo: "Scaduta", tono: .errore)
             } else if p.scadeEntro(RiepilogoPosizioni.giorniScadenza), let s = p.scadenza {
                 let giorni = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: Date()), to: s).day ?? 0
+                #if os(macOS)
+                // Migliorie d'uso 15: «Scade tra {n} giorni» per intero (stessa soglia di 90 giorni)
+                Pillola(testo: TestiDettaglioPosizione.scadeTra(giorni), tono: .attenzione)
+                #else
                 Pillola(testo: "Scade tra \(giorni) gg", tono: .attenzione)
+                #endif
             } else {
+                #if os(macOS)
+                // Migliorie d'uso 15: un debito in essere è «Debito», neutro
+                if p.area == .debiti {
+                    Pillola(testo: "Debito", tono: .neutro)
+                } else {
+                    Pillola(testo: "In essere", tono: .ok)
+                }
+                #else
                 Pillola(testo: "In essere", tono: .ok)
+                #endif
             }
         }
     }

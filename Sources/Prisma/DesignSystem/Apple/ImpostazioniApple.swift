@@ -72,11 +72,12 @@ private struct CardImpostazioniApple: ViewModifier {
 // MARK: - Voce della barra laterale
 
 /// Voce `.rub` della barra laterale: titolo 14 bold con padding 11×12 e raggio 14; sotto il puntatore il fondo
-/// `chip`, scelta `rgba(0,122,255,.13)` (0,25 s). Uno stato facoltativo a destra (il pallino).
+/// `chip`, scelta `rgba(0,122,255,.13)` (0,25 s). Un segno facoltativo a destra: il pallino (iPad), oppure sul Mac
+/// (migliorie d'uso 31) l'etichetta di cosa manca, il numero di «Da sistemare» o la spunta verde.
 struct VoceLateraleImpostazioniApple: View {
     let titolo: String
     let attiva: Bool
-    var stato: Pillola.Tono? = nil
+    var segno: SegnoVoceImpostazioni? = nil
     let azione: () -> Void
 
     @Environment(\.modoIstantanea) private var istantanea
@@ -85,10 +86,10 @@ struct VoceLateraleImpostazioniApple: View {
 
     private typealias L = Tema.Apple.Impostazioni.Laterale
 
-    init(titolo: String, attiva: Bool, stato: Pillola.Tono? = nil, azione: @escaping () -> Void) {
+    init(titolo: String, attiva: Bool, segno: SegnoVoceImpostazioni? = nil, azione: @escaping () -> Void) {
         self.titolo = titolo
         self.attiva = attiva
-        self.stato = stato
+        self.segno = segno
         self.azione = azione
     }
 
@@ -102,11 +103,21 @@ struct VoceLateraleImpostazioniApple: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
                 Spacer(minLength: 0)
-                if let stato {
-                    Circle()
-                        .fill(StatoRigaApple.colore(stato))
-                        .frame(width: Tema.Apple.Impostazioni.Stato.pallino, height: Tema.Apple.Impostazioni.Stato.pallino)
-                        .accessibilityHidden(true)
+                if let segno {
+                    switch segno {
+                    case .pallino(let tono):
+                        Circle()
+                            .fill(StatoRigaApple.colore(tono))
+                            .frame(width: Tema.Apple.Impostazioni.Stato.pallino, height: Tema.Apple.Impostazioni.Stato.pallino)
+                            .accessibilityHidden(true)
+                    case .etichetta(let testo, let errore):
+                        PillolaColonnaImpostazioni(testo: testo, errore: errore)
+                    case .spunta:
+                        Image(systemName: L.simboloSpunta)
+                            .carattereApple(L.spunta)
+                            .foregroundColor(L.coloreSpunta)
+                            .accessibilityHidden(true)
+                    }
                 }
             }
             .padding(L.paddingVoce)
@@ -120,8 +131,17 @@ struct VoceLateraleImpostazioniApple: View {
             withAnimation(Tema.Apple.Moto.animazione(L.animazioneFondo, calmo: calmo)) { sopra = dentro }
         }
         .animation(Tema.Apple.Moto.animazione(L.animazioneFondo, calmo: calmo, istantanea: istantanea), value: attiva)
-        .accessibilityLabel(Text(titolo))
+        .accessibilityLabel(Text(etichettaAccessibile))
         .accessibilityAddTraits(attiva ? Self.trattiAttiva : Self.trattiVoce)
+    }
+
+    /// Il titolo e, se c'è, cosa manca («Archivio e backup, mai fatto»).
+    private var etichettaAccessibile: String {
+        switch segno {
+        case .etichetta(let testo, _)?: return "\(titolo), \(testo)"
+        case .spunta?: return "\(titolo), tutto a posto"
+        default: return titolo
+        }
     }
 
     private var fondo: Color {
@@ -132,6 +152,103 @@ struct VoceLateraleImpostazioniApple: View {
     private static var trattiVoce: AccessibilityTraits { .isButton }
     private static var trattiAttiva: AccessibilityTraits { [.isButton, .isSelected] }
 }
+
+/// Il segno a destra di una voce della colonna delle Impostazioni.
+enum SegnoVoceImpostazioni: Equatable {
+    /// Il pallino nel colore del tono (iPad).
+    case pallino(Pillola.Tono)
+    /// Migliorie d'uso 31: l'etichetta breve di cosa manca («mai fatto», «spenti») o il numero di «Da sistemare».
+    case etichetta(String, errore: Bool)
+    /// Migliorie d'uso 31: «Da sistemare» a zero.
+    case spunta
+}
+
+/// Migliorie d'uso 31: la pillola della colonna (`.impSt`): 11 semibold in capsula, arancio al 16% con il testo
+/// `arancioTesto`, o rosso al 13% con il testo rosso per gli errori.
+struct PillolaColonnaImpostazioni: View {
+    let testo: String
+    var errore = false
+
+    private typealias E = Tema.Apple.Impostazioni.Laterale.EtichettaStato
+
+    init(testo: String, errore: Bool = false) {
+        self.testo = testo
+        self.errore = errore
+    }
+
+    var body: some View {
+        Text(testo)
+            .carattereApple(E.carattere)
+            .foregroundColor(errore ? E.testoErrore : E.testoAttenzione)
+            .lineLimit(1)
+            .padding(E.padding)
+            .background { Capsule(style: .continuous).fill(errore ? E.fondoErrore : E.fondoAttenzione) }
+            .fixedSize()
+    }
+}
+
+// MARK: - Ricerca (Migliorie d'uso 30, solo Mac)
+
+#if os(macOS)
+/// Il campo «Cerca nelle impostazioni» in cima alla colonna (`.impQ`): alto 34, raggio 10, fondo `chip`, lente 15 e
+/// testo 13,5, senza il bordo di fuoco di sistema. Esc nel campo pieno lo svuota (e non chiude la finestra); nel campo
+/// vuoto fa quello che fa sempre (`escVuoto`: chiude Impostazioni).
+struct CampoCercaImpostazioni: View {
+    @Binding var testo: String
+    var fuoco: FocusState<Bool>.Binding
+    let escVuoto: () -> Void
+
+    private typealias C = Tema.Apple.Impostazioni.Laterale.Cerca
+
+    init(testo: Binding<String>, fuoco: FocusState<Bool>.Binding, escVuoto: @escaping () -> Void) {
+        self._testo = testo
+        self.fuoco = fuoco
+        self.escVuoto = escVuoto
+    }
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: C.raggio, style: .continuous)
+        HStack(spacing: C.spazio) {
+            Image(systemName: C.simbolo)
+                .carattereApple(C.lente)
+                .foregroundColor(C.coloreLente)
+                .accessibilityHidden(true)
+            TextField("", text: $testo, prompt: Text(TestiImpostazioni.cerca))
+                .textFieldStyle(.plain)
+                .carattereApple(C.testo)
+                .foregroundColor(C.coloreTesto)
+                .lineLimit(1)
+                .focused(fuoco)
+                .focusEffectDisabled()
+                .onExitCommand {
+                    if testo.isEmpty { escVuoto() } else { testo = "" }
+                }
+                .accessibilityLabel(TestiImpostazioni.cerca)
+        }
+        .padding(.horizontal, C.paddingOrizzontale)
+        .frame(height: C.altezza)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background { forma.fill(C.fondo) }
+    }
+}
+
+/// La pillola con il nome della pagina accanto a «Apri» nei risultati della ricerca (12 semibold, padding 4×10).
+struct EtichettaPaginaImpostazioni: View {
+    let testo: String
+
+    private typealias R = Tema.Apple.Impostazioni.Risultati
+
+    var body: some View {
+        Text(testo)
+            .carattereApple(R.pillola)
+            .foregroundColor(R.colorePillola)
+            .lineLimit(1)
+            .padding(R.paddingPillola)
+            .background { Capsule(style: .continuous).fill(R.fondoPillola) }
+            .fixedSize()
+    }
+}
+#endif
 
 // MARK: - Stato della riga
 
@@ -305,5 +422,124 @@ struct AnelloBackupApple: View {
                 withAnimation(Moto.spunta) { spunta = true }
             }
         }
+    }
+}
+
+// MARK: - Il nome dei canali e le tre domande del primo avvio (migliorie d'uso 38)
+
+/// Il campo del nome di un canale (`campoCh` del template): pallino del colore del canale, campo largo 150 e alto 32 e,
+/// a destra, l'etichetta del canale che cambia mentre si scrive. Il nome entra nei calcoli in cache e nei documenti:
+/// passa all'archivio solo a fine scrittura (Invio, fuoco perso, campo che sparisce), con `salva`.
+///
+///     CampoNomeCanale(canale: .alleanza, nome: Canale.alleanza.nomeBreve) { stato.impostaNomeCanale(.alleanza, $0) }
+struct CampoNomeCanale: View {
+    let canale: Canale
+    /// Il nome in uso adesso (dall'archivio).
+    let nome: String
+    let salva: (String) -> Void
+    @State private var bozza: String
+    @FocusState private var fuoco: Bool
+
+    private typealias F = Tema.Apple.Impostazioni.CampoCanale
+
+    init(canale: Canale, nome: String, salva: @escaping (String) -> Void) {
+        self.canale = canale
+        self.nome = nome
+        self.salva = salva
+        _bozza = State(initialValue: nome)
+    }
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: F.raggio, style: .continuous)
+        HStack(spacing: F.spazio) {
+            Circle()
+                .fill(canale == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente)
+                .frame(width: F.pallino, height: F.pallino)
+                .accessibilityHidden(true)
+            TextField("", text: $bozza, prompt: Text(NomiCanali.base.nome(canale)))
+                .textFieldStyle(.plain)
+                .carattereApple(F.carattere)
+                .foregroundColor(F.coloreTesto)
+                .autocorrectionDisabled()
+                .focused($fuoco)
+                .padding(.horizontal, F.paddingOrizzontale)
+                .frame(width: F.larghezza, height: F.altezza)
+                .background { forma.fill(F.fondo) }
+                .overlay { forma.strokeBorder(F.filo, lineWidth: F.spessoreFilo) }
+                .overlay {
+                    if fuoco {
+                        forma.inset(by: -F.spessoreAnello).strokeBorder(F.anelloFuoco, lineWidth: F.spessoreAnello)
+                    }
+                }
+                .onSubmit { scrivi() }
+                .onChange(of: bozza) { nuovo in
+                    // Come `maxlength` 18 del template, senza i caratteri che non vanno su un'etichetta
+                    let ripulito = NomiCanali.ripulisciScrittura(nuovo)
+                    if ripulito != nuovo { bozza = ripulito }
+                }
+                .onChange(of: fuoco) { attivo in
+                    if !attivo { scrivi() }
+                }
+                // Cambiato da fuori (il primo avvio, un ripristino) mentre non si scrive: vale l'archivio
+                .onChange(of: nome) { esterno in
+                    if !fuoco && esterno != bozza { bozza = esterno }
+                }
+                .onDisappear { scrivi() }
+                .accessibilityLabel(Text(canale == .alleanza ? "Il primo canale" : "Il secondo canale"))
+            EtichettaCanaleApple(canale: canale, compatta: canale == .indipendente, nomeScelto: bozza)
+        }
+    }
+
+    /// Fine della scrittura: il nome ripulito passa all'archivio (vuoto = quello di base) e il campo lo mostra.
+    private func scrivi() {
+        let pulito = NomiCanali.pulisci(bozza)
+        let mostrato = pulito.isEmpty ? NomiCanali.base.nome(canale) : pulito
+        if mostrato != nome { salva(pulito) }
+        if bozza != mostrato { bozza = mostrato }
+    }
+}
+
+/// Un'opzione della terza domanda del primo avvio (`.avO` del template): riquadro raggio 16 con il cerchio di scelta 20
+/// a sinistra, titolo e spiegazione; la scelta ha il filo blu e il cerchio pieno.
+struct OpzioneInizio: View {
+    let titolo: String
+    let testo: String
+    let scelta: Bool
+    let azione: () -> Void
+
+    private typealias P = Tema.Apple.PrimoAvvio
+    @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.modoIstantanea) private var modoIstantanea
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: P.raggioOpzione, style: .continuous)
+        Button(action: azione) {
+            HStack(spacing: P.spazioOpzione) {
+                Circle()
+                    .strokeBorder(scelta ? P.filoScelta : P.coloreCerchio, lineWidth: scelta ? P.filoCerchioScelto : P.filoCerchio)
+                    .frame(width: P.cerchio, height: P.cerchio)
+                VStack(alignment: .leading, spacing: P.sottoTitoloOpzione) {
+                    Text(titolo)
+                        .carattereApple(P.titoloOpzione)
+                        .foregroundColor(P.coloreTitolo)
+                    Text(testo)
+                        .carattereApple(P.testoOpzione)
+                        .foregroundColor(P.coloreTestoOpzione)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(P.paddingOpzione)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background { forma.fill(P.fondoOpzione) }
+            .overlay {
+                forma.strokeBorder(scelta ? P.filoScelta : P.filoOpzione, lineWidth: scelta ? P.spessoreFiloScelta : P.spessoreFiloOpzione)
+            }
+            .contentShape(forma)
+        }
+        .buttonStyle(.plain)
+        .animation(Tema.Apple.Moto.animazione(P.animazioneScelta, calmo: calmo, istantanea: modoIstantanea), value: scelta)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(scelta ? .isSelected : [])
     }
 }

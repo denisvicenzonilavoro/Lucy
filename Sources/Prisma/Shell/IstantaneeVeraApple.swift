@@ -2,8 +2,8 @@
 import Foundation
 
 /// Le istantanee di Vera nel tema Apple (§4.7, PIE e01…e10): la colonna con la sfera grande, «Ciao, sono Vera.», lo
-/// stato vero di Qwen e la card «Oggi»; la chat che comincia con il saluto di Vera, i suggerimenti e il campo a
-/// capsula; la testata con «Lavoro / Conversazione». Poi una risposta con la scheda dei calcoli (le cifre dai
+/// stato di Vera, «Parliamo di» e «Per rispondere uso» (migliorie d'uso 27); la chat che comincia con il saluto di
+/// Vera e, a conversazione vuota, i riquadri degli esempi, poi il campo a capsula; la testata con «Lavoro / Conversazione». Poi una risposta con la scheda dei calcoli (le cifre dai
 /// motori di Prisma sui dati di prova), i puntini «sta scrivendo» e Qwen non pronto. Tutto nello stato finale.
 extension Istantanee {
     nonisolated static var sceneVeraApple: [(nome: String, prepara: (StatoShell) -> Void)] {
@@ -33,6 +33,24 @@ extension Istantanee {
             ("483-vera-qwen-non-pronto", { s in
                 preparaVeraApple(s)
                 s.disponibilitaLocale = .nonDisponibile("Ollama non risponde: aprilo sul Mac e premi «Verifica».")
+            }),
+            // Migliorie d'uso 27: «Tutti i clienti» nella colonna e i riquadri degli esempi del portafoglio
+            ("1045-uso-vera-tutti-i-clienti", { s in
+                preparaVeraApple(s)
+                s.veraPortafoglio = true
+            }),
+            ("1045-uso-vera-tutti-i-clienti-scuro", { s in
+                preparaVeraApple(s)
+                s.veraPortafoglio = true
+            }),
+            // Migliorie d'uso 27: in modalità Conversazione la colonna dice che i dati dei clienti non entrano
+            ("1046-uso-vera-conversazione", { s in
+                preparaVeraApple(s)
+                s.modalitaVeraScelta = .conversazione
+            }),
+            ("1046-uso-vera-conversazione-scuro", { s in
+                preparaVeraApple(s)
+                s.modalitaVeraScelta = .conversazione
             }),
         ]
     }

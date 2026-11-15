@@ -133,7 +133,7 @@ extension Tema.Apple.Posizioni {
             static let fraModelli: CGFloat = 14
             static let fuori = K(dimensione: 40, peso: .bold, tracking: -1.2, tabellare: true)
             static let totale = K(dimensione: 22, peso: .bold, tracking: -0.4, tabellare: true)
-            static let coloreFuori = C.arancio
+            static let coloreFuori = C.arancioTesto
             static let coloreTutti = C.verde
             static let spazioPulsante: CGFloat = 16
             static let avatarLontani: CGFloat = 28

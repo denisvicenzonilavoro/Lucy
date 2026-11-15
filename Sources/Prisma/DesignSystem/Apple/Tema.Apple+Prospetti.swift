@@ -73,6 +73,43 @@ extension Tema.Apple {
             static let colorePiede = Colore.inchiostro3
             static let sopraPiede: CGFloat = 12
             static let spazioCollegati: CGFloat = 2
+            /// Migliorie d'uso 23: la riga «a cosa serve» sotto il nome va al più su due righe.
+            static let righeInBreve = 2
+            /// Le etichette sotto la riga («per il cliente», «per te»): 11,5 semibold, padding 2×8, capsula `chip`
+            /// con il testo `inchiostro2`; 5 fra le etichette e 5 sopra.
+            static let etichettaVoce = Carattere(dimensione: 11.5, peso: .semibold)
+            static let paddingEtichettaVoce = EdgeInsets(top: 2, leading: 8, bottom: 2, trailing: 8)
+            static let fondoEtichettaVoce = Colore.chip
+            static let testoEtichettaVoce = Colore.inchiostro2
+            static let spazioEtichette: CGFloat = 5
+            static let sopraEtichette: CGFloat = 5
+            /// «per l'incontro di oggi»: i colori dello stato «ok» (verde al 15%, testo verde scuro, più chiaro in scuro).
+            static let fondoEtichettaIncontro = Color(r: 47, g: 163, b: 90, a: 0.15)
+            static let testoEtichettaIncontro = Color.dinamico(chiaro: Color(hex: "#1E7A43"), scuro: Color(hex: "#6FD596"))
+        }
+
+        // MARK: La scheda «A cosa serve» (migliorie d'uso 23)
+
+        enum Info {
+            /// La «i» sopra la pagina: pulsante rotondo 32.
+            static let pulsante: CGFloat = Misura.Controllo.freccia
+            static let carattereSimbolo = Carattere(dimensione: 15, peso: .medium)
+            static let coloreSimbolo = Colore.inchiostro
+            static let fondoPulsante = Colore.cardPiena
+            static let bordoPulsante = Colore.separatore
+            /// La scheda: larga 360, padding 18×20; occhiello, nome 24 bold, testo `.k`, note piccole.
+            static let larghezza: CGFloat = 360
+            static let padding = Misura.padding(18, 20)
+            static let spazio: CGFloat = 8
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let nome = Carattere(dimensione: 24, peso: .bold, tracking: -0.5)
+            static let coloreNome = Colore.inchiostro
+            static let testo = Carattere(dimensione: 13, peso: .regular)
+            static let coloreTesto = Colore.inchiostro
+            static let sopraFonti: CGFloat = 6
+            static let nota = Carattere(dimensione: 12, peso: .regular)
+            static let coloreNota = Colore.inchiostro2
         }
 
         // MARK: Scelte del documento (la colonna di sempre, dentro la barra laterale)
@@ -99,10 +136,22 @@ extension Tema.Apple {
             static let sottotitolo = Carattere.secondario
             static let coloreSottotitolo = Colore.inchiostro2
             static let spazioTitoli: CGFloat = 1
-            /// Spazio minimo del titolo: sotto questa misura le azioni passano alle sole icone.
+            /// Spazio minimo del titolo: sotto questa misura, sul Mac, «Mostra al cliente» passa in «Altro» (migliorie
+            /// d'uso 24); altrove le azioni passano alle sole icone.
             static let larghezzaMinimaTitolo: CGFloat = 180
+            /// Migliorie d'uso 24: la freccia di «Altro ⌄» (come nell'Agenda).
+            static let frecciaAltro = Carattere(dimensione: 11, peso: .semibold)
+            static let opacitaFrecciaAltro = 0.6
+            static let spazioFrecciaAltro: CGFloat = 4
             static let spazioAzioni: CGFloat = 8
             static let padding = EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 0)
+            /// Migliorie d'uso 22: la barra sopra la pagina con «Per il cliente | Per te» è alta 58 (`#pBarra`).
+            static let altezzaVersione: CGFloat = 58
+            /// «Solo per il cliente» / «Solo per te»: l'etichetta grigia dei documenti con una versione sola.
+            static let etichettaSolo = Carattere(dimensione: 12.5, peso: .semibold)
+            static let coloreEtichettaSolo = Colore.inchiostro2
+            static let fondoEtichettaSolo = Colore.chip
+            static let paddingEtichettaSolo = EdgeInsets(top: 5, leading: 12, bottom: 5, trailing: 12)
         }
 
         // MARK: Anteprima

@@ -12,7 +12,7 @@ import Foundation
 // ragionamento» e «Ragiona a passi» acceso o spento sono in `Impostazioni.vera.passi`.
 extension StatoShell {
     static let titoloPassi = "Ragiona a passi"
-    static let avvisoPassiSenzaQwen = "Qwen non è pronto: il piano e la spiegazione sono quelli delle regole di Prisma, con le stesse cifre."
+    static let avvisoPassiSenzaQwen = TestiStatoVera.titoloNonPronta + ": il piano e la spiegazione sono quelli delle regole di Prisma, con le stesse cifre."
 
     /// Qwen si usa solo se è pronto (e non nelle prove e nelle istantanee con le risposte preparate).
     var qwenPerPassi: MotoreLocale? { generativo != nil && !rispostePreparate ? qwen : nil }

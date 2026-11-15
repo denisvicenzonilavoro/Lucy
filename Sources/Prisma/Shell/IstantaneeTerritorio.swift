@@ -11,6 +11,12 @@ import Foundation
 /// - 707: il giorno senza visite fuori studio («Il prossimo giro: …»); 708: il fumetto di Giulia (solo chiaro);
 /// - 709: Impostazioni › Territorio, chiaro e scuro.
 ///
+/// Migliorie d'uso 32 «La mappa risponde» (serie 1100-1129 del gruppo 05): 700, 701, 702, 706 e 708 restano su «Tutti i
+/// clienti» (con un cliente scelto la vista Oggi lo mette in evidenza con i vicini); 700 mostra «Apri «Da fare» ›».
+/// - 1100: la scheda aperta su un cliente con qualcosa da fare, chiaro e scuro; 1101: il cliente scelto (riquadro suo,
+///   vicini accesi, anello bianco fermo); 1102: lo stesso con «Con qualcosa da fare» acceso (niente anello); 1103: il
+///   cliente scelto non è sulla mappa.
+///
 /// DATI DI PROVA DICHIARATI: la tabella dei comuni è quella ridotta di prova (32 comuni, confini a ottagono); il giro di
 /// Bologna (posizioni a mano di Laura, Andrea e Sofia, partenza, l'attività di Sofia) è `TerritorioDiProva`. Il giorno
 /// del giro è il primo giorno di lavoro da domani, così l'istantanea non cambia con il giorno in cui gira il workflow.
@@ -25,16 +31,19 @@ extension Istantanee {
             una(nome + "-scuro", prepara)
         }
         coppia("700-territorio-oggi") { s in
+            s.scegliCliente(nil)
             conFittizi(s)
             s.apriTerritorioIstantanea(.oggi)
         }
         coppia("701-territorio-crescita") { s in
+            s.scegliCliente(nil)
             conFittizi(s)
             s.territorio.avvioCrescitaFatto = true
             s.territorio.annoCrescita = nil
             s.apriTerritorioIstantanea(.crescita)
         }
         una("702-territorio-crescita-anno") { s in
+            s.scegliCliente(nil)
             conFittizi(s)
             s.territorio.avvioCrescitaFatto = true
             s.apriTerritorioIstantanea(.crescita)
@@ -60,6 +69,7 @@ extension Istantanee {
             s.apriTerritorioIstantanea(.oggi)
         }
         una("706-territorio-senza-luogo") { s in
+            s.scegliCliente(nil)
             let indirizzi = ["giulia": "Via Che Non Esiste 3, Paperopoli", "marco": "Piazza 1, Samone", "laura": ""]
             for i in s.dati.clienti.indices {
                 if let nuovo = indirizzi[s.dati.clienti[i].id] {
@@ -76,6 +86,7 @@ extension Istantanee {
             s.apriTerritorioIstantanea(.giro)
         }
         una("708-territorio-fumetto") { s in
+            s.scegliCliente(nil)
             conFittizi(s)
             s.apriTerritorioIstantanea(.oggi)
             s.territorio.lucePuntata = "giulia"
@@ -84,6 +95,35 @@ extension Istantanee {
             s.territorio.caricaSeServe()
             s.schedaImpostazioni = .territorio
             s.apri(.impostazioni)
+        }
+        // Migliorie d'uso 32
+        coppia("1100-uso-territorio-scheda-luce") { s in
+            s.scegliCliente(nil)
+            conFittizi(s)
+            s.apriTerritorioIstantanea(.oggi)
+            let luci = s.territorioOggi().luci
+            s.territorio.luceScelta = (luci.first { $0.daFare != nil } ?? luci.first)?.id
+        }
+        una("1101-uso-territorio-cliente") { s in
+            conFittizi(s)
+            s.scegliCliente("giulia")
+            s.apriTerritorioIstantanea(.oggi)
+        }
+        una("1102-uso-territorio-cliente-filtro") { s in
+            conFittizi(s)
+            s.scegliCliente("giulia")
+            s.apriTerritorioIstantanea(.oggi)
+            s.territorio.soloDaFare = true
+        }
+        una("1103-uso-territorio-cliente-senza-luogo") { s in
+            conFittizi(s)
+            if let i = s.dati.clienti.firstIndex(where: { $0.id == "giulia" }) {
+                s.dati.clienti[i].indirizzo = ""
+                s.dati.clienti[i].fiscale = nil
+                s.dati.clienti[i].luogo = nil
+            }
+            s.scegliCliente("giulia")
+            s.apriTerritorioIstantanea(.oggi)
         }
         return scene
     }

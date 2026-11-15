@@ -193,10 +193,30 @@ enum TestiObiettivoApple {
         return "\(euro(totale)) al mese · \(quando)"
     }
 
+    /// Migliorie d'uso 13: «550 € al mese · scadenza ottobre 2029» (lo stato colorato va sotto).
+    static func rigaScadenza(totale: Double, scadenza: Date) -> String {
+        "\(euro(totale)) al mese · scadenza \(Formati.meseAnno.string(from: scadenza))"
+    }
+
+    /// «1 anno», «2 anni e 3 mesi», «5 mesi», «1 mese».
+    static func durata(mesi: Int) -> String {
+        let anni = mesi / 12, resto = mesi % 12
+        let parteMesi = "\(resto) \(resto == 1 ? "mese" : "mesi")"
+        guard anni > 0 else { return parteMesi }
+        let parteAnni = "\(anni) \(anni == 1 ? "anno" : "anni")"
+        return resto > 0 ? parteAnni + " e " + parteMesi : parteAnni
+    }
+
+    /// «Scadenza: ottobre 2029. La percentuale è la stessa della scheda: quanto è già messo da parte.»
+    static func notaScadenza(_ scadenza: Date) -> String {
+        "Scadenza: \(Formati.meseAnno.string(from: scadenza)). La percentuale è la stessa della scheda: quanto è già messo da parte."
+    }
+
     /// «4 mesi prima», «2 mesi dopo», «Come con il versamento di oggi» o, se non ci arriva, quanto manca alla scadenza;
-    /// sempre con la scadenza.
-    static func scarto(nuovo: Int?, oggi: Int?, uguale: Bool, mancante: Double, scadenza: Date) -> String {
-        let fine = " · scadenza " + Formati.meseAnno.string(from: scadenza)
+    /// con la scadenza in coda (sul Mac no: la dice la nota sotto lo stato, migliorie d'uso 13).
+    static func scarto(nuovo: Int?, oggi: Int?, uguale: Bool, mancante: Double, scadenza: Date,
+                       conScadenza: Bool = true) -> String {
+        let fine = conScadenza ? " · scadenza " + Formati.meseAnno.string(from: scadenza) : ""
         guard let n = nuovo else { return "Alla scadenza mancano \(euro(mancante))" + fine }
         if uguale { return "Con il versamento di oggi" + fine }
         guard let o = oggi else { return "Con il versamento di oggi non ci arriverebbe" + fine }
@@ -210,6 +230,79 @@ enum TestiObiettivoApple {
     static func canali(_ o: Obiettivo, posizioni: [Posizione]) -> [Canale] {
         let presenti = Set(posizioni.filter { o.posizioniCollegate.contains($0.id) && $0.stato == .inEssere }.map(\.canale))
         return Canale.allCases.filter { presenti.contains($0) }
+    }
+}
+
+// MARK: - Se ci arriva (migliorie d'uso 13)
+
+/// Se l'obiettivo ci arriva entro la scadenza, solo testo e tono (i mesi li dà `CurvaObiettivo`, nessun calcolo
+/// nuovo): lo stato colorato della card (versamento di oggi) e del dettaglio (versamento del cursore). È una misura
+/// deterministica, al rendimento atteso; la probabilità resta nel dettaglio completo (`StatoObiettivo`).
+enum ArrivoObiettivo: Equatable {
+    /// Ciò che c'è basta già.
+    case giaRaggiunto
+    /// Ci arriva entro la scadenza, al mese scritto.
+    case inTempo(mese: String)
+    /// Ci arriva, ma tanti mesi dopo la scadenza.
+    case inRitardo(mesi: Int)
+    /// Nessun versamento (né delle posizioni collegate né in più) e ciò che c'è non basta.
+    case senzaVersamenti
+    /// Con i versamenti di oggi non ci arriva nemmeno trent'anni dopo la scadenza.
+    case nonCiArriva
+
+    enum Tono { case ok, attenzione, errore }
+
+    /// Dai mesi già calcolati: `arrivo` (0 = c'è già, nil = non ci arriva), `scadenza` (mesi alla scadenza), il
+    /// versamento mensile totale (posizioni collegate più quello in più) e il nome del mese di arrivo. Prima conta
+    /// l'arrivo: un obiettivo già raggiunto, o che ci arriva con ciò che c'è, resta verde anche senza versamenti.
+    init(arrivo: Int?, scadenza: Int, totale: Double, mese: (Int) -> String) {
+        if let m = arrivo {
+            if m == 0 {
+                self = .giaRaggiunto
+            } else if m <= scadenza {
+                self = .inTempo(mese: mese(m))
+            } else {
+                self = .inRitardo(mesi: m - scadenza)
+            }
+        } else if totale <= 0 {
+            self = .senzaVersamenti
+        } else {
+            self = .nonCiArriva
+        }
+    }
+
+    /// Dalla strada dell'obiettivo (in memoria): `versamento` è quello in più, `attivi` i versamenti delle posizioni
+    /// collegate in essere (già dentro la curva).
+    init(curva: CurvaObiettivo, versamento: Double, attivi: Double) {
+        self.init(arrivo: curva.mesiArrivo(versamento: versamento), scadenza: curva.mesiScadenza,
+                  totale: max(attivi, 0) + max(versamento, 0),
+                  mese: { TestiObiettivoApple.mese($0, curva: curva) })
+    }
+
+    /// Ci arriva entro la scadenza (o c'è già): non conta fra gli obiettivi da guardare.
+    var arrivaInTempo: Bool {
+        switch self {
+        case .giaRaggiunto, .inTempo: return true
+        case .inRitardo, .senzaVersamenti, .nonCiArriva: return false
+        }
+    }
+
+    var tono: Tono {
+        switch self {
+        case .giaRaggiunto, .inTempo: return .ok
+        case .inRitardo: return .attenzione
+        case .senzaVersamenti, .nonCiArriva: return .errore
+        }
+    }
+
+    var testo: String {
+        switch self {
+        case .giaRaggiunto: return "Già raggiunto"
+        case .inTempo(let mese): return "In tempo: ci arriva a \(mese)"
+        case .inRitardo(let mesi): return "In ritardo: ci arriva \(TestiObiettivoApple.durata(mesi: mesi)) dopo"
+        case .senzaVersamenti: return "Senza versamenti non ci arriva"
+        case .nonCiArriva: return "Con questo versamento non ci arriva"
+        }
     }
 }
 
@@ -258,12 +351,24 @@ struct SchedaObiettivoApple: View {
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
                     .padding(.top, s.sopraTesto)
-                Text(TestiObiettivoApple.riga(totale: totale, arrivo: curva.mesiArrivo(versamento: o.versamentoMensile),
-                                              curva: curva))
-                    .carattereApple(s.testo)
-                    .foregroundColor(s.coloreTesto)
-                    .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
+                if s.mostraStato {
+                    // Migliorie d'uso 13: la riga con la scadenza e, sotto, se ci arriva (versamento di oggi)
+                    Text(TestiObiettivoApple.rigaScadenza(totale: totale, scadenza: o.scadenza))
+                        .carattereApple(s.testo)
+                        .foregroundColor(s.coloreTesto)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                    StatoArrivoObiettivo(arrivo: ArrivoObiettivo(curva: curva, versamento: o.versamentoMensile,
+                                                                 attivi: a.versamentiAttivi))
+                        .padding(.top, s.sopraStato)
+                } else {
+                    Text(TestiObiettivoApple.riga(totale: totale, arrivo: curva.mesiArrivo(versamento: o.versamentoMensile),
+                                                  curva: curva))
+                        .carattereApple(s.testo)
+                        .foregroundColor(s.coloreTesto)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
                 if !canali.isEmpty {
                     HStack(spacing: s.spazioCanali) {
                         ForEach(canali) { EtichettaCanaleApple(canale: $0, compatta: true) }
@@ -334,6 +439,8 @@ struct ChiaveAltezzaPiedeObiettivo: PreferenceKey {
 /// Il dettaglio dell'obiettivo (920×520): `.lbl` nel colore e nome 30; l'anello 220/22 della copertura alla
 /// scadenza, che segue il cursore; «Già messi da parte» e «Obiettivo» che contano; il versamento mensile con il
 /// cursore; «Arriva a <mese anno>» e lo scarto, ricalcolati a ogni passo; sotto, il dettaglio completo di Prisma.
+/// Sul Mac (migliorie d'uso 13) l'anello mostra invece la quota di oggi, come la card, e sotto lo scarto compaiono lo
+/// stato colorato che segue il cursore (`StatoArrivoObiettivo`) e la nota sulla scadenza.
 /// Piede: «Salva nel dossier», «Annulla» e la nota sul rendimento.
 struct DettaglioObiettivoApple: View {
     @Environment(StatoShell.self) var stato
@@ -432,7 +539,10 @@ struct DettaglioObiettivoApple: View {
 
     private func corpo(_ o: Obiettivo, avanzamento a: AvanzamentoObiettivo, curva: CurvaObiettivo, colore: Color) -> some View {
         let d = Tema.Apple.Clienti.DettaglioObiettivo.self
-        let copertura = curva.copertura(versamento: versamento)
+        // Sul Mac (migliorie d'uso 13) l'anello dice la quota di oggi, la stessa della card, e resta fermo col
+        // cursore; altrove la copertura alla scadenza, che segue il cursore.
+        let soloOggi = Tema.Apple.Clienti.Obiettivi.mostraStato
+        let copertura = soloOggi ? a.quota : curva.copertura(versamento: versamento)
         return HStack(alignment: .center, spacing: d.spazioAnello) {
             Anello(frazione: copertura, colore: colore, misura: d.anello, spessore: d.spessoreAnello,
                    ritardo: Tema.Apple.Moto.Anello.ritardoDettaglio) {
@@ -440,12 +550,12 @@ struct DettaglioObiettivoApple: View {
                     NumeroCheConta(copertura * 100, formato: .percentuale)
                         .carattereApple(d.centroAnello)
                         .foregroundColor(d.coloreCentro)
-                    Text("alla scadenza")
+                    Text(soloOggi ? "oggi" : "alla scadenza")
                         .carattereApple(d.sottoCentro)
                         .foregroundColor(d.coloreSottoCentro)
                 }
             }
-            .accessibilityLabel("Copertura alla scadenza")
+            .accessibilityLabel(soloOggi ? "Già messo da parte oggi" : "Copertura alla scadenza")
             VStack(alignment: .leading, spacing: 0) {
                 HStack(alignment: .top, spacing: d.spazioCifre) {
                     cifra("Già messi da parte", a.accantonato, indice: 0)
@@ -473,11 +583,22 @@ struct DettaglioObiettivoApple: View {
                                                 oggi: curva.mesiArrivo(versamento: o.versamentoMensile),
                                                 uguale: versamento == o.versamentoMensile,
                                                 mancante: curva.mancante(versamento: versamento),
-                                                scadenza: o.scadenza))
+                                                scadenza: o.scadenza, conScadenza: !soloOggi))
                     .carattereApple(d.scarto)
                     .foregroundColor(d.coloreScarto)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, d.sopraScarto)
+                if soloOggi {
+                    // Se ci arriva con il versamento del cursore: una lettura della curva, a ogni passo
+                    StatoArrivoObiettivo(arrivo: ArrivoObiettivo(curva: curva, versamento: versamento,
+                                                                 attivi: a.versamentiAttivi))
+                        .padding(.top, d.sopraStato)
+                    Text(TestiObiettivoApple.notaScadenza(o.scadenza))
+                        .carattereApple(d.notaScadenza)
+                        .foregroundColor(d.coloreNota)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, d.sopraNotaScadenza)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
@@ -626,6 +747,12 @@ struct PresentatoreDettaglioDossier<Contenuto: View>: View {
 
     private static func dettaglioIniziale(_ stato: StatoShell) -> StatoDettaglio {
         guard let id = RichiestaIstantaneaDossier.per(stato)?.dettaglio else { return StatoDettaglio() }
+        #if os(macOS)
+        // Migliorie d'uso 5: l'elenco dei dati da completare nato dalla riga del quadro
+        if id == QuadroDossier.idDati {
+            return StatoDettaglio(aperto: id, misura: QuadroDossier.misuraDati(stato.completezzaCliente(stato.clienteAttivoId)))
+        }
+        #endif
         let misura = DettaglioAziendaId(id) != nil ? Tema.Apple.Azienda.misuraDettaglio : Tema.Apple.Clienti.DettaglioObiettivo.misura
         return StatoDettaglio(aperto: id, misura: misura)
     }
@@ -648,6 +775,19 @@ struct DettaglioDossierApple: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
+        #if os(macOS)
+        if id == QuadroDossier.idDati {
+            // Migliorie d'uso 5: «Dati per l'analisi · <Nome>», nato dalla riga del quadro (DossierQuadro.swift)
+            DettaglioDatiAnalisiApple()
+        } else {
+            dettaglioComune
+        }
+        #else
+        dettaglioComune
+        #endif
+    }
+
+    @ViewBuilder private var dettaglioComune: some View {
         if let o = stato.dati.obiettivi.first(where: { $0.id == id }) {
             DettaglioObiettivoApple(obiettivo: o, posizioni: stato.posizioniCliente(o.clienteId))
                 // Un altro obiettivo: il cursore riparte dal suo versamento

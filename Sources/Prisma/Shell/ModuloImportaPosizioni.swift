@@ -74,7 +74,7 @@ struct ModuloImportaPosizioni: View {
                     HStack(spacing: 10) {
                         Text("Canale delle righe che non lo indicano")
                             .font(Tipo.campoEtichetta).foregroundColor(Colori.Rubrica.testo)
-                        SegmentiAnalisi(opzioni: [(Canale.alleanza, "Alleanza"), (.indipendente, "Indipendente")], selezione: $canale)
+                        SegmentiAnalisi(opzioni: [(Canale.alleanza, Canale.alleanza.nomeBreve), (.indipendente, Canale.indipendente.nomeBreve)], selezione: $canale)
                             .frame(width: 240)
                     }
                 }

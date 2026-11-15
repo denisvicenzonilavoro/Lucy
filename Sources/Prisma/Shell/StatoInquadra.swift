@@ -9,7 +9,7 @@ import UIKit
 #endif
 
 // Inquadra e capisci (Design/template-novita-specifica.md §9, Orizzonte giro 5): lo stato della scena.
-// - Sul Mac il pulsante «◎ Inquadra con l’iPhone» (testata di Posizioni › Portafoglio) o la voce 6 delle Novità aprono
+// - Sul Mac la voce «Inquadra con l’iPhone» di «Aggiungi» (Posizioni, migliorie d’uso 6) o la voce 6 delle Novità aprono
 //   la scena: con il ponte acceso (Impostazioni › Vera › iPhone e iPad) si aspetta il testo dall'iPhone, altrimenti si
 //   trascina una foto o un PDF, letti sul Mac con LetturaDocumenti (Vision, sul dispositivo).
 // - I campi trovati (MotoreInquadra) si illuminano sul foglio uno alla volta e compaiono nella scheda «Prisma sul Mac».
@@ -224,7 +224,12 @@ extension StatoShell {
     /// Il ponte con iPhone e iPad è acceso e ha un codice (Impostazioni › Vera).
     var ponteInquadraAcceso: Bool {
         let p = dati.impostazioni.vera.ponte
+        #if os(macOS)
+        // Migliorie d'uso 39: anche «Inquadra un documento» acceso in Impostazioni › iPhone e iPad
+        return p.condividi && p.abbinato && p.inquadra
+        #else
         return p.condividi && p.abbinato
+        #endif
     }
 
     /// Apre la scena (testata di Posizioni, Novità). Mai in modalità cliente, sotto il benvenuto o in presentazione.

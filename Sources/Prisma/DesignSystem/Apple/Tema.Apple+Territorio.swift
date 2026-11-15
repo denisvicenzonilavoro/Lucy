@@ -69,8 +69,16 @@ extension Tema.Apple {
             static let nomiMassimi = 8
             /// Minimo per il fumetto e il clic.
             static let raggioTocco: CGFloat = 10
-            /// Le luci fuori dal filtro (zona, giro) restano attenuate a questa opacità.
+            /// Le luci fuori dal filtro (zona, giro, cliente scelto) restano attenuate a questa opacità. Il template delle
+            /// Migliorie d'uso (32) dice 0,14: sulla mappa scura le luci piccole sparirebbero, si tiene 0,28 (proposta §32.6).
             static let opacitaFuori = 0.28
+            // L'anello bianco attorno al cliente scelto (Migliorie d'uso 32): va e torna, non conta fra i 12 che pulsano
+            static let anelloScelto = Color.white
+            /// Distanza dell'anello dal bordo della luce, a riposo (il template: raggio 17 su luci piccole).
+            static let distanzaScelto: CGFloat = 5
+            /// Quanto si allarga l'anello al culmine (il template: da 17 a 30).
+            static let allargamentoScelto: CGFloat = 13
+            static let spessoreScelto: CGFloat = 2
 
             static func raggio(patrimonio: Double) -> CGFloat {
                 min(raggioMassimo, raggioBase + CGFloat((max(0, patrimonio) / patrimonioUnita).squareRoot()) * passo)
@@ -133,6 +141,14 @@ extension Tema.Apple {
             static let altezzaRiga: CGFloat = 40
             static let avatar: CGFloat = 28
             static let raggioRiga = Tema.Apple.Raggio.voce
+            // Il riquadro del cliente scelto (Migliorie d'uso 32): bordo accento al 40%, avatar 34, nome 15
+            static let bordoCliente = Tema.Apple.Colore.accento.opacity(0.4)
+            static let avatarCliente: CGFloat = 34
+            static let nomeCliente = C(dimensione: 15, peso: .bold)
+            static let spazioCliente: CGFloat = 10
+            /// Il collegamento «Apri «Da fare» ›» in fondo al riquadro «Con qualcosa da fare».
+            static let collegamento = Tema.Apple.Colore.accento
+            static let sopraCollegamento: CGFloat = 6
         }
 
         // MARK: Il giro di domani
@@ -200,6 +216,38 @@ extension Tema.Apple {
             static let spazio: CGFloat = 4
         }
 
+        // MARK: La scheda di una luce (Migliorie d'uso 32)
+
+        /// La scheda che si apre al clic su una luce (`#terK` del template): larga 268, 22 a destra e 44 sopra il centro
+        /// della luce, tenuta dentro la mappa e mai sopra il pannello.
+        enum SchedaLuce {
+            static let superficie = Tema.Apple.Superficie.dettaglio
+            static let larghezza: CGFloat = 268
+            static let padding = EdgeInsets(top: 12, leading: 14, bottom: 12, trailing: 14)
+            static let raggio: CGFloat = 16
+            static let avatar: CGFloat = 34
+            /// Fra avatar e nome, fra le righe della scheda.
+            static let spazio: CGFloat = 9
+            static let spazioAvatar: CGFloat = 10
+            static let spazioEtichette: CGFloat = 6
+            static let sopraPulsante: CGFloat = 10
+            static let distanzaX: CGFloat = 22
+            static let distanzaY: CGFloat = 44
+            /// Dal bordo della mappa.
+            static let margineBordo: CGFloat = 12
+            /// L'altezza che la scheda occupa di solito: serve solo a tenerla sopra il bordo basso.
+            static let altezzaStimata: CGFloat = 170
+            static let testo = C(dimensione: 13.5, peso: .regular)
+            static let titolo = C(dimensione: 13.5, peso: .bold)
+            static let secondario = C.secondario
+            static let coloreTitolo = K.inchiostro
+            static let coloreSecondario = K.inchiostro2
+            static let fondoEtichetta = K.chip
+            static let etichetta = C(dimensione: 12, peso: .semibold, tabellare: true)
+            static let paddingEtichetta = EdgeInsets(top: 3, leading: 8, bottom: 3, trailing: 8)
+            static let scalaEntrata: CGFloat = 0.9
+        }
+
         // MARK: Legenda e note in fondo al pannello
 
         enum Legenda {
@@ -255,6 +303,16 @@ extension Tema.Apple {
             /// La pulsazione dell'anello arancio: uscita in 1,8 s, ripetuta (si ferma con calmo e nelle istantanee).
             static var animazionePulsazione: Animation { .easeOut(duration: pulsazione * Tema.Apple.Moto.ritmo).repeatForever(autoreverses: false) }
             static let pulsantiMassimi = 12
+            /// L'anello bianco del cliente scelto (Migliorie d'uso 32): 2,4 s andata e ritorno (17 → 30 → 17, opacità
+            /// 0,95 → 0,2 → 0,95), cioè metà durata con `autoreverses`.
+            static let pulsazioneScelto = 2.4
+            static let opacitaInizioScelto = 0.95
+            static let opacitaFineScelto = 0.2
+            static var animazioneScelto: Animation {
+                .easeInOut(duration: pulsazioneScelto / 2 * Tema.Apple.Moto.ritmo).repeatForever(autoreverses: true)
+            }
+            /// La scheda della luce entra con la molla del tema (0,26 s al ritmo dell'app).
+            static let entrataScheda = 0.26
             static let rimonta = Tema.Apple.Studio.Moto.durataRimonta
             static let dissolvenzaCalma = 0.15
             /// Il passaggio dell'inquadratura fra Oggi/Crescita (tutte le luci) e il giro (le tappe), curva di uscita.

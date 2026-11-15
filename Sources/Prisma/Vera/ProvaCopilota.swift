@@ -20,6 +20,7 @@ enum ProvaCopilota {
         archivio(controlla)
         modelloFinto(controlla)
         ponte(controlla)
+        filtriPonte(controlla)
         // La schermata del copilota (Shell/ProvaVistaCopilota.swift): testi, evidenze, dialogo di prova, verbale
         ProvaVistaCopilota.esegui(controlla)
     }
@@ -361,6 +362,45 @@ enum ProvaCopilota {
 
     // MARK: - Il ponte
 
+    /// Migliorie d'uso 39: i quattro filtri del ponte (Vera, Inquadra, Nota a voce, Al tavolo) sono accesi di base, si
+    /// leggono accesi da un archivio di prima e da soli non accendono il collegamento.
+    private static func filtriPonte(_ controlla: (Bool, String) -> Void) {
+        let nuovo = ImpostazioniPonte()
+        controlla(nuovo.modello && nuovo.inquadra && nuovo.nota && nuovo.tavolo && !nuovo.condividi && !nuovo.collegato,
+                  "Ponte, filtri: accesi di base, collegamento spento")
+        let codice = PonteVera.nuovoCodice()
+        let vecchio = try? JSONDecoder().decode(ImpostazioniPonte.self, from: Data(#"{"condividi":false,"codice":"\#(codice)"}"#.utf8))
+        controlla(vecchio.map { $0.modello && $0.inquadra && $0.nota && $0.tavolo && !$0.condividi && !$0.collegato } == true,
+                  "Ponte, filtri: un archivio di prima li legge accesi e il collegamento resta spento")
+        var p = ImpostazioniPonte()
+        p.condividi = true
+        p.codice = codice
+        p.modello = false
+        p.inquadra = false
+        p.nota = false
+        let tornato = (try? JSONEncoder().encode(p)).flatMap { try? JSONDecoder().decode(ImpostazioniPonte.self, from: $0) }
+        controlla(tornato == p && tornato?.collegato == true, "Ponte, filtri: vanno e tornano dall'archivio")
+        controlla(p.rifiuto(percorso: "api/chat") != nil && p.rifiuto(percorso: "v1/chat/completions") != nil
+                    && p.rifiuto(percorso: BustaPonte.copilota) != nil && p.rifiuto(percorso: BustaPonte.precarica) != nil,
+                  "Ponte, filtri: con «Vera» spento il Mac rifiuta il modello e il copilota")
+        controlla(p.rifiuto(percorso: BustaPonte.inquadra) != nil && p.rifiuto(percorso: BustaPonte.carta) != nil
+                    && p.rifiuto(percorso: BustaPonte.nota) != nil && p.rifiuto(percorso: BustaPonte.stato) == nil,
+                  "Ponte, filtri: con Inquadra e Nota spente il Mac rifiuta testi, carta e note; lo stato passa sempre")
+        let tutto = ImpostazioniPonte()
+        let percorsi = ["api/chat", "v1/chat/completions", BustaPonte.stato, BustaPonte.precarica, BustaPonte.copilota,
+                        BustaPonte.inquadra, BustaPonte.carta, BustaPonte.nota]
+        controlla(percorsi.allSatisfy { tutto.rifiuto(percorso: $0) == nil }, "Ponte, filtri: tutti accesi, il Mac accetta tutto come prima")
+        #if os(macOS)
+        // Con `condividi` spento l'ascolto resta chiuso anche con i quattro filtri accesi e il codice
+        var vera = ImpostazioniVera()
+        vera.ponte.codice = codice
+        let server = ServerPonteVera()
+        server.aggiorna(vera, porta: 0, annuncia: false)
+        controlla(!server.acceso && server.porta == nil, "Ponte, filtri: senza collegamento acceso nessun ascolto in rete")
+        server.ferma()
+        #endif
+    }
+
     private static func ponte(_ controlla: (Bool, String) -> Void) {
         let codice = PonteVera.nuovoCodice()
         guard let k = PonteVera.chiave(codice), let altra = PonteVera.chiave(PonteVera.nuovoCodice()) else {
@@ -504,6 +544,28 @@ enum ProvaCopilota {
         server.consegnaArrivi(nil)
         let senza = aspetta { await ipad.manda(arrivo) }
         controlla(!senza.accettato && raccolta.elenco.count == 4, "Ponte: se Prisma sul Mac non è pronto la ricevuta lo dice")
+        // Migliorie d'uso 39: con «Inquadra un documento» e «Nota a voce» spenti il Mac rifiuta quei messaggi e continua a
+        // ricevere le schede; con «Vera» spento rifiuta le schede e accetta le note
+        server.consegnaArrivi { (a: ArrivoPonte) async -> RicevutaPonte in
+            raccolta.aggiungi(a)
+            return .accettata()
+        }
+        var spenti = vera
+        spenti.ponte.inquadra = false
+        spenti.ponte.nota = false
+        server.aggiorna(spenti, sessione: finta, porta: 0, annuncia: false)
+        let (fotoNo, notaNo, schedeSi) = aspetta {
+            (await ipad.manda(.inquadratura(inquadratura)), await ipad.manda(.notaVocale(nota)), await ipad.manda(arrivo))
+        }
+        controlla(!fotoNo.accettato && !notaNo.accettato && schedeSi.accettato && raccolta.elenco.count == 5,
+                  "Ponte, filtri: con Inquadra e Nota a voce spente il Mac le rifiuta e riceve ancora le schede di Vera")
+        var senzaVera = vera
+        senzaVera.ponte.modello = false
+        server.aggiorna(senzaVera, sessione: finta, porta: 0, annuncia: false)
+        let (schedeNo, notaSi) = aspetta { (await ipad.manda(arrivo), await ipad.manda(.notaVocale(nota))) }
+        controlla(!schedeNo.accettato && notaSi.accettato && raccolta.elenco.count == 6,
+                  "Ponte, filtri: con «Vera» spento il Mac rifiuta le schede del copilota e accetta le note")
+        server.consegnaArrivi(nil)
     }
     #endif
 

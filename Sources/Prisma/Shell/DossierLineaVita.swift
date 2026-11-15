@@ -348,7 +348,7 @@ struct LineaVitaDossier: View {
     private func note(_ prep: PreparazioneLineaVita) -> some View {
         let k = Tema.Apple.Clienti.LineaVita.self
         let senzaEventi = stato.eventiVitaCliente(cliente.id).isEmpty
-        let diProva = stato.haDatiDiProva && StatoShell.clientiDiProva.contains(cliente.id)
+        let diProva = stato.scritteProva && StatoShell.clientiDiProva.contains(cliente.id)
         return ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: k.spazioNote) {
                 if senzaEventi {

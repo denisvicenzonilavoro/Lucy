@@ -10,9 +10,30 @@ import SwiftUI
 @MainActor
 struct VerbaleCopilotaVista: View {
     @Environment(StatoShell.self) var stato
+    let copilota: StatoCopilotaIncontro
+    let clienteId: String
+    let incontro: Incontro?
+
+    var body: some View {
+        // Il dettaglio di sempre (sull'iPad, e sul Mac fuori da Incontri): la sessione del cliente
+        CorpoVerbaleCopilota(copilota: copilota, clienteId: clienteId, incontro: incontro,
+                             sessione: copilota.sessione(per: clienteId, in: stato), nelDettaglio: true)
+    }
+}
+
+/// Il corpo del verbale (Migliorie d'uso 20): nel dettaglio che nasce dal pulsante (`nelDettaglio`, con il titolo e «Più
+/// tardi») oppure, sul Mac, dentro la pagina del momento «Dopo» di Incontri (senza titolo, che sta nella testata
+/// dell'incontro, e con «Fissa il prossimo» al posto di «Più tardi»: il verbale resta lì).
+@MainActor
+struct CorpoVerbaleCopilota: View {
+    @Environment(StatoShell.self) var stato
     @Bindable var copilota: StatoCopilotaIncontro
     let clienteId: String
     let incontro: Incontro?
+    let sessione: SessioneCopilota?
+    var nelDettaglio = true
+    /// «Fissa il prossimo» (solo nella pagina).
+    var fissaProssimo: (() -> Void)? = nil
 
     private typealias V = Tema.Apple.Copilota.Verbale
 
@@ -20,22 +41,24 @@ struct VerbaleCopilotaVista: View {
         let _ = ContaCorpi.segna()
         let cliente = stato.cliente(clienteId)
         let nome = cliente?.nome ?? "Cliente"
-        let sessione = copilota.sessione(per: clienteId, in: stato)
+        let sessione = self.sessione
         let valide = (sessione?.schede ?? []).filter { $0.stato != .scartata }
         let dossier = valide.filter { $0.tipo != .attivita }
         let attivita = valide.filter { $0.tipo == .attivita }
         let punti = dossier.map { "• " + ApplicaCopilota.punto($0) }
         let scelte = sessione.map { copilota.scelte($0) } ?? []
         return VStack(alignment: .leading, spacing: 0) {
-            Text("Incontro concluso · \(nome)")
-                .carattereApple(V.occhiello)
-                .foregroundColor(V.coloreOcchiello)
-            Text(incontro?.titolo ?? "Incontro senza appuntamento")
-                .carattereApple(V.titolo)
-                .foregroundColor(V.coloreTitolo)
-                .lineLimit(1)
-                // Lo spazio del ✕
-                .padding(.trailing, Tema.Apple.Misura.Padding.chiudiDettaglio * 2)
+            if nelDettaglio {
+                Text("Incontro concluso · \(nome)")
+                    .carattereApple(V.occhiello)
+                    .foregroundColor(V.coloreOcchiello)
+                Text(incontro?.titolo ?? "Incontro senza appuntamento")
+                    .carattereApple(V.titolo)
+                    .foregroundColor(V.coloreTitolo)
+                    .lineLimit(1)
+                    // Lo spazio del ✕
+                    .padding(.trailing, Tema.Apple.Misura.Padding.chiudiDettaglio * 2)
+            }
             HStack(alignment: .top, spacing: V.spazioColonne) {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
@@ -77,7 +100,7 @@ struct VerbaleCopilotaVista: View {
                 }
                 .frame(width: V.larghezzaDestra, alignment: .topLeading)
             }
-            .padding(.top, V.sopraColonne)
+            .padding(.top, nelDettaglio ? V.sopraColonne : 0)
             .frame(maxHeight: .infinity, alignment: .top)
             pulsanti(sessione: sessione, scelte: scelte, nome: nome)
                 .padding(.top, V.sopraPulsanti)
@@ -164,8 +187,13 @@ struct VerbaleCopilotaVista: View {
             }
             Button("Scrivi il riepilogo a \(TestiCopilota.primoNome(nome))") { riepilogo() }
                 .buttonStyle(.appleGrande)
-            Button("Più tardi") { copilota.dettaglio.chiudi() }
-                .buttonStyle(.appleGrande)
+            if nelDettaglio {
+                Button("Più tardi") { copilota.dettaglio.chiudi() }
+                    .buttonStyle(.appleGrande)
+            } else if let fissaProssimo {
+                Button(TestiMomentiIncontro.fissaIlProssimo) { fissaProssimo() }
+                    .buttonStyle(.appleGrande)
+            }
             Spacer(minLength: 0)
             Toggle(isOn: $copilota.conservaTrascrizione) {
                 Text(TestiCopilota.conservaTrascrizione)
@@ -188,7 +216,7 @@ struct VerbaleCopilotaVista: View {
 
     /// Messaggi con il riepilogo dell'incontro di quel cliente; le voci non confermate restano in sospeso.
     private func riepilogo() {
-        copilota.dettaglio.chiudi(subito: true)
+        if nelDettaglio { copilota.dettaglio.chiudi(subito: true) }
         if let i = incontro, let o = stato.occasioneRiepilogo(i) {
             stato.preparaMessaggio(clienteId: o.clienteId, occasioneId: o.id)
         } else {

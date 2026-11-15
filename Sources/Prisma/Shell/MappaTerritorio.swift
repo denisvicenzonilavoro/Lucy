@@ -21,6 +21,10 @@ struct ContenutoMappa {
     let conNome: Set<String>
     /// Margine a sinistra coperto dal pannello (0 se il pannello sta sotto la mappa).
     let coperto: CGFloat
+    /// Migliorie d'uso 32 (solo Mac, solo nella vista Oggi): il cliente scelto nella barra, se è sulla mappa, e chi gli sta
+    /// a meno di dieci minuti. Senza filtro acceso restano accesi solo loro; l'anello bianco gira attorno al cliente.
+    var clienteScelto: String? = nil
+    var vicini: Set<String> = []
 }
 
 /// Una luce già messa sulla mappa.
@@ -71,6 +75,14 @@ struct MappaTerritorio: View {
         .background(M.terra)
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(Text(etichettaAccessibile))
+        #if os(macOS)
+        // Migliorie d'uso 32: con la scheda di una luce aperta, VoiceOver offre «Apri il dossier» di quel cliente
+        .accessibilityActions {
+            if let id = stato.territorio.luceScelta, let l = contenuto.luci.first(where: { $0.id == id }) {
+                Button("\(TestiTerritorio.apriDossier) di \(l.cliente.nome)") { stato.apriCliente(id) }
+            }
+        }
+        #endif
         .task(id: entrataFinita) { await chiudiEntrata() }
         .task(id: inizioNascita) { await chiudiNascita() }
         .task(id: inizioCambio) { await chiudiCambio() }
@@ -100,7 +112,8 @@ struct MappaTerritorio: View {
                                suggerimento: giro.suggerimenti.first.map { punto($0.coordinata, p, margine, misura) })
                         .id(giro.tappe.map(\.id).joined(separator: "|"))
                 }
-                if let id = stato.territorio.lucePuntata, let l = posate.first(where: { $0.luce.id == id }) {
+                if let id = stato.territorio.lucePuntata, id != stato.territorio.luceScelta,
+                   let l = posate.first(where: { $0.luce.id == id }) {
                     FumettoLuce(luce: l.luce)
                         .frame(width: T.Fumetto.larghezzaMassima, height: 0, alignment: .bottom)
                         .position(x: min(max(l.punto.x, contenuto.coperto + T.Fumetto.larghezzaMassima / 2),
@@ -108,6 +121,12 @@ struct MappaTerritorio: View {
                                   y: l.punto.y - l.raggio - T.Fumetto.distanza)
                         .allowsHitTesting(false)
                 }
+                #if os(macOS)
+                if let id = stato.territorio.luceScelta, !stato.territorio.spostando,
+                   let l = posate.first(where: { $0.luce.id == id }) {
+                    schedaLuce(l, misura)
+                }
+                #endif
                 if stato.territorio.spostando { bandaSposta(misura) }
             }
             .frame(width: misura.width, height: misura.height)
@@ -214,6 +233,8 @@ struct MappaTerritorio: View {
         let nelGiro: Set<String> = contenuto.vista == .giro
             ? Set((contenuto.giro?.tappe ?? []).compactMap(\.cliente?.id) + (contenuto.giro?.suggerimenti ?? []).map(\.cliente.id))
             : []
+        // Migliorie d'uso 32: con un cliente scelto e nessun filtro restano accesi lui e i suoi vicini (il filtro vince)
+        let attorno: String? = contenuto.vista == .oggi && !t.soloDaFare && t.filtroZona == nil ? contenuto.clienteScelto : nil
         var r: [LucePosata] = []
         for (i, l) in contenuto.luci.enumerated() {
             if let anno = contenuto.annoCrescita, contenuto.vista == .crescita, l.annoInizio > anno { continue }
@@ -223,6 +244,8 @@ struct MappaTerritorio: View {
             } else if t.soloDaFare {
                 if l.daFare == nil { alfa = L.opacitaFuori }
             } else if let z = t.filtroZona, l.luogo.zona != z {
+                alfa = L.opacitaFuori
+            } else if let c = attorno, l.id != c, !contenuto.vicini.contains(l.id) {
                 alfa = L.opacitaFuori
             }
             r.append(LucePosata(luce: l, punto: punto(l.luogo.coordinata, p, margine, misura), raggio: L.raggio(patrimonio: l.patrimonio),
@@ -371,6 +394,18 @@ struct MappaTerritorio: View {
                     .position(l.punto)
                     .allowsHitTesting(false)
             }
+            // Migliorie d'uso 32: l'anello bianco del cliente scelto (va e torna; non conta fra i 12), solo senza filtro
+            let t = stato.territorio
+            if contenuto.vista == .oggi, !t.soloDaFare, t.filtroZona == nil, let id = contenuto.clienteScelto,
+               let l = posate.first(where: { $0.luce.id == id }) {
+                let raggio = l.raggio + L.distanzaScelto
+                AnelloPulsanteTerritorio(raggio: raggio, colore: L.anelloScelto, spessore: L.spessoreScelto,
+                                         scala: (raggio + L.allargamentoScelto) / raggio, opacita: T.Moto.opacitaFineScelto,
+                                         opacitaRiposo: T.Moto.opacitaInizioScelto, animazione: T.Moto.animazioneScelto)
+                    .id("scelto-\(id)")
+                    .position(l.punto)
+                    .allowsHitTesting(false)
+            }
         }
     }
 
@@ -385,20 +420,28 @@ struct MappaTerritorio: View {
         }
         guard let l = luceSotto(q, posate) else {
             stato.territorio.lucePuntata = nil
+            #if os(macOS)
+            if stato.territorio.luceScelta != nil { stato.territorio.luceScelta = nil }
+            #endif
             return
         }
         #if os(macOS)
         if NSEvent.modifierFlags.contains(.option) {
-            // ⌥ clic: le Posizioni del cliente
-            stato.clienteAttivoId = l.luce.id
+            // ⌥ clic: le Posizioni del cliente (scelto in silenzio, Migliorie d'uso 2)
+            stato.territorio.luceScelta = nil
+            stato.scegliCliente(l.luce.id)
             stato.apri(.posizioni)
             return
         }
-        #endif
+        // Migliorie d'uso 32: il clic apre la scheda della luce («Apri il dossier»); un clic su un'altra luce la sposta
+        stato.territorio.luceScelta = l.luce.id
+        #else
         stato.apriCliente(l.luce.id)
+        #endif
     }
 
-    /// Doppio clic: torna a vedere tutti; clic: dossier (⌥ clic: Posizioni) o, in «Sposta», il punto.
+    /// Doppio clic: torna a vedere tutti; clic: la scheda della luce sul Mac, il dossier sull'iPad (⌥ clic: Posizioni) o,
+    /// in «Sposta», il punto.
     private func gestoTocco(_ posate: [LucePosata], _ proiezione: ProiezioneMappa?, _ margine: CGFloat,
                             _ misura: CGSize) -> some Gesture {
         let doppio = SpatialTapGesture(count: 2).onEnded { _ in tornaATutti() }
@@ -412,6 +455,8 @@ struct MappaTerritorio: View {
             .onChanged { v in
                 let base = zoomBase ?? stato.territorio.zoom
                 if zoomBase == nil { zoomBase = base }
+                // La scheda non resta staccata dalla sua luce
+                if stato.territorio.luceScelta != nil { stato.territorio.luceScelta = nil }
                 stato.territorio.zoom = min(M.zoomMassimo, max(M.zoomMinimo, base * v.magnification))
             }
             .onEnded { _ in zoomBase = nil }
@@ -423,6 +468,7 @@ struct MappaTerritorio: View {
             .onChanged { v in
                 let base = spostamentoBase ?? stato.territorio.spostamento
                 if spostamentoBase == nil { spostamentoBase = base }
+                if stato.territorio.luceScelta != nil { stato.territorio.luceScelta = nil }
                 stato.territorio.spostamento = CGSize(width: base.width + v.translation.width,
                                                       height: base.height + v.translation.height)
             }
@@ -435,7 +481,23 @@ struct MappaTerritorio: View {
         t.spostamento = .zero
         t.filtroZona = nil
         t.soloDaFare = false
+        t.luceScelta = nil
     }
+
+    #if os(macOS)
+    /// La scheda della luce (Migliorie d'uso 32): 22 a destra e 44 sopra il centro della luce, tenuta fra il pannello e il
+    /// bordo destro e sopra il bordo basso. Un clic dentro la scheda non arriva alla mappa (non la chiude).
+    private func schedaLuce(_ l: LucePosata, _ misura: CGSize) -> some View {
+        let k = T.SchedaLuce.self
+        let x = max(contenuto.coperto, min(l.punto.x + k.distanzaX, misura.width - k.larghezza - k.margineBordo))
+        let y = max(k.margineBordo, min(l.punto.y - k.distanzaY, misura.height - k.altezzaStimata - k.margineBordo))
+        return SchedaLuce(luce: l.luce)
+            .id(l.luce.id)
+            .contentShape(Rectangle())
+            .onTapGesture {}
+            .offset(x: x, y: y)
+    }
+    #endif
 
     private func bandaSposta(_ misura: CGSize) -> some View {
         let s = T.Sposta.self
@@ -559,6 +621,12 @@ struct AnelloPulsanteTerritorio: View {
     let raggio: CGFloat
     let colore: Color
     let spessore: CGFloat
+    /// Scala e opacità al culmine, opacità a riposo e animazione: di base quelle dell'anello arancio (si allarga, svanisce
+    /// e riparte); l'anello bianco del cliente scelto (Migliorie d'uso 32) va e torna.
+    var scala: CGFloat = Tema.Apple.Territorio.Moto.scalaPulsazione
+    var opacita: Double = Tema.Apple.Territorio.Moto.opacitaPulsazione
+    var opacitaRiposo: Double = 1
+    var animazione: Animation = Tema.Apple.Territorio.Moto.animazionePulsazione
 
     @Environment(\.prismaStatoFinale) private var fermo
     @ObservedObject private var visibilita = VisibilitaPrisma.condivisa
@@ -572,10 +640,10 @@ struct AnelloPulsanteTerritorio: View {
         Circle()
             .stroke(colore, lineWidth: spessore)
             .frame(width: 2 * raggio, height: 2 * raggio)
-            .scaleEffect(pulsa ? Mo.scalaPulsazione : 1)
-            .opacity(pulsa ? Mo.opacitaPulsazione : 1)
+            .scaleEffect(pulsa ? scala : 1)
+            .opacity(pulsa ? opacita : opacitaRiposo)
             // Senza animazione (fermo, o Prisma non in vista) il valore nuovo toglie la pulsazione ripetuta in corso
-            .animation(fermo || !inVista ? nil : Mo.animazionePulsazione, value: pulsa)
+            .animation(fermo || !inVista ? nil : animazione, value: pulsa)
             .onAppear { if !fermo { acceso = true } }
     }
 }
@@ -696,6 +764,7 @@ struct PercorsoGiro: Shape {
 
 private struct FumettoLuce: View {
     let luce: LuceCliente
+    @Environment(StatoShell.self) private var stato
 
     private typealias F = Tema.Apple.Territorio.Fumetto
 
@@ -734,10 +803,81 @@ private struct FumettoLuce: View {
     private var provenienza: String {
         switch luce.luogo.precisione {
         case .manuale:
-            let prova = luce.cliente.luogo?.nota == TerritorioDiProva.nota ? " · dati di prova" : ""
+            // Migliorie d'uso 37: in dimostrazione basta l'etichetta della barra
+            let prova = luce.cliente.luogo?.nota == TerritorioDiProva.nota && !stato.inDimostrazione ? " · dati di prova" : ""
             return "posizione a mano" + prova
         case .comune:
             return "posizione del comune di \(luce.luogo.comune?.nome ?? luce.luogo.zona)"
         }
     }
 }
+
+#if os(macOS)
+// MARK: - La scheda di una luce (Migliorie d'uso 32)
+
+/// La scheda che si apre al clic su una luce: chi è, il patrimonio seguito con i canali, da quando è cliente e se ha
+/// qualcosa da fare, e «Apri il dossier». Entra con la molla del tema (scala 0,9 → 1); con calmo e nelle istantanee è
+/// già ferma. Il Territorio non si apre in modalità cliente: nome e patrimonio non vanno mai davanti al cliente.
+private struct SchedaLuce: View {
+    let luce: LuceCliente
+
+    @Environment(StatoShell.self) private var stato
+    @Environment(\.prismaStatoFinale) private var fermo
+    @State private var dentro = false
+
+    private typealias K = Tema.Apple.Territorio.SchedaLuce
+
+    var body: some View {
+        let visibile = fermo || dentro
+        VStack(alignment: .leading, spacing: K.spazio) {
+            HStack(spacing: K.spazioAvatar) {
+                AvatarCliente(iniziali: luce.cliente.iniziali, tinta: luce.cliente.tinta.colori, lato: K.avatar)
+                VStack(alignment: .leading, spacing: Tema.Apple.Territorio.Pannello.spazioRighe) {
+                    Text(luce.cliente.nome)
+                        .carattereApple(K.titolo)
+                        .foregroundColor(K.coloreTitolo)
+                        .lineLimit(1)
+                    Text(luce.luogo.zona)
+                        .carattereApple(K.secondario)
+                        .foregroundColor(K.coloreSecondario)
+                        .lineLimit(1)
+                }
+            }
+            HStack(spacing: K.spazioEtichette) {
+                Text(Formati.euro(luce.patrimonio))
+                    .carattereApple(K.etichetta)
+                    .foregroundColor(K.coloreTitolo)
+                    .padding(K.paddingEtichetta)
+                    .background(Capsule().fill(K.fondoEtichetta))
+                switch luce.canale {
+                case .alleanza: EtichettaCanale(canale: .alleanza, compatta: true)
+                case .indipendente: EtichettaCanale(canale: .indipendente, compatta: true)
+                case .entrambi:
+                    EtichettaCanale(canale: .alleanza, compatta: true)
+                    EtichettaCanale(canale: .indipendente, compatta: true)
+                }
+            }
+            Text(TestiTerritorio.clienteDal(luce.annoInizio, stimato: luce.annoStimato)
+                 + (luce.daFare != nil ? TestiTerritorio.haQualcosaDaFare : ""))
+                .carattereApple(K.secondario)
+                .foregroundColor(K.coloreSecondario)
+                .fixedSize(horizontal: false, vertical: true)
+            Button(TestiTerritorio.apriDossier) { stato.apriCliente(luce.id) }
+                .buttonStyle(.applePrimario)
+                .padding(.top, K.sopraPulsante - K.spazio)
+        }
+        .padding(K.padding)
+        .frame(width: K.larghezza, alignment: .leading)
+        .fixedSize(horizontal: false, vertical: true)
+        .superficieApple(K.superficie, raggio: K.raggio)
+        .scaleEffect(visibile ? 1 : K.scalaEntrata, anchor: .topLeading)
+        .opacity(visibile ? 1 : 0)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(Text(luce.cliente.nome))
+        .onAppear {
+            guard !fermo else { return }
+            withAnimation(Tema.Apple.Moto.molla(Tema.Apple.Territorio.Moto.entrataScheda)) { dentro = true }
+        }
+    }
+}
+#endif

@@ -16,6 +16,45 @@ enum ProvaCalcoliAgenda {
         note(verifica)
         archivio(verifica)
         spaziCampagne(verifica)
+        momento(verifica)
+    }
+
+    /// Migliorie d'uso 18: il momento di un impegno (prima, da chiudere, chiuso), il blocco «Non disponibile», l'impegno
+    /// a cavallo dell'ora, l'esito breve, gli istanti in cui la vista di oggi si rifà e il conto della testata.
+    private static func momento(_ verifica: VerificaCalcoli) {
+        let giorno = g(2026, 10, 28)
+        let adesso = h(giorno, 10, 24)
+        func impegno(_ id: String, _ ora: Int, _ min: Int, durata: Int, stato: Appuntamento.Stato = .pianificato,
+                     tipo: TipoAppuntamento = .analisi, cliente: String = "marco", posizione: String? = nil) -> Appuntamento {
+            Appuntamento(id: id, clienteId: cliente, titolo: "Prova", inizio: h(giorno, ora, min), durataMinuti: durata,
+                         luogo: "In studio", note: "", stato: stato, tipo: tipo, posizioneId: posizione)
+        }
+        let futuro = impegno("m1", 11, 0, durata: 60)
+        let passato = impegno("m2", 9, 30, durata: 45)
+        let chiuso = impegno("m3", 8, 0, durata: 30, stato: .concluso)
+        let blocco = impegno("m4", 8, 30, durata: 60, tipo: .nonDisponibile, cliente: "")
+        let aCavallo = impegno("m5", 10, 0, durata: 60)
+        let finisceOra = impegno("m6", 9, 54, durata: 30)
+        verifica.vero("A-M1 Agenda: un impegno che deve ancora venire è «prima»", MomentoImpegno.di(futuro, adesso: adesso) == .prima
+                      && !MomentoImpegno.attenuato(futuro, adesso: adesso))
+        verifica.vero("A-M2 Agenda: passato e ancora pianificato, «da chiudere» e attenuato",
+                      MomentoImpegno.di(passato, adesso: adesso) == .daChiudere && MomentoImpegno.attenuato(passato, adesso: adesso))
+        verifica.vero("A-M3 Agenda: concluso, «chiuso» e attenuato", MomentoImpegno.di(chiuso, adesso: adesso) == .chiuso
+                      && MomentoImpegno.attenuato(chiuso, adesso: adesso))
+        verifica.vero("A-M4 Agenda: un blocco «Non disponibile» passato non chiede l'esito, è solo attenuato",
+                      MomentoImpegno.di(blocco, adesso: adesso) == .prima && MomentoImpegno.attenuato(blocco, adesso: adesso))
+        verifica.vero("A-M5 Agenda: un impegno in corso (a cavallo dell'ora) non è ancora da chiudere",
+                      MomentoImpegno.di(aCavallo, adesso: adesso) == .prima && !MomentoImpegno.attenuato(aCavallo, adesso: adesso))
+        verifica.vero("A-M6 Agenda: finito proprio adesso è da chiudere (fine <= adesso, come le notifiche)",
+                      MomentoImpegno.di(finisceOra, adesso: adesso) == .daChiudere)
+        verifica.vero("A-M7 Agenda: l'esito breve di un impegno chiuso senza proposta è «concluso»",
+                      MomentoImpegno.esitoBreve(chiuso, proposta: nil) == "concluso" && MomentoImpegno.esitoBreve(passato, proposta: nil) == nil)
+        let fini = MomentoImpegno.fini([futuro, passato, aCavallo], dopo: adesso)
+        verifica.vero("A-M8 Agenda: oggi la vista si rifà solo alla fine degli impegni ancora da finire",
+                      fini == [h(giorno, 11, 0).addingTimeInterval(1), h(giorno, 12, 0).addingTimeInterval(1)])
+        verifica.vero("A-M9 Agenda: la testata dice «libero», «1 impegno», «3 impegni»",
+                      MomentoImpegno.notaGiorno(0) == "libero" && MomentoImpegno.notaGiorno(1) == "1 impegno"
+                      && MomentoImpegno.notaGiorno(3) == "3 impegni")
     }
 
     /// Gli orari da proporre in una campagna («Luce» giro 12, §9.4.5 punto 7): al più quattro, uno per giorno, nei giorni

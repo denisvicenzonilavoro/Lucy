@@ -63,7 +63,7 @@ extension Tema.Apple {
             /// Riga della completezza dei dati: `.k` nel tono (verde da 85% in su, altrimenti arancio).
             static let completezza = Carattere.secondario
             static let coloreCompleti = Colore.verde
-            static let coloreIncompleti = Colore.arancio
+            static let coloreIncompleti = Colore.arancioTesto
             static let completezzaSopra: CGFloat = 6
             /// Fra la riga della completezza e «Completa nella scheda del cliente ›».
             static let spazioCompletezza: CGFloat = 10
@@ -96,8 +96,27 @@ extension Tema.Apple {
             static let coloreTrattino = Colore.inchiostro3
             /// `.lbl` nel colore dell'area, con la priorità del cliente accanto.
             static let etichetta = Carattere.etichetta
-            static let priorita = Carattere(dimensione: 11.5, peso: .semibold)
-            static let colorePriorita = Colore.arancio
+            /// Migliorie d'uso 17 «Le priorità in ordine: 1, 2, 3»: sul Mac al posto di «★ Priorità» la capsula
+            /// «Priorità {n}» (`.prio` del template: 11 bold, tracking 0,2, padding 2×9). «Priorità 1» arancio tenue
+            /// con il testo `arancioTesto` (`.prio.p1`), «2» e «3» neutre (fondo chip, testo `inchiostro2`); senza ruota
+            /// dei bisogni l'ordine viene dall'area più scoperta. iPhone e iPad tengono la stella fino al loro
+            /// aggiornamento.
+            #if os(macOS)
+            static let numeraPriorita = true
+            #else
+            static let numeraPriorita = false
+            #endif
+            static let priorita = Carattere(dimensione: 11, peso: .bold, tracking: 0.2)
+            static let paddingPriorita = Misura.padding(2, 9)
+            static let fondoPrimaPriorita = Color(r: 224, g: 138, b: 0, a: 0.18)
+            static let testoPrimaPriorita = Colore.arancioTesto
+            static let fondoPriorita = Colore.chip
+            static let testoPriorita = Colore.inchiostro2
+            /// Nella scheda Bisogni la capsula «Priorità n · area» sta a 8 dal collegamento ad Analisi 360.
+            static let spazioPrioritaBisogni: CGFloat = 8
+            /// La stella di prima («★ Priorità» 11,5 semibold arancio), per iPhone e iPad.
+            static let prioritaStella = Carattere(dimensione: 11.5, peso: .semibold)
+            static let colorePriorita = Colore.arancioTesto
             static let spazioEtichetta: CGFloat = 8
             /// Titolo 26 bold «{grande} {testo}», 4 sotto l'etichetta.
             static let titolo = Carattere(dimensione: 26, peso: .bold, tracking: -0.5)
@@ -113,7 +132,7 @@ extension Tema.Apple {
             static let righeDescrizione = 4
             /// Stato delle ipotesi e canali in essere: `.k` 12,5, 10 sopra.
             static let stato = Carattere.secondario
-            static let coloreStimate = Colore.arancio
+            static let coloreStimate = Colore.arancioTesto
             static let coloreConfermate = Colore.verde
             static let coloreDaVerificare = Colore.inchiostro2
             static let statoSopra: CGFloat = 10
@@ -122,6 +141,36 @@ extension Tema.Apple {
             static let collegamento = Carattere(dimensione: 13, peso: .semibold)
             static let coloreCollegamento = Colore.accento
             static let collegamentoSopra: CGFloat = 12
+        }
+
+        // MARK: Un solo avviso sulle stime (migliorie d'uso 16)
+
+        /// Migliorie d'uso 16 «Un solo avviso sulle stime»: sul Mac l'avviso sulle stime è una capsula sola, a destra
+        /// nella riga del segmentato delle due viste (`#anStime` del template: `.chip` 12,5 semibold, testo
+        /// `arancioTesto` e bordo arancio al 35%; verde con «✓ Nessuna stima…»), che apre lo stesso elenco «Dati per
+        /// l'analisi» del dossier. Spariscono la riga della completezza nella testata, lo stato delle ipotesi sulle card,
+        /// la frase sulle ipotesi nel piede e il blocco «Le ipotesi» della colonna. iPhone e iPad restano come prima
+        /// fino al loro aggiornamento.
+        enum Stime {
+            #if os(macOS)
+            static let unAvvisoSolo = true
+            #else
+            static let unAvvisoSolo = false
+            #endif
+            static let capsula = Carattere(dimensione: 12.5, peso: .semibold)
+            static let paddingCapsula = EdgeInsets(top: 7, leading: 14, bottom: 7, trailing: 14)
+            static let fondo = Colore.cardPiena
+            static let bordo = Colore.separatore
+            static let testoStime = Colore.arancioTesto
+            static let bordoStime = Color(r: 224, g: 138, b: 0, a: 0.35)
+            static let testoNessunaStima = Colore.verde
+            static let simboloNessunaStima = "checkmark"
+            static let spazioSimbolo: CGFloat = 6
+            /// La capsula sta a 12 dal segmentato (o dall'etichetta «di prova»).
+            static let spazioDalSegmentato: CGFloat = 12
+            /// La riga sotto ogni voce dell'elenco: `.k` 12,5 `inchiostro2`.
+            static let rigaVoce = Carattere.secondario
+            static let coloreRigaVoce = Colore.inchiostro2
         }
 
         // MARK: Piede

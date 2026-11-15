@@ -7,7 +7,8 @@ import UniformTypeIdentifiers
 /// Impostazioni › Archivio e backup, come nel template (§4.6, PIE i03-i06): la card con l'anello del backup che si
 /// riempie mentre il backup lavora e «Crea backup» (l'azione principale), poi il backup automatico settimanale,
 /// «Dove salvare», «Ripristina…» e la password; sotto i backup disponibili, gli avvisi dell'archivio e l'archivio di
-/// Prisma. Tutto funziona come prima. I dati di prova stanno in Strumenti.
+/// Prisma. Tutto funziona come prima. Sul Mac (migliorie d'uso 37) qui anche «Togli i clienti di prova», per chi li ha ancora
+/// nell'archivio; la dimostrazione sta in Impostazioni › Dimostrazione.
 extension AppImpostazioni {
 
     var archivio: some View {
@@ -65,7 +66,7 @@ extension AppImpostazioni {
             }
             // «Luce» giro 15 (decisione 42): la chiave delle capsule del tempo entra solo nei backup protetti
             if !b.cifrato && !stato.dati.capsule.isEmpty {
-                NotaImpostazioni(TestiCapsule.avvisoBackup, colore: Tema.Apple.Colore.arancio)
+                NotaImpostazioni(TestiCapsule.avvisoBackup, colore: Tema.Apple.Colore.arancioTesto)
                     .cascataImpostazioni(6)
             }
 
@@ -83,6 +84,7 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-archivio-biblioteca")
             .cascataImpostazioni(6)
 
             GruppoImpostazioni(titolo: "Backup disponibili") {
@@ -96,7 +98,30 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-archivio-elenco")
             .cascataImpostazioni(7)
+
+            #if os(macOS)
+            // Migliorie d'uso 37: durante la dimostrazione il backup è fermo (la scheda della barra lo promette)
+            if stato.inDimostrazione {
+                NotaImpostazioni(TestiDimostrazione.backupFermo, colore: Tema.Apple.Colore.arancioTesto)
+                    .cascataImpostazioni(7)
+            }
+            // Migliorie d'uso 37: la sola pulizia rimasta, per chi ha ancora i clienti di prova mescolati ai suoi (prima un
+            // backup, come sempre)
+            if stato.haDatiDiProva && !stato.inDimostrazione {
+                GruppoImpostazioni(titolo: "Clienti di prova") {
+                    RigaImpostazione(titolo: "Togli i clienti di prova", sottotitolo: "Restano solo i tuoi clienti",
+                                     icona: IconaVetroImpostazioni(simbolo: "person.crop.circle.badge.minus", colori: Tema.Colore.Impostazioni.dati),
+                                     aiuto: "Per lavorare solo con i tuoi clienti: restano i clienti che hai inserito tu. Prima viene salvato un backup.",
+                                     ultima: true) {
+                        ValoreRiga(testo: "Togli") { confermaTogliProva = true }
+                    }
+                }
+                .id("imp-archivio-prova")
+                .cascataImpostazioni(7)
+            }
+            #endif
 
             if stato.copieNonLeggibili > 0 {
                 VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.spazioControlliAffiancati) {
@@ -134,6 +159,7 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-archivio-mac")
             .cascataImpostazioni(9)
             HStack(spacing: Tema.Apple.Impostazioni.Backup.fraNumeri) {
                 numero(stato.clienti.count, "clienti")
@@ -170,8 +196,9 @@ extension AppImpostazioni {
             Button("Crea backup") { stato.creaBackup() }
                 .buttonStyle(StilePulsanteRigaImpostazioni(principale: true, grande: true))
                 .fixedSize()
-                .disabled(stato.backupInCorso)
-                .help("Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Vera")
+                .disabled(stato.backupInCorso || stato.inDimostrazione)
+                .help(stato.inDimostrazione ? TestiDimostrazione.backupFermo
+                                            : "Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Vera")
         }
         .padding(k.padding)
         .frame(maxWidth: .infinity, alignment: .leading)

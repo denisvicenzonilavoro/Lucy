@@ -653,7 +653,7 @@ struct ModuloCreaDaDocumento: View {
             Text(titolo)
                 .font(Tema.Apple.AltreApp.titoloRiga.fontLeggibile)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
-            SegmentiAnalisi(opzioni: [(Canale.alleanza, "Alleanza"), (Canale.indipendente, "Indipendente")], selezione: $canale)
+            SegmentiAnalisi(opzioni: [(Canale.alleanza, Canale.alleanza.nomeBreve), (Canale.indipendente, Canale.indipendente.nomeBreve)], selezione: $canale)
             EtichettaCanale(canale: canale)
             MenuTendina(selezione: $area, opzioni: aree, larghezza: m.menuArea)
             Text(Self.testoDati(confermati: confermati, daControllare: daControllare))
@@ -1126,7 +1126,7 @@ struct ConfrontoClienteVista: View {
                             .font(Tema.Apple.Carattere.secondario.fontLeggibile)
                             .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         HStack(spacing: m.spazioBarra) {
-                            SegmentiAnalisi(opzioni: [(Optional(Canale.alleanza), "Alleanza"), (Optional(Canale.indipendente), "Indipendente")],
+                            SegmentiAnalisi(opzioni: [(Optional(Canale.alleanza), Canale.alleanza.nomeBreve), (Optional(Canale.indipendente), Canale.indipendente.nomeBreve)],
                                             selezione: $canaleScelto)
                                 .frame(maxWidth: m.menuArea)
                             if let c = canaleScelto { EtichettaCanale(canale: c) }

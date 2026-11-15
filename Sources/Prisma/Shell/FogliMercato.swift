@@ -116,6 +116,7 @@ struct FoglioMercatoVista: View {
             case .soglie: FoglioSoglieMercato()
             case .importa: FoglioImportaMercato(sessione: stato.sessioneMercato)
             case .aMano: FoglioAManoMercato()
+            case .riservatezza: FoglioRiservatezzaMercato()
             }
         }
         .padding(f.padding)
@@ -154,6 +155,60 @@ private struct CampoFoglioMercato<Contenuto: View>: View {
                 .carattereApple(f.etichetta)
                 .foregroundColor(f.coloreEtichetta)
             contenuto()
+        }
+    }
+}
+
+// MARK: - Riservatezza (migliorie d'uso 29)
+
+/// La scheda dell'etichetta nella riga in testa: «Riservatezza», il titolo uguale all'etichetta e la frase di sempre
+/// (`TestiAppMercato.fascia`). Dice solo il vero: acceso escono solo richieste di dati pubblici a BCE ed Eurostat, mai
+/// ISIN né dati dei clienti; spento non esce niente, con il rimando a Impostazioni › Mercato.
+struct FoglioRiservatezzaMercato: View {
+    @Environment(StatoShell.self) var stato
+
+    var body: some View {
+        let _ = ContaCorpi.segna()
+        let f = Tema.Apple.Mercato.Foglio.self
+        let r = Tema.Apple.Mercato.Riservatezza.self
+        let attivo = stato.dati.impostazioni.mercato.attivo
+        let testi = TestiAppMercato.fascia(attivo: attivo)
+        VStack(alignment: .leading, spacing: f.spazio) {
+            VStack(alignment: .leading, spacing: f.spazioCampo) {
+                Text(TestiAppMercato.riservatezza)
+                    .carattereApple(r.occhiello)
+                    .foregroundColor(r.coloreOcchiello)
+                    .textCase(.uppercase)
+                HStack(spacing: r.spazio) {
+                    Image(systemName: r.simbolo)
+                        .carattereApple(r.carattereSimbolo)
+                        .foregroundColor(attivo ? r.coloreSimboloAcceso : r.coloreSimboloSpento)
+                        .accessibilityHidden(true)
+                    Text(TestiAppMercato.etichettaRiservatezza(attivo: attivo))
+                        .carattereApple(f.titolo)
+                        .foregroundColor(f.coloreTitolo)
+                }
+                .accessibilityAddTraits(.isHeader)
+                (Text(testi.testo) + Text(testi.forte).bold())
+                    .carattereApple(f.testo)
+                    .foregroundColor(f.coloreTesto)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            HStack(spacing: f.spazio) {
+                Spacer(minLength: 0)
+                #if os(macOS)
+                if !attivo, stato.appConsentita(.impostazioni) {
+                    Button(TestiAppMercato.apriImpostazioni) {
+                        stato.sessioneMercato.foglio = nil
+                        stato.apriImpostazioniMercato()
+                    }
+                    .buttonStyle(.apple)
+                }
+                #endif
+                Button(TestiAppMercato.chiudi) { stato.sessioneMercato.foglio = nil }
+                    .buttonStyle(.applePrimario)
+                    .keyboardShortcut(.defaultAction)
+            }
         }
     }
 }

@@ -10,7 +10,11 @@ import Foundation
 //   oggi (il documento d'identità si aggiorna nella scheda «In regola»);
 // - occasioni (MotoreOccasioni, entro `giorniOccasioni`): alla loro data;
 // - attività aperte (le cose da fare dell'Agenda, senza le riprese delle proposte già sul nastro): alla scadenza;
-// - attenzioni dei dossier (MotoreAttenzioni): senza data, in «Più avanti».
+// - attenzioni dei dossier (MotoreAttenzioni): senza data, in «Più avanti»;
+// - solo con `Ingressi.conScadenze` (migliorie d'uso 3, sul Mac: il «Da fare» unico prende il posto delle notifiche e di
+//   «In scadenza entro 90 giorni»): le posizioni in essere in scadenza entro `RiepilogoPosizioni.giorniScadenza` giorni
+//   (o scadute da meno) e i compleanni dei prossimi `MotoreNotifiche.giorniCompleanno` giorni, in «Questa settimana»;
+// - con `Ingressi.perTe` anche le attività scritte senza cliente («Per te»).
 // Occasioni e attenzioni non hanno un esito da salvare: «Segna come fatto» aggiunge un'attività completata con
 // l'id `VoceDaFare.idSegno` («fatto-…»), che resta nell'Agenda come traccia e toglie la voce dal nastro.
 // Motore puro: riceve `oggi` e gli elenchi già calcolati (la Shell li prende dalle sue cache).
@@ -20,6 +24,8 @@ struct VoceDaFare: Identifiable, Equatable {
     /// Da dove viene. L'ordine conta: a parità di data, prima le proposte, poi i riesami e così via.
     enum Tipo: Int, Equatable, Comparable {
         case proposta, riesame, conformita, occasione, attivita, attenzione
+        /// Migliorie d'uso 3 (solo con `Ingressi.conScadenze`): una posizione in essere in scadenza e un compleanno.
+        case scadenza, ricorrenza
 
         static func < (a: Tipo, b: Tipo) -> Bool { a.rawValue < b.rawValue }
     }
@@ -145,6 +151,11 @@ enum MotoreDaFare {
         /// MotoreAttenzioni.calcola
         let attenzioni: [Attenzione]
         let oggi: Date
+        /// Migliorie d'uso 3 (sul Mac): anche le scadenze delle posizioni in essere e i compleanni.
+        var conScadenze = false
+        /// Migliorie d'uso 3 (sul Mac): il «cliente» delle attività scritte senza cliente («Per te», con le iniziali
+        /// dell'utente); nil = si saltano, come prima.
+        var perTe: Cliente? = nil
     }
 
     // MARK: - Il nastro
@@ -247,7 +258,7 @@ enum MotoreDaFare {
 
         // Attività aperte (le riprese delle proposte sono già sul nastro con la proposta)
         for a in x.attivita where !a.completata && !riprese.contains(a.id) && !a.id.hasPrefix(prefissoSegno) {
-            guard let c = perId[a.clienteId] else { continue }
+            guard let c = perId[a.clienteId] ?? (a.clienteId.isEmpty ? x.perTe : nil) else { continue }
             let data = max(inizio, cal.startOfDay(for: a.scadenza))
             let g = gruppo(data, oggi: x.oggi)
             let quando: String
@@ -264,6 +275,11 @@ enum MotoreDaFare {
                 canali: canali(c), posizioneId: nil, fatto: .attivita(id: a.id), anello: nil, tipoIncontro: .telefonata))
         }
 
+        // Migliorie d'uso 3: scadenze delle posizioni in essere e compleanni (solo se chiesti)
+        if x.conScadenze {
+            voci += vociScadenze(x, clienti: perId, segni: segni)
+        }
+
         // Attenzioni dei dossier: senza data
         for a in x.attenzioni where visibili.contains(a.cliente.id) {
             let id = "attenzione-" + a.id
@@ -277,15 +293,64 @@ enum MotoreDaFare {
         return voci
     }
 
-    /// Le voci divise nei gruppi e ordinate (data, tipo, cliente), al più `massimoPerGruppo` per gruppo.
-    static func nastro(_ voci: [VoceDaFare]) -> NastroDaFare {
+    /// Le scadenze delle posizioni in essere (entro `RiepilogoPosizioni.giorniScadenza` giorni avanti o indietro) e i
+    /// compleanni vicini dei clienti visibili. Si chiudono con il segno «fatto» (`Fatto.segna`): la scadenza porta la data
+    /// nell'id, così una scadenza spostata torna sul nastro; il compleanno porta l'anno.
+    private static func vociScadenze(_ x: Ingressi, clienti perId: [String: Cliente], segni: Set<String>) -> [VoceDaFare] {
+        let cal = Calendar.current
+        let inizio = cal.startOfDay(for: x.oggi)
+        let limite = cal.date(byAdding: .day, value: RiepilogoPosizioni.giorniScadenza, to: inizio) ?? inizio
+        let indietro = cal.date(byAdding: .day, value: -RiepilogoPosizioni.giorniScadenza, to: inizio) ?? inizio
+        var voci: [VoceDaFare] = []
+        for p in x.posizioni where p.stato == .inEssere {
+            guard let s = p.scadenza, let c = perId[p.clienteId] else { continue }
+            let giorno = cal.startOfDay(for: s)
+            guard giorno >= indietro, giorno <= limite else { continue }
+            let id = "scadenza-\(p.id)-\(Int(giorno.timeIntervalSince1970))"
+            guard !segni.contains(prefissoSegno + id) else { continue }
+            let data = max(inizio, giorno)
+            let g = gruppo(data, oggi: x.oggi)
+            let scaduta = giorno < inizio
+            let quando = scaduta ? "Scaduta da \(giorni(MotoreSeguitoProposte.giorni(da: giorno, a: x.oggi)))"
+                                 : testoQuando(data, gruppo: g, oggi: x.oggi)
+            let nome = p.nome.isEmpty ? "Posizione" : p.nome
+            let spiegazione = scaduta
+                ? "È scaduta il \(Formati.dataEstesa.string(from: giorno)) ma risulta ancora in essere: reinvestimento o stato da aggiornare."
+                : "Scade il \(Formati.dataEstesa.string(from: giorno)): il capitale da reinvestire o la copertura da rinnovare."
+            voci.append(VoceDaFare(
+                id: id, tipo: .scadenza, cliente: c, data: data, gruppo: g, quando: quando,
+                perche: scaduta ? "«\(nome)» è scaduta" : "«\(nome)» in scadenza", spiegazione: spiegazione,
+                canali: [p.canale], posizioneId: p.id, fatto: .segna, anello: nil, tipoIncontro: .analisi))
+        }
+        for c in x.clienti {
+            guard let nascita = c.dataNascita,
+                  let prossimo = MotoreNotifiche.prossimoCompleanno(nascita, da: inizio, cal: cal) else { continue }
+            let n = cal.dateComponents([.day], from: inizio, to: cal.startOfDay(for: prossimo)).day ?? 99
+            guard n <= MotoreNotifiche.giorniCompleanno else { continue }
+            let anno = cal.component(.year, from: prossimo)
+            let id = "compleanno-\(c.id)-\(anno)"
+            guard !segni.contains(prefissoSegno + id) else { continue }
+            let data = cal.startOfDay(for: prossimo)
+            let g: VoceDaFare.Gruppo = n <= 0 ? .oggi : .settimana
+            let anni = anno - cal.component(.year, from: nascita)
+            voci.append(VoceDaFare(
+                id: id, tipo: .ricorrenza, cliente: c, data: data, gruppo: g, quando: testoQuando(data, gruppo: .settimana, oggi: x.oggi),
+                perche: "Compie \(anni) anni", spiegazione: "Il compleanno è il \(Formati.dataLunga.string(from: prossimo)): un pensiero fa piacere.",
+                canali: [], posizioneId: nil, fatto: .segna, anello: nil, tipoIncontro: .telefonata))
+        }
+        return voci
+    }
+
+    /// Le voci divise nei gruppi e ordinate (data, tipo, cliente), al più `massimo` per gruppo (le schede di Posizioni:
+    /// `massimoPerGruppo`; il pannello «Da fare» del Mac le vuole tutte).
+    static func nastro(_ voci: [VoceDaFare], massimo: Int = massimoPerGruppo) -> NastroDaFare {
         var visti = Set<String>()
         let uniche = voci.filter { visti.insert($0.id).inserted }
         let gruppi = Dictionary(grouping: uniche, by: \.gruppo)
         let blocchi = VoceDaFare.Gruppo.allCases.compactMap { g -> NastroDaFare.Blocco? in
             guard let elenco = gruppi[g], !elenco.isEmpty else { return nil }
             let ordinate = elenco.sorted(by: precede)
-            return NastroDaFare.Blocco(gruppo: g, voci: Array(ordinate.prefix(massimoPerGruppo)), totale: ordinate.count)
+            return NastroDaFare.Blocco(gruppo: g, voci: Array(ordinate.prefix(massimo)), totale: ordinate.count)
         }
         return NastroDaFare(blocchi: blocchi)
     }
@@ -433,5 +498,50 @@ enum ProvaDaFare {
         let vuoto = MotoreDaFare.calcola(MotoreDaFare.Ingressi(clienti: [], posizioni: [], attivita: [], proposte: [], riesami: [],
                                                                conformita: [], occasioni: [], attenzioni: [], oggi: oggi))
         verifica.vero("Da fare: senza clienti è vuoto", vuoto.vuoto && vuoto.totale == 0)
+
+        // Migliorie d'uso 3: scadenze, compleanni e attività «Per te» solo se chiesti (sul Mac)
+        let polizza = AiutiProva.posizione("Infortuni", .protezione, 0) { p in
+            p.id = "polizza"
+            p.clienteId = "anna"
+            p.scadenza = AiutiProva.data(2026, 11, 20)
+        }
+        let vecchia = AiutiProva.posizione("Deposito", .liquidita, 0) { p in
+            p.id = "deposito"
+            p.clienteId = "bruno"
+            p.scadenza = AiutiProva.data(2026, 10, 1)
+        }
+        let lontana = AiutiProva.posizione("Lontana", .investimento, 0) { p in
+            p.id = "lontana"
+            p.clienteId = "bruno"
+            p.scadenza = AiutiProva.data(2027, 6, 1)
+        }
+        var festeggiata = cliente("carla")
+        festeggiata.dataNascita = AiutiProva.data(1976, 11, 5)
+        let mia = Attivita(id: "mia", clienteId: "", titolo: "Rinnovare l'iscrizione all'albo", scadenza: oggi, priorita: .normale,
+                           completata: false)
+        let perTe = cliente("perte")
+        func ingressiScadenze(_ conScadenze: Bool, perTe: Cliente?, attivita: [Attivita]) -> MotoreDaFare.Ingressi {
+            MotoreDaFare.Ingressi(clienti: [anna, bruno, festeggiata], posizioni: [polizza, vecchia, lontana], attivita: attivita,
+                                  proposte: [], riesami: [], conformita: [], occasioni: [], attenzioni: [], oggi: oggi,
+                                  conScadenze: conScadenze, perTe: perTe)
+        }
+        let senza = MotoreDaFare.voci(ingressiScadenze(false, perTe: nil, attivita: [mia]))
+        verifica.vero("Da fare: senza la richiesta niente scadenze, compleanni né voci senza cliente", senza.isEmpty)
+        let con = MotoreDaFare.nastro(MotoreDaFare.voci(ingressiScadenze(true, perTe: perTe, attivita: [mia])), massimo: .max)
+        verifica.vero("Da fare: la polizza in scadenza", con.voci.contains { $0.tipo == .scadenza && $0.posizioneId == "polizza" && $0.gruppo == .mese })
+        verifica.vero("Da fare: la posizione scaduta è di oggi e lo dice",
+                      con.voci.first { $0.posizioneId == "deposito" }.map { $0.gruppo == .oggi && $0.quando == "Scaduta da 33 giorni" } ?? false)
+        verifica.vero("Da fare: oltre 90 giorni la scadenza non c'è", !con.voci.contains { $0.posizioneId == "lontana" })
+        verifica.vero("Da fare: il compleanno in questa settimana",
+                      con.voci.first { $0.tipo == .ricorrenza }.map { $0.cliente.id == "carla" && $0.gruppo == .settimana && $0.perche == "Compie 50 anni" } ?? false)
+        verifica.vero("Da fare: l'attività senza cliente è «per te»", con.voci.contains { $0.id == "attivita-mia" && $0.cliente.id == "perte" })
+        let segnata = Attivita(id: MotoreDaFare.prefissoSegno + "compleanno-carla-2026", clienteId: "carla", titolo: "Fatto",
+                               scadenza: oggi, priorita: .normale, completata: true)
+        let dopo = MotoreDaFare.voci(ingressiScadenze(true, perTe: nil, attivita: [mia, segnata]))
+        verifica.vero("Da fare: il compleanno segnato non torna e senza «per te» l'attività senza cliente si salta",
+                      !dopo.contains { $0.tipo == .ricorrenza } && !dopo.contains { $0.id == "attivita-mia" })
+        verifica("Da fare: il nastro intero non taglia", Double(MotoreDaFare.nastro(MotoreDaFare.voci(MotoreDaFare.Ingressi(
+            clienti: [bruno], posizioni: [], attivita: tante, proposte: [], riesami: [], conformita: [], occasioni: [], attenzioni: [],
+            oggi: oggi)), massimo: .max).voci.count), 12)
     }
 }

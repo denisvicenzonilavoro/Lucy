@@ -820,7 +820,7 @@ struct DettaglioRadar: View {
                 VStack(alignment: .trailing, spacing: 2) {
                     Text(TestiRadar.puntiConNome(v.distanza))
                         .carattereApple(D.distanza)
-                        .foregroundColor(v.fuori ? Tema.Apple.Colore.arancio : Tema.Apple.Colore.verde)
+                        .foregroundColor(v.fuori ? Tema.Apple.Colore.arancioTesto : Tema.Apple.Colore.verde)
                     Text("di distanza dal modello")
                         .carattereApple(Tema.Apple.Carattere.secondario)
                         .foregroundColor(Tema.Apple.Colore.inchiostro2)

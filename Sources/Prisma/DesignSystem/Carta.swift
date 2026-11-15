@@ -39,6 +39,10 @@ extension Colori {
         static let tavoloAlto = Color(hex: "#d8dcda")
         static let tavoloBasso = Color(hex: "#e7e6df")
         static let ombraFoglio = Color(hex: "#2634352e")
+        /// Migliorie d'uso 22: il timbro «SOLO PER TE» delle pagine del consulente (arancio bruciato, opaco e fisso).
+        static let timbro = Color(hex: "#B4530B")
+        /// Sotto il timbro: la carta, perché resti leggibile anche sopra la data della testata.
+        static let fondoTimbro = Color(hex: "#ffffff")
     }
 }
 
@@ -75,6 +79,9 @@ extension Tipo {
         static let nota = font(7)
         static let assi = font(6.5)
         static let piede = font(6.5)
+        /// Migliorie d'uso 22: il timbro «SOLO PER TE» e la frase in fondo all'ultima pagina.
+        static let timbro = font(9.5, grassetto: true)
+        static let notaPerTe = font(6.5, grassetto: true)
 
         // Gemelli per le misure
         static let nsVoceValore = nsFont(9)
@@ -119,5 +126,18 @@ extension Misure {
         static let righeMinime = 3
         /// Scala dell'etichetta del canale dentro le tabelle.
         static let scalaEtichetta: CGFloat = 0.82
+
+        // Migliorie d'uso 22: il timbro «SOLO PER TE», misurato dal bordo della pagina (anche in A4 orizzontale)
+        static let timbroSpaziatura: CGFloat = 1
+        static let timbroBordo: CGFloat = 1.5
+        static let timbroRaggio: CGFloat = 6
+        static let timbroPadding = EdgeInsets(top: 3, leading: 7, bottom: 3, trailing: 7)
+        static let timbroDestra: CGFloat = 46
+        static let timbroAlto: CGFloat = 40
+        /// Sulle pagine di `PaginaCarta` (posizione, confronto, riesame) a 40 dall'alto c'è la data della testata:
+        /// lì il timbro sta nel margine alto, sopra la testata, senza coprire nulla.
+        static let timbroAltoCarta: CGFloat = 8
+        /// La frase dell'ultima pagina, nel margine basso sotto il piede (non tocca l'area del contenuto).
+        static let notaPerTeBasso: CGFloat = 9
     }
 }

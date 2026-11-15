@@ -22,10 +22,18 @@ extension Tema.Apple {
 
         /// Testo principale (--ink).
         static let inchiostro = d(nero(0.87), bianco(0.94))
-        /// Testo secondario, `.k`, `.lbl` (--ink2).
+        #if os(macOS)
+        /// Testo secondario, `.k`, `.lbl` (--ink2). Migliorie d'uso 7: in chiaro nero al 62% (contrasto 6,2 sul bianco).
+        static let inchiostro2 = d(nero(0.62), bianco(0.62))
+        /// Etichette di assi, ore, giorni fuori mese (--ink3). Migliorie d'uso 7: nero al 54% e bianco al 52%
+        /// (contrasto almeno 4,5 per i testi piccoli).
+        static let inchiostro3 = d(nero(0.54), bianco(0.52))
+        #else
+        /// Testo secondario, `.k`, `.lbl` (--ink2). iPhone e iPad prendono i toni nuovi con il loro aggiornamento.
         static let inchiostro2 = d(nero(0.55), bianco(0.62))
         /// Etichette di assi, ore, giorni fuori mese (--ink3).
         static let inchiostro3 = d(nero(0.34), bianco(0.38))
+        #endif
         /// Bordi da 1 pt e divisori (--sep).
         static let separatore = d(nero(0.08), bianco(0.09))
         /// Fondo della finestra interna (--win).
@@ -80,8 +88,17 @@ extension Tema.Apple {
         static let accento = Color(hex: "#007AFF")
         /// Urgenza, oggi nel calendario, linea dell'ora, area Protezione.
         static let rosso = Color(hex: "#E5484D")
-        /// Urgenza media, completezza sotto l'85%.
+        /// Urgenza media, completezza sotto l'85%: l'arancione pieno di pallini, anelli e barre («lì non si legge, si
+        /// guarda»). Per le scritte c'è `arancioTesto`.
         static let arancio = Color(hex: "#E08A00")
+        #if os(macOS)
+        /// L'arancione delle scritte (--orangeT, Migliorie d'uso 7): scadenze, «Da incassare», «Da fare oggi», avvisi,
+        /// priorità, passo in corso. #B4530B in chiaro (contrasto 5,0 sul bianco), #F5A94A in scuro.
+        static let arancioTesto = Color.dinamico(chiaro: Color(hex: "#B4530B"), scuro: Color(hex: "#F5A94A"))
+        #else
+        /// L'arancione delle scritte: su iPhone e iPad resta l'arancione pieno fino al loro aggiornamento.
+        static let arancioTesto = arancio
+        #endif
         /// Positivo, spunte, «Ti preparo», delta.
         static let verde = Color(hex: "#2FA35A")
         /// Interruttore acceso.
@@ -94,6 +111,14 @@ extension Tema.Apple {
         static let anello3 = Color(hex: "#8B5CF6")
         /// Stime e proposte nei grafici.
         static let stima = Color(hex: "#8B5CF6")
+        #if os(macOS)
+        /// La linea del totale (--tot, Migliorie d'uso 8): portafoglio e patrimonio nel blu scuro del logo, #0F2433 in
+        /// chiaro e #E3ECF2 in scuro, perché il blu pieno resta ad Alleanza e ai comandi. Linee spesse almeno 2,6.
+        static let totale = Color.dinamico(chiaro: Color(hex: "#0F2433"), scuro: Color(hex: "#E3ECF2"))
+        #else
+        /// La linea del totale: su iPhone e iPad resta il blu degli anelli fino al loro aggiornamento.
+        static let totale = anello2
+        #endif
         /// Fondo dell'etichetta Alleanza (non cambia in scuro).
         static let fondoAlleanza = Color(r: 37, g: 99, b: 235, a: 0.13)
         /// Fondo dell'etichetta indipendente (non cambia in scuro).
@@ -104,8 +129,13 @@ extension Tema.Apple {
         static let testoToast = Color.white
         /// Velo della presentazione.
         static let sala = Color(r: 6, g: 14, b: 20, a: 0.92)
+        #if os(macOS)
+        /// «tra 45 giorni»: l'arancione delle scritte (Migliorie d'uso 7).
+        static let scadenza = arancioTesto
+        #else
         /// «tra 45 giorni».
         static let scadenza = Color(hex: "#C25E00")
+        #endif
         /// Voce selezionata in rubrica e barre laterali.
         static let selezioneVoce = Color(r: 0, g: 122, b: 255, a: 0.13)
         /// Giorno scelto nel calendario.

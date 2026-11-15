@@ -21,6 +21,10 @@ import UniformTypeIdentifiers
 //   dati del consulente; senza, il foglio dice «secondo il regime impostato · da completare» e il totale è provvisorio.
 // - «Riduci movimento»: niente cascata, numeri fermi, il foglio cambia con una dissolvenza di 0,15 s; istantanee:
 //   tutto nello stato finale.
+// - Migliorie d'uso 28 (solo Mac): sopra l'elenco il filtro per stato («Tutte · Da incassare · Bozze · Pagate»); in cima
+//   alla colonna delle azioni la scheda «A che punto è» (Bozza · Emessa · Pagata, `PassiApple`) con la frase di ciò che
+//   manca, e un solo pulsante blu, il prossimo passo (`MotoreParcelle.passo`); «＋ Nuova parcella» sta nella riga in
+//   testa di Studio (AzioniStudio, `StatoShell.richiestaNuovaParcella`). iPhone e iPad restano come prima.
 // Valori in DesignSystem/Apple/Tema.Apple+Parcelle.swift.
 
 // MARK: - Istantanee
@@ -36,21 +40,52 @@ final class RichiestaIstantaneaParcelle {
     let fileXML: String?
     /// La bozza mostrata nel modulo «Nuova parcella», sopra la scheda.
     let modulo: Parcella?
+    /// Il filtro dell'elenco (Migliorie d'uso 28, solo Mac); nil = «Tutte».
+    let filtro: FiltroParcelle?
 
-    private init(stato: StatoShell, parcellaId: String?, fileXML: String?, modulo: Parcella?) {
+    private init(stato: StatoShell, parcellaId: String?, fileXML: String?, modulo: Parcella?, filtro: FiltroParcelle?) {
         self.stato = stato
         self.parcellaId = parcellaId
         self.fileXML = fileXML
         self.modulo = modulo
+        self.filtro = filtro
     }
 
-    static func chiedi(_ s: StatoShell, parcella: String?, fileXML: String? = nil, modulo: Parcella? = nil) {
-        attuale = RichiestaIstantaneaParcelle(stato: s, parcellaId: parcella, fileXML: fileXML, modulo: modulo)
+    static func chiedi(_ s: StatoShell, parcella: String?, fileXML: String? = nil, modulo: Parcella? = nil,
+                       filtro: FiltroParcelle? = nil) {
+        attuale = RichiestaIstantaneaParcelle(stato: s, parcellaId: parcella, fileXML: fileXML, modulo: modulo, filtro: filtro)
     }
 
     static func per(_ s: StatoShell) -> RichiestaIstantaneaParcelle? {
         guard let r = attuale, r.stato === s else { return nil }
         return r
+    }
+}
+
+// MARK: - Il filtro dell'elenco (Migliorie d'uso 28)
+
+/// Il segmentato sopra l'elenco delle parcelle: tutte, da incassare (emesse), bozze, pagate. Le annullate stanno solo in
+/// «Tutte». Resta in memoria nella vista.
+enum FiltroParcelle: String, CaseIterable, Hashable {
+    case tutte, daIncassare, bozze, pagate
+
+    /// La parcella entra nel filtro.
+    func comprende(_ p: Parcella) -> Bool {
+        switch self {
+        case .tutte: return true
+        case .daIncassare: return p.stato == .emessa
+        case .bozze: return p.stato == .bozza
+        case .pagate: return p.stato == .pagata
+        }
+    }
+
+    var titolo: String {
+        switch self {
+        case .tutte: return "Tutte"
+        case .daIncassare: return "Da incassare"
+        case .bozze: return "Bozze"
+        case .pagate: return "Pagate"
+        }
     }
 }
 
@@ -75,6 +110,55 @@ enum TestiParcelle {
     static let aiutoMessaggi = "Apre Messaggi sul cliente con il testo pronto e la fattura PDF da allegare: la spedisci tu"
 
     static func incassato(_ anno: Int) -> String { "Incassato nel \(String(anno))" }
+
+    // MARK: Migliorie d'uso 28
+
+    static let occhielloAChePunto = "A che punto è"
+    /// I nomi dei passi (nella colonna lo stato resta «Da incassare»).
+    static let passi = ["Bozza", "Emessa", "Pagata"]
+    static let emetti = "Emetti la parcella"
+    static let modifica = "Modifica la bozza"
+    static let preparaXML = "Prepara il file XML"
+    static let preparaDiNuovo = "Prepara di nuovo il file XML"
+    static let segnaPagata = "Segna come pagata"
+    static let mandaConMessaggi = "Manda con Messaggi"
+    static let sollecito = "Manda un sollecito"
+    static let salvaPDF = "Salva PDF"
+    static let duplica = "Duplica come bozza"
+    static let completaDati = "Completa i dati"
+    static let nessunaConStato = "Nessuna parcella con questo stato."
+    static let avvisoEmessa = "Parcella emessa: ora prepara il file XML"
+    /// La nota sotto i pulsanti quando il prossimo passo è il file XML.
+    static let notaXMLBreve = "Il file XML della fattura elettronica lo carichi tu sul portale dell’Agenzia delle "
+        + "Entrate, o lo dai al commercialista."
+
+    /// «Segnata come pagata: 900 € nel totale incassato».
+    static func avvisoPagata(_ importo: Double) -> String {
+        "Segnata come pagata: \(TestiFattura.importo(importo)) nel totale incassato"
+    }
+
+    /// «Tutte 6», «Da incassare 2», «Bozze 1», «Pagate 3».
+    static func filtro(_ f: FiltroParcelle, numero: Int) -> String { "\(f.titolo) \(numero)" }
+
+    /// La frase sotto i passi: che cosa manca alla parcella.
+    static func aChePunto(_ p: Parcella, cliente: Cliente?, oggi: Date, cal: Calendar = .current) -> String {
+        switch p.stato {
+        case .bozza:
+            return "È una bozza: puoi ancora cambiarla."
+        case .emessa:
+            let giorni = max(0, cal.dateComponents([.day], from: cal.startOfDay(for: p.data), to: cal.startOfDay(for: oggi)).day ?? 0)
+            let quando = giorni == 0 ? "oggi" : giorni == 1 ? "ieri" : "\(giorni) giorni fa"
+            let nome = cliente.map { $0.nome.split(separator: " ").first.map(String.init) ?? $0.nome } ?? "Il cliente"
+            let frase = "Emessa il \(TestiFattura.data(p.data)), \(quando): \(nome) non l’ha ancora pagata."
+            return MotoreParcelle.scaduta(p, oggi: oggi, cal: cal) ? frase + " La scadenza è passata." : frase
+        case .pagata:
+            guard let il = p.incassataIl else { return "Pagata: è nel totale incassato." }
+            return "Pagata il \(TestiFattura.data(il)): è nel totale incassato."
+        case .annullata:
+            guard let il = p.annullataIl else { return "Annullata: non conta più nei totali." }
+            return "Annullata il \(TestiFattura.data(il)): non conta più nei totali."
+        }
+    }
 
     /// «2026/015 · Piano previdenziale», «senza numero · Primo check-up».
     static func sottoVoce(_ p: Parcella) -> String {
@@ -178,6 +262,8 @@ struct ParcelleStudioVista: View {
     @State private var modulo: ModuloParcellaAperto?
     @State private var daAnnullare: String?
     @State private var daEmettere: String?
+    /// Migliorie d'uso 28 (solo Mac): il filtro dell'elenco per stato, in memoria.
+    @State private var filtro: FiltroParcelle = .tutte
 
     private typealias D = Tema.Apple.Parcelle.Disposizione
 
@@ -201,7 +287,16 @@ struct ParcelleStudioVista: View {
         let elenco = stato.ricavato("studio.parcelle.elenco") { Self.ordinate(stato.parcelle) }
         let richiesta = RichiestaIstantaneaParcelle.per(stato)
         let idScelto = scelta ?? richiesta?.parcellaId
-        let p = idScelto.flatMap { id in elenco.first { $0.id == id } } ?? elenco.first
+        #if os(macOS)
+        // Il filtro (nelle istantanee quello chiesto dalla scena): una parcella che il filtro nasconde lascia il posto
+        // alla prima di quelle che si vedono, come nel template
+        let filtroVisto = (istantanea ? richiesta?.filtro : nil) ?? filtro
+        let visibili = filtroVisto == .tutte ? elenco : elenco.filter { filtroVisto.comprende($0) }
+        #else
+        let filtroVisto = FiltroParcelle.tutte
+        let visibili = elenco
+        #endif
+        let p = idScelto.flatMap { id in visibili.first { $0.id == id } } ?? visibili.first
         let totali = stato.ricavato("studio.parcelle.totali") { stato.totaliParcelle() }
         let fatture = stato.ricavato("studio.parcelle.fatture") { FattureInMemoria() }
         let xml: FileXMLPronto? = fileXML ?? richiesta?.fileXML.flatMap { nome in
@@ -210,7 +305,7 @@ struct ParcelleStudioVista: View {
         return GeometryReader { geo in
             let laterale = min(D.larghezzaLaterale, max(D.larghezzaLateraleMinima, geo.size.width * D.quotaLaterale))
             HStack(alignment: .top, spacing: D.spazio) {
-                barra(elenco, scelta: p?.id, totali: totali)
+                barra(elenco, visibili: visibili, filtro: filtroVisto, scelta: p?.id, totali: totali)
                     .frame(width: laterale)
                     .frame(maxHeight: .infinity, alignment: .top)
                 anteprima(p, xml: xml, fatture: fatture)
@@ -234,6 +329,8 @@ struct ParcelleStudioVista: View {
             }, chiudi: { modulo = nil })
             .environment(stato)
         }
+        // Migliorie d'uso 28: «＋ Nuova parcella» nella riga in testa di Studio (solo sul Mac la richiesta cresce)
+        .onChange(of: stato.richiestaNuovaParcella) { _, _ in apriNuova() }
         .alert("Annullare la fattura?", isPresented: presente($daAnnullare)) {
             Button("Annulla la fattura", role: .destructive) {
                 if let id = daAnnullare { stato.annullaParcella(id) }
@@ -261,10 +358,11 @@ struct ParcelleStudioVista: View {
 
     // MARK: Barra laterale
 
-    private func barra(_ elenco: [Parcella], scelta: String?, totali: TotaliParcelle) -> some View {
+    private func barra(_ elenco: [Parcella], visibili: [Parcella], filtro filtroVisto: FiltroParcelle, scelta: String?,
+                       totali: TotaliParcelle) -> some View {
         let forma = RoundedRectangle(cornerRadius: D.raggioLaterale, style: .continuous)
         let T = Tema.Apple.Parcelle.Totali.self
-        let prova = stato.haDatiDiProva && !elenco.isEmpty
+        let prova = stato.scritteProva && !elenco.isEmpty
         let oggi = Date()
         return VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: T.spazio) {
@@ -277,6 +375,12 @@ struct ParcelleStudioVista: View {
                                    nota: totali.scadute > 0 ? (totali.scadute == 1 ? "1 scaduta" : "\(totali.scadute) scadute") : nil)
             }
             .padding(.bottom, T.sotto)
+            #if os(macOS)
+            if !elenco.isEmpty {
+                filtroElenco(elenco, scelto: filtroVisto)
+                    .padding(.bottom, Tema.Apple.Parcelle.Filtro.sotto)
+            }
+            #endif
             if elenco.isEmpty {
                 Text(TestiParcelle.vuotoElenco)
                     .carattereApple(Tema.Apple.Parcelle.vuoto)
@@ -285,10 +389,18 @@ struct ParcelleStudioVista: View {
                     .padding(.horizontal, Tema.Apple.Parcelle.rientroVuoto)
                     .entrataCascata(0, base: base)
                 Spacer(minLength: 0)
+            } else if visibili.isEmpty {
+                Text(TestiParcelle.nessunaConStato)
+                    .carattereApple(Tema.Apple.Parcelle.vuoto)
+                    .foregroundColor(Tema.Apple.Parcelle.coloreVuoto)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, Tema.Apple.Parcelle.rientroVuoto)
+                    .padding(.vertical, Tema.Apple.Parcelle.rientroVuotoFiltro)
+                Spacer(minLength: 0)
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: Tema.Apple.Parcelle.Voce.fraVoci) {
-                        ForEach(Array(elenco.enumerated()), id: \.element.id) { i, p in
+                        ForEach(Array(visibili.enumerated()), id: \.element.id) { i, p in
                             // `.equatable()`: a un clic rifanno il corpo solo la voce lasciata e quella scelta
                             VoceParcellaApple(parcella: p, cliente: stato.cliente(p.clienteId), scelta: p.id == scelta,
                                               scaduta: MotoreParcelle.scaduta(p, oggi: oggi)) { calmo, istantanea in
@@ -303,6 +415,8 @@ struct ParcelleStudioVista: View {
                 }
                 .frame(maxHeight: .infinity, alignment: .top)
             }
+            #if !os(macOS)
+            // Sul Mac «＋ Nuova parcella» sta nella riga in testa di Studio (Migliorie d'uso 28, AzioniStudio)
             Button { apriNuova() } label: {
                 Text(TestiParcelle.nuova)
                     .frame(maxWidth: .infinity)
@@ -311,12 +425,25 @@ struct ParcelleStudioVista: View {
             .disabled(stato.solaLettura || stato.clienti.isEmpty)
             .help("Una parcella della consulenza indipendente: il cliente, la consulenza e l’importo")
             .padding(.top, Tema.Apple.Parcelle.nuovaSopra)
+            #endif
         }
         .padding(D.paddingLaterale)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .clipShape(forma)
         .superficieApple(D.superficieLaterale, raggio: D.raggioLaterale)
     }
+
+    #if os(macOS)
+    /// Il segmentato a tutta larghezza che filtra l'elenco: «Tutte 6», «Da incassare 2», «Bozze 1», «Pagate 3». I conteggi
+    /// dall'elenco già in memoria (poche voci); cambiare filtro non rifà né l'elenco né i totali.
+    private func filtroElenco(_ elenco: [Parcella], scelto: FiltroParcelle) -> some View {
+        let voci = FiltroParcelle.allCases.map { f in
+            (f, TestiParcelle.filtro(f, numero: f == .tutte ? elenco.count : elenco.filter { f.comprende($0) }.count))
+        }
+        let selezione = Binding<FiltroParcelle>(get: { scelto }, set: { nuovo in filtro = nuovo })
+        return SegmentatoPillola(selezione: selezione, voci: voci, larghezzaPiena: true)
+    }
+    #endif
 
     @ViewBuilder private func menu(_ p: Parcella) -> some View {
         switch p.stato {
@@ -384,7 +511,147 @@ struct ParcelleStudioVista: View {
 
     // MARK: Azioni
 
-    private func azioni(_ p: Parcella, testi: TestiFattura, mancanti: [DatoMancante], xml: FileXMLPronto?) -> some View {
+    /// La colonna delle azioni: sul Mac «A che punto è» con il solo pulsante blu del prossimo passo (Migliorie d'uso 28);
+    /// su iPhone e iPad quella di prima.
+    @ViewBuilder private func azioni(_ p: Parcella, testi: TestiFattura, mancanti: [DatoMancante], xml: FileXMLPronto?) -> some View {
+        #if os(macOS)
+        azioniUso(p, testi: testi, mancanti: mancanti, xml: xml)
+        #else
+        azioniDiPrima(p, testi: testi, mancanti: mancanti, xml: xml)
+        #endif
+    }
+
+    #if os(macOS)
+    /// «A che punto è» in cima, poi un solo pulsante blu, il prossimo passo (`MotoreParcelle.passo`), gli altri bianchi
+    /// sotto; in fondo la nota del file XML (solo quando il prossimo passo è il file) e lo stato del file.
+    private func azioniUso(_ p: Parcella, testi: TestiFattura, mancanti: [DatoMancante], xml: FileXMLPronto?) -> some View {
+        let z = Tema.Apple.Parcelle.Azioni.self
+        let cliente = stato.cliente(p.clienteId)
+        let oggi = Date()
+        let passo = MotoreParcelle.passo(p, oggi: oggi)
+        let scaduta = MotoreParcelle.scaduta(p, oggi: oggi)
+        // Il file già preparato si legge dalla parcella (anche dopo aver cambiato scelta o riaperto Prisma)
+        let pronto = xml ?? Self.fileGiaPronto(p)
+        // Sulla bozza il numero manca per forza: le tessere dicono solo ciò che va completato altrove
+        let daCompletare = p.stato == .bozza ? mancanti.filter { $0.codice != "parcella.numero" } : mancanti
+        return VStack(alignment: .leading, spacing: z.spazio) {
+            schedaAChePunto(p, cliente: cliente, oggi: oggi)
+            switch passo {
+            case .emetti:
+                pulsante(TestiParcelle.emetti, primario: true) { daEmettere = p.id }
+                    .disabled(stato.solaLettura || !MotoreFattura.mancantiParcella(p).allSatisfy { $0.codice == "parcella.numero" })
+                pulsante(TestiParcelle.modifica) { modulo = ModuloParcellaAperto(parcella: p, nuova: false) }
+                    .disabled(stato.solaLettura)
+            case .preparaXML:
+                pulsanteFileXML(p, cliente: cliente, mancanti: mancanti)
+                pulsanteMessaggi(p, testi: testi, sollecito: false)
+                pulsanteSegnaPagata(p, primario: false)
+                pulsante(TestiParcelle.salvaPDF) { salvaPDF(p, testi: testi) }
+            case .segnaPagata:
+                pulsanteSegnaPagata(p, primario: true)
+                pulsanteMessaggi(p, testi: testi, sollecito: scaduta)
+                pulsantePreparaDiNuovo(p, mancanti: mancanti)
+                pulsante(TestiParcelle.salvaPDF) { salvaPDF(p, testi: testi) }
+            case .nessuno:
+                pulsante(TestiParcelle.salvaPDF) { salvaPDF(p, testi: testi) }
+                if p.stato == .annullata {
+                    pulsante(TestiParcelle.duplica) { duplica(p) }
+                        .disabled(stato.solaLettura)
+                } else {
+                    pulsantePreparaDiNuovo(p, mancanti: mancanti)
+                }
+            }
+            if passo == .preparaXML {
+                Text(TestiParcelle.notaXMLBreve)
+                    .carattereApple(z.nota)
+                    .foregroundColor(z.coloreNota)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, z.notaSopra)
+            }
+            if p.stato != .annullata {
+                statoFile(p, cliente: cliente, mancanti: daCompletare, xml: pronto)
+            }
+        }
+    }
+
+    /// Il file XML già preparato per una parcella emessa o pagata (l'ultimo tra i suoi documenti), senza l'indirizzo.
+    private static func fileGiaPronto(_ p: Parcella) -> FileXMLPronto? {
+        guard p.stato == .emessa || p.stato == .pagata, let d = p.documenti.last(where: { $0.formato == .xml }) else { return nil }
+        return FileXMLPronto(parcellaId: p.id, nome: d.nomeFile, url: nil)
+    }
+
+    /// La scheda «A che punto è»: l'occhiello, i tre passi (non per l'annullata) e la frase di ciò che manca.
+    private func schedaAChePunto(_ p: Parcella, cliente: Cliente?, oggi: Date) -> some View {
+        let a = Tema.Apple.Parcelle.AChePunto.self
+        return VStack(alignment: .leading, spacing: 0) {
+            Text(TestiParcelle.occhielloAChePunto)
+                .carattereApple(a.occhiello)
+                .foregroundColor(a.coloreOcchiello)
+            if let attuale = MotoreParcelle.indicePasso(p) {
+                PassiApple(passi: TestiParcelle.passi, attuale: attuale)
+                    .padding(.top, Tema.Apple.Passi.sopra)
+            }
+            Text(TestiParcelle.aChePunto(p, cliente: cliente, oggi: oggi))
+                .carattereApple(a.frase)
+                .foregroundColor(a.coloreFrase)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, a.fraseSopra)
+        }
+        .padding(a.padding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(a.superficie, raggio: a.raggio)
+    }
+
+    /// Un pulsante a tutta larghezza: blu solo per il prossimo passo.
+    private func pulsante(_ titolo: String, primario: Bool = false, azione: @escaping () -> Void) -> some View {
+        Button(action: azione) {
+            Text(titolo).frame(maxWidth: .infinity)
+        }
+        .buttonStyle(StilePulsanteApple(primario ? .principale : .secondaria, grande: true))
+    }
+
+    /// «Prepara il file XML» blu; se mancano dati diventa «Completa i dati», che porta dove completarli (Impostazioni ›
+    /// Studio prima, poi il dossier). Se manca solo un dato della parcella emessa resta «Prepara il file XML», spento.
+    @ViewBuilder private func pulsanteFileXML(_ p: Parcella, cliente: Cliente?, mancanti: [DatoMancante]) -> some View {
+        if mancanti.isEmpty {
+            pulsante(TestiParcelle.preparaXML, primario: true) { preparaXML(p) }
+                .disabled(stato.solaLettura)
+                .help("Scrive il file del tracciato FatturaPA e ti chiede dove salvarlo")
+        } else if mancanti.contains(where: { $0.dove == .consulente }) {
+            pulsante(TestiParcelle.completaDati, primario: true) { stato.apriImpostazioniFatture() }
+                .disabled(stato.inModoCliente)
+                .help(TestiParcelle.mancano(mancanti))
+        } else if cliente != nil && mancanti.contains(where: { $0.dove == .cliente }) {
+            pulsante(TestiParcelle.completaDati, primario: true) { apriDossier(p.clienteId) }
+                .disabled(stato.inModoCliente)
+                .help(TestiParcelle.mancano(mancanti))
+        } else {
+            pulsante(TestiParcelle.preparaXML, primario: true) { preparaXML(p) }
+                .disabled(true)
+                .help(TestiParcelle.mancano(mancanti))
+        }
+    }
+
+    private func pulsantePreparaDiNuovo(_ p: Parcella, mancanti: [DatoMancante]) -> some View {
+        pulsante(TestiParcelle.preparaDiNuovo) { preparaXML(p) }
+            .disabled(!mancanti.isEmpty || stato.solaLettura)
+            .help(mancanti.isEmpty ? "Scrive di nuovo il file del tracciato FatturaPA" : TestiParcelle.mancano(mancanti))
+    }
+
+    private func pulsanteSegnaPagata(_ p: Parcella, primario: Bool) -> some View {
+        pulsante(TestiParcelle.segnaPagata, primario: primario) { segnaPagata(p) }
+            .disabled(stato.solaLettura)
+            .help("Segna l’incasso con la data di oggi")
+    }
+
+    /// «Manda con Messaggi», o «Manda un sollecito» per la parcella scaduta: la stessa occasione di Messaggi (da saldare).
+    private func pulsanteMessaggi(_ p: Parcella, testi: TestiFattura, sollecito: Bool) -> some View {
+        pulsante(sollecito ? TestiParcelle.sollecito : TestiParcelle.mandaConMessaggi) { mandaConMessaggi(p, testi: testi) }
+            .help(TestiParcelle.aiutoMessaggi)
+    }
+    #endif
+
+    private func azioniDiPrima(_ p: Parcella, testi: TestiFattura, mancanti: [DatoMancante], xml: FileXMLPronto?) -> some View {
         let z = Tema.Apple.Parcelle.Azioni.self
         let cliente = stato.cliente(p.clienteId)
         return VStack(alignment: .leading, spacing: z.spazio) {
@@ -553,7 +820,14 @@ struct ParcelleStudioVista: View {
 
     private func emetti(_ p: Parcella) {
         guard let e = stato.emettiParcella(p.id, data: p.data) else { return }
+        #if os(macOS)
+        // Il filtro torna a «Tutte» e la scelta resta sulla parcella (Migliorie d'uso 28)
+        filtro = .tutte
+        scelta = e.id
+        stato.mostraAvviso(TestiParcelle.avvisoEmessa)
+        #else
         stato.mostraAvviso("Parcella emessa: N. \(e.numero ?? "")")
+        #endif
     }
 
     private func testoEmissione(_ id: String?) -> String {
@@ -569,7 +843,13 @@ struct ParcelleStudioVista: View {
 
     private func segnaPagata(_ p: Parcella) {
         stato.segnaParcellaPagata(p.id)
+        #if os(macOS)
+        filtro = .tutte
+        scelta = p.id
+        stato.mostraAvviso(TestiParcelle.avvisoPagata(MotoreParcelle.importo(p)))
+        #else
         stato.mostraAvviso("Segnata pagata oggi")
+        #endif
     }
 
     private func duplica(_ p: Parcella) {

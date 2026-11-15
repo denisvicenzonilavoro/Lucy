@@ -189,7 +189,7 @@ extension Tema.Apple.Studio {
             static let paddingRiepilogo = Tema.Apple.Misura.Padding.tile
             static let cifra = Tema.Apple.Carattere.valore
             static let coloreCifra = Tema.Apple.Colore.inchiostro
-            static let coloreScartate = Tema.Apple.Colore.arancio
+            static let coloreScartate = Tema.Apple.Colore.arancioTesto
             static let spazioCifre: CGFloat = 24
             static let righeScartate = Tema.Apple.Carattere.secondario
             static let coloreRigheScartate = Tema.Apple.Colore.inchiostro2

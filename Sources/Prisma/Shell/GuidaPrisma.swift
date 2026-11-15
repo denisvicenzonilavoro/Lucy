@@ -12,12 +12,14 @@ enum PaginaGuida: Equatable {
     case app(AppPrisma)
     /// Il glossario, aperto su una voce (nil: dall'inizio).
     case glossario(VoceGlossario.Chiave?)
+    /// Come si usa la scrivania (migliorie d'uso 6): il «?» della barra con la scrivania davanti, sul Mac.
+    case scrivania
 
     /// La scheda del pannello.
     var scheda: SchedaGuida {
         switch self {
         case .introduzione: return .comeFunziona
-        case .app: return .app
+        case .app, .scrivania: return .app
         case .glossario: return .parole
         }
     }
@@ -70,7 +72,7 @@ enum GuidaTesti {
                 aCosaServe: "Tutto quello che il cliente ha già (in essere) e quello che gli proponi (in proposta), diviso per canale: Alleanza o consulenza indipendente. È il cuore di Prisma.",
                 inBreve: "Che cosa ha il cliente e che cosa gli proponi",
                 passi: ["Scegli il cliente e guarda il riepilogo: quanto ha, dove, con quale canale.",
-                        "«Posizione» per ciò che ha già, «Proposta» per ciò che consigli (o «Importa…» da Excel).",
+                        passoAggiungiPosizioni,
                         "Apri una posizione: valore, costi, riscatto e proiezione nel tempo."],
                 parole: [.inEssere, .canale, .riscatto, .penali, .sri])
         case .analisi360:
@@ -230,19 +232,55 @@ enum GuidaTesti {
             return AiutoApp(
                 aCosaServe: "Una ricerca unica in tutto Prisma: clienti, posizioni, documenti, appuntamenti e attività.",
                 inBreve: "Trova clienti, posizioni, documenti (⌘K)",
-                passi: ["⌘K, oppure «Cerca ovunque» sulla scrivania.",
+                passi: [passoApriRicerca,
                         "Scrivi una parte del nome o del prodotto.",
                         "Invio per aprire il risultato; i filtri restringono (per esempio «canale:alleanza»)."],
                 parole: [])
         case .impostazioni:
             return AiutoApp(
-                aCosaServe: "Il tuo profilo, i backup (manuali e ogni settimana), l'aspetto chiaro o scuro, la dimensione del testo e i dati di prova.",
-                inBreve: "Profilo, backup, aspetto, dati di prova",
+                aCosaServe: "Il tuo profilo, i backup (manuali e ogni settimana), l'aspetto chiaro o scuro, la dimensione del testo e la dimostrazione.",
+                inBreve: "Profilo, backup, aspetto, dimostrazione",
                 passi: ["Archivio: scegli la cartella dei backup e fai il primo.",
                         "Esperienza: aspetto, dimensione del testo, guida.",
-                        "Archivio: carica o togli i clienti di prova."],
+                        "Dimostrazione: Prisma con i clienti di prova; in Archivio si tolgono quelli rimasti."],
                 parole: [])
         }
+    }
+
+    /// Come si usa la scrivania (migliorie d'uso 6, `PaginaGuida.scrivania`): i testi del template.
+    static let scrivania = AiutoApp(
+        aCosaServe: "La tua giornata in una schermata: la mossa del giorno, le cose da fare, i prossimi incontri, il portafoglio.",
+        inBreve: "La tua giornata in una schermata",
+        passi: ["Parti dalla mossa del giorno.",
+                "Spunta le cose da fare: spariscono da tutta Prisma.",
+                "Apri un’app dal dock, scegli un cliente in alto, o cerca con la lente (⌘K)."],
+        parole: [])
+
+    /// Il titolo della scheda della scrivania.
+    static let titoloScrivania = "La scrivania"
+
+    /// In fondo alla scheda «Come si usa» in grande (migliorie d'uso 6, sul Mac).
+    static let rigaInFondo = "La guida parla sempre dell’app che hai davanti: per questo il pulsante «Come si usa» non è più ripetuto in ogni barra."
+
+    /// Il collegamento al glossario in fondo alla scheda «Come si usa» in grande.
+    static let paroleDiPrisma = "Le parole di Prisma"
+
+    /// Il secondo passo di Posizioni: sul Mac i pulsanti stanno nel menu «Aggiungi» (migliorie d'uso 6).
+    private static var passoAggiungiPosizioni: String {
+        #if os(macOS)
+        return "«Aggiungi»: «Posizione» per ciò che ha già, «Proposta» per ciò che consigli, oppure «Importa…» da Excel."
+        #else
+        return "«Posizione» per ciò che ha già, «Proposta» per ciò che consigli (o «Importa…» da Excel)."
+        #endif
+    }
+
+    /// Il primo passo della ricerca: sul Mac la lente della barra, senza «Cerca ovunque» sulla scrivania.
+    private static var passoApriRicerca: String {
+        #if os(macOS)
+        return "⌘K, oppure la lente in alto nella barra."
+        #else
+        return "⌘K, oppure «Cerca ovunque» sulla scrivania."
+        #endif
     }
 }
 
@@ -257,6 +295,15 @@ struct PaginaIntroduzione {
     var conCanali = false
     /// Sopra i punti, il percorso tipico Cliente → Posizioni → Analisi → Prospetto.
     var conPercorso = false
+
+    /// Dove si trova «Come si usa»: sul Mac nel «?» della barra, per l'app davanti (migliorie d'uso 6).
+    private static var puntoComeSiUsa: String {
+        #if os(macOS)
+        return "Il «?» in alto nella barra: a cosa serve l'app che hai davanti e come si usa, in 3 passi."
+        #else
+        return "«Come si usa», in alto in ogni finestra: a cosa serve l'app e come si usa, in 3 passi."
+        #endif
+    }
 
     /// Le 5 pagine dell'introduzione (fuori dalla vista: la prova dei calcoli le conta).
     static let pagine: [PaginaIntroduzione] = [
@@ -291,7 +338,7 @@ struct PaginaIntroduzione {
         PaginaIntroduzione(
             titolo: "Spiegarlo in modo chiaro",
             testo: "Da **Prospetti e report** esce il documento in PDF: il *prospetto* dettagliato per te, il *report* essenziale da lasciare al cliente. **Vera** risponde alle tue domande e spiega i documenti, con le cifre di Prisma.",
-            punti: ["«Come si usa», in alto in ogni finestra: a cosa serve l'app e come si usa, in 3 passi.",
+            punti: [puntoComeSiUsa,
                     "Menu Aiuto › Guida di Prisma (⌘?) per rivedere tutto, quando vuoi."],
             app: [.presentazioni, .vera], conPercorso: true),
     ]
@@ -309,7 +356,8 @@ extension StatoShell {
     /// prima si entra, poi la guida compare a sblocco finito (due transazioni separate, mai insieme).
     /// Durante la presentazione non si apre.
     func apriGuida(_ pagina: PaginaGuida = .introduzione(0)) {
-        guard presentazione == nil else { return }
+        // Migliorie d'uso 1: nella vista pulita di «Mostra al cliente» la guida non si apre
+        guard presentazione == nil, !inVistaCliente else { return }
         if bloccato {
             sblocca()
             // Nelle istantanee e nelle prove lo sblocco è di colpo: si prosegue subito
@@ -332,6 +380,17 @@ extension StatoShell {
         }
     }
 
+    /// La pagina «Come si usa» di ciò che c'è davanti: l'app attiva o, sul Mac, la scrivania (migliorie d'uso 6);
+    /// su iPhone e iPad senza app resta Clienti, come prima.
+    var paginaGuidaDavanti: PaginaGuida {
+        #if os(macOS)
+        if let app = appAttiva { return .app(app) }
+        return .scrivania
+        #else
+        return .app(appAttiva ?? .clienti)
+        #endif
+    }
+
     /// Chiude la guida. Se era l'introduzione, la segna come vista (non riparte da sola).
     func chiudiGuida() {
         guard let g = sistema.guida else { return }
@@ -350,7 +409,12 @@ extension StatoShell {
         // «Luce» giro 5: gli obiettivi raggiunti prendono la loro data (i traguardi, StatoTraguardi.swift)
         segnaObiettiviRaggiunti()
         if !dati.impostazioni.introduzioneVista {
+            #if os(macOS)
+            // Migliorie d'uso 38: sul Mac le tre domande del primo avvio (PrimoAvvio.swift) al posto dell'introduzione
+            if primoAvvio == nil { apriPrimoAvvio() }
+            #else
             apriGuida(.introduzione(0))
+            #endif
         } else {
             // Le novità non si aprono più da sole (scelta dell'utente, 10 novembre 2026)
             // «Luce» giro 14: le carte della notte si aprono da sole una volta (prima della storia: vince la notte)

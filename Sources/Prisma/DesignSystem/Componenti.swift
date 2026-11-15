@@ -796,13 +796,15 @@ struct EtichettaCanaleStampa: View {
     var compatta = false
 
     var body: some View {
+        let _ = SegnaleNomiCanali.condiviso.nomi
         let c = Tema.Colore.Componenti.self
         let m = Tema.Misura.Componenti.self
         let alleanza = canale == .alleanza
         let colore = alleanza ? Tema.Colore.canaleAlleanzaStampa : Tema.Colore.canaleIndipendenteStampa
         let forma = Capsule(style: .continuous)
         HStack(spacing: m.spazioStampa) {
-            if alleanza, let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
+            // Il logo Alleanza solo con il nome di base del primo canale (migliorie d'uso 38)
+            if canale.conLogo, let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
                 Image(piattaforma: simbolo)
                     .renderingMode(.template)
                     .resizable()

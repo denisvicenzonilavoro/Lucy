@@ -244,6 +244,72 @@ enum ProvaSeguito {
                 controlla(false, "archivio con \(ProvaCarico.copie) copie dei clienti di prova")
             }
         }
+        // 13. Migliorie d'uso 19: la capsula «Concluso» (impegno senza proposta) segna concluso e non tocca le proposte
+        do {
+            let s = StatoShell(persistente: false)
+            let proposteDiPrima = s.dati.posizioni
+            if let a = evento(s, "event-giulia") {
+                controlla(s.propostaCollegata(a) == nil, "scheda dell'impegno: una revisione senza proposta non chiede l'esito")
+            }
+            s.segnaConclusoImpegno("event-giulia")
+            controlla(evento(s, "event-giulia")?.stato == Appuntamento.Stato.concluso,
+                      "scheda dell'impegno: la capsula «Concluso» segna concluso l'impegno")
+            controlla(s.dati.posizioni == proposteDiPrima, "scheda dell'impegno: la capsula «Concluso» non tocca le proposte")
+            s.segnaConclusoImpegno("event-giulia")
+            controlla(evento(s, "event-giulia")?.stato == Appuntamento.Stato.concluso,
+                      "scheda dell'impegno: un secondo tocco su «Concluso» non riapre")
+        }
+
+        // 14. Una scelta su un impegno passato ancora pianificato: prima concluso (proposta presentata), poi l'esito
+        do {
+            let s = StatoShell(persistente: false)
+            let ieri10 = cal.date(bySettingHour: 10, minute: 0, second: 0, of: giorno(-1)) ?? giorno(-1)
+            if let k = s.dati.appuntamenti.firstIndex(where: { $0.id == "event-laura" }) { s.dati.appuntamenti[k].inizio = ieri10 }
+            if let a = evento(s, "event-laura") {
+                controlla(MomentoImpegno.di(a, adesso: adesso) == MomentoImpegno.daChiudere,
+                          "scheda dell'impegno: la presentazione di ieri ancora pianificata è da chiudere")
+                controlla(s.propostaDaChiudere(a) == nil && s.propostaCollegata(a)?.id == infortuniLaura,
+                          "scheda dell'impegno: la proposta collegata risponde anche prima di segnare concluso")
+            }
+            // Ciò che fa la capsula: prima `preparaEsitoImpegno`, poi l'esito del modulo («Ci deve pensare»)
+            s.preparaEsitoImpegno("event-laura")
+            let presentata = posizione(s, infortuniLaura)?.esito == EsitoProposta.presentata
+            let conclusa = evento(s, "event-laura")?.stato == Appuntamento.Stato.concluso
+            controlla(presentata && conclusa, "scheda dell'impegno: la scelta segna concluso l'impegno e la proposta è presentata")
+            s.chiudiProposta(infortuniLaura, .inAttesa, appuntamentoId: "event-laura")
+            if let a = evento(s, "event-laura") {
+                let p = posizione(s, infortuniLaura)
+                controlla(p?.seguito?.appuntamentoEsitoId == "event-laura", "scheda dell'impegno: l'esito è scritto su questo impegno")
+                controlla(s.propostaCollegata(a) == nil && s.propostaDaChiudere(a) == nil,
+                          "scheda dell'impegno: a esito dato nessun modulo")
+                controlla(RegoleImpegnoConcluso.sceltaAccesa(a, proposta: p) == TestiSeguito.sceltaInAttesa,
+                          "scheda dell'impegno: a esito dato resta accesa la capsula «Ci deve pensare»")
+            }
+            // Un secondo `preparaEsitoImpegno` su un impegno già concluso non lo riapre
+            s.preparaEsitoImpegno("event-laura")
+            controlla(evento(s, "event-laura")?.stato == Appuntamento.Stato.concluso,
+                      "scheda dell'impegno: un impegno già concluso non si riapre prima dell'esito")
+        }
+
+        // 15. Il riquadro «Il verbale»: non scritto, pronto da confermare, confermato
+        do {
+            var i = Incontro(clienteId: "giulia", titolo: "Prova", data: adesso, appuntamentoId: "event-giulia")
+            controlla(RegoleImpegnoConcluso.verbale(incontro: nil, sessioni: []) == StatoVerbaleImpegno.nonScritto
+                      && RegoleImpegnoConcluso.verbale(incontro: i, sessioni: []) == StatoVerbaleImpegno.nonScritto,
+                      "verbale: senza incontro o senza copilota «Non ancora scritto»")
+            var sessione = SessioneCopilota(clienteId: "giulia", incontroId: i.id, data: adesso,
+                                            consenso: ConsensoCopilota(data: adesso, modo: .aVoce))
+            sessione.verbale = VerbaleCopilota()
+            controlla(RegoleImpegnoConcluso.verbale(incontro: i, sessioni: [sessione]) == StatoVerbaleImpegno.pronto,
+                      "verbale: un verbale del copilota non confermato è «Pronto, da confermare»")
+            var altra = sessione
+            altra.incontroId = "un-altro-incontro"
+            controlla(RegoleImpegnoConcluso.verbale(incontro: i, sessioni: [altra]) == StatoVerbaleImpegno.nonScritto,
+                      "verbale: il copilota di un altro incontro non conta")
+            i.stato = .concluso
+            controlla(RegoleImpegnoConcluso.verbale(incontro: i, sessioni: [sessione]) == StatoVerbaleImpegno.confermato,
+                      "verbale: incontro concluso «Confermato»")
+        }
         return esiti
     }
 }

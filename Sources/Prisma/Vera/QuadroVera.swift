@@ -126,7 +126,7 @@ struct QuadroVera: Equatable {
         // Fase 4: routine, agenda che si organizza, tagliando, mercato per i clienti, stile, tre livelli e piano a passi
         guard m.esitoRoutine == nil, m.agendaOrari == nil, m.agendaSpostamento == nil, m.tagliando == nil, m.mercatoClienti == nil,
               m.stileVera == nil, m.treLivelli == nil, m.pianoPassi == nil else { return false }
-        if let t = m.titolo, t == "Qwen non è pronto" || t == "Vera non ha potuto rispondere" { return false }
+        if TestiStatoVera.eTitoloNonPronta(m.titolo) || m.titolo == "Vera non ha potuto rispondere" { return false }
         return m.motore != StatoShell.motoreAzioni
     }
 }

@@ -75,7 +75,7 @@ extension StatoShell {
         storia.tipo = tipo
         storia.pagine = pagine
         storia.pagina = 0
-        storia.diProva = haDatiDiProva
+        storia.diProva = scritteProva
         segnaStoriaVista(tipo, oggi: oggi)
         if sistema.sovrapposizione?.storiaAperta != nil {
             // Dall'ultima pagina della settimana all'anno: la sovrapposizione resta, cambia la storia

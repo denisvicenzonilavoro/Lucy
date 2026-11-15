@@ -8,17 +8,52 @@ import Foundation
 extension StatoShell {
     /// Le occasioni dei messaggi dei clienti visibili (in modalità cliente solo le sue). Per oggi vengono dalla cache
     /// (DerivatiDati); per un altro giorno si calcolano.
-    func occasioniMessaggi(oggi: Date = Date()) -> OccasioniMessaggi {
+    /// Migliorie d'uso 25: con `cliente` (Messaggi sul Mac segue il cliente della barra) solo le occasioni di quel cliente,
+    /// filtrate dal motore prima del limite per gruppo, tenute con `ricavato` per cliente; la modalità cliente passa dalla
+    /// stessa via (prima filtrava dopo il limite e perdeva le occasioni del cliente fuori dalle prime 8 di tutti).
+    func occasioniMessaggi(oggi: Date = Date(), cliente: String? = nil) -> OccasioniMessaggi {
+        #if os(macOS)
+        let solo = modoCliente ?? cliente
+        let calcola = { () -> OccasioniMessaggi in
+            MotoreOccasioniMessaggi.calcola(dati: self.datiDeiCalcoli(), oggi: oggi, soloCliente: solo)
+        }
+        #else
+        // iPhone e iPad come prima: tutto il portafoglio, poi in modalità cliente solo le sue (dopo il limite per gruppo)
         let calcola = { () -> OccasioniMessaggi in
             let tutte = MotoreOccasioniMessaggi.calcola(dati: self.datiDeiCalcoli(), oggi: oggi)
             return self.modoCliente.map { tutte.soloCliente($0) } ?? tutte
         }
+        #endif
         guard Calendar.current.isDateInToday(oggi) else { return calcola() }
+        if modoCliente == nil, let c = cliente {
+            return ricavato("messaggi-occasioni|\(c)") { calcola() }
+        }
         let d = derivatiValidi()
         if let o = d.occasioniMessaggi { return o }
         let v = calcola()
         d.occasioniMessaggi = v
         return v
+    }
+
+    /// Migliorie d'uso 25 (Mac): «Sì, spedito». Il consulente dice che il messaggio aperto in Mail o in Messaggi è
+    /// partito: si segna l'ora (solo per un messaggio aperto, mai in sola lettura). Prisma non lo indovina e non legge
+    /// Mail né Messaggi. Restituisce se l'ha segnato.
+    @discardableResult
+    func segnaSpedito(messaggioId: String) -> Bool {
+        guard !solaLettura, let i = dati.messaggi.firstIndex(where: { $0.id == messaggioId }) else { return false }
+        let s = dati.messaggi[i].stato
+        guard s == .apertoInMail || s == .apertoInMessaggi else { return false }
+        dati.messaggi[i].speditoIl = MessaggioCliente.adesso
+        return true
+    }
+
+    /// «Non è partito»: toglie il segno; il messaggio resta aperto nel dossier e l'occasione coperta.
+    @discardableResult
+    func togliSpedito(messaggioId: String) -> Bool {
+        guard !solaLettura, let i = dati.messaggi.firstIndex(where: { $0.id == messaggioId }),
+              dati.messaggi[i].speditoIl != nil else { return false }
+        dati.messaggi[i].speditoIl = nil
+        return true
     }
 
     /// I messaggi preparati per un cliente, dal più recente (il dossier li mostra con la data).

@@ -23,24 +23,28 @@ struct SegmentatoPillola<Valore: Hashable>: View {
     var larghezzaPiena: Bool
     /// Un'icona prima del titolo (avatar 24 dei clienti di Analisi 360).
     var icona: ((Valore) -> AnyView)?
+    /// Il numerino dopo il titolo di una voce (Migliorie d'uso 33: le pratiche ferme su «Dopo la firma»); nil o zero:
+    /// niente capsula.
+    var numero: ((Valore) -> NumeroVoceSegmentato?)?
 
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
     @Namespace private var spazio
 
     init(selezione: Binding<Valore>, voci: [(Valore, String)], larghezzaPiena: Bool = false,
-         icona: ((Valore) -> AnyView)? = nil) {
+         icona: ((Valore) -> AnyView)? = nil, numero: ((Valore) -> NumeroVoceSegmentato?)? = nil) {
         self._selezione = selezione
         self.voci = voci
         self.larghezzaPiena = larghezzaPiena
         self.icona = icona
+        self.numero = numero
     }
 
     /// Le voci da un elenco di valori e da come si chiamano.
     init(selezione: Binding<Valore>, valori: [Valore], titolo: (Valore) -> String, larghezzaPiena: Bool = false,
-         icona: ((Valore) -> AnyView)? = nil) {
+         icona: ((Valore) -> AnyView)? = nil, numero: ((Valore) -> NumeroVoceSegmentato?)? = nil) {
         self.init(selezione: selezione, voci: valori.map { ($0, titolo($0)) },
-                  larghezzaPiena: larghezzaPiena, icona: icona)
+                  larghezzaPiena: larghezzaPiena, icona: icona, numero: numero)
     }
 
     private var indiceScelto: Int? {
@@ -75,6 +79,10 @@ struct SegmentatoPillola<Valore: Hashable>: View {
         let titolo = voci[i].1
         let attiva = i == indiceScelto
         let c = Tema.Apple.Controlli.Segmentato.self
+        let n: NumeroVoceSegmentato? = {
+            guard let numero, let v = numero(valore), v.valore > 0 else { return nil }
+            return v
+        }()
         return HStack(spacing: icona == nil ? 0 : c.spazioIcona) {
             if let icona {
                 icona(valore)
@@ -84,6 +92,15 @@ struct SegmentatoPillola<Valore: Hashable>: View {
                 .lineLimit(1)
                 // A tutta larghezza ogni voce tiene almeno la sua etichetta: lo spazio in più va alle voci corte
                 .fixedSize(horizontal: larghezzaPiena, vertical: false)
+            if let n {
+                Text("\(n.valore)")
+                    .carattereApple(c.numero)
+                    .foregroundColor(n.testo)
+                    .padding(c.paddingNumero)
+                    .background(Capsule(style: .continuous).fill(n.fondo))
+                    .fixedSize()
+                    .padding(.leading, c.spazioNumero)
+            }
         }
         .carattereApple(Tema.Apple.Carattere.barra)
         .foregroundColor(attiva ? Tema.Apple.Colore.inchiostro : Tema.Apple.Colore.inchiostro2)
@@ -97,7 +114,7 @@ struct SegmentatoPillola<Valore: Hashable>: View {
             selezione = valore
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(titolo))
+        .accessibilityLabel(Text(n.map { titolo + ", " + $0.parlato } ?? titolo))
         .accessibilityAddTraits(attiva ? Self.trattiAttiva : Self.trattiVoce)
         .accessibilityAction {
             guard !attiva else { return }
@@ -115,6 +132,15 @@ struct SegmentatoPillola<Valore: Hashable>: View {
     private var animazioneTesto: Animation? {
         Tema.Apple.Moto.animazione(Tema.Apple.Moto.Segmentato.animazioneTesto, calmo: calmo, istantanea: istantanea)
     }
+}
+
+/// Il numerino accanto a una voce del segmentato (Migliorie d'uso 33): il valore, i colori della capsula e la frase che
+/// VoiceOver legge dopo il titolo («Dopo la firma, 1 pratica ferma»).
+struct NumeroVoceSegmentato {
+    let valore: Int
+    let fondo: Color
+    let testo: Color
+    let parlato: String
 }
 
 // MARK: - Interruttore (§2.9)

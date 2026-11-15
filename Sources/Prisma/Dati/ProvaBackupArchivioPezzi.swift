@@ -46,6 +46,9 @@ extension ProvaBackup {
         if let e = try provaInterrotto(base.appendingPathComponent("Interrotto", isDirectory: true)) {
             return "archivio a pezzi: \(e)"
         }
+        if let e = try provaTuttiIClienti(base.appendingPathComponent("TuttiIClienti", isDirectory: true)) {
+            return "archivio a pezzi: \(e)"
+        }
         if let e = try provaSezioneNuova(base.appendingPathComponent("SezioneNuova", isDirectory: true)) {
             return "archivio a pezzi: \(e)"
         }
@@ -55,7 +58,7 @@ extension ProvaBackup {
         if let e = try provaSecondaRevisioneArchivio(base.appendingPathComponent("SecondaRevisione", isDirectory: true)) {
             return "archivio a pezzi: \(e)"
         }
-        print("OK    archivio a pezzi: conversione, backup e ripristino, backup di prima, file rovinati e mancanti, scrittura dei soli file cambiati, salvataggi interrotti (transazioni), file non leggibili adesso, indici più recenti, copie omonime, formato di prima dopo un ripristino, archivio.json vecchio, sole sezioni, ricostruzione senza clienti tolti, NaN, copie d'avvio interrotte, segnaposto per le versioni di prima, backup protetto, copia d'avvio, transazione rimasta nella stessa sessione, due ricostruzioni di fila, riserva dell'indice (impostazioni e Prisma ovunque di adesso, clienti tolti che non tornano), conversione interrotta prima della verifica, copia d'avvio più recente, archivio.json di una versione precedente, backup dell'archivio valido (mai copia d'avvio, segno o pezzi sciolti), ripristino interrotto a pezzi e backup a pezzi più recenti")
+        print("OK    archivio a pezzi: conversione, backup e ripristino, backup di prima, file rovinati e mancanti, scrittura dei soli file cambiati, salvataggi interrotti (transazioni), file non leggibili adesso, indici più recenti, copie omonime, formato di prima dopo un ripristino, archivio.json vecchio, sole sezioni, ricostruzione senza clienti tolti, NaN, copie d'avvio interrotte, segnaposto per le versioni di prima, backup protetto, copia d'avvio, transazione rimasta nella stessa sessione, due ricostruzioni di fila, riserva dell'indice (impostazioni e Prisma ovunque di adesso, clienti tolti che non tornano), conversione interrotta prima della verifica, copia d'avvio più recente, archivio.json di una versione precedente, backup dell'archivio valido (mai copia d'avvio, segno o pezzi sciolti), ripristino interrotto a pezzi, backup a pezzi più recenti e «Tutti i clienti» (cliente attivo vuoto) dopo la ricostruzione")
         return nil
     }
 
@@ -258,6 +261,30 @@ extension ProvaBackup {
             }
         }
         return r
+    }
+
+    /// Migliorie d'uso 2: il cliente attivo vuoto è «Tutti i clienti». Si salva, si rilegge e, con l'indice mancante,
+    /// si ricostruisce dalla riserva restando vuoto (prima la ricostruzione lo sostituiva con il primo cliente).
+    private static func provaTuttiIClienti(_ base: URL) throws -> String? {
+        let fm = FileManager.default
+        let cartella = base.appendingPathComponent("Prisma", isDirectory: true)
+        try? fm.removeItem(at: cartella)
+        var d = try passatoDalDisco(DatiPrisma.demo())
+        d.clienteAttivoId = ""
+        try Archivio.salva(d, in: cartella)
+        Archivio.coda.sync {}
+        let pezzi = ArchivioPezzi.cartellaPezzi(in: cartella)
+        let letto = try ArchivioPezzi.leggi(pezzi)
+        guard letto.lettura.dati.clienteAttivoId.isEmpty else {
+            return "«Tutti i clienti» (cliente attivo vuoto) riletto come «\(letto.lettura.dati.clienteAttivoId)»"
+        }
+        let riserva = try ArchivioPezzi.leggiIndice(pezzi)
+        try fm.removeItem(at: pezzi.appendingPathComponent(ArchivioPezzi.nomeIndice))
+        let ricostruito = try ArchivioPezzi.leggi(pezzi, indiceDiRiserva: riserva)
+        guard ricostruito.lettura.dati.clienteAttivoId.isEmpty else {
+            return "ricostruendo l'indice «Tutti i clienti» è diventato «\(ricostruito.lettura.dati.clienteAttivoId)»"
+        }
+        return nil
     }
 
     /// Una modifica a un cliente riscrive solo il suo file, l'indice solo se cambia (ordine, nomi, impostazioni).

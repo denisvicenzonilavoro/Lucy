@@ -620,7 +620,7 @@ extension StatoShell {
             mostraAvviso("In modalità cliente la Ricerca non si apre: mostra i dati di altri clienti.")
             return
         }
-        guard !bloccato, presentazione == nil else { return }
+        guard !bloccato, presentazione == nil, !inVistaCliente else { return }
         // Un pannello alla volta, come in macOS
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }
@@ -721,6 +721,10 @@ extension StatoShell {
             filtroClienteAgenda = nil
             giornoAgenda = Calendar.current.startOfDay(for: a.inizio)
             appuntamentoSelezionato = a.id
+            #if os(macOS)
+            // Migliorie d'uso 18: la settimana non ha la colonna del dettaglio, l'appuntamento si mostra in «Giorno»
+            if vistaAgenda == .settimana { vistaAgenda = .giorno }
+            #endif
             apri(.agenda)
         case .attivita(let id):
             guard let a = attivita.first(where: { $0.id == id }) else { return }

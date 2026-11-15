@@ -57,7 +57,10 @@ struct AppClienti: View {
             controllaCompletamento(stato.richiestaCompletamento)
             controllaPotenziale(stato.richiestaClienteDaPotenziale)
             controllaBozza(stato.bozzaNuovoCliente)
+            controllaModifica(stato.richiestaModificaCliente)
         }
+        // Migliorie d'uso 12: «Modifica» nella riga in testa del dossier (Mac) apre il modulo di oggi
+        .onChange(of: stato.richiestaModificaCliente) { controllaModifica($0) }
         .onChange(of: stato.richiestaNuovoCliente) { controllaRichiesta($0) }
         .onChange(of: stato.richiestaClienteDaPotenziale) { controllaPotenziale($0) }
         // «Luce» giro 13: «Scrivi a mano» dalla scena del nuovo cliente apre il modulo con i dati letti
@@ -76,6 +79,17 @@ struct AppClienti: View {
         case .passaparola: VistaPassaparola()
         case .rubrica: conDettaglio
         }
+    }
+
+    /// «Modifica» dalla riga in testa del dossier (migliorie d'uso 12): il modulo della scheda del cliente, come il
+    /// «Modifica» della testata di prima. La richiesta si consuma subito.
+    private func controllaModifica(_ id: String?) {
+        guard let id else { return }
+        stato.richiestaModificaCliente = nil
+        guard modulo == nil, let c = stato.cliente(id) else { return }
+        // La nota «Da ricordare» in attesa entra prima nella scheda: il modulo la salverebbe com'era
+        TestiRinviati.scriviOra()
+        modulo = stato.cliente(id) ?? c
     }
 
     /// Il modulo del nuovo cliente già compilato dal potenziale arrivato in «Cliente».
@@ -117,18 +131,36 @@ struct AppClienti: View {
         // Sul Mac come nel template: la rubrica nel pannello, il dossier nella card a 16 di distanza
         // Finestra stretta (mezza finestra di uno spazio): resta solo il dossier, a tutta larghezza. La larghezza
         // ideale fissata dice a ViewThatFits quanto chiede il dossier (senza, i testi lunghi la farebbero enorme)
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: Tema.Apple.Clienti.spazioRubrica) {
-                rubrica
-                    .frame(width: Tema.Apple.Clienti.larghezzaRubrica)
-                    .frame(maxHeight: .infinity, alignment: .top)
-                    .superficieApple(Tema.Apple.Superficie.pannello)
-                    .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.Superficie.pannello.raggio, style: .continuous))
-                dossier(superficie: Tema.Apple.Superficie.cardPiatta)
-                    .frame(minWidth: Tema.Apple.Clienti.larghezzaMinimaDossier, idealWidth: Tema.Apple.Clienti.larghezzaMinimaDossier,
-                           maxWidth: .infinity)
+        // Migliorie d'uso 11: con un cliente scelto la colonna di sinistra è l'indice del suo dossier (216), non la
+        // rubrica; «‹ Rubrica» torna a «Tutti i clienti». In finestra stretta l'indice diventa «Sezione: … ⌄».
+        if let c = stato.clienteAttivo {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Tema.Apple.Clienti.Indice.spazio) {
+                    IndiceDossierApple(cliente: c)
+                        .frame(width: Tema.Apple.Clienti.Indice.larghezza)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .superficieApple(Tema.Apple.Superficie.pannello)
+                        .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.Superficie.pannello.raggio, style: .continuous))
+                    dossier(superficie: Tema.Apple.Superficie.cardPiatta, schede: .nessuna)
+                        .frame(minWidth: Tema.Apple.Clienti.larghezzaMinimaDossier, idealWidth: Tema.Apple.Clienti.larghezzaMinimaDossier,
+                               maxWidth: .infinity)
+                }
+                dossier(superficie: Tema.Apple.Superficie.cardPiatta, schede: .menu)
             }
-            dossier(superficie: Tema.Apple.Superficie.cardPiatta)
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Tema.Apple.Clienti.spazioRubrica) {
+                    rubrica
+                        .frame(width: Tema.Apple.Clienti.larghezzaRubrica)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .superficieApple(Tema.Apple.Superficie.pannello)
+                        .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.Superficie.pannello.raggio, style: .continuous))
+                    dossier(superficie: Tema.Apple.Superficie.cardPiatta)
+                        .frame(minWidth: Tema.Apple.Clienti.larghezzaMinimaDossier, idealWidth: Tema.Apple.Clienti.larghezzaMinimaDossier,
+                               maxWidth: .infinity)
+                }
+                dossier(superficie: Tema.Apple.Superficie.cardPiatta)
+            }
         }
         #endif
     }
@@ -200,9 +232,9 @@ struct AppClienti: View {
 
     // MARK: - Dossier
 
-    @ViewBuilder private func dossier(superficie: Tema.Apple.Superficie?) -> some View {
+    @ViewBuilder private func dossier(superficie: Tema.Apple.Superficie?, schede: SchedeDossier = .segmentato) -> some View {
         if stato.clienteAttivo != nil {
-            DossierApple(superficie: superficie, modifica: { c in modulo = c }) { scheda, c in
+            DossierApple(superficie: superficie, schede: schede, modifica: { c in modulo = c }) { scheda, c in
                 schedaDossier(scheda, c)
             }
         } else if stato.dati.clienti.isEmpty {
@@ -218,7 +250,7 @@ struct AppClienti: View {
                 ],
                 pulsante: "Importa i clienti…",
                 azione: { stato.importaClientiDaFile() },
-                secondario: ("Carica i clienti di prova", {
+                secondario: (AppClienti.testoClientiDiProva, {
                     stato.schedaImpostazioni = .strumenti
                     stato.apri(.impostazioni)
                 })
@@ -228,8 +260,15 @@ struct AppClienti: View {
         } else {
             VStack(spacing: 10) {
                 IconaApp(app: .clienti, lato: Misure.Scrivania.icona)
+                #if os(macOS)
+                // «Tutti i clienti» (migliorie d'uso 2): la rubrica; le cifre e il «Da fare» arrivano con la miglioria 11
+                Text(TestiSceltaCliente.tuaRubrica).font(Tipo.pannelloTitolo).foregroundColor(Colori.Rubrica.testo)
+                Text(TestiSceltaCliente.tuaRubricaTesto).font(Tipo.pannelloTesto).foregroundColor(Colori.Rubrica.secondario)
+                    .multilineTextAlignment(.center)
+                #else
                 Text("Nessun cliente scelto.").font(Tipo.pannelloTitolo).foregroundColor(Colori.Rubrica.testo)
                 Text("Scegli un cliente nella rubrica a sinistra.").font(Tipo.pannelloTesto).foregroundColor(Colori.Rubrica.secondario)
+                #endif
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .fondoSuperficie(superficie)
@@ -295,14 +334,18 @@ struct AppClienti: View {
                 RigaCampo(etichetta: "Sostituto d'imposta",
                           valore: f.sostitutoImposta.map { $0 ? "Sì" : "No" } ?? "")
             }
-            Button {
-                // La nota «Da ricordare» in attesa entra prima nella scheda: il modulo la salverebbe com'era
-                TestiRinviati.scriviOra()
-                modulo = stato.cliente(c.id) ?? c
-            } label: {
-                Label("Modifica la scheda", systemImage: "pencil")
+            HStack(spacing: Tema.Apple.Clienti.Testata.spazioComandi) {
+                Button {
+                    // La nota «Da ricordare» in attesa entra prima nella scheda: il modulo la salverebbe com'era
+                    TestiRinviati.scriviOra()
+                    modulo = stato.cliente(c.id) ?? c
+                } label: {
+                    Label("Modifica la scheda", systemImage: "pencil")
+                }
+                    .buttonStyle(StileCuoioChiaro())
+                // Migliorie d'uso 12: sul Mac «Aggiungi un'azienda…» (per chi non ha «L'azienda» nell'indice) sta nel
+                // menu «Altro ⌄» della riga in testa (RigaTestaDossier.swift)
             }
-                .buttonStyle(StileCuoioChiaro())
         }
     }
 
@@ -507,7 +550,7 @@ private struct MessaggiNoteDossier: View {
                         VStack(alignment: .leading, spacing: 0) {
                             Text(m.oggetto ?? m.origine.tipo.nome)
                                 .font(Tipo.campoValore).foregroundColor(Colori.Rubrica.testo).lineLimit(1)
-                            Text("\(m.canale.nome) · \(m.tono.nome) · \(m.stato.nome) · \(m.autore.nome)")
+                            Text("\(m.canale.nome) · \(m.tono.nome) · \(m.nomeStato) · \(m.autore.nome)")
                                 .font(Tipo.rubricaTema).foregroundColor(Colori.Rubrica.secondario).lineLimit(1)
                         }
                         Spacer()
@@ -555,16 +598,26 @@ private struct MessaggiNoteDossier: View {
             trovata = (k, Self.prima(pronte, cliente: id))
             return
         }
-        // Come `occasioniMessaggi()`: tutto il portafoglio, poi in modalità cliente solo le sue
+        // Come `occasioniMessaggi()`: tutto il portafoglio, in modalità cliente solo le sue (filtrate dal motore prima del
+        // limite per gruppo, migliorie d'uso 25)
         let dati = stato.datiDeiCalcoli()
         let modo = stato.modoCliente
         let oggi = Date()
+        #if os(macOS)
         let tutte = await Task.detached(priority: .userInitiated) {
-            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi)
+            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi, soloCliente: modo)
         }.value
         // Nel frattempo i dati, il giorno o la modalità sono cambiati: vale il calcolo della chiave nuova
         guard !Task.isCancelled, stato.derivatiValidi().chiave == k else { return }
+        trovata = (k, Self.prima(tutte, cliente: id))
+        #else
+        // iPhone e iPad come prima: il filtro della modalità cliente dopo il limite per gruppo
+        let tutte = await Task.detached(priority: .userInitiated) {
+            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi)
+        }.value
+        guard !Task.isCancelled, stato.derivatiValidi().chiave == k else { return }
         trovata = (k, Self.prima(modo.map { tutte.soloCliente($0) } ?? tutte, cliente: id))
+        #endif
     }
 }
 
@@ -773,5 +826,17 @@ struct PanoramicaCliente: View {
             stato.clienteAttivoId = cliente.id
             stato.apri(app)
         }
+    }
+}
+
+extension AppClienti {
+    /// Il pulsante secondario della rubrica vuota. Sul Mac (migliorie d'uso 37) porta a Impostazioni › Dimostrazione: i
+    /// clienti di prova non entrano più nell'archivio vero.
+    static var testoClientiDiProva: String {
+        #if os(macOS)
+        return "Guarda la dimostrazione"
+        #else
+        return "Carica i clienti di prova"
+        #endif
     }
 }

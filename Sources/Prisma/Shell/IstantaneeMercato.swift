@@ -153,23 +153,36 @@ enum MercatoDiProva {
 /// - 547: il dettaglio della tessera Euro Stoxx 50 con la serie dei 12 mesi e la fonte;
 /// - 548: Impostazioni › Mercato con l'interruttore, le serie e le soglie;
 /// - 549: il centro notifiche con gli avvisi di Mercato.
+/// Migliorie d'uso 29 (Design/uso/gruppo-04.md §29.5): 540-547 su «Tutti i clienti», con l'etichetta della riservatezza
+/// nella riga in testa al posto della fascia, le righe degli avvisi con l'azione e «Silenzia» (546: la riga silenziata
+/// con «Riattiva»), 544 aperto da «Soglie…»; nuove
+/// - 1051: Marco scelto nella barra, «Cosa tocca Marco oggi» e «Avvisi per Marco» (anche scura);
+/// - 1052: la scheda «Riservatezza» con «Dati di mercato» acceso;
+/// - 1053: «Dati di mercato» spento, l'etichetta «Niente esce dal Mac».
 extension Istantanee {
     nonisolated static var sceneMercato: [(nome: String, prepara: (StatoShell) -> Void)] {
         var elenco: [(nome: String, prepara: (StatoShell) -> Void)] = []
+        /// Le scene della vista d'insieme: «Tutti i clienti» nella barra.
+        func tutti(_ prepara: @escaping (StatoShell) -> Void) -> (StatoShell) -> Void {
+            { s in
+                s.scegliCliente(nil)
+                prepara(s)
+            }
+        }
         let scene: [(String, (StatoShell) -> Void)] = [
-            ("540-mercato", { s in MercatoDiProva.apri(s) }),
-            ("541-mercato-vuoto", { s in MercatoDiProva.vuoto(s) }),
-            ("542-mercato-isin", { s in MercatoDiProva.cerca(s, MercatoDiProva.isinFondo) }),
-            ("543-mercato-isin-sconosciuto", { s in MercatoDiProva.cerca(s, MercatoDiProva.isinSconosciuto) }),
-            ("543-mercato-isin-non-valido", { s in MercatoDiProva.cerca(s, MercatoDiProva.isinSbagliato) }),
-            ("544-mercato-soglie", { s in
+            ("540-mercato", tutti { s in MercatoDiProva.apri(s) }),
+            ("541-mercato-vuoto", tutti { s in MercatoDiProva.vuoto(s) }),
+            ("542-mercato-isin", tutti { s in MercatoDiProva.cerca(s, MercatoDiProva.isinFondo) }),
+            ("543-mercato-isin-sconosciuto", tutti { s in MercatoDiProva.cerca(s, MercatoDiProva.isinSconosciuto) }),
+            ("543-mercato-isin-non-valido", tutti { s in MercatoDiProva.cerca(s, MercatoDiProva.isinSbagliato) }),
+            ("544-mercato-soglie", tutti { s in
                 MercatoDiProva.prepara(s)
                 s.sessioneMercato.foglio = .soglie
                 s.apri(.mercato)
             }),
-            ("545-mercato-dati-vecchi", { s in MercatoDiProva.apri(s, vecchi: true) }),
-            ("546-mercato-avviso-spento", { s in MercatoDiProva.avvisoSpento(s) }),
-            ("547-mercato-tessera-dettaglio", { s in
+            ("545-mercato-dati-vecchi", tutti { s in MercatoDiProva.apri(s, vecchi: true) }),
+            ("546-mercato-avviso-spento", tutti { s in MercatoDiProva.avvisoSpento(s) }),
+            ("547-mercato-tessera-dettaglio", tutti { s in
                 MercatoDiProva.prepara(s)
                 s.sessioneMercato.dettaglioIstantanea = "euro-stoxx-50"
                 s.apri(.mercato)
@@ -188,6 +201,24 @@ extension Istantanee {
             elenco.append((nome: nome, prepara: prepara))
             elenco.append((nome: nome + "-scuro", prepara: prepara))
         }
+        // Migliorie d'uso 29
+        let cliente: (StatoShell) -> Void = { s in
+            MercatoDiProva.prepara(s)
+            s.scegliCliente("marco")
+            s.apri(.mercato)
+        }
+        elenco.append((nome: "1051-uso-mercato-cliente", prepara: cliente))
+        elenco.append((nome: "1051-uso-mercato-cliente-scuro", prepara: cliente))
+        elenco.append((nome: "1052-uso-mercato-riservatezza", prepara: tutti { s in
+            MercatoDiProva.prepara(s)
+            s.sessioneMercato.foglio = .riservatezza
+            s.apri(.mercato)
+        }))
+        elenco.append((nome: "1053-uso-mercato-spento", prepara: tutti { s in
+            MercatoDiProva.prepara(s)
+            s.dati.impostazioni.mercato.attivo = false
+            s.apri(.mercato)
+        }))
         return elenco
     }
 }

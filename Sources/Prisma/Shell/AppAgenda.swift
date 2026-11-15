@@ -6,6 +6,9 @@ import SwiftUI
 /// la giornata scelta. Settimana: la barra laterale con il mese a puntini, la settimana a pillola e la giornata con
 /// le ore, gli impegni e la linea dell'ora (AgendaApple.swift). Giorno: la giornata con le ore e la colonna del
 /// giorno con il dettaglio di sempre. Occasioni: le occasioni di 12 mesi (AgendaOccasioni.swift).
+/// Sul Mac (Migliorie d'uso 18) la barra ha «Giorno | Settimana | Mese» e il pulsante «Occasioni» con il numero; la
+/// vista di partenza è la settimana a sette colonne (AgendaSettimana.swift) e la striscia dei riesami non c'è più (sono
+/// voci del «Da fare»).
 /// Sul Mac Attività è accorpata qui: ogni attività sta nel giorno della sua scadenza («Da fare»), quelle rimaste
 /// indietro nella giornata di oggi. Nella giornata compaiono anche le posizioni in scadenza: ogni scadenza è
 /// l'occasione per rivedere la posizione del cliente. Toccando un impegno nella giornata si apre la sua traccia
@@ -37,7 +40,8 @@ struct AppAgenda: View {
             GeometryReader { geo in
                 // I riesami del mese mostrato: in un mese passato la striscia non compare, e nemmeno nella vista
                 // «Occasioni», che guarda 12 mesi mentre la striscia ne guarda uno
-                let riesami: RiesamiDelMese? = stato.vistaAgenda == .occasioni ? nil : stato.riesamiDelMese(giorno)
+                // Sul Mac la striscia non c'è più (Migliorie d'uso 18 e 3): i riesami sono voci del «Da fare»
+                let riesami: RiesamiDelMese? = !Self.conStriscia || stato.vistaAgenda == .occasioni ? nil : stato.riesamiDelMese(giorno)
                 let mesePassato = giorno < (cal.dateInterval(of: .month, for: Date())?.start ?? giorno)
                 let spazio = Tema.Apple.Agenda.Disposizione.spazioRighe
                 VStack(spacing: 0) {
@@ -72,6 +76,43 @@ struct AppAgenda: View {
         // Sul Mac «Nuova attività» arriva qui: Attività è accorpata nell'Agenda (su iPad la apre Attività)
         .onAppear { controllaRichiesta(stato.richiestaNuovaAttivita) }
         .onChange(of: stato.richiestaNuovaAttivita) { controllaRichiesta($0) }
+        // Migliorie d'uso 19: «Modifica» e «Attività collegata» dal menu «Altro» della scheda di un impegno concluso
+        .onChange(of: stato.richiestaModuloImpegno) { _, r in apriModuloImpegno(r) }
+        #endif
+    }
+
+    #if os(macOS)
+    /// Il modulo chiesto dalla scheda dell'impegno: la modifica dell'appuntamento o l'attività collegata, come dal
+    /// dettaglio di sempre.
+    private func apriModuloImpegno(_ r: RichiestaModuloImpegno?) {
+        guard let r else { return }
+        stato.richiestaModuloImpegno = nil
+        switch r {
+        case .modifica(let id):
+            guard let e = stato.appuntamento(id) else { return }
+            spiegazioneModulo = nil
+            modulo = e
+        case .attivita(let id):
+            guard let e = stato.appuntamento(id) else { return }
+            moduloAttivita = Self.attivitaCollegata(e)
+        }
+    }
+    #endif
+
+    /// L'attività collegata a un appuntamento («Attività collegata»).
+    static func attivitaCollegata(_ e: Appuntamento) -> Attivita {
+        var t = Attivita.nuova(clienteId: e.clienteId, scadenza: e.inizio)
+        t.titolo = "Preparare: \(e.titolo)"
+        t.appuntamentoId = e.id
+        return t
+    }
+
+    /// La striscia «Riesami del mese» sopra il calendario: solo su iPad (sul Mac i riesami stanno nel «Da fare»).
+    private static var conStriscia: Bool {
+        #if os(macOS)
+        return false
+        #else
+        return true
         #endif
     }
 
@@ -204,7 +245,12 @@ struct AppAgenda: View {
 
     private func rigaBarra<Riepilogo: View>(_ riepilogo: Riepilogo, clienti: [(String?, String)], compatta: Bool) -> some View {
         let b = Tema.Apple.Agenda.Barra.self
+        #if os(macOS)
+        // Migliorie d'uso 18: «Giorno | Settimana | Mese»; le occasioni sono un pulsante con il numero, accanto
+        let viste: [(VistaAgenda, String)] = [(.giorno, "Giorno"), (.settimana, "Settimana"), (.mese, "Mese")]
+        #else
         let viste: [(VistaAgenda, String)] = [(.mese, "Mese"), (.settimana, "Settimana"), (.giorno, "Giorno"), (.occasioni, "Occasioni")]
+        #endif
         let aiuti = aiutiFrecce
         return HStack(spacing: b.spazio) {
             HStack(spacing: b.spazioFrecce) {
@@ -235,8 +281,16 @@ struct AppAgenda: View {
             Spacer(minLength: 0)
             SegmentatoPillola(selezione: Bindable(stato).vistaAgenda, voci: viste)
                 .fixedSize()
+            #if os(macOS)
+            PulsanteOccasioniAgenda(compatto: compatta)
+            // Migliorie d'uso 2: il cliente si sceglie nella barra; qui solo «Solo <Nome> ✕» per tornare a tutti
+            if let id = stato.filtroClienteAgenda, let c = stato.cliente(id), !stato.inModoCliente {
+                PillolaSoloCliente(nome: StatoShell.nomeBreve(c)) { stato.scegliCliente(nil, avviso: true) }
+            }
+            #else
             MenuTendina(selezione: Bindable(stato).filtroClienteAgenda, opzioni: clienti,
                         larghezza: compatta ? b.menuClientiCompatto : b.menuClienti)
+            #endif
             if compatta {
                 Button { nuovaAttivita() } label: { Image(systemName: "checklist") }
                     .buttonStyle(.apple)
@@ -305,6 +359,33 @@ struct AppAgenda: View {
         .cardAgendaApple()
     }
 
+    #if os(macOS)
+    /// La settimana che si vede tutta (Migliorie d'uso 18): a sinistra il mese con i puntini e le cifre della settimana
+    /// (non nella finestra stretta), a destra i sette giorni affiancati con gli impegni al loro posto
+    /// (AgendaSettimana.swift). Toccando un giorno, nel mese piccolo o nella testata, si apre in «Giorno».
+    private var vistaSettimana: some View {
+        let settimane = CalendarioAgenda.settimane(meseDi: giorno)
+        let indice = indiceGiorni(settimane.flatMap { $0 })
+        let giorni = CalendarioAgenda.giorni(settimanaDi: giorno)
+        return GeometryReader { geo in
+            HStack(alignment: .top, spacing: Tema.Apple.Agenda.Disposizione.spazio) {
+                if geo.size.width >= Tema.Apple.Agenda.SettimanaSette.sogliaLaterale {
+                    BarraLateraleAgendaApple(giorno: giorno, settimane: settimane, indice: indice, strato: strato,
+                                             seleziona: { apriGiorno($0) })
+                }
+                SettimanaAgendaApple(giorni: giorni, indice: indice, apriGiorno: { apriGiorno($0) })
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+        }
+    }
+
+    /// Un giorno della settimana in «Giorno».
+    private func apriGiorno(_ g: Date) {
+        seleziona(g)
+        stato.vistaAgenda = .giorno
+    }
+    #else
     /// La settimana del template: a sinistra il mese con i puntini e le cifre della settimana, a destra la
     /// settimana a pillola, la data e la giornata con gli impegni e la linea dell'ora.
     private var vistaSettimana: some View {
@@ -327,6 +408,8 @@ struct AppAgenda: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
     }
+
+    #endif
 
     /// Il giorno: la giornata con le ore a sinistra, a destra la colonna del giorno (appuntamenti, cose da fare,
     /// scadenze, occasioni e il dettaglio di sempre della riga scelta).
@@ -771,12 +854,7 @@ struct AppAgenda: View {
                     spiegazioneModulo = nil
                     modulo = e
                 },
-                nuovaAttivita: {
-                    var t = Attivita.nuova(clienteId: e.clienteId, scadenza: e.inizio)
-                    t.titolo = "Preparare: \(e.titolo)"
-                    t.appuntamentoId = e.id
-                    moduloAttivita = t
-                }
+                nuovaAttivita: { moduloAttivita = Self.attivitaCollegata(e) }
             )
         case .attivita(let t):
             DettaglioAttivita(attivita: t) { moduloAttivita = t }
@@ -1026,6 +1104,7 @@ struct RigaScadenzaAgenda: View {
 
 struct DettaglioAppuntamento: View {
     @Environment(StatoShell.self) var stato
+    @Environment(\.modoIstantanea) private var istantanea
     let evento: Appuntamento
     let modifica: () -> Void
     let nuovaAttivita: () -> Void
@@ -1156,53 +1235,83 @@ struct DettaglioAppuntamento: View {
             // L'ultima riga sfuma sopra le azioni invece di finire tagliata a metà
             .sfumaturaBordiScorrimento(sotto: Misure.AgendaImpaginazione.sfumaturaDettaglio)
 
-            // Le azioni in due gruppi: le principali in alto, le altre in una fila sola se c'è posto,
-            // altrimenti due per riga (o una sotto l'altra): i titoli non si troncano mai
-            // Nessun blu nel dettaglio (il blu è «Appuntamento» nella barra): per prima l'azione consigliata,
-            // «Prepara l'incontro», in vetro dell'accento; l'analisi viene prima di Vera.
-            let spazio = Misure.AgendaImpaginazione.spazioAzioni
-            VStack(spacing: spazio) {
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: spazio) {
-                        azioneIncontro(aperto)
-                        azioneVera
-                    }
-                    VStack(spacing: spazio) {
-                        azioneIncontro(aperto)
-                        azioneVera
-                    }
-                }
-                ViewThatFits(in: .horizontal) {
-                    HStack(spacing: spazio) {
-                        azioneConcluso(concluso)
-                        azioneModifica
-                        azioneAttivita
-                        azioneFascicolo(archiviato)
-                    }
-                    VStack(spacing: spazio) {
-                        HStack(spacing: spazio) {
-                            azioneConcluso(concluso)
-                            azioneModifica
-                        }
-                        HStack(spacing: spazio) {
-                            azioneAttivita
-                            azioneFascicolo(archiviato)
-                        }
-                    }
-                    VStack(spacing: spazio) {
-                        azioneConcluso(concluso)
-                        azioneModifica
-                        azioneAttivita
-                        azioneFascicolo(archiviato)
-                    }
-                }
-            }
-            .padding(.top, 7)
-            .bordoAlto(Colori.Agenda.azioniBordo)
+            azioni(aperto: aperto, concluso: concluso, archiviato: archiviato, cliente: cliente)
+                .padding(.top, 7)
+                .bordoAlto(Colori.Agenda.azioniBordo)
         }
     }
 
     // MARK: - Azioni del dettaglio
+
+    /// Migliorie d'uso 19: sul Mac, per un impegno passato o chiuso, le azioni dicono le stesse cose della scheda
+    /// dell'impegno: «Scrivi il verbale» e «Altro ⌄». Prima dell'ora (e sull'iPad) restano quelle di sempre.
+    @ViewBuilder private func azioni(aperto: Bool, concluso: Bool, archiviato: Documento?, cliente: Cliente?) -> some View {
+        #if os(macOS)
+        if cliente != nil && MomentoImpegno.di(evento, adesso: istantanea ? OraIstantanee.data() : Date()) != .prima {
+            azioniDopo
+        } else {
+            azioniPrima(aperto: aperto, concluso: concluso, archiviato: archiviato)
+        }
+        #else
+        azioniPrima(aperto: aperto, concluso: concluso, archiviato: archiviato)
+        #endif
+    }
+
+    #if os(macOS)
+    private var azioniDopo: some View {
+        HStack(spacing: Misure.AgendaImpaginazione.spazioAzioni) {
+            PulsanteAzione(titolo: TestiAgendaApple.scriviIlVerbale, principale: true, simbolo: "list.bullet.rectangle") {
+                stato.apriIncontro(per: evento, scheda: .passi)
+            }
+            .help("Il verbale dell'incontro, in Incontri nel momento «Dopo»")
+            MenuAltroImpegno(evento: evento, modifica: modifica, attivita: nuovaAttivita)
+        }
+    }
+    #endif
+
+    // Le azioni in due gruppi: le principali in alto, le altre in una fila sola se c'è posto,
+    // altrimenti due per riga (o una sotto l'altra): i titoli non si troncano mai
+    // Nessun blu nel dettaglio (il blu è «Appuntamento» nella barra): per prima l'azione consigliata,
+    // «Prepara l'incontro», in vetro dell'accento; l'analisi viene prima di Vera.
+    private func azioniPrima(aperto: Bool, concluso: Bool, archiviato: Documento?) -> some View {
+        let spazio = Misure.AgendaImpaginazione.spazioAzioni
+        return VStack(spacing: spazio) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: spazio) {
+                    azioneIncontro(aperto)
+                    azioneVera
+                }
+                VStack(spacing: spazio) {
+                    azioneIncontro(aperto)
+                    azioneVera
+                }
+            }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: spazio) {
+                    azioneConcluso(concluso)
+                    azioneModifica
+                    azioneAttivita
+                    azioneFascicolo(archiviato)
+                }
+                VStack(spacing: spazio) {
+                    HStack(spacing: spazio) {
+                        azioneConcluso(concluso)
+                        azioneModifica
+                    }
+                    HStack(spacing: spazio) {
+                        azioneAttivita
+                        azioneFascicolo(archiviato)
+                    }
+                }
+                VStack(spacing: spazio) {
+                    azioneConcluso(concluso)
+                    azioneModifica
+                    azioneAttivita
+                    azioneFascicolo(archiviato)
+                }
+            }
+        }
+    }
 
     private var azioneVera: some View {
         PulsanteAzione(titolo: "Prepara con Vera", simbolo: "sparkles") {

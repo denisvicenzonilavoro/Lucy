@@ -12,7 +12,7 @@ extension Tema.Apple {
     static let routineAlone = Color.dinamico(chiaro: Color(r: 194, g: 38, b: 75, a: 0.35), scuro: Color(r: 255, g: 92, b: 131, a: 0.35))
     static let routineFatto = Colore.verde
     static let routineDaConfermare = Colore.accento
-    static let routineAttesa = Colore.arancio
+    static let routineAttesa = Colore.arancioTesto
     static let routineImpossibile = Colore.rosso
     static let routinePuntino = Colore.inchiostro3
     static let routineTratteggio = Colore.inchiostro3

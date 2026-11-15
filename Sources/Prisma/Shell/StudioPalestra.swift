@@ -47,7 +47,12 @@ enum TestiPalestra {
     static let sceltaTesto = "Dal menu «Allenati con…»: un cliente del tuo archivio o un profilo inventato (solo età, lavoro e timori)."
     static let inizia = "▶︎ Inizia l’allenamento"
     static let rifai = "↻ Rifai l’allenamento"
+    #if os(macOS)
+    /// Migliorie d'uso 9: niente nomi tecnici in vista.
+    static let nonProntaTitolo = "Vera non è pronta: la palestra ha bisogno di lei."
+    #else
     static let nonProntaTitolo = "Vera non è pronta: la palestra ha bisogno di Qwen sul Mac."
+    #endif
     static let apriImpostazioni = "Impostazioni › Vera"
     static let riprova = "Riprova"
     static let lenta = "Vera ci sta mettendo un po’…"
@@ -405,14 +410,20 @@ private struct ConversazionePalestra: View {
     }
 
     private func nonPronta(_ motivo: String) -> some View {
-        VStack(spacing: P.spazioStato) {
+        #if os(macOS)
+        // Migliorie d'uso 9: il motivo tecnico (Ollama, modello) si legge in Impostazioni › Vera
+        let spiegazione = TestiStatoVera.spiegazione
+        #else
+        let spiegazione = motivo
+        #endif
+        return VStack(spacing: P.spazioStato) {
             SferaVera(misura: P.sferaStato, viva: false)
             Text(TestiPalestra.nonProntaTitolo)
                 .carattereApple(P.titoloStato)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
-            Text(motivo)
+            Text(spiegazione)
                 .carattereApple(P.testoStato)
                 .foregroundColor(P.coloreStato)
                 .multilineTextAlignment(.center)

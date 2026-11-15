@@ -21,6 +21,10 @@ import SwiftUI
 //   rosso che pulsa. «Riduci movimento» e istantanee: tutto fermo nello stato finale, senza alone.
 // - iPad: la stessa vista; nelle finestre strette le tessere vanno a capo e i riquadri uno sotto l'altro. Su iPhone e
 //   iPad Mercato si legge soltanto (MercatoTelefono.swift per l'iPhone).
+// - Migliorie d'uso 29 (Design/uso/gruppo-04.md §29, solo Mac): la fascia verde lascia il posto all'etichetta
+//   «Escono solo dati pubblici» / «Niente esce dal Mac» nella riga in testa; con un cliente scelto nella barra i
+//   riquadri diventano «Cosa tocca <Nome> oggi» e «Avvisi per <Nome>»; ogni avviso ha la sua azione e «Silenzia»;
+//   «Soglie…» sta nel riquadro degli avvisi. Su iPad fascia e interruttore restano come prima.
 // Valori in DesignSystem/Apple/Tema.Apple+Mercato.swift.
 
 @MainActor
@@ -112,9 +116,24 @@ private struct CorpoMercato: View {
         let vecchi = MotoreMercato.datiVecchi(tessere)
         let maiAggiornato = tessere.isEmpty && stato.dati.mercato.quote.isEmpty
         let sinistra = max(0, (larghezza - D.spazioRiquadri) * D.proporzioneRiquadri / (D.proporzioneRiquadri + 1))
+        // Migliorie d'uso 29 (sul Mac): con un cliente scelto nella barra i riquadri parlano solo di lui. Filtri su
+        // elenchi già in cache e piccoli; la fascia verde lascia il posto all'etichetta nella riga in testa.
+        #if os(macOS)
+        let scelto: Cliente? = stato.tuttiIClienti ? nil : stato.clienteAttivo
+        let conFascia = false
+        #else
+        let scelto: Cliente? = nil
+        let conFascia = true
+        #endif
+        let mostrati: [EventoMercato] = scelto.map { c in
+            eventi.filter { e in e.toccati.contains { $0.clienteId == c.id } }
+        } ?? eventi
         return VStack(alignment: .leading, spacing: 0) {
-            FasciaRiservatezzaMercato(attivo: attivo)
-                .entrataCascata(0, base: M.base)
+            if conFascia {
+                FasciaRiservatezzaMercato(attivo: attivo)
+                    .entrataCascata(0, base: M.base)
+                    .padding(.bottom, D.spazioStriscia)
+            }
             Group {
                 if maiAggiornato {
                     VuotoMercato(attivo: attivo)
@@ -123,27 +142,26 @@ private struct CorpoMercato: View {
                     StrisciaMercato(tessere: tessere, larghezza: larghezza, apri: apri)
                 }
             }
-            .padding(.top, D.spazioStriscia)
             Group {
                 if largo {
                     HStack(alignment: .top, spacing: D.spazioRiquadri) {
                         // Affiancati i riquadri hanno l'altezza della finestra: le righe si costruiscono mentre entrano
                         // in vista (`pigro`)
-                        RiquadroToccati(eventi: eventi, vecchi: vecchi, senzaDati: maiAggiornato, pigro: true)
+                        RiquadroToccati(eventi: mostrati, vecchi: vecchi, senzaDati: maiAggiornato, cliente: scelto, pigro: true)
                             .frame(width: sinistra)
                             .frame(maxHeight: .infinity)
                             .entrataCascata(M.indiceMassimoTessere + 1, base: M.base)
-                        RiquadroAvvisi(sessione: sessione, pigro: true)
+                        RiquadroAvvisi(sessione: sessione, cliente: scelto, pigro: true)
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                             .entrataCascata(M.indiceMassimoTessere + 2, base: M.base)
                     }
                     .frame(maxHeight: .infinity, alignment: .top)
                 } else {
                     VStack(alignment: .leading, spacing: D.spazioRiquadri) {
-                        RiquadroToccati(eventi: eventi, vecchi: vecchi, senzaDati: maiAggiornato)
+                        RiquadroToccati(eventi: mostrati, vecchi: vecchi, senzaDati: maiAggiornato, cliente: scelto)
                             .frame(minHeight: D.altezzaRiquadroImpilato)
                             .entrataCascata(M.indiceMassimoTessere + 1, base: M.base)
-                        RiquadroAvvisi(sessione: sessione)
+                        RiquadroAvvisi(sessione: sessione, cliente: scelto)
                             .frame(minHeight: D.altezzaRiquadroImpilato)
                             .entrataCascata(M.indiceMassimoTessere + 2, base: M.base)
                     }
@@ -179,8 +197,8 @@ private struct OcchielloMercatoCorpo: View {
     }
 }
 
-/// A destra nella testata: la ricerca per ISIN a pillola con «Cerca» dentro e il pulsante blu delle soglie degli
-/// avvisi (gli avvisi nascono dalle soglie: il pulsante le apre).
+/// A destra nella testata: sul Mac l'etichetta della riservatezza, poi la ricerca per ISIN a pillola con «Cerca»
+/// dentro; su iPad anche il pulsante blu delle soglie degli avvisi (sul Mac «Soglie…» sta nel riquadro degli avvisi).
 struct AzioniMercato: View {
     @Environment(StatoShell.self) var stato
 
@@ -199,9 +217,15 @@ private struct AzioniMercatoCorpo: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         HStack(spacing: I.spazio) {
+            #if os(macOS)
+            // Migliorie d'uso 29: prima di tutto l'etichetta della riservatezza (al posto della fascia verde)
+            EtichettaRiservatezzaMercato(attivo: stato.dati.impostazioni.mercato.attivo) { sessione.foglio = .riservatezza }
+            #endif
             CampoISINMercato(sessione: sessione)
             // «Per i tuoi clienti» (fase 4 di Vera): si nasconde da solo in modalità cliente
             PulsanteMercatoClientiVera()
+            #if !os(macOS)
+            // Sul Mac le soglie si aprono da «Soglie…» nel riquadro degli avvisi (migliorie d'uso 29)
             if !stato.inModoCliente {
                 Button { sessione.foglio = .soglie } label: {
                     Label(TestiAppMercato.soglie, systemImage: "slider.horizontal.3")
@@ -209,9 +233,59 @@ private struct AzioniMercatoCorpo: View {
                 .buttonStyle(.applePrimario)
                 .help(TestiAppMercato.soglieNota)
             }
+            #endif
         }
     }
 }
+
+#if os(macOS)
+/// Migliorie d'uso 29 (template `.chipC`, riga 4019): la capsula con il lucchetto nella riga in testa. Dice solo il
+/// vero: «Escono solo dati pubblici» con «Dati di mercato» acceso, «Niente esce dal Mac» da spento. Sotto il puntatore
+/// si solleva di 2 (fermo con «Riduci movimento» e nelle istantanee); un clic apre la scheda «Riservatezza».
+struct EtichettaRiservatezzaMercato: View {
+    let attivo: Bool
+    let azione: () -> Void
+
+    @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.modoIstantanea) private var istantanea
+    @State private var sopra = false
+
+    private typealias R = Tema.Apple.Mercato.Riservatezza
+
+    var body: some View {
+        let forma = Capsule(style: .continuous)
+        let testo = TestiAppMercato.etichettaRiservatezza(attivo: attivo)
+        return Button(action: azione) {
+            HStack(spacing: R.spazio) {
+                Image(systemName: R.simbolo)
+                    .carattereApple(R.carattereSimbolo)
+                    .foregroundColor(attivo ? R.coloreSimboloAcceso : R.coloreSimboloSpento)
+                    .accessibilityHidden(true)
+                Text(testo)
+                    .carattereApple(R.testo)
+                    .foregroundColor(R.coloreTesto)
+                    .lineLimit(1)
+            }
+            .padding(R.padding)
+            .background {
+                forma.fill(R.fondo)
+                    .overlay { forma.strokeBorder(R.bordo, lineWidth: R.spessoreBordo) }
+            }
+            .contentShape(forma)
+        }
+        .buttonStyle(StileSemplice())
+        .fixedSize()
+        .offset(y: sollevata ? R.sollevamento : 0)
+        .animation(Tema.Apple.Moto.animazione(Tema.Apple.Moto.ChipScelta.animazione, calmo: calmo, istantanea: istantanea),
+                   value: sollevata)
+        .onHover { dentro in sopra = dentro && !istantanea }
+        .help(TestiAppMercato.aiutoRiservatezza)
+        .accessibilityLabel(Text(testo))
+    }
+
+    private var sollevata: Bool { sopra && !calmo && !istantanea }
+}
+#endif
 
 /// Il campo ISIN a pillola (`chip`, raggio 99) con «Cerca» dentro: Invio cerca, Esc svuota (sul Mac).
 struct CampoISINMercato: View {

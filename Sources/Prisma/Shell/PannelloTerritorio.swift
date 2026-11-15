@@ -29,6 +29,8 @@ struct TileTerritorio: View {
     var bordo: Color = Tema.Apple.Territorio.Pannello.bordoTile
     var accesa = false
     var azione: (() -> Void)? = nil
+    /// Un collegamento in fondo alla tile, fuori dal clic della tile (Migliorie d'uso 32: «Apri «Da fare» ›»).
+    var collegamento: (testo: String, azione: () -> Void)? = nil
 
     var body: some View {
         let corpo = VStack(alignment: .leading, spacing: P.spazio / 2) {
@@ -45,12 +47,29 @@ struct TileTerritorio: View {
                     .foregroundColor(P.coloreTesto2)
                     .fixedSize(horizontal: false, vertical: true)
             }
+            if let collegamento {
+                Button(collegamento.testo, action: collegamento.azione)
+                    .buttonStyle(.plain)
+                    .carattereApple(P.piccolo)
+                    .foregroundColor(P.collegamento)
+                    .padding(.top, P.sopraCollegamento - P.spazio / 2)
+            }
         }
         .padding(P.paddingTile)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(RoundedRectangle(cornerRadius: P.raggioTile, style: .continuous).fill(accesa ? P.fondoTileAcceso : P.fondoTile))
         .overlay(RoundedRectangle(cornerRadius: P.raggioTile, style: .continuous).stroke(bordo, lineWidth: P.spessoreBordoTile))
-        if let azione {
+        if let azione, let collegamento {
+            // Con un collegamento dentro, la tile non è un Button (niente pulsanti annidati): il clic sulla tile la
+            // accende, quello sul collegamento va al collegamento
+            corpo
+                .contentShape(RoundedRectangle(cornerRadius: P.raggioTile, style: .continuous))
+                .onTapGesture(perform: azione)
+                .accessibilityElement(children: .combine)
+                .accessibilityAddTraits(accesa ? AccessibilityTraits([.isButton, .isSelected]) : AccessibilityTraits.isButton)
+                .accessibilityAction(.default, azione)
+                .accessibilityAction(named: Text(collegamento.testo), collegamento.azione)
+        } else if let azione {
             Button(action: azione) { corpo }
                 .buttonStyle(.plain)
                 .accessibilityAddTraits(accesa ? .isSelected : [])
@@ -134,10 +153,18 @@ struct PannelloOggi: View {
         let t = stato.territorio
         let conZone = !stato.dati.impostazioni.territorio.zone.isEmpty
         return VStack(spacing: P.spazioTile) {
+            #if os(macOS)
+            // Migliorie d'uso 32: il riquadro del cliente scelto nella barra, prima dei tre interruttori
+            if !stato.tuttiIClienti, let c = stato.cliente(stato.clienteAttivoId) {
+                TileClienteTerritorio(cliente: c, oggi: oggi)
+                    .entrataCascata(3)
+            }
+            #endif
             if let z = oggi.zonaPiuRicca {
                 TileTerritorio(titolo: conZone ? "La zona con più patrimonio" : "Il comune con più patrimonio", valore: z.nome,
                                accesa: t.filtroZona == z.nome) {
                     t.soloDaFare = false
+                    t.luceScelta = nil
                     t.filtroZona = t.filtroZona == z.nome ? nil : z.nome
                 }
                 .entrataCascata(3)
@@ -145,6 +172,7 @@ struct PannelloOggi: View {
             if let z = oggi.zonaUnCliente {
                 TileTerritorio(titolo: "Dove hai un solo cliente", valore: z.nome, accesa: t.filtroZona == z.nome) {
                     t.soloDaFare = false
+                    t.luceScelta = nil
                     t.filtroZona = t.filtroZona == z.nome ? nil : z.nome
                 }
                 .entrataCascata(4)
@@ -152,12 +180,22 @@ struct PannelloOggi: View {
             TileTerritorio(titolo: "Con qualcosa da fare",
                            valore: oggi.conQualcosaDaFare == 1 ? "1 cliente" : "\(oggi.conQualcosaDaFare) clienti",
                            nota: "sono i punti con l'anello arancio", coloreValore: P.testoDaFare, bordo: P.bordoDaFare,
-                           accesa: t.soloDaFare) {
+                           accesa: t.soloDaFare, azione: {
                 t.filtroZona = nil
+                t.luceScelta = nil
                 t.soloDaFare.toggle()
-            }
+            }, collegamento: collegamentoDaFare)
             .entrataCascata(5)
         }
+    }
+
+    /// «Apri «Da fare» ›» (Migliorie d'uso 32): il pannello «Da fare» della barra su «Tutti». Solo sul Mac.
+    private var collegamentoDaFare: (testo: String, azione: () -> Void)? {
+        #if os(macOS)
+        return (TestiTerritorio.apriDaFare, { stato.apriDaFare(soloCliente: false) })
+        #else
+        return nil
+        #endif
     }
 
     private var elencoDaFare: some View {
@@ -182,6 +220,58 @@ struct PannelloOggi: View {
     }
 }
 
+#if os(macOS)
+/// Il riquadro del cliente scelto nella barra (Migliorie d'uso 32): chi è, da quando, e quanti clienti gli stanno a meno
+/// di dieci minuti (le luci rimaste accese). Se non è sulla mappa lo dice, con «Metti la posizione a mano». Non è un
+/// interruttore; VoiceOver legge la frase intera.
+struct TileClienteTerritorio: View {
+    let cliente: Cliente
+    let oggi: TerritorioOggi
+
+    @Environment(StatoShell.self) private var stato
+
+    var body: some View {
+        let nome = MotoreTerritorio.nomeBattesimo(cliente)
+        let luce = oggi.luci.first { $0.id == cliente.id }
+        VStack(alignment: .leading, spacing: P.spazio) {
+            HStack(spacing: P.spazioCliente) {
+                AvatarCliente(iniziali: cliente.iniziali, tinta: cliente.tinta.colori, lato: P.avatarCliente)
+                VStack(alignment: .leading, spacing: P.spazioRighe) {
+                    Text(cliente.nome)
+                        .carattereApple(P.nomeCliente)
+                        .foregroundColor(P.coloreTesto)
+                        .lineLimit(1)
+                    if let luce {
+                        Text(TestiTerritorio.zonaEAnno(luce.luogo.zona, anno: luce.annoInizio, stimato: luce.annoStimato))
+                            .carattereApple(P.piccolo)
+                            .foregroundColor(P.coloreTesto2)
+                            .lineLimit(1)
+                    }
+                }
+            }
+            if let luce {
+                Text(TestiTerritorio.vicini(stato.viciniTerritorio(luce.id, luci: oggi.luci).count, nome: nome))
+                    .carattereApple(P.testo)
+                    .foregroundColor(P.coloreTesto)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                Text(TestiTerritorio.nonSullaMappa(nome))
+                    .carattereApple(P.testo)
+                    .foregroundColor(P.coloreTesto)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(TestiTerritorio.mettiAMano) { stato.apriTerritorioSposta(cliente.id) }
+                    .buttonStyle(.appleSobrio)
+            }
+        }
+        .padding(P.paddingTile)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: P.raggioTile, style: .continuous).fill(P.fondoTile))
+        .overlay(RoundedRectangle(cornerRadius: P.raggioTile, style: .continuous).stroke(P.bordoCliente, lineWidth: P.spessoreBordoTile))
+        .accessibilityElement(children: .combine)
+    }
+}
+#endif
+
 /// La legenda e la frase sulla provenienza delle posizioni (niente CAP), con «dati di prova» se la tabella è di prova.
 struct LegendaTerritorio: View {
     let diProva: Bool
@@ -192,8 +282,8 @@ struct LegendaTerritorio: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Lg.spazio) {
             HStack(spacing: Lg.spazio * 2) {
-                voce(colore: L.alleanza, "Alleanza")
-                voce(colore: L.indipendente, "Indipendente")
+                voce(colore: L.alleanza, Canale.alleanza.nomeBreve)
+                voce(colore: L.indipendente, Canale.indipendente.nomeBreve)
                 HStack(spacing: Lg.spazio) {
                     Circle().stroke(Lg.bordoEntrambi, lineWidth: Lg.spessoreBordo).frame(width: Lg.pallino, height: Lg.pallino)
                     Text("entrambi").carattereApple(Lg.testo).foregroundColor(Lg.colore)
@@ -664,7 +754,8 @@ struct RigaPosizioneMappa: View {
 
     private var testo: String {
         if cliente.luogo != nil {
-            return cliente.luogo?.nota == TerritorioDiProva.nota ? "a mano · dati di prova" : "a mano"
+            // Migliorie d'uso 37: in dimostrazione basta l'etichetta della barra
+            return cliente.luogo?.nota == TerritorioDiProva.nota && !stato.inDimostrazione ? "a mano · dati di prova" : "a mano"
         }
         guard let t = stato.territorio.tabella else { return "posizione dal comune dell'indirizzo" }
         let r = MotoreTerritorio.luoghi(clienti: [cliente], tabella: t, zone: [])

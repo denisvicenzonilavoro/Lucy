@@ -131,7 +131,7 @@ extension Tema.Apple {
             /// Le note sotto il segmentato (età ipotizzata, obiettivo mancante) e l'avviso arancio di Vera.
             static let nota = Tema.Apple.Carattere.secondario
             static let coloreNota = Tema.Apple.Colore.inchiostro2
-            static let coloreAvviso = Tema.Apple.Colore.arancio
+            static let coloreAvviso = Tema.Apple.Colore.arancioTesto
             static let sopraNota: CGFloat = 8
             /// «dati di prova» accanto al titolo (capsula arancio delle altre etichette di prova).
             static let prova = Tema.Apple.Studio.Card.prova

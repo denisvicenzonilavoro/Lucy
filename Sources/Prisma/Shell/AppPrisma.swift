@@ -50,6 +50,38 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
     /// Le app del dock, nell'ordine di `allCases`.
     static var delDock: [AppPrisma] { allCases.filter(\.nelDock) }
 
+    /// Migliorie d'uso 36: sul Mac il dock è in gruppi separati da un filo, nell'ordine del lavoro: le persone,
+    /// l'incontro, il contatto, il mestiere, e in fondo Vera e Impostazioni. `allCases` non cambia (l'ordine dei
+    /// casi si usa in archivi, prove, iPhone e iPad), e iPhone e iPad restano su `delDock`.
+    static let gruppiDockMac: [[AppPrisma]] = [
+        [.clienti, .posizioni, .analisi360],
+        [.agenda, .incontri, .presentazioni, .sala, .pratiche],
+        [.messaggi, .territorio],
+        [.mercato, .biblioteca, .studio],
+        [.vera, .impostazioni],
+    ]
+
+    /// Le app del dock del Mac in fila, gruppo dopo gruppo: ⌥1…⌥9 sono le prime nove.
+    static var dockMac: [AppPrisma] { gruppiDockMac.flatMap { $0 } }
+
+    /// I gruppi del dock di questa piattaforma: sul Mac quelli di `gruppiDockMac`, altrove un solo gruppo (`delDock`).
+    static var gruppiDock: [[AppPrisma]] {
+        #if os(macOS)
+        return gruppiDockMac
+        #else
+        return [delDock]
+        #endif
+    }
+
+    /// Le app del dock di questa piattaforma, in fila.
+    static var dockInFila: [AppPrisma] { gruppiDock.flatMap { $0 } }
+
+    /// I gruppi del dock con le sole app che `consentita` lascia passare, senza i gruppi rimasti vuoti (in modalità
+    /// cliente sul Mac sparisce «il contatto», Messaggi e Territorio, con il suo filo).
+    static func gruppiDockConsentiti(_ consentita: (AppPrisma) -> Bool) -> [[AppPrisma]] {
+        gruppiDock.map { $0.filter(consentita) }.filter { !$0.isEmpty }
+    }
+
     /// Le app con una finestra propria fuori dal dock (Prodotti, Note, Ricerca), nell'ordine di `allCases`.
     static var altreApp: [AppPrisma] { allCases.filter { $0.ospite == nil && $0.fuoriDalDock } }
 
@@ -132,7 +164,13 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
     var occhiello: String {
         switch self {
         case .clienti: return "Rubrica Prisma"
-        case .analisi360: return "Il centro della consulenza"
+        case .analisi360:
+            #if os(macOS)
+            // Migliorie d'uso 10: il centro è Posizioni; Analisi 360 dice il suo lavoro
+            return Parole.occhielloAnalisi360
+            #else
+            return "Il centro della consulenza"
+            #endif
         case .incontri: return "Il tempo della relazione"
         case .posizioni: return "Il cuore della consulenza"
         case .obiettivi: return "Il quaderno dei progetti"
@@ -158,6 +196,17 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .biblioteca: return "Condizioni, circolari e normativa"
         }
     }
+
+    #if os(macOS)
+    /// Il testo a destra nella riga in testa alla finestra (migliorie d'uso 4, `#wRight` del template): facoltativo,
+    /// dopo il sottotitolo e prima delle azioni. Nel template lo ha solo Vera.
+    var testoDestro: String? {
+        switch self {
+        case .vera: return "Tutto resta su questo Mac"
+        default: return nil
+        }
+    }
+    #endif
 
     /// Titolo dell'intestazione dentro la finestra.
     var titoloIntestazione: String {

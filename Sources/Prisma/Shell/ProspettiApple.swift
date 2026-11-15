@@ -26,6 +26,9 @@ import SwiftUI
 //   nei Documenti, Salva PDF (il blu, l'azione principale).
 // - «Riduci movimento»: dissolvenze di 0,15 s; istantanee: tutto fermo nello stato finale.
 // - Sull'iPad la stessa app: niente passaggio del puntatore, la carta si sfoglia col dito (`SfogliaAnteprimaApple`).
+// - Sul Mac (migliorie d'uso 23) la colonna ha i documenti per momento (`ElencoProspetti`), con la riga «a cosa serve»,
+//   le etichette delle versioni e «per l'incontro di oggi»; la riga scelta non si allarga (solo le scelte per impaginare)
+//   e la descrizione lunga sta dietro la «i» sopra la pagina (Shell/ElencoProspettiApple.swift). Niente piede.
 // Valori in DesignSystem/Apple/Tema.Apple+Prospetti.swift. L'iPhone non ha Prospetti.
 
 // MARK: - Stili delle scelte del documento (comuni)
@@ -108,7 +111,12 @@ extension AppProspetti {
 
     /// L'ordine di tutte le voci, dall'alto in basso: dice da che parte gira la pagina.
     private var ordineVoci: [TipoProspetto] {
+        #if os(macOS)
+        // Migliorie d'uso 23: l'ordine dei gruppi per momento
+        ElencoProspetti.ordine
+        #else
         tipiPerIncontro + Self.tipiDiDettaglio + [.portafoglio, .fascicolo]
+        #endif
     }
 
     var corpoProspettiApple: some View {
@@ -137,7 +145,9 @@ extension AppProspetti {
     private var barraLateraleApple: some View {
         let l = Tema.Apple.Prospetti.Laterale.self
         let forma = RoundedRectangle(cornerRadius: l.raggio, style: .continuous)
+        #if !os(macOS)
         let perIncontro = tipiPerIncontro
+        #endif
         // La voce scelta, letta una volta per tutte le voci (non una per voce)
         let scelto = scelta.tipo
         return VStack(alignment: .leading, spacing: 0) {
@@ -146,6 +156,14 @@ extension AppProspetti {
             ScrollViewReader { lettore in
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
+                        #if os(macOS)
+                        gruppiPerMomentoApple(scelto: scelto)
+                        // Migliorie d'uso 23 (decisione 23-e): niente piede con i collegamenti e la nota «Impaginati sul Mac…»
+                        cardFascicoloApple
+                            .padding(.top, l.sopraFascicolo)
+                            .id(TipoProspetto.fascicolo.id)
+                            .entrataCascata(ElencoProspetti.ordine.count + ElencoProspetti.gruppi.count)
+                        #else
                         gruppoApple("Per l'incontro", tipi: perIncontro, primo: 0, scelto: scelto)
                         gruppoApple("Prospetti di dettaglio", tipi: Self.tipiDiDettaglio, primo: perIncontro.count + 1, scelto: scelto)
                         if !stato.inModoCliente {
@@ -157,6 +175,7 @@ extension AppProspetti {
                             .entrataCascata(perIncontro.count + Self.tipiDiDettaglio.count + 4)
                         piedeLateraleApple
                             .padding(.top, l.sopraPiede)
+                        #endif
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -188,6 +207,67 @@ extension AppProspetti {
             }
         }
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 23: i gruppi per momento («Primo incontro», «Le analisi», «Per una proposta», «Fine anno»,
+    /// «Per te» fuori dalla modalità cliente), con il documento adatto all'incontro di oggi segnato in verde.
+    @ViewBuilder private func gruppiPerMomentoApple(scelto: TipoProspetto) -> some View {
+        let gruppi = ElencoProspetti.gruppi.filter { !(stato.inModoCliente && $0.titolo == ElencoProspetti.gruppoPerTe) }
+        let primi = Self.primiIndici(gruppi.map { $0.tipi.count })
+        let oggi = stato.prospettoPerIncontroOggi(cliente)
+        ForEach(Array(gruppi.enumerated()), id: \.offset) { i, g in
+            gruppoMomentoApple(g.titolo, tipi: g.tipi, primo: primi[i], scelto: scelto, perIncontroOggi: oggi)
+        }
+    }
+
+    /// L'indice di cascata della prima riga di ogni gruppo (l'etichetta del gruppo conta una riga).
+    private static func primiIndici(_ conteggi: [Int]) -> [Int] {
+        var primi: [Int] = []
+        var n = 0
+        for c in conteggi {
+            primi.append(n)
+            n += c + 1
+        }
+        return primi
+    }
+
+    private func gruppoMomentoApple(_ titolo: String, tipi: [TipoProspetto], primo: Int, scelto: TipoProspetto,
+                                    perIncontroOggi: TipoProspetto?) -> some View {
+        let l = Tema.Apple.Prospetti.Laterale.self
+        return VStack(alignment: .leading, spacing: l.fraVoci) {
+            Text(titolo)
+                .carattereApple(l.etichetta)
+                .foregroundColor(l.coloreEtichetta)
+                .lineLimit(1)
+                .padding(.top, primo == 0 ? 0 : l.sopraGruppo)
+                .padding(.bottom, max(0, l.sottoEtichetta - l.fraVoci))
+                .entrataCascata(primo)
+            ForEach(Array(tipi.enumerated()), id: \.element) { i, t in
+                voceMomentoApple(t, scelto: scelto, perIncontroOggi: perIncontroOggi == t)
+                    .entrataCascata(primo + i + 1, sfocatura: false)
+            }
+        }
+    }
+
+    /// Una riga: il nome, la riga «a cosa serve» (al più due righe) e le etichette. La riga scelta non si allarga: sotto
+    /// restano solo le scelte che servono a impaginare (e il commento del report), se ce ne sono (decisione 23-d).
+    private func voceMomentoApple(_ t: TipoProspetto, scelto: TipoProspetto, perIncontroOggi: Bool) -> some View {
+        let scelta = scelto == t
+        return VStack(alignment: .leading, spacing: 0) {
+            VoceProspettoApple(titolo: nomeBreve(t), sottotitolo: t.inBreve, nuovo: voceNuova(t), scelta: scelta,
+                               righeSottotitolo: Tema.Apple.Prospetti.Laterale.righeInBreve,
+                               conEtichette: true, versioni: t.versioni, incontroOggi: perIncontroOggi) {
+                scegliApple(t)
+            }
+            if scelta && sceltaSiAllarga {
+                contenutoScelta
+                    .padding(Tema.Apple.Prospetti.Laterale.paddingScelte)
+                    .transition(.opacity)
+            }
+        }
+        .id(t.id)
+    }
+    #endif
 
     private func voceApple(_ t: TipoProspetto, scelto: TipoProspetto) -> some View {
         let scelta = scelto == t
@@ -332,23 +412,99 @@ extension AppProspetti {
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .help(d.titolo)
-                Text("\(d.genere) · \(d.cliente) · \(formato) · \(n) \(n == 1 ? "pagina" : "pagine")")
+                Text(sottotitoloBarra(d, formato: formato, pagine: n))
                     .carattereApple(b.sottotitolo)
                     .foregroundColor(b.coloreSottotitolo)
                     .lineLimit(1)
             }
-            // Il titolo tiene sempre un minimo: se non basta, le azioni passano alle sole icone
+            // Il titolo tiene sempre un minimo: se non basta, sul Mac «Mostra al cliente» passa in «Altro», altrove le
+            // azioni passano alle sole icone
             .frame(minWidth: b.larghezzaMinimaTitolo, alignment: .leading)
+            #if os(macOS)
+            // Migliorie d'uso 22: «Per il cliente | Per te», o l'etichetta grigia per chi ha una versione sola
+            selettoreVersione
+                .fixedSize()
+            // Migliorie d'uso 23: la «i» con la scheda «A cosa serve»
+            PulsanteInfoProspetto(tipo: scelta.tipo)
+            #endif
             Spacer(minLength: b.spazioAzioni)
+            #if os(macOS)
+            // Migliorie d'uso 24: tre pulsanti sempre con il nome, «Mostra al cliente», «Salva PDF…» e «Altro ⌄»; se
+            // non c'è posto «Mostra al cliente» entra in «Altro» (mai le sole icone)
+            ViewThatFits(in: .horizontal) {
+                treAzioniApple(d, mostraInAltro: false)
+                treAzioniApple(d, mostraInAltro: true)
+            }
+            .layoutPriority(1)
+            // «Al tavolo…» di «Altro»: i comandi del tavolo con l'iPad, come il pulsante di prima
+            .popover(isPresented: $tavoloAperto, arrowEdge: .bottom) {
+                PannelloAlTavolo(tavolo: stato.tavolo, contesto: contestoTavolo(d))
+                    .environment(stato)
+            }
+            #else
             // Con le etichette se c'è posto, altrimenti le sole icone (con il suggerimento): il blu tiene la scritta
             ViewThatFits(in: .horizontal) {
                 azioniApple(d, soloIcona: false)
                 azioniApple(d, soloIcona: true)
             }
             .layoutPriority(1)
+            #endif
         }
         .padding(b.padding)
+        #if os(macOS)
+        .frame(minHeight: b.altezzaVersione)
+        #endif
     }
+
+    /// Sotto il titolo: sul Mac (migliorie d'uso 22) che cosa si guarda, «Report · da mostrare e da consegnare» o
+    /// «Prospetto di dettaglio · solo per te»; altrove il genere, il cliente e il formato di sempre.
+    private func sottotitoloBarra(_ d: DocumentoStampabile, formato: String, pagine n: Int) -> String {
+        let quante = "\(n) \(n == 1 ? "pagina" : "pagine")"
+        #if os(macOS)
+        if let v = scelta.versione ?? scelta.soloPer {
+            return "\(TestiVersioneProspetto.sottotitolo(v)) · \(quante)"
+        }
+        #endif
+        return "\(d.genere) · \(d.cliente) · \(formato) · \(quante)"
+    }
+
+    #if os(macOS)
+    /// Il selettore a pillola delle due versioni, o «Solo per il cliente» / «Solo per te» (neutra).
+    @ViewBuilder private var selettoreVersione: some View {
+        let b = Tema.Apple.Prospetti.Barra.self
+        if let v = scelta.versione {
+            SegmentatoPillola(selezione: Binding(get: { v }, set: { cambiaVersione($0) }),
+                              voci: [(VersioneProspetto.perIlCliente, TestiVersioneProspetto.perIlCliente),
+                                     (VersioneProspetto.perTe, TestiVersioneProspetto.perTe)])
+        } else if let solo = scelta.soloPer {
+            Text(TestiVersioneProspetto.solo(solo))
+                .carattereApple(b.etichettaSolo)
+                .foregroundColor(b.coloreEtichettaSolo)
+                .lineLimit(1)
+                .padding(b.paddingEtichettaSolo)
+                .background { Capsule().fill(b.fondoEtichettaSolo) }
+        }
+    }
+
+    /// Cambia la versione con la pagina che esce e la nuova che entra dal lato opposto: «Per te» viene dopo (sale).
+    /// La scelta si ricorda finché Prisma resta aperto.
+    private func cambiaVersione(_ nuova: VersioneProspetto) {
+        guard scelta.versione != nil, nuova != scelta.versione else { return }
+        let attuale = scelta
+        stato.versioneProspetti = nuova
+        archiviato = nil
+        cambiaAnteprima(direzione: nuova == .perTe ? 1 : -1) { stato.prospetto = attuale.conVersione(nuova) }
+    }
+
+    /// Il tavolo con l'iPad riceve sempre la versione per il cliente, dalla prima pagina se sullo schermo c'è quella per te.
+    private func contestoTavolo(_ d: DocumentoStampabile) -> ContestoTavolo {
+        if scelta.versione == .perTe {
+            return ContestoTavolo(documento: stato.documentoProspettoInCache(scelta.conVersione(.perIlCliente)),
+                                  pagina: 0, clienteId: stato.clienteAttivoId)
+        }
+        return ContestoTavolo(documento: d, pagina: indiceAnteprima(d), clienteId: stato.clienteAttivoId)
+    }
+    #endif
 
     /// La seconda lettura del PDF (parole a rischio): se è pulito si va avanti, altrimenti il foglio con gli avvisi.
     private func rileggiPoi(_ d: DocumentoStampabile, dati: Data, _ poi: @escaping () -> Void) {
@@ -357,6 +513,8 @@ extension AppProspetti {
         if e.pulito { poi() } else { letturaProspetto = LetturaInAttesa(esito: e, continua: poi) }
     }
 
+    #if !os(macOS)
+    /// iPhone e iPad: la fila delle azioni di sempre (sul Mac i tre pulsanti delle migliorie d'uso 24).
     private func azioniApple(_ d: DocumentoStampabile, soloIcona: Bool) -> some View {
         let b = Tema.Apple.Prospetti.Barra.self
         return HStack(spacing: b.spazioAzioni) {
@@ -382,14 +540,6 @@ extension AppProspetti {
                 .disabled(stato.veraInCorso)
                 .help("Chiedi a Vera: spiega le cifre di questo documento, per te")
             }
-            #if os(macOS)
-            // Il tavolo con l'iPad (Shell/AlTavolo.swift): mai il portafoglio, che parla di tutti i clienti
-            if scelta.tipo != .portafoglio {
-                PulsanteAlTavolo(tavolo: stato.tavolo,
-                                 contesto: ContestoTavolo(documento: d, pagina: indiceAnteprima(d), clienteId: stato.clienteAttivoId),
-                                 soloIcona: soloIcona)
-            }
-            #endif
             // Il portafoglio parla di tutti i clienti: non si mostra a un cliente
             if scelta.tipo != .portafoglio {
                 Button { presentaApple(d) } label: {
@@ -421,7 +571,8 @@ extension AppProspetti {
                 // Il portafoglio è per te: il foglio della password resta, senza proposta dai dati di un cliente
                 if let dati = pdf(d) {
                     rileggiPoi(d, dati: dati) {
-                        daSalvare = PDFDaSalvare(dati: dati, nome: StampaCarta.nomeFile(d), cliente: scelta.tipo == .portafoglio ? nil : stato.clienteAttivo)
+                        daSalvare = PDFDaSalvare(dati: dati, nome: StampaCarta.nomeFile(d), cliente: scelta.tipo == .portafoglio ? nil : stato.clienteAttivo,
+                                                 avvisoSalvato: nil)
                     }
                 }
             } label: {
@@ -440,12 +591,161 @@ extension AppProspetti {
             Label(testo, systemImage: simbolo)
         }
     }
+    #endif
+
+    #if os(macOS)
+    // MARK: Tre pulsanti (migliorie d'uso 24)
+
+    /// Senza cliente scelto i tre pulsanti aprono la scelta del cliente (il portafoglio è di tutti: non serve).
+    private var senzaClienteAzioni: Bool {
+        stato.clienteAttivo == nil && scelta.tipo != .portafoglio
+    }
+
+    /// «Mostra al cliente» si può solo per i documenti da mostrare: mai il portafoglio né quelli solo per te.
+    private var mostraSpento: Bool {
+        scelta.tipo == .portafoglio || scelta.soloPer == .perTe
+    }
+
+    private var aiutoMostra: String {
+        if scelta.tipo == .portafoglio { return TestiAzioniProspetto.aiutoPortafoglio }
+        if scelta.soloPer == .perTe { return TestiVersioneProspetto.aiutoSoloPerTe }
+        return scelta.versione == .perTe ? TestiAzioniProspetto.aiutoMostraPerTe : TestiAzioniProspetto.aiutoMostra
+    }
+
+    /// Il tavolo con l'iPad: mai il portafoglio (parla di tutti i clienti) né i documenti solo per te.
+    private var tavoloAmmesso: Bool {
+        scelta.tipo != .portafoglio && scelta.soloPer != .perTe
+    }
+
+    /// «Mostra al cliente» (se c'è posto), «Salva PDF…» (blu, sempre con la scritta) e «Altro ⌄»; accanto, finché non si
+    /// cambia documento, il collegamento sobrio «Archiviato in Documenti ↗» (decisione 24-a).
+    private func treAzioniApple(_ d: DocumentoStampabile, mostraInAltro: Bool) -> some View {
+        let b = Tema.Apple.Prospetti.Barra.self
+        return HStack(spacing: b.spazioAzioni) {
+            if let id = archiviato {
+                Button {
+                    stato.documentoSelezionato = id
+                    stato.apri(.documenti)
+                } label: {
+                    HStack(spacing: Tema.Apple.Controlli.Pulsante.spazio) {
+                        Text(TestiAzioniProspetto.archiviato)
+                        Image(systemName: "arrow.up.right")
+                    }
+                }
+                .buttonStyle(.appleSobrio)
+                .fixedSize()
+            }
+            if !mostraInAltro {
+                Button {
+                    if senzaClienteAzioni { stato.apriSceltaCliente() } else { presentaApple(d) }
+                } label: {
+                    Label(TestiMostra.titolo, systemImage: TestiAzioniProspetto.simboloMostra)
+                }
+                .buttonStyle(.apple)
+                .fixedSize()
+                .disabled(mostraSpento && !senzaClienteAzioni)
+                .help(aiutoMostra)
+            }
+            Button {
+                if senzaClienteAzioni { stato.apriSceltaCliente() } else { salvaPDFApple(d) }
+            } label: {
+                Label(TestiAzioniProspetto.salvaPDF, systemImage: "square.and.arrow.down")
+            }
+            .buttonStyle(.applePrimario)
+            .fixedSize()
+            menuAltroApple(d, conMostra: mostraInAltro)
+        }
+    }
+
+    /// «Altro ⌄»: Stampa…, Archivia nei Documenti, Chiedi a Vera di commentarlo, e «Al tavolo…» (con «Mostra al
+    /// cliente» in testa se nella riga non c'è posto). Senza cliente scelto apre la scelta del cliente.
+    @ViewBuilder private func menuAltroApple(_ d: DocumentoStampabile, conMostra: Bool) -> some View {
+        if senzaClienteAzioni {
+            Button { stato.apriSceltaCliente() } label: { etichettaAltroApple }
+                .buttonStyle(.apple)
+                .fixedSize()
+                .help(TestiAzioniProspetto.aiutoAltro)
+        } else {
+            Menu {
+                if conMostra {
+                    Button { presentaApple(d) } label: {
+                        Label(TestiMostra.titolo, systemImage: TestiAzioniProspetto.simboloMostra)
+                    }
+                    .disabled(mostraSpento)
+                }
+                if tavoloAmmesso {
+                    Button { tavoloAperto = true } label: {
+                        Label(TestiAzioniProspetto.alTavolo, systemImage: "ipad.landscape")
+                    }
+                }
+                if conMostra || tavoloAmmesso { Divider() }
+                Button { if let dati = pdf(d) { StampaCarta.stampa(dati, formato: d.formato) } } label: {
+                    Label(TestiAzioniProspetto.stampa, systemImage: "printer")
+                }
+                // Il portafoglio riguarda tutti i clienti: non va nei documenti di uno di loro
+                if scelta.tipo != .portafoglio {
+                    Button {
+                        if let dati = pdf(d) { rileggiPoi(d, dati: dati) { archiviato = stato.archiviaProspetto(dati, documento: d) } }
+                    } label: {
+                        Label(TestiAzioniProspetto.archivia, systemImage: "archivebox")
+                    }
+                }
+                if scelta.spuntoVera != nil {
+                    Button { stato.chiediVeraDelDocumento(scelta) } label: {
+                        Label(TestiAzioniProspetto.chiediVera, systemImage: "sparkles")
+                    }
+                    .disabled(stato.veraInCorso)
+                }
+            } label: {
+                etichettaAltroApple
+            }
+            .menuStyle(.button)
+            .menuIndicator(.hidden)
+            .buttonStyle(.apple)
+            .fixedSize()
+            .help(TestiAzioniProspetto.aiutoAltro)
+        }
+    }
+
+    private var etichettaAltroApple: some View {
+        let b = Tema.Apple.Prospetti.Barra.self
+        return HStack(spacing: b.spazioFrecciaAltro) {
+            Text(TestiAzioniProspetto.altro)
+            Image(systemName: "chevron.down")
+                .carattereApple(b.frecciaAltro)
+                .opacity(b.opacitaFrecciaAltro)
+        }
+    }
+
+    /// «Salva PDF…»: la seconda lettura, poi il foglio della password; dopo il salvataggio l'avviso con la versione.
+    private func salvaPDFApple(_ d: DocumentoStampabile) {
+        guard let dati = pdf(d) else { return }
+        rileggiPoi(d, dati: dati) {
+            let avviso: String? = TestiVersioneProspetto.pdfSalvato(d.titolo, versione: scelta.versione)
+            daSalvare = PDFDaSalvare(dati: dati, nome: StampaCarta.nomeFile(d),
+                                     cliente: scelta.tipo == .portafoglio ? nil : stato.clienteAttivo,
+                                     avvisoSalvato: avviso)
+        }
+    }
+    #endif
 
     /// La presentazione parte dalla pagina mostrata nell'anteprima.
     private func presentaApple(_ d: DocumentoStampabile) {
         // Presentare il prospetto del riesame salva la fotografia di oggi (memoria del riesame)
         if case .riesame = scelta { stato.fotografaRiesame(stato.clienteAttivoId, origine: .prospetto) }
+        #if os(macOS)
+        // Migliorie d'uso 22: al cliente si mostra sempre la versione per lui, dalla prima pagina (la pagina girata
+        // è della versione per te, che ha altre pagine)
+        if scelta.versione == .perTe {
+            guard let perIlCliente = stato.documentoProspetto(scelta.conVersione(.perIlCliente)) else { return }
+            stato.mostraAvviso(TestiVersioneProspetto.avvisoMostra)
+            stato.mostraProspetto(perIlCliente, daPagina: 0)
+            return
+        }
+        stato.mostraProspetto(d, daPagina: indiceAnteprima(d))
+        #else
         stato.presenta(d, daPagina: indiceAnteprima(d))
+        #endif
     }
 
     // MARK: Anteprima
@@ -555,6 +855,19 @@ private struct RigaClienteProspettiApple: View {
         let _ = ContaCorpi.segna()
         let l = Tema.Apple.Prospetti.Laterale.self
         let cliente = stato.clienteAttivo
+        #if os(macOS)
+        // Migliorie d'uso 2: il cliente si sceglie nella barra in alto; qui resta chi è, senza tendina
+        return HStack(spacing: l.spazioCliente) {
+            if let c = cliente {
+                AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: l.avatar)
+            }
+            Text(cliente?.nome ?? TestiSceltaCliente.tuttiIClienti)
+                .carattereApple(l.nomeCliente)
+                .foregroundColor(l.coloreNome)
+                .lineLimit(1)
+            Spacer(minLength: 0)
+        }
+        #else
         return Button { aperto = true } label: {
             HStack(spacing: l.spazioCliente) {
                 if let c = cliente {
@@ -574,6 +887,7 @@ private struct RigaClienteProspettiApple: View {
         .buttonStyle(StileSemplice())
         .popover(isPresented: $aperto, arrowEdge: .trailing) { ElencoClienti(aperto: $aperto) }
         .help("Scegli il cliente: prospetti e report valgono per lui")
+        #endif
     }
 }
 
@@ -584,6 +898,11 @@ private struct VoceProspettoApple: View {
     let sottotitolo: String
     let nuovo: Bool
     let scelta: Bool
+    /// Migliorie d'uso 23 (sul Mac): la riga sotto il nome su più righe e le etichette delle versioni.
+    var righeSottotitolo = 1
+    var conEtichette = false
+    var versioni: [VersioneProspetto] = []
+    var incontroOggi = false
     let azione: () -> Void
 
     @Environment(\.prismaCalmo) private var calmo
@@ -598,10 +917,17 @@ private struct VoceProspettoApple: View {
                 Text(titolo)
                     .carattereApple(l.titoloVoce)
                     .foregroundColor(l.coloreTitoloVoce)
+                    .lineLimit(1)
                 testoSotto
                     .carattereApple(l.sottotitoloVoce)
+                    .lineLimit(righeSottotitolo)
+                    .fixedSize(horizontal: false, vertical: righeSottotitolo > 1)
+                #if os(macOS)
+                if conEtichette {
+                    EtichetteVoceProspetto(versioni: versioni, perIncontroOggi: incontroOggi)
+                }
+                #endif
             }
-            .lineLimit(1)
             .padding(l.paddingVoce)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background { fondo }
@@ -817,4 +1143,22 @@ private final class VistaScorrimentoAnteprima: NSView {
     }
 }
 
+#endif
+
+#if os(macOS)
+/// I testi dei tre pulsanti dei Prospetti (migliorie d'uso 24, template righe 3817-3868).
+enum TestiAzioniProspetto {
+    static let simboloMostra = "person.crop.rectangle"
+    static let salvaPDF = "Salva PDF…"
+    static let altro = "Altro"
+    static let stampa = "Stampa…"
+    static let archivia = "Archivia nei Documenti"
+    static let chiediVera = "Chiedi a Vera di commentarlo"
+    static let alTavolo = "Al tavolo…"
+    static let archiviato = "Archiviato in Documenti"
+    static let aiutoAltro = "Stampa, archivia nei Documenti, chiedi a Vera, il tavolo con l'iPad"
+    static let aiutoPortafoglio = "Il portafoglio parla di tutti i clienti: non si mostra a un cliente"
+    static let aiutoMostra = "Mostra al cliente: il documento a tutto schermo dalla pagina mostrata (← → per sfogliare, esc per uscire), nella vista pulita"
+    static let aiutoMostraPerTe = "Mostra al cliente: la versione per il cliente a tutto schermo, dalla prima pagina, nella vista pulita"
+}
 #endif

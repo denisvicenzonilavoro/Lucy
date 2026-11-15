@@ -13,8 +13,6 @@ import CoreGraphics
     /// Il modello mostrato (nil = il primo).
     var scelto: String?
     var pagina = 0
-    /// Il cliente da compilare (nil = il cliente attivo).
-    var clienteId: String?
     /// La proposta a cui si riferisce il modulo (nil = la più recente del canale del modulo).
     var posizioneId: String?
     /// La compilazione in corso: un'anteprima, finché non si salva.
@@ -39,6 +37,9 @@ import CoreGraphics
     var rilascioAttivo = false
 
     let persistente: Bool
+    /// Migliorie d'uso 37 (decisione 3): durante la dimostrazione i moduli dell'utente si vedono ma non si scrivono
+    /// (un modello aggiunto resta in memoria, nessun file tolto, moduli.json fermo); spenta, si rileggono dal disco.
+    @ObservationIgnored private(set) var ferma = false
     /// Solo istantanee: l'aspetto con Vera pronta (sfera viva) o no.
     @ObservationIgnored var veraProntaIstantanea: Bool?
     @ObservationIgnored private var caricata = false
@@ -54,6 +55,17 @@ import CoreGraphics
 
     /// Aspetta le scritture in coda.
     static func attendiScritture() { coda.sync {} }
+
+    /// Migliorie d'uso 37: ferma le scritture durante la dimostrazione; spenta, rilegge i modelli dal disco.
+    func fermaPerDimostrazione(_ f: Bool) {
+        guard f != ferma else { return }
+        Self.coda.sync {}
+        ferma = f
+        if !f && persistente {
+            pdfInMemoria = [:]
+            ricarica()
+        }
+    }
 
     /// Dopo un ripristino: rilegge i modelli dalla cartella ripristinata.
     func ricarica() {
@@ -79,7 +91,7 @@ import CoreGraphics
     }
 
     private func salva() {
-        guard persistente else { return }
+        guard persistente, !ferma else { return }
         let elenco = modelli
         Self.coda.async { try? ArchivioModuli.scrivi(elenco, in: Archivio.cartella) }
     }
@@ -162,7 +174,7 @@ import CoreGraphics
         carica()
         modelli.removeAll { $0.id == m.id }
         modelli.append(m)
-        if persistente {
+        if persistente && !ferma {
             let url = ArchivioModuli.pdf(m, in: Archivio.cartella)
             Self.coda.async {
                 try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -190,7 +202,7 @@ import CoreGraphics
         ordineImmagini.removeAll { $0.hasPrefix(id) }
         riquadri = riquadri.filter { !$0.key.hasPrefix(id) }
         if scelto == id { scelto = nil; azzeraCompilazione() }
-        if persistente {
+        if persistente && !ferma {
             let url = ArchivioModuli.pdf(m, in: Archivio.cartella)
             Self.coda.async { try? FileManager.default.removeItem(at: url) }
         }
@@ -209,24 +221,9 @@ import CoreGraphics
 // MARK: - Nello stato di Prisma
 
 extension StatoShell {
-    /// Il cliente da compilare: quello scelto in «Compila per», altrimenti il cliente attivo.
-    var clienteModulo: Cliente? {
-        if let id = moduli.clienteId, let c = cliente(id) { return c }
-        return clienteAttivo
-    }
-
-    /// I clienti come chip in «Compila per»: il cliente attivo, quello scelto e quelli con proposte aperte, al più 5.
-    var clientiRecentiModulo: [Cliente] {
-        var ids: [String] = []
-        for id in [moduli.clienteId, clienteAttivo?.id].compactMap({ $0 }) where !ids.contains(id) { ids.append(id) }
-        let conProposte = dati.posizioni.filter { $0.stato == .proposta && $0.esito != .rifiutata }
-            .sorted { $0.creataIl > $1.creataIl }.map(\.clienteId)
-        for id in conProposte where !ids.contains(id) { ids.append(id) }
-        for c in dati.clienti where !ids.contains(c.id) { ids.append(c.id) }
-        return ids.prefix(Self.chipModuli).compactMap { cliente($0) }
-    }
-
-    static let chipModuli = 5
+    /// Il cliente da compilare: il cliente della barra (Migliorie d'uso 33: niente più «Compila per»; con «Tutti i
+    /// clienti» nessuno, e il pulsante apre la scelta del cliente).
+    var clienteModulo: Cliente? { clienteAttivo }
 
     /// Le proposte del cliente nel canale del modulo (la più recente prima).
     func proposteModulo(_ c: Cliente, _ m: ModelloModulo) -> [Posizione] {
@@ -250,8 +247,8 @@ extension StatoShell {
                                  conservaIban: dati.impostazioni.pratiche.ibanConservato)
     }
 
-    /// L'anteprima di adesso, solo se è del cliente e del modello mostrati: cambiato il cliente attivo (o tolto quello
-    /// di «Compila per»), l'anteprima di prima non si mostra, non si salva nel dossier e non va al cliente.
+    /// L'anteprima di adesso, solo se è del cliente e del modello mostrati: cambiato il cliente della barra, l'anteprima
+    /// di prima non si mostra, non si salva nel dossier e non va al cliente.
     var anteprimaModulo: AnteprimaCompilazione? {
         guard let a = moduli.anteprima, let c = clienteModulo, let m = moduli.modelloScelto,
               a.clienteId == c.id, a.modelloId == m.id else { return nil }
@@ -275,13 +272,6 @@ extension StatoShell {
         guard moduli.scelto != id else { return }
         moduli.scelto = id
         moduli.pagina = 0
-        moduli.azzeraCompilazione()
-    }
-
-    func scegliClienteModulo(_ id: String) {
-        guard moduli.clienteId != id || moduli.anteprima != nil else { return }
-        moduli.clienteId = id
-        moduli.posizioneId = nil
         moduli.azzeraCompilazione()
     }
 

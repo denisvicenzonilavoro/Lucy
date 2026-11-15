@@ -57,7 +57,7 @@ extension Tema.Apple {
             static let coloreNota = Colore.inchiostro2
             /// «dati di prova» accanto al titolo della card.
             static let prova = Carattere.secondario
-            static let coloreProva = Colore.arancio
+            static let coloreProva = Colore.arancioTesto
             static let spazioProva: CGFloat = 8
             /// Quanto si può stringere un testo di una riga prima di andare a capo o tagliarsi.
             static let riduzioneTesto: CGFloat = 0.75
@@ -270,7 +270,7 @@ extension Tema.Apple {
             static let coloreCifra = Colore.inchiostro
             static let riduzioneCifra: CGFloat = 0.6
             /// «Da incassare» in arancio quando c'è qualcosa da incassare.
-            static let coloreDaIncassare = Colore.arancio
+            static let coloreDaIncassare = Colore.arancioTesto
             /// La nota sotto le cifre (aliquote o obiettivi mancanti).
             static let nota = Carattere(dimensione: 12, peso: .regular)
             static let coloreNota = Colore.inchiostro2

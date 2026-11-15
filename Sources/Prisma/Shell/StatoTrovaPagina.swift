@@ -157,7 +157,8 @@ struct RisultatoBiblioteca: Equatable {
 
     /// Salva il testo di un documento accanto al PDF (o solo in memoria, fuori dall'app).
     func salvaTesto(_ id: String, _ pagine: [String]) {
-        guard persistente else {
+        // Migliorie d'uso 37: durante la dimostrazione la Biblioteca non si scrive, il testo resta in memoria
+        guard persistente, !biblioteca.ferma else {
             memoria[id] = pagine
             return
         }
@@ -172,7 +173,7 @@ struct RisultatoBiblioteca: Equatable {
     func dimentica(_ id: String) {
         memoria[id] = nil
         togliDallaCache(id)
-        if persistente {
+        if persistente && !biblioteca.ferma {
             let file = Self.cartella.appendingPathComponent("\(id).txt")
             Self.codaLettura.async { try? FileManager.default.removeItem(at: file) }
         }
@@ -225,11 +226,12 @@ struct RisultatoBiblioteca: Equatable {
     func preparaIndice() { conIndice { _ in } }
 
     /// Cerca i passi: la ricerca BM25 gira sulla coda dell'indice, il risultato arriva sul thread principale.
-    func cerca(_ domanda: String, poi: @escaping ([PassoTrovato], IndiceBiblioteca) -> Void) {
+    /// `solo` (migliorie d'uso 35): l'id del documento aperto, per cercare solo nei suoi passi.
+    func cerca(_ domanda: String, solo: String? = nil, poi: @escaping ([PassoTrovato], IndiceBiblioteca) -> Void) {
         conIndice { indice in
-            guard self.persistente else { return poi(MotoreBiblioteca.cerca(domanda, in: indice), indice) }
+            guard self.persistente else { return poi(MotoreBiblioteca.cerca(domanda, in: indice, solo: solo), indice) }
             Self.coda.async {
-                let trovati = MotoreBiblioteca.cerca(domanda, in: indice)
+                let trovati = MotoreBiblioteca.cerca(domanda, in: indice, solo: solo)
                 DispatchQueue.main.async { poi(trovati, indice) }
             }
         }

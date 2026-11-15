@@ -116,6 +116,10 @@ extension AppImpostazioni {
             gruppoPromemoria
             GruppoOccasioniImpostazioni()
                 .id("impostazioni-occasioni")
+            #if os(macOS)
+            // Migliorie d'uso 37: la prova dei promemoria, prima in Strumenti
+            gruppoProvaPromemoria
+            #endif
         }
     }
 
@@ -293,14 +297,14 @@ extension AppImpostazioni {
                 RigaImpostazione(titolo: "Qwen sul Mac",
                                  sottotitolo: pronta ? stato.qwen.descrizione : (stato.disponibilitaLocale.motivo ?? "Non collegata"),
                                  stato: Pillola(testo: pronta ? "Collegata" : "Non collegata", tono: pronta ? .ok : .attenzione),
-                                 aiuto: "Vera usa Qwen del tuo Mac: Prisma aperto sul Mac, «iPhone e iPad» attivo in Impostazioni › Vera, stessa rete Wi‑Fi") {
+                                 aiuto: "Vera usa Qwen del tuo Mac: Prisma aperto sul Mac, il ponte attivo sul Mac in Impostazioni › iPhone e iPad, stessa rete Wi‑Fi") {
                     Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
                 }
                 RigaImpostazione(titolo: "Codice del Mac",
-                                 sottotitolo: ponte.abbinato ? "Abbinato" : "Da Impostazioni › Vera sul Mac",
-                                 aiuto: ponte.abbinato ? "Lo trovi sul Mac in Impostazioni › Vera (arriva anche con il backup)"
-                                                       : "Scrivi il codice che compare sul Mac in Impostazioni › Vera › iPhone e iPad") {
+                                 sottotitolo: ponte.abbinato ? "Abbinato" : "Da Impostazioni › iPhone e iPad sul Mac",
+                                 aiuto: ponte.abbinato ? "Lo trovi sul Mac in Impostazioni › iPhone e iPad (arriva anche con il backup)"
+                                                       : "Scrivi il codice che compare sul Mac in Impostazioni › iPhone e iPad") {
                     TextField("ABCD-EFGH-JKLM", text: Bindable(stato.dati).impostazioni.vera.ponte.codice)
                         .campoTesto()
                         .textInputAutocapitalization(.characters)
@@ -352,6 +356,16 @@ extension AppImpostazioni {
                         .fixedSize()
                 }
                 .cascataImpostazioni(1)
+                #if os(macOS)
+                // Migliorie d'uso 39: il collegamento con iPhone e iPad sta in un posto solo, Impostazioni › iPhone e iPad
+                RigaImpostazione(titolo: "iPhone e iPad", sottotitolo: TestiCollegamenti.rimandoVera,
+                                 aiuto: "Il codice, i dispositivi collegati e che cosa fanno insieme al Mac (Vera, Inquadra, la nota a voce, il tavolo)") {
+                    Button("Apri") { stato.schedaImpostazioni = .ovunque }
+                        .buttonStyle(StilePulsanteRigaImpostazioni())
+                        .fixedSize()
+                }
+                .cascataImpostazioni(2)
+                #else
                 RigaImpostazione(titolo: "iPhone e iPad", sottotitolo: "Usano Vera del Mac attraverso la rete di casa, cifrata. Mai internet.",
                                  aiuto: "iPhone e iPad usano Qwen di questo Mac attraverso la rete di casa o dello studio, cifrato con un codice") {
                     interruttore(Binding(get: { vera.ponte.condividi }, set: { attivo in
@@ -374,6 +388,7 @@ extension AppImpostazioni {
                     }
                     .cascataImpostazioni(3)
                 }
+                #endif
                 RigaImpostazione(titolo: "Scorciatoia", sottotitolo: "Apri la mini Vera; tienila premuta per parlare.", ultima: true) {
                     TastiScorciatoia(tasti: ["⌥", "Spazio"])
                 }
@@ -415,6 +430,7 @@ extension AppImpostazioni {
                     interruttore(Bindable(stato.dati).impostazioni.vera.conservaConversazioni)
                 }
             }
+            .id("imp-vera-come")
             .cascataImpostazioni(5)
             // Fase 2 del brief di Vera: memoria, lezioni, filo lungo e ricerca per significato
             GruppoImpostazioni(titolo: "Memoria") {
@@ -443,11 +459,13 @@ extension AppImpostazioni {
                 }
                 RigaMemoriaVera(memoria: stato.memoriaVera)
             }
+            .id("imp-vera-memoria")
             .cascataImpostazioni(6)
             // Fase 4 di Vera, funzione 15: «Il tuo stile» (regole, provenienza, interruttori, esempio; VisteStileVera.swift)
             GruppoImpostazioni(titolo: "Il tuo stile") {
                 GruppoStileVeraImpostazioni()
             }
+            .id("imp-vera-stile")
             .cascataImpostazioni(6)
             // Fase 5 di Vera: «Vera su misura», «Due velocità», «Il cervello grande» e l'etichetta sotto le risposte (regola
             // bloccata: niente interruttore). Le pagine si aprono sopra la chat di Vera (VisteSuMisuraVera, VisteMotoriVera)
@@ -474,9 +492,11 @@ extension AppImpostazioni {
                     EmptyView()
                 }
             }
+            .id("imp-vera-motori")
             .cascataImpostazioni(6)
             // Fase 4 di Vera, funzione 5: il tagliando dei dati (VisteTagliandoVera.swift)
             GruppoTagliandoImpostazioni()
+                .id("imp-vera-tagliando")
                 .cascataImpostazioni(6)
             GruppoImpostazioni(titolo: "Avanzate") {
                 rigaApri("Fornitore e indirizzo", "\(vera.fornitore.nome) · solo indirizzi del Mac",
@@ -497,13 +517,26 @@ extension AppImpostazioni {
                     }
                 }
             }
+            .id("imp-vera-avanzate")
             .cascataImpostazioni(7)
+            // Migliorie d'uso 37: le prove di Vera, prima in Strumenti (confronto dei modelli, le misure della velocità di
+            // Prisma e di Vera, la voce chiusa)
+            GruppoImpostazioni(titolo: "Prove") {
+                rigaConfrontaModelli
+            }
+            .id("imp-vera-confronta")
+            .cascataImpostazioni(7)
+            GruppoVelocita()
+                .id(MisuraVelocita.ancora)
+                .cascataImpostazioni(7)
+            gruppoVoceVera
+                .cascataImpostazioni(7)
             NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Prisma. I dati non lasciano il Mac.")
                 .cascataImpostazioni(8)
         }
     }
 
-    /// Strumenti › Vera: le stesse domande di prova a ogni modello, risposte e tempi affiancati.
+    /// Vera › Prove (migliorie d'uso 37, prima Strumenti): le stesse domande di prova a ogni modello, risposte e tempi affiancati.
     var rigaConfrontaModelli: some View {
         RigaImpostazione(titolo: "Confronta i modelli",
                          sottotitolo: stato.avanzamentoConfronto ?? "Le stesse domande a ogni modello",
@@ -522,7 +555,7 @@ extension AppImpostazioni {
     }
     #endif
 
-    // MARK: Voce di Vera (in Strumenti, chiusa: per ora Vera non parla)
+    // MARK: Voce di Vera (sul Mac in Impostazioni › Vera, chiusa: per ora Vera non parla)
 
     /// La voce di Vera e la conversazione a voce: tutto sul Mac (sintesi e dettatura di macOS). Il codice resta
     /// pronto per quando Vera avrà la voce.

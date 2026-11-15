@@ -53,6 +53,42 @@ extension Tema.Apple {
             static let opacitaSpenta: Double = 0.55
         }
 
+        /// Migliorie d'uso 34 «Le esperienze della Sala, al momento giusto»: in alto a destra di ogni scheda il momento
+        /// e la durata (`.saMom`: 11 semibold `inchiostro2` su `chip`, capsula, padding 3×9, a 16 dall'alto e 14 da
+        /// destra); sotto il tassello delle consigliate l'etichetta verde «Consigliata per …» (`.st2.ok`: 11,5 bold,
+        /// padding 3×9, a 72 dall'alto e 16 da sinistra); il filtro attenua le altre schede a 0,26 in 0,35 s.
+        /// Solo sul Mac: iPhone e iPad tengono la griglia di prima fino al loro aggiornamento.
+        enum Momento {
+            #if os(macOS)
+            static let ammesso = true
+            #else
+            static let ammesso = false
+            #endif
+            static let carattere = C(dimensione: 11, peso: .semibold)
+            static let colore = Tema.Apple.Colore.inchiostro2
+            static let fondo = Tema.Apple.Colore.chip
+            static let padding = Tema.Apple.Misura.padding(3, 9)
+            static let dallAlto: CGFloat = 16
+            static let daDestra: CGFloat = 14
+            /// Lo spazio minimo fra il tassello e l'etichetta del momento: se non c'è, l'etichetta perde la durata.
+            static let accantoTassello: CGFloat = 8
+            /// L'etichetta delle consigliate: i toni dello stato positivo dei dossier (`.st2.ok`).
+            static let consiglio = C(dimensione: 11.5, peso: .bold)
+            static let paddingConsiglio = Tema.Apple.Misura.padding(3, 9)
+            static let testoConsiglio = Tema.Apple.Clienti.Obiettivi.testoStatoOk
+            static let fondoConsiglio = Tema.Apple.Clienti.Obiettivi.fondoStatoOk
+            /// L'etichetta sta a 72 dall'alto della scheda piccola: subito sotto il tassello (16 + 44), dentro la
+            /// colonna, così non copre mai il titolo e la frase.
+            static let sopraConsiglio: CGFloat = 72
+            static var sottoTasselloConsiglio: CGFloat {
+                max(0, sopraConsiglio - Scheda.paddingPiccola - Scheda.tassello)
+            }
+            /// Le schede di un altro momento: attenuate, non nascoste (restano cliccabili).
+            static let opacitaAttenuata: Double = 0.26
+            static let durataCambio = 0.35
+            static var cambio: Animation { Tema.Apple.Moto.Curva.ease.animazione(durataCambio) }
+        }
+
         /// Il palco: testata alta 40 («‹ Sala», tassello 32 raggio 10, nome 21 bold, cliente 14 grigio, pulsanti a
         /// destra a 6), la card a 52 dall'alto fino in fondo.
         enum Palco {

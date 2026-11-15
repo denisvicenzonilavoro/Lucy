@@ -125,8 +125,6 @@ struct ComandiPrisma: Commands {
             // Il pannello di ricerca come Spotlight: ⌘K lo apre e lo chiude
             Button("Cerca ovunque") { stato.alternaRicerca() }
                 .keyboardShortcut("k", modifiers: .command)
-            Button(menu.inModoCliente ? "Esci dalla modalità cliente" : "Modalità cliente") { stato.alternaModoCliente() }
-                .keyboardShortcut("m", modifiers: [.command, .option])
             Button("Spazi di lavoro…") { stato.pannelloSpazi = true }
                 .disabled(menu.inModoCliente)
             Button("Le tue app aperte…") { stato.pannelloAppAperte = true }
@@ -136,13 +134,18 @@ struct ComandiPrisma: Commands {
             Button("Scrivania") { stato.mostraScrivania() }
                 .keyboardShortcut("0", modifiers: .option)
             Divider()
-            ForEach(Array(AppPrisma.delDock.prefix(9).enumerated()), id: \.element) { indice, app in
-                Button(app.titolo) { stato.apriApp(app) }
-                    .keyboardShortcut(KeyEquivalent(Character("\(indice + 1)")), modifiers: .option)
-            }
-            Divider()
-            ForEach(Array(AppPrisma.delDock.dropFirst(9))) { app in
-                Button(app.titolo) { stato.apriApp(app) }
+            // Migliorie d'uso 36: le app nei gruppi del dock, con un filo fra un gruppo e l'altro; ⌥1…⌥9 le prime nove
+            ForEach(Array(AppPrisma.gruppiDockMac.enumerated()), id: \.offset) { g, gruppo in
+                if g > 0 { Divider() }
+                ForEach(gruppo) { app in
+                    let indice = AppPrisma.dockMac.firstIndex(of: app) ?? 9
+                    if indice < 9 {
+                        Button(app.titolo) { stato.apriApp(app) }
+                            .keyboardShortcut(KeyEquivalent(Character("\(indice + 1)")), modifiers: .option)
+                    } else {
+                        Button(app.titolo) { stato.apriApp(app) }
+                    }
+                }
             }
             // Le app con una finestra propria fuori dal dock (versione «Orizzonte»): Prodotti e Note.
             // La Ricerca è «Cerca ovunque» (⌘K), qui sopra
@@ -151,8 +154,17 @@ struct ComandiPrisma: Commands {
                 Button(app.titolo) { stato.apriApp(app) }
             }
             }
-            // Durante la presentazione nulla si muove sotto il velo: resta solo la schermata di benvenuto
-            .disabled(menu.bloccato || menu.inPresentazione)
+            // Durante la presentazione nulla si muove sotto il velo: resta solo la schermata di benvenuto. Nella vista
+            // pulita di «Mostra al cliente» non si apre nessun'altra app (migliorie d'uso 1)
+            .disabled(menu.bloccato || menu.inPresentazione || menu.inVistaCliente)
+            Divider()
+            // Migliorie d'uso 1: un solo modo per girare lo schermo, «Mostra al cliente» (con il cliente entra su «Il
+            // quadro», senza apre il pannello); nella vista pulita «Fine: torna al lavoro»
+            Button(menu.inVistaCliente ? TestiMostra.fine : (menu.inModoCliente ? "Esci dalla modalità cliente" : TestiMostra.titolo)) {
+                stato.alternaMostraAlCliente()
+            }
+            .keyboardShortcut("m", modifiers: [.command, .option])
+            .disabled(menu.bloccato || (menu.inPresentazione && !menu.inVistaCliente))
             Divider()
             Button("Schermata di benvenuto") { stato.blocca() }
                 .keyboardShortcut("l", modifiers: [.command, .option])
@@ -163,12 +175,12 @@ struct ComandiPrisma: Commands {
         // Con la schermata di benvenuto davanti le voci restano attive: apriGuida sblocca e poi apre.
         CommandGroup(replacing: .help) {
             Group {
-                Button("Guida di Prisma") { stato.apriGuida(.app(stato.appAttiva ?? .clienti)) }
+                Button("Guida di Prisma") { stato.apriGuida(stato.paginaGuidaDavanti) }
                     .keyboardShortcut("?", modifiers: .command)
                 Button("Come funziona Prisma (introduzione)") { stato.apriGuida(.introduzione(0)) }
                 Button("Le parole della finanza") { stato.apriGuida(.glossario(nil)) }
             }
-            .disabled(menu.inPresentazione)
+            .disabled(menu.inPresentazione || menu.inVistaCliente)
             Divider()
             // Prova guidata sul Mac (Shell/ProvaGuidata.swift); scelta di nuovo durante la prova, la interrompe
             Button("Prova la fluidità…") { ProvaGuidata.condivisa.avvia(stato: stato) }

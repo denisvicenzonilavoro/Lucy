@@ -49,6 +49,12 @@ extension StatoShell {
         set { sistema.pannelloNotifiche = newValue }
     }
 
+    /// Il pannello «Di chi parliamo?» della barra è aperto (migliorie d'uso 2, solo sul Mac).
+    var pannelloCliente: Bool {
+        get { sistema.pannelloCliente }
+        set { sistema.pannelloCliente = newValue }
+    }
+
     var finestreVisibili: [Finestra] { sistema.visibili }
 
     /// App in primo piano (nil = scrivania).
@@ -82,7 +88,7 @@ extension StatoShell {
     /// è nascosto: l'icona è sul bordo in basso. `nascosto`: come sarà il dock a movimento finito.
     /// nil per le app senza icona nel dock (accorpate, Prodotti, Note, Ricerca): la finestra compare al suo posto.
     fileprivate func centroDock(_ app: AppPrisma, nascosto: Bool? = nil) -> CGPoint? {
-        DisposizioneDock.centroIcona(app, tra: AppPrisma.delDock.filter { appConsentita($0) },
+        DisposizioneDock.centroIcona(app, tra: AppPrisma.gruppiDockConsentiti { appConsentita($0) },
                                      in: sistema.misura, nascosto: nascosto ?? !finestreVisibili.isEmpty)
     }
 
@@ -94,6 +100,8 @@ extension StatoShell {
             mostraAvviso("In modalità cliente \(app.titolo) non si apre: mostra i dati di altri clienti.")
             return
         }
+        // Migliorie d'uso 1: nella vista pulita di «Mostra al cliente» si apre solo la Sala
+        guard !inVistaCliente || app == .sala else { return }
         #if os(macOS)
         // Le app accorpate (Obiettivi, Documenti, Simulazioni, Confronti, Attività) si aprono nel loro ospite,
         // sulla scheda giusta: tutte le chiamate `apri(.documenti)` e simili passano da qui
@@ -304,6 +312,8 @@ extension StatoShell {
             }
         }
         if app == .vera { spegniVoceSeVeraSparisce() }
+        // Migliorie d'uso 34: il momento scelto nel filtro della Sala non si ricorda fra un'apertura e l'altra
+        if app == .sala, sala.momento != nil { sala.momento = nil }
     }
 
     /// La finestra rientra nella sua icona del dock; resta nell'elenco finché il volo non finisce (`rientrano`:
@@ -463,8 +473,14 @@ extension StatoShell {
         Movimenti.anima(Tema.Moto.Blocco.scrivania, durata: Tema.Moto.Blocco.durata, animato: movimento) {
             if pannelloNotifiche { pannelloNotifiche = false }
             if pannelloSpazi { pannelloSpazi = false }
+            if pannelloCliente { pannelloCliente = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
+            #if os(macOS)
+            // Migliorie d'uso 1: il pannello di «Mostra al cliente» e la schermata neutra si chiudono
+            if sceltaMostra { sceltaMostra = false }
+            if schermataNeutraMac { schermataNeutraMac = false }
+            #endif
             // La guida si chiude senza segnare l'introduzione come vista: riparte al prossimo sblocco
             if sistema.guida != nil { sistema.guida = nil }
             if !bloccato { bloccato = true }
@@ -550,6 +566,8 @@ extension StatoShell {
 
     /// Riduce tutte le finestre e mostra la scrivania: una ogni 50 ms, dalla finestra in alto (tema showDesk).
     func mostraScrivania() {
+        // Migliorie d'uso 1: nella vista pulita il marchio e ⌥0 non portano alla scrivania
+        guard !inVistaCliente else { return }
         // «Scrivania» nel dock riporta sempre ai widget, anche dalla Vera della scrivania (VeraScrivania.swift)
         if sistema.paginaVera != 0 || sistema.gestoVera.spostamento != 0 { nascondiVeraScrivania() }
         let davanti = finestreVisibili.reversed().map(\.app)

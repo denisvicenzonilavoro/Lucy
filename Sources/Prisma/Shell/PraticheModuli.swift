@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 
 // Pratiche › Moduli, «Compila da solo» (Design/template-luce-specifica.md §7.2, «Luce» giro 10). A sinistra «I tuoi
 // moduli» (larga 290), al centro la pagina del PDF vero dell'utente su un piano grigio con le caselle disegnate sopra, a
-// destra «Compila per» con i clienti, «✦ Compila con i dati di …» e, dopo la compilazione, le tile: campi compilati,
+// destra «Compilo per» con il cliente della barra (Migliorie d'uso 33), «✦ Compila con i dati di …» e, dopo la compilazione, le tile: campi compilati,
 // Vera con i dati che mancano, le firme da raccogliere, le risposte che dà il cliente. Le caselle si riempiono una alla
 // volta e il valore si scrive lettera per lettera; con «Riduci movimento» e nelle istantanee tutto è già fermo. Lo stato
 // sta in StatoModuli, i conti in CompilatoreModuli, i valori in Tema.Apple.Pratiche.Moduli.
@@ -54,6 +54,16 @@ private struct CorpoPraticheModuli: View {
             }
         }
         .onAppear { moduli.carica() }
+        #if os(macOS)
+        // Migliorie d'uso 33: cambiato il cliente della barra, la proposta e la compilazione del cliente di prima non
+        // restano in memoria (una proposta del cliente nuovo, scelta da chi l'ha portato qui, resta)
+        .onChange(of: stato.clienteAttivoId) { nuovo in
+            if let id = moduli.posizioneId, stato.dati.posizioni.first(where: { $0.id == id })?.clienteId != nuovo {
+                moduli.posizioneId = nil
+            }
+            if moduli.compilazionePer?.hasPrefix(nuovo + "|") != true { moduli.azzeraCompilazione() }
+        }
+        #endif
         .fileImporter(isPresented: $importa, allowedContentTypes: [.pdf], allowsMultipleSelection: true) { esito in
             if case .success(let urls) = esito { stato.importaModuli(urls) }
         }
@@ -494,15 +504,13 @@ private struct TestoScritto: View, Animatable {
     }
 }
 
-// MARK: - La colonna «Compila per»
+// MARK: - La colonna «Compilo per»
 
 private struct ColonnaCompila: View {
     let stato: StatoShell
     let moduli: StatoModuli
     let modello: ModelloModulo
 
-    @State private var cerca = false
-    @State private var testoCerca = ""
     @State private var daSalvare: PDFDaSalvare?
 
     private typealias P = Tema.Apple.Pratiche
@@ -512,15 +520,32 @@ private struct ColonnaCompila: View {
         let cliente = stato.clienteModulo
         ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: M.spazioDestra) {
-                HStack(spacing: M.spazioChip) {
-                    Text("Compila per")
-                        .carattereApple(Tema.Apple.Carattere.etichetta)
-                        .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                // Migliorie d'uso 33: il cliente è quello della barra; qui nessun selettore («Compila per» con i chip)
+                HStack(alignment: .firstTextBaseline, spacing: M.spazioChip) {
+                    if let cliente {
+                        Text(TestiPratiche.compiloPer)
+                            .carattereApple(Tema.Apple.Carattere.etichetta)
+                            .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                            .fixedSize()
+                        Text(cliente.nome)
+                            .carattereApple(M.nomeCompila)
+                            .foregroundColor(Tema.Apple.Colore.inchiostro)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                    } else {
+                        Text(TestiPratiche.perChiCompilo)
+                            .carattereApple(Tema.Apple.Carattere.etichetta)
+                            .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                    }
                     Spacer(minLength: 0)
                     if modello.diProva == true { EtichettaDatiDiProvaPratiche() }
                 }
-                chip(cliente)
-                if let cliente { proposta(cliente) }
+                if let cliente {
+                    proposta(cliente)
+                } else {
+                    Button(TestiPratiche.scegliCliente) { stato.apriSceltaClientePratiche() }
+                        .buttonStyle(.apple)
+                }
                 pulsante(cliente)
                 if let a = stato.anteprimaModulo, let cliente {
                     TileFinali(stato: stato, moduli: moduli, modello: modello, cliente: cliente, anteprima: a,
@@ -534,41 +559,6 @@ private struct ColonnaCompila: View {
             ModuloSalvaPDF(pdf: pdf, impostazioni: stato.dati.impostazioni.pdf, soloProtetto: true)
                 .environment(stato)
         }
-    }
-
-    @ViewBuilder private func chip(_ scelto: Cliente?) -> some View {
-        let recenti = stato.clientiRecentiModulo
-        FlussoChip(spazio: M.spazioChip) {
-            ForEach(recenti) { c in
-                ChipClienteModulo(cliente: c, acceso: c.id == scelto?.id) { stato.scegliClienteModulo(c.id) }
-            }
-            if stato.dati.clienti.count > recenti.count {
-                Button { cerca = true } label: {
-                    Label("Altri", systemImage: "magnifyingglass")
-                }
-                .buttonStyle(.apple)
-                .popover(isPresented: $cerca) { ricerca }
-            }
-        }
-    }
-
-    private var ricerca: some View {
-        let t = testoCerca.trimmingCharacters(in: .whitespaces).lowercased()
-        let trovati = stato.dati.clienti.filter { t.isEmpty || $0.nome.lowercased().contains(t) }
-            .sorted { $0.nome < $1.nome }.prefix(12)
-        return VStack(alignment: .leading, spacing: M.spazioRighe) {
-            TextField("Cerca un cliente", text: $testoCerca)
-                .textFieldStyle(.roundedBorder)
-            ForEach(Array(trovati)) { c in
-                Button(c.nome) {
-                    stato.scegliClienteModulo(c.id)
-                    cerca = false
-                }
-                .buttonStyle(.appleSobrio)
-            }
-        }
-        .padding(Tema.Apple.Pratiche.Moduli.paddingPopover)
-        .frame(width: Tema.Apple.Pratiche.Moduli.larghezzaPopover)
     }
 
     @ViewBuilder private func proposta(_ c: Cliente) -> some View {
@@ -612,69 +602,12 @@ private struct ColonnaCompila: View {
                 Button("✦ Compila con i dati di \(StatoShell.nomeDiBattesimo(c))") { stato.compilaModulo() }
                     .buttonStyle(.applePrimarioGrande)
             } else {
-                Button("Scegli un cliente") {}
+                // Senza cliente (con «Tutti i clienti» nella barra): come «Scegli il cliente», apre la scelta della barra
+                Button(TestiPratiche.compilaConCliente) { stato.apriSceltaClientePratiche() }
                     .buttonStyle(.applePrimarioGrande)
-                    .disabled(true)
             }
         }
         .frame(maxWidth: .infinity)
-    }
-}
-
-/// Un chip del cliente: avatar 22 e nome di battesimo; acceso in blu pieno.
-private struct ChipClienteModulo: View {
-    let cliente: Cliente
-    let acceso: Bool
-    let azione: () -> Void
-
-    private typealias M = Tema.Apple.Pratiche.Moduli
-
-    var body: some View {
-        let forma = Capsule(style: .continuous)
-        Button(action: azione) {
-            HStack(spacing: M.spazioChip) {
-                AvatarCliente(iniziali: cliente.iniziali, tinta: cliente.tinta.colori, lato: M.avatarChip)
-                Text(StatoShell.nomeDiBattesimo(cliente))
-                    .carattereApple(M.chipCarattere)
-                    .foregroundColor(acceso ? M.chipTestoAcceso : M.chipTesto)
-                    .lineLimit(1)
-            }
-            .padding(M.chipPadding)
-            .background(forma.fill(acceso ? M.chipAcceso : M.chipFondo))
-            .overlay(forma.strokeBorder(acceso ? Color.clear : M.chipBordo, lineWidth: Tema.Apple.Misura.bordo))
-            .contentShape(forma)
-        }
-        .buttonStyle(StileSemplice())
-        .accessibilityAddTraits(acceso ? AccessibilityTraits.isSelected : AccessibilityTraits())
-    }
-}
-
-/// I chip vanno a capo quando la riga è piena.
-private struct FlussoChip: Layout {
-    var spazio: CGFloat
-
-    func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
-        let larghezza = proposal.width ?? .infinity
-        var x: CGFloat = 0, y: CGFloat = 0, riga: CGFloat = 0, massimo: CGFloat = 0
-        for s in subviews {
-            let d = s.sizeThatFits(.unspecified)
-            if x > 0 && x + d.width > larghezza { x = 0; y += riga + spazio; riga = 0 }
-            x += d.width + spazio
-            riga = max(riga, d.height)
-            massimo = max(massimo, x - spazio)
-        }
-        return CGSize(width: proposal.width ?? massimo, height: y + riga)
-    }
-
-    func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {
-        var x = bounds.minX, y = bounds.minY, riga: CGFloat = 0
-        for s in subviews {
-            let d = s.sizeThatFits(.unspecified)
-            if x > bounds.minX && x + d.width > bounds.maxX { x = bounds.minX; y += riga + spazio; riga = 0 }
-            s.place(at: CGPoint(x: x, y: y), proposal: ProposedViewSize(d))
-            x += d.width + spazio
-            riga = max(riga, d.height)
-        }
     }
 }
 

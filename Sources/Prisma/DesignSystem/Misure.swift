@@ -259,6 +259,10 @@ enum Misure {
         static let spazio: CGFloat = 10
         /// Fra i pulsanti a destra dell'intestazione.
         static let spazioAzioni: CGFloat = 8
+        /// Fra le due metà del pulsante diviso «Nuovo cliente | ⌄» (migliorie d'uso 6, `.btnS` del template).
+        static let spazioPulsanteDiviso: CGFloat = 1
+        /// Fra «Aggiungi» e la sua freccia del menu (migliorie d'uso 6).
+        static let spazioFrecciaMenu: CGFloat = 4
     }
 
     /// Pulsanti in capsula del tema (raggio pari a circa metà dell'altezza).

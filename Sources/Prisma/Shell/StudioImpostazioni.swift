@@ -38,7 +38,7 @@ struct PaginaImpostazioniStudio: View {
             NotaImpostazioni("Studio misura il tuo lavoro con i numeri che scrivi qui: Prisma non li inventa. "
                              + "Un campo vuoto resta vuoto, e Studio dice che cosa manca.")
             VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.fraRighe) {
-                GruppoImpostazioni(titolo: "Le tue aliquote Alleanza") {
+                GruppoImpostazioni(titolo: "Le tue aliquote \(Canale.alleanza.nomeBreve)") {
                     ForEach(Array(aree.enumerated()), id: \.element) { i, area in
                         let successiva = AliquoteProvvigione.voceSuccessiva(area: area)
                         RigaImpostazione(titolo: area.nome, sottotitolo: Self.spiegazione(area),

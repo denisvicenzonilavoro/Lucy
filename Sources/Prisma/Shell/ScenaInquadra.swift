@@ -293,7 +293,7 @@ private struct SchedaInquadraMac: View {
             }
             return "Sull’iPhone apri Prisma › Posizioni › Inquadra: il testo letto arriva qui, cifrato in rete locale. Oppure trascina qui una foto o un PDF."
         case .trascina:
-            return "L’iPhone non è collegato: attiva «iPhone e iPad» in Impostazioni › Vera, oppure trascina qui una foto o un PDF. Prisma lo legge sul Mac e non lo salva."
+            return "L’iPhone non è collegato: collegalo in Impostazioni › iPhone e iPad, oppure trascina qui una foto o un PDF. Prisma lo legge sul Mac e non lo salva."
         case .lettura:
             return "Leggo «\(inquadra.origine)» sul Mac, senza mandarlo fuori."
         case .illeggibile:
@@ -310,9 +310,15 @@ private struct SchedaInquadraMac: View {
 
     @ViewBuilder private var contenuto: some View {
         switch inquadra.fase {
-        case .attesa, .trascina:
+        case .attesa:
             ZonaInquadra(inquadra: inquadra)
                 .padding(.top, Tema.Apple.Inquadra.Zona.sopra)
+        case .trascina:
+            ZonaInquadra(inquadra: inquadra)
+                .padding(.top, Tema.Apple.Inquadra.Zona.sopra)
+            // Migliorie d'uso 39: il trascinamento resta, e c'è il rimando a Impostazioni › iPhone e iPad
+            RimandoCollegaDispositivo { stato.chiudiInquadra() }
+                .padding(.top, S.pulsantiSopra)
         case .lettura:
             EmptyView()
         case .illeggibile:
@@ -521,7 +527,7 @@ private struct ZonaInquadra: View {
 
 // MARK: - Il pulsante della testata di Posizioni
 
-/// «◎ Inquadra con l’iPhone» accanto ai segmenti del Portafoglio (§9.1.1).
+/// «◎ Inquadra con l’iPhone»: nello Smontaggio vuoto. In Posizioni è una voce del menu «Aggiungi» (migliorie d'uso 6).
 struct PulsanteInquadra: View {
     @Environment(StatoShell.self) var stato
 

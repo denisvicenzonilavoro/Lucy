@@ -351,7 +351,6 @@ enum ProvaCalcoliModuli {
         let a = clienti[0], b = clienti[1]
         s.caricaEsempiModuli()
         s.moduli.scelto = "modulo-prova-\(TipoModulo.propostaPolizza.rawValue)"
-        s.moduli.clienteId = nil
         s.clienteAttivoId = a.id
         s.compilaModulo()
         let campo = s.moduli.modelloScelto?.campiConDato.first?.id ?? ""

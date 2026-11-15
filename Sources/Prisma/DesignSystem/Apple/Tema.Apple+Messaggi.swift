@@ -44,6 +44,13 @@ extension Tema.Apple {
             static let sopraNota: CGFloat = 12
             static let testoNota = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
             static let coloreTestoNota = Colore.inchiostro2
+            /// Migliorie d'uso 25 (Mac): il numerino accanto all'occhiello (`.bN2`: 11 bold, fondo `chip`, testo
+            /// `inchiostro2`, a capsula, `padding:1px 7px`), 6 dal titolo. Lo usa `NumeroOcchielloApple`.
+            static let numeroOcchiello = Carattere(dimensione: 11, peso: .bold, tabellare: true)
+            static let fondoNumeroOcchiello = Colore.chip
+            static let coloreNumeroOcchiello = Colore.inchiostro2
+            static let paddingNumeroOcchiello = Misura.padding(1, 7)
+            static let spazioNumeroOcchiello: CGFloat = 6
         }
 
         // MARK: Voce dell'elenco (§2.1 `.rub`)
@@ -69,6 +76,13 @@ extension Tema.Apple {
             /// «✓ Preparato alle 10:42»: verde, semibold.
             static let preparato = Carattere(dimensione: 11.5, peso: .semibold)
             static let colorePreparato = Colore.verde
+            /// Migliorie d'uso 25 (Mac): la spunta verde a destra di un messaggio spedito (`gu('fatto',17)`), 8 dal testo;
+            /// sotto il titolo «Aperto in Mail alle …» (aperto, non ancora confermato) in `inchiostro2`.
+            static let spuntaSpedito = Carattere(dimensione: 17, peso: .semibold)
+            static let simboloSpedito = "checkmark.circle.fill"
+            static let coloreSpedito = Colore.verde
+            static let spazioSpunta: CGFloat = 8
+            static let coloreAperto = Colore.inchiostro2
             /// Sotto il puntatore `chip`, scelta `selezioneVoce`, il fondo cambia in 0,25 s.
             static let fondoSopra = Colore.chip
             static let fondoScelta = Colore.selezioneVoce
@@ -90,7 +104,7 @@ extension Tema.Apple {
             static let destinatario = Carattere.secondario
             static let coloreDestinatario = Colore.inchiostro2
             /// «manca l'indirizzo email nel dossier»: arancio come gli avvisi.
-            static let coloreRecapitoMancante = Colore.arancio
+            static let coloreRecapitoMancante = Colore.arancioTesto
             static let titolo = Carattere(dimensione: 23, peso: .bold, tracking: -0.4)
             static let coloreTitolo = Colore.inchiostro
             static let spazioTitolo: CGFloat = 2
@@ -103,7 +117,7 @@ extension Tema.Apple {
             static let testoPerche = Colore.accento
             /// «Senza consenso commerciale»: fondo e testo arancio degli avvisi.
             static let fondoConsenso = Colore.avvisoFondo
-            static let testoConsenso = Colore.arancio
+            static let testoConsenso = Colore.arancioTesto
             /// Riga dei controlli: gap 10, `margin:18px 0 14px`.
             static let controlliSopra: CGFloat = 18
             static let controlliSotto: CGFloat = 14
@@ -113,6 +127,14 @@ extension Tema.Apple {
             static let spazioSfera: CGFloat = 6
             static let notaVera = Carattere.secondario
             static let coloreNotaVera = Colore.inchiostro2
+            /// Migliorie d'uso 26 (solo Mac): le etichette «Tono» e «Invia con» (`.k` 12,5 `inchiostro2`), 8 dal
+            /// segmentato, 14 fra i due gruppi; a destra «Vera ha usato N dati del dossier ›» (`.lnk` 13 semibold accento).
+            static let etichettaControllo = Carattere.secondario
+            static let coloreEtichettaControllo = Colore.inchiostro2
+            static let spazioEtichetta: CGFloat = 8
+            static let fraGruppiControlli: CGFloat = 14
+            static let datiUsati = Carattere(dimensione: 13, peso: .semibold)
+            static let coloreDatiUsati = Colore.accento
             /// Riga dell'oggetto: 14, `padding:10px 0`, filetto basso `separatore`.
             static let oggetto = Carattere(dimensione: 14, peso: .regular)
             static let oggettoForte = Carattere(dimensione: 14, peso: .bold)
@@ -128,7 +150,7 @@ extension Tema.Apple {
             static let sopraAvviso: CGFloat = 14
             /// «Dati di prova: …»: arancio, 11,5.
             static let prova = Carattere(dimensione: 11.5, peso: .semibold)
-            static let coloreProva = Colore.arancio
+            static let coloreProva = Colore.arancioTesto
             static let sopraProva: CGFloat = 6
         }
 
@@ -177,6 +199,44 @@ extension Tema.Apple {
             static let sopraNota: CGFloat = 8
         }
 
+        // MARK: La scheda «Da dove vengono le cifre» (migliorie d'uso 26, solo Mac)
+
+        enum FoglioDati {
+            /// Larga 440, `padding:22px 24px`; occhiello `.lbl`; titolo 23 bold tracking −0,4 (`margin:4px 0 6px`);
+            /// frase 13,5 `inchiostro2`; righe chiave/valore 14 (`.kvr`: `padding:9px 0`, alte almeno 40, filo
+            /// `separatore` fra le righe, chiave `inchiostro2` larga al massimo 210, valore in grassetto tabellare).
+            static let larghezza: CGFloat = 440
+            static let padding = Misura.padding(22, 24)
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let titolo = Carattere(dimensione: 23, peso: .bold, tracking: -0.4)
+            static let coloreTitolo = Colore.inchiostro
+            static let sopraTitolo: CGFloat = 4
+            static let frase = Carattere(dimensione: 13.5, peso: .regular, interlinea: 1.4)
+            static let coloreFrase = Colore.inchiostro2
+            static let sopraFrase: CGFloat = 6
+            static let sopraRighe: CGFloat = 8
+            static let chiave = Carattere(dimensione: 14, peso: .regular)
+            static let coloreChiave = Colore.inchiostro2
+            static let larghezzaChiave: CGFloat = 210
+            static let valore = Carattere(dimensione: 14, peso: .bold, tabellare: true)
+            static let coloreValore = Colore.inchiostro
+            static let spazioRiga: CGFloat = 16
+            static let paddingRiga: CGFloat = 9
+            static let altezzaRiga: CGFloat = 40
+            static let filo = Colore.separatore
+            static let spessoreFilo = Misura.bordo
+            /// «Scritto da Vera» / «Testo di Prisma» in fondo, `.k` `inchiostro3`, 12 sopra; «Chiudi» 16 sopra.
+            static let nota = Carattere.secondario
+            static let coloreNota = Colore.inchiostro3
+            static let sopraNota: CGFloat = 12
+            static let sopraPulsanti: CGFloat = 16
+            /// Nelle istantanee la scheda si disegna sopra il pannello, sul velo, come il dettaglio.
+            static let velo = Colore.velo
+            static let superficie = Superficie.dettaglio
+            static let raggio = Raggio.dettaglioAperto
+        }
+
         // MARK: Barra dei pulsanti (§2.2)
 
         enum Barra {
@@ -185,6 +245,20 @@ extension Tema.Apple {
             static let sopra: CGFloat = 16
             static let nota = Carattere.secondario
             static let coloreNota = Colore.inchiostro2
+            /// Migliorie d'uso 25 (Mac): la barra a tre stati. «Aperto in Mail. L’hai spedito?» 14,5 bold, 8 prima dei
+            /// pulsanti; la pillola verde «✓ Spedito oggi alle …» (13 semibold, fondo verde al 12%, `padding:6px 12px`)
+            /// con accanto «È nel dossier di …» `.k`.
+            static let domanda = Carattere(dimensione: 14.5, peso: .bold)
+            static let coloreDomanda = Colore.inchiostro
+            static let spazioDomanda: CGFloat = 8
+            static let pillolaSpedito = Carattere(dimensione: 13, peso: .semibold)
+            static let testoPillolaSpedito = Colore.verde
+            static let fondoPillolaSpedito = Colore.verde.opacity(0.12)
+            static let paddingPillolaSpedito = Misura.padding(6, 12)
+            static let simboloPillolaSpedito = "checkmark"
+            static let spazioPillolaSpedito: CGFloat = 5
+            /// Un messaggio spedito si rilegge: il testo com'era, senza campo né comparsa.
+            static let opacitaControlliSpento = 0.5
         }
 
         // MARK: Stato vuoto (§1.6)
@@ -225,6 +299,11 @@ extension Tema.Apple {
             static let baseCambio = Tema.Apple.Moto.Cascata.baseDentroApp
             /// Al più tante voci entrano a cascata, le altre con l'ultima.
             static let voceMassima = 8
+            /// Migliorie d'uso 25 (Mac): la barra cambia stato con un'entrata breve (opacità 0→1, y 6→0, 0,26 s);
+            /// calmo: dissolvenza 0,15 s; istantanee: ferma.
+            static let durataCambioBarra = 0.26
+            static let spostamentoCambioBarra: CGFloat = 6
+            static var cambioBarra: Animation { .easeOut(duration: durataCambioBarra * Tema.Apple.Moto.ritmo) }
         }
     }
 }

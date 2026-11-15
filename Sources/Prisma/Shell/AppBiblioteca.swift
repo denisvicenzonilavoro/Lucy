@@ -128,7 +128,7 @@ struct VistaBiblioteca: View {
     }
 
     @ViewBuilder private var suggerimenti: some View {
-        let elenco = stato.suggerimentiBiblioteca
+        let elenco = stato.suggerimentiBiblioteca()
         if !elenco.isEmpty {
             HStack(spacing: B.spazioSuggerimenti) {
                 ForEach(elenco, id: \.self) { s in
@@ -351,33 +351,119 @@ struct VistaBiblioteca: View {
         }
     }
 
-    /// Il documento intero nel vassoio, con le frecce delle pagine.
+    /// Il documento intero (migliorie d'uso 35, §35.3 punto 4): due colonne come la risposta. A sinistra la tile del
+    /// documento (genere, titolo, pagine e canale, «Vera l’ha letto sul Mac.») con le domande su quel documento, o «Chiedi
+    /// tu»; a destra il vassoio con le frecce delle pagine. Entra salendo di 8 con la dissolvenza (ferma con «Riduci
+    /// movimento» e nelle istantanee).
     private func documentoAperto(_ d: DocumentoBiblioteca, pagina: Int) -> some View {
         let pagine = trova.pagine(d)
         let totale = max(1, max(pagine.count, d.numeroPagine))
         let testo = pagina - 1 < pagine.count ? pagine[pagina - 1] : ""
-        return VStack(alignment: .leading, spacing: B.sottoTile) {
-            HStack(spacing: 10) {
-                TasselloGlifo(glifo: .libro, lato: B.latoTassello, tinta: B.tassello(canale: d.canale))
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(d.titolo).carattereApple(B.titoloDocumento).foregroundColor(B.coloreTitolo)
-                    Text([d.dettaglio, d.edizione].filter { !$0.isEmpty }.joined(separator: " · "))
-                        .carattereApple(B.dettaglioDocumento).foregroundColor(B.coloreDettaglio)
+        return GeometryReader { g in
+            let vassoioMinimo = B.larghezzaFoglio * B.scalaMinima + 2 * B.latiVassoio
+            let colonna = min(B.larghezzaRisposta, g.size.width - B.spazioColonne - vassoioMinimo)
+            if colonna >= B.rispostaMinima {
+                HStack(alignment: .top, spacing: B.spazioColonne) {
+                    colonnaDocumento(d, totale: totale).frame(width: colonna)
+                    vassoioDocumento(d, pagina: pagina, testo: testo, totale: totale)
                 }
-                Spacer()
-                if trova.risultato != nil {
-                    Button("Torna alla risposta") { stato.tornaAllaRisposta() }.buttonStyle(.apple)
+            } else {
+                // Finestra stretta: la tile sopra, il foglio sotto, e si scorre
+                ScrollView(.vertical, showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: B.spazioColonne) {
+                        colonnaDocumento(d, totale: totale)
+                        vassoioDocumento(d, pagina: pagina, testo: testo, totale: totale)
+                            .frame(height: B.altezzaVassoioStretto)
+                    }
                 }
             }
-            VassoioBiblioteca(foglio: FoglioBiblioteca(documento: d, pagina: pagina, testo: testo, frase: nil, passi: [], avanzamento: 1),
-                              totale: totale, giro: trova.giro) {
-                Button { stato.apriDocumentoBiblioteca(d.id, pagina: pagina - 1) } label: { Image(systemName: "chevron.left") }
-                    .buttonStyle(.plain).disabled(pagina <= 1)
-                    .accessibilityLabel(Text("Pagina precedente"))
-                Button { stato.apriDocumentoBiblioteca(d.id, pagina: pagina + 1) } label: { Image(systemName: "chevron.right") }
-                    .buttonStyle(.plain).disabled(pagina >= totale)
-                    .accessibilityLabel(Text("Pagina seguente"))
+        }
+        .entrataStile(B.entrataDocumento)
+        .id(d.id)
+    }
+
+    /// La colonna del documento aperto: la tile, le domande su quel documento e il ritorno alla risposta (o a tutti i
+    /// documenti).
+    private func colonnaDocumento(_ d: DocumentoBiblioteca, totale: Int) -> some View {
+        let domande = stato.suggerimentiBiblioteca(documento: d.id)
+        let righe = TestiBiblioteca.pagineECanale(pagine: totale, canale: d.canale) + "\n"
+            + (d.illeggibile ? TestiBiblioteca.illeggibile : TestiBiblioteca.lettoSulMac)
+        return VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 0) {
+                Text(d.genereVisto.nome).carattereApple(B.etichetta).foregroundColor(B.coloreEtichetta)
+                Text(d.titolo)
+                    .carattereApple(B.titoloDocumentoAperto)
+                    .foregroundColor(B.coloreTitolo)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, B.sottoEtichettaDocumento)
+                Text(righe)
+                    .carattereApple(B.dettaglioDocumentoAperto)
+                    .foregroundColor(d.illeggibile ? B.coloreAvviso : B.coloreDettaglioAperto)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, B.sottoTitoloDocumentoAperto)
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(B.paddingTileDocumento)
+            .superficieApple(B.superficieRisposta)
+            .accessibilityElement(children: .combine)
+            Text(domande.isEmpty ? TestiBiblioteca.chiediTu : TestiBiblioteca.domandeDocumento)
+                .carattereApple(B.etichetta)
+                .foregroundColor(B.coloreEtichetta)
+                .padding(.horizontal, B.rientroEtichettaDomande)
+                .padding(.top, B.sopraDomandeDocumento)
+                .padding(.bottom, B.sottoEtichettaDomande)
+            if domande.isEmpty {
+                Text(TestiBiblioteca.chiediTuTesto)
+                    .carattereApple(B.nota)
+                    .foregroundColor(B.coloreNota)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, B.rientroEtichettaDomande)
+            } else {
+                VStack(alignment: .leading, spacing: B.spazioDomandeDocumento) {
+                    ForEach(domande, id: \.self) { q in
+                        Button { stato.chiediBiblioteca(q, solo: d.id) } label: { domandaDocumento(q) }
+                            .buttonStyle(StileSemplice())
+                    }
+                }
+            }
+            Button(trova.risultato != nil ? TestiBiblioteca.tornaAllaRisposta : TestiBiblioteca.chiudiDocumento) {
+                stato.tornaAllaRisposta()
+            }
+            .buttonStyle(.apple)
+            .padding(.top, B.sottoTile)
+        }
+    }
+
+    /// Una domanda su un documento: come le pillole dei suggerimenti, ma a tutta larghezza e a capo.
+    private func domandaDocumento(_ q: String) -> some View {
+        Text(q)
+            .carattereApple(B.testoDomandaDocumento)
+            .foregroundColor(B.coloreDomandaDocumento)
+            .multilineTextAlignment(.leading)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(B.paddingDomandaDocumento)
+            .background {
+                RoundedRectangle(cornerRadius: B.raggioDomandaDocumento, style: .continuous)
+                    .fill(B.fondoDomandaDocumento)
+                    .overlay {
+                        RoundedRectangle(cornerRadius: B.raggioDomandaDocumento, style: .continuous)
+                            .strokeBorder(B.bordoDomandaDocumento, lineWidth: Tema.Apple.Misura.bordo)
+                    }
+            }
+            .contentShape(RoundedRectangle(cornerRadius: B.raggioDomandaDocumento, style: .continuous))
+    }
+
+    /// Il vassoio del documento aperto, con le frecce delle pagine.
+    private func vassoioDocumento(_ d: DocumentoBiblioteca, pagina: Int, testo: String, totale: Int) -> some View {
+        VassoioBiblioteca(foglio: FoglioBiblioteca(documento: d, pagina: pagina, testo: testo, frase: nil, passi: [], avanzamento: 1),
+                          totale: totale, giro: trova.giro) {
+            Button { stato.apriDocumentoBiblioteca(d.id, pagina: pagina - 1) } label: { Image(systemName: "chevron.left") }
+                .buttonStyle(.plain).disabled(pagina <= 1)
+                .accessibilityLabel(Text("Pagina precedente"))
+            Button { stato.apriDocumentoBiblioteca(d.id, pagina: pagina + 1) } label: { Image(systemName: "chevron.right") }
+                .buttonStyle(.plain).disabled(pagina >= totale)
+                .accessibilityLabel(Text("Pagina seguente"))
         }
     }
 }
@@ -403,11 +489,21 @@ private struct LateraleBiblioteca: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
+        // Migliorie d'uso 35: con un cliente scelto e almeno un documento dei suoi prodotti, due gruppi
+        let cliente = stato.clienteBiblioteca
+        let ids = cliente.map { stato.documentiBibliotecaCliente($0.id) } ?? []
+        let suoi = Set(ids)
+        let miei: [DocumentoBiblioteca] = suoi.isEmpty ? [] : documenti.filter { suoi.contains($0.id) }
+        let altri: [DocumentoBiblioteca] = suoi.isEmpty ? documenti : documenti.filter { !suoi.contains($0.id) }
+        let titolo: String? = cliente.flatMap { c -> String? in
+            miei.isEmpty ? nil : TestiBiblioteca.deiProdotti(StatoShell.nomeBreve(c))
+        }
         VStack(alignment: .leading, spacing: 8) {
             HStack {
-                Text("I documenti").carattereApple(B.etichetta).foregroundColor(B.coloreEtichetta)
+                Text(titolo ?? TestiBiblioteca.documenti).carattereApple(B.etichetta).foregroundColor(B.coloreEtichetta)
+                    .lineLimit(1)
                 Spacer()
-                Text("\(documenti.count)").carattereApple(B.etichetta).foregroundColor(B.coloreEtichetta).monospacedDigit()
+                Text("\(titolo == nil ? documenti.count : miei.count)").carattereApple(B.etichetta).foregroundColor(B.coloreEtichetta).monospacedDigit()
                 Button { stato.scegliDocumentiBiblioteca() } label: {
                     Image(systemName: "plus").font(.system(size: 11, weight: .bold))
                 }
@@ -420,7 +516,22 @@ private struct LateraleBiblioteca: View {
                 // a tutta larghezza, la disposizione non cambia
                 LazyVStack(alignment: .leading, spacing: 2) {
                     ForEach(trova.letture) { l in rigaLettura(l) }
-                    ForEach(documenti) { d in rigaDocumento(d) }
+                    if titolo != nil {
+                        ForEach(miei) { d in rigaDocumento(d) }
+                        if !altri.isEmpty {
+                            HStack {
+                                Text(TestiBiblioteca.altriDocumenti).carattereApple(B.etichetta).foregroundColor(B.coloreEtichetta)
+                                Spacer()
+                                Text("\(altri.count)").carattereApple(B.etichetta).foregroundColor(B.coloreEtichetta).monospacedDigit()
+                            }
+                            .padding(.top, B.sopraGruppo)
+                            .padding(.bottom, B.sottoGruppo)
+                            .accessibilityAddTraits(.isHeader)
+                        }
+                        ForEach(altri) { d in rigaDocumento(d) }
+                    } else {
+                        ForEach(documenti) { d in rigaDocumento(d) }
+                    }
                 }
             }
             Spacer(minLength: 0)
@@ -492,7 +603,7 @@ private struct LateraleBiblioteca: View {
             }
         }
         Menu("Canale") {
-            Button { stato.classificaBiblioteca(d.id, canale: .some(.alleanza)) } label: { marcato("Alleanza", d.canale == .alleanza) }
+            Button { stato.classificaBiblioteca(d.id, canale: .some(.alleanza)) } label: { marcato(Canale.alleanza.nomeBreve, d.canale == .alleanza) }
             Button { stato.classificaBiblioteca(d.id, canale: .some(.indipendente)) } label: { marcato("Consulenza indipendente", d.canale == .indipendente) }
             Button { stato.classificaBiblioteca(d.id, canale: .some(nil)) } label: { marcato("Nessuno (di riferimento)", d.canale == nil) }
         }
@@ -549,17 +660,26 @@ private struct BarraDomandaBiblioteca: View {
 
     private var cercaInCorso: Bool { trova.risultato?.stato == .cerca }
 
+    /// Migliorie d'uso 35: con un documento aperto il campo chiede di quel documento, e la domanda cerca solo lì.
+    private var documentoAperto: DocumentoBiblioteca? { trova.aperta.flatMap { stato.documentoBiblioteca($0.documentoId) } }
+
+    private var segnaposto: String {
+        documentoAperto.map { TestiBiblioteca.segnapostoDocumento($0.titoloBreve) } ?? TestiBiblioteca.segnaposto
+    }
+
+    private func chiedi() { stato.chiediBiblioteca(trova.domanda, solo: documentoAperto?.id) }
+
     var body: some View {
         let vuota = trova.domanda.trimmingCharacters(in: .whitespaces).isEmpty
         HStack(spacing: B.spazioSfera) {
             SferaVera(misura: B.sferaDomanda, pensa: cercaInCorso)
-            TextField("Chiedi qualcosa ai tuoi documenti…", text: $trova.domanda)
+            TextField(segnaposto, text: $trova.domanda)
                 .textFieldStyle(.plain)
                 .carattereApple(B.campoDomanda)
                 .foregroundColor(C.inchiostro)
                 .focused($campo)
-                .onSubmit { stato.chiediBiblioteca(trova.domanda) }
-            Button("Cerca") { stato.chiediBiblioteca(trova.domanda) }
+                .onSubmit { chiedi() }
+            Button("Cerca") { chiedi() }
                 .buttonStyle(.applePrimario)
                 .disabled(vuota || senzaDocumenti)
             // ⌘F porta nel campo della domanda

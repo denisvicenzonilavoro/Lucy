@@ -139,3 +139,103 @@ extension Tema.Apple {
         static let vociInCascata = 8
     }
 }
+
+// MARK: - Il «Da fare» unico (migliorie d'uso 3, solo sul Mac)
+
+extension Tema.Apple {
+    /// La pillola «Da fare» della barra, il suo pannello e la riga comune (`RigaDaFare`): Design/uso/gruppo-01.md §3,
+    /// CSS del template righe 423-424 e 479-498.
+    enum ElencoDaFare {
+        // La pillola della barra: glifo del cerchio con la spunta, «Da fare» e il numero
+        static let glifoPillola = "checkmark.circle"
+        static let spazioPillola: CGFloat = 5
+        /// Il numero (`.bN`): 10 bold bianco su rosso `#FF3B30`, verde quando è zero, padding 1×6.
+        static let numero = Carattere(dimensione: 10, peso: .bold, tabellare: true)
+        static let paddingNumero = EdgeInsets(top: 1, leading: 6, bottom: 1, trailing: 6)
+        static let fondoNumero = Colore.rossoBadge
+        static let fondoNumeroZero = Colore.verde
+        static let testoNumero = Color(r: 255, g: 255, b: 255)
+
+        // Il pannello (`#notif`): largo 450, padding 12×10, fondo `pop` (vetro coprente), raggio delle card
+        static let larghezza: CGFloat = 450
+        static let padding = Misura.padding(12, 10)
+        static let raggio: CGFloat = Raggio.card
+        static let destra: CGFloat = 12
+        static let basso: CGFloat = 98
+        /// L'elenco scorre oltre 650.
+        static let altezzaElenco: CGFloat = 650
+        /// Oltre queste righe (alte almeno `altezzaRiga`) l'elenco non può stare in `altezzaElenco`: scorre subito, con le
+        /// righe create solo quando si vedono.
+        static let righeSenzaScorrere = Int((altezzaElenco / altezzaRiga).rounded(.up))
+        /// Righe al più per gruppo nel pannello; le altre con «e altre N · Mostra tutte».
+        static let righePerGruppo = 12
+        /// La testata: «Da fare» 16 bold, il numero, a destra il segmentato o «in ordine di tempo».
+        static let titolo = Carattere(dimensione: 16, peso: .bold)
+        static let spazioTitolo: CGFloat = 6
+        static let paddingTesta = EdgeInsets(top: 2, leading: 6, bottom: 6, trailing: 6)
+        static let nota = Carattere(dimensione: 12, peso: .regular)
+        /// Il titolo dei gruppi (`.dfG`): 11 bold maiuscolo, tracking 0,6, 12 sopra (4 il primo), 2 sotto.
+        static let gruppo = Carattere(dimensione: 11, peso: .bold, tracking: 0.6, maiuscolo: true)
+        static let gruppoSopra: CGFloat = 12
+        static let gruppoPrimoSopra: CGFloat = 4
+        static let gruppoSotto: CGFloat = 2
+        static let paddingElenco: CGFloat = 4
+        /// «Tutto fatto.» al centro, 28 sopra e sotto.
+        static let vuotoPadding: CGFloat = 28
+        /// Il piede: filo sopra, 6 sopra il filo, 8 sotto; «+ Aggiungi» e «Fatte oggi» 13.
+        static let piedeSopra: CGFloat = 6
+        static let piedePadding = EdgeInsets(top: 8, leading: 4, bottom: 0, trailing: 4)
+        static let piede = Carattere(dimensione: 13, peso: .regular)
+        static let collegamento = Carattere(dimensione: 13, peso: .semibold)
+        static let coloreCollegamento = Colore.accento
+        /// Il campo «Aggiungi»: capsula `chip`, padding 4/4/4/14, testo 13,5, al più 70 caratteri.
+        static let paddingCampo = EdgeInsets(top: 4, leading: 14, bottom: 4, trailing: 4)
+        static let campo = Carattere(dimensione: 13.5, peso: .regular)
+        static let fondoCampo = Colore.chip
+        static let caratteriCampo = 70
+
+        // La riga (`.dfR`)
+        static let altezzaRiga: CGFloat = 38
+        static let paddingRiga = Misura.padding(5, 4)
+        static let spazioRiga: CGFloat = 10
+        static let raggioRiga: CGFloat = 10
+        static let fondoRigaSopra = Colore.chip
+        static let filo = Colore.separatore
+        /// Nell'Agenda il filo fra le righe è arancio al 22%.
+        static let filoAgenda = Colore.arancio.opacity(0.22)
+        /// Il cerchio da spuntare: 20, filo 2 `ink3`; al passaggio verde al 18% e scala 1,12.
+        static let cerchio: CGFloat = 20
+        static let trattoCerchio: CGFloat = 2
+        static let coloreCerchio = Colore.inchiostro3
+        static let coloreCerchioSopra = Colore.verde
+        static let fondoCerchioSopra = Colore.verde.opacity(0.18)
+        static let scalaCerchioSopra: CGFloat = 1.12
+        /// Il pallino del momento: 8 (rosso oggi, arancio in settimana, verde dopo).
+        static let pallino: CGFloat = 8
+        static func colorePallino(_ t: VoceDaFare.Tono) -> Color { Posizioni.Scheda.colore(t) }
+        /// Titolo 13,5 semibold, sotto 12 secondario.
+        static let titoloRiga = Carattere(dimensione: 13.5, peso: .semibold, interlinea: 1.3)
+        static let sottoRiga = Carattere(dimensione: 12, peso: .regular)
+        static let spazioCanali: CGFloat = 4
+        /// L'uscita della riga spuntata: opacità 0 e 16 a destra in 0,32 s.
+        static let uscita: CGFloat = 16
+        static let durataUscita: Double = 0.32
+        static var animazioneUscita: Animation { Moto.Curva.ease.animazione(durataUscita) }
+
+        // Il dettaglio fuori da Posizioni (al centro) e la scheda semplice delle voci scritte a mano
+        static let misuraSemplice = CGSize(width: 440, height: 250)
+        static let misuraDettaglio = Posizioni.Dettaglio.misura
+        static let quandoSemplice = Carattere(dimensione: 12, peso: .semibold, maiuscolo: true)
+        static let testoSemplice = Carattere(dimensione: 19, peso: .bold)
+        static let notaSemplice = Carattere(dimensione: 13, peso: .regular, interlinea: 1.4)
+        static let spazioSemplice: CGFloat = 10
+        /// Il riquadro «Da fare» della scrivania (al posto di «In scadenza entro 90 giorni»): al più tre righe sotto la
+        /// testata, 6 fra il titolo e il numero, 8 sopra l'elenco.
+        static let righeScrivania = 3
+        static let elencoSopraScrivania: CGFloat = 8
+        /// Le righe degli arrivi: pallino del gruppo delle notifiche.
+        static let pallinoArrivoUrgente = Colore.rosso
+        static let pallinoArrivoAvviso = Colore.arancio
+        static let pallinoArrivoInformazione = Colore.accento
+    }
+}

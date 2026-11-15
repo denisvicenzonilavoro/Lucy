@@ -367,6 +367,16 @@ struct VeraScrivania: View {
         }
     }
 
+    /// Sotto «Vera»: sul Mac solo se è pronta (Migliorie d'uso 9, il nome del motore sta in Impostazioni › Vera); su
+    /// iPhone e iPad il nome del motore, come prima.
+    private var statoMotore: String {
+        #if os(macOS)
+        return pronta ? TestiStatoVera.veraPronta : TestiStatoVera.veraNonPronta
+        #else
+        return pronta ? stato.qwen.nome : "\(stato.qwen.nome) · non pronto"
+        #endif
+    }
+
     /// In alto: la sfera piccola (si muove mentre Vera pensa), di chi si parla, nuova conversazione, «Apri in Vera».
     private var testata: some View {
         let m = Tema.Misura.VeraScrivania.self
@@ -378,7 +388,7 @@ struct VeraScrivania: View {
                 Text("Vera")
                     .font(Tema.Testo.VeraScrivania.titolo)
                     .foregroundColor(c.testo)
-                Text(stato.veraInCorso ? "Sto pensando…" : (pronta ? stato.qwen.nome : "\(stato.qwen.nome) · non pronto"))
+                Text(stato.veraInCorso ? "Sto pensando…" : statoMotore)
                     .font(Tema.Testo.VeraScrivania.nota)
                     .foregroundColor(pronta ? c.testoSecondario : c.nonPronto)
                     .lineLimit(1)
@@ -500,7 +510,7 @@ struct VeraScrivania: View {
         return HStack(spacing: m.spazioPiccolo) {
             Circle().fill(c.nonPronto)
                 .frame(width: Tema.Misura.VeraChat.spia, height: Tema.Misura.VeraChat.spia)
-            Text("\(q.nome) · non pronto. \(q.disponibilita.motivo ?? q.descrizione)")
+            Text(testoNonPronto(q))
                 .font(Tema.Testo.VeraScrivania.nota)
                 .foregroundColor(c.testoSecondario)
                 .lineLimit(2)
@@ -509,8 +519,24 @@ struct VeraScrivania: View {
             Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
                 .buttonStyle(StileVetro(margine: Tema.Misura.VeraChat.margineVerifica))
                 .fixedSize()
-                .help("Chiede di nuovo a Ollama se Qwen è pronto")
+                .help(aiutoVerifica)
         }
+    }
+
+    private func testoNonPronto(_ q: MotoreLocale) -> String {
+        #if os(macOS)
+        return TestiStatoVera.veraNonPronta + ". " + TestiStatoVera.spiegazione
+        #else
+        return "\(q.nome) · non pronto. \(q.disponibilita.motivo ?? q.descrizione)"
+        #endif
+    }
+
+    private var aiutoVerifica: String {
+        #if os(macOS)
+        return TestiStatoVera.aiutoVerifica
+        #else
+        return "Chiede di nuovo a Ollama se Qwen è pronto"
+        #endif
     }
 
     /// Tre o quattro spunti in pillole, come nell'app Vera.
@@ -538,7 +564,7 @@ struct VeraScrivania: View {
         (.riepilogo, "Riassumi il dossier"),
         (.scadenze, "Cosa scade?"),
         (.checkUp, "Check-up completo"),
-        (.incontro, "Prepara l'incontro"),
+        (.incontro, Parole.spuntoIncontro),
     ]
 
     static let spuntiPortafoglio: [(SpuntoPortafoglio, String)] = [

@@ -10,6 +10,7 @@ import Foundation
 /// - 812: nessun modulo caricato, la zona di rilascio e «Moduli da preparare»;
 /// - 813: la revisione della mappa di un fac-simile piatto (caselle proposte dalle regole, da confermare), chiaro e scuro;
 /// - 814: compilato con Qwen non pronto (la tile senza la sfera di Vera);
+/// - 1107 e 1108 (Migliorie d'uso 33): «Compilo per Giulia Rossi» e, con «Tutti i clienti», «Per chi lo compilo?»;
 /// - 815: Impostazioni › Moduli con i due fac-simile e l'interruttore dell'IBAN.
 /// DATI DI PROVA DICHIARATI: i moduli sono i fac-simile disegnati da Prisma (FacSimileModulo, con la scritta «FAC-SIMILE»);
 /// per Giulia si aggiungono nel solo stato dell'istantanea (che non si salva) la scheda fiscale con la sede, una proposta
@@ -45,6 +46,12 @@ extension Istantanee {
             s.moduli.veraProntaIstantanea = false
             s.compilaModulo()
         }
+        // Migliorie d'uso 33: «Compilo per <Nome>» con il cliente della barra, «Per chi lo compilo?» con «Tutti i clienti»
+        una("1107-uso-pratiche-moduli-cliente") { s in preparaModuli(s) }
+        una("1108-uso-pratiche-moduli-senza-cliente") { s in
+            preparaModuli(s)
+            s.scegliCliente(nil)
+        }
         una("815-impostazioni-moduli") { s in
             s.caricaEsempiModuli()
             s.schedaImpostazioni = .moduli
@@ -77,8 +84,7 @@ extension Istantanee {
             p.decorrenza = Calendar(identifier: .gregorian).date(from: DateComponents(year: 2026, month: 12, day: 1))
             s.dati.posizioni.append(p)
         }
-        s.clienteAttivoId = "giulia"
-        s.moduli.clienteId = "giulia"
+        s.scegliCliente("giulia")
         s.moduli.scelto = "modulo-prova-\(TipoModulo.propostaPolizza.rawValue)"
         s.apriPratiche(.moduli)
     }

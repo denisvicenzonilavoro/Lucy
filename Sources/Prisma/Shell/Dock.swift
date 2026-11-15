@@ -18,14 +18,17 @@ struct Dock: View {
         let _ = ContaCorpi.segna()
         let attiva = sistema.appAttiva
         let rientrano = sistema.rientrano
-        let voci = AppPrisma.delDock.filter { stato.appConsentita($0) }.map { app -> VoceDock in
+        // Migliorie d'uso 36: i gruppi del dock con le sole app consentite; un gruppo rimasto vuoto (in modalità
+        // cliente «il contatto», Messaggi e Territorio) sparisce con il suo filo
+        let gruppi = AppPrisma.gruppiDockConsentiti { stato.appConsentita($0) }
+        let voci = gruppi.joined().map { app -> VoceDock in
             // Chi rientra nell'icona (chiusa, in volo) ha già spento il pallino
             let via = rientrano.contains(app)
             return VoceDock(app: app, attiva: attiva == app && !via, aperta: sistema.aperta(app) && !via)
         }
         let shell = stato
         let registro = sistema.iconeDock
-        FilaDock(voci: voci, scrivaniaAttiva: attiva == nil,
+        FilaDock(voci: voci, gruppi: gruppi.map(\.count), scrivaniaAttiva: attiva == nil,
                  apri: { app in shell.apriApp(app) },
                  mostraScrivania: { shell.mostraScrivania() })
             // Si ridisegna solo se cambiano le icone o i puntini, non a ogni cambiamento dello stato
@@ -34,9 +37,9 @@ struct Dock: View {
             .onPreferenceChange(ChiaveIconeDock.self) { cornici in registro.aggiorna(cornici) }
     }
 
-    /// ⌥1…⌥9 per le prime nove app del dock.
+    /// ⌥1…⌥9 per le prime nove app del dock (sul Mac nell'ordine dei gruppi, `AppPrisma.dockMac`).
     static func scorciatoia(_ app: AppPrisma) -> String? {
-        guard let i = AppPrisma.delDock.firstIndex(of: app), i < 9 else { return nil }
+        guard let i = AppPrisma.dockInFila.firstIndex(of: app), i < 9 else { return nil }
         return "⌥\(i + 1)"
     }
 }
@@ -53,6 +56,8 @@ struct VoceDock: Equatable {
 /// passare sul dock non fa ricalcolare nient'altro dell'app.
 private struct FilaDock: View, Equatable {
     let voci: [VoceDock]
+    /// Quante app in ogni gruppo, nell'ordine di `voci`: fra un gruppo e l'altro c'è un filo (migliorie d'uso 36).
+    let gruppi: [Int]
     let scrivaniaAttiva: Bool
     let apri: (AppPrisma) -> Void
     let mostraScrivania: () -> Void
@@ -67,12 +72,13 @@ private struct FilaDock: View, Equatable {
 
     /// Le azioni chiamano sempre la stessa shell: contano solo le icone e i loro segni.
     nonisolated static func == (a: FilaDock, b: FilaDock) -> Bool {
-        a.voci == b.voci && a.scrivaniaAttiva == b.scrivaniaAttiva
+        a.voci == b.voci && a.gruppi == b.gruppi && a.scrivaniaAttiva == b.scrivaniaAttiva
     }
 
     var body: some View {
         let lato = Tema.Misura.dockIcona
         let scale = ingrandimenti(puntatore)
+        let inizi = DisposizioneDock.inizi(gruppi: gruppi)
         let riga = HStack(alignment: .bottom, spacing: DisposizioneDock.spazio) {
             ElementoDock(titolo: "Scrivania", etichetta: "Scrivania",
                          descrizione: "Torna alla scrivania: la tua giornata e i widget",
@@ -86,6 +92,8 @@ private struct FilaDock: View, Equatable {
             .onHover { passa(0, $0) }
             DivisoreDock()
             ForEach(Array(voci.enumerated()), id: \.element.app) { indice, voce in
+                // Il filo fra un gruppo e l'altro (quello dopo la Scrivania è qui sopra)
+                if inizi.contains(indice) { DivisoreDock() }
                 ElementoDock(
                     titolo: voce.app.titolo,
                     etichetta: voce.app.nomeDock,
@@ -136,7 +144,7 @@ private struct FilaDock: View, Equatable {
     private func ingrandimenti(_ x: CGFloat?) -> [CGFloat] {
         let n = voci.count + 1
         guard let x, ingrandisce else { return Array(repeating: 1, count: n) }
-        let d = DisposizioneDock.disposizione(icone: n)
+        let d = DisposizioneDock.disposizione(gruppi: [1] + gruppi)
         return d.centri.map { centro in
             Tema.Apple.Moto.IngrandimentoDock.scala(distanza: abs(x - (centro + d.larghezza / 2)))
         }
@@ -203,18 +211,33 @@ enum DisposizioneDock {
     static var larghezzaDivisore: CGFloat { Tema.Misura.filo * 2 + 2 * rientroDivisore }
 
     /// Centri delle icone (Scrivania compresa) rispetto al centro del dock e larghezza del dock.
-    static func disposizione(icone numero: Int) -> (centri: [CGFloat], larghezza: CGFloat) {
+    /// `gruppi`: quante icone per gruppo, la Scrivania è il primo gruppo da 1; a ogni confine c'è un filo
+    /// (migliorie d'uso 36). I gruppi vuoti non contano.
+    static func disposizione(gruppi: [Int]) -> (centri: [CGFloat], larghezza: CGFloat) {
         let lato = Tema.Misura.dockIcona
         var x = margineLato
         var centri: [CGFloat] = []
-        for i in 0..<max(0, numero) {
-            centri.append(x + lato / 2)
-            x += lato + spazio
-            // Dopo la Scrivania c'è il divisore
-            if i == 0 { x += larghezzaDivisore + spazio }
+        let pieni = gruppi.filter { $0 > 0 }
+        for (g, numero) in pieni.enumerated() {
+            if g > 0 { x += larghezzaDivisore + spazio }
+            for _ in 0..<numero {
+                centri.append(x + lato / 2)
+                x += lato + spazio
+            }
         }
-        let larghezza = x - spazio + margineLato
+        let larghezza = centri.isEmpty ? 2 * margineLato : x - spazio + margineLato
         return (centri.map { $0 - larghezza / 2 }, larghezza)
+    }
+
+    /// Gli indici (nella fila delle app, senza la Scrivania) da cui comincia un gruppo dopo il primo: lì va un filo.
+    static func inizi(gruppi: [Int]) -> Set<Int> {
+        var inizi = Set<Int>()
+        var somma = 0
+        for (g, numero) in gruppi.enumerated() where numero > 0 {
+            if g > 0 && somma > 0 { inizi.insert(somma) }
+            somma += numero
+        }
+        return inizi
     }
 
     /// Altezza sotto l'icona: nome e puntino dell'app aperta.
@@ -224,11 +247,13 @@ enum DisposizioneDock {
     }
 
     /// Centro dell'icona dell'app nel dock a riposo, nelle coordinate della shell (`ShellView.spazioShell`) grande
-    /// `misura`. `elenco`: le app del dock (quelle consentite). Con il dock nascosto l'icona è sul bordo in basso.
-    static func centroIcona(_ app: AppPrisma, tra elenco: [AppPrisma], in misura: CGSize, nascosto: Bool) -> CGPoint? {
+    /// `misura`. `gruppi`: i gruppi del dock con le sole app consentite (`AppPrisma.gruppiDockConsentiti`). Con il dock
+    /// nascosto l'icona è sul bordo in basso.
+    static func centroIcona(_ app: AppPrisma, tra gruppi: [[AppPrisma]], in misura: CGSize, nascosto: Bool) -> CGPoint? {
+        let elenco = Array(gruppi.joined())
         guard let i = elenco.firstIndex(of: app), misura.width > 0, misura.height > 0 else { return nil }
-        // La Scrivania è la prima icona
-        let centri = disposizione(icone: elenco.count + 1).centri
+        // La Scrivania è la prima icona, da sola nel primo gruppo
+        let centri = disposizione(gruppi: [1] + gruppi.map(\.count)).centri
         guard i + 1 < centri.count else { return nil }
         let lato = Tema.Misura.dockIcona
         let y = misura.height - Tema.Misura.dockDalBasso - margine - altezzaSotto - lato / 2
@@ -237,7 +262,8 @@ enum DisposizioneDock {
     }
 }
 
-/// Il divisore fra la Scrivania e le app: un filo verticale che sfuma in alto e in basso.
+/// Il divisore fra la Scrivania e le app, e fra un gruppo di app e l'altro (migliorie d'uso 36, tutti uguali come
+/// nel template): un filo verticale che sfuma in alto e in basso.
 struct DivisoreDock: View {
     var body: some View {
         Rectangle()

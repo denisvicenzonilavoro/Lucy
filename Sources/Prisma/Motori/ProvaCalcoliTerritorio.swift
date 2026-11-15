@@ -28,6 +28,7 @@ enum ProvaCalcoliTerritorio {
         prestazioni(verifica, tabella)
         vociDaFare(verifica)
         partenza(verifica, tabella)
+        vicini(verifica)
     }
 
     private static let cal = Calendar(identifier: .gregorian)
@@ -483,5 +484,46 @@ enum ProvaCalcoliTerritorio {
         let aMano = Coordinata(lat: 44.5, lon: 11.3)
         imp.territorio.partenza = LuogoManuale(coordinata: aMano)
         verifica.vero("Territorio: la partenza a mano vince su tutto", MotoreTerritorio.partenza(impostazioni: imp, tabella: t) == aMano)
+    }
+
+    // MARK: 15. I vicini del cliente scelto (Migliorie d'uso 32)
+
+    /// Stima in linea d'aria × 1,3 a 70 km/h fra comuni diversi (40 nello stesso comune): «a meno di dieci minuti» vuol
+    /// dire 9 minuti arrotondati al più. Coordinate inventate (dati di prova), spostate verso nord di tanti km.
+    private static func vicini(_ verifica: VerificaCalcoli) {
+        let centro = Coordinata(lat: 44.49, lon: 11.34)
+        let bologna = ComuneTabella(codice: "BO-bologna", nome: "Bologna", provincia: "BO", centro: centro, raggioKm: 6)
+        let altro = ComuneTabella(codice: "BO-prova", nome: "Prova", provincia: "BO", centro: centro, raggioKm: 6)
+        func luce(_ id: String, km: Double, comune: ComuneTabella?) -> LuceCliente {
+            let c = cliente(id, "")
+            let punto = Coordinata(lat: centro.lat + km / 111.195, lon: centro.lon)
+            let l = LuogoCliente(clienteId: id, coordinata: punto, precisione: .manuale, comune: comune, zona: comune?.nome ?? "Prova")
+            return LuceCliente(cliente: c, luogo: l, patrimonio: 10_000, canale: .indipendente, daFare: nil, annoInizio: 2020, annoStimato: false)
+        }
+        let imp = ImpostazioniTerritorio()
+        let luci = [luce("io", km: 0, comune: bologna),
+                    luce("sotto", km: 8.0, comune: altro),        // 10,4 km di strada a 70: 9 minuti
+                    luce("sopra", km: 9.2, comune: altro),        // 12,0 km: 10 minuti, non «a meno di dieci»
+                    luce("citta", km: 5.5, comune: bologna),      // 7,15 km a 40 nello stesso comune: 11 minuti
+                    luce("fuori", km: 5.5, comune: altro),        // gli stessi km fra comuni diversi: 6 minuti
+                    luce("senza", km: 1, comune: nil)]            // posizione a mano senza comune: fra comuni diversi
+        let v = Set(MotoreTerritorio.vicini(di: "io", luci: luci, impostazioni: imp))
+        verifica.vero("Territorio · vicini: la soglia è di 10 minuti", MotoreTerritorio.minutiVicini == 10)
+        verifica.vero("Territorio · vicini: appena sotto i dieci minuti è un vicino", v.contains("sotto"))
+        verifica.vero("Territorio · vicini: a dieci minuti non lo è", !v.contains("sopra"))
+        verifica.vero("Territorio · vicini: nello stesso comune conta la velocità di città", !v.contains("citta"))
+        verifica.vero("Territorio · vicini: fra comuni diversi la velocità fuori città", v.contains("fuori"))
+        verifica.vero("Territorio · vicini: una posizione a mano senza comune vale come un altro comune", v.contains("senza"))
+        verifica.vero("Territorio · vicini: il cliente non è vicino di sé stesso", !v.contains("io"))
+        verifica.vero("Territorio · vicini: un cliente che non è sulla mappa non ha vicini",
+                      MotoreTerritorio.vicini(di: "assente", luci: luci, impostazioni: imp).isEmpty)
+        verifica.vero("Territorio · vicini: frase al plurale",
+                      TestiTerritorio.vicini(3, nome: "Giulia") == "3 clienti a meno di dieci minuti da Giulia: sono le luci rimaste accese.")
+        verifica.vero("Territorio · vicini: frase al singolare", TestiTerritorio.vicini(1, nome: "Giulia").hasPrefix("1 cliente a meno"))
+        verifica.vero("Territorio · vicini: frase senza vicini",
+                      TestiTerritorio.vicini(0, nome: "Giulia") == "Nessun cliente a meno di dieci minuti da Giulia.")
+        verifica.vero("Territorio · scheda: «In Prisma dal» se l'anno viene dalla scheda",
+                      TestiTerritorio.clienteDal(2019, stimato: true) == "In Prisma dal 2019"
+                      && TestiTerritorio.clienteDal(2019, stimato: false) == "Cliente dal 2019")
     }
 }

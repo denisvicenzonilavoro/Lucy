@@ -518,9 +518,10 @@ struct CapsulaCanale: View {
     var completa = false
 
     var body: some View {
+        let _ = SegnaleNomiCanali.condiviso.nomi
         let margini = compatta ? Tema.Misura.chipPiccoloMargini : Tema.Misura.chipMargini
         HStack(spacing: Tema.Misura.spazioChip) {
-            if canale == .alleanza, !compatta, let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
+            if canale.conLogo, !compatta, let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
                 Image(piattaforma: simbolo)
                     .renderingMode(.template)
                     .resizable()

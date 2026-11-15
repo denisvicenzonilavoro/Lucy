@@ -7,7 +7,9 @@ import Foundation
 /// - 821: nessuna pratica: tile a zero e «Nessuna pratica aperta…» con «Vai alle proposte»;
 /// - 822: il dettaglio della pratica di Giulia già aperto (passi segnati a mano, l'emissione tolta a mano che Prisma
 ///   riconoscerebbe dal numero di contratto, note), chiaro e scuro;
-/// - 823: «✓ Sollecito pronto» sulla pratica ferma di Marco.
+/// - 823: «✓ Sollecito pronto» sulla pratica ferma di Marco;
+/// - 1109 e 1110 (Migliorie d'uso 33): Marco scelto nella barra (solo le sue pratiche, tile ricontate) e un cliente senza
+///   pratiche («Nessuna pratica aperta per …»). Le 820-823 sono su «Tutti i clienti».
 /// DATI DI PROVA DICHIARATI: le quattro pratiche del template (`PraticheDiProva`, nota «Dati di prova») su posizioni dei
 /// clienti di prova, con le date relative a oggi; stati, conteggi e frasi li calcola MotorePratiche.
 extension Istantanee {
@@ -22,6 +24,7 @@ extension Istantanee {
         }
         coppia("820-pratiche-dopo") { s in preparaPraticheDopo(s) }
         una("821-pratiche-dopo-vuota") { s in
+            s.scegliCliente(nil)
             s.dati.pratiche = []
             s.apriPratiche(.dopoLaFirma)
         }
@@ -33,11 +36,23 @@ extension Istantanee {
             preparaPraticheDopo(s)
             s.sollecitaPratica(PraticheDiProva.prefisso + "marco", apri: false)
         }
+        // Migliorie d'uso 33: solo le pratiche di Marco (tile ricontate) e un cliente senza pratiche
+        una("1109-uso-pratiche-dopo-cliente") { s in
+            preparaPraticheDopo(s)
+            s.scegliCliente("marco")
+        }
+        una("1110-uso-pratiche-dopo-cliente-vuota") { s in
+            preparaPraticheDopo(s)
+            let conPratiche = Set(s.statiPratiche().map(\.clienteId))
+            if let c = s.dati.clienti.first(where: { !conPratiche.contains($0.id) }) { s.scegliCliente(c.id) }
+        }
         return scene
     }
 
-    /// Le pratiche di prova (quelle di `DatiPrisma.demo()`, rifatte con le date di oggi); poi Pratiche › Dopo la firma.
+    /// Le pratiche di prova (quelle di `DatiPrisma.demo()`, rifatte con le date di oggi); poi Pratiche › Dopo la firma
+    /// con «Tutti i clienti» (Migliorie d'uso 33: il numero delle ferme sul segmento).
     nonisolated static func preparaPraticheDopo(_ s: StatoShell) {
+        s.scegliCliente(nil)
         s.dati.pratiche = PraticheDiProva.pratiche()
         s.apriPratiche(.dopoLaFirma)
     }

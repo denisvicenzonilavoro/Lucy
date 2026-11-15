@@ -2,7 +2,7 @@ import SwiftUI
 
 // I riquadri della scrivania del tema Apple (Design/template-apple-specifica.md §3.6).
 //
-//   Buonasera, Denis.                              [▶︎ La tua settimana] [Cerca ovunque]
+//   Buonasera, Denis.                              [▶︎ La tua settimana] ([Cerca ovunque] solo su iPhone e iPad)
 //   ┌──────────────────────── La mossa del giorno ────────────────────────┐
 //   ┌──── Agenda di oggi ────┐┌─ Portafoglio clienti ─┐┌──────── Vera ────────┐
 //   ┌── Il tuo studio (Mac) ───┐┌──────── In scadenza entro 90 giorni ────────┐
@@ -184,7 +184,7 @@ private struct CorpoRiquadriScrivania: View, Equatable {
                 rigaBassaSinistra(pronto: pronto, ritardoAnelli: ritardoAnelli, altezza: bassa)
                     .frame(width: basse[0])
                     .modifier(entrata(6))
-                RiquadroScadenzeScrivania()
+                rigaBassaDestra()
                     .frame(width: basse[1])
                     .modifier(entrata(7))
             }
@@ -200,6 +200,16 @@ private struct CorpoRiquadriScrivania: View, Equatable {
         return RiquadroStudioScrivania(pronto: pronto, ritardoAnelli: ritardoAnelli, altezza: altezza)
         #else
         return RiquadroDaFare()
+        #endif
+    }
+
+    /// In basso a destra: sul Mac il «Da fare» unico (migliorie d'uso 3) al posto di «In scadenza entro 90 giorni» (le
+    /// scadenze delle posizioni sono voci del «Da fare»); sull'iPad restano le scadenze.
+    @ViewBuilder private func rigaBassaDestra() -> some View {
+        #if os(macOS)
+        RiquadroDaFareScrivania()
+        #else
+        RiquadroScadenzeScrivania()
         #endif
     }
 
@@ -318,8 +328,8 @@ private struct TestataScrivania: View {
     }
 
     /// «☾ Stanotte» con il pallino delle carte da decidere (giro 14, solo sul Mac, mai in modalità cliente), «▶︎ La tua
-    /// settimana» (con l'invito del lunedì, giro 5) e «⌕ Cerca ovunque» (versione «Luce», §1.2.1). «Nuovo cliente» è nella
-    /// testata di Clienti.
+    /// settimana» (con l'invito del lunedì, giro 5) e, su iPhone e iPad, «⌕ Cerca ovunque» (versione «Luce», §1.2.1; sul Mac
+    /// un solo «Cerca», la lente della barra: migliorie d'uso 6). «Nuovo cliente» è nella testata di Clienti.
     private var pulsanti: some View {
         HStack(spacing: Tema.Apple.Scrivania.Saluto.spazioPulsanti) {
             #if os(macOS)
@@ -352,12 +362,15 @@ private struct TestataScrivania: View {
             }
             .disabled(stato.inModoCliente)
             .help("La tua settimana in trenta secondi: incontri, incassi, chi chiamare e i traguardi")
+            #if !os(macOS)
+            // Sul Mac un solo «Cerca»: la lente della barra (migliorie d'uso 6)
             Button {
                 stato.cercaOvunque()
             } label: {
                 Label("Cerca ovunque", systemImage: "magnifyingglass")
             }
             .help("Cerca clienti, posizioni, documenti e comandi (⌘K)")
+            #endif
         }
         .buttonStyle(.appleVetro)
         .fixedSize()
@@ -639,7 +652,7 @@ private struct CorpoMossaScrivania: View, Equatable {
                 Button {
                     stato.preparaMossa(mossa)
                 } label: {
-                    Label("Preparami l'incontro", systemImage: m.simboloPrepara)
+                    Label(Parole.preparamiIncontro, systemImage: m.simboloPrepara)
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(StilePulsanteApple(.principale, grande: true))
@@ -1091,10 +1104,23 @@ private struct CorpoVeraScrivaniaApple: View, Equatable {
                     Text("Vera")
                         .carattereApple(e.nome)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
+                    #if os(macOS)
+                    // Migliorie d'uso 9: solo se Vera è pronta, niente nome del motore (sta in Impostazioni › Vera)
+                    HStack(spacing: e.spazioStato) {
+                        Circle()
+                            .fill(pronta ? e.pallinoPronta : e.pallinoNonPronta)
+                            .frame(width: e.pallinoStato, height: e.pallinoStato)
+                        Text(pronta ? TestiStatoVera.pronta : TestiStatoVera.nonPronta)
+                            .carattereApple(e.stato)
+                            .foregroundColor(pronta ? Tema.Apple.Colore.inchiostro2 : e.coloreNonPronto)
+                            .lineLimit(1)
+                    }
+                    #else
                     Text(pronta ? "\(nomeMotore) · pronto" : "\(nomeMotore) · non pronto")
                         .carattereApple(e.stato)
                         .foregroundColor(pronta ? Tema.Apple.Colore.inchiostro2 : e.coloreNonPronto)
                         .lineLimit(1)
+                    #endif
                 }
             }
             // Sugli schermi bassi la frase cede righe alle domande (niente altezza fissa: resta nel riquadro)
@@ -1258,6 +1284,86 @@ private struct RigaDaFareScrivania: View {
         return t
     }
 }
+
+#if os(macOS)
+// MARK: - Da fare (migliorie d'uso 3, solo sul Mac)
+
+/// «Da fare» con il numero (verde a zero), «[altre N · ]Apri tutto ›» che apre il pannello della barra e le prime voci
+/// del nastro unico con la riga comune: il cerchio spunta, un clic sulla riga apre il dettaglio al centro.
+private struct RiquadroDaFareScrivania: View {
+    @Environment(StatoShell.self) var stato
+    @Environment(\.prismaInVista) private var inVista
+    /// Sotto una finestra ingrandita le voci restano le ultime calcolate (`UltimiValoriScrivania`).
+    @State private var ultimi = UltimiValoriScrivania<ValoriDaFareScrivania>()
+
+    var body: some View {
+        let _ = ContaCorpi.segna()
+        let v = ultimi.valori(fermi: ScrivaniaFuoriVista.fermi(stato, inVista: inVista)) {
+            let n = stato.nastroDaFareCompleto(cliente: nil)
+            return ValoriDaFareScrivania(chiave: stato.chiaveVista,
+                                         voci: Array(n.voci.prefix(Tema.Apple.ElencoDaFare.righeScrivania)), totale: n.totale)
+        }
+        CorpoDaFareScrivaniaMac(stato: stato, chiave: v.chiave, voci: v.voci, totale: v.totale)
+            .equatable()
+            .riquadroScrivania(apre: { stato.apriDaFare() })
+    }
+}
+
+/// Le voci calcolate dal riquadro, con la chiave dei dati da cui vengono.
+private struct ValoriDaFareScrivania {
+    let chiave: ChiaveVista
+    let voci: [VoceDaFare]
+    let totale: Int
+}
+
+private struct CorpoDaFareScrivaniaMac: View, Equatable {
+    let stato: StatoShell
+    let chiave: ChiaveVista
+    /// Dal riquadro: il body non legge lo stato, così le modifiche dei dati non lo rifanno da sole.
+    let voci: [VoceDaFare]
+    let totale: Int
+
+    nonisolated static func == (a: CorpoDaFareScrivaniaMac, b: CorpoDaFareScrivaniaMac) -> Bool { a.chiave == b.chiave }
+
+    var body: some View {
+        let r = Tema.Apple.Scrivania.Riquadro.self
+        let f = Tema.Apple.ElencoDaFare.self
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .center, spacing: f.spazioTitolo) {
+                Text(TestiDaFare.titolo)
+                    .carattereApple(r.titolo)
+                    .foregroundColor(Tema.Apple.Colore.inchiostro)
+                    .lineLimit(1)
+                NumeroDaFare(numero: totale)
+                Spacer(minLength: 0)
+                Button { stato.apriDaFare() } label: {
+                    Text((totale > voci.count ? TestiDaFare.altre(totale - voci.count) : "") + TestiDaFare.apriTutto)
+                        .carattereApple(r.collegamento)
+                        .foregroundColor(r.coloreCollegamento)
+                        .lineLimit(1)
+                }
+                .buttonStyle(StileSemplice())
+            }
+            GeometryReader { geo in
+                // Almeno una riga anche sugli schermi più bassi
+                let entrano = max(1, min(voci.count, Int(geo.size.height / f.altezzaRiga)))
+                VStack(alignment: .leading, spacing: 0) {
+                    if voci.isEmpty {
+                        Text(TestiDaFare.niente)
+                            .carattereApple(r.vuoto)
+                            .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                    }
+                    ForEach(Array(voci.prefix(entrano))) { v in
+                        RigaDaFare(voce: v, fatto: { stato.fattoDaFare(v) }, apri: { stato.apriVoceDaFare(v) })
+                    }
+                }
+                .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
+            }
+            .padding(.top, f.elencoSopraScrivania)
+        }
+    }
+}
+#endif
 
 // MARK: - In scadenza entro 90 giorni
 

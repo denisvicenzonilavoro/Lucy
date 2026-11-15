@@ -88,6 +88,9 @@ enum VoceConfronto: Hashable {
     @ObservationIgnored private var ultimaVersioneClienti = 0
     /// I motori dei singoli clienti, per cliente (CacheClienti.swift).
     @ObservationIgnored let cacheClienti = CacheClienti()
+    /// Gli stati delle pratiche mostrati in Pratiche (Migliorie d'uso 33, PraticheCliente.swift): una sola cache per la
+    /// testata e la scheda «Dopo la firma».
+    @ObservationIgnored let cacheStatiPratiche = CacheStatiPratiche()
 
     /// Finestre interne, pannelli e blocco (StatoShellFinestre.swift ne inoltra le proprietà con i nomi di sempre):
     /// cambiarli non pubblica StatoShell, così le app aperte e i widget non si ricalcolano.
@@ -104,10 +107,16 @@ enum VoceConfronto: Hashable {
     private(set) var azioneAvviso: AzioneAvviso?
     var schermoIntero = false
     var schedaImpostazioni: SchedaImpostazioni = .panoramica
+    /// Migliorie d'uso 30: il testo del campo «Cerca nelle impostazioni» (solo in memoria; si svuota chiudendo
+    /// Impostazioni). Pieno, la pagina a destra mostra i risultati (IndiceImpostazioni.swift).
+    var cercaImpostazioni = ""
     var schedaCliente: SchedaCliente = .panoramica
     /// La scheda di Studio (Cruscotto, Parcelle e fatture, Track record, Esame OCF): resta finché l'app è aperta, così
     /// la scrivania e le novità possono aprire quella giusta (StudioApp.swift).
     var schedaStudio: SchedaStudio = .cruscotto
+    /// Migliorie d'uso 28: «＋ Nuova parcella» nella riga in testa di Studio lo fa crescere, e Studio › Parcelle apre
+    /// il modulo (in memoria, solo Mac).
+    var richiestaNuovaParcella = 0
     /// «Luce»: la scheda di Pratiche e la vista di Territorio (StatoSala.swift).
     var schedaPratiche: SchedaPratiche = .proposta
     var vistaTerritorio: VistaTerritorio = .oggi
@@ -157,8 +166,28 @@ enum VoceConfronto: Hashable {
     /// DerivatiDati: questa resta come segno per la prova di Vera.
     @ObservationIgnored var cacheDossier: (chiave: Int, valore: AnalisiDossier)?
     /// Posizioni mostra il portafoglio di tutti i clienti invece del dossier del cliente attivo.
+    /// Sul Mac (migliorie d'uso 2, «Un solo posto per scegliere il cliente») non è più una scelta a sé: vale
+    /// «Tutti i clienti» della barra (`tuttiIClienti`); scriverlo sceglie «Tutti» (true) o torna al cliente di prima
+    /// (false). Su iPhone e iPad resta il campo di sempre (`portafoglioProprio`).
     // Il portafoglio parla di tutti i clienti: in modalità cliente resta chiuso
-    var portafoglio = false { didSet { if portafoglio && modoCliente != nil { portafoglio = false } } }
+    var portafoglio: Bool {
+        get {
+            #if os(macOS)
+            return tuttiIClienti
+            #else
+            return portafoglioProprio
+            #endif
+        }
+        set {
+            #if os(macOS)
+            impostaTuttiIClienti(newValue)
+            #else
+            portafoglioProprio = newValue && modoCliente == nil
+            #endif
+        }
+    }
+    /// Il portafoglio di Posizioni su iPhone e iPad (sul Mac non si usa: vale la scelta della barra).
+    var portafoglioProprio = false
     /// Posizioni › Portafoglio: la vista (Portafoglio o Prova del fuoco), lo scenario e i cursori della prova del fuoco
     /// (StatoProvaFuoco.swift). Un oggetto a parte: trascinare il cursore non pubblica StatoShell. Non si salva.
     let provaFuoco = StatoProvaFuoco()
@@ -228,14 +257,30 @@ enum VoceConfronto: Hashable {
     /// spazio in memoria e i lavori della sincronizzazione. Un oggetto a parte: i pallini e i controlli non pubblicano
     /// StatoShell. Non si salva (le impostazioni dello spazio stanno in `dati.impostazioni.ovunque`).
     let ovunque = StatoOvunque()
+    #if os(macOS)
+    /// Migliorie d'uso 39: i dispositivi che si sono fatti vivi (ponte, tavolo, giornali di «Prisma ovunque») e la scheda
+    /// «Collega con un codice» (DispositiviCollegati.swift). Solo in memoria: mai nell'archivio, nei backup o nello spazio.
+    let dispositivi = RegistroDispositivi()
+    #endif
     /// Modalità cliente: lo schermo girato verso il cliente mostra solo il suo dossier (id del cliente).
-    var modoCliente: String? { didSet { aggiornaMenu() } }
+    var modoCliente: String? {
+        didSet {
+            aggiornaMenu()
+            #if os(macOS)
+            // La vista pulita vive solo sopra la modalità cliente: se questa si spegne (blocco, cliente eliminato), si chiude
+            if modoCliente == nil, vistaCliente != nil { chiudiVistaClienteSenzaRitorno() }
+            #endif
+        }
+    }
     /// Il pulsante dell'intestazione di Posizioni chiede di aprire il modulo (nuova posizione o proposta).
     var richiestaNuovaPosizione: StatoPosizione?
     /// «Dal catalogo» nell'intestazione di Posizioni: il prodotto sul cliente in due passi (in essere o proposta).
     var richiestaDalCatalogo: StatoPosizione?
     /// Il pulsante "Nuovo cliente" dell'intestazione chiede alla rubrica di aprire il modulo.
     var richiestaNuovoCliente = false
+    /// «Modifica» nella riga in testa del dossier (migliorie d'uso 12, Mac): l'id del cliente di cui aprire il modulo,
+    /// che Clienti apre e consuma subito (il modulo vive in AppClienti).
+    var richiestaModificaCliente: String?
     /// «Scrivi a mano» dalla scena del nuovo cliente («Luce» giro 13): la bozza con i dati letti, che Clienti apre nel
     /// modulo (si consuma appena letta).
     var bozzaNuovoCliente: Cliente?
@@ -255,7 +300,12 @@ enum VoceConfronto: Hashable {
     // Agenda e Attività (stato delle viste, non salvato)
     /// Giornata aperta in agenda.
     var giornoAgenda = Calendar.current.startOfDay(for: Date())
+    #if os(macOS)
+    /// Sul Mac l'Agenda apre sulla settimana a sette colonne (Migliorie d'uso 18, decisione 18-a).
+    var vistaAgenda: VistaAgenda = .settimana
+    #else
     var vistaAgenda: VistaAgenda = .mese
+    #endif
     var appuntamentoSelezionato: String?
     /// nil = tutti i clienti.
     var filtroClienteAgenda: String?
@@ -269,6 +319,9 @@ enum VoceConfronto: Hashable {
     var filtroPrioritaAttivita: Attivita.Priorita?
     /// Il pulsante dell'intestazione di Attività chiede di aprire il modulo.
     var richiestaNuovaAttivita = false
+    /// Migliorie d'uso 19: la traccia di un impegno concluso chiede all'Agenda il modulo di modifica o dell'attività
+    /// collegata («Altro ⌄»); l'Agenda lo apre e lo azzera (solo in memoria).
+    var richiestaModuloImpegno: RichiestaModuloImpegno?
 
     // Strumenti di analisi (stato delle viste, non salvato)
     /// Area aperta in Analisi 360 (nil = panoramica).
@@ -296,6 +349,9 @@ enum VoceConfronto: Hashable {
 
     // Incontri
     var incontroAperto: String?
+    /// Migliorie d'uso 21 (solo sul Mac): l'appuntamento scelto in Incontri che non ha ancora un incontro. Si mostra
+    /// «Prima» costruito dall'appuntamento senza scrivere niente; l'incontro nasce al primo gesto che scrive.
+    var appuntamentoIncontro: String?
     var schedaIncontro: SchedaIncontro = .preparazione
     /// Proposte ricavate dagli appunti (per incontro) e quelle scelte per entrare nel dossier.
     var proposteIncontro: [String: [PropostaIncontro]] = [:]
@@ -344,8 +400,70 @@ enum VoceConfronto: Hashable {
     /// Promemoria del Mac: il permesso di macOS (nil finché non si sa, e sempre nelle istantanee e nelle prove).
     var permessoPromemoria: PermessoPromemoria?
 
-    /// Vera parla del portafoglio (tutti i clienti) invece che del cliente attivo.
-    var veraPortafoglio = false { didSet { if veraPortafoglio && modoCliente != nil { veraPortafoglio = false } } }
+    /// Vera parla del portafoglio (tutti i clienti) invece che del cliente attivo. Sul Mac segue la barra, come
+    /// `portafoglio`; su iPhone e iPad resta il campo di sempre (`veraPortafoglioProprio`).
+    var veraPortafoglio: Bool {
+        get {
+            #if os(macOS)
+            return tuttiIClienti
+            #else
+            return veraPortafoglioProprio
+            #endif
+        }
+        set {
+            #if os(macOS)
+            impostaTuttiIClienti(newValue)
+            #else
+            veraPortafoglioProprio = newValue && modoCliente == nil
+            #endif
+        }
+    }
+    /// Vera sul portafoglio su iPhone e iPad (sul Mac non si usa: vale la scelta della barra).
+    var veraPortafoglioProprio = false
+    /// Gli ultimi clienti scelti (al più tre, il più recente prima), anche quelli scelti in silenzio: il pannello della
+    /// barra li mostra in «Recenti». Solo in memoria: si azzerano alla chiusura (migliorie d'uso 2). Sul Mac.
+    var clientiRecenti: [String] = []
+    #if os(macOS)
+    /// Migliorie d'uso 3 «Un solo Da fare» (StatoDaFare.swift), tutto in memoria: il pannello mostra solo il cliente della
+    /// barra («Solo <Nome>»), il campo «+ Aggiungi» è aperto, le cose segnate come fatte dal «Da fare» (l'ultima in fondo,
+    /// per «Annulla l’ultima»), la voce aperta al centro fuori da Posizioni.
+    var daFareSoloCliente = false
+    var daFareScrivo = false
+    var fatteDaFare: [FattoDaFare] = []
+    var voceDaFareAperta: VoceDaFare? = nil
+    /// Migliorie d'uso 5 «Il dossier parte dal quadro» (DossierQuadro.swift): l'area di cui Analisi 360 apre il dettaglio
+    /// appena c'è (un clic su un riquadro del quadro del cliente). Solo in memoria; la consuma PresentatoreAree360.
+    var dettaglioArea360DaAprire: AreaAnalisi? = nil
+    /// Migliorie d'uso 1 «Mostra al cliente» (MostraAlCliente.swift), tutto in memoria come `modoCliente`: il capitolo della
+    /// vista pulita (nil: non si mostra; sotto c'è sempre la modalità cliente), il pannello di scelta aperto, la schermata
+    /// neutra, la scheda di una parola o delle ipotesi, il menu dell'avatar, l'app davanti prima di girare lo schermo e
+    /// l'avviso «Per tornare al lavoro…» già mostrato in questa sessione.
+    var vistaCliente: CapitoloCliente? = nil { didSet { menu.aggiornaVista(vistaCliente != nil) } }
+    var sceltaMostra = false
+    /// Migliorie d'uso 38: le tre domande del primo avvio aperte, con la pagina (0…2; nil = chiuse). Solo in memoria.
+    var primoAvvio: Int? = nil
+    /// Migliorie d'uso 37 (StatoDimostrazione.swift): la dimostrazione è accesa. In memoria ci sono solo i clienti di
+    /// prova, l'archivio vero resta sul disco intatto; salvataggi, backup, «Prisma ovunque», notte, routine, tagliando,
+    /// promemoria e pulizie dei file sono fermi. Solo sul Mac: su iPhone e iPad resta sempre falsa.
+    private(set) var inDimostrazione = false
+    /// Migliorie d'uso 37: il gruppo dei clienti di prova della dimostrazione (quello in uso, o quello della prossima volta).
+    var gruppoProva: GruppoProva = .trentacinque
+    /// Migliorie d'uso 37: la scheda «Stai mostrando Prisma con i clienti di prova.» aperta dall'etichetta della barra.
+    var schedaDimostrazione = false
+    /// Migliorie d'uso 37: lo spegnimento rilegge l'archivio dal disco (fuori dal thread principale): uno alla volta.
+    @ObservationIgnored var spegnimentoDimostrazione = false
+    /// Migliorie d'uso 37, solo nelle prove e nelle istantanee (non persistente, nessun archivio sul disco): i dati di
+    /// prima della dimostrazione. Nell'app resta sempre nil: i dati veri si rileggono dal disco.
+    @ObservationIgnored private var datiPrimaDellaDimostrazione: DatiPrisma?
+    var schermataNeutraMac = false
+    var schedaMostra: SchedaMostra? = nil
+    var menuUscitaMostra = false
+    @ObservationIgnored var appPrimaDellaVista: AppPrisma?
+    @ObservationIgnored var avvisoVistaVisto = false
+    #else
+    /// Migliorie d'uso 37: su iPhone e iPad la dimostrazione non c'è, resta sempre falsa.
+    let inDimostrazione = false
+    #endif
     /// «Le routine» di Vera (fase 4, CollegaRoutineShell.swift): la pagina delle routine aperta sopra Vera e la routine scelta.
     var paginaRoutineVera = false
     var routineSelezionataVera: String?
@@ -367,6 +485,9 @@ enum VoceConfronto: Hashable {
     // Prospetti e report
     /// Prospetto scelto (nil = quadro delle posizioni del cliente attivo).
     var prospetto: SceltaProspetto?
+    /// Migliorie d'uso 22 (solo sul Mac): l'ultima versione scelta in Prospetti, «Per il cliente» all'apertura
+    /// (decisione 22-a). Solo in memoria, finché Prisma resta aperto.
+    var versioneProspetti: VersioneProspetto = .perIlCliente
     /// Valutazione aperta nel modulo di modifica.
     var valutazioneInModifica: ValutazioneInvestimento?
     @ObservationIgnored private var testiDocumenti = MemoriaTesti()
@@ -408,7 +529,7 @@ enum VoceConfronto: Hashable {
     /// letto in attesa che il consulente scelga di chi è. Solo in memoria, come la copia nella cartella temporanea.
     var scelteClienteCaduto: [String: SceltaClienteCaduto] = [:]
     /// Qwen sul Mac (Ollama): pronto o perché no. Si aggiorna con `verificaMotoreLocale()`.
-    var disponibilitaLocale = DisponibilitaVera.nonDisponibile("Ollama non ancora verificato.")
+    var disponibilitaLocale = DisponibilitaVera.nonDisponibile(StatoShell.veraNonVerificata)
     /// La risposta di Vera mentre arriva (osservata solo dalla bolla in arrivo).
     let flussoVera = FlussoVera()
     /// La mini finestra di Vera (⌥ Spazio, sfera nella barra): osservata solo dal suo pannello e dalla sfera.
@@ -523,6 +644,12 @@ enum VoceConfronto: Hashable {
     private(set) var solaLettura = false
     /// Archivio di una versione più recente: neanche il ripristino di un backup è sicuro.
     private(set) var ripristinoBloccato = false
+
+    /// Migliorie d'uso 31: solo per le istantanee di «Da sistemare» (1058), l'archivio in sola lettura. Mai nell'app.
+    func segnaSolaLetturaPerIstantanea() {
+        guard !persistente else { return }
+        solaLettura = true
+    }
 
     init(persistente: Bool = true) {
         self.persistente = persistente
@@ -659,7 +786,15 @@ enum VoceConfronto: Hashable {
         // I messaggi nuovi del ponte (giro 5): schede del copilota dall'iPad, testi inquadrati dall'iPhone
         ServerPonteVera.condiviso.consegnaArrivi { [weak self] arrivo in
             guard let stato = self else { return .rifiutata("Prisma sul Mac si sta chiudendo.") }
-            return await MainActor.run { stato.riceviDalPonte(arrivo) }
+            return await MainActor.run { () -> RicevutaPonte in
+                // Migliorie d'uso 39: il nome del dispositivo, per «I tuoi dispositivi»
+                stato.dispositivi.annotaPonte(nome: arrivo.nomeDispositivo)
+                return stato.riceviDalPonte(arrivo)
+            }
+        }
+        // Migliorie d'uso 39: ogni busta aperta annota «un dispositivo» (le chiamate al modello non portano il nome)
+        ServerPonteVera.condiviso.annotaContatti { [weak self] in
+            DispatchQueue.main.async { [weak self] in self?.dispositivi.annotaPonte(nome: nil) }
         }
         // Inquadra e capisci: con la scena in attesa, il testo dell'iPhone entra da solo (StatoInquadra.swift)
         osservaInquadrature()
@@ -671,6 +806,10 @@ enum VoceConfronto: Hashable {
         // Prisma ovunque (StatoOvunque.swift): spento finché l'utente non lo accende; acceso, apre lo spazio con la
         // chiave del Portachiavi e fa un primo giro, fuori dal thread principale
         avviaOvunque()
+        #if os(macOS)
+        // Migliorie d'uso 37: la dimostrazione accesa alla chiusura riparte (preferenza del Mac, fuori dall'archivio)
+        DispatchQueue.main.async { [weak self] in self?.riprendiDimostrazione() }
+        #endif
         // I file rimasti da un'importazione interrotta vanno nel Cestino (il disco lavora in background);
         // solo con l'archivio letto senza intoppi (con un archivio recuperato o di prova i file servono ancora)
         if caricati.avviso == nil, !caricati.solaLettura, copieNonLeggibili == 0 {
@@ -714,6 +853,18 @@ enum VoceConfronto: Hashable {
     /// Collega i dati a `datiCambiati` (dopo le pulizie di init, che come prima non contano come modifiche).
     private func collegaDati() {
         dati.aggancio = { [weak self] cambio in self?.datiCambiati(cambio) }
+        applicaNomiCanali()
+    }
+
+    /// Migliorie d'uso 38: i nomi dei canali dell'archivio diventano quelli in uso (`NomiCanaliCorrenti` per motori e
+    /// Vera, `SegnaleNomiCanali` per le etichette), prima che `versioneCalcoli` cambi. Solo sul Mac: su iPhone e iPad
+    /// restano quelli di base anche se il campo arriva con «Prisma ovunque».
+    func applicaNomiCanali() {
+        #if os(macOS)
+        let nomi = dati.impostazioni.nomiCanali ?? .base
+        if NomiCanaliCorrenti.valore != nomi { NomiCanaliCorrenti.imposta(nomi) }
+        if SegnaleNomiCanali.condiviso.nomi != nomi { SegnaleNomiCanali.condiviso.nomi = nomi }
+        #endif
     }
 
     /// L'unico punto da cui parte tutto ciò che segue una modifica dei dati: i contatori delle cache (la regola di
@@ -752,6 +903,7 @@ enum VoceConfronto: Hashable {
         case .clienteAttivo(let prima):
             if dati.clienteAttivoId != prima { clienteAttivoCambiato.send(dati.clienteAttivoId) }
         case .impostazioni(let prima):
+            if dati.impostazioni.nomiCanali != prima.nomiCanali { applicaNomiCanali() }
             versioneDatiNotifiche &+= 1
             if !dati.impostazioni.stessiCalcoli(di: prima) {
                 versioneCalcoli &+= 1
@@ -763,6 +915,7 @@ enum VoceConfronto: Hashable {
             if dati.impostazioni.tagliando != prima.tagliando { programmaTagliando() }
             #endif
         case .tutto(let prima):
+            applicaNomiCanali()
             versioneDatiNotifiche &+= 1
             neutriNotifiche = NeutriNotifiche(dati)
             // Gli array non toccati condividono la memoria con i vecchi: confrontarli costa O(1)
@@ -845,6 +998,9 @@ enum VoceConfronto: Hashable {
                 scenarioInSospeso = nil
             }
             dati.clienteAttivoId = newValue
+            #if os(macOS)
+            ricordaRecente(newValue)
+            #endif
         }
     }
 
@@ -1461,7 +1617,8 @@ enum VoceConfronto: Hashable {
 
     private func rimuoviFile(_ d: Documento) {
         // In sola lettura (archivio di una versione più nuova) i file restano: l'archivio vero li usa ancora
-        guard persistente, !solaLettura else { return }
+        // Migliorie d'uso 37: in dimostrazione nemmeno (i documenti tolti sono di prova, i file sono quelli veri)
+        guard persistente, !solaLettura, !inDimostrazione else { return }
         if let u = urlDocumento(d) { try? FileManager.default.removeItem(at: u) }
         if let t = urlTesto(d) { try? FileManager.default.removeItem(at: t) }
     }
@@ -1471,7 +1628,8 @@ enum VoceConfronto: Hashable {
     /// Restituisce quanti file ha tolto.
     @discardableResult
     func pulisciDocumentiOrfani(nelCestino: Bool = false) -> Int {
-        guard persistente, !solaLettura else { return 0 }
+        // Migliorie d'uso 37: con i soli dati di prova in memoria i file dei clienti veri sembrerebbero orfani
+        guard persistente, !solaLettura, !inDimostrazione else { return 0 }
         let orfani = Self.fileOrfani(usati: fileUsati(), radice: Archivio.cartellaDocumenti)
         return Self.togli(orfani.file, cartelle: orfani.cartelle, nelCestino: nelCestino)
     }
@@ -1480,7 +1638,7 @@ enum VoceConfronto: Hashable {
     /// cartella e Cestino si toccano fuori. Se nel frattempo i documenti cambiano (un'importazione) si rinuncia:
     /// i file creati dopo l'elenco non ne fanno parte, e quelli di prima sono di nuovo controllati qui.
     func pulisciDocumentiOrfaniInBackground() {
-        guard persistente, !solaLettura, documentiInLettura.isEmpty else { return }
+        guard persistente, !solaLettura, !inDimostrazione, documentiInLettura.isEmpty else { return }
         let usati = fileUsati()
         let impronta = dati.documenti.map(\.file)
         let radice = Archivio.cartellaDocumenti
@@ -1488,7 +1646,8 @@ enum VoceConfronto: Hashable {
             let orfani = StatoShell.fileOrfani(usati: usati, radice: radice)
             guard !orfani.file.isEmpty || !orfani.cartelle.isEmpty else { return }
             DispatchQueue.main.async {
-                guard !self.solaLettura, self.documentiInLettura.isEmpty, self.dati.documenti.map(\.file) == impronta else { return }
+                guard !self.solaLettura, !self.inDimostrazione, self.documentiInLettura.isEmpty,
+                      self.dati.documenti.map(\.file) == impronta else { return }
                 DispatchQueue.global(qos: .utility).async {
                     let tolti = StatoShell.togli(orfani.file, cartelle: orfani.cartelle, nelCestino: true)
                     guard tolti > 0 else { return }
@@ -1561,7 +1720,13 @@ enum VoceConfronto: Hashable {
     /// Il prospetto da mostrare per il cliente attivo. Una scelta di un altro cliente torna alla prima
     /// valutazione del cliente, o al resoconto delle posizioni se non ne ha.
     var sceltaProspetto: SceltaProspetto {
-        let predefinita: SceltaProspetto = valutazioniCliente(clienteAttivoId).first.map { .valutazione($0.id, report: false) } ?? .resoconto(report: false)
+        // Migliorie d'uso 22: sul Mac il documento di partenza è nella versione per il cliente (o nell'ultima scelta)
+        #if os(macOS)
+        let r = versioneProspetti == .perIlCliente
+        #else
+        let r = false
+        #endif
+        let predefinita: SceltaProspetto = valutazioniCliente(clienteAttivoId).first.map { .valutazione($0.id, report: r) } ?? .resoconto(report: r)
         switch prospetto {
         case .posizione(let id)? where posizioni.contains(where: { $0.id == id && $0.clienteId == clienteAttivoId }):
             return .posizione(id)
@@ -1617,8 +1782,26 @@ enum VoceConfronto: Hashable {
         scelta.conCommento ? commento(scelta)?.testo : nil
     }
 
-    /// Il documento da mostrare e stampare per una scelta.
+    /// Il documento da mostrare e stampare per una scelta. Sul Mac (migliorie d'uso 22) le pagine per il consulente
+    /// portano il timbro «SOLO PER TE» (decisione 22-b: anche nel PDF, in stampa e nell'archiviato).
     func documentoProspetto(_ scelta: SceltaProspetto) -> DocumentoStampabile? {
+        let documento = documentoProspettoSenzaTimbro(scelta)
+        #if os(macOS)
+        if scelta.conTimbroPerTe {
+            // Posizione, confronto e riesame passano da `PaginaCarta`, che ha la data in alto a destra
+            let suCarta: Bool
+            switch scelta {
+            case .posizione, .confronto, .riesame: suCarta = true
+            default: suCarta = false
+            }
+            return documento?.conTimbroPerTe(alto: suCarta ? Misure.Carta.timbroAltoCarta : Misure.Carta.timbroAlto)
+        }
+        #endif
+        return documento
+    }
+
+    /// Il documento di una scelta, così come lo impagina il suo compositore.
+    private func documentoProspettoSenzaTimbro(_ scelta: SceltaProspetto) -> DocumentoStampabile? {
         if case .valutazione(let id, let report) = scelta {
             return valutazione(id).flatMap(testiValutazione).map { DocumentoStampabile($0, report: report) }
         }
@@ -2121,6 +2304,27 @@ enum VoceConfronto: Hashable {
     /// Nuovo incontro: dal prossimo appuntamento del cliente, con i temi delle sue priorità.
     func nuovoIncontro(cliente id: String, appuntamento: Appuntamento? = nil) {
         let a = appuntamento ?? prossimiAppuntamenti.first { $0.clienteId == id }
+        let i = bozzaIncontro(cliente: id, appuntamento: a)
+        salvaIncontro(i)
+        incontroAperto = i.id
+        appuntamentoIncontro = nil
+        schedaIncontro = .preparazione
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 20 (decisione 20-d): «Nuovo incontro» sul Mac crea davvero un incontro senza appuntamento, così
+    /// compare fra gli incontri sciolti dell'elenco e non si sovrappone a quello di un appuntamento.
+    func nuovoIncontroSenzaAppuntamento(cliente id: String) {
+        let i = bozzaIncontro(cliente: id, appuntamento: nil)
+        salvaIncontro(i)
+        incontroAperto = i.id
+        appuntamentoIncontro = nil
+        schedaIncontro = .preparazione
+    }
+    #endif
+
+    /// L'incontro che nascerebbe da un appuntamento (o senza), con i temi delle priorità del cliente: non si salva.
+    func bozzaIncontro(cliente id: String, appuntamento a: Appuntamento?) -> Incontro {
         var i = Incontro(clienteId: id, titolo: a?.titolo ?? "Incontro di consulenza", data: a?.inizio ?? Appuntamento.alMinuto(Date()),
                          appuntamentoId: a?.id)
         if let c = cliente(id) {
@@ -2129,19 +2333,38 @@ enum VoceConfronto: Hashable {
             for t in priorita where !temi.contains(t) { temi.append(t) }
             if !temi.isEmpty { i.temi = temi }
         }
-        salvaIncontro(i)
-        incontroAperto = i.id
-        schedaIncontro = .preparazione
+        return i
     }
 
-    /// Apre l'incontro legato a un appuntamento (lo crea se manca).
-    func apriIncontro(per a: Appuntamento) {
+    /// Migliorie d'uso 21: l'incontro mostrato da un appuntamento senza incontro entra nell'archivio solo qui, al primo
+    /// gesto che scrive («Inizia l'ascolto», «Prepara con Vera», l'ascolto del copilota, la chiusura). Se c'è già non fa
+    /// niente.
+    func assicuraIncontro(_ i: Incontro) {
+        guard incontro(i.id) == nil else { return }
+        salvaIncontro(i)
+        incontroAperto = i.id
+        appuntamentoIncontro = nil
+    }
+
+    /// Apre l'incontro legato a un appuntamento. Sul Mac (Migliorie d'uso 21) se manca non lo crea: Incontri mostra
+    /// «Prima» dall'appuntamento e l'incontro nasce al primo gesto che scrive. Su iPhone e iPad lo crea subito.
+    /// `scheda`: il momento su cui aprire (Migliorie d'uso 19, «Scrivi il verbale» → «Dopo»); nil = quello di sempre
+    /// («Prossimi passi» per un incontro concluso, altrimenti «Preparazione»).
+    func apriIncontro(per a: Appuntamento, scheda: SchedaIncontro? = nil) {
         clienteAttivoId = a.clienteId
         if let i = dati.incontri.first(where: { $0.appuntamentoId == a.id }) {
             incontroAperto = i.id
-            schedaIncontro = i.stato == .concluso ? .passi : .preparazione
+            appuntamentoIncontro = nil
+            schedaIncontro = scheda ?? (i.stato == .concluso ? .passi : .preparazione)
         } else {
+            #if os(macOS)
+            incontroAperto = nil
+            appuntamentoIncontro = a.id
+            schedaIncontro = scheda ?? .preparazione
+            #else
             nuovoIncontro(cliente: a.clienteId, appuntamento: a)
+            if let scheda { schedaIncontro = scheda }
+            #endif
         }
         apri(.incontri)
     }
@@ -2199,7 +2422,8 @@ enum VoceConfronto: Hashable {
             }
         }
         let attivita = i.prossimaAttivita.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !attivita.isEmpty {
+        // Migliorie d'uso 20: un incontro riaperto e richiuso non crea due volte l'attività e il seguito
+        if !attivita.isEmpty, i.attivitaCreataId == nil || !dati.attivita.contains(where: { $0.id == i.attivitaCreataId }) {
             var t = Attivita.nuova(clienteId: i.clienteId, scadenza: scadenza)
             t.titolo = attivita
             t.appuntamentoId = i.appuntamentoId
@@ -2208,7 +2432,8 @@ enum VoceConfronto: Hashable {
             dati.attivita.append(t)
             i.attivitaCreataId = t.id
         }
-        if let quando = i.prossimoIncontro {
+        if let quando = i.prossimoIncontro,
+           i.appuntamentoCreatoId == nil || !dati.appuntamenti.contains(where: { $0.id == i.appuntamentoCreatoId }) {
             var a = Appuntamento.nuovo(clienteId: i.clienteId, giorno: quando)
             a.inizio = Appuntamento.alMinuto(quando)
             a.titolo = "Seguito · \(i.titolo)"
@@ -2228,6 +2453,16 @@ enum VoceConfronto: Hashable {
         salvaIncontro(i)
         proposteIncontro[id] = nil
         mostraAvviso("Incontro archiviato: profilo, attività e agenda aggiornati")
+    }
+
+    /// Migliorie d'uso 20 (decisione 20-b), «Riapri»: l'incontro archiviato torna in preparazione e il suo appuntamento
+    /// torna pianificato. Attività, appuntamenti creati e dossier già aggiornati restano (e `attivitaCreataId` /
+    /// `appuntamentoCreatoId` restano, così una nuova chiusura non li crea due volte).
+    func riapriIncontro(_ id: String) {
+        guard var i = incontro(id), i.stato == .concluso else { return }
+        i.stato = .preparazione
+        salvaIncontro(i)
+        if let a = appuntamento(i.appuntamentoId), a.stato == .concluso { alternaConcluso(a.id) }
     }
 
     // MARK: - Profilo dei bisogni
@@ -2349,9 +2584,14 @@ enum VoceConfronto: Hashable {
 
     /// Il messaggio di Vera quando Qwen non c'è: il motivo e cosa fare.
     func qwenNonPronto(cliente id: String) {
-        let motivo = disponibilitaLocale.motivo ?? "Qwen non risponde."
-        aggiungiMessaggio(MessaggioVera(autore: .vera, testo: motivo + " Vera risponde solo con Qwen: quando è pronto, rifai la domanda.",
-                                       titolo: "Qwen non è pronto", motore: "Prisma"), cliente: id)
+        #if os(macOS)
+        // Migliorie d'uso 9: niente nomi tecnici in vista; il motivo (Ollama, modello) sta in Impostazioni › Vera
+        let testo = TestiStatoVera.spiegazione + " Quando è pronta, rifai la domanda."
+        #else
+        let testo = (disponibilitaLocale.motivo ?? "Qwen non risponde.") + " Vera risponde solo con Qwen: quando è pronto, rifai la domanda."
+        #endif
+        aggiungiMessaggio(MessaggioVera(autore: .vera, testo: testo,
+                                       titolo: TestiStatoVera.titoloNonPronta, motore: "Prisma"), cliente: id)
     }
 
     /// Chiede a Ollama, sul Mac, se Qwen è pronto (all'avvio, aprendo Vera e dalle impostazioni).
@@ -2954,6 +3194,10 @@ enum VoceConfronto: Hashable {
         occasioneSelezionata = nil
         // L'elenco delle occasioni non mostra gli appuntamenti: si torna al mese
         if vistaAgenda == .occasioni { vistaAgenda = .mese }
+        #if os(macOS)
+        // La settimana a sette colonne non ha la colonna del dettaglio: l'appuntamento si mostra in «Giorno»
+        if vistaAgenda == .settimana { vistaAgenda = .giorno }
+        #endif
         if filtroClienteAgenda != nil && filtroClienteAgenda != a.clienteId { filtroClienteAgenda = nil }
         apri(.agenda)
     }
@@ -3202,7 +3446,8 @@ enum VoceConfronto: Hashable {
     /// Salva adesso e aspetta: quando torna, l'archivio sul disco è aggiornato. Lo usano backup,
     /// ripristino, riapertura e chiusura.
     func salvaOra() {
-        guard persistente, !salvataggioSospeso, archivioPronto else { return }
+        // Migliorie d'uso 37: con la dimostrazione accesa l'archivio vero non si tocca (37.3 A.4)
+        guard persistente, !salvataggioSospeso, archivioPronto, !inDimostrazione else { return }
         scrivi()
         salvataggio.attendi()
     }
@@ -3210,7 +3455,7 @@ enum VoceConfronto: Hashable {
     /// Accoda il salvataggio dei dati di adesso (niente, se questa generazione è già sul disco o in coda).
     private func scrivi() {
         // Mai un archivio a metà sopra quello vero (avvio a due tempi)
-        guard persistente, !salvataggioSospeso, archivioPronto else { return }
+        guard persistente, !salvataggioSospeso, archivioPronto, !inDimostrazione else { return }
         // L'istantanea è un valore: la copia va alla coda senza rischi, e la coda non legge mai `self.dati`
         salvataggio.accoda(dati.istantanea, generazione: versioneDati) { [weak self] errore in
             self?.mostraAvviso("Salvataggio non riuscito: \(errore.localizedDescription)")
@@ -3376,6 +3621,11 @@ enum VoceConfronto: Hashable {
     /// Crea un backup completo della cartella dell'archivio.
     func creaBackup(automatico: Bool = false) {
         guard persistente, !backupInCorso else { return }
+        // Migliorie d'uso 37: i dati di prova non finiscono tra quelli veri
+        guard !inDimostrazione else {
+            if !automatico { mostraAvviso(TestiDimostrazione.backupFermo) }
+            return
+        }
         // Con la protezione attiva il backup si fa solo con la password, mai in chiaro
         let password: String?
         do {
@@ -3426,6 +3676,7 @@ enum VoceConfronto: Hashable {
     /// backup; se nessuna lo apre si chiede la password.
     func ripristina(_ zip: URL, password scritta: String? = nil) {
         guard persistente, !backupInCorso else { return }
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard !ripristinoBloccato else { mostraAvviso("Archivio in sola lettura: apri l'ultima versione di Prisma per ripristinare."); return }
         // Riconosciuto dal contenuto: anche un backup protetto rinominato
         let protetto = CifraturaBackup.cifrato(zip)
@@ -3543,7 +3794,7 @@ enum VoceConfronto: Hashable {
     /// Toglie i 5 clienti di prova con tutti i loro dati (e le schede prodotto di esempio non usate),
     /// lasciando i clienti veri. Prima salva un backup.
     func togliDatiDiProva() {
-        guard persistente, !backupInCorso, !solaLettura else { return }
+        guard persistente, !backupInCorso, !solaLettura, !inDimostrazione else { return }
         let password: String?
         do {
             password = try passwordPerBackup()
@@ -3576,6 +3827,7 @@ enum VoceConfronto: Hashable {
     /// Importa in rubrica i clienti scelti (da vCard o CSV). Prima salva un backup dello stato attuale.
     func importaClienti(_ elenco: [ClienteImportato]) {
         guard !elenco.isEmpty, !solaLettura else { return }
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else {
             aggiungiImportati(elenco)
             return
@@ -3615,6 +3867,7 @@ enum VoceConfronto: Hashable {
     /// in rubrica (chiave: il segnaposto in `clienteId`). Prima salva un backup dello stato attuale.
     func importaPosizioni(_ elenco: [Posizione], nuoviClienti: [String: ClienteImportato] = [:]) {
         guard !elenco.isEmpty, !solaLettura else { return }
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else {
             aggiungiPosizioniImportate(elenco, nuoviClienti: nuoviClienti)
             return
@@ -3682,6 +3935,11 @@ enum VoceConfronto: Hashable {
             return true
         }
         guard !backupInCorso else { return false }
+        // Migliorie d'uso 37: niente backup né operazioni sull'archivio vero durante la dimostrazione
+        guard !inDimostrazione else {
+            mostraAvviso(TestiDimostrazione.nonDurante)
+            return false
+        }
         let password: String?
         do {
             password = try passwordPerBackup()
@@ -3770,7 +4028,7 @@ enum VoceConfronto: Hashable {
     /// Torna ai dati di prova (con backup di sicurezza dello stato attuale): i 5 clienti del template,
     /// oppure con `completi` anche i 30 clienti fittizi.
     func ripristinaDatiDiProva(completi: Bool = false) {
-        guard persistente, !backupInCorso, !solaLettura else { return }
+        guard persistente, !backupInCorso, !solaLettura, !inDimostrazione else { return }
         let password: String?
         do {
             password = try passwordPerBackup()
@@ -3854,7 +4112,7 @@ enum VoceConfronto: Hashable {
         let b = dati.impostazioni.backup
         // Con un archivio non leggibile da sistemare i backup automatici non sostituiscono quelli buoni
         // (il conto si aggiorna all'avvio, dopo un ripristino e quando il consulente le segna come gestite)
-        guard persistente, b.automatico, !solaLettura, copieNonLeggibili == 0, !backupInCorso,
+        guard persistente, b.automatico, !solaLettura, !inDimostrazione, copieNonLeggibili == 0, !backupInCorso,
               let prossimo = b.prossimo, prossimo <= Date() else { return }
         // Backup protetti: il Portachiavi si legge (una volta per sessione) fuori dal thread principale
         if b.cifrato, passwordBackupInMemoria == nil, !portachiaviLetto {
@@ -3939,18 +4197,31 @@ enum SchedaImpostazioni: String, CaseIterable, Hashable, Identifiable {
     /// La stima delle distanze, il giro, la partenza, le zone e l'anello arancio di Territorio («Luce» giro 11,
     /// PaginaImpostazioniTerritorio.swift).
     case territorio
-    /// Dati di prova, confronto dei modelli, prove di promemoria e voce.
+    /// Dati di prova, confronto dei modelli, prove di promemoria e voce. Sul Mac (migliorie d'uso 37) «Dimostrazione»:
+    /// il valore grezzo resta «strumenti».
     case strumenti
 
     var id: String { rawValue }
 
     var titolo: String {
         switch self {
-        case .panoramica: return "Panoramica"
+        case .panoramica:
+            // Migliorie d'uso 31: sul Mac la prima voce dice cosa resta da sistemare
+            #if os(macOS)
+            return "Da sistemare"
+            #else
+            return "Panoramica"
+            #endif
         case .profilo: return "Profilo"
         case .aspetto: return "Aspetto"
         case .ovunque: return "iPhone e iPad"
-        case .lavoro: return "Agenda e lavoro"
+        case .lavoro:
+            // Migliorie d'uso 30: sul Mac la parola del template; la pagina tiene anche festività e seguito delle proposte
+            #if os(macOS)
+            return "Agenda e orari"
+            #else
+            return "Agenda e lavoro"
+            #endif
         case .promemoria: return "Promemoria e occasioni"
         case .conformita: return "Conformità"
         case .proposte: return "Proposte e PDF"
@@ -3965,7 +4236,13 @@ enum SchedaImpostazioni: String, CaseIterable, Hashable, Identifiable {
         case .sala: return "Sala"
         case .moduli: return "Moduli"
         case .territorio: return "Territorio"
-        case .strumenti: return "Strumenti"
+        case .strumenti:
+            // Migliorie d'uso 37: sul Mac la pagina è la dimostrazione (le prove di Vera e dei promemoria sono nelle loro pagine)
+            #if os(macOS)
+            return "Dimostrazione"
+            #else
+            return "Strumenti"
+            #endif
         }
     }
 
@@ -4117,3 +4394,118 @@ struct AzioneAvviso {
     let titolo: String
     let esegui: () -> Void
 }
+
+// MARK: - Migliorie d'uso 37: la dimostrazione
+
+#if os(macOS)
+extension StatoShell {
+    /// Accende la dimostrazione con il gruppo dato (o, già accesa, cambia gruppo). Prima l'archivio vero va sul disco,
+    /// intero; poi i dati di prova entrano in memoria al suo posto (rifatti ogni volta, decisione 1): nessun backup
+    /// prima, perché l'archivio vero non si tocca. Le impostazioni dell'utente restano solo per l'aspetto, i nomi dei
+    /// canali e il motore e il ponte di Vera (37.3 A.2).
+    func accendiDimostrazione(_ gruppo: GruppoProva, avviso: Bool = true) {
+        guard archivioPronto, !spegnimentoDimostrazione else { return }
+        guard !backupInCorso else {
+            mostraAvviso(TestiDimostrazione.attendiBackup)
+            return
+        }
+        let gia = inDimostrazione
+        if !gia {
+            salvaOra()
+            if !persistente { datiPrimaDellaDimostrazione = dati.istantanea }
+            // Prima di toccare i dati: da qui in poi niente scrive sull'archivio vero
+            inDimostrazione = true
+            fermaScrittureAccanto(true)
+        }
+        gruppoProva = gruppo
+        dati.carica(Self.datiDimostrazione(gruppo, impostazioni: dati.impostazioni))
+        pulisciDopoCambioDimostrazione()
+        ricordaDimostrazione()
+        if avviso { mostraAvviso(gia ? TestiDimostrazione.gruppoInUso(gruppo) : TestiDimostrazione.accesa) }
+    }
+
+    /// Spegne la dimostrazione: l'archivio vero si rilegge dal disco (fuori dal thread principale, come all'avvio), con
+    /// le scelte di aspetto, nomi dei canali e Vera fatte intanto (decisione 7); tutto il resto fatto in dimostrazione si
+    /// perde, «senza niente da ripulire».
+    func spegniDimostrazione(avviso: String? = TestiDimostrazione.spenta) {
+        guard inDimostrazione, !spegnimentoDimostrazione else { return }
+        guard persistente else {
+            // Prove e istantanee: nessun archivio sul disco, i dati di prima sono in memoria
+            var d = datiPrimaDellaDimostrazione ?? DatiPrisma.demo()
+            Self.riportaImpostazioni(&d.impostazioni, da: dati.impostazioni)
+            datiPrimaDellaDimostrazione = nil
+            concludiSpegnimento(d, avviso: avviso)
+            return
+        }
+        spegnimentoDimostrazione = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let letto = Archivio.carica()
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.spegnimentoDimostrazione = false
+                self.salvataggio.prepara(letto.sulDisco)
+                self.solaLettura = letto.solaLettura
+                self.ripristinoBloccato = letto.bloccaRipristino
+                self.salvataggioSospeso = letto.solaLettura
+                var d = letto.dati
+                if !letto.solaLettura { Self.riportaImpostazioni(&d.impostazioni, da: self.dati.impostazioni) }
+                self.concludiSpegnimento(d, avviso: letto.avviso ?? avviso)
+            }
+        }
+    }
+
+    /// La parte comune dello spegnimento: i dati veri al loro posto, poi tutto riparte.
+    private func concludiSpegnimento(_ d: DatiPrisma, avviso: String?) {
+        // Ancora accesa mentre i dati cambiano: il salvataggio automatico di `carica` non parte prima del tempo
+        dati.carica(d)
+        pulisciDopoCambioDimostrazione()
+        inDimostrazione = false
+        schedaDimostrazione = false
+        fermaScrittureAccanto(false)
+        ricordaDimostrazione()
+        // Le impostazioni riportate dalla dimostrazione (aspetto, canali, Vera) vanno sul disco
+        salvaOra()
+        aggiornaPromemoria()
+        if dati.impostazioni.ovunque.acceso { sincronizzaOvunque(automatica: true) }
+        if let avviso { mostraAvviso(avviso) }
+    }
+
+    /// Come dopo un ripristino: filtri, selezioni e testi letti dei documenti ripartono (mai un cliente dell'altro
+    /// archivio sullo schermo).
+    private func pulisciDopoCambioDimostrazione() {
+        testiDocumenti = MemoriaTesti()
+        documentoSelezionato = nil
+        posizioneInDettaglio = nil
+        azzeraNote()
+        trovaPagina.azzera()
+    }
+
+    /// Ferma (o fa ripartire) le scritture accanto all'archivio: memoria di Vera, cache della ricerca, Biblioteca e Moduli.
+    /// Spenta la dimostrazione, memoria, Biblioteca e Moduli si rileggono dal disco.
+    private func fermaScrittureAccanto(_ ferma: Bool) {
+        memoriaVera.fermaPerDimostrazione(ferma)
+        indiceVera.fermaSalvataggi(ferma)
+        biblioteca.fermaPerDimostrazione(ferma)
+        moduli.fermaPerDimostrazione(ferma)
+    }
+
+    /// Riaprendo Prisma con la dimostrazione accesa (decisione 2): l'archivio vero è già letto (schermata di
+    /// benvenuto), subito dopo entrano i dati di prova.
+    func riprendiDimostrazione() {
+        guard persistente, !inDimostrazione else { return }
+        let preferenze = UserDefaults.standard
+        if let g = preferenze.string(forKey: TestiDimostrazione.chiaveGruppo).flatMap(GruppoProva.init(rawValue:)) {
+            gruppoProva = g
+        }
+        guard preferenze.bool(forKey: TestiDimostrazione.chiaveAccesa) else { return }
+        accendiDimostrazione(gruppoProva, avviso: false)
+    }
+
+    /// Le preferenze del Mac (fuori dall'archivio, dai backup e da «Prisma ovunque», 37.4).
+    private func ricordaDimostrazione() {
+        guard persistente else { return }
+        UserDefaults.standard.set(inDimostrazione, forKey: TestiDimostrazione.chiaveAccesa)
+        UserDefaults.standard.set(gruppoProva.rawValue, forKey: TestiDimostrazione.chiaveGruppo)
+    }
+}
+#endif

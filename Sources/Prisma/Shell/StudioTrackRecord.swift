@@ -285,7 +285,7 @@ private struct ElencoTrackRecord: View, Equatable {
     var body: some View {
         // Dalla cache (DerivatiDati): calcolato una volta per versione dei dati e per giorno, mai qui
         let t = stato.trackRecord()
-        let prova = stato.haDatiDiProva
+        let prova = stato.scritteProva
         // Anche l'ordine e le linee delle card vengono dalla cache, fuori dal GeometryReader: a ogni passo del
         // ridimensionamento cambiano solo la larghezza e ciò che ne dipende (grafico e colonne delle tile)
         let voci: [TrackRecord.Voce] = t.raccomandazioni == 0 ? [] : stato.vociTrackRecordOrdinate()

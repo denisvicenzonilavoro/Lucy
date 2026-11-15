@@ -15,7 +15,8 @@ import UniformTypeIdentifiers
 
 /// I fogli di Mercato.
 enum FoglioMercato: String, Identifiable {
-    case importa, aMano, soglie
+    /// `riservatezza`: la scheda dell'etichetta «Escono solo dati pubblici» / «Niente esce dal Mac» (migliorie d'uso 29).
+    case importa, aMano, soglie, riservatezza
 
     var id: String { rawValue }
 }
@@ -70,7 +71,7 @@ extension StatoShell {
     /// «Aggiornato oggi alle 18:00 · valori di prova».
     func occhielloMercato(oggi: Date = Date()) -> String {
         MotoreMercato.occhiello(ultimo: MotoreMercato.ultimoArrivo(dati.mercato), inCorso: sessioneMercato.inAggiornamento,
-                                datiDiProva: mercatoDiProva, oggi: oggi)
+                                datiDiProva: mercatoDiProva && !inDimostrazione, oggi: oggi)
     }
 
     /// Gli eventi di «Chi è toccato» con le soglie dell'utente (in modalità cliente solo il suo).
@@ -158,6 +159,44 @@ extension StatoShell {
             apriCliente(a.clienteId)
         }
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 29, «Apri le posizioni»: con una posizione sola il suo dettaglio (come oggi); con più posizioni
+    /// (o il portafoglio) il cliente si sceglie nella barra, in silenzio, e Posizioni si apre sul suo quadro. Mai il
+    /// dossier: il nome del pulsante dice dove porta (`apriAvvisoMercato` resta per il clic sul testo e il menu).
+    func apriPosizioniAvvisoMercato(_ a: AvvisoMercato) {
+        if a.posizioni.count == 1, let p = dati.posizioni.first(where: { $0.id == a.posizioni[0] }) {
+            apriPosizione(p)
+            return
+        }
+        guard cliente(a.clienteId) != nil else { return }
+        scegliCliente(a.clienteId)
+        posizioneInDettaglio = nil
+        apri(.posizioni)
+    }
+
+    /// Il pulsante dell'avviso (`AzioneAvvisoMercato`): le posizioni, o il messaggio se Messaggi è consentito
+    /// (altrimenti l'apertura di ciò che l'avviso tocca).
+    func eseguiAzioneAvvisoMercato(_ a: AvvisoMercato) {
+        switch AzioneAvvisoMercato.per(a) {
+        case .apriPosizione, .apriPosizioni:
+            apriPosizioniAvvisoMercato(a)
+        case .preparaMessaggio:
+            if appConsentita(.messaggi) {
+                preparaMessaggioAvviso(a)
+            } else {
+                apriAvvisoMercato(a)
+            }
+        }
+    }
+
+    /// «Silenzia» e «Riattiva»: lo stato `.visto` di sempre (il pallino grigio, fuori dalle notifiche), con l'avviso.
+    func silenziaAvvisoMercato(_ a: AvvisoMercato, silenzia: Bool) {
+        guard mercatoModificabile else { return }
+        segnaAvvisoMercato(a.id, visto: silenzia)
+        mostraAvviso(silenzia ? TestiAppMercato.avvisoSilenziato : TestiAppMercato.avvisoRiattivato)
+    }
+    #endif
 
     // MARK: - Messaggi
 

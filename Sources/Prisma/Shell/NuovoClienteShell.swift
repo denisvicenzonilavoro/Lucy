@@ -264,8 +264,12 @@ extension StatoShell {
                 rinominaDocumento(nuovo.id, titolo: "Documento d’identità", tipo: .altro)
             }
         }
-        // Pratiche › Moduli ha già il cliente scelto: i moduli si compilano da lì (nessun PDF scritto da solo)
-        if conModuli { moduli.clienteId = c.id }
+        // Pratiche › Moduli ha già il cliente scelto (quello della barra, scelto qui sopra): i moduli si compilano da lì
+        // (nessun PDF scritto da solo)
+        if conModuli {
+            moduli.posizioneId = nil
+            moduli.azzeraCompilazione()
+        }
         chiudiScenaNuovoCliente()
         #if os(macOS)
         apri(.clienti)

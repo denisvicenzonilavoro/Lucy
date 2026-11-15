@@ -58,6 +58,15 @@ struct CopilotaIncontro: View {
         #endif
     }
 
+    /// Sotto questa larghezza trascrizione e schede vanno una sotto l'altra (sul Mac la parte destra di Incontri).
+    static var sogliaStretta: CGFloat {
+        #if os(macOS)
+        return Tema.Apple.Copilota.Durante.sogliaStretta
+        #else
+        return Tema.Apple.Copilota.Disposizione.sogliaStretta
+        #endif
+    }
+
     static var suIPad: Bool {
         #if os(iOS)
         return true
@@ -69,10 +78,21 @@ struct CopilotaIncontro: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         let cliente = stato.cliente(clienteId)
+        #if os(macOS)
+        // Migliorie d'uso 20: la sessione dell'incontro mostrato, mai quella di un altro incontro dello stesso cliente
+        let sessione = copilota.sessione(incontro: incontro?.id, cliente: clienteId, in: stato)
+        #else
         let sessione = copilota.sessione(per: clienteId, in: stato)
+        #endif
         return GeometryReader { geo in
-            let stretta = geo.size.width < D.sogliaStretta
+            let stretta = geo.size.width < Self.sogliaStretta
             Group {
+                #if os(macOS)
+                // Migliorie d'uso 20: il copilota è il contenuto del momento «Durante», sotto la testata dell'incontro
+                // (avatar, titolo e momenti). In testa la barra alta 66 con il selettore «Copilota | Appunti a mano», lo
+                // stato con la riga del consenso, l'onda e il pulsante; niente colonna «Oggi», niente scheda del consenso.
+                principale(cliente: cliente, sessione: sessione, stretta: stretta, larghezza: geo.size.width)
+                #else
                 if stretta {
                     VStack(alignment: .leading, spacing: D.spazio) {
                         SchedaConsensoCopilota(copilota: copilota, cliente: cliente, compatta: true)
@@ -87,6 +107,7 @@ struct CopilotaIncontro: View {
                                    larghezza: geo.size.width - D.larghezzaColonna - D.gioco)
                     }
                 }
+                #endif
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
         }
@@ -98,15 +119,28 @@ struct CopilotaIncontro: View {
     }
 
     private func principale(cliente: Cliente?, sessione: SessioneCopilota?, stretta: Bool, larghezza: CGFloat) -> some View {
-        VStack(alignment: .leading, spacing: D.spazio) {
+        #if os(macOS)
+        // Migliorie d'uso 20: per un incontro archiviato la trascrizione dice che resta il verbale, in «Dopo»
+        let concluso = incontro?.stato == .concluso
+        #else
+        let concluso = false
+        #endif
+        return VStack(alignment: .leading, spacing: D.spazio) {
             // L'onda sta nella testata solo se c'è posto per titoli, onda e pulsante (sull'iPad in verticale no):
             // così la testata non allarga mai l'area principale oltre la finestra.
+            #if os(macOS)
+            TestataCopilota(copilota: copilota, cliente: cliente, incontro: incontro, sessione: sessione,
+                            conOnda: larghezza >= Tema.Apple.Copilota.Durante.larghezzaMinimaConOnda, barraDurante: true)
+                .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+            #else
             TestataCopilota(copilota: copilota, cliente: cliente, incontro: incontro, sessione: sessione,
                             conOnda: larghezza >= Tema.Apple.Copilota.Testata.larghezzaMinimaConOnda)
                 .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+            #endif
             GeometryReader { g in
                 let schede = ColonnaSchedeCopilota(copilota: copilota, sessione: sessione)
-                let trascrizione = TrascrizioneCopilotaVista(copilota: copilota, sessione: sessione, cliente: cliente)
+                let trascrizione = TrascrizioneCopilotaVista(copilota: copilota, sessione: sessione, cliente: cliente,
+                                                             incontroConcluso: concluso)
                 if stretta {
                     let alta = max(0, (g.size.height - D.spazio) * D.quotaTrascrizioneStretta)
                     VStack(spacing: D.spazio) {
@@ -466,14 +500,108 @@ struct TestataCopilota: View {
     let incontro: Incontro?
     let sessione: SessioneCopilota?
     var conOnda = true
+    /// Migliorie d'uso 20 (solo sul Mac): la barra alta 66 del momento «Durante», senza avatar né titolo (stanno nella
+    /// testata dell'incontro), con il selettore «Copilota | Appunti a mano» e la riga del consenso.
+    var barraDurante = false
+
+    @State private var foglioConsenso = false
 
     private typealias T = Tema.Apple.Copilota.Testata
+    private typealias B = Tema.Apple.Copilota.Durante
 
     private var puoPartire: Bool { GuardiaCopilota.puoPartire(cliente) && !stato.solaLettura }
 
+    /// L'incontro mostrato è archiviato: il copilota non si avvia.
+    private var incontroConcluso: Bool { incontro?.stato == .concluso }
+
     var body: some View {
+        if barraDurante {
+            barra
+        } else {
+            testata
+        }
+    }
+
+    /// Selettore, stato con la riga del consenso, onda, «● Avvia il copilota» (non per un incontro concluso).
+    private var barra: some View {
         let _ = ContaCorpi.segna()
-        HStack(alignment: .center, spacing: T.spazio) {
+        return HStack(alignment: .center, spacing: B.spazio) {
+            SegmentatoPillola(selezione: Bindable(copilota).modo,
+                              voci: [(ModoAscoltoIncontro.copilota, TestiMomentiIncontro.copilota),
+                                     (ModoAscoltoIncontro.appunti, TestiMomentiIncontro.appuntiAMano)])
+                .fixedSize()
+                .disabled(copilota.ascolta)
+                .help(copilota.ascolta ? TestiMomentiIncontro.aiutoSelettore : "")
+            VStack(alignment: .leading, spacing: T.spazioTitoli) {
+                if incontroConcluso {
+                    Text(TestiMomentiIncontro.incontroConcluso)
+                        .carattereApple(B.stato)
+                        .foregroundColor(B.coloreStato)
+                        .lineLimit(1)
+                } else {
+                    statoAscolto
+                }
+                rigaConsenso
+            }
+            .layoutPriority(1)
+            Spacer(minLength: 0)
+            if conOnda {
+                OndaCopilota(copilota: copilota, parametri: .barraDurante)
+            }
+            if !incontroConcluso {
+                pulsante
+            }
+        }
+        .padding(.horizontal, B.paddingOrizzontale)
+        .padding(.vertical, B.paddingVerticale)
+        .frame(maxWidth: .infinity, minHeight: B.altezza, alignment: .leading)
+        .superficieApple(B.superficie, raggio: B.raggio)
+        .sheet(isPresented: $foglioConsenso) {
+            VStack(alignment: .trailing, spacing: B.paddingFoglioConsenso) {
+                SchedaConsensoCopilota(copilota: copilota, cliente: cliente, compatta: false)
+                Button("Fine") { foglioConsenso = false }
+                    .buttonStyle(.appleGrande)
+                    .keyboardShortcut(.defaultAction)
+            }
+            .padding(B.paddingFoglioConsenso)
+            .frame(width: B.larghezzaFoglioConsenso)
+            .environment(stato)
+        }
+    }
+
+    /// «Giulia ha dato il consenso · l'audio non lascia il Mac» in verde col lucchetto (una riga, non un riquadro); senza
+    /// consenso in arancio «Manca il consenso all'ascolto» con «Registra il consenso…». Si tocca per aprire il modulo di
+    /// sempre (registrare o revocare) in un foglio; senza consenso il copilota resta spento come prima.
+    @ViewBuilder private var rigaConsenso: some View {
+        if let c = cliente {
+            Button { foglioConsenso = true } label: {
+                if c.consensoCopilota != nil {
+                    Label(TestiMomentiIncontro.consensoDato(c.nome), systemImage: "lock.fill")
+                        .carattereApple(B.consenso)
+                        .foregroundColor(B.coloreConsenso)
+                        .lineLimit(1)
+                } else {
+                    HStack(spacing: B.spazioConsenso) {
+                        Label(TestiMomentiIncontro.mancaConsenso, systemImage: "exclamationmark.circle.fill")
+                            .lineLimit(1)
+                        Text(TestiMomentiIncontro.registraConsenso)
+                            .underline()
+                            .lineLimit(1)
+                    }
+                    .carattereApple(B.consenso)
+                    .foregroundColor(B.coloreSenzaConsenso)
+                }
+            }
+            .buttonStyle(StileSemplice())
+            .fixedSize()
+            .disabled(stato.solaLettura && c.consensoCopilota == nil)
+            .help(TestiMomentiIncontro.aiutoConsenso)
+        }
+    }
+
+    private var testata: some View {
+        let _ = ContaCorpi.segna()
+        return HStack(alignment: .center, spacing: T.spazio) {
             if let c = cliente {
                 AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: T.avatar)
             }
@@ -583,12 +711,19 @@ struct TestataCopilota: View {
     private func premi() {
         switch copilota.fase {
         case .ascolto:
+            #if os(macOS)
+            // Migliorie d'uso 20: alla fine dell'ascolto Prisma passa da sola al momento «Dopo», dove il verbale resta
+            copilota.terminaNelDopo(stato)
+            #else
             copilota.termina()
             apriVerbale()
+            #endif
         case .prepara:
             copilota.annulla()
         case .pronto, .concluso, .interrotto:
             guard let c = cliente else { return }
+            // Migliorie d'uso 21: l'ascolto scrive, quindi l'incontro mostrato da un appuntamento nasce qui
+            if let i = incontro { stato.assicuraIncontro(i) }
             copilota.avvia(stato, clienteId: c.id, incontroId: incontro?.id)
         }
     }
@@ -603,9 +738,10 @@ struct TestataCopilota: View {
 @MainActor
 private struct OndaCopilota: View {
     let copilota: StatoCopilotaIncontro
+    var parametri: ParametriOnda = .copilota
 
     var body: some View {
-        OndaNastroApple(livelli: copilota.livelli, ascolta: copilota.fase == .ascolto)
+        OndaNastroApple(livelli: copilota.livelli, ascolta: copilota.fase == .ascolto, parametri: parametri)
     }
 }
 
@@ -639,6 +775,8 @@ struct TrascrizioneCopilotaVista: View {
     let copilota: StatoCopilotaIncontro
     let sessione: SessioneCopilota?
     let cliente: Cliente?
+    /// Migliorie d'uso 20: l'incontro mostrato è archiviato (senza trascrizione conservata resta il verbale, in «Dopo»).
+    var incontroConcluso = false
 
     private typealias R = Tema.Apple.Copilota.Trascrizione
 
@@ -664,7 +802,8 @@ struct TrascrizioneCopilotaVista: View {
                     .padding(.top, Tema.Apple.Copilota.Scheda.sopraFrase)
             }
             if pezzi.isEmpty && riga == nil {
-                Text(copilota.ascolta ? TestiCopilota.ascoltoSenzaParole : TestiCopilota.vuotoTrascrizione)
+                Text(copilota.ascolta ? TestiCopilota.ascoltoSenzaParole
+                     : (incontroConcluso ? TestiMomentiIncontro.trascrizioneNonConservata : TestiCopilota.vuotoTrascrizione))
                     .carattereApple(R.vuoto)
                     .foregroundColor(R.coloreVuoto)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

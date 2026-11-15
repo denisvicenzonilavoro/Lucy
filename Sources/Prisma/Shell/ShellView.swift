@@ -28,6 +28,8 @@ struct ShellView: View {
             .environment(stato.sistema)
             // Due dita sul trackpad ed Esc per la Vera della scrivania (solo Mac, mai nelle istantanee)
             .gestoVeraScrivania()
+            // Esc chiude la finestra interna davanti quando sopra non c'è niente (migliorie d'uso 4, solo Mac)
+            .escChiudeFinestra()
             // «Riduci movimento» di Prisma (in OR con quello del Mac) e «Dimensione del testo» del tema Apple per tutto
             // l'albero delle viste; `Movimenti.calmo` lo legge anche chi anima fuori dalle viste (finestre, blocco)
             .prismaCalmo(stato.dati.impostazioni.riduciMovimento)
@@ -76,6 +78,15 @@ struct CorpoShell: View {
         salaCoprente || (modoIstantanea && (stato.presentazione != nil || sistema.sovrapposizione?.coprente == true))
     }
 
+    /// Migliorie d'uso 1: la schermata neutra di «Mostra al cliente» è davanti (solo Mac; su iPhone e iPad mai).
+    private var neutra: Bool {
+        #if os(macOS)
+        return stato.schermataNeutraMac
+        #else
+        return false
+        #endif
+    }
+
     /// Con una finestra aperta il dock si nasconde, come in macOS: torna portando il puntatore in basso.
     private var dockNascosto: Bool { !sistema.visibili.isEmpty }
 
@@ -99,9 +110,18 @@ struct CorpoShell: View {
                 livelliScrivania(misura, area: area)
                     .frame(width: misura.width, height: misura.height, alignment: .topLeading)
                     .scaleEffect(scalaScena)
-                    .opacity(sottoSala ? 0 : 1)
-                    .accessibilityHidden(sottoSala)
-                    .allowsHitTesting(!sistema.bloccato && !sottoSala)
+                    .opacity(sottoSala || neutra ? 0 : 1)
+                    .accessibilityHidden(sottoSala || neutra)
+                    .allowsHitTesting(!sistema.bloccato && !sottoSala && !neutra)
+
+                // Migliorie d'uso 1: la schermata neutra di «Mostra al cliente» copre tutto tranne l'acqua (solo Mac)
+                #if os(macOS)
+                if neutra && !sistema.bloccato {
+                    SchermataNeutraMac()
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .transition(modoIstantanea ? AnyTransition.identity : AnyTransition.opacity)
+                }
+                #endif
 
                 // Lo strato degli effetti (genio e chiusura in Core Animation, MotoreGenio): sopra finestre, dock e
                 // pannelli, sotto la presentazione e il benvenuto. Mai nelle istantanee e nelle prove
@@ -274,15 +294,19 @@ struct CorpoShell: View {
         let nascosti = sistema.bloccato
         // Durante un genio il dock si vede sempre (come macOS con il dock nascosto): la finestra va nella sua icona
         let dockGiu = dockNascosto && !dockRichiamato && sistema.dockPerEffetti.isEmpty
-        return ZStack(alignment: .topLeading) {
+        // Migliorie d'uso 1: nella vista pulita di «Mostra al cliente» scrivania e dock non si vedono e non prendono clic
+        let vista = stato.inVistaCliente
+        let livelli = ZStack(alignment: .topLeading) {
             // La scrivania con i widget e, scorrendo a sinistra, Vera (VeraScrivania.swift): sotto le finestre e il dock
             PagineScrivania(sistema: sistema, gesto: sistema.gestoVera, misura: misura)
                 .frame(width: misura.width, height: misura.height, alignment: .topLeading)
+                .opacity(vista ? 0 : 1)
+                .allowsHitTesting(!vista)
 
             livelloFinestre(area: area, misura: misura)
                 .opacity(nascosti ? 0 : 1)
 
-            if dockGiu {
+            if dockGiu && !vista {
                 // Striscia invisibile sul bordo in basso: richiama il dock
                 Color.clear
                     .contentShape(Rectangle())
@@ -302,7 +326,8 @@ struct CorpoShell: View {
                            value: dockGiu)
                 .frame(width: misura.width, height: misura.height, alignment: .bottom)
                 .clipped()
-                .opacity(nascosti ? 0 : 1)
+                .opacity(nascosti || vista ? 0 : 1)
+                .allowsHitTesting(!vista)
 
             // I pannelli in contenitori animati: l'animazione resta loro e non tocca il resto della shell
             ZStack {
@@ -318,14 +343,28 @@ struct CorpoShell: View {
 
             ZStack {
                 if sistema.pannelloNotifiche {
+                    #if os(macOS)
+                    // Migliorie d'uso 3: sul Mac la pillola «Da fare» apre il «Da fare» unico al posto delle notifiche
+                    PannelloDaFare()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                    #else
                     PannelloNotifiche()
                         .frame(width: misura.width, height: misura.height)
                         .transition(transizionePannello)
+                    #endif
                 }
             }
             .animation(curvaPannello(sistema.pannelloNotifiche, Tema.Moto.Pannelli.notifiche, Tema.Moto.Pannelli.notificheUscita),
                        value: sistema.pannelloNotifiche)
             .opacity(nascosti ? 0 : 1)
+
+            #if os(macOS)
+            // Il dettaglio di una voce del «Da fare» aperto fuori da Posizioni (pannello, scrivania): al centro, sopra il velo
+            StratoDettaglioDaFare(stato: stato)
+                .frame(width: misura.width, height: misura.height)
+                .opacity(nascosti ? 0 : 1)
+            #endif
 
             // «Le novità» (✦ Novità nella barra): sopra le notifiche, sotto la barra (la pillola resta cliccabile).
             // Entra con il velo del contenitore e la molla della scheda; si chiude di colpo, come nel template
@@ -339,6 +378,15 @@ struct CorpoShell: View {
                 }
             }
             .opacity(nascosti ? 0 : 1)
+
+            #if os(macOS)
+            // Migliorie d'uso 1: la vista pulita di «Mostra al cliente» (il capitolo e la barra dei capitoli), sotto la barra
+            if let capitolo = stato.vistaCliente {
+                StratoVistaCliente(capitolo: capitolo)
+                    .frame(width: misura.width, height: misura.height)
+                    .opacity(nascosti ? 0 : 1)
+            }
+            #endif
 
             // La barra svanisce al blocco e ricompare allo sblocco in 0,6 s (tema Apple §3.2)
             BarraSuperiore()
@@ -363,6 +411,54 @@ struct CorpoShell: View {
             StratoNotaVocaleArrivo(notaVocale: stato.notaVocale)
                 .frame(width: misura.width, height: misura.height, alignment: .topTrailing)
                 .opacity(nascosti ? 0 : 1)
+            // Migliorie d'uso 1: il menu dell'avatar e le schede delle parole e delle ipotesi della vista pulita, e il
+            // pannello di scelta di «Mostra al cliente» (con il velo, sopra la barra)
+            StratoSopraVistaCliente()
+                .frame(width: misura.width, height: misura.height)
+                .opacity(nascosti ? 0 : 1)
+            ZStack {
+                if stato.sceltaMostra {
+                    PannelloMostraAlCliente()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                }
+            }
+            .animation(curvaPannello(stato.sceltaMostra, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
+                       value: stato.sceltaMostra)
+            .opacity(nascosti ? 0 : 1)
+            // Migliorie d'uso 38: le tre domande del primo avvio (PrimoAvvio.swift), con il velo, sopra barra e dock
+            ZStack {
+                if stato.primoAvvio != nil {
+                    PrimoAvvio()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                }
+            }
+            .animation(curvaPannello(stato.primoAvvio != nil, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
+                       value: stato.primoAvvio != nil)
+            .opacity(nascosti ? 0 : 1)
+            // Migliorie d'uso 39: la scheda «Collega con un codice» (DispositiviCollegati.swift), con il velo
+            ZStack {
+                if stato.dispositivi.schedaCodice {
+                    SchedaCollegaDispositivo()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                }
+            }
+            .animation(curvaPannello(stato.dispositivi.schedaCodice, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
+                       value: stato.dispositivi.schedaCodice)
+            .opacity(nascosti ? 0 : 1)
+            // Migliorie d'uso 37: la scheda della dimostrazione (StatoDimostrazione.swift), dall'etichetta della barra
+            ZStack {
+                if stato.schedaDimostrazione {
+                    SchedaDimostrazione()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                }
+            }
+            .animation(curvaPannello(stato.schedaDimostrazione, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
+                       value: stato.schedaDimostrazione)
+            .opacity(nascosti ? 0 : 1)
             #endif
 
             ZStack {
@@ -400,6 +496,29 @@ struct CorpoShell: View {
                        value: sistema.guida != nil)
             .opacity(nascosti ? 0 : 1)
         }
+        return stratoSceltaCliente(livelli, misura: misura, nascosti: nascosti)
+    }
+
+    /// Il pannello «Di chi parliamo?» della pillola del cliente (migliorie d'uso 2, solo sul Mac): sopra la scrivania,
+    /// allineato alla pillola della barra, con il velo e le curve del centro notifiche.
+    private func stratoSceltaCliente(_ contenuto: some View, misura: CGSize, nascosti: Bool) -> some View {
+        #if os(macOS)
+        return contenuto.overlayPreferenceValue(AncoraPillolaCliente.self) { ancora in
+            GeometryReader { geo in
+                ZStack(alignment: .topLeading) {
+                    if sistema.pannelloCliente && !nascosti {
+                        PannelloSceltaCliente(sinistra: ancora.map { geo[$0].minX } ?? 0)
+                            .frame(width: misura.width, height: misura.height)
+                            .transition(transizionePannello)
+                    }
+                }
+                .animation(curvaPannello(sistema.pannelloCliente, Tema.Moto.Pannelli.notifiche, Tema.Moto.Pannelli.notificheUscita),
+                           value: sistema.pannelloCliente)
+            }
+        }
+        #else
+        return contenuto
+        #endif
     }
 
     /// Velo e contenitore dei pannelli: solo opacità (la scheda dentro entra con la sua scala, `entrataScheda`).
@@ -507,11 +626,19 @@ struct CorpoShell: View {
         // Tutte le finestre fuori vista sotto la sala della presentazione (cambia di rado: un valore d'ambiente va bene);
         // coperte, nascoste, ridotte e sotto il blocco lo dice StatoFinestre.finestraInVista a chi lo chiede
         let sotto = sottoSala
+        let vista = stato.inVistaCliente
+        let salaInVista = stato.salaNellaVistaCliente
         return ZStack(alignment: .topLeading) {
             ForEach(CorpoShell.inOrdineFisso(elenco)) { f in
+                // Migliorie d'uso 1: nella vista pulita le finestre non si vedono, tranne la Sala nel suo capitolo
+                let fuoriVista = vista && !(salaInVista && f.app == .sala)
                 finestra(f, z: elenco.firstIndex(where: { $0.app == f.app }) ?? 0, attiva: f.app == attiva,
                          area: f.ridotta ? areaRidotte : area, limiteDock: f.ridotta ? nil : limiteDock,
                          calmo: calmo, sotto: sotto)
+                    .opacity(fuoriVista ? 0 : 1)
+                    .allowsHitTesting(!fuoriVista)
+                    // …e le loro scorciatoie da tastiera (Esc compreso) non scattano mentre sono nascoste
+                    .disabled(fuoriVista)
             }
         }
         .frame(width: area.width, height: area.height, alignment: .topLeading)

@@ -29,14 +29,15 @@ extension Tema.Apple.Clienti {
         // Grafico 1040×330 nel template: passato 36 mesi su 600, futuro 25 mesi su 400 (la riga «oggi» al 60%)
         /// Dove cade «oggi», in frazione della larghezza del grafico.
         static let quotaPassato: CGFloat = 0.6
-        static let colorePassato = Colore.anello2
+        /// Il patrimonio com'era: la linea del totale (Migliorie d'uso 8), anche nel «━» della legenda.
+        static let colorePassato = Colore.totale
         static let coloreStima = Colore.stima
         static let spessorePassato: CGFloat = Tema.Apple.Grafico.Tracciato.spessore
         static let spessoreStima: CGFloat = Tema.Apple.Grafico.Tracciato.spessoreStima
         /// Tratteggiata 6 6 anche a disegno finito (§4.9, errore 1).
         static let tratteggioStima: [CGFloat] = Tema.Apple.Grafico.Tracciato.tratteggioStima
-        /// Senza proposte la stima è nel blu del passato, tratteggiata.
-        static let coloreStimaSenza = Colore.anello2
+        /// Senza proposte la stima è nel colore del passato, tratteggiata.
+        static let coloreStimaSenza = Colore.totale
         /// Margini della scala: 4% sotto il minimo e 6% sopra il massimo, come nel template.
         static let margineSotto: Double = 0.96
         static let margineSopra: Double = 1.06

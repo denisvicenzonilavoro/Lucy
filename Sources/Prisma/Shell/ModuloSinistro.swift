@@ -29,7 +29,13 @@ struct ModuloSinistro: View {
             let clienti = stato.clienti
             let attivo = stato.clienteAttivoId
             let dalModulo = sinistri.clienteModulo.flatMap { id in clienti.first(where: { $0.id == id })?.id }
+            #if os(macOS)
+            // Migliorie d'uso 33: con «Tutti i clienti» nella barra il modulo parte senza cliente («Salva» spento finché
+            // non se ne sceglie uno), mai in silenzio sul primo della rubrica
+            let scelto = dalModulo ?? clienti.first(where: { $0.id == attivo })?.id ?? ""
+            #else
             let scelto = dalModulo ?? clienti.first(where: { $0.id == attivo })?.id ?? clienti.first?.id ?? ""
+            #endif
             let adatte = MotoreSinistri.polizzeAdatte(stato.dati.posizioni, clienteId: scelto)
             let polizza = sinistri.polizzaModulo.flatMap { id in adatte.first(where: { $0.id == id })?.id }
             _bozza = State(initialValue: Sinistro(id: "sinistro-\(UUID().uuidString.prefix(8).lowercased())", clienteId: scelto,
@@ -48,6 +54,7 @@ struct ModuloSinistro: View {
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
             riga("Cliente") {
                 Picker("", selection: $bozza.clienteId) {
+                    if bozza.clienteId.isEmpty { Text(TestiSinistri.scegliCliente).tag("") }
                     ForEach(clienti) { c in Text(c.nome).tag(c.id) }
                 }
                 .labelsHidden()
@@ -56,7 +63,7 @@ struct ModuloSinistro: View {
             riga("Polizza") {
                 Picker("", selection: $bozza.posizioneId) {
                     Text(TestiSinistri.nessunaPolizza).tag(String?.none)
-                    ForEach(polizze) { p in Text("\(p.nome) · \(p.canale == .alleanza ? "Alleanza" : "indipendente")").tag(Optional(p.id)) }
+                    ForEach(polizze) { p in Text("\(p.nome) · \(p.canale.nomeInFrase)").tag(Optional(p.id)) }
                 }
                 .labelsHidden()
             }
@@ -158,7 +165,7 @@ struct ModuloSinistro: View {
     private func contatore(_ n: Int, _ massimo: Int) -> some View {
         Text("\(n)/\(massimo)")
             .carattereApple(M.contatore)
-            .foregroundColor(n > massimo ? Tema.Apple.Colore.arancio : M.coloreContatore)
+            .foregroundColor(n > massimo ? Tema.Apple.Colore.arancioTesto : M.coloreContatore)
             .fixedSize()
     }
 

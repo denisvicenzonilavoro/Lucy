@@ -168,7 +168,7 @@ private struct CapsulaNonPronta: View {
                 Text("Mi sto svegliando…")
                     .font(Tema.Testo.MiniVera.fraseSveglia)
                     .foregroundColor(c.testo)
-                Text(mini.motivoNonPronta ?? "Qwen si avvia sul Mac, qualche secondo e ci sono. Non invento nulla nel frattempo.")
+                Text(mini.motivoNonPronta ?? "Vera si avvia sul Mac, qualche secondo e ci sono. Non invento nulla nel frattempo.")
                     .font(Tema.Testo.MiniVera.sotto)
                     .foregroundColor(c.testoTerziario)
                     .fixedSize(horizontal: false, vertical: true)
@@ -233,7 +233,7 @@ private struct SchedaRisposta: View {
         let cifre = mini.cifre
         let mostra = !mini.inArrivo
         return VStack(alignment: .leading, spacing: 0) {
-            if let t = mini.titolo, t == "Vera non ha potuto rispondere" || t == "Qwen non è pronto" {
+            if let t = mini.titolo, t == "Vera non ha potuto rispondere" || TestiStatoVera.eTitoloNonPronta(t) {
                 Text(t)
                     .font(Tema.Testo.MiniVera.rispostaForte)
                     .foregroundColor(Tema.Colore.MiniVera.testo)

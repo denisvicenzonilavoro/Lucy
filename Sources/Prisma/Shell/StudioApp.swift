@@ -131,7 +131,7 @@ enum TestiStudio {
     /// Il fumetto di una colonna degli incassi: «dicembre · Alleanza 1.200 € · Indipendente 0 €».
     static func mese(_ m: CruscottoStudio.MeseIncasso) -> String {
         let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
-        return "\(mese(m.inizio)) · Alleanza \(alleanza) · Indipendente \(euro(m.indipendente))"
+        return "\(mese(m.inizio)) · \(Canale.alleanza.nomeBreve) \(alleanza) · \(Canale.indipendente.nomeBreve) \(euro(m.indipendente))"
     }
 }
 
@@ -208,6 +208,17 @@ struct AzioniStudio: View {
             SegmentatoPillola(selezione: Bindable(stato).schedaStudio,
                               valori: SchedaStudio.visibili(modoCliente: stato.inModoCliente), titolo: { $0.titolo })
                 .fixedSize()
+            #if os(macOS)
+            // Migliorie d'uso 28: «＋ Nuova parcella» sta qui, dopo le schede, solo in Parcelle (come «Nuovo cliente»);
+            // il modulo lo apre la scheda (StudioParcelle.swift), che osserva la richiesta
+            if stato.schedaStudio == .fatture && !stato.inModoCliente {
+                Button(TestiParcelle.nuova) { stato.richiestaNuovaParcella += 1 }
+                    .buttonStyle(.applePrimario)
+                    .fixedSize()
+                    .disabled(stato.solaLettura || stato.clienti.isEmpty)
+                    .help("Una parcella della consulenza indipendente: il cliente, la consulenza e l’importo")
+            }
+            #endif
         }
     }
 }

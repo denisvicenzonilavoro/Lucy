@@ -96,6 +96,77 @@ private struct CorpoImpostazioniOvunque: View {
                     .padding(.bottom, P.sottoCard)
                     .transition(.opacity.combined(with: .move(edge: .top)))
             }
+            #if os(macOS)
+            if suMac {
+                colonnaCollegamenti
+            } else {
+                righe
+            }
+            #else
+            righe
+            #endif
+        }
+        .animation(Tema.Apple.Moto.animazione(Tema.Apple.Ovunque.Moto.apertura, calmo: calmo, istantanea: istantanea),
+                   value: ovunque.modulo)
+        .animation(Tema.Apple.Moto.animazione(Tema.Apple.Ovunque.Moto.apertura, calmo: calmo, istantanea: istantanea),
+                   value: ovunque.modificheAperte)
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 39 (solo Mac): «I tuoi dispositivi», «Cosa fanno insieme al Mac» con le cinque righe (sotto
+    /// «I dati», acceso, le sue righe rientrate), «Modifiche in attesa» e la nota dei due segreti.
+    private var colonnaCollegamenti: some View {
+        typealias D = Tema.Apple.Ovunque.Dispositivi
+        return VStack(alignment: .leading, spacing: 0) {
+            GruppoDispositiviCollegati(registro: stato.dispositivi)
+                .entrataCascata(2, base: base)
+            GruppoImpostazioni(titolo: TestiCollegamenti.insieme) {
+                rigaDati
+                if o.acceso {
+                    VStack(alignment: .leading, spacing: P.fraRighe) {
+                        rigaModificheDaiDispositivi
+                        rigaPotenziali
+                        rigaCartella
+                        rigaPassphrase
+                    }
+                    .padding(.leading, D.rientro)
+                }
+                RigaFunzionePonte(titolo: TestiCollegamenti.vera, sottotitolo: TestiCollegamenti.veraSotto, chiave: \.modello)
+                RigaFunzionePonte(titolo: TestiCollegamenti.inquadra, sottotitolo: TestiCollegamenti.inquadraSotto, chiave: \.inquadra)
+                RigaFunzionePonte(titolo: TestiCollegamenti.notaVoce, sottotitolo: TestiCollegamenti.notaSotto, chiave: \.nota)
+                RigaFunzionePonte(titolo: TestiCollegamenti.tavolo, sottotitolo: TestiCollegamenti.tavoloSotto, chiave: \.tavolo)
+            }
+            .padding(.top, D.fraGruppi)
+            .entrataCascata(3, base: base)
+            VStack(alignment: .leading, spacing: P.fraRighe) {
+                rigaInAttesa
+                if ovunque.modificheAperte {
+                    PannelloModificheOvunque(ovunque: ovunque)
+                        .transition(.opacity.combined(with: .move(edge: .top)))
+                }
+            }
+            .padding(.top, D.fraGruppi)
+            .entrataCascata(4, base: base)
+            NotaImpostazioni(TestiCollegamenti.nota)
+                .padding(.top, P.fraRighe)
+                .entrataCascata(5, base: base)
+        }
+    }
+
+    /// «I dati» = «Prisma ovunque»: accenderlo apre il percorso di oggi (cartella e passphrase), spegnerlo chiede conferma.
+    private var rigaDati: some View {
+        RigaImpostazione(titolo: TestiCollegamenti.dati, sottotitolo: TestiCollegamenti.datiSotto) {
+            Toggle(isOn: bindingCopia) { EmptyView() }
+                .toggleStyle(.appleSenzaEtichetta)
+                .accessibilityLabel(Text(TestiCollegamenti.dati))
+                .disabled(ovunque.inCorso)
+        }
+    }
+    #endif
+
+    /// Le righe di prima (iPhone e iPad).
+    private var righe: some View {
+        VStack(alignment: .leading, spacing: 0) {
             VStack(alignment: .leading, spacing: P.fraRighe) {
                 rigaCopia
                     .entrataCascata(2, base: base)
@@ -124,10 +195,6 @@ private struct CorpoImpostazioniOvunque: View {
                 .padding(.top, P.fraRighe)
                 .entrataCascata(8, base: base)
         }
-        .animation(Tema.Apple.Moto.animazione(Tema.Apple.Ovunque.Moto.apertura, calmo: calmo, istantanea: istantanea),
-                   value: ovunque.modulo)
-        .animation(Tema.Apple.Moto.animazione(Tema.Apple.Ovunque.Moto.apertura, calmo: calmo, istantanea: istantanea),
-                   value: ovunque.modificheAperte)
     }
 
     // MARK: Card dello schema
@@ -217,8 +284,9 @@ private struct CorpoImpostazioniOvunque: View {
 
     // MARK: Righe
 
-    private var rigaCopia: some View {
-        let acceso = Binding<Bool>(
+    /// L'interruttore della copia cifrata: accenderlo apre il modulo (cartella e passphrase), spegnerlo chiede conferma.
+    private var bindingCopia: Binding<Bool> {
+        Binding<Bool>(
             get: { o.acceso || ovunque.modulo == .accendi },
             set: { nuovo in
                 if nuovo {
@@ -229,6 +297,10 @@ private struct CorpoImpostazioniOvunque: View {
                     ovunque.modulo = nil
                 }
             })
+    }
+
+    private var rigaCopia: some View {
+        let acceso = bindingCopia
         return RigaImpostazione(titolo: "Copia cifrata su iPhone e iPad",
                                 sottotitolo: suMac ? "I dati viaggiano solo come file cifrato in iCloud Drive."
                                                    : "Questo dispositivo legge la copia cifrata che il Mac scrive in iCloud Drive.") {

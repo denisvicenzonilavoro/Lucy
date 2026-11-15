@@ -21,6 +21,9 @@ import SwiftUI
 // - «Apri il dossier» apre il cliente dell'impegno; «Presenta al cliente» presenta il fascicolo dell'impegno,
 //   di quel cliente (§4.9 n. 10), con la modalità cliente; «Tutti i dettagli» porta al dettaglio di sempre
 //   (modifica, concluso, esito della proposta, attività collegate) nella vista Giorno.
+// - Sul Mac (Migliorie d'uso 19) dopo l'ora o già chiuso la scheda chiede com'è andato: «Incontro concluso», «Com'è
+//   andata?», «Punti toccati», «Il verbale», «Cosa succede adesso», «Scrivi il verbale» e «Altro ⌄»
+//   (ImpegnoConcluso.swift).
 
 extension StatoShell {
     /// I punti da toccare nell'incontro, dalla preparazione esistente (al massimo `Traccia.massimoPunti`).
@@ -99,6 +102,7 @@ struct TracciaImpegnoApple: View {
     let idDettaglio: String
     @Environment(StatoShell.self) var stato
     @Environment(\.statoDettaglioApple) private var dettaglio
+    @Environment(\.modoIstantanea) private var istantanea
     @State private var preparando = false
 
     private static let prefisso = "impegno-"
@@ -119,30 +123,61 @@ struct TracciaImpegnoApple: View {
         let t = Tema.Apple.Agenda.Traccia.self
         let cliente = stato.cliente(e.clienteId)
         let punti = stato.puntiDaToccare(e)
+        let concluso = mostraConcluso(e, cliente: cliente)
         return VStack(alignment: .leading, spacing: 0) {
-            testata(e, cliente: cliente)
-            HStack(alignment: .top, spacing: t.spazioColonne) {
-                ScrollView(.vertical, showsIndicators: false) {
-                    ListaTiPreparo(titolo: TestiAgendaApple.puntiDaToccare, voci: punti, avviata: preparando,
-                                   poi: { fascicoloPronto(e, cliente: cliente) })
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                if let c = cliente {
-                    tile(c)
-                        .frame(width: t.larghezzaTile)
-                }
-            }
-            .padding(.top, t.corpoSopra)
-            .frame(maxHeight: .infinity, alignment: .top)
-            piede(e, cliente: cliente)
+            testata(e, cliente: cliente, concluso: concluso)
+            centro(e, cliente: cliente, punti: punti, concluso: concluso)
+                .padding(.top, t.corpoSopra)
+                .frame(maxHeight: .infinity, alignment: .top)
+            piede(e, cliente: cliente, concluso: concluso)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
+    /// Migliorie d'uso 19, solo sul Mac: dopo l'ora o già chiuso (MomentoImpegno, con l'ora ferma delle istantanee)
+    /// la scheda chiede com'è andato. Un impegno senza cliente resta com'è (decisione 18-d); l'iPad pure.
+    private func mostraConcluso(_ e: Appuntamento, cliente: Cliente?) -> Bool {
+        #if os(macOS)
+        guard cliente != nil else { return false }
+        let adesso = istantanea ? OraIstantanee.data() : Date()
+        return MomentoImpegno.di(e, adesso: adesso) != .prima
+        #else
+        return false
+        #endif
+    }
+
+    @ViewBuilder private func centro(_ e: Appuntamento, cliente: Cliente?, punti: [String], concluso: Bool) -> some View {
+        #if os(macOS)
+        if concluso {
+            CorpoImpegnoConcluso(evento: e, punti: punti)
+        } else {
+            centroPrima(e, cliente: cliente, punti: punti)
+        }
+        #else
+        centroPrima(e, cliente: cliente, punti: punti)
+        #endif
+    }
+
+    /// Prima dell'ora: i punti da toccare e le cifre del cliente.
+    private func centroPrima(_ e: Appuntamento, cliente: Cliente?, punti: [String]) -> some View {
+        let t = Tema.Apple.Agenda.Traccia.self
+        return HStack(alignment: .top, spacing: t.spazioColonne) {
+            ScrollView(.vertical, showsIndicators: false) {
+                ListaTiPreparo(titolo: TestiAgendaApple.puntiDaToccare, voci: punti, avviata: preparando,
+                               poi: { fascicoloPronto(e, cliente: cliente) })
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+            if let c = cliente {
+                tile(c)
+                    .frame(width: t.larghezzaTile)
+            }
+        }
+    }
+
     // MARK: Testata
 
-    private func testata(_ e: Appuntamento, cliente: Cliente?) -> some View {
+    private func testata(_ e: Appuntamento, cliente: Cliente?, concluso: Bool) -> some View {
         let t = Tema.Apple.Agenda.Traccia.self
         let colore = Tema.Apple.Agenda.colore(cliente)
         let margine = max(0, t.margineChiudi - Tema.Apple.Misura.Padding.dettaglio.trailing)
@@ -150,9 +185,9 @@ struct TracciaImpegnoApple: View {
         return HStack(alignment: .center, spacing: t.spazioTestata) {
             avatar(cliente, colore: colore)
             VStack(alignment: .leading, spacing: t.spazioTesti) {
-                Text(etichetta(e))
+                Text(concluso ? TestiAgendaApple.etichettaConcluso(e.inizio) : etichetta(e))
                     .carattereApple(t.etichetta)
-                    .foregroundColor(colore)
+                    .foregroundColor(concluso ? t.coloreConcluso : colore)
                     .lineLimit(1)
                 Text(e.titolo)
                     .carattereApple(t.titolo)
@@ -203,28 +238,8 @@ struct TracciaImpegnoApple: View {
 
     private func tile(_ c: Cliente) -> some View {
         let t = Tema.Apple.Agenda.Traccia.self
-        let r = stato.riepilogoPosizioniCliente(c.id)
-        let completezza = stato.completezzaCliente(c.id)
         return VStack(alignment: .leading, spacing: t.spazioTile) {
-            riquadro("Patrimonio netto") {
-                NumeroCheConta(r.patrimonioNetto, formato: .euro, indice: 0)
-                    .carattereApple(t.cifraTile)
-                    .foregroundColor(t.coloreCifraTile)
-                    .lineLimit(1)
-                    .minimumScaleFactor(t.scalaMinimaCifra)
-            }
-            if let comp = completezza {
-                riquadro("Dati per l'analisi") {
-                    NumeroCheConta(Double(comp.percentuale), formato: .percentuale, indice: 1)
-                        .carattereApple(t.cifraTile)
-                        .foregroundColor(t.coloreCifraTile)
-                        .lineLimit(1)
-                    BarraPiena(frazione: Double(comp.percentuale) / 100,
-                               colore: comp.percentuale >= t.sogliaVerde ? t.barraCompleta : t.barraParziale)
-                        .frame(height: Tema.Apple.Grafico.Barra.altezza)
-                        .padding(.top, t.barraSopra)
-                }
-            }
+            CifreClienteTraccia(clienteId: c.id)
             Text(TestiPortafoglioApple.cifreDaiMotori)
                 .carattereApple(t.nota)
                 .foregroundColor(t.coloreNota)
@@ -232,26 +247,56 @@ struct TracciaImpegnoApple: View {
         }
     }
 
-    private func riquadro<Contenuto: View>(_ nome: String, @ViewBuilder contenuto: () -> Contenuto) -> some View {
-        let t = Tema.Apple.Agenda.Traccia.self
-        return VStack(alignment: .leading, spacing: t.spazioTesti) {
-            Text(nome)
-                .carattereApple(t.nomeTile)
-                .foregroundColor(t.coloreNomeTile)
-                .lineLimit(1)
-            contenuto()
-        }
-        .padding(t.paddingTile)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .superficieApple(t.superficieTile, raggio: t.raggioTile)
-    }
-
     // MARK: Piede
 
-    private func piede(_ e: Appuntamento, cliente: Cliente?) -> some View {
+    @ViewBuilder private func piede(_ e: Appuntamento, cliente: Cliente?, concluso: Bool) -> some View {
+        #if os(macOS)
+        if concluso {
+            piedeConcluso(e)
+        } else {
+            piedePrima(e, cliente: cliente)
+        }
+        #else
+        piedePrima(e, cliente: cliente)
+        #endif
+    }
+
+    #if os(macOS)
+    /// Dopo l'ora: un solo pulsante blu, «Scrivi il verbale» (Incontri, momento «Dopo»), poi «Apri il dossier» e
+    /// «Altro ⌄». «Tutti i dettagli» non c'è più: «Modifica» porta al dettaglio di sempre con il modulo.
+    private func piedeConcluso(_ e: Appuntamento) -> some View {
         let t = Tema.Apple.Agenda.Traccia.self
         return HStack(spacing: t.spazioPulsanti) {
-            Button { preparando = true } label: { Text("Preparami l'incontro") }
+            Button {
+                dettaglio?.chiudi(subito: true)
+                stato.apriIncontro(per: e, scheda: .passi)
+            } label: { Text(TestiAgendaApple.scriviIlVerbale) }
+                .buttonStyle(.applePrimarioGrande)
+            Button {
+                dettaglio?.chiudi(subito: true)
+                stato.apriCliente(e.clienteId)
+            } label: { Text(TestiAgendaApple.apriIlDossier) }
+                .buttonStyle(.appleGrande)
+            MenuAltroImpegno(evento: e,
+                             modifica: { richiedi(.modifica(e.id), e) },
+                             attivita: { richiedi(.attivita(e.id), e) },
+                             prima: { dettaglio?.chiudi(subito: true) })
+            Spacer(minLength: 0)
+        }
+    }
+
+    /// «Modifica» e «Attività collegata»: la scheda si chiude, l'Agenda passa al dettaglio di sempre e apre il modulo.
+    private func richiedi(_ r: RichiestaModuloImpegno, _ e: Appuntamento) {
+        dettaglio?.chiudi(subito: true)
+        stato.mostraDettaglioImpegno(e)
+        stato.richiestaModuloImpegno = r
+    }
+    #endif
+
+    private func piedePrima(_ e: Appuntamento, cliente: Cliente?) -> some View {
+        let t = Tema.Apple.Agenda.Traccia.self
+        return HStack(spacing: t.spazioPulsanti) {
+            Button { preparando = true } label: { Text(Parole.preparamiIncontro) }
                 .buttonStyle(.applePrimarioGrande)
                 .disabled(preparando)
             if cliente != nil {
@@ -284,5 +329,60 @@ struct TracciaImpegnoApple: View {
         dettaglio?.chiudi(subito: true)
         stato.preparaFascicolo(per: e)
         stato.mostraAvviso("Fascicolo per \(cliente?.nome ?? e.titolo) pronto in Prospetti")
+    }
+}
+
+// MARK: - Riquadri condivisi (traccia dell'impegno e Incontri › Prima)
+
+/// Un riquadro della traccia: il nome `.k` e sotto il contenuto (la cifra), su tile. Lo usano la traccia dell'impegno e,
+/// con le Migliorie d'uso 20, il momento «Prima» di Incontri.
+struct RiquadroTracciaApple<Contenuto: View>: View {
+    let nome: String
+    @ViewBuilder let contenuto: () -> Contenuto
+
+    var body: some View {
+        let t = Tema.Apple.Agenda.Traccia.self
+        VStack(alignment: .leading, spacing: t.spazioTesti) {
+            Text(nome)
+                .carattereApple(t.nomeTile)
+                .foregroundColor(t.coloreNomeTile)
+                .lineLimit(1)
+            contenuto()
+        }
+        .padding(t.paddingTile)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(t.superficieTile, raggio: t.raggioTile)
+    }
+}
+
+/// «Patrimonio netto» e «Dati per l'analisi» (con la barra verde da `sogliaVerde`, arancio sotto), dai motori: la
+/// traccia dell'impegno e Incontri › Prima mostrano gli stessi riquadri.
+struct CifreClienteTraccia: View {
+    @Environment(StatoShell.self) var stato
+    let clienteId: String
+
+    var body: some View {
+        let t = Tema.Apple.Agenda.Traccia.self
+        let r = stato.riepilogoPosizioniCliente(clienteId)
+        let completezza = stato.completezzaCliente(clienteId)
+        RiquadroTracciaApple(nome: "Patrimonio netto") {
+            NumeroCheConta(r.patrimonioNetto, formato: .euro, indice: 0)
+                .carattereApple(t.cifraTile)
+                .foregroundColor(t.coloreCifraTile)
+                .lineLimit(1)
+                .minimumScaleFactor(t.scalaMinimaCifra)
+        }
+        if let comp = completezza {
+            RiquadroTracciaApple(nome: "Dati per l'analisi") {
+                NumeroCheConta(Double(comp.percentuale), formato: .percentuale, indice: 1)
+                    .carattereApple(t.cifraTile)
+                    .foregroundColor(t.coloreCifraTile)
+                    .lineLimit(1)
+                BarraPiena(frazione: Double(comp.percentuale) / 100,
+                           colore: comp.percentuale >= t.sogliaVerde ? t.barraCompleta : t.barraParziale)
+                    .frame(height: Tema.Apple.Grafico.Barra.altezza)
+                    .padding(.top, t.barraSopra)
+            }
+        }
     }
 }

@@ -276,6 +276,8 @@ final class TavoloMac: ObservableObject {
     /// che usa Vera su iPhone e iPad (Impostazioni › Vera).
     func avvia(porta: UInt16 = ProtocolloTavolo.porta, annuncia: Bool = true, tempi: ProtocolloTavolo.Tempi = .normali) {
         guard ascolto == nil, let s = stato else { return }
+        // Migliorie d'uso 39: con «Al tavolo» spento in Impostazioni › iPhone e iPad il tavolo non si apre
+        guard permesso else { return }
         if PonteVera.normalizza(s.dati.impostazioni.vera.ponte.codice) == nil {
             s.dati.impostazioni.vera.ponte.codice = PonteVera.nuovoCodice()
         }
@@ -294,6 +296,18 @@ final class TavoloMac: ObservableObject {
                 DispatchQueue.main.async { [weak self] in self?.clienteCambiato(id) }
             }
         a.avvia(porta: porta, annuncia: annuncia)
+    }
+
+    /// Migliorie d'uso 39: «Al tavolo» è acceso in Impostazioni › iPhone e iPad.
+    var permesso: Bool { stato?.dati.impostazioni.vera.ponte.tavolo ?? false }
+
+    /// «Apri il tavolo» dai pulsanti: con «Al tavolo» spento porta a Impostazioni › iPhone e iPad invece di fermarsi.
+    func avviaOImpostazioni() {
+        guard permesso else {
+            stato?.apriCollegamenti()
+            return
+        }
+        avvia()
     }
 
     /// «Chiudi il tavolo»: schermata neutra, «fine» all'iPad e niente più ascolto.
@@ -656,6 +670,8 @@ final class TavoloMac: ObservableObject {
             azzera()
             avviso = nil
             collegamento = .collegato(nome)
+            // Migliorie d'uso 39: l'iPad del tavolo in «I tuoi dispositivi»
+            stato?.dispositivi.annotaTavolo(nome: nome)
         case .scollegato(let f):
             azzera()
             collegamento = .inAttesa

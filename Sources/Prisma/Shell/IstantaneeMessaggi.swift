@@ -35,12 +35,45 @@ enum MessaggiDiProva {
     }
 
     /// Prepara i dati, chiede l'occasione, il tono, il canale e chi scrive, e apre Messaggi.
-    static func apri(_ s: StatoShell, tipo: TipoOccasioneMessaggio, cliente: String, tono: TonoMessaggio = .cordiale,
-                     canale: CanaleMessaggio = .mail, vera: Bool = true) {
+    /// Migliorie d'uso 25 (Mac): Messaggi segue il cliente della barra; le scene di prima restano su «Tutti i clienti»,
+    /// con `soloCliente` la barra sceglie il cliente della scena. `barra` aggiunge il messaggio di prova del riepilogo di
+    /// Giulia aperto in Mail oggi alle 10:30 (la domanda «L'hai spedito?») e, con `.spedito`, segnato alle 10:42.
+    static func apri(_ s: StatoShell, tipo: TipoOccasioneMessaggio?, cliente: String, tono: TonoMessaggio = .cordiale,
+                     canale: CanaleMessaggio = .mail, vera: Bool = true, datiAperti: Bool = false, soloCliente: Bool = false,
+                     barra: StatoBarraMessaggio = .normale) {
         prepara(s)
         if !vera { s.disponibilitaLocale = .nonDisponibile(motivoNonPronta) }
+        #if os(macOS)
+        s.scegliCliente(soloCliente ? cliente : nil)
+        #endif
+        if barra != .normale { apertoInMail(s, spedito: barra == .spedito) }
         RichiestaIstantaneaMessaggi.chiedi(s, tipo: tipo, cliente: cliente, tono: tono, canale: canale, vera: vera,
-                                           motivoNonPronta: vera ? nil : motivoNonPronta)
+                                           motivoNonPronta: vera ? nil : motivoNonPronta, datiAperti: datiAperti, barra: barra)
+        s.apri(.messaggi)
+    }
+
+    /// Il riepilogo dell'incontro di Giulia aperto in Mail oggi alle 10:30 (testo del modello fisso, come scritto da Vera)
+    /// e, con `spedito`, segnato come spedito alle 10:42. Solo nella scena.
+    static func apertoInMail(_ s: StatoShell, spedito: Bool, cal: Calendar = .current) {
+        let id = OccasioneMessaggio.id(tipo: .riepilogoIncontro, clienteId: "giulia", riferimento: incontroGiulia)
+        guard let o = s.occasioniMessaggi().occasione(id), let c = s.cliente("giulia") else { return }
+        let scritto = RichiestaIstantaneaMessaggi.testo(o, cliente: c, stato: s, tono: .cordiale, canale: .mail, vera: true, motivo: nil)
+        guard let m = s.salvaMessaggio(o, tono: .cordiale, canale: .mail, scritto: scritto, stato: .apertoInMail),
+              let i = s.dati.messaggi.firstIndex(where: { $0.id == m.id }) else { return }
+        let oggi = cal.startOfDay(for: Date())
+        s.dati.messaggi[i].apertoIl = cal.date(bySettingHour: 10, minute: 30, second: 0, of: oggi)
+        if spedito { s.dati.messaggi[i].speditoIl = cal.date(bySettingHour: 10, minute: 42, second: 0, of: oggi) }
+    }
+
+    /// Un cliente di prova senza nessuna occasione, scelto nella barra (migliorie d'uso 25, Mac): il vuoto per cliente.
+    static func vuotoCliente(_ s: StatoShell) {
+        prepara(s)
+        let nuovo = Cliente(id: "elena-prova", nome: "Elena Fabbri", iniziali: "EF", tinta: .blu, tema: "", email: "",
+                            telefono: "", preferito: false, nota: "", creatoIl: Calendar.current.startOfDay(for: Date()))
+        s.dati.clienti.append(nuovo)
+        #if os(macOS)
+        s.scegliCliente(nuovo.id)
+        #endif
         s.apri(.messaggi)
     }
 
@@ -62,6 +95,12 @@ enum MessaggiDiProva {
 /// - 494: Vera non è pronta: il testo di Prisma con la riga che lo spiega;
 /// - 495: Marco senza indirizzo email: la testata lo dice e il pulsante porta al dossier;
 /// - 496: nessuna occasione.
+/// Migliorie d'uso 26: nelle scene del Mac la fila ha «Tono», «Invia con» e «Vera ha usato N dati del dossier ›», e
+/// sotto il testo non ci sono più le cifre né la riga dell'autore; 1044 apre la scheda «Da dove vengono le cifre».
+/// Migliorie d'uso 25: gli occhielli hanno il numero delle voci da mandare (490-496 restano su «Tutti i clienti»);
+/// 1040 Giulia scelta nella barra, con il riepilogo spedito in «Mandati oggi»; 1041 la barra «Aperto in Mail. L’hai
+/// spedito?»; 1042 la pillola verde «Spedito oggi alle 10:42 con Mail» e «Non è partito»; 1043 un cliente senza
+/// messaggi da preparare.
 extension Istantanee {
     nonisolated static var sceneMessaggi: [(nome: String, prepara: (StatoShell) -> Void)] {
         [
@@ -87,6 +126,31 @@ extension Istantanee {
             ("495-messaggi-recapito-mancante-scuro", { s in senzaEmailMarco(s) }),
             ("496-messaggi-vuoto", { s in MessaggiDiProva.vuoto(s) }),
             ("496-messaggi-vuoto-scuro", { s in MessaggiDiProva.vuoto(s) }),
+            ("1044-uso-messaggi-dati-usati", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", datiAperti: true)
+            }),
+            ("1044-uso-messaggi-dati-usati-scuro", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", datiAperti: true)
+            }),
+            ("1040-uso-messaggi-cliente", { s in
+                MessaggiDiProva.apri(s, tipo: nil, cliente: "giulia", soloCliente: true, barra: .spedito)
+            }),
+            ("1040-uso-messaggi-cliente-scuro", { s in
+                MessaggiDiProva.apri(s, tipo: nil, cliente: "giulia", soloCliente: true, barra: .spedito)
+            }),
+            ("1041-uso-messaggi-hai-spedito", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", soloCliente: true, barra: .daConfermare)
+            }),
+            ("1041-uso-messaggi-hai-spedito-scuro", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", soloCliente: true, barra: .daConfermare)
+            }),
+            ("1042-uso-messaggi-spedito", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", soloCliente: true, barra: .spedito)
+            }),
+            ("1042-uso-messaggi-spedito-scuro", { s in
+                MessaggiDiProva.apri(s, tipo: .riepilogoIncontro, cliente: "giulia", soloCliente: true, barra: .spedito)
+            }),
+            ("1043-uso-messaggi-vuoto-cliente", { s in MessaggiDiProva.vuotoCliente(s) }),
         ]
     }
 

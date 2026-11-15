@@ -8,8 +8,13 @@ extension Tema.Apple.Clienti {
     // MARK: Panoramica (§4.2.2)
 
     enum Panoramica {
-        /// Griglia `1,25fr 1fr` con spazio 14; sotto questa larghezza le due colonne vanno una sotto l'altra.
+        /// Griglia `1,25fr 1fr` con spazio 14; sotto questa larghezza le due colonne vanno una sotto l'altra. Sul Mac
+        /// `1,32fr 1fr` (migliorie d'uso 5: a sinistra il quadro del cliente).
+        #if os(macOS)
+        static let proporzione: CGFloat = 1.32
+        #else
         static let proporzione: CGFloat = 1.25
+        #endif
         static let spazio: CGFloat = Tema.Apple.Misura.Spazio.griglia
         #if os(iOS)
         /// Sull'iPad in verticale una colonna sola: «Dati per l'analisi» non sta in 1,25fr di 700 pt.
@@ -31,7 +36,7 @@ extension Tema.Apple.Clienti {
         static let percentuale = Tema.Apple.Carattere(dimensione: 22, peso: .bold, tabellare: true)
         static let sogliaVerde = 85
         static let testoCompleto = Tema.Apple.Colore.verde
-        static let testoParziale = Tema.Apple.Colore.arancio
+        static let testoParziale = Tema.Apple.Colore.arancioTesto
         static let anelloCompleto = Tema.Apple.Colore.anello1
         static let anelloParziale = Tema.Apple.Colore.arancio
         /// Anello 120/13 con «completi» 11,5 al centro, a 12 sotto il titolo e a 22 dall'elenco.
@@ -84,6 +89,74 @@ extension Tema.Apple.Clienti {
 
         /// Sotto la griglia, il resto della panoramica di Prisma (riesame, In regola, il dossier collegato).
         static let sopraSeguito: CGFloat = Tema.Apple.Misura.Spazio.griglia
+
+        #if os(macOS)
+        // MARK: Il quadro del cliente (migliorie d'uso 5, `#quadroC` del template)
+
+        enum Quadro {
+            /// Card: padding 18/22/14/22, testata «Il quadro di <Nome>» con «Apri Analisi 360 ›» a destra.
+            static let padding = EdgeInsets(top: 18, leading: 22, bottom: 14, trailing: 22)
+            static let collegamento = Tema.Apple.Carattere(dimensione: 13, peso: .semibold)
+            static let coloreCollegamento = Tema.Apple.Colore.accento
+            static let spazioTestata: CGFloat = 12
+            /// La griglia 2×2 dei riquadri delle aree: spazio 10, a 12 sotto la testata.
+            static let spazioGriglia: CGFloat = 10
+            static let sopraGriglia: CGFloat = 12
+            /// Un riquadro (`.tile` senza ombra): padding 10×14, anello e testi a 14, inclinazione massima 4.
+            static let superficieTessera = Tema.Apple.Superficie.tile
+            static let raggioTessera: CGFloat = Tema.Apple.Raggio.tile
+            static let paddingTessera = EdgeInsets(top: 10, leading: 14, bottom: 10, trailing: 14)
+            static let spazioTessera: CGFloat = 14
+            static let inclinazioneTessera: Double = 4
+            /// Anello 76/9 con la cifra 17 bold al centro (i mesi 12,5, su due righe «3,5» / «mesi»).
+            static let anello: CGFloat = 76
+            static let spessoreAnello: CGFloat = 9
+            static let cifra = Tema.Apple.Carattere(dimensione: 17, peso: .bold, interlinea: 1.05, tabellare: true)
+            static let cifraMesi = Tema.Apple.Carattere(dimensione: 12.5, peso: .bold, interlinea: 1.05, tabellare: true)
+            static let coloreCifra = Tema.Apple.Colore.inchiostro
+            static let coloreTrattino = Tema.Apple.Colore.inchiostro3
+            /// Occhiello dell'area 10,5 nel suo colore; la riga 15,5 bold a 2 sopra e 3 sotto; il testo 12,5 (1,35).
+            static let occhiello = Tema.Apple.Carattere(dimensione: 10.5, peso: .semibold, tracking: 0.6, maiuscolo: true)
+            static let riga = Tema.Apple.Carattere(dimensione: 15.5, peso: .bold, tracking: -0.2, interlinea: 1.2)
+            static let coloreRiga = Tema.Apple.Colore.inchiostro
+            static let sopraRiga: CGFloat = 2
+            static let sottoRiga: CGFloat = 3
+            static let testo = Tema.Apple.Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.35)
+            static let coloreTesto = Tema.Apple.Colore.inchiostro2
+            static let righeTesto = 2
+
+            /// La riga «Dati per l'analisi» in fondo (`#datiC`): filo sopra, 12 sopra e sotto il filo, spazio 12,
+            /// barra larga al più 200, percentuale 13,5 bold che si conta.
+            static let sopraDati: CGFloat = 12
+            static let spazioDati: CGFloat = 12
+            static let barraMassima: CGFloat = 200
+            static let percentuale = Tema.Apple.Carattere(dimensione: 13.5, peso: .bold, tabellare: true)
+            static let coloreDatiCompleti = Tema.Apple.Colore.verde
+
+            /// L'elenco nato dalla riga: 680 di larghezza, 196 + 62 per voce, fra 320 e 640 di altezza.
+            static let larghezzaDettaglio: CGFloat = 680
+            static let altezzaBaseDettaglio: CGFloat = 196
+            static let altezzaVoceDettaglio: CGFloat = 62
+            static let altezzaMinimaDettaglio: CGFloat = 320
+            static let altezzaMassimaDettaglio: CGFloat = 640
+            /// «Completi al N%» 28 bold, la frase 14,5 a 6 (al più 540 di larghezza), 10 sopra l'elenco.
+            static let titoloDettaglio = Tema.Apple.Carattere(dimensione: 28, peso: .bold, tracking: -0.6, tabellare: true)
+            static let fraseDettaglio = Tema.Apple.Carattere(dimensione: 14.5, peso: .regular)
+            static let larghezzaFrase: CGFloat = 540
+            static let sopraFrase: CGFloat = 6
+            static let sottoFrase: CGFloat = 10
+            static let sopraTitoloDettaglio: CGFloat = 2
+            /// «Tutti i dati ci sono»: 15 semibold verde, 22 sopra e sotto.
+            static let tuttiCi = Tema.Apple.Carattere(dimensione: 15, peso: .semibold)
+            static let paddingTuttiCi: CGFloat = 22
+
+            /// «Da fare per <Nome>»: padding 14/18/6/18, al più tre righe.
+            static let paddingDaFare = EdgeInsets(top: 14, leading: 18, bottom: 6, trailing: 18)
+            static let righeDaFare = 3
+            static let spazioTitoloDaFare: CGFloat = 6
+            static let sottoTitoloDaFare: CGFloat = 2
+        }
+        #endif
     }
 
     // MARK: Obiettivi (§4.2.3)
@@ -122,6 +195,26 @@ extension Tema.Apple.Clienti {
         static let collegamento = Tema.Apple.Carattere(dimensione: 13, peso: .semibold)
         static let coloreCollegamento = Tema.Apple.Colore.accento
         static let sopraCollegamento: CGFloat = 12
+
+        /// Migliorie d'uso 13 «Obiettivi: si vede se ci arriva»: sotto la riga grigia («550 € al mese · scadenza …»)
+        /// lo stato scritto e colorato (`.st2` del template: capsula 12,5 bold, padding 4×11, a 10). Solo sul Mac:
+        /// iPhone e iPad tengono la riga di prima fino al loro aggiornamento.
+        #if os(macOS)
+        static let mostraStato = true
+        #else
+        static let mostraStato = false
+        #endif
+        static let statoArrivo = Tema.Apple.Carattere(dimensione: 12.5, peso: .bold)
+        static let paddingStato = Tema.Apple.Misura.padding(4, 11)
+        static let sopraStato: CGFloat = 10
+        /// I toni dello stato: verde «In tempo» e «Già raggiunto», arancio delle scritte «In ritardo», rosso «Non ci
+        /// arriva», sui fondi tenui del template (`.st2.ok`, `.avv`, `.ko`).
+        static let testoStatoOk = Color.dinamico(chiaro: Color(hex: "#1F7A41"), scuro: Color(hex: "#6FD08E"))
+        static let fondoStatoOk = Color(r: 47, g: 163, b: 90, a: 0.15)
+        static let testoStatoAttenzione = Tema.Apple.Colore.arancioTesto
+        static let fondoStatoAttenzione = Color(r: 224, g: 138, b: 0, a: 0.16)
+        static let testoStatoErrore = Color.dinamico(chiaro: Color(hex: "#C2333A"), scuro: Color(hex: "#FF8A8F"))
+        static let fondoStatoErrore = Color(r: 229, g: 72, b: 77, a: 0.13)
 
         /// Il posto libero: card trasparente tratteggiata, «＋» 30 e il testo 14 `inchiostro2`.
         static let segnoPostoLibero = Tema.Apple.Carattere(dimensione: 30, peso: .regular)
@@ -219,5 +312,10 @@ extension Tema.Apple.Clienti {
         static let spazioNota: CGFloat = 14
         static let nota = Tema.Apple.Carattere.secondario
         static let coloreNota = Tema.Apple.Colore.inchiostro2
+        /// Migliorie d'uso 13: lo stato che segue il cursore a 12 sotto lo scarto, poi la nota sulla scadenza a 8
+        /// (12,5 `inchiostro2`). Sul Mac l'anello mostra la quota di oggi, come la card.
+        static let sopraStato: CGFloat = 12
+        static let sopraNotaScadenza: CGFloat = 8
+        static let notaScadenza = Tema.Apple.Carattere(dimensione: 12.5, peso: .regular)
     }
 }

@@ -15,7 +15,8 @@ extension StatoShell {
     }
 
     /// Si può chiamare Vera? Non durante la presentazione al cliente (sotto c'è solo il documento).
-    var miniVeraConsentita: Bool { presentazione == nil }
+    /// Migliorie d'uso 1: nemmeno nella vista pulita di «Mostra al cliente» (anche ⌥ Spazio).
+    var miniVeraConsentita: Bool { presentazione == nil && !inVistaCliente }
 
     /// Apre la mini finestra in uno stato (dalla sfera nella barra, da ⌥ Spazio, dalle prove).
     func apriMiniVera(_ fase: FaseMiniVera) {
@@ -203,7 +204,7 @@ extension StatoShell {
         let elenco = conversazione(mini.chiave)
         guard !veraInCorso, elenco.count > mini.messaggiPrima, let m = elenco.last, m.autore == .vera else { return false }
         mini.abbonamenti.removeAll()
-        if m.titolo == "Qwen non è pronto" {
+        if TestiStatoVera.eTitoloNonPronta(m.titolo) {
             mini.pendente = DomandaMiniVera(testo: mini.domanda)
             mini.nonPronta(motivo: disponibilitaLocale.motivo)
             return true

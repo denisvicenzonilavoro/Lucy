@@ -384,6 +384,8 @@ extension StatoShell {
             var operazioni: [OperazioneOvunque] = []
             var nomi: [String: String] = [:]
             var viste = Set<String>()
+            // Migliorie d'uso 39: i dispositivi dei giornali, con la data del file, per «I tuoi dispositivi»
+            let dispositivi = lettura.giornali.map { (id: $0.dispositivo, nome: $0.nomeDispositivo, data: $0.scrittoIl) }
             for g in lettura.giornali {
                 nomi[g.dispositivo] = g.nomeDispositivo
                 for op in g.operazioni where op.dispositivo == g.dispositivo && op.seq > (visto[op.dispositivo] ?? 0)
@@ -397,6 +399,11 @@ extension StatoShell {
                 self.ovunque.inArrivo = operazioni
                 self.ovunque.nomiDispositivi.merge(nomi) { _, nuovo in nuovo }
                 self.ovunque.attesaICloud = !lettura.inAttesa.isEmpty
+                #if os(macOS)
+                self.dispositivi.annotaOvunque(dispositivi)
+                #else
+                _ = dispositivi
+                #endif
             }
         }
     }
@@ -437,6 +444,9 @@ extension StatoShell {
     /// il giornale e legge l'istantanea. `automatica`: niente avviso se non è cambiato nulla, niente errori a schermo.
     func sincronizzaOvunque(forza: Bool = false, automatica: Bool = false) {
         guard persistente, !solaLettura else { return }
+        // Migliorie d'uso 37: con la dimostrazione accesa l'istantanea non si scrive con i dati di prova e i giornali non si
+        // uniscono (restano nella cartella e si uniscono allo spegnimento)
+        guard !inDimostrazione else { return }
         let o = dati.impostazioni.ovunque
         guard o.acceso else { return }
         if ovunque.inCorso {

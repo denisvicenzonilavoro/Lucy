@@ -105,13 +105,15 @@ extension StatoShell {
         p.cacheBisogni = nil
         p.azzera()
         p.scelto = b.id
+        // Migliorie d'uso 33: con un altro cliente nella barra il bisogno chiesto resterebbe nascosto
+        if let c = clientePratiche, c.id != b.clienteId { portaAlClientePratiche(b.clienteId) }
     }
 
     /// «Proponi una key man ›» e «Proponi un piano ›» del dossier dell'azienda (§9.3.4): Pratiche › Proposta sul
     /// bisogno «persona chiave» (con il capitale che manca, da MotoreAzienda) o «welfare per i dipendenti».
     func proponiDaAzienda(clienteId: String, aziendaId: String, area: AreaAzienda) {
         guard let fonte = fonteProposta(clienteId), let a = fonte.cliente.elencoAziende.first(where: { $0.id == aziendaId }) else { return }
-        clienteAttivoId = clienteId
+        portaAlClientePratiche(clienteId)
         if let b = MotoreProposta.bisognoAzienda(a, area: area, fonte: fonte, bozze: bozzeAperteProposta(clienteId)) {
             richiediBisognoProposta(b)
             apriPratiche(.proposta)
@@ -339,12 +341,12 @@ extension StatoShell {
         case .prodotti:
             apri(.prodotti)
         case .analisi360:
-            clienteAttivoId = b.clienteId
+            portaAlClientePratiche(b.clienteId)
             apri(.analisi360)
         case .posizione:
-            if let bozza { apriPosizione(bozza) } else { clienteAttivoId = b.clienteId; apri(.posizioni) }
+            if let bozza { apriPosizione(bozza) } else { portaAlClientePratiche(b.clienteId); apri(.posizioni) }
         case .azienda:
-            clienteAttivoId = b.clienteId
+            portaAlClientePratiche(b.clienteId)
             schedaCliente = .azienda
             apri(.clienti)
         }
@@ -360,7 +362,7 @@ extension StatoShell {
 
     /// Riquadro 3: il prospetto della proposta (quello di sostituzione per «costi più bassi»).
     func apriProspettoProposta(_ bozza: Posizione, prospetto: ProspettoProposta?) {
-        clienteAttivoId = bozza.clienteId
+        portaAlClientePratiche(bozza.clienteId)
         if let a = prospetto?.attualeId {
             apriProspetto(.sostituzione(a, bozza.id, report: false))
         } else {
@@ -371,7 +373,8 @@ extension StatoShell {
     /// Riquadro 5: Pratiche › Moduli sul primo modulo della proposta, per il cliente e la proposta giusti.
     func apriModuliProposta(_ bozza: Posizione, modulo: String?) {
         moduli.carica()
-        moduli.clienteId = bozza.clienteId
+        // Migliorie d'uso 33: i moduli si compilano per il cliente della barra
+        portaAlClientePratiche(bozza.clienteId)
         moduli.posizioneId = bozza.id
         if let modulo, moduli.modello(modulo) != nil {
             moduli.scelto = modulo
@@ -399,7 +402,7 @@ extension StatoShell {
             return
         }
         guard let attuale = dati.posizioni.first(where: { $0.id == bozza.id }) else { return }
-        clienteAttivoId = attuale.clienteId
+        portaAlClientePratiche(attuale.clienteId)
         let documento = documentoProposta(attuale, prospetto: prospetto)
         var presentata = attuale
         if presentata.esito == nil || presentata.esito == .bozza { presentata.esito = .presentata }

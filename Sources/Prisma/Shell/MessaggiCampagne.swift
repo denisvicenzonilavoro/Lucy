@@ -611,7 +611,7 @@ private struct RigaMembroCampagna: View {
         if let b = bozza {
             switch b.stato {
             case .bozza: return TestiCampagne.bozzaPronta
-            case .apertoInMail, .apertoInMessaggi, .salvato: return b.stato.nome
+            case .apertoInMail, .apertoInMessaggi, .salvato: return b.nomeStato
             }
         }
         if !m.recapito(canale) { return AperturaMessaggi.mancante(canale) }

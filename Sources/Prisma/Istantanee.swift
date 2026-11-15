@@ -47,6 +47,8 @@ enum Istantanee {
             s.clienteAttivoId = "marco"
             s.posizioneInDettaglio = "pos-marco-infortuni-famiglia"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac il quadro della copertura sta nella scheda «La copertura»
+            s.ancoraPosizioni = "dettaglio-costi"
         }),
         ("11-agenda", { s in
             // Il giorno con il dettaglio dell'appuntamento (la vista predefinita è il mese; nel tema Apple la
@@ -58,6 +60,8 @@ enum Istantanee {
         // L'Agenda a vista mensile con Attività accorpata: la griglia, le pillole, la giornata di oggi a destra
         ("11a-agenda-mese", { s in
             Istantanee.attivitaRimastaIndietro(s)
+            // Sul Mac l'Agenda apre sulla settimana (Migliorie d'uso 18): il mese si chiede
+            s.vistaAgenda = .mese
             s.apri(.agenda)
         }),
         ("11b-agenda-giorno", { s in
@@ -68,6 +72,7 @@ enum Istantanee {
             s.apri(.agenda)
         }),
         ("11c-agenda-mese-stretta", { s in
+            s.vistaAgenda = .mese
             s.apri(.agenda)
             s.alternaIngrandimento(.agenda)
             s.ridimensiona(.agenda, dimensione: CGSize(width: 860, height: 640))
@@ -247,9 +252,13 @@ enum Istantanee {
             s.apri(.documenti)
         }),
         ("71-posizioni-resistenza", { s in
-            // Marco, profilo moderato: la prova di resistenza sotto la ripartizione
+            // Marco, profilo moderato: la prova di resistenza sotto la ripartizione (sul Mac la sua schermata,
+            // migliorie d'uso 14)
             s.clienteAttivoId = "marco"
             s.apri(.posizioni)
+            #if os(macOS)
+            s.ancoraPosizioni = "resistenza"
+            #endif
         }),
         ("72-vera-resistenza", { s in
             s.clienteAttivoId = "marco"
@@ -342,7 +351,7 @@ enum Istantanee {
             s.apri(.posizioni)
         }),
         ("85-impostazioni-strumenti", { s in
-            // Strumenti, in fondo alla barra laterale: dati di prova, confronto dei modelli, prove
+            // Strumenti in fondo alla barra laterale; sul Mac (migliorie d'uso 37) la pagina «Dimostrazione», spenta
             s.schedaImpostazioni = .strumenti
             s.apri(.impostazioni)
         }),
@@ -352,8 +361,11 @@ enum Istantanee {
             #if os(macOS)
             s.misureIstantanea = MisuraVelocita.diProvaIstantanea
             s.ancoraImpostazioni = MisuraVelocita.ancora
-            #endif
+            // Migliorie d'uso 37: le misure della velocità stanno in Impostazioni › Vera
+            s.schedaImpostazioni = .vera
+            #else
             s.schedaImpostazioni = .strumenti
+            #endif
             s.apri(.impostazioni)
         }),
         ("86-impostazioni-velocita-scuro", { s in
@@ -361,15 +373,24 @@ enum Istantanee {
             #if os(macOS)
             s.misureIstantanea = MisuraVelocita.diProvaIstantanea
             s.ancoraImpostazioni = MisuraVelocita.ancora
-            #endif
+            // Migliorie d'uso 37: le misure della velocità stanno in Impostazioni › Vera
+            s.schedaImpostazioni = .vera
+            #else
             s.schedaImpostazioni = .strumenti
+            #endif
             s.apri(.impostazioni)
         }),
         ("70-modo-cliente", { s in
             // Lo schermo girato verso Marco: solo il suo dossier, niente degli altri clienti
             s.clienteAttivoId = "marco"
+            #if os(macOS)
+            // Migliorie d'uso 1: sul Mac la vista pulita di «Mostra al cliente», sul capitolo «Le posizioni»
+            s.avvisoVistaVisto = true
+            s.mostra(.posizioni)
+            #else
             s.entraModoCliente()
             s.apri(.posizioni)
+            #endif
         }),
         ("69-riesame-prospetto", { s in
             s.clienteAttivoId = "giulia"
@@ -485,7 +506,8 @@ enum Istantanee {
         }),
         ("64-app-aperte", { s in
             // Ogni scheda con il suo contesto: Agenda filtrata su Marco, Note su Sofia, Posizioni sul
-            // portafoglio, Prodotti senza cliente, Clienti sul cliente attivo
+            // portafoglio, Prodotti senza cliente, Clienti sul cliente attivo. Sul Mac (migliorie d'uso 2) portafoglio
+            // e cliente attivo si escludono: il portafoglio è «Tutti i clienti», e Clienti mostra la rubrica
             s.filtroClienteAgenda = "marco"
             s.filtroClienteNote = "sofia"
             s.apri(.agenda)
@@ -539,6 +561,8 @@ enum Istantanee {
             s.clienteAttivoId = "giulia"
             s.posizioneInDettaglio = "pos-giulia-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac la gestione separata sta nella scheda «Costi e rischio»
+            s.ancoraPosizioni = "dettaglio-gestione"
         }),
         ("93-posizioni-riscatto-penali", { s in
             // Andrea, proposta con penali e 12 mesi di blocco: il riscatto anno per anno
@@ -552,6 +576,8 @@ enum Istantanee {
             s.clienteAttivoId = "sofia"
             s.posizioneInDettaglio = "pos-sofia-obbligazionario-a-scadenza-2030"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac i costi come nel KID stanno nella scheda «Costi e rischio»
+            s.ancoraPosizioni = "dettaglio-costi"
         }),
         ("95-posizioni-crisi", { s in
             // Giulia: le crisi del 2008, 2020 e 2022 nella prova di resistenza
@@ -683,6 +709,7 @@ enum Istantanee {
         ("114-agenda-esito-proposta", { s in
             // Laura: la proposta presentata ieri, il riquadro «Com'è andata…» con le quattro scelte
             Istantanee.concludiIeri(s, "event-laura", ore: 10)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("115-agenda-firma-decorrenza", { s in
@@ -691,6 +718,7 @@ enum Istantanee {
                 s.dati.appuntamenti[i].tipo = .firma
             }
             Istantanee.concludiIeri(s, "event-giulia-previdenza", ore: 18)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("116-portafoglio-seguito", { s in
@@ -715,6 +743,8 @@ enum Istantanee {
             s.clienteAttivoId = "andrea"
             s.posizioneInDettaglio = "pos-andrea-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac l'esito della proposta è una riga della scheda «Contratto»
+            s.ancoraPosizioni = "dettaglio-contratto"
         }),
         // Giro 3 · esperienza per tipo di prodotto (specifica 2)
         ("120-clienti-esperienza", { s in
@@ -728,6 +758,8 @@ enum Istantanee {
             s.clienteAttivoId = "andrea"
             s.posizioneInDettaglio = "pos-andrea-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac la pillola «Esperienza» sta nella scheda «Costi e rischio»
+            s.ancoraPosizioni = "dettaglio-costi"
         }),
         ("122-posizioni-coerenza-esperienza", { s in
             // Giulia: «Coerenza con il profilo» con l'esperienza sul PIP tra i punti da rivedere
@@ -737,14 +769,19 @@ enum Istantanee {
         }),
         // Giro 3 · riesami del mese in Agenda (specifica 6)
         ("124-agenda-riesami-mese", { s in
-            // La striscia «Riesami del mese»: Sofia mai incontrata, Laura e Marco scaduti
+            // Sofia mai incontrata, Laura e Marco scaduti. Sul Mac (migliorie d'uso 3 e 18) la striscia «Riesami del mese»
+            // non c'è più: i riesami sono voci del pannello «Da fare», aperto sopra l'Agenda; su iPad resta la striscia
             ProvaRiesamiAgenda.prepara(s)
             s.apri(.agenda)
+            #if os(macOS)
+            s.apriDaFare()
+            #endif
         }),
         ("125-agenda-riesame-pianificato", { s in
             // «Pianifica» per Laura: il riesame nel primo spazio libero, con canale e ordine del giorno
             ProvaRiesamiAgenda.prepara(s)
             if let p = s.pianificaRiesame("laura") { s.salvaAppuntamento(p.appuntamento) }
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("126-impostazioni-orari", { s in
@@ -753,9 +790,13 @@ enum Istantanee {
             s.apri(.impostazioni)
         }),
         ("127-agenda-riesami-schermo-basso", { s in
-            // Finestra bassa (1280×760): fascia e striscia compatte su una riga
+            // Finestra bassa (1280×760): sul Mac i riesami nel pannello «Da fare» sopra la settimana (migliorie d'uso 3 e
+            // 18); su iPad fascia e striscia compatte su una riga
             ProvaRiesamiAgenda.prepara(s)
             s.apri(.agenda)
+            #if os(macOS)
+            s.apriDaFare()
+            #endif
         }),
         // Giro 4 · calendario delle occasioni (specifica 4)
         ("130-agenda-occasioni", { s in
@@ -1127,6 +1168,7 @@ enum Istantanee {
             // Le note dell'appuntamento si aprono con «Cosa è cambiato dal riesame del …»
             DatiMemoriaDemo.prepara(s)
             if let a = s.bozzaRiesame("giulia") { s.salvaAppuntamento(a) }
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("214-clienti-riesami-primo", { s in
@@ -1227,6 +1269,8 @@ enum Istantanee {
             s.ridimensiona(.clienti, dimensione: CGSize(width: 820, height: 680))
         }),
         ("238-agenda-finestra-stretta", { s in
+            // Il mese stretto (la settimana stretta è la scena 455)
+            s.vistaAgenda = .mese
             s.apri(.agenda)
             s.alternaIngrandimento(.agenda)
             s.ridimensiona(.agenda, dimensione: CGSize(width: 820, height: 680))
@@ -1249,6 +1293,7 @@ enum Istantanee {
             s.clienteAttivoId = "giulia"
             s.posizioneInDettaglio = "pos-giulia-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            s.ancoraPosizioni = "dettaglio-gestione"
         }),
         ("106-posizioni-multiramo-scuro", { s in
             // La stessa scena della multiramo di Marco, in aspetto scuro (vetro delle due parti)
@@ -1264,10 +1309,12 @@ enum Istantanee {
         }),
         ("11a-agenda-mese-scuro", { s in
             Istantanee.attivitaRimastaIndietro(s)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("114-agenda-esito-proposta-scuro", { s in
             Istantanee.concludiIeri(s, "event-laura", ore: 10)
+            s.vistaAgenda = .mese  // Migliorie d'uso 18: sul Mac l'Agenda apre sulla settimana
             s.apri(.agenda)
         }),
         ("116-portafoglio-seguito-scuro", { s in
@@ -1288,8 +1335,12 @@ enum Istantanee {
             s.apri(.clienti)
         }),
         ("124-agenda-riesami-mese-scuro", { s in
+            // Sul Mac i riesami nel pannello «Da fare» (migliorie d'uso 3 e 18)
             ProvaRiesamiAgenda.prepara(s)
             s.apri(.agenda)
+            #if os(macOS)
+            s.apriDaFare()
+            #endif
         }),
         ("130-agenda-occasioni-scuro", { s in
             Istantanee.preparaOccasioni(s)
@@ -1421,6 +1472,14 @@ enum Istantanee {
         ("414-scrivania-apple-calma", { s in s.dati.posizioni.removeAll() }),
         // Su uno schermo più basso le righe si accorciano in proporzione
         ("415-scrivania-apple-schermo-basso", { s in propostaFermaGiulia(s) }),
+        // Migliorie d'uso 36: il dock in gruppi separati da un filo (le persone, l'incontro, il contatto, il mestiere,
+        // Vera e Impostazioni); in modalità cliente il gruppo «il contatto» sparisce con il suo filo
+        ("1125-uso-dock-gruppi", { _ in }),
+        ("1125-uso-dock-gruppi-scuro", { _ in }),
+        ("1126-uso-dock-gruppi-modo-cliente", { s in
+            s.clienteAttivoId = "giulia"
+            s.entraModoCliente(avviso: false)
+        }),
         // «Orizzonte», parte comune: Messaggi con i dati di prova veri dei motori (dal giro 3, senza Qwen: il testo di
         // Prisma) e Mercato (dal giro 7 l'app vera: senza dati di prova, mai aggiornato e con «Dati di mercato» spento).
         // Il pannello «Le novità» di Orizzonte (501) non c'è più: con «Luce» è il 614 (IstantaneeLuce.swift)
@@ -1438,7 +1497,7 @@ enum Istantanee {
             s.schedaCliente = .panoramica
             s.apri(.clienti)
         }),
-        ("431-clienti-dossier-altro", { s in
+        ("431-clienti-dossier-in-regola", { s in
             s.clienteAttivoId = "marco"
             s.schedaCliente = .inRegola
             s.apri(.clienti)
@@ -1636,6 +1695,13 @@ enum Istantanee {
         var tutteLeScene = scene
         tutteLeScene += sceneMiniVera
         tutteLeScene += sceneVeraScrivania
+        tutteLeScene += sceneSceltaCliente
+        // Migliorie d'uso 6: la guida della scrivania (IstantaneeBarreCorte.swift)
+        tutteLeScene += sceneBarreCorte
+        // Migliorie d'uso 3: il «Da fare» unico (IstantaneeDaFare.swift)
+        tutteLeScene += sceneDaFare
+        // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (IstantaneeMostra.swift)
+        tutteLeScene += sceneMostra
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu
@@ -1649,6 +1715,10 @@ enum Istantanee {
         tutteLeScene += sceneSimulatoriApple
         tutteLeScene += sceneAnalisi360Apple
         tutteLeScene += sceneAgendaApple
+        // Migliorie d'uso 21: l'elenco di Incontri (IstantaneeElencoIncontri.swift)
+        tutteLeScene += sceneElencoIncontri
+        // Migliorie d'uso 20: i tre momenti dell'incontro (IstantaneeMomentiIncontro.swift)
+        tutteLeScene += sceneMomentiIncontro
         tutteLeScene += sceneProspettiApple
         tutteLeScene += sceneAnnoInsieme
         tutteLeScene += sceneTavolo

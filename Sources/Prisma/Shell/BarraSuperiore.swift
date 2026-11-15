@@ -13,6 +13,7 @@ import SwiftUI
 struct BarraSuperiore: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.modoIstantanea) var modoIstantanea
+    @Environment(\.prismaCalmo) private var calmo
     /// Dove sono i pulsanti veri della finestra del Mac (nil: non letti, o non ci sono).
     @State var semafori: PosizioneSemafori? = nil
 
@@ -25,8 +26,23 @@ struct BarraSuperiore: View {
             HStack(spacing: B.spazio) {
                 marchio
                     .offset(y: y)
-                appCorrente
+                // Migliorie d'uso 1: nella vista pulita di «Mostra al cliente» niente pillola dell'app
+                if !stato.inVistaCliente {
+                    appCorrente
+                        .offset(y: y)
+                }
+                #if os(macOS)
+                // Migliorie d'uso 2: il cliente di tutta Prisma, scelto qui
+                pillolaCliente
                     .offset(y: y)
+                // Migliorie d'uso 37: l'etichetta della dimostrazione accesa, subito dopo la pillola del cliente (mai in
+                // modalità cliente né nella vista pulita); al clic la scheda per uscire
+                if mostraEtichettaDimostrazione {
+                    EtichettaDimostrazione { stato.schedaDimostrazione = true }
+                        .offset(y: y)
+                        .transition(.opacity)
+                }
+                #endif
                 Spacer(minLength: 20)
                 // I vetri sono quasi alti quanto la barra: seguono i pulsanti finché resta un punto dal bordo
                 strumenti
@@ -36,6 +52,10 @@ struct BarraSuperiore: View {
             .padding(.leading, margineSinistro)
             .padding(.trailing, B.margineDestro)
             .foregroundColor(Tema.Apple.Colore.inchiostroAcqua)
+            #if os(macOS)
+            .animation(Tema.Apple.Moto.animazione(Tema.Apple.Dimostrazione.animazione, calmo: calmo),
+                       value: mostraEtichettaDimostrazione)
+            #endif
 
             orologio
                 .offset(y: y)
@@ -108,6 +128,44 @@ struct BarraSuperiore: View {
         }
     }
 
+    #if os(macOS)
+    /// Migliorie d'uso 37: l'etichetta «Dimostrazione» c'è solo con la dimostrazione accesa, fuori dalla modalità cliente.
+    private var mostraEtichettaDimostrazione: Bool {
+        stato.inDimostrazione && !stato.inModoCliente && !stato.inVistaCliente
+    }
+
+    /// La pillola del cliente (migliorie d'uso 2, template #bCli): avatar 20 e nome del cliente, oppure il glifo delle
+    /// persone e «Tutti i clienti», con la freccia in giù; apre il pannello «Di chi parliamo?» (mai in modalità cliente).
+    private var pillolaCliente: some View {
+        let P = Tema.Apple.SceltaCliente.Pillola.self
+        let c = stato.clienteAttivo
+        return PulsanteBarra(aiuto: TestiSceltaCliente.aiutoPillola, forma: .pillola, azione: {
+            if stato.pannelloCliente { stato.pannelloCliente = false } else { stato.apriSceltaCliente() }
+        }) {
+            HStack(spacing: P.spazio) {
+                if let c {
+                    AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: P.avatar)
+                } else {
+                    Image(systemName: "person.2.fill")
+                        .carattereApple(P.glifo)
+                }
+                Text(c?.nome ?? TestiSceltaCliente.tuttiIClienti)
+                    .carattereApple(Tema.Apple.Carattere.barra)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+                    .frame(maxWidth: P.larghezzaMassimaNome, alignment: .leading)
+                    .fixedSize(horizontal: true, vertical: false)
+                if !stato.inModoCliente {
+                    Image(systemName: "chevron.down")
+                        .carattereApple(P.freccia)
+                        .opacity(P.opacitaFreccia)
+                }
+            }
+        }
+        .anchorPreference(key: AncoraPillolaCliente.self, value: .bounds) { $0 }
+    }
+    #endif
+
     /// «lun 2 nov 23:09», 13 medium con le cifre tabellari.
     private var orologio: some View {
         TimelineView(.everyMinute) { contesto in
@@ -128,63 +186,16 @@ struct BarraSuperiore: View {
     /// staccati l'uno dall'altro, senza una capsula comune che li raggruppi.
     private var strumenti: some View {
         HStack(spacing: B.spazio) {
-            if stato.inModoCliente {
-                ContrassegnoModoCliente()
+            #if os(macOS)
+            if stato.inVistaCliente {
+                // Migliorie d'uso 1: nella vista pulita resta solo l'avatar, con l'anello: l'unica uscita
+                avatarUscita
             } else {
-                // La pillola «✦ Novità» non c'è più (scelta dell'utente, 10 novembre 2026): le novità non si mostrano nell'app
-
-                PulsanteBarra(aiuto: "Cerca in Prisma (⌘K)", forma: .pillola, azione: { stato.alternaRicerca() }) {
-                    HStack(spacing: B.spazioCerca) {
-                        Image(systemName: "magnifyingglass")
-                            .carattereApple(B.simbolo)
-                        Text("Cerca")
-                            .carattereApple(Tema.Apple.Carattere.barra)
-                        Text("⌘K")
-                            .carattereApple(B.scorciatoia)
-                            .opacity(B.opacitaScorciatoia)
-                    }
-                }
-
-                #if os(macOS)
-                // La sfera di Vera: apre la mini finestra (anche ⌥ Spazio, da qualsiasi app)
-                PulsanteSferaVera(mini: stato.miniVera)
-                    .frame(width: B.tasto, height: B.tasto)
-                    .vetro(.leggero, forma: .capsula)
-                    .puntoAcqua(.sferaVeraBarra)
-                #endif
-
-                PulsanteBarra(aiuto: "Notifiche", azione: { stato.alternaNotifiche() }) {
-                    simbolo("bell")
-                }
-                // Il numero si disegna fuori dal gruppo di vetro (qui sotto, dopo .gruppoVetro()): dentro il
-                // GlassEffectContainer di macOS 26 il vetro del cerchio gli passava sopra
-                .anchorPreference(key: AncoraCampanella.self, value: .bounds) { $0 }
-                // Una notifica nuova arriva come una goccia qui (OsservatoreAcqua) e porta la sua posizione
-                // nell'evento «notifica nuova» (EventiShell.swift)
-                .puntoAcqua(.campanella)
-                .segnaCampanella()
+                strumentiLavoro
             }
-
-            // La guida di Prisma (anche in modalità cliente): come funziona, le app, le parole
-            PulsanteBarra(aiuto: "Guida di Prisma: come funziona, le app, le parole (⌘?)",
-                          azione: { stato.apriGuida(.app(stato.appAttiva ?? .clienti)) }) {
-                simbolo("questionmark")
-            }
-
-            PulsanteBarra(aiuto: "Blocca Prisma: la schermata di benvenuto", azione: { stato.blocca() }) {
-                simbolo("lock")
-            }
-
-            PulsanteBarra(aiuto: stato.inModoCliente ? "Esci dalla modalità cliente (⌥⌘M)"
-                                                     : "Modalità cliente: mostra solo il cliente attivo, per girare lo schermo (⌥⌘M)",
-                          azione: { if stato.inModoCliente { stato.esciModoCliente() } else { stato.entraModoCliente() } }) {
-                simbolo(stato.inModoCliente ? "person.fill.checkmark" : "person.crop.rectangle")
-            }
-
-            // L'avatar è già un cerchio a sé: niente vetro attorno
-            PulsanteBarra(aiuto: "Impostazioni", forma: nil, azione: { stato.apri(.impostazioni) }) {
-                AvatarUtente(iniziali: stato.inizialiUtente)
-            }
+            #else
+            strumentiLavoro
+            #endif
         }
         .foregroundColor(Tema.Apple.Colore.inchiostroAcqua)
         .frame(height: B.tasto)
@@ -207,6 +218,120 @@ struct BarraSuperiore: View {
                 }
             }
         }
+    }
+
+    #if os(macOS)
+    /// L'avatar «DV» della vista pulita: l'anello bianco e il menu «Fine: torna al lavoro» / «Schermata neutra».
+    private var avatarUscita: some View {
+        let U = Tema.Apple.MostraAlCliente.Uscita.self
+        return PulsanteBarra(aiuto: TestiMostra.aiutoUscita, forma: nil, azione: { stato.menuUscitaMostra.toggle() }) {
+            AvatarUtente(iniziali: stato.inizialiUtente)
+                .overlay(Circle().strokeBorder(U.anello, lineWidth: U.spessore))
+        }
+    }
+    #endif
+
+    /// Gli strumenti di lavoro: Cerca, Vera, «Da fare», «Mostra al cliente», guida, lucchetto e avatar.
+    @ViewBuilder private var strumentiLavoro: some View {
+            if stato.inModoCliente {
+                ContrassegnoModoCliente()
+            } else {
+                // La pillola «✦ Novità» non c'è più (scelta dell'utente, 10 novembre 2026): le novità non si mostrano nell'app
+
+                #if os(macOS)
+                // Migliorie d'uso 6: «Cerca» è un tasto tondo con la lente, come gli altri strumenti (⌘K nell'aiuto)
+                PulsanteBarra(aiuto: "Cerca in Prisma (⌘K)", azione: { stato.alternaRicerca() }) {
+                    simbolo("magnifyingglass")
+                }
+                .accessibilityLabel(Text("Cerca"))
+                #else
+                PulsanteBarra(aiuto: "Cerca in Prisma (⌘K)", forma: .pillola, azione: { stato.alternaRicerca() }) {
+                    HStack(spacing: B.spazioCerca) {
+                        Image(systemName: "magnifyingglass")
+                            .carattereApple(B.simbolo)
+                        Text("Cerca")
+                            .carattereApple(Tema.Apple.Carattere.barra)
+                        Text("⌘K")
+                            .carattereApple(B.scorciatoia)
+                            .opacity(B.opacitaScorciatoia)
+                    }
+                }
+                #endif
+
+                #if os(macOS)
+                // La sfera di Vera: apre la mini finestra (anche ⌥ Spazio, da qualsiasi app)
+                PulsanteSferaVera(mini: stato.miniVera)
+                    .frame(width: B.tasto, height: B.tasto)
+                    .vetro(.leggero, forma: .capsula)
+                    .puntoAcqua(.sferaVeraBarra)
+                #endif
+
+                #if os(macOS)
+                // Migliorie d'uso 3: al posto della campanella la pillola «Da fare» con il numero delle voci aperte
+                // (rosso, verde a zero); apre il pannello «Da fare» su «Tutti». La goccia dell'acqua arriva qui
+                PulsanteBarra(aiuto: TestiDaFare.aiutoPillola, forma: .pillola, azione: {
+                    if stato.pannelloNotifiche { stato.alternaNotifiche() } else { stato.apriDaFare() }
+                }) {
+                    EtichettaPillolaDaFare()
+                }
+                .accessibilityLabel(Text(TestiDaFare.titolo))
+                .puntoAcqua(.campanella)
+                .segnaCampanella()
+
+                // Migliorie d'uso 1: «Mostra al cliente», una pillola con il glifo e il nome, prima del «?»
+                PulsanteBarra(aiuto: TestiMostra.aiutoPillola, forma: .pillola, azione: { stato.apriMostraAlCliente() }) {
+                    HStack(spacing: Tema.Apple.MostraAlCliente.Pillola.spazio) {
+                        Image(systemName: "person.crop.rectangle")
+                            .carattereApple(Tema.Apple.MostraAlCliente.Pillola.glifo)
+                        Text(TestiMostra.titolo)
+                            .carattereApple(Tema.Apple.Carattere.barra)
+                            .lineLimit(1)
+                    }
+                }
+                #else
+                PulsanteBarra(aiuto: "Notifiche", azione: { stato.alternaNotifiche() }) {
+                    simbolo("bell")
+                }
+                // Il numero si disegna fuori dal gruppo di vetro (qui sotto, dopo .gruppoVetro()): dentro il
+                // GlassEffectContainer di macOS 26 il vetro del cerchio gli passava sopra
+                .anchorPreference(key: AncoraCampanella.self, value: .bounds) { $0 }
+                // Una notifica nuova arriva come una goccia qui (OsservatoreAcqua) e porta la sua posizione
+                // nell'evento «notifica nuova» (EventiShell.swift)
+                .puntoAcqua(.campanella)
+                .segnaCampanella()
+                #endif
+            }
+
+            // La guida di Prisma (anche in modalità cliente): come funziona, le app, le parole
+            PulsanteBarra(aiuto: "Guida di Prisma: come funziona, le app, le parole (⌘?)",
+                          azione: { stato.apriGuida(stato.paginaGuidaDavanti) }) {
+                simbolo("questionmark")
+            }
+
+            PulsanteBarra(aiuto: "Blocca Prisma: la schermata di benvenuto", azione: { stato.blocca() }) {
+                simbolo("lock")
+            }
+
+            #if os(macOS)
+            // Sul Mac «Mostra al cliente» sta prima del «?»; qui resta solo l'uscita dalla modalità cliente accesa da
+            // altre strade (la presentazione della Sala)
+            if stato.inModoCliente {
+                PulsanteBarra(aiuto: "Esci dalla modalità cliente (⌥⌘M)", azione: { stato.esciModoCliente() }) {
+                    simbolo("person.fill.checkmark")
+                }
+            }
+            #else
+            PulsanteBarra(aiuto: stato.inModoCliente ? "Esci dalla modalità cliente (⌥⌘M)"
+                                                     : "Modalità cliente: mostra solo il cliente attivo, per girare lo schermo (⌥⌘M)",
+                          azione: { if stato.inModoCliente { stato.esciModoCliente() } else { stato.entraModoCliente() } }) {
+                simbolo(stato.inModoCliente ? "person.fill.checkmark" : "person.crop.rectangle")
+            }
+            #endif
+
+            // L'avatar è già un cerchio a sé: niente vetro attorno
+            PulsanteBarra(aiuto: "Impostazioni", forma: nil, azione: { stato.apri(.impostazioni) }) {
+                AvatarUtente(iniziali: stato.inizialiUtente)
+            }
     }
 
     /// Un simbolo di sistema al centro di un tasto tondo.

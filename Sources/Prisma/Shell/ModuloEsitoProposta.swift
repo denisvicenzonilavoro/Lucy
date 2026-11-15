@@ -15,6 +15,11 @@ struct FormEsitoProposta: View {
     let giorniSeguito: Int
     let conferma: (EsitoScelto) -> Void
     var chiudi: (() -> Void)? = nil
+    /// Migliorie d'uso 19 (solo Mac, scheda dell'impegno concluso): le quattro scelte a capsula, senza la testa (la
+    /// scheda ha già «Com'è andata?» e la proposta fra i punti).
+    var capsule = false
+    /// Chiamata a ogni scelta prima del passo (la scheda segna concluso l'impegno ancora pianificato).
+    var primaDellaScelta: (() -> Void)? = nil
 
     @State private var passo: PassoEsito
     @State private var dati: DatiAccettazione
@@ -24,13 +29,16 @@ struct FormEsitoProposta: View {
 
     init(posizione: Posizione, appuntamento: Appuntamento?, passoIniziale: PassoEsito, compatto: Bool,
          datiProposti: DatiAccettazione, giorniSeguito: Int,
-         conferma: @escaping (EsitoScelto) -> Void, chiudi: (() -> Void)? = nil) {
+         conferma: @escaping (EsitoScelto) -> Void, chiudi: (() -> Void)? = nil,
+         capsule: Bool = false, primaDellaScelta: (() -> Void)? = nil) {
         self.posizione = posizione
         self.appuntamento = appuntamento
         self.compatto = compatto
         self.giorniSeguito = giorniSeguito
         self.conferma = conferma
         self.chiudi = chiudi
+        self.capsule = capsule
+        self.primaDellaScelta = primaDellaScelta
         _passo = State(initialValue: passoIniziale)
         _dati = State(initialValue: datiProposti)
     }
@@ -46,7 +54,7 @@ struct FormEsitoProposta: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: Misure.Seguito.spazio) {
-            testa
+            if !capsule { testa }
             switch passo {
             case .scelta: scelta
             case .accettata: accettata
@@ -76,7 +84,38 @@ struct FormEsitoProposta: View {
 
     // MARK: - Passo «scelta»
 
-    private var scelta: some View {
+    @ViewBuilder private var scelta: some View {
+        if capsule {
+            // La nota del seguito sta nel riquadro «Cosa succede adesso» della scheda
+            ScelteCapsulaApple(voci: Self.vociCapsule, accesa: nil, azione: { voce in sceltaCapsula(voce) })
+        } else {
+            sceltaPulsanti
+        }
+    }
+
+    /// Le quattro scelte di oggi, con le loro parole (`TestiSeguito`).
+    static let vociCapsule = [TestiSeguito.sceltaAccettata, TestiSeguito.sceltaRimandata,
+                              TestiSeguito.sceltaRifiutata, TestiSeguito.sceltaInAttesa]
+
+    /// Una capsula toccata: prima ciò che chiede la scheda, poi il passo (l'accettazione e il rinvio non si saltano,
+    /// «Ci deve pensare» conferma subito).
+    private func sceltaCapsula(_ voce: String) {
+        primaDellaScelta?()
+        switch voce {
+        case TestiSeguito.sceltaAccettata:
+            passo = .accettata
+        case TestiSeguito.sceltaRimandata:
+            motivo = nil
+            passo = .rimandata
+        case TestiSeguito.sceltaRifiutata:
+            motivo = nil
+            passo = .rifiutata
+        default:
+            conferma(.inAttesa)
+        }
+    }
+
+    private var sceltaPulsanti: some View {
         VStack(alignment: .leading, spacing: Misure.Seguito.spazio) {
             HStack(spacing: Misure.Seguito.spazio) {
                 PulsanteAzione(titolo: TestiSeguito.sceltaAccettata, principale: true) { passo = .accettata }

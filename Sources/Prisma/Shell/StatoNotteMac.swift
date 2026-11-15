@@ -20,7 +20,8 @@ extension StatoShell {
     }
 
     func controllaNotteMac(adesso: Date) {
-        guard persistente, archivioPronto, !solaLettura, !notte.inCorso else { return }
+        // Migliorie d'uso 37: niente carte sui clienti di prova
+        guard persistente, archivioPronto, !solaLettura, !inDimostrazione, !notte.inCorso else { return }
         guard MotoreNotte.attesa(condizioniNotte(adesso: adesso, manuale: false)) == nil else { return }
         avviaNotte(adesso: adesso, manuale: false)
     }
@@ -33,6 +34,10 @@ extension StatoShell {
         }
         guard !solaLettura else {
             mostraAvviso(TestiNotte.avvisoSolaLettura)
+            return
+        }
+        guard !inDimostrazione else {
+            mostraAvviso(TestiDimostrazione.nonDurante)
             return
         }
         if let a = MotoreNotte.attesa(condizioniNotte(adesso: Date(), manuale: true)) {
@@ -572,7 +577,10 @@ extension StatoShell {
             }
         case .moduli:
             if let cid = c.clienteId {
-                scegliClienteModulo(cid)
+                // Migliorie d'uso 33: è un'azione dell'utente, quindi sceglie il cliente della barra
+                portaAlClientePratiche(cid)
+                moduli.posizioneId = nil
+                moduli.azzeraCompilazione()
                 scegliPropostaModulo(c.riferimento)
             }
             apriPratiche(.moduli)

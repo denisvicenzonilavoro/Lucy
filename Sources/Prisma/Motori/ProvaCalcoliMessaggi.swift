@@ -54,6 +54,74 @@ enum ProvaCalcoliMessaggi {
         verificaVera(verifica)
         indirizzi(verifica)
         clientiDiProva(verifica)
+        speditiECliente(verifica)
+    }
+
+    // MARK: - M13 Spediti e cliente della barra (migliorie d'uso 25)
+
+    /// Un'occasione costruita a mano per le prove del limite per gruppo.
+    private static func occasioneDiProva(_ clienteId: String, _ priorita: PrioritaMessaggio, _ riferimento: String) -> OccasioneMessaggio {
+        OccasioneMessaggio(origine: OrigineMessaggio(tipo: .compleanno, riferimento: riferimento), clienteId: clienteId, canale: nil,
+                           gruppo: .oggi, titolo: "Occasione di prova", perche: "Prova", oggetto: "Prova", cifre: [],
+                           priorita: priorita, data: oggi)
+    }
+
+    private static func speditiECliente(_ verifica: VerificaCalcoli) {
+        let giulia = cliente("giulia", "Giulia Rossi")
+        let i = incontroDiProva(oggi)
+        let x = dati([giulia], incontri: [i])
+        guard let o = calcola(x).occasione("riepilogoIncontro-giulia-\(i.id)") else {
+            return verifica.vero("M13 Spedito: occasione del riepilogo trovata", false)
+        }
+        // Aperto oggi alle 10:30 e segnato come spedito alle 10:42
+        let alle1030 = cal.date(bySettingHour: 10, minute: 30, second: 0, of: oggi) ?? oggi
+        var aperto = messaggio(o, stato: .apertoInMail, il: alle1030)
+        aperto.apertoIl = alle1030
+        aperto.speditoIl = cal.date(bySettingHour: 10, minute: 42, second: 0, of: oggi)
+        var conSpedito = x
+        conSpedito.messaggi = [aperto]
+        let spedita = calcola(conSpedito).occasione(o.id)
+        verifica.vero("M13 Spedito: aperto oggi e segnato come spedito, l'occasione ha l'ora e la copertura «aperto in Mail»",
+                      spedita?.speditoIl == aperto.speditoIl && spedita?.copertura?.aperto == true
+                      && spedita?.copertura?.messaggioId == aperto.id && spedita?.copertura?.canale == .mail
+                      && spedita?.copertura?.testo == aperto.testo && spedita?.preparatoIl == alle1030)
+        // «Non è partito»: senza il segno l'occasione resta coperta (aperta), senza ora di spedizione
+        var tolto = aperto
+        tolto.speditoIl = nil
+        var conTolto = x
+        conTolto.messaggi = [tolto]
+        let ancora = calcola(conTolto).occasione(o.id)
+        verifica.vero("M13 Spedito: tolto il segno, l'occasione resta coperta e aperta, senza ora di spedizione",
+                      ancora != nil && ancora?.speditoIl == nil && ancora?.copertura?.aperto == true && ancora?.preparatoIl == alle1030)
+        // Aperto e spedito ieri: non ricompare
+        let ieri = d(2026, 11, 3)
+        var vecchio = messaggio(o, stato: .apertoInMail, il: ieri)
+        vecchio.apertoIl = ieri
+        vecchio.speditoIl = ieri
+        var conVecchio = x
+        conVecchio.messaggi = [vecchio]
+        verifica.vero("M13 Spedito: aperto e spedito ieri non ricompare", calcola(conVecchio).occasione(o.id) == nil)
+        // Solo salvato: copertura senza apertura
+        var conSalvato = x
+        conSalvato.messaggi = [messaggio(o, stato: .salvato, il: alle1030)]
+        let salvata = calcola(conSalvato).occasione(o.id)
+        verifica.vero("M13 Spedito: un messaggio solo salvato copre l'occasione ma non è «aperto»",
+                      salvata?.copertura?.stato == .salvato && salvata?.copertura?.aperto == false && salvata?.speditoIl == nil)
+        // Il nome dello stato nel dossier
+        verifica.vero("M13 Spedito: nel dossier «Spedito il 4 novembre» al posto di «Aperto in Mail»",
+                      aperto.nomeStato == "Spedito il 4 novembre" && tolto.nomeStato == StatoMessaggio.apertoInMail.nome)
+        // Il cliente della barra: il filtro viene prima del limite di 8 per gruppo
+        let altri = (0..<10).map { n in occasioneDiProva("altro-\(n)", .alta, "r\(n)") }
+        let sua = occasioneDiProva("giulia", .bassa, "rg")
+        let tutti = MotoreOccasioniMessaggi.dividi(altri + [sua], messaggi: [], clienti: [:], oggi: oggi, cal: cal)
+        let suoi = MotoreOccasioniMessaggi.dividi(altri + [sua], messaggi: [], clienti: [:], oggi: oggi, cal: cal, soloCliente: "giulia")
+        verifica.vero("M13 Cliente: fra dieci occasioni più importanti di altri clienti, senza filtro il limite di 8 la toglie",
+                      tutti.occasione(sua.id) == nil && tutti.oggi.count == RegoleMessaggi.massimoPerGruppo)
+        verifica.vero("M13 Cliente: con il cliente della barra resta (il taglio a 8 viene dopo il filtro)",
+                      suoi.oggi.map(\.id) == [sua.id] && suoi.festeggiare.isEmpty && suoi.settimana.isEmpty)
+        verifica.vero("M13 Cliente: senza cliente il motore dà lo stesso risultato di sempre",
+                      calcola(conSpedito) == MotoreOccasioniMessaggi.calcola(dati: conSpedito, oggi: oggi, cal: cal, soloCliente: nil)
+                      && calcola(conSpedito) == MotoreOccasioniMessaggi.calcola(dati: conSpedito, oggi: oggi, cal: cal, soloCliente: "giulia"))
     }
 
     // MARK: - M1 Riepilogo dell'incontro

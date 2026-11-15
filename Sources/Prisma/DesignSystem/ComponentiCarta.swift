@@ -558,3 +558,35 @@ struct GraficoCarta: View {
         return elenco
     }
 }
+
+// MARK: - Il timbro delle pagine per te (Migliorie d'uso 22)
+
+/// «SOLO PER TE»: il riquadro arancio bruciato in alto a destra della prima pagina dei prospetti per il consulente.
+/// Colori fissi e opachi di carta: uguale a schermo, nel PDF, in stampa e nell'archiviato.
+struct TimbroSoloPerTe: View {
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: M.timbroRaggio, style: .continuous)
+        Text(verbatim: TestiVersioneProspetto.timbro)
+            .font(Tipo.Carta.timbro)
+            .tracking(M.timbroSpaziatura)
+            .foregroundColor(Colori.Carta.timbro)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(M.timbroPadding)
+            .background(forma.fill(Colori.Carta.fondoTimbro))
+            .overlay(forma.strokeBorder(Colori.Carta.timbro, lineWidth: M.timbroBordo))
+    }
+}
+
+/// In fondo all'ultima pagina per te, nel margine basso: «Prospetto per il consulente: non va consegnato.»
+struct NotaSoloPerTe: View {
+    let testo: String
+
+    var body: some View {
+        Text(verbatim: testo)
+            .font(Tipo.Carta.notaPerTe)
+            .foregroundColor(Colori.Carta.timbro)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+    }
+}

@@ -42,7 +42,7 @@ enum VoceObiettivoStudio: String, CaseIterable, Identifiable {
 
     var nome: String {
         switch self {
-        case .produzioneAlleanza: return "Produzione Alleanza"
+        case .produzioneAlleanza: return "Produzione \(Canale.alleanza.nomeBreve)"
         case .nuoviClienti: return "Nuovi clienti"
         case .ricaviConsulenza: return "Ricavi consulenza"
         }

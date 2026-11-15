@@ -231,7 +231,7 @@ struct CifreMiniVera: Equatable {
         spunto(.riepilogo, testo: "Riassumi il dossier", simbolo: "sparkle"),
         spunto(.scadenze, testo: "Cosa scade?", simbolo: "clock"),
         spunto(.checkUp, testo: "Check-up completo", simbolo: "chart.line.uptrend.xyaxis"),
-        spunto(.incontro, testo: "Prepara l'incontro", simbolo: "calendar"),
+        spunto(.incontro, testo: Parole.spuntoIncontro, simbolo: "calendar"),
     ]
 
     /// «La tua giornata»: l'agenda di oggi e il portafoglio.

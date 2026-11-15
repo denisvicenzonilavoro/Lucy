@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import CoreGraphics
 
 /// Prova automatica di Vera (`Prisma --prova-vera`), eseguita dal workflow.
 /// Controlla le istruzioni nel pacchetto, la scheda del cliente (entro la finestra del modello),
@@ -431,7 +432,68 @@ enum ProvaVera {
                   "Dock di «Luce»: Clienti, Posizioni, Analisi 360, Incontri, Agenda, Territorio, Messaggi, Pratiche, Prospetti, Sala, Biblioteca, Mercato, Studio, Vera, Impostazioni; Prodotti, Note e Ricerca fuori dal dock")
         controlla(Array(AppPrisma.delDock.prefix(9)) == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio,
                                                          .messaggi, .pratiche, .presentazioni],
-                  "Scorciatoie ⌥1…⌥9: da Clienti a Prospetti (Mercato e Studio senza scorciatoia, decisione 120)")
+                  "iPhone e iPad: il dock resta nell'ordine di sempre, da Clienti a Prospetti nelle prime nove")
+        #if os(macOS)
+        // Migliorie d'uso 36: sul Mac il dock è in gruppi, nell'ordine del lavoro, e nessuna app si perde
+        controlla(Set(AppPrisma.dockMac) == Set(AppPrisma.delDock) && AppPrisma.dockMac.count == AppPrisma.delDock.count
+                  && AppPrisma.dockInFila == AppPrisma.dockMac,
+                  "Dock del Mac in gruppi: le stesse 15 app di `delDock`, ognuna una volta sola")
+        controlla(AppPrisma.dockMac == [.clienti, .posizioni, .analisi360, .agenda, .incontri, .presentazioni, .sala, .pratiche,
+                                        .messaggi, .territorio, .mercato, .biblioteca, .studio, .vera, .impostazioni]
+                  && AppPrisma.gruppiDockMac.map(\.count) == [3, 5, 2, 3, 2],
+                  "Gruppi del dock: Clienti, Posizioni, Analisi 360 | Agenda, Incontri, Prospetti, Sala, Pratiche | Messaggi, Territorio | Mercato, Biblioteca, Studio | Vera, Impostazioni")
+        controlla(Array(AppPrisma.dockMac.prefix(9)) == [.clienti, .posizioni, .analisi360, .agenda, .incontri, .presentazioni,
+                                                         .sala, .pratiche, .messaggi],
+                  "Scorciatoie ⌥1…⌥9 del Mac: le prime nove del dock in gruppi, da Clienti a Messaggi (Territorio senza scorciatoia)")
+        // Le finestre escono e rientrano dall'icona giusta: i centri contano i fili fra i gruppi
+        let misuraDock = CGSize(width: 1440, height: 900)
+        let tuttiGruppi = AppPrisma.gruppiDockConsentiti { _ in true }
+        let lato = Tema.Misura.dockIcona
+        let passo = lato + DisposizioneDock.spazio
+        let passoFilo = passo + DisposizioneDock.larghezzaDivisore + DisposizioneDock.spazio
+        func centroX(_ app: AppPrisma, _ gruppi: [[AppPrisma]]) -> CGFloat? {
+            DisposizioneDock.centroIcona(app, tra: gruppi, in: misuraDock, nascosto: false)?.x
+        }
+        let tutti = DisposizioneDock.disposizione(gruppi: [1] + tuttiGruppi.map(\.count))
+        if let imp = centroX(.impostazioni, tuttiGruppi), let vera = centroX(.vera, tuttiGruppi),
+           let studio = centroX(.studio, tuttiGruppi), let clienti = centroX(.clienti, tuttiGruppi),
+           let ultimo = tutti.centri.last, let primo = tutti.centri.first {
+            // Spezzato in costanti con il tipo scritto: il controllo dei tipi resta veloce
+            let meta: CGFloat = misuraDock.width / 2
+            let margini: CGFloat = 2 * DisposizioneDock.margineLato
+            let icone: CGFloat = 16 * lato
+            let spazi: CGFloat = 15 * DisposizioneDock.spazio
+            let fili: CGFloat = 5 * (DisposizioneDock.larghezzaDivisore + DisposizioneDock.spazio)
+            let attesa: CGFloat = margini + icone + spazi + fili
+            let okImp: Bool = abs(imp - (meta + ultimo)) < 0.01
+            let okVera: Bool = abs(imp - vera - passo) < 0.01
+            let okStudio: Bool = abs(vera - studio - passoFilo) < 0.01
+            let okClienti: Bool = abs(clienti - (meta + primo) - passoFilo) < 0.01
+            let okLarghezza: Bool = abs(tutti.larghezza - attesa) < 0.01
+            controlla(okImp && okVera && okStudio && okClienti && okLarghezza,
+                      "Dock in gruppi: Impostazioni è l'ultima icona e fra Studio e Vera, come fra la Scrivania e Clienti, c'è un filo")
+        } else {
+            controlla(false, "Dock in gruppi: i centri delle icone ci sono tutti")
+        }
+        let gruppiCliente = AppPrisma.gruppiDockConsentiti { !StatoShell.appRiservate.contains($0) }
+        if let vera = centroX(.vera, gruppiCliente), let studio = centroX(.studio, gruppiCliente),
+           let sala = centroX(.sala, gruppiCliente), let mercato = centroX(.mercato, gruppiCliente),
+           let ultimo = DisposizioneDock.disposizione(gruppi: [1] + gruppiCliente.map(\.count)).centri.last {
+            let quattroGruppi: Bool = gruppiCliente.count == 4
+            let senzaImpostazioni: Bool = centroX(.impostazioni, gruppiCliente) == nil
+            let senzaMessaggi: Bool = centroX(.messaggi, gruppiCliente) == nil
+            let senzaTerritorio: Bool = centroX(.territorio, gruppiCliente) == nil
+            let meta: CGFloat = misuraDock.width / 2
+            let okVeraUltima: Bool = abs(vera - (meta + ultimo)) < 0.01
+            let okStudio: Bool = abs(vera - studio - passoFilo) < 0.01
+            let okMercato: Bool = abs(mercato - sala - passoFilo) < 0.01
+            let senzaRiservate: Bool = senzaImpostazioni && senzaMessaggi && senzaTerritorio
+            controlla(quattroGruppi && senzaRiservate && okVeraUltima && okStudio && okMercato,
+                      "Modalità cliente: il gruppo «il contatto» sparisce con il suo filo (niente filo doppio), Vera è l'ultima icona")
+        } else {
+            controlla(false, "Modalità cliente: i centri delle icone consentite ci sono")
+        }
+        #endif
         controlla(StatoShell.appRiservate.isSuperset(of: [.territorio, .pratiche])
                   && !StatoShell.appRiservate.contains(.sala) && !StatoShell.appRiservate.contains(.biblioteca),
                   "Modalità cliente: Territorio e Pratiche riservate, Sala e Biblioteca consentite (decisione 50)")
@@ -1077,6 +1139,8 @@ enum ProvaVera {
         ProvaFalloTu.esegui(controlla)
         // La fase 2: ricerca, memoria, lezioni, filo lungo, 30 secondi, norme, lascia cadere (ProvaFaseDueVera.swift)
         ProvaFaseDueVera.esegui(controlla)
+        // Migliorie d'uso 27: gli esempi a conversazione vuota e le fonti della colonna (EsempiVera.swift)
+        ProvaEsempiVera.esegui(controlla)
         // «Luce», giro 6: Biblioteca · Trova la pagina (frase verificata sul passo, cifre, nomi, Qwen finto) (ProvaTrovaPaginaVera.swift)
         ProvaTrovaPaginaVera.esegui(controlla)
         // Giro 0 di «Prisma istantaneo»: i tempi di Vera (caricamento, prima parola, parole al secondo) (ProvaMisuraVera.swift)
@@ -1117,6 +1181,17 @@ enum ProvaVera {
         ProvaNovitaVera.esegui(controlla)
         // «Ragiona a passi» collegato all'app: smistamento, messaggio con il piano, scheda «Conferma» (ProvaCollegaPassi.swift)
         ProvaCollegaPassi.esegui(controlla)
+        // Migliorie d'uso 2: un solo posto per scegliere il cliente (ProvaSceltaCliente.swift, solo sul Mac)
+        ProvaSceltaCliente.esegui(controlla)
+        ProvaSettimanaAgenda.esegui(controlla)
+        // Migliorie d'uso 21: l'elenco di Incontri «Oggi», «Prossimi», «Fatti» (ElencoIncontri.swift, solo sul Mac)
+        ProvaElencoIncontri.esegui(controlla)
+        #if os(macOS)
+        // Migliorie d'uso 3: un solo «Da fare» (StatoDaFare.swift, solo sul Mac): numero, fatto, «Annulla l’ultima», «+ Aggiungi»
+        ProvaDaFareShell.esegui(controlla)
+        // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (MostraAlCliente.swift, solo sul Mac)
+        ProvaMostraAlCliente.esegui(controlla)
+        #endif
         // Le domande dei passi con il loro seguito, «Rifai i calcoli», il piano vuoto evitato
         StatoShell.provaPassiSeguito(controlla)
         // La fase 5: su misura (anonimizzazione, pacchetto, importazione, esame e sostituzione con il server finto) (ProvaSuMisuraVera.swift)

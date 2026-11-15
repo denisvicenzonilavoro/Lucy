@@ -234,7 +234,7 @@ extension CompositoreProspetti {
         ]))
         b.append(.tabella(TabellaProspetto(
             colonne: [ColonnaProspetto(titolo: "Voce", peso: 1.6), ColonnaProspetto(titolo: "Cifra", peso: 1, destra: true),
-                      ColonnaProspetto(titolo: "Alleanza", peso: 1, destra: true), ColonnaProspetto(titolo: "Indipendente", peso: 1, destra: true),
+                      ColonnaProspetto(titolo: Canale.alleanza.nomeBreve, peso: 1, destra: true), ColonnaProspetto(titolo: Canale.indipendente.nomeBreve, peso: 1, destra: true),
                       ColonnaProspetto(titolo: "Nota", peso: 2.6)],
             righe: v.voci.map { x -> [CellaProspetto] in
                 [.f(x.tipo.titolo), .t(x.totale.map(Formati.euro) ?? "—"),
@@ -297,8 +297,8 @@ extension CompositoreProspetti {
             colonne: [ColonnaProspetto(titolo: "Data", peso: 1), ColonnaProspetto(titolo: "Propensione", peso: 1),
                       ColonnaProspetto(titolo: "Divario pensione", peso: 1.1, destra: true),
                       ColonnaProspetto(titolo: "Scoperto caso morte", peso: 1.2, destra: true),
-                      ColonnaProspetto(titolo: "Alleanza", peso: 1.1, destra: true),
-                      ColonnaProspetto(titolo: "Indipendente", peso: 1.1, destra: true),
+                      ColonnaProspetto(titolo: Canale.alleanza.nomeBreve, peso: 1.1, destra: true),
+                      ColonnaProspetto(titolo: Canale.indipendente.nomeBreve, peso: 1.1, destra: true),
                       ColonnaProspetto(titolo: "Semafori", peso: 1.3), ColonnaProspetto(titolo: "Dati", peso: 0.7, destra: true)],
             righe: righe,
             evidenzia: [0]))]

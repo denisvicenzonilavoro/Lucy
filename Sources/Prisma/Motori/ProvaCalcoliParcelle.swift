@@ -86,6 +86,33 @@ enum ProvaCalcoliParcelle {
         verifica.vero("Parcelle: progressivo d'invio di 5 caratteri",
                       MotoreParcelle.progressivoInvio(1) == "00001" && MotoreParcelle.progressivoInvio(36) == "00010")
 
+        // 3b. Il prossimo passo (Migliorie d'uso 28): bozza → emetti; emessa senza file XML → preparalo; emessa con il
+        //     file → segna pagata (scaduta o no); pagata e annullata → nessuno
+        let xml = DocumentoParcella(formato: .xml, nomeFile: "IT00000000000_00001.xml", creatoIl: oggi)
+        let pdf = DocumentoParcella(formato: .pdf, nomeFile: "Parcella.pdf", creatoIl: oggi)
+        var conFile = parcella("pf", 300, .emessa, progressivo: 3, scadenza: d(2026, 12, 1))
+        conFile.documenti = [pdf, xml]
+        var scadutaConFile = parcella("ps", 300, .emessa, progressivo: 3, scadenza: d(2026, 10, 1))
+        scadutaConFile.documenti = [xml]
+        var soloPDF = parcella("pp", 300, .emessa, progressivo: 3, scadenza: d(2026, 10, 1))
+        soloPDF.documenti = [pdf]
+        var pagataConFile = parcella("pg", 300, .pagata, progressivo: 1, incassata: d(2026, 3, 10))
+        pagataConFile.documenti = [xml]
+        verifica.vero("Parcelle: la bozza si emette", MotoreParcelle.passo(bozza, oggi: oggi) == .emetti)
+        verifica.vero("Parcelle: emessa senza file XML, si prepara il file",
+                      MotoreParcelle.passo(elenco[3], oggi: oggi) == .preparaXML && MotoreParcelle.passo(soloPDF, oggi: oggi) == .preparaXML)
+        verifica.vero("Parcelle: emessa con il file XML, si segna pagata",
+                      MotoreParcelle.passo(conFile, oggi: oggi) == .segnaPagata && !MotoreParcelle.scaduta(conFile, oggi: oggi, cal: cal))
+        verifica.vero("Parcelle: scaduta con il file XML, si segna pagata (e c'è il sollecito)",
+                      MotoreParcelle.passo(scadutaConFile, oggi: oggi) == .segnaPagata
+                        && MotoreParcelle.scaduta(scadutaConFile, oggi: oggi, cal: cal))
+        verifica.vero("Parcelle: pagata e annullata non hanno un passo",
+                      MotoreParcelle.passo(elenco[0], oggi: oggi) == .nessuno && MotoreParcelle.passo(pagataConFile, oggi: oggi) == .nessuno
+                        && MotoreParcelle.passo(elenco[6], oggi: oggi) == .nessuno)
+        verifica.vero("Parcelle: i passi Bozza, Emessa, Pagata; l'annullata fuori",
+                      MotoreParcelle.indicePasso(bozza) == 0 && MotoreParcelle.indicePasso(elenco[3]) == 1
+                        && MotoreParcelle.indicePasso(elenco[0]) == 2 && MotoreParcelle.indicePasso(elenco[6]) == nil)
+
         // 4. Regime vuoto: nessuna cifra, l'elenco di ciò che manca
         let righe = [RigaParcella(id: "r1", descrizione: "Analisi", importo: 1_000), RigaParcella(id: "r2", descrizione: "Relazione", importo: 250.50)]
         let vuoto = MotoreFattura.calcola(righe: righe, regime: RegimeFatturazione())

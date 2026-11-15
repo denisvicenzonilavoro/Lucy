@@ -8,7 +8,7 @@ import SwiftUI
 extension Tema.Apple.Colore {
     /// Il testo arancio delle pillole (la pillola «Senza Mac · copia cifrata»): `#B45309` in chiaro; in scuro un arancio
     /// più chiaro (`#F5A84B`), perché `#B45309` sul fondo arancio al 16% del vetro scuro non si legge.
-    static let arancioTesto = Color.dinamico(chiaro: Color(hex: "#B45309"), scuro: Color(hex: "#F5A84B"))
+    static let arancioTestoPillola = Color.dinamico(chiaro: Color(hex: "#B45309"), scuro: Color(hex: "#F5A84B"))
 }
 
 extension Tema.Apple {
@@ -128,7 +128,7 @@ extension Tema.Apple {
             /// Padding 3×8, capsula, fondo arancio al 16%, testo `#B45309` 10,5.
             static let padding = Misura.padding(3, 8)
             static let fondo = Colore.arancio.opacity(0.16)
-            static let testo = Colore.arancioTesto
+            static let testo = Colore.arancioTestoPillola
             static let carattere = Carattere(dimensione: 10.5, peso: .semibold)
             /// Nella barra di iPhone e iPad: un filo più grande, alta quanto il marchio.
             static let carattereBarra = Carattere(dimensione: 12, peso: .semibold)
@@ -294,6 +294,69 @@ extension Tema.Apple {
             static var rimbalzo: Animation { Tema.Apple.Moto.molla(0.5) }
             /// L'apertura delle modifiche in attesa e del modulo.
             static var apertura: Animation { Tema.Apple.Moto.uscita(0.45) }
+        }
+
+        // MARK: Migliorie d'uso 39 · iPhone e iPad: un collegamento solo
+
+        /// «I tuoi dispositivi»: una card senza ombra (padding 4×20) con una riga `.kvr` per dispositivo (9 sopra e
+        /// sotto, alta almeno 40, filo in fondo, 16 fra le parti), nome 14 grassetto, quando è stato visto `.k`.
+        enum Dispositivi {
+            static let superficie = Impostazioni.Riga.superficie
+            static let raggio = Impostazioni.Riga.raggio
+            static let padding = Misura.padding(4, 20)
+            static let paddingRiga: CGFloat = 9
+            static let altezzaRiga: CGFloat = 40
+            static let spazio: CGFloat = 16
+            static let nome = Carattere(dimensione: 14, peso: .bold)
+            static let coloreNome = Colore.inchiostro
+            static let visto = Carattere.secondario
+            static let coloreVisto = Colore.inchiostro2
+            static let altro = Carattere(dimensione: 14, peso: .regular)
+            static let coloreAltro = Colore.inchiostro2
+            static let filo = Colore.separatore
+            static let spessoreFilo: CGFloat = 1
+            /// Fra i pulsanti della riga «Un altro iPhone o iPad».
+            static let spazioPulsanti: CGFloat = 8
+            /// Fra i gruppi della pagina (16 sopra l'occhiello «Cosa fanno insieme al Mac»).
+            static let fraGruppi: CGFloat = 16
+            /// Le righe di «I dati» (cartella, passphrase…) rientrano sotto la loro riga.
+            static let rientro: CGFloat = 24
+            /// Le righe del ponte con il collegamento spento («Prima collega un dispositivo»).
+            static let opacitaSpenta: Double = 0.55
+        }
+
+        /// La scheda «Collega con un codice» (`apriCodice` del template): larga 640, padding 28×32, raggio 28, sul vetro
+        /// sopra la scrivania con il velo; occhiello, titolo 24 (4 sopra, 6 sotto), il codice 54 grassetto spaziato 6 con
+        /// le cifre tabellari (14 sopra, 10 sotto), la frase 14,5.
+        enum Codice {
+            static let larghezza: CGFloat = 640
+            static let padding = Misura.padding(28, 32)
+            static let raggio: CGFloat = Raggio.dettaglioAperto
+            static let bordo: CGFloat = 40
+            static let superficie = Superficie.vetroSopra
+            static let velo = Colore.velo
+            static let entrataY: CGFloat = 18
+            static let entrataScala: CGFloat = 0.97
+            static var animazione: Animation { Tema.Apple.Moto.Curva.uscita.animazione(0.48) }
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let titolo = Carattere(dimensione: 24, peso: .bold, tracking: -0.4)
+            static let coloreTitolo = Colore.inchiostro
+            static let sopraTitolo: CGFloat = 4
+            static let sottoTitolo: CGFloat = 6
+            static let carattere = Carattere(dimensione: 54, peso: .bold, tracking: 6, tabellare: true)
+            static let spaziatura: CGFloat = 6
+            static let coloreCodice = Colore.inchiostro
+            static let sopraCodice: CGFloat = 14
+            static let sottoCodice: CGFloat = 10
+            static let frase = Carattere(dimensione: 14.5, peso: .regular, interlinea: 1.55)
+            static let coloreFrase = Colore.inchiostro
+            /// Il ✕ in alto a destra (22 dal bordo) e i pulsanti in fondo (18 sopra, 8 fra l'uno e l'altro).
+            static let chiudi: CGFloat = 22
+            static let sopraPulsanti: CGFloat = 18
+            static let spazioPulsanti: CGFloat = 8
+            static let avviso = Carattere.secondario
+            static let coloreAvviso = Colore.inchiostro2
         }
     }
 }

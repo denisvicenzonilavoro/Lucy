@@ -51,6 +51,8 @@ extension StatoShell {
 
     /// Apre Pratiche › Sinistri sul sinistro dato.
     func mostraSinistro(_ id: String) {
+        // Migliorie d'uso 33: Pratiche segue il cliente della barra; un sinistro di un altro cliente porta su di lui
+        if let x = sinistro(id), let c = clientePratiche, c.id != x.clienteId { portaAlClientePratiche(x.clienteId) }
         sinistri.scelto = id
         sinistri.moduloAperto = false
         apriPratiche(.sinistri)
@@ -92,6 +94,8 @@ extension StatoShell {
         } else {
             dati.sinistri.append(x)
         }
+        // Migliorie d'uso 33: il sinistro salvato si vede anche se è di un cliente diverso da quello della barra
+        if let c = clientePratiche, c.id != x.clienteId { portaAlClientePratiche(x.clienteId) }
         sinistri.scelto = x.id
     }
 

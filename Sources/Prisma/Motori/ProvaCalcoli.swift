@@ -1230,6 +1230,8 @@ enum ProvaCalcoli {
         ProvaCalcoliSimulatoriAnalisi.esegui(verificaEsterna)
         // Giro 4 (acqua viva): la griglia delle aree di Analisi 360 (anelli, mesi di spese, composizione)
         ProvaCalcoliAree360.esegui(verificaEsterna)
+        // Migliorie d'uso 1: le frasi del quadro della vista pulita («Mostra al cliente»)
+        ProvaCalcoliFrasiCliente.esegui(verificaEsterna)
         // Orizzonte, giro 1: il cruscotto di Studio (ricavi, obiettivi, imbuto, incassi, valore e tempo)
         ProvaCalcoliStudio.esegui(verificaEsterna)
         // Orizzonte, giro 2: parcelle e fatture (totali, numerazione, voci fiscali con regimi di prova dichiarati, XML) e track record
@@ -1329,6 +1331,26 @@ enum ProvaCalcoli {
         ProvaCalcoliCapsule.esegui(verificaEsterna)
         ProvaCalcoliBiglietto.esegui(verificaEsterna)
         ProvaCalcoliSinistri.esegui(verificaEsterna)
+        // Migliorie d'uso 13: se l'obiettivo ci arriva (in tempo, in ritardo, senza versamenti, già raggiunto) e la durata
+        ProvaCalcoliArrivoObiettivo.esegui(verificaEsterna)
+        // Migliorie d'uso 17: le priorità di Analisi 360 in ordine, senza doppioni, e dall'area più scoperta senza ruota
+        ProvaCalcoliPrioritaAree360.esegui(verificaEsterna)
+        // Migliorie d'uso 34: il momento e la durata di ogni esperienza della Sala, le due consigliate dalle priorità
+        ProvaCalcoliSalaMomenti.esegui(verificaEsterna)
+        // Migliorie d'uso 11: i gruppi dell'indice del dossier e «L'azienda» solo per chi ce l'ha
+        ProvaCalcoliIndiceDossier.esegui(verificaEsterna)
+        // Migliorie d'uso 15: la frase della scheda di una posizione non inventa cifre, i dati vuoti pertinenti al tipo
+        ProvaCalcoliDettaglioPosizione.esegui(verificaEsterna)
+        // Migliorie d'uso 31: «Da sistemare» (ordine di gravità, etichette della colonna, «A posto» solo per ciò che è attivo)
+        ProvaMotoreDaSistemare.esegui(verificaEsterna)
+        // Migliorie d'uso 38: il nome dei canali (pulizia, nomi di base e scelti, archivio) e le tre domande del primo avvio
+        ProvaNomiCanali.esegui(verificaEsterna)
+        #if os(macOS)
+        // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
+        MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }
+        // Migliorie d'uso 30: l'indice della ricerca nelle Impostazioni (pagine, doppioni, ancore, maiuscole e accenti)
+        MainActor.assumeIsolated { ProvaIndiceImpostazioni.esegui(verificaEsterna) }
+        #endif
 
         // Giro 7: glossario e guida. Ogni chiave ha la sua voce, le etichette puntano a voci vere, ogni app ha 3 passi
         verifica("Glossario: voci per ogni chiave", Double(VoceGlossario.Chiave.allCases.filter { Glossario.voce($0) == nil }.count), 0)
@@ -1338,6 +1360,14 @@ enum ProvaCalcoli {
         verifica("Glossario: «SRI» trovato cercando «sri»", Glossario.cerca("sri", categoria: nil).first?.chiave == .sri ? 1 : 0, 1)
         verifica("Glossario: ricerca senza accenti («liquidita» trova «Riserva di liquidità»)",
                  Glossario.cerca("liquidita", categoria: nil).contains { $0.chiave == .riservaLiquidita } ? 1 : 0, 1)
+        #if os(macOS)
+        // Migliorie d'uso 10: le parole che restano hanno la loro voce, e solo Posizioni è il centro
+        verifica("Parole: «Da fare», «Mostra al cliente», «Tutti i clienti», «Il quadro» nel glossario",
+                 Double([VoceGlossario.Chiave.daFare, .mostraAlCliente, .tuttiIClienti, .ilQuadro]
+                    .filter { Glossario.voce($0)?.categoria != .prisma }.count), 0)
+        verifica("Parole: nessun'altra app si dice «il centro della consulenza»",
+                 Double(AppPrisma.allCases.filter { $0.occhiello.lowercased().contains("centro della consulenza") }.count), 0)
+        #endif
         verifica("Guida: app senza 3 passi", Double(AppPrisma.allCases.filter { $0.aiuto.passi.count != 3 }.count), 0)
         verifica("Guida: riga del dock entro 60 caratteri", Double(AppPrisma.allCases.filter { $0.aiuto.inBreve.count > 60 }.count), 0)
         verifica("Guida: nessun glifo nei passi",

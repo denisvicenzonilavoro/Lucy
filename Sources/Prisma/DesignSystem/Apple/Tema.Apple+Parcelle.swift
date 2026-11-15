@@ -38,12 +38,12 @@ extension Tema.Apple {
             static let valore = Carattere.valore
             static let coloreValore = Colore.inchiostro
             /// «Da incassare» in arancio quando c'è qualcosa da incassare.
-            static let coloreDaIncassare = Colore.arancio
+            static let coloreDaIncassare = Colore.arancioTesto
             static let riduzioneValore: CGFloat = 0.6
             static let spazioValore: CGFloat = 2
             /// «dati di prova» o «provvisorio» sotto il valore.
             static let nota = Carattere(dimensione: 11.5, peso: .regular)
-            static let coloreNota = Colore.arancio
+            static let coloreNota = Colore.arancioTesto
         }
 
         // MARK: Elenco (§1.2.2)
@@ -82,7 +82,7 @@ extension Tema.Apple {
             static func colore(_ s: StatoParcella, scaduta: Bool) -> Color {
                 switch s {
                 case .bozza, .annullata: return Colore.inchiostro3
-                case .emessa: return scaduta ? Colore.rosso : Colore.arancio
+                case .emessa: return scaduta ? Colore.rosso : Colore.arancioTesto
                 case .pagata: return Colore.verde
                 }
             }
@@ -94,6 +94,8 @@ extension Tema.Apple {
         static let vuoto = Carattere.secondario
         static let coloreVuoto = Colore.inchiostro2
         static let rientroVuoto: CGFloat = 4
+        /// «Nessuna parcella con questo stato.» (Migliorie d'uso 28): 18 sopra e sotto.
+        static let rientroVuotoFiltro: CGFloat = 18
 
         // MARK: Anteprima (§1.3)
 
@@ -119,8 +121,13 @@ extension Tema.Apple {
         // MARK: Colonna delle azioni (§1.3, §1.5)
 
         enum Azioni {
+            #if os(macOS)
+            /// Larga 236 (Migliorie d'uso 28, `#fAz`), 18 dal bordo destro e dall'alto, 8 fra i pulsanti.
+            static let larghezza: CGFloat = 236
+            #else
             /// Larga 220, 18 dal bordo destro e dall'alto, 8 fra i pulsanti.
             static let larghezza: CGFloat = 220
+            #endif
             static let margine: CGFloat = 18
             static let spazio: CGFloat = 8
             /// La nota sotto i pulsanti: 6 sopra, `.k` con interlinea 1,45.
@@ -140,7 +147,7 @@ extension Tema.Apple {
             static let pronto = Carattere(dimensione: 14, peso: .bold)
             static let colorePronto = Colore.verde
             static let titoloMancano = Carattere(dimensione: 13, peso: .bold)
-            static let coloreTitoloMancano = Colore.arancio
+            static let coloreTitoloMancano = Colore.arancioTesto
             static let dettaglio = Carattere(dimensione: 12, peso: .regular, interlinea: 1.4)
             static let coloreDettaglio = Colore.inchiostro2
             static let sottoTitolo: CGFloat = 4
@@ -148,6 +155,26 @@ extension Tema.Apple {
             /// La parcella pagata: «Pagata il …» nella colonna, `.k` verde.
             static let incasso = Carattere(dimensione: 12.5, peso: .semibold)
             static let coloreIncasso = Colore.verde
+        }
+
+        // MARK: Migliorie d'uso 28: «A che punto è» e il filtro
+
+        /// La scheda «A che punto è» in cima alla colonna delle azioni: `.card` senza ombra, padding 14×16, l'occhiello
+        /// `.lbl`, la fila dei passi (`Tema.Apple.Passi`) e la frase `.k` con interlinea 1,45, 10 sopra.
+        enum AChePunto {
+            static let superficie = Superficie.tile
+            static let raggio = Raggio.tile
+            static let padding = Misura.Padding.tile
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let frase = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
+            static let coloreFrase = Colore.inchiostro2
+            static let fraseSopra: CGFloat = 10
+        }
+
+        /// Il segmentato che filtra l'elenco per stato, a tutta larghezza sotto le tessere, 10 sopra l'elenco.
+        enum Filtro {
+            static let sotto: CGFloat = 10
         }
 
         // MARK: Modulo «Nuova parcella» (§4.1)
@@ -186,7 +213,7 @@ extension Tema.Apple {
             static let fraVoci: CGFloat = 4
             static let notaVoci = Carattere(dimensione: 12, peso: .regular, interlinea: 1.4)
             static let coloreNotaVoci = Colore.inchiostro2
-            static let coloreAvviso = Colore.arancio
+            static let coloreAvviso = Colore.arancioTesto
             /// Il segno ✕ per togliere una riga.
             static let togli = Carattere(dimensione: 12, peso: .semibold)
             static let coloreTogli = Colore.inchiostro3

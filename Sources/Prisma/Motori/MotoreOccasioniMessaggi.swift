@@ -90,6 +90,10 @@ struct OccasioneMessaggio: Identifiable, Hashable {
     let inRitardo: Bool
     /// Un messaggio per questa occasione è stato aperto o salvato oggi: resta nell'elenco con la spunta fino a domani.
     var preparatoIl: Date?
+    /// Migliorie d'uso 25: il messaggio più recente che copre l'occasione oggi (aperto, salvato o spedito), come
+    /// `preparatoIl` non salvato: la colonna e la barra del Mac sanno «aperto / salvato / spedito» senza cercare
+    /// nell'archivio.
+    var copertura: CoperturaMessaggio? = nil
 
     init(origine: OrigineMessaggio, clienteId: String, canale: Canale?, gruppo: GruppoMessaggio, titolo: String,
          perche: String, oggetto: String, cifre: [CifraMessaggio], priorita: PrioritaMessaggio, data: Date,
@@ -110,6 +114,8 @@ struct OccasioneMessaggio: Identifiable, Hashable {
     }
 
     var tipo: TipoOccasioneMessaggio { origine.tipo }
+    /// Quando il consulente l'ha segnato come spedito (dalla copertura; nil se non l'ha segnato).
+    var speditoIl: Date? { copertura?.speditoIl }
     /// Propone qualcosa: serve il consenso commerciale.
     var commerciale: Bool { origine.tipo.commerciale }
 
@@ -121,6 +127,31 @@ struct OccasioneMessaggio: Identifiable, Hashable {
     func valore(_ v: VoceCifraMessaggio) -> String? {
         cifre.first { $0.etichetta == v.rawValue }?.valore
     }
+}
+
+/// Il messaggio che copre un'occasione oggi (migliorie d'uso 25): l'id nel dossier, lo stato, il canale, quando l'ha
+/// coperta, il segno «spedito» e il testo da rileggere (un messaggio spedito si rilegge, non si riscrive).
+struct CoperturaMessaggio: Hashable {
+    let messaggioId: String
+    let stato: StatoMessaggio
+    let canale: CanaleMessaggio
+    let quando: Date
+    let speditoIl: Date?
+    let oggetto: String?
+    let testo: String
+
+    init(_ m: MessaggioCliente) {
+        messaggioId = m.id
+        stato = m.stato
+        canale = m.canale
+        quando = m.dataMostrata
+        speditoIl = m.speditoIl
+        oggetto = m.oggetto
+        testo = m.testo
+    }
+
+    /// Aperto in Mail o in Messaggi (non solo salvato).
+    var aperto: Bool { stato == .apertoInMail || stato == .apertoInMessaggi }
 }
 
 /// Le occasioni divise nei gruppi di Messaggi, già ordinate: «Da festeggiare» (i traguardi), «Da mandare oggi» e
@@ -165,7 +196,9 @@ enum MotoreOccasioniMessaggi {
     /// Le occasioni di oggi e della settimana per tutti i clienti dei dati, senza quelle già coperte da un messaggio
     /// aperto o salvato negli ultimi `RegoleMessaggi.giorniCopertura` giorni (quelle coperte oggi restano con
     /// `preparatoIl`). Ordine: gruppo, priorità, tipo, giorno, nome del cliente. Al massimo 8 per gruppo.
-    static func calcola(dati: DatiPrisma, oggi: Date, cal: Calendar = .current) -> OccasioniMessaggi {
+    /// `soloCliente` (migliorie d'uso 25: Messaggi segue il cliente della barra, e la modalità cliente) tiene solo le
+    /// occasioni di quel cliente **prima** del limite per gruppo; senza, il risultato è quello di sempre.
+    static func calcola(dati: DatiPrisma, oggi: Date, cal: Calendar = .current, soloCliente: String? = nil) -> OccasioniMessaggi {
         let inizio = cal.startOfDay(for: oggi)
         var clienti: [String: Cliente] = [:]
         for c in dati.clienti where clienti[c.id] == nil { clienti[c.id] = c }
@@ -183,7 +216,7 @@ enum MotoreOccasioniMessaggi {
         elenco += MotoreTraguardi.occasioni(MotoreTraguardi.calcola(dati: dati, oggi: oggi, cal: cal), oggi: oggi, cal: cal)
         // Le bozze delle campagne ancora da aprire («Luce» giro 12): in «Da mandare oggi», priorità bassa
         elenco += MotoreCampagne.occasioniDaBozze(dati: dati, oggi: oggi)
-        return dividi(elenco, messaggi: dati.messaggi, clienti: clienti, oggi: oggi, cal: cal)
+        return dividi(elenco, messaggi: dati.messaggi, clienti: clienti, oggi: oggi, cal: cal, soloCliente: soloCliente)
     }
 
     // MARK: - Fonti (pubbliche per le prove)
@@ -421,23 +454,31 @@ enum MotoreOccasioniMessaggi {
 
     /// Toglie i doppioni e le occasioni coperte da un messaggio aperto o salvato (quelle coperte oggi restano con
     /// `preparatoIl`), ordina e divide nei due gruppi.
+    /// Con `soloCliente` tiene solo le occasioni di quel cliente, prima del limite di 8 per gruppo (migliorie d'uso 25).
     static func dividi(_ elenco: [OccasioneMessaggio], messaggi: [MessaggioCliente], clienti: [String: Cliente],
-                       oggi: Date, cal: Calendar) -> OccasioniMessaggi {
+                       oggi: Date, cal: Calendar, soloCliente: String? = nil) -> OccasioniMessaggi {
         let inizio = cal.startOfDay(for: oggi)
         let limite = cal.date(byAdding: .day, value: -RegoleMessaggi.giorniCopertura, to: inizio) ?? inizio
-        // Per ogni occasione coperta, il momento più recente in cui un messaggio l'ha coperta
-        var coperte: [String: Date] = [:]
+        // Per ogni occasione coperta, il messaggio più recente che l'ha coperta (migliorie d'uso 25: con stato, canale e
+        // segno «spedito», per la colonna e la barra del Mac)
+        var coperte: [String: CoperturaMessaggio] = [:]
         for m in messaggi where m.stato.copreOccasione && m.dataMostrata >= limite {
+            if let solo = soloCliente, m.clienteId != solo { continue }
+            let c = CoperturaMessaggio(m)
             for chiave in [m.occasioneId, OccasioneMessaggio.id(tipo: m.origine.tipo, clienteId: m.clienteId, riferimento: m.origine.riferimento)] {
-                coperte[chiave] = max(coperte[chiave] ?? .distantPast, m.dataMostrata)
+                if let prima = coperte[chiave], prima.quando >= c.quando { continue }
+                coperte[chiave] = c
             }
         }
         var visti = Set<String>()
         var tenute: [OccasioneMessaggio] = []
-        for var o in elenco where visti.insert(o.id).inserted {
-            if let quando = coperte[o.id] {
-                guard quando >= inizio else { continue }
-                o.preparatoIl = quando
+        for var o in elenco {
+            if let solo = soloCliente, o.clienteId != solo { continue }
+            guard visti.insert(o.id).inserted else { continue }
+            if let c = coperte[o.id] {
+                guard c.quando >= inizio else { continue }
+                o.preparatoIl = c.quando
+                o.copertura = c
             }
             tenute.append(o)
         }

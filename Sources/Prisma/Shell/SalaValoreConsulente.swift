@@ -142,7 +142,7 @@ struct ValoreConsulenteVista: View {
                     .carattereApple(V.etichetta)
                     .foregroundColor(V.coloreEtichetta)
                     .lineLimit(1)
-                if StatoShell.clientiDiProva.contains(cliente.id) && stato.haDatiDiProva {
+                if StatoShell.clientiDiProva.contains(cliente.id) && stato.scritteProva {
                     Text("dati di prova").carattereApple(V.prova).foregroundColor(V.coloreProva)
                 }
                 if sala.titoloValore == nil && !v.presto && v.totale != nil {
@@ -342,7 +342,7 @@ struct ValoreConsulenteVista: View {
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .frame(width: V.larghezzaCifra, alignment: .trailing)
         }
-        .help("Alleanza (provvigioni stimate) \(Formati.euro(provvigioni)) · Indipendente (parcelle) \(Formati.euro(v.parcellePagate))")
+        .help("\(Canale.alleanza.nomeBreve) (provvigioni stimate) \(Formati.euro(provvigioni)) · \(Canale.indipendente.nomeBreve) (parcelle) \(Formati.euro(v.parcellePagate))")
     }
 
     private func barra(_ etichetta: String, valore: Double, frazione: Double, colore: Color, indice: Int) -> some View {

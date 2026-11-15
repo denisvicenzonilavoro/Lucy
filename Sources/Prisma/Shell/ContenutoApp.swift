@@ -15,7 +15,11 @@ struct ContenutoApp: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            #if !os(macOS)
             IntestazioneApp(app: app) { azioni }
+            #endif
+            // Sul Mac titolo, occhiello e azioni stanno nella riga in testa alla finestra (migliorie d'uso 4,
+            // RigaTestaFinestra in FinestraInterna.swift): qui solo il contenuto
             Group {
                 if montato || subito {
                     corpo
@@ -94,7 +98,16 @@ extension ContenutoApp {
     }
 
     /// Pulsanti a destra nell'intestazione dell'app.
-    @ViewBuilder var azioni: some View {
+    var azioni: some View { AzioniApp(app: app) }
+}
+
+/// I pulsanti dell'app, in una vista a sé: sul Mac stanno nella riga in testa alla finestra (migliorie d'uso 4) e non
+/// leggono lo stato dei gesti della cornice (trascinare la finestra non rifà le azioni); su iPhone e iPad
+/// nell'intestazione dell'app.
+struct AzioniApp: View {
+    let app: AppPrisma
+
+    var body: some View {
         switch app {
         case .clienti: AzioniClienti()
         case .posizioni: AzioniPosizioni()
@@ -138,8 +151,20 @@ struct AzioniClienti: View {
         }
     }
 
-    /// Il menu «…» (Importa, Incolla da Excel) e il blu «Nuovo cliente»: solo nella Rubrica.
+    /// Sul Mac (migliorie d'uso 6) il pulsante diviso «Nuovo cliente | ⌄»: la freccia apre «Importa…» e «Incolla da
+    /// Excel». Su iPhone e iPad il menu «…» (Importa, Incolla da Excel) e il blu «Nuovo cliente». Solo nella Rubrica.
     @ViewBuilder private var pulsantiRubrica: some View {
+        #if os(macOS)
+        HStack(spacing: Misure.IntestazioneApp.spazioPulsanteDiviso) {
+            pulsanteNuovoCliente
+            Button { apriMenuAzioni(vociAltriModi) } label: {
+                Image(systemName: "chevron.down")
+                    .accessibilityLabel(Text("Altri modi di aggiungere"))
+            }
+            .buttonStyle(StileAqua())
+            .help("Altri modi di aggiungere: importa clienti da un file (vCard, Excel o CSV) o incollali da Excel")
+        }
+        #else
         Menu {
             Button { stato.importaClientiDaFile() } label: {
                 Label("Importa…", systemImage: "square.and.arrow.down")
@@ -156,7 +181,26 @@ struct AzioniClienti: View {
         .menuStyle(.borderlessButton)
         .fixedSize()
         .help("Importa clienti da un file (vCard, Excel o CSV) o incollali da Excel")
-        // Il blu dell'app: la cosa da fare qui
+        pulsanteNuovoCliente
+        #endif
+    }
+
+    #if os(macOS)
+    /// Le voci della freccia di «Nuovo cliente»: le stesse del menu «…» di prima.
+    private var vociAltriModi: [VoceMenuAzioni] {
+        let s = stato
+        let modifica = !s.solaLettura
+        return [
+            .azione("Importa…", attiva: modifica,
+                    aiuto: "Importa clienti da un file: vCard (Contatti), Excel o CSV") { s.importaClientiDaFile() },
+            .azione("Incolla da Excel", attiva: modifica,
+                    aiuto: "Copia in Excel le righe dei clienti con l'intestazione (⌘C), poi scegli qui") { s.incollaDaExcel(posizioni: false) },
+        ]
+    }
+    #endif
+
+    /// Il blu dell'app: la cosa da fare qui.
+    private var pulsanteNuovoCliente: some View {
         Button(action: nuovoCliente) {
             Label {
                 Text("Nuovo cliente")
@@ -293,6 +337,22 @@ struct AzioniPosizioni: View {
                 .disabled(stato.solaLettura)
                 .help(TestiAggiornaValori.aiutoPulsante)
             }
+            #if os(macOS)
+            // Migliorie d'uso 6: le altre cinque azioni stanno nel menu del blu «Aggiungi ⌄»
+            Button { apriMenuAzioni(vociAggiungi) } label: {
+                Label {
+                    HStack(spacing: Misure.IntestazioneApp.spazioFrecciaMenu) {
+                        Text("Aggiungi")
+                        Image(systemName: "chevron.down")
+                            .imageScale(.small)
+                    }
+                } icon: {
+                    Image(systemName: "plus")
+                }
+            }
+            .buttonStyle(StileBlu())
+            .help("Aggiungi una posizione o una proposta, un prodotto del catalogo, oppure importa, incolla o inquadra")
+            #else
             Button { stato.importaPosizioniDaFile() } label: {
                 Label("Importa…", systemImage: "square.and.arrow.down")
             }
@@ -322,6 +382,47 @@ struct AzioniPosizioni: View {
             }
             .buttonStyle(StileBlu())
             .help("Nuova posizione: un prodotto che il cliente ha già (polizza, fondo, conto, piano pensione)")
+            #endif
         }
     }
+
+    #if os(macOS)
+    /// Le voci di «Aggiungi» (template: Posizione, Proposta, filo, Importa…, Incolla da Excel, Inquadra con l’iPhone;
+    /// «Dal catalogo», che il template non ha, dopo «Proposta»). Ogni voce tiene il suo aiuto e il blocco in sola
+    /// lettura di prima; «Inquadra con l’iPhone» non c'è in modalità cliente (parla anche degli altri clienti).
+    private var vociAggiungi: [VoceMenuAzioni] {
+        let s = stato
+        let modifica = !s.solaLettura
+        var voci: [VoceMenuAzioni] = [
+            .azione("Posizione",
+                    aiuto: "Nuova posizione: un prodotto che il cliente ha già (polizza, fondo, conto, piano pensione)") {
+                s.richiestaNuovaPosizione = .inEssere
+            },
+            .azione("Proposta",
+                    aiuto: "Nuova proposta: un prodotto che proponi al cliente e che non ha ancora sottoscritto") {
+                s.richiestaNuovaPosizione = .proposta
+            },
+            .azione("Dal catalogo", attiva: modifica,
+                    aiuto: "Un prodotto del catalogo (Alleanza o indipendente) sul cliente: scrivi solo importi e durata, il resto viene dalla scheda") {
+                s.richiestaDalCatalogo = .proposta
+            },
+            .separatore,
+            .azione("Importa…", attiva: modifica,
+                    aiuto: "Importa posizioni da Excel o CSV (elenco delle polizze, portafoglio). Puoi anche trascinare il file sulla finestra.") {
+                s.importaPosizioniDaFile()
+            },
+            .azione("Incolla da Excel", attiva: modifica,
+                    aiuto: "Incolla da Excel: copia in Excel le righe delle polizze con l'intestazione (⌘C), poi scegli qui") {
+                s.incollaDaExcel(posizioni: true)
+            },
+        ]
+        if !s.inModoCliente {
+            voci.append(.azione("Inquadra con l’iPhone",
+                                aiuto: "Leggi una polizza con la fotocamera dell’iPhone, oppure da una foto o un PDF trascinati sul Mac") {
+                s.apriInquadra()
+            })
+        }
+        return voci
+    }
+    #endif
 }

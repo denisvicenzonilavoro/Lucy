@@ -246,6 +246,9 @@ struct MessaggioCliente: Identifiable, Codable, Hashable {
     var stato = StatoMessaggio.bozza
     /// Quando è stato aperto in Mail o in Messaggi (nil se non è mai stato aperto).
     var apertoIl: Date?
+    /// Migliorie d'uso 25 (Mac): quando il consulente ha detto «Sì, spedito» dopo averlo aperto in Mail o in Messaggi
+    /// (nil se non l'ha segnato). Prisma non sa se Mail ha spedito e non lo indovina: il segno lo mette solo il consulente.
+    var speditoIl: Date?
     var autore: AutoreMessaggio
     /// Il modello che ha scritto il testo (per esempio «qwen3.5:4b»); nil per il modello fisso.
     var modello: String?
@@ -278,9 +281,16 @@ struct MessaggioCliente: Identifiable, Codable, Hashable {
         (a.dataMostrata, a.id) > (b.dataMostrata, b.id)
     }
 
+    /// Lo stato da mostrare nel dossier: «Spedito il 15 novembre» se il consulente l'ha segnato, altrimenti il nome dello
+    /// stato («Aperto in Mail», «Salvato nel dossier»…).
+    var nomeStato: String {
+        guard let s = speditoIl else { return stato.nome }
+        return "Spedito il " + Formati.giornoMese.string(from: s)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case id, clienteId, creatoIl, occasioneId, origine, canaleLavoro, tono, canale, oggetto, testo, cifre, stato, apertoIl
-        case autore, modello
+        case speditoIl, autore, modello
     }
 
     /// Lettura tollerante: un tono, un canale o uno stato sconosciuti tornano al predefinito; senza cliente,
@@ -300,6 +310,7 @@ struct MessaggioCliente: Identifiable, Codable, Hashable {
         cifre = ((try? c.decodeIfPresent(ElencoTollerante<CifraMessaggio>.self, forKey: .cifre)) ?? nil)?.elementi ?? []
         stato = (try? c.decodeIfPresent(StatoMessaggio.self, forKey: .stato)) ?? .salvato
         apertoIl = (try? c.decodeIfPresent(Date.self, forKey: .apertoIl)) ?? nil
+        speditoIl = (try? c.decodeIfPresent(Date.self, forKey: .speditoIl)) ?? nil
         autore = (try? c.decodeIfPresent(AutoreMessaggio.self, forKey: .autore)) ?? .modelloFisso
         modello = (try? c.decodeIfPresent(String.self, forKey: .modello)) ?? nil
     }

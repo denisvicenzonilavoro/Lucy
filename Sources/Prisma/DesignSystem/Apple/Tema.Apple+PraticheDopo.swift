@@ -24,6 +24,9 @@ extension Tema.Apple {
         /// La tile scelta come filtro: bordo blu.
         static let bordoTileScelta = C.accento.opacity(0.55)
         static let spessoreTileScelta: CGFloat = 1.5
+        /// Il numerino delle pratiche ferme sul segmento «Dopo la firma» (Migliorie d'uso 33): rosso al 14%, testo rosso.
+        static let fondoNumeroFerme = C.rosso.opacity(0.14)
+        static let testoNumeroFerme = C.rosso
 
         // MARK: Card di una pratica (§7.3.2)
 

@@ -25,7 +25,7 @@ struct CruscottoStudioVista: View {
     var body: some View {
         // Dalla cache del motore (calcolato una volta per versione dei calcoli e per giorno), mai qui
         let c = stato.cruscottoStudio()
-        let prova = stato.haDatiDiProva
+        let prova = stato.scritteProva
         return GeometryReader { geo in
             ScrollView(.vertical, showsIndicators: false) {
                 griglia(c, prova: prova, misura: geo.size)

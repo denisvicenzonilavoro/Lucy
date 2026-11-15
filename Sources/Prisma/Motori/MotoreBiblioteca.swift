@@ -242,7 +242,9 @@ enum MotoreBiblioteca {
     /// I passi più pertinenti (BM25, k1 = 1,2, b = 0,75), con il premio per intestazione (metà dell'idf) e titolo
     /// (un quarto). Entra solo un passo che ha almeno una parola della domanda nel suo testo o nell'intestazione: meglio
     /// «non trovata» che un passo a caso.
-    static func cerca(_ domanda: String, in indice: IndiceBiblioteca, quanti: Int = quanti) -> [PassoTrovato] {
+    /// `solo` (migliorie d'uso 35): con un documento aperto si cercano solo i suoi passi; l'idf resta quello di tutto
+    /// l'indice, così i punteggi non cambiano rispetto alla ricerca in tutti i documenti.
+    static func cerca(_ domanda: String, in indice: IndiceBiblioteca, quanti: Int = quanti, solo: String? = nil) -> [PassoTrovato] {
         let q = Set(parole(domanda))
         guard !q.isEmpty, !indice.passi.isEmpty else { return [] }
         let n = Double(indice.passi.count)
@@ -252,6 +254,7 @@ enum MotoreBiblioteca {
         }
         var trovati: [PassoTrovato] = []
         for (i, p) in indice.passi.enumerated() {
+            if let solo, p.documentoId != solo { continue }
             var punti = 0.0
             var corpo = false
             for x in q {

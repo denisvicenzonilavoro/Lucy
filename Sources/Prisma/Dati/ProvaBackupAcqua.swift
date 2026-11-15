@@ -13,4 +13,19 @@ extension ProvaBackup {
         radice["impostazioni"] = impostazioni
         return try JSONSerialization.data(withJSONObject: radice)
     }
+
+    /// Migliorie d'uso 39: l'archivio senza i quattro filtri del ponte (`impostazioni.eve.ponte`), com'era prima.
+    static func senzaFiltriPonte(in archivio: Data) throws -> Data? {
+        guard var radice = try JSONSerialization.jsonObject(with: archivio) as? [String: Any],
+              var impostazioni = radice["impostazioni"] as? [String: Any],
+              var vera = impostazioni["eve"] as? [String: Any],
+              var ponte = vera["ponte"] as? [String: Any] else { return nil }
+        for chiave in ["modello", "inquadra", "nota", "tavolo"] {
+            guard ponte.removeValue(forKey: chiave) != nil else { return nil }
+        }
+        vera["ponte"] = ponte
+        impostazioni["eve"] = vera
+        radice["impostazioni"] = impostazioni
+        return try JSONSerialization.data(withJSONObject: radice)
+    }
 }

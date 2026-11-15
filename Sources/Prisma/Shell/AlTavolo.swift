@@ -129,7 +129,7 @@ struct PannelloAlTavolo: View {
         let t = Tema.Apple.Tavolo.self
         let codice = stato.dati.impostazioni.vera.ponte.codice
         return VStack(alignment: .leading, spacing: t.spazioPannello) {
-            Text("L'iPad davanti al cliente mostra solo ciò che scegli qui. Mac e iPad sulla stessa rete Wi‑Fi, con il codice di Vera.")
+            Text("L'iPad davanti al cliente mostra solo ciò che scegli qui. Mac e iPad sulla stessa rete Wi‑Fi, con il codice di Impostazioni › iPhone e iPad.")
                 .carattereApple(t.statoPannello)
                 .foregroundColor(t.coloreStatoPannello)
                 .fixedSize(horizontal: false, vertical: true)
@@ -140,7 +140,7 @@ struct PannelloAlTavolo: View {
                     .textSelection(.enabled)
             }
             Button {
-                tavolo.avvia()
+                tavolo.avviaOImpostazioni()
             } label: {
                 Label("Apri il tavolo", systemImage: "ipad.landscape")
             }
@@ -250,7 +250,7 @@ struct StrisciaTavoloSala: View {
                         Button("Chiudi il tavolo") { tavolo.chiudi() }
                             .buttonStyle(StileCapsulaSalaApple(chiara: false))
                     } else {
-                        Button("Apri il tavolo") { tavolo.avvia() }
+                        Button("Apri il tavolo") { tavolo.avviaOImpostazioni() }
                             .buttonStyle(StileCapsulaSalaApple(chiara: true))
                     }
                 }
