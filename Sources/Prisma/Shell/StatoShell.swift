@@ -111,6 +111,9 @@ enum VoceConfronto: Hashable {
     /// La scheda di Studio (Cruscotto, Parcelle e fatture, Track record, Esame OCF): resta finché l'app è aperta, così
     /// la scrivania e le novità possono aprire quella giusta (StudioApp.swift).
     var schedaStudio: SchedaStudio = .cruscotto
+    /// Migliorie d'uso 28: «＋ Nuova parcella» nella riga in testa di Studio lo fa crescere, e Studio › Parcelle apre
+    /// il modulo (in memoria, solo Mac).
+    var richiestaNuovaParcella = 0
     /// «Luce»: la scheda di Pratiche e la vista di Territorio (StatoSala.swift).
     var schedaPratiche: SchedaPratiche = .proposta
     var vistaTerritorio: VistaTerritorio = .oggi

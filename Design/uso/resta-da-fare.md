@@ -1155,3 +1155,35 @@ Resta:
 - `--prova-fluidita`: la colonna sul Mac non legge più `attivitaAperte` né `posizioniCliente`; nessun controllo nuovo.
 - Rigenerare sul Mac 480-487, 19-vera, 46-vera-pensione, 47-vera-checkup e guardare 1045 e 1046 (la colonna stretta a
   metà schermo e la griglia nella finestra piccola).
+
+## 28. Le parcelle dicono a che punto sono
+
+Fatto (solo Mac, `#if os(macOS)`; iPhone e iPad tengono la colonna di prima e «＋ Nuova parcella» in fondo all'elenco):
+- **Il prossimo passo** in `MotoreParcelle.passo(_:oggi:)` (enum `PassoParcella`: emetti, preparaXML, segnaPagata,
+  nessuno) e `indicePasso` (bozza 0, emessa 1, pagata 2, annullata nil); il file XML si legge da `Parcella.documenti`
+  (`haFileXML`). Prove in `--prova-calcoli` (i quattro stati, con e senza file, scaduta e no).
+- **«A che punto è»** in cima alla colonna delle azioni (larga 236): occhiello, `PassiApple` (nuovo componente generico
+  in DesignSystem/Apple/PassiApple.swift, token in `Tema.Apple.Passi`) e la frase `TestiParcelle.aChePunto`: bozza,
+  «Emessa il …, oggi|ieri|N giorni fa: <Nome> non l’ha ancora pagata.» con « La scadenza è passata.» se
+  `MotoreParcelle.scaduta` (proposta di §28.6 al posto dei 30 giorni), «Pagata il …», «Annullata il …» senza passi.
+- **Un solo pulsante blu**: bozza «Emetti la parcella» (conferma di sempre) e «Modifica la bozza» (niente «Salva PDF»,
+  proposta di §28.6); emessa senza file «Prepara il file XML» (o «Completa i dati» blu, verso Impostazioni › Studio o il
+  dossier), «Manda con Messaggi», «Segna come pagata», «Salva PDF»; emessa con il file «Segna come pagata», «Manda con
+  Messaggi» o «Manda un sollecito» se scaduta (stessa occasione «da saldare» di Messaggi), «Prepara di nuovo il file
+  XML», «Salva PDF»; pagata «Salva PDF», «Prepara di nuovo»; annullata «Salva PDF», «Duplica come bozza». La nota del file
+  XML solo prima del file; la tessera «✓ File XML pronto» anche dal file già nella parcella.
+- Avvisi «Parcella emessa: ora prepara il file XML» e «Segnata come pagata: <importo> nel totale incassato»; dopo i due
+  passi il filtro torna a «Tutte» e la scelta resta sulla parcella.
+- **Il filtro** (`FiltroParcelle`, `@State` in memoria) a tutta larghezza sotto le tessere, con i numeri veri; vuoto:
+  «Nessuna parcella con questo stato.». Una parcella nascosta dal filtro lascia il posto alla prima visibile.
+- **«＋ Nuova parcella»** nella riga in testa di Studio (`AzioniStudio`, solo nella scheda Parcelle e non in modalità
+  cliente): fa crescere `StatoShell.richiestaNuovaParcella` (in memoria), che la scheda osserva per aprire il modulo.
+- Istantanee nuove 1047-uso-parcelle-bozza (anche scura), 1048-uso-parcelle-scaduta, 1049-uso-parcelle-filtro,
+  1050-uso-parcelle-pagata; `RichiestaIstantaneaParcelle` prende il filtro. 510-514 cambiano da sole.
+
+Resta:
+- `--prova-fluidita`: nessun controllo nuovo che cambiare filtro non rifaccia `studio.parcelle.elenco` né i totali (il
+  filtro è uno stato della vista e l'elenco sta in `ricavato`, quindi non li rifà; manca solo la prova scritta).
+- Coordinarsi con la 52 (gruppo 09), che tocca la stessa riga in testa di Studio.
+- Rigenerare sul Mac 510-514 e guardare 1047-1050: altezza della colonna delle azioni nelle finestre basse (la scheda
+  «A che punto è» aggiunge circa 110 punti sopra i pulsanti) e il filtro nella barra stretta a 300.

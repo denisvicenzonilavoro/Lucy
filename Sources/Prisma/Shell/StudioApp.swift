@@ -208,6 +208,17 @@ struct AzioniStudio: View {
             SegmentatoPillola(selezione: Bindable(stato).schedaStudio,
                               valori: SchedaStudio.visibili(modoCliente: stato.inModoCliente), titolo: { $0.titolo })
                 .fixedSize()
+            #if os(macOS)
+            // Migliorie d'uso 28: «＋ Nuova parcella» sta qui, dopo le schede, solo in Parcelle (come «Nuovo cliente»);
+            // il modulo lo apre la scheda (StudioParcelle.swift), che osserva la richiesta
+            if stato.schedaStudio == .fatture && !stato.inModoCliente {
+                Button(TestiParcelle.nuova) { stato.richiestaNuovaParcella += 1 }
+                    .buttonStyle(.applePrimario)
+                    .fixedSize()
+                    .disabled(stato.solaLettura || stato.clienti.isEmpty)
+                    .help("Una parcella della consulenza indipendente: il cliente, la consulenza e l’importo")
+            }
+            #endif
         }
     }
 }

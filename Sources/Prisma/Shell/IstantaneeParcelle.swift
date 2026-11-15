@@ -11,6 +11,12 @@ import SwiftUI
 /// - 514: il modulo «Nuova parcella»;
 /// - 515: il foglio della fattura a grandezza piena, solo chiaro (la carta è sempre bianca);
 /// - 516: Impostazioni › Studio › Dati per le fatture con i campi vuoti.
+/// Migliorie d'uso 28 (la colonna delle azioni dice «A che punto è», un solo pulsante blu, il filtro sopra l'elenco,
+/// «＋ Nuova parcella» nella riga in testa; 510-514 cambiano da sole):
+/// - 1047: la bozza (Andrea Conti), «Emetti la parcella» blu (anche scura);
+/// - 1048: la 2026/012 emessa con il file XML e la scadenza passata: «Segna come pagata» blu e «Manda un sollecito»;
+/// - 1049: il filtro «Bozze»;
+/// - 1050: la 2026/013 pagata, senza pulsante blu.
 ///
 /// DATI DI PROVA DICHIARATI: le parcelle «parcella-prova-…» (numeri, descrizioni e importi del template, dimostrativi),
 /// il consulente di prova e il REGIME DI PROVA di `ProvaFatturaPA` (RF01, IVA, contributo e ritenuta di prova: servono a
@@ -40,11 +46,22 @@ extension Istantanee {
             ("515-fattura-carta", { s in preparaParcelle(s, completo: true, scelta: idParcella015) }),
             ("516-impostazioni-fatturazione", { s in preparaImpostazioniFatture(s) }),
             ("516-impostazioni-fatturazione-scuro", { s in preparaImpostazioniFatture(s) }),
+            // Migliorie d'uso 28: «A che punto è», il solo pulsante blu del prossimo passo e il filtro
+            ("1047-uso-parcelle-bozza", { s in preparaParcelle(s, completo: true, scelta: idParcellaBozza) }),
+            ("1047-uso-parcelle-bozza-scuro", { s in preparaParcelle(s, completo: true, scelta: idParcellaBozza) }),
+            ("1048-uso-parcelle-scaduta", { s in preparaParcellaScaduta(s) }),
+            ("1049-uso-parcelle-filtro", { s in
+                preparaParcelle(s, completo: true, scelta: idParcellaBozza, filtro: .bozze)
+            }),
+            ("1050-uso-parcelle-pagata", { s in preparaParcelle(s, completo: true, scelta: idParcella013) }),
         ]
     }
 
     nonisolated static let idParcella015 = "parcella-prova-015"
     nonisolated static let idParcella014 = "parcella-prova-014"
+    nonisolated static let idParcella013 = "parcella-prova-013"
+    nonisolated static let idParcella012 = "parcella-prova-012"
+    nonisolated static let idParcellaBozza = "parcella-prova-016"
 
     /// Le scene che disegnano solo il foglio della fattura (sempre chiaro), non la shell.
     nonisolated static let sceneCartaFattura: Set<String> = ["515-fattura-carta"]
@@ -70,11 +87,26 @@ extension Istantanee {
 
     /// Le parcelle di prova del template (dimostrative) con o senza i dati fiscali di prova, la scheda aperta e la
     /// parcella scelta; con `xml` il file della parcella scelta è già preparato.
-    nonisolated static func preparaParcelle(_ s: StatoShell, completo: Bool, scelta: String, xml: Bool = false) {
+    nonisolated static func preparaParcelle(_ s: StatoShell, completo: Bool, scelta: String, xml: Bool = false,
+                                            filtro: FiltroParcelle? = nil) {
         parcelleDiProva(s, completo: completo)
         let cliente = s.dati.parcelle.first { $0.id == scelta }?.clienteId ?? ""
         let nome = xml ? s.preparaFatturaPA(scelta).file.map { s.nomeFileFatturaPA($0, clienteId: cliente) } : nil
-        RichiestaIstantaneaParcelle.chiedi(s, parcella: scelta, fileXML: nome)
+        RichiestaIstantaneaParcelle.chiedi(s, parcella: scelta, fileXML: nome, filtro: filtro)
+        s.apriStudio(.fatture)
+    }
+
+    /// La 2026/012 (Sofia) emessa 46 giorni fa con la scadenza passata da 16 giorni e il file XML già preparato: il
+    /// pulsante blu è «Segna come pagata» e c'è «Manda un sollecito» (scena 1048, Migliorie d'uso 28).
+    nonisolated static func preparaParcellaScaduta(_ s: StatoShell) {
+        parcelleDiProva(s, completo: true)
+        let cal = Calendar.current
+        if let i = s.dati.parcelle.firstIndex(where: { $0.id == idParcella012 }) {
+            s.dati.parcelle[i].scadenza = cal.date(byAdding: .day, value: -16, to: cal.startOfDay(for: Date()))
+        }
+        let cliente = s.dati.parcelle.first { $0.id == idParcella012 }?.clienteId ?? ""
+        let nome = s.preparaFatturaPA(idParcella012).file.map { s.nomeFileFatturaPA($0, clienteId: cliente) }
+        RichiestaIstantaneaParcelle.chiedi(s, parcella: idParcella012, fileXML: nome)
         s.apriStudio(.fatture)
     }
 

@@ -36,6 +36,11 @@ struct TotaliParcelle: Equatable {
     let senzaVoci: Int
 }
 
+/// Il prossimo passo di una parcella (Migliorie d'uso 28): il pulsante blu della colonna delle azioni.
+enum PassoParcella: Equatable {
+    case emetti, preparaXML, segnaPagata, nessuno
+}
+
 enum MotoreParcelle {
     /// L'imponibile delle righe in euro (arrotondato al centesimo riga per riga).
     static func imponibile(_ p: Parcella) -> Double {
@@ -51,6 +56,33 @@ enum MotoreParcelle {
     static func scaduta(_ p: Parcella, oggi: Date, cal: Calendar = .current) -> Bool {
         guard p.stato == .emessa, let s = p.scadenza else { return false }
         return cal.startOfDay(for: s) < cal.startOfDay(for: oggi)
+    }
+
+    // MARK: - A che punto è (Migliorie d'uso 28)
+
+    /// Il file XML della fattura elettronica è già stato preparato (è tra i documenti della parcella).
+    static func haFileXML(_ p: Parcella) -> Bool {
+        p.documenti.contains { $0.formato == .xml }
+    }
+
+    /// Il prossimo passo di una parcella, quello del solo pulsante blu: la bozza si emette, l'emessa senza file XML lo
+    /// prepara, l'emessa con il file si segna pagata; pagata e annullata non hanno un passo.
+    static func passo(_ p: Parcella, oggi: Date) -> PassoParcella {
+        switch p.stato {
+        case .bozza: return .emetti
+        case .emessa: return haFileXML(p) ? .segnaPagata : .preparaXML
+        case .pagata, .annullata: return .nessuno
+        }
+    }
+
+    /// Il passo in cui sta la parcella nella fila «Bozza · Emessa · Pagata» (0, 1, 2); nil per l'annullata, che non ha passi.
+    static func indicePasso(_ p: Parcella) -> Int? {
+        switch p.stato {
+        case .bozza: return 0
+        case .emessa: return 1
+        case .pagata: return 2
+        case .annullata: return nil
+        }
     }
 
     /// Le parcelle scadute, dalla scadenza più vecchia.

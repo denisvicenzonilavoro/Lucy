@@ -94,6 +94,8 @@ extension Tema.Apple {
         static let vuoto = Carattere.secondario
         static let coloreVuoto = Colore.inchiostro2
         static let rientroVuoto: CGFloat = 4
+        /// «Nessuna parcella con questo stato.» (Migliorie d'uso 28): 18 sopra e sotto.
+        static let rientroVuotoFiltro: CGFloat = 18
 
         // MARK: Anteprima (§1.3)
 
@@ -119,8 +121,13 @@ extension Tema.Apple {
         // MARK: Colonna delle azioni (§1.3, §1.5)
 
         enum Azioni {
+            #if os(macOS)
+            /// Larga 236 (Migliorie d'uso 28, `#fAz`), 18 dal bordo destro e dall'alto, 8 fra i pulsanti.
+            static let larghezza: CGFloat = 236
+            #else
             /// Larga 220, 18 dal bordo destro e dall'alto, 8 fra i pulsanti.
             static let larghezza: CGFloat = 220
+            #endif
             static let margine: CGFloat = 18
             static let spazio: CGFloat = 8
             /// La nota sotto i pulsanti: 6 sopra, `.k` con interlinea 1,45.
@@ -148,6 +155,26 @@ extension Tema.Apple {
             /// La parcella pagata: «Pagata il …» nella colonna, `.k` verde.
             static let incasso = Carattere(dimensione: 12.5, peso: .semibold)
             static let coloreIncasso = Colore.verde
+        }
+
+        // MARK: Migliorie d'uso 28: «A che punto è» e il filtro
+
+        /// La scheda «A che punto è» in cima alla colonna delle azioni: `.card` senza ombra, padding 14×16, l'occhiello
+        /// `.lbl`, la fila dei passi (`Tema.Apple.Passi`) e la frase `.k` con interlinea 1,45, 10 sopra.
+        enum AChePunto {
+            static let superficie = Superficie.tile
+            static let raggio = Raggio.tile
+            static let padding = Misura.Padding.tile
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let frase = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.45)
+            static let coloreFrase = Colore.inchiostro2
+            static let fraseSopra: CGFloat = 10
+        }
+
+        /// Il segmentato che filtra l'elenco per stato, a tutta larghezza sotto le tessere, 10 sopra l'elenco.
+        enum Filtro {
+            static let sotto: CGFloat = 10
         }
 
         // MARK: Modulo «Nuova parcella» (§4.1)
