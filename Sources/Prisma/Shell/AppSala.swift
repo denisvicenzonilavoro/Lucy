@@ -189,6 +189,11 @@ private struct EscSala: View {
         if libera {
             Button(palco ? "Torna alla Sala" : "Chiudi la Sala") {
                 if palco {
+                    // Migliorie d'uso 59: con il copione aperto, Esc chiude prima il copione
+                    if stato.sala.copioneAperto {
+                        stato.sala.copioneAperto = false
+                        return
+                    }
                     // A metà del gioco del rischio chiede conferma (§4.1.4)
                     guard stato.puoTornareAllaSala() else { return }
                     withAnimation(Tema.Apple.Moto.SalaEsperienze.ritorno) { stato.tornaAllaSala() }
@@ -500,6 +505,17 @@ private struct PalcoSala: View {
                 .superficieApple(Tema.Apple.SalaEsperienze.Scheda.superficie, raggio: Tema.Apple.SalaEsperienze.Scheda.raggio)
                 .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.SalaEsperienze.Scheda.raggio, style: .continuous))
         }
+        // Migliorie d'uso 59: il copione «Cosa dire» in alto a destra, 48 sotto la testata, sopra il palco (e sopra la
+        // riga di conferma delle cifre, che resta leggibile a sinistra). Fuori dalla card: non è mai nella presentazione
+        // né nelle immagini mandate all'iPad. Solo sul Mac
+        .overlay(alignment: .topTrailing) {
+            #if os(macOS)
+            if stato.consulenteVede {
+                RiquadroCopione(sala: stato.sala, esperienza: esperienza)
+                    .padding(.top, Tema.Apple.SalaEsperienze.Copione.dallAlto)
+            }
+            #endif
+        }
     }
 
     private var testata: some View {
@@ -520,6 +536,12 @@ private struct PalcoSala: View {
             .lineLimit(1)
             Spacer(minLength: P.spazioTestata)
             HStack(spacing: P.spazioPulsanti) {
+                #if os(macOS)
+                // Migliorie d'uso 59: i pulsanti del consulente («Cosa dire»), solo quando il cliente non guarda il Mac
+                if stato.consulenteVede {
+                    AzioniPalco(sala: stato.sala)
+                }
+                #endif
                 // «▣ Mostra sul tavolo» (giro 16, decisioni 48 e 111): sul Mac osserva il tavolo; su iPhone e iPad il
                 // tavolo lato Mac non c'è. «✦ Aggiungi al Prisma» si accende con il giro 15 (decisione 7)
                 #if os(macOS)

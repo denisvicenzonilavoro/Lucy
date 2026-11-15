@@ -9,6 +9,7 @@ import SwiftUI
 /// - 617: la tavola delle icone nell'ordine del dock su fondo chiaro e scuro (Pratiche e Incontri, Biblioteca e Clienti,
 ///   Sala e Vera a confronto, decisione 122); 619: la tavola dei 29 glifi nei tasselli;
 /// - 618: le quattro finestre nuove con la testata e lo stato «in arrivo»;
+/// - 684-685 (migliorie d'uso 59): il copione «Cosa dire» aperto sul palco, con e senza durata;
 /// - 690-694: la Sala (griglia, palco, senza cliente, in modalità cliente, presentazione sulla sala opaca);
 /// - 1115-1117 (migliorie d'uso 34): i momenti e le consigliate sulla griglia, il filtro, un cliente senza priorità.
 /// I clienti sono quelli di prova del template (dati di prova): nessun dato nuovo nell'archivio.
@@ -60,6 +61,16 @@ extension Istantanee {
         coppia("694-sala-presenta") { s in
             s.apriEsperienza(.prismaLuce, cliente: "giulia")
             s.presentaEsperienza(.prismaLuce)
+        }
+        // Migliorie d'uso 59: «Cosa dire» aperto sul palco (Giulia, Una giornata della pensione) e sul Prisma del cliente,
+        // che non ha durata (l'occhiello dice solo il momento)
+        coppia("684-sala-copione") { s in
+            s.apriEsperienza(.giornataPensione, cliente: "giulia")
+            s.sala.copioneAperto = true
+        }
+        coppia("685-sala-copione-senza-durata") { s in
+            s.apriEsperienza(.prismaCliente, cliente: "giulia")
+            s.sala.copioneAperto = true
         }
         // Migliorie d'uso 34: le esperienze dicono il loro momento e quanto durano, due sono consigliate per il cliente
         coppia("1115-uso-sala-momenti") { s in

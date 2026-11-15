@@ -3,7 +3,7 @@ import Foundation
 /// Migliorie d'uso 34 «Le esperienze della Sala, al momento giusto»: ogni esperienza ha un momento (e una durata, tranne
 /// il Prisma del cliente), le etichette dicono «Per aprire · 2 min» e «Dopo l’incontro», le consigliate vengono dalle
 /// priorità in ordine (al più due, il risparmio non ha un'esperienza sua, nessun consiglio senza priorità).
-/// Chiamata da `ProvaCalcoli.esegui()`.
+/// Dalla miglioria 59 anche i copioni «Cosa dire» delle esperienze. Chiamata da `ProvaCalcoli.esegui()`.
 enum ProvaCalcoliSalaMomenti {
     static func esegui(_ verifica: VerificaCalcoli) {
         // Ogni esperienza ha un momento; ogni momento ha almeno un'esperienza
@@ -31,5 +31,26 @@ enum ProvaCalcoliSalaMomenti {
         verifica.vero("Sala consigliate: mai il Prisma del cliente né un'esperienza senza area",
                       EsperienzaSala.allCases.filter { $0.areaConsigliata != nil }.count == 3)
         verifica.vero("Sala consigliate: l'etichetta verde", TestiSala.consigliata("Giulia") == "Consigliata per Giulia")
+
+        // Migliorie d'uso 59: ogni esperienza ha il suo copione (apertura, tre passi, una domanda) e l'occhiello dice
+        // «minuti», «minuto» al singolare e niente durata dove manca
+        verifica.vero("Sala copione: ogni esperienza ha apertura, tre passi e una domanda",
+                      EsperienzaSala.allCases.allSatisfy { e in
+                          let c = e.copione
+                          return !c.apertura.isEmpty && !c.domanda.isEmpty && c.passi.count == 3 && c.passi.allSatisfy { !$0.isEmpty }
+                      })
+        verifica.vero("Sala copione: «Cosa dire · per spiegare · 3 minuti» sulla giornata della pensione",
+                      TestiCopione.titolo(.giornataPensione) == "Cosa dire · per spiegare · 3 minuti")
+        verifica.vero("Sala copione: «1 minuto» al singolare sul film",
+                      TestiCopione.titolo(.film) == "Cosa dire · dopo l’incontro · 1 minuto")
+        verifica.vero("Sala copione: niente durata sul Prisma del cliente",
+                      TestiCopione.titolo(.prismaCliente) == "Cosa dire · dopo l’incontro")
+        verifica.vero("Sala copione: il film dura venti secondi, non un minuto (decisione 59-a)",
+                      EsperienzaSala.film.copione.apertura.contains("venti secondi"))
+        verifica.vero("Sala copione: nessuna cifra nei copioni",
+                      EsperienzaSala.allCases.allSatisfy { e in
+                          let c = e.copione
+                          return !(c.passi + [c.apertura, c.domanda]).joined().contains("€")
+                      })
     }
 }

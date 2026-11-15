@@ -301,9 +301,14 @@ enum ProvaMostraAlCliente {
                   "Mostra al cliente: scelto il cliente, il pannello passa alle quattro scelte")
         s.chiudiSceltaMostra()
         s.apri(.agenda)
+        // Migliorie d'uso 59: il copione «Cosa dire» si vede solo al consulente e si chiude davanti al cliente
+        controlla(s.consulenteVede, "Mostra al cliente: fuori dalla vista pulita il consulente vede il copione")
+        s.sala.copioneAperto = true
         s.mostra(.quadro)
         controlla(s.inVistaCliente && s.inModoCliente && s.vistaCliente == .quadro && !s.sceltaMostra,
                   "Mostra al cliente: «Il suo quadro» entra nella vista pulita sopra la modalità cliente")
+        controlla(!s.consulenteVede && !s.sala.copioneAperto,
+                  "Mostra al cliente: nella vista pulita il copione non si vede e si chiude")
         controlla(s.clienti.map(\.id) == [primo.id], "Mostra al cliente: si vede solo il cliente mostrato")
         let posizioniAperte = s.sistema.aperta(.posizioni)
         s.apri(.posizioni)

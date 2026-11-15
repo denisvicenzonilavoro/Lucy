@@ -108,6 +108,49 @@ extension Tema.Apple {
             static let larghezzaInArrivo: CGFloat = 460
         }
 
+        /// Migliorie d'uso 59 «Ogni esperienza ha il suo copione»: il riquadro «Cosa dire» (`#saCopP`), ancorato in alto a
+        /// destra del palco, 48 sotto la testata, largo 372, padding 16×18, superficie dei pannelli sospesi (l'ombra
+        /// `vetro` è quella del tema più vicina a 0 24 50 −18 blu notte al 50%); la frase d'apertura e la domanda con il
+        /// carattere del titolo 17 semibold (`.copA`), le etichette `.k`, i tre passi con il numerino tondo blu 20.
+        enum Copione {
+            static let larghezza: CGFloat = 372
+            static let dallAlto: CGFloat = 48
+            static let padding = Tema.Apple.Misura.padding(16, 18)
+            static let superficie = Tema.Apple.Superficie.vetroSopra
+            static let raggio = Tema.Apple.Raggio.card
+            /// L'occhiello «Cosa dire · per spiegare · 3 minuti» (`.lbl`).
+            static let occhiello = C.etichetta
+            static let coloreOcchiello = Tema.Apple.Colore.inchiostro2
+            /// La ✕ che chiude.
+            static let glifoChiudi = C(dimensione: 11, peso: .bold)
+            /// «Apri così», «Mentre la fate», «Chiudi con una domanda» e «Lo vedi solo tu» (`.k`).
+            static let etichetta = C.secondario
+            static let coloreEtichetta = Tema.Apple.Colore.inchiostro2
+            static let sottoOcchiello: CGFloat = 10
+            static let spazioSezione: CGFloat = 12
+            static let sottoEtichetta: CGFloat = 2
+            /// `.copA`: 17 semibold, interlinea 1,35, tracking −0,2.
+            static let frase = C(dimensione: 17, peso: .semibold, tracking: -0.2, interlinea: 1.35)
+            static let coloreFrase = Tema.Apple.Colore.inchiostro
+            /// I passi: testo 14, spazio 10, padding verticale 5.
+            static let passo = C.corpo
+            static let colorePasso = Tema.Apple.Colore.inchiostro
+            static let spazioPasso: CGFloat = 10
+            static let paddingPasso: CGFloat = 5
+            /// Il numerino: lato 20, cifra 11,5 bold bianca su accento.
+            static let numerino: CGFloat = 20
+            static let cifra = C(dimensione: 11.5, peso: .bold, tabellare: true)
+            static let fondoNumerino = Tema.Apple.Colore.accento
+            static let coloreCifra = Color.white
+            /// Il filetto sopra «Lo vedi solo tu».
+            static let filetto = Tema.Apple.Colore.separatore
+            static let spessoreFiletto: CGFloat = 1
+            static let sottoFiletto: CGFloat = 10
+            /// Il glifo «info» del pulsante, lato 14.
+            static let glifoPulsante = C(dimensione: 14, peso: .regular)
+            static let spazioPulsante: CGFloat = 5
+        }
+
         /// La presentazione sulla sala opaca (velo dei Prospetti, sempre scuro): il palco grande al centro, «Chiudi»
         /// bianco in basso.
         enum Presenta {
@@ -151,5 +194,10 @@ extension Tema.Apple.Moto {
         /// Il passaggio griglia ↔ palco (la card nasce dalla scheda toccata).
         static var passaggio: Animation { Curva.dettaglioApre.animazione(durataPalco) }
         static var ritorno: Animation { Curva.dettaglioChiude.animazione(durataPalco) }
+        /// Migliorie d'uso 59: il riquadro «Cosa dire» scende di 8 e cresce da 0,98 con una molla in 0,32 s.
+        static let durataCopione = 0.32
+        static let scalaCopione: CGFloat = 0.98
+        static let discesaCopione: CGFloat = -8
+        static var copione: Animation { Curva.molla.animazione(durataCopione) }
     }
 }

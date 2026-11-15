@@ -238,6 +238,9 @@ enum VistaTerritorio: String, CaseIterable, Identifiable, Hashable {
     /// Migliorie d'uso 34: il momento scelto nel filtro della griglia (nil = «Tutte»). Osservato, non salvato: si azzera
     /// alla chiusura della Sala.
     var momento: MomentoSala?
+    /// Migliorie d'uso 59: il riquadro «Cosa dire» è aperto sul palco. Osservato, non salvato: si chiude aprendo un'altra
+    /// esperienza, tornando alla griglia, cambiando cliente ed entrando nella modalità cliente (la vista del cliente).
+    var copioneAperto = false
     /// Solo istantanee (1117): il cliente come se non avesse priorità (etichette dei momenti senza consigli).
     @ObservationIgnored var senzaPrioritaIstantanea = false
 }
@@ -275,12 +278,14 @@ extension StatoShell {
         sala.esperienza = clienteAttivo == nil ? nil : e
         sala.stesureLettera = [:]
         sala.dettaglioValoreAperto = false
+        sala.copioneAperto = false
         apri(.sala)
     }
 
     /// «‹ Sala»: dal palco alla griglia.
     func tornaAllaSala() {
         guard sala.esperienza != nil else { return }
+        sala.copioneAperto = false
         sala.esperienza = nil
     }
 

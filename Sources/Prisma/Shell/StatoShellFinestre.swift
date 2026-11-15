@@ -314,6 +314,8 @@ extension StatoShell {
         if app == .vera { spegniVoceSeVeraSparisce() }
         // Migliorie d'uso 34: il momento scelto nel filtro della Sala non si ricorda fra un'apertura e l'altra
         if app == .sala, sala.momento != nil { sala.momento = nil }
+        // Migliorie d'uso 59: neanche il copione aperto
+        if app == .sala, sala.copioneAperto { sala.copioneAperto = false }
     }
 
     /// La finestra rientra nella sua icona del dock; resta nell'elenco finché il volo non finisce (`rientrano`:

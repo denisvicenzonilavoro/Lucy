@@ -272,6 +272,8 @@ enum VoceConfronto: Hashable {
             // La vista pulita vive solo sopra la modalità cliente: se questa si spegne (blocco, cliente eliminato), si chiude
             if modoCliente == nil, vistaCliente != nil { chiudiVistaClienteSenzaRitorno() }
             #endif
+            // Migliorie d'uso 59: il copione «Cosa dire» non resta aperto davanti al cliente
+            if modoCliente != nil, sala.copioneAperto { sala.copioneAperto = false }
         }
     }
     /// Il pulsante dell'intestazione di Posizioni chiede di aprire il modulo (nuova posizione o proposta).
@@ -1007,6 +1009,8 @@ enum VoceConfronto: Hashable {
             if newValue != dati.clienteAttivoId {
                 fascicoloAppuntamento = nil
                 scenarioInSospeso = nil
+                // Migliorie d'uso 59: il copione è dell'esperienza vissuta con un cliente
+                if sala.copioneAperto { sala.copioneAperto = false }
             }
             dati.clienteAttivoId = newValue
             #if os(macOS)

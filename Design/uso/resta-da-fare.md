@@ -1880,3 +1880,33 @@ Resta:
   `impostazioni.studio.spese`, `speseStudio` e `kmClienti`.
 - Istantanee da rigenerare sul Mac (780, 781, 782 con «almeno … km» nella tessera, 785, 788 in colonna: la tessera non
   deve tagliarsi) e pagina delle anteprime da aggiornare; il passaggio sulle colonne chiede uno screenshot.
+
+## 59. Ogni esperienza ha il suo copione
+
+Fatto (solo Mac):
+- I copioni delle undici esperienze in `Motori/CopioneSala.swift` (`CopioneSala`, `EsperienzaSala.copione` con lo
+  `switch` completo, `TestiCopione` con l'occhiello «Cosa dire · per spiegare · 3 minuti», «1 minuto», senza durata
+  solo il momento). Decisione 59-a applicata: il film «In venti secondi…», il Prisma del cliente «Scegliete insieme la
+  password, davanti a lui». Copioni fissi (59-b), «tu» al consulente e «lei» al cliente (59-c).
+- `StatoSala.copioneAperto` (osservato, non salvato): si chiude con `apriEsperienza`, `tornaAllaSala`, al cambio di
+  cliente, entrando nella modalità cliente (quindi nella vista pulita) e alla chiusura della Sala. Esc lo chiude prima di
+  tornare alla griglia.
+- «Cosa dire» (glifo `info.circle`) primo dei pulsanti della testata del palco (`AzioniPalco`, Shell/SalaAzioniPalco.swift)
+  e il riquadro `RiquadroCopione` in overlay in alto a destra di `PalcoSala` (48 sotto la testata, largo 372), fuori da
+  `ContenutoPalco`: mai nella presentazione né nelle immagini per l'iPad. Si vedono solo con `StatoShell.consulenteVede`
+  (fuori dalla modalità cliente e dalla vista pulita). Token in `Tema.Apple.SalaEsperienze.Copione` e
+  `Tema.Apple.Moto.SalaEsperienze.copione`; superficie `vetroSopra` (ombra `vetro`, la più vicina a 0 24 50 −18 del
+  template: nessun caso nuovo in `Ombra`).
+- Prove: i copioni (tre passi, occhiello, nessuna cifra) in `ProvaCalcoliSalaMomenti` (`--prova-calcoli`; la specifica
+  diceva `ProvaCalcoliEsperienza`, che però prova l'esperienza in prodotti finanziari del profilo MiFID); `consulenteVede`
+  e la chiusura del copione nella vista pulita in `ProvaMostraAlCliente` (`--prova-vera`).
+- Istantanee nuove 684-sala-copione e 685-sala-copione-senza-durata (chiare e scure); 691-sala-palco cambia da sola.
+
+Resta:
+- **Il cliente guarda l'iPad (58)**: `consulenteVede` va esteso con «o nella vista del cliente con `luogoCliente ==
+  .tavolo`» quando arriva la 58, e il copione si chiude quando il cliente torna a guardare il Mac.
+- **Finestre strette**: la testata del palco non riduce ancora i pulsanti a icone con `ViewThatFits` (l'`HStack` dei
+  pulsanti è `.fixedSize()`, il titolo si accorcia per primo). Da fare insieme alla 60, che aggiunge «Segna come fatta»;
+  verificare con 618-app-nuove-sala e una scena stretta del palco.
+- Istantanee da rigenerare sul Mac (684, 685, 691; controllare che 693-sala-modo-cliente non mostri «Cosa dire»; 681 con
+  la 58) e pagina delle anteprime da aggiornare; l'entrata a molla chiede uno screenshot.
