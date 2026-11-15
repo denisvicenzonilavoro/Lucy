@@ -862,7 +862,10 @@ extension StatoShell {
             mostraAvviso(TestiTerritorio.giroInDimostrazione)
             return
         }
-        territorio.giroIPhone = GiroInviatoIPhone(giorno: Calendar.current.startOfDay(for: giorno), giri: ovunque.giri)
+        // Con un giro già in corso la scrittura che porta le tappe è quella di recupero (`ancoraUnGiro`): il giro partito
+        // prima del tocco non le contiene, quindi conta solo quello dopo
+        territorio.giroIPhone = GiroInviatoIPhone(giorno: Calendar.current.startOfDay(for: giorno),
+                                                  giri: ovunque.giri + (ovunque.inCorso ? 1 : 0))
         sincronizzaOvunque()
     }
 

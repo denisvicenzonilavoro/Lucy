@@ -66,7 +66,8 @@ enum MotoreSimulatoriAnalisi {
     /// dell'analisi, mezzo punto sotto (mai sotto 0) e mezzo punto sopra, senza doppioni, in ordine.
     static func rendimentiDaScegliere(_ r: Double) -> [Double] {
         let tondo = { (x: Double) -> Double in (x * 100).rounded() / 100 }
-        let voci = [tondo(max(0, r - scartoRendimento)), tondo(max(0, r)), tondo(max(0, r) + scartoRendimento)]
+        // Quello dell'analisi resta esatto (mai arrotondato), così il simulatore parte dalle stesse cifre dell'analisi
+        let voci = [tondo(max(0, r - scartoRendimento)), max(0, r), tondo(max(0, r) + scartoRendimento)]
         var fatti: [Double] = []
         for v in voci where !fatti.contains(v) { fatti.append(v) }
         return fatti.sorted()
@@ -74,7 +75,7 @@ enum MotoreSimulatoriAnalisi {
 
     /// Mezzo punto l'anno sopra e sotto il rendimento dell'analisi.
     static let scartoRendimento = 0.5
-    /// Sotto questo scarto il rendimento scelto è quello dell'analisi (le scelte sono arrotondate al centesimo).
+    /// Sotto questo scarto il rendimento scelto è quello dell'analisi (le scelte accanto sono arrotondate al centesimo).
     static let toleranzaRendimento = 0.006
 
     /// Le aliquote da scegliere quando manca il reddito: quelle degli scaglioni IRPEF di oggi.

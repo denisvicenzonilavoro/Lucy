@@ -82,6 +82,7 @@ struct PresentatoreAree360<Contenuto: View>: View {
     let stato: StatoShell
     @StateObject private var dettaglio: StatoDettaglio
     @StateObject private var cache = CacheAree360()
+    @Environment(\.modoIstantanea) private var modoIstantanea
     let contenuto: Contenuto
 
     init(stato: StatoShell, @ViewBuilder contenuto: () -> Contenuto) {
@@ -144,9 +145,9 @@ struct PresentatoreAree360<Contenuto: View>: View {
     }
 
     /// Alla comparsa il dettaglio chiesto con `apriAreaAnalisi360(_:)` è già aperto (`dettaglioIniziale`): resta solo
-    /// da consumare la richiesta.
+    /// da consumare la richiesta. Nelle istantanee la richiesta resta: la scena può costruire la vista più volte.
     private func consumaAreaGiaAperta() {
-        if stato.areaDaAprire != nil { stato.areaDaAprire = nil }
+        if !modoIstantanea, stato.areaDaAprire != nil { stato.areaDaAprire = nil }
     }
 
     /// Migliorie d'uso 46: aspetta la fine del cambio di vista (650 ms del template al ritmo dell'app; subito con

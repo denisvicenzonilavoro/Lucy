@@ -115,10 +115,15 @@ private struct CorpoSimulatorePrevidenzaApple: View {
         massimo = m
         _versamento = State(initialValue: min(max(0, iniziale), m))
         _canale = State(initialValue: quadro.canale)
-        // Il rendimento dell'analisi come compare fra le scelte (arrotondato al centesimo, mai sotto 0)
         let r = quadro.ipotesi.rendimentoReale
+        #if os(macOS)
+        // Il rendimento dell'analisi come compare fra le scelte (lo stesso valore esatto, mai sotto 0)
         _rendimento = State(initialValue: MotoreSimulatoriAnalisi.rendimentiDaScegliere(r)
             .first { abs($0 - r) < MotoreSimulatoriAnalisi.toleranzaRendimento } ?? r)
+        #else
+        // Su iPhone e iPad non c'è scelta: il rendimento dell'analisi com'è scritto
+        _rendimento = State(initialValue: r)
+        #endif
         _aliquota = State(initialValue: MotoreSimulatoriAnalisi.aliquotaIniziale)
         _coperturaOggi = State(initialValue: quadro.coperturaOggi)
     }
