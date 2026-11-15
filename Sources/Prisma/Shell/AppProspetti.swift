@@ -135,6 +135,13 @@ struct AppProspetti: View {
     static let notaStato = "Impaginati sul dispositivo · stessi calcoli dell'app · il PDF resta dove lo salvi o lo mandi"
     #endif
 
+    /// Per chi comincia: la differenza tra i due documenti (sul Mac, migliorie d'uso 22, con le parole delle versioni).
+    #if os(macOS)
+    static let fraseVuoto = TestiVersioneProspetto.vuoto
+    #else
+    static let fraseVuoto = "Il prospetto è il documento dettagliato per te; il report è la versione essenziale da lasciare al cliente."
+    #endif
+
     var vuoto: some View {
         VStack(spacing: 10) {
             Text(scelta.tipo == .valutazione ? "Nessuna valutazione per questo cliente"
@@ -144,7 +151,7 @@ struct AppProspetti: View {
                 .font(SSP.titolo).foregroundColor(SSP.coloreTitolo)
                 .multilineTextAlignment(.center)
             // Per chi comincia: la differenza tra i due documenti che Prisma impagina
-            Text("Il prospetto è il documento dettagliato per te; il report è la versione essenziale da lasciare al cliente.")
+            Text(Self.fraseVuoto)
                 .font(SSP.nota).foregroundColor(SSP.coloreNota)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
@@ -194,31 +201,37 @@ struct AppProspetti: View {
 
     func scegli(_ t: TipoProspetto) {
         archiviato = nil
+        // Migliorie d'uso 22: sul Mac si parte da «Per il cliente», o dall'ultima versione scelta finché Prisma è aperto
+        #if os(macOS)
+        let r = stato.versioneProspetti == .perIlCliente
+        #else
+        let r = false
+        #endif
         switch t {
         case .valutazione:
-            stato.prospetto = stato.valutazioniCliente(cliente).first.map { .valutazione($0.id, report: false) } ?? .valutazione("", report: false)
+            stato.prospetto = stato.valutazioniCliente(cliente).first.map { .valutazione($0.id, report: r) } ?? .valutazione("", report: r)
         case .resoconto:
-            stato.prospetto = .resoconto(report: false)
+            stato.prospetto = .resoconto(report: r)
         case .sostituzione:
-            stato.prospetto = .sostituzione("", "", report: false)
+            stato.prospetto = .sostituzione("", "", report: r)
         case .previdenza:
-            stato.prospetto = .previdenza(report: false)
+            stato.prospetto = .previdenza(report: r)
         case .protezione:
-            stato.prospetto = .protezione(report: false)
+            stato.prospetto = .protezione(report: r)
         case .obiettivo:
-            stato.prospetto = .obiettivo("", report: false)
+            stato.prospetto = .obiettivo("", report: r)
         case .liquidita:
-            stato.prospetto = .liquidita(report: false)
+            stato.prospetto = .liquidita(report: r)
         case .checkUp:
-            stato.prospetto = .checkUp(report: false)
+            stato.prospetto = .checkUp(report: r)
         case .resistenza:
-            stato.prospetto = .resistenza(report: false)
+            stato.prospetto = .resistenza(report: r)
         case .costi:
-            stato.prospetto = .costi(report: false)
+            stato.prospetto = .costi(report: r)
         case .successione:
-            stato.prospetto = .successione(report: false)
+            stato.prospetto = .successione(report: r)
         case .patrimonio:
-            stato.prospetto = .patrimonio(report: false)
+            stato.prospetto = .patrimonio(report: r)
         case .fascicolo:
             stato.fascicoloAppuntamento = nil
             stato.prospetto = .fascicolo
@@ -234,6 +247,16 @@ struct AppProspetti: View {
         case .annoInsieme:
             stato.prospetto = .annoInsieme
         }
+    }
+
+    /// «Prospetto | Report» nelle scelte della voce: su iPhone e iPad. Sul Mac (migliorie d'uso 22) la versione si
+    /// sceglie sopra la pagina, con «Per il cliente | Per te».
+    @ViewBuilder func selettoreVersioneColonna(_ report: Bool, _ cambia: @escaping (Bool) -> Void) -> some View {
+        #if os(macOS)
+        EmptyView()
+        #else
+        SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")], selezione: Binding(get: { report }, set: cambia))
+        #endif
     }
 
     private var posizioniOrdinate: [Posizione] {
@@ -320,8 +343,7 @@ struct AppProspetti: View {
                "Imposte e netto incassabile al centesimo, costi voce per voce", "Previdenza: netto e aliquota per ogni causa",
                "Scadenze dei prossimi 12 mesi e proposte aperte", "Storico dei valori, metodo e firme"]
         return VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .resoconto(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .resoconto(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: A4 orizzontale, una pagina per messaggio, da lasciare al cliente."
                         : "Prospetto per te: A4 verticale, ogni cifra posizione per posizione, da mostrare al cliente.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -412,8 +434,7 @@ struct AppProspetti: View {
 
     private func sceltaCheckUp(report: Bool) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .checkUp(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .checkUp(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: chi sei, la fotografia, il semaforo, da dove partire, la sintesi."
                         : "Prospetto per te: anagrafica e profilo, fotografia per area e canale, semaforo di sette aree, bisogni rilevati, prossimi passi e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -445,8 +466,7 @@ struct AppProspetti: View {
 
     private func sceltaPatrimonio(report: Bool) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .patrimonio(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .patrimonio(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: il percorso con il grafico, area per area, proposte e traguardi, la sintesi."
                         : "Prospetto per te: grafico e tabella anno per anno con e senza le proposte, per area, proposte per canale, obiettivi, metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -458,8 +478,7 @@ struct AppProspetti: View {
 
     private func sceltaSuccessione(report: Bool) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .successione(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .successione(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: cosa passerebbe e quando, chi eredita, perché una polizza è diversa, cosa sistemare, la sintesi."
                         : "Prospetto per te: ogni posizione con destino, beneficiari e avvisi, divisa per canale; eredi con quote e imposte; cosa sistemare; metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -471,8 +490,7 @@ struct AppProspetti: View {
 
     private func sceltaCosti(report: Bool) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .costi(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .costi(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: quanto paga, il peso nel tempo con e senza costi, cosa riceve in cambio e dove risparmiare, la sintesi."
                         : "Prospetto per te: ogni posizione per canale con costi, euro dell'anno, 10 e 20 anni; il grafico; le alternative con l'uscita; metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -484,8 +502,7 @@ struct AppProspetti: View {
 
     private func sceltaResistenza(report: Bool) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .resistenza(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .resistenza(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: i tre scenari, il confronto con il suo profilo e la parte al riparo, la sintesi."
                         : "Prospetto per te: ogni posizione con SRI, quota esposta e perdita, divisa per canale; inflazione e immobili; metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -497,8 +514,7 @@ struct AppProspetti: View {
 
     private func sceltaLiquidita(report: Bool) -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .liquidita(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .liquidita(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: cosa arriva, i quattro salvadanai, il costo dell'attesa, la sintesi."
                         : "Prospetto per te: capitali in scadenza al centesimo, conti, salvadanai, confronto fermo o destinato, metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -530,8 +546,7 @@ struct AppProspetti: View {
             }
             VStack(alignment: .leading, spacing: 10) {
                 if elenco.contains(where: { $0.id == id }) {
-                    SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                                    selezione: Binding(get: { report }, set: { stato.prospetto = .obiettivo(id, report: $0); archiviato = nil }))
+                    selettoreVersioneColonna(report) { stato.prospetto = .obiettivo(id, report: $0); archiviato = nil }
                 }
                 Text(TestiProspettiObiettivo.dove)
                     .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -555,8 +570,7 @@ struct AppProspetti: View {
             : ["Famiglia, fabbisogno caso morte e divario", "Invalidità, malattia e riserva", "Mappa dei rischi coperti e scoperti",
                "Coperture per canale, costo per 1.000 €", "Scadenze da verificare", "Premi, detrazione del 19%, metodo e firme"]
         return VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .protezione(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .protezione(report: $0); archiviato = nil }
             VStack(alignment: .leading, spacing: 7) {
                 ForEach(voci, id: \.self) { voce in
                     HStack(alignment: .top, spacing: 7) {
@@ -589,8 +603,7 @@ struct AppProspetti: View {
                "Deducibilità e risparmio IRPEF", "Aliquota della prestazione nel tempo", "Uscite di oggi per causa, al centesimo",
                "Montante anno per anno, scenari, metodo e firme"]
         return VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .previdenza(report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .previdenza(report: $0); archiviato = nil }
             VStack(alignment: .leading, spacing: 7) {
                 ForEach(voci, id: \.self) { voce in
                     HStack(alignment: .top, spacing: 7) {
@@ -619,8 +632,7 @@ struct AppProspetti: View {
         let elenco = posizioniOrdinate.filter { $0.area.proiettabile }
         let attuale = elenco.first { $0.id == a }
         return VStack(alignment: .leading, spacing: 10) {
-            SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                            selezione: Binding(get: { report }, set: { stato.prospetto = .sostituzione(a, b, report: $0); archiviato = nil }))
+            selettoreVersioneColonna(report) { stato.prospetto = .sostituzione(a, b, report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: A4 orizzontale, restare o cambiare spiegato una pagina alla volta."
                         : "Prospetto per te: A4 verticale, uscita di oggi, netto anno per anno, scenari, costi e caratteristiche.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -665,8 +677,7 @@ struct AppProspetti: View {
             }
             VStack(alignment: .leading, spacing: 10) {
                 if elenco.contains(where: { $0.id == id }) {
-                    SegmentiAnalisi(opzioni: [(false, "Prospetto"), (true, "Report")],
-                                    selezione: Binding(get: { report }, set: { stato.prospetto = .valutazione(id, report: $0); archiviato = nil }))
+                    selettoreVersioneColonna(report) { stato.prospetto = .valutazione(id, report: $0); archiviato = nil }
                     Text(report ? "Report per il cliente: A4 orizzontale, una pagina per messaggio, da lasciare al cliente."
                                 : "Prospetto per te: A4 verticale, quattro pagine con ogni cifra, da mostrare al cliente.")
                         .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)

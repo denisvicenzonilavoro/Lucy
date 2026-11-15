@@ -9,6 +9,8 @@ struct PDFDaSalvare: Identifiable {
     let dati: Data
     let nome: String
     let cliente: Cliente?
+    /// Migliorie d'uso 22 (sul Mac): l'avviso dopo il salvataggio, con la versione salvata (nil = nessun avviso).
+    var avvisoSalvato: String? = nil
 }
 
 /// Prima di salvare un PDF per il cliente: protezione con password (proposta dalle Impostazioni,
@@ -85,7 +87,10 @@ struct ModuloSalvaPDF: View {
                     return
                 }
                 // Il pannello di salvataggio dopo la chiusura del foglio
-                DispatchQueue.main.async { StampaCarta.salva(dati, nome: pdf.nome) }
+                DispatchQueue.main.async {
+                    // Migliorie d'uso 22: solo se il file è stato scritto, l'avviso dice quale versione
+                    if StampaCarta.salva(dati, nome: pdf.nome), let avviso = pdf.avvisoSalvato { stato.mostraAvviso(avviso) }
+                }
             } label: {
                 Label("Salva…", systemImage: "square.and.arrow.down")
             }

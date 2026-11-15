@@ -103,6 +103,13 @@ extension Tema.Apple {
             static let larghezzaMinimaTitolo: CGFloat = 180
             static let spazioAzioni: CGFloat = 8
             static let padding = EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 0)
+            /// Migliorie d'uso 22: la barra sopra la pagina con «Per il cliente | Per te» è alta 58 (`#pBarra`).
+            static let altezzaVersione: CGFloat = 58
+            /// «Solo per il cliente» / «Solo per te»: l'etichetta grigia dei documenti con una versione sola.
+            static let etichettaSolo = Carattere(dimensione: 12.5, peso: .semibold)
+            static let coloreEtichettaSolo = Colore.inchiostro2
+            static let fondoEtichettaSolo = Colore.chip
+            static let paddingEtichettaSolo = EdgeInsets(top: 5, leading: 12, bottom: 5, trailing: 12)
         }
 
         // MARK: Anteprima

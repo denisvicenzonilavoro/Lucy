@@ -941,3 +941,44 @@ Resta:
 - **Istantanee da rigenerare sul Mac**: 452, 456 (chiara e scura), 457, 11-agenda e 11b-agenda-giorno (il dettaglio di un
   impegno passato alle 10:24 ferme, con «Scrivi il verbale» e «Altro ⌄»); il menu «Altro ⌄» e i passi
   dell'accettazione aperti nella scheda chiedono uno screenshot. Aggiornare la pagina delle anteprime.
+
+## 22. «Per te» e «Per il cliente» al posto di «Prospetto» e «Report»
+
+Fatto (solo sul Mac, `#if os(macOS)`; iPhone e iPad tengono «Prospetto | Report» nella colonna):
+- **La versione separata dalla scelta** (`Dati/Prospetto.swift`): `VersioneProspetto`, `SceltaProspetto.versione`,
+  `conVersione(_:)`, `soloPer` e `conTimbroPerTe` (non il portafoglio, decisione 22-c). I casi di `SceltaProspetto` non
+  cambiano (chiavi dei commenti uguali).
+- **Sopra la pagina** (`barraAzioniApple`, alta almeno 58): il titolo, sotto «Report · da mostrare e da consegnare» o
+  «Prospetto di dettaglio · solo per te» con il numero di pagine, e accanto `SegmentatoPillola` «Per il cliente | Per te»
+  (il cambio usa `cambiaAnteprima`, «Per te» = +1) o l'etichetta grigia «Solo per il cliente» / «Solo per te».
+- **Via «Prospetto | Report» dalla colonna** sul Mac (`selettoreVersioneColonna`).
+- **Partenza da «Per il cliente»** (decisione 22-a) in `scegli(_:)` e nella scelta predefinita (`sceltaProspetto`), con
+  l'ultima versione ricordata in `StatoShell.versioneProspetti` (solo in memoria).
+- **Il timbro «SOLO PER TE»** (`TimbroSoloPerTe`, `NotaSoloPerTe` in `ComponentiCarta.swift`, colori e misure in
+  `Carta.swift`) da un posto solo: `DocumentoStampabile.conTimbroPerTe(alto:)` in fondo a `documentoProspetto(_:)`.
+  Prima pagina a 46 dal bordo destro e 40 dall'alto; sulle pagine di `PaginaCarta` (posizione, confronto, riesame), dove
+  a 40 c'è la data, nel margine alto (8). L'ultima pagina ha «Prospetto per il consulente: non va consegnato.» sotto il
+  piede. Uguale a schermo, nel PDF, in stampa e nell'archiviato (22-b); il numero di pagine non cambia.
+- **«Mostra al cliente»**: dalla versione per te presenta la versione per il cliente dalla prima pagina, con l'avviso «Al
+  cliente si mostra la versione per il cliente»; spento per posizione, confronto e riesame («Questo documento è solo per
+  te», decisione 22-d). **«Al tavolo»**: sempre la versione per il cliente; niente pulsante per i documenti solo per te.
+- **«Salva PDF»**: `StampaCarta.salva` dice se il file è stato scritto; solo allora l'avviso «PDF salvato: «<nome>» ·
+  versione per te / per il cliente» (`PDFDaSalvare.avvisoSalvato`). Il nome del file resta con «Prospetto»/«Report».
+- La frase del vuoto con le parole delle versioni. Token in `Tema.Apple.Prospetti.Barra` (`altezzaVersione`,
+  `etichettaSolo`…), testi in `TestiVersioneProspetto` (`Shell/VersioniProspetto.swift`).
+- Prove in `ProvaVersioniProspetto` (`--prova-prospetti`): `conVersione` va e torna, ogni documento ha la scelta o una
+  versione sola, il timbro e la frase nel PDF per te (check-up, resoconto, riesame) e non in quelli per il cliente, stesso
+  numero di pagine, la seconda lettura non segnala il timbro, l'avviso del PDF salvato.
+- Istantanee: nuove 466-prospetti-per-te (chiara e scura: il check-up di Giulia per te, con il selettore e il timbro).
+
+Resta:
+- **463-prospetti-solo-per-il-cliente** non aggiunta: la 460 (e la scura) mostra già «Un anno insieme» con l'etichetta
+  «Solo per il cliente».
+- **L'avviso di «Mostra al cliente»** nasce insieme alla sala della presentazione: va guardato sul Mac se resta visibile
+  sopra la sala; se no, va ritardata la presentazione di un tempo del tema.
+- La coda del check-up («… La versione per il cliente è «Il quadro di …».») non c'è: la frase dell'ultima pagina è una sola.
+- Controllare a occhio che il timbro non copra logo, data o etichetta del canale su nessuna prima pagina (466 e le scene
+  «…-prospetto» di `Istantanee.swift`, che ora mostrano il timbro dove sono nella versione per te); la frase dell'ultima
+  pagina nei prospetti di `FoglioProspetto` sta nei 22 punti sotto il piede.
+- **Istantanee da rigenerare sul Mac**: 460 (chiara e scura), 461, 466 (chiara e scura), 236 e le scene dei prospetti
+  (27-44, 66, 69, 101, 102, 112, 211, 212). Aggiornare la pagina delle anteprime.

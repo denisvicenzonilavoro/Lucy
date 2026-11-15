@@ -254,3 +254,63 @@ extension SceltaProspetto {
         }
     }
 }
+
+/// Migliorie d'uso 22: le due versioni di un documento, separate dalla scelta. «Per il cliente» è il report
+/// (da mostrare e da consegnare), «Per te» il prospetto di dettaglio. Nell'archivio e nelle chiavi dei commenti
+/// la scelta resta quella di sempre (`report: Bool` nei casi): qui solo la lettura e il cambio.
+enum VersioneProspetto: Hashable {
+    case perIlCliente, perTe
+}
+
+extension SceltaProspetto {
+    /// La versione scelta, nil per i documenti che ne hanno una sola (vedi `soloPer`).
+    var versione: VersioneProspetto? {
+        switch self {
+        case .resoconto(let r), .previdenza(let r), .protezione(let r), .liquidita(let r), .checkUp(let r),
+             .resistenza(let r), .costi(let r), .successione(let r), .patrimonio(let r):
+            return r ? .perIlCliente : .perTe
+        case .sostituzione(_, _, let r), .obiettivo(_, let r), .valutazione(_, let r):
+            return r ? .perIlCliente : .perTe
+        case .fascicolo, .posizione, .confronto, .portafoglio, .riesame, .annoInsieme:
+            return nil
+        }
+    }
+
+    /// La stessa scelta nell'altra versione (o in questa): i documenti senza la scelta restano come sono.
+    func conVersione(_ v: VersioneProspetto) -> SceltaProspetto {
+        let r = v == .perIlCliente
+        switch self {
+        case .resoconto: return .resoconto(report: r)
+        case .sostituzione(let a, let b, _): return .sostituzione(a, b, report: r)
+        case .previdenza: return .previdenza(report: r)
+        case .protezione: return .protezione(report: r)
+        case .obiettivo(let id, _): return .obiettivo(id, report: r)
+        case .liquidita: return .liquidita(report: r)
+        case .checkUp: return .checkUp(report: r)
+        case .resistenza: return .resistenza(report: r)
+        case .costi: return .costi(report: r)
+        case .successione: return .successione(report: r)
+        case .patrimonio: return .patrimonio(report: r)
+        case .valutazione(let id, _): return .valutazione(id, report: r)
+        case .fascicolo, .posizione, .confronto, .portafoglio, .riesame, .annoInsieme: return self
+        }
+    }
+
+    /// Per i documenti con una versione sola: per chi sono (nil per quelli con la scelta).
+    var soloPer: VersioneProspetto? {
+        switch self {
+        case .posizione, .confronto, .riesame, .portafoglio: return .perTe
+        case .annoInsieme, .fascicolo: return .perIlCliente
+        case .resoconto, .sostituzione, .previdenza, .protezione, .obiettivo, .liquidita, .checkUp, .resistenza,
+             .costi, .successione, .patrimonio, .valutazione:
+            return nil
+        }
+    }
+
+    /// true per le pagine del consulente che portano il timbro «SOLO PER TE» (decisione 22-c: non il portafoglio,
+    /// che non si archivia né si mostra mai).
+    var conTimbroPerTe: Bool {
+        if case .portafoglio = self { return false }
+        return versione == .perTe || soloPer == .perTe
+    }
+}

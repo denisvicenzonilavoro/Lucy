@@ -622,6 +622,8 @@ enum ProvaProspetti {
 
         // Completezza dei dati: pagina e slide delle ipotesi stimate, sezione «Dati per l'analisi» del riesame
         ProvaProspettiCompletezza.esegui(verifica, cartella: cartella)
+        // Migliorie d'uso 22: «Per il cliente» e «Per te», il timbro «SOLO PER TE» delle pagine per il consulente
+        ProvaVersioniProspetto.esegui(verifica)
         // Scheda di adeguatezza della proposta: Sofia (indipendente) e Andrea (Alleanza), due pagine A4
         ProvaAdeguatezza.provaProspetti(verifica, cartella: cartella)
         // Giro 6: TFR in azienda o nel fondo (prospetto 2 pagine, report 4 o 5)

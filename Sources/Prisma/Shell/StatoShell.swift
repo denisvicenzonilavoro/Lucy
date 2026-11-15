@@ -479,6 +479,9 @@ enum VoceConfronto: Hashable {
     // Prospetti e report
     /// Prospetto scelto (nil = quadro delle posizioni del cliente attivo).
     var prospetto: SceltaProspetto?
+    /// Migliorie d'uso 22 (solo sul Mac): l'ultima versione scelta in Prospetti, «Per il cliente» all'apertura
+    /// (decisione 22-a). Solo in memoria, finché Prisma resta aperto.
+    var versioneProspetti: VersioneProspetto = .perIlCliente
     /// Valutazione aperta nel modulo di modifica.
     var valutazioneInModifica: ValutazioneInvestimento?
     @ObservationIgnored private var testiDocumenti = MemoriaTesti()
@@ -1711,7 +1714,13 @@ enum VoceConfronto: Hashable {
     /// Il prospetto da mostrare per il cliente attivo. Una scelta di un altro cliente torna alla prima
     /// valutazione del cliente, o al resoconto delle posizioni se non ne ha.
     var sceltaProspetto: SceltaProspetto {
-        let predefinita: SceltaProspetto = valutazioniCliente(clienteAttivoId).first.map { .valutazione($0.id, report: false) } ?? .resoconto(report: false)
+        // Migliorie d'uso 22: sul Mac il documento di partenza è nella versione per il cliente (o nell'ultima scelta)
+        #if os(macOS)
+        let r = versioneProspetti == .perIlCliente
+        #else
+        let r = false
+        #endif
+        let predefinita: SceltaProspetto = valutazioniCliente(clienteAttivoId).first.map { .valutazione($0.id, report: r) } ?? .resoconto(report: r)
         switch prospetto {
         case .posizione(let id)? where posizioni.contains(where: { $0.id == id && $0.clienteId == clienteAttivoId }):
             return .posizione(id)
@@ -1767,8 +1776,26 @@ enum VoceConfronto: Hashable {
         scelta.conCommento ? commento(scelta)?.testo : nil
     }
 
-    /// Il documento da mostrare e stampare per una scelta.
+    /// Il documento da mostrare e stampare per una scelta. Sul Mac (migliorie d'uso 22) le pagine per il consulente
+    /// portano il timbro «SOLO PER TE» (decisione 22-b: anche nel PDF, in stampa e nell'archiviato).
     func documentoProspetto(_ scelta: SceltaProspetto) -> DocumentoStampabile? {
+        let documento = documentoProspettoSenzaTimbro(scelta)
+        #if os(macOS)
+        if scelta.conTimbroPerTe {
+            // Posizione, confronto e riesame passano da `PaginaCarta`, che ha la data in alto a destra
+            let suCarta: Bool
+            switch scelta {
+            case .posizione, .confronto, .riesame: suCarta = true
+            default: suCarta = false
+            }
+            return documento?.conTimbroPerTe(alto: suCarta ? Misure.Carta.timbroAltoCarta : Misure.Carta.timbroAlto)
+        }
+        #endif
+        return documento
+    }
+
+    /// Il documento di una scelta, così come lo impagina il suo compositore.
+    private func documentoProspettoSenzaTimbro(_ scelta: SceltaProspetto) -> DocumentoStampabile? {
         if case .valutazione(let id, let report) = scelta {
             return valutazione(id).flatMap(testiValutazione).map { DocumentoStampabile($0, report: report) }
         }

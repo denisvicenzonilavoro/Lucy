@@ -332,13 +332,18 @@ extension AppProspetti {
                     .lineLimit(1)
                     .truncationMode(.middle)
                     .help(d.titolo)
-                Text("\(d.genere) · \(d.cliente) · \(formato) · \(n) \(n == 1 ? "pagina" : "pagine")")
+                Text(sottotitoloBarra(d, formato: formato, pagine: n))
                     .carattereApple(b.sottotitolo)
                     .foregroundColor(b.coloreSottotitolo)
                     .lineLimit(1)
             }
             // Il titolo tiene sempre un minimo: se non basta, le azioni passano alle sole icone
             .frame(minWidth: b.larghezzaMinimaTitolo, alignment: .leading)
+            #if os(macOS)
+            // Migliorie d'uso 22: «Per il cliente | Per te», o l'etichetta grigia per chi ha una versione sola
+            selettoreVersione
+                .fixedSize()
+            #endif
             Spacer(minLength: b.spazioAzioni)
             // Con le etichette se c'è posto, altrimenti le sole icone (con il suggerimento): il blu tiene la scritta
             ViewThatFits(in: .horizontal) {
@@ -348,7 +353,60 @@ extension AppProspetti {
             .layoutPriority(1)
         }
         .padding(b.padding)
+        #if os(macOS)
+        .frame(minHeight: b.altezzaVersione)
+        #endif
     }
+
+    /// Sotto il titolo: sul Mac (migliorie d'uso 22) che cosa si guarda, «Report · da mostrare e da consegnare» o
+    /// «Prospetto di dettaglio · solo per te»; altrove il genere, il cliente e il formato di sempre.
+    private func sottotitoloBarra(_ d: DocumentoStampabile, formato: String, pagine n: Int) -> String {
+        let quante = "\(n) \(n == 1 ? "pagina" : "pagine")"
+        #if os(macOS)
+        if let v = scelta.versione ?? scelta.soloPer {
+            return "\(TestiVersioneProspetto.sottotitolo(v)) · \(quante)"
+        }
+        #endif
+        return "\(d.genere) · \(d.cliente) · \(formato) · \(quante)"
+    }
+
+    #if os(macOS)
+    /// Il selettore a pillola delle due versioni, o «Solo per il cliente» / «Solo per te» (neutra).
+    @ViewBuilder private var selettoreVersione: some View {
+        let b = Tema.Apple.Prospetti.Barra.self
+        if let v = scelta.versione {
+            SegmentatoPillola(selezione: Binding(get: { v }, set: { cambiaVersione($0) }),
+                              voci: [(VersioneProspetto.perIlCliente, TestiVersioneProspetto.perIlCliente),
+                                     (VersioneProspetto.perTe, TestiVersioneProspetto.perTe)])
+        } else if let solo = scelta.soloPer {
+            Text(TestiVersioneProspetto.solo(solo))
+                .carattereApple(b.etichettaSolo)
+                .foregroundColor(b.coloreEtichettaSolo)
+                .lineLimit(1)
+                .padding(b.paddingEtichettaSolo)
+                .background { Capsule().fill(b.fondoEtichettaSolo) }
+        }
+    }
+
+    /// Cambia la versione con la pagina che esce e la nuova che entra dal lato opposto: «Per te» viene dopo (sale).
+    /// La scelta si ricorda finché Prisma resta aperto.
+    private func cambiaVersione(_ nuova: VersioneProspetto) {
+        guard scelta.versione != nil, nuova != scelta.versione else { return }
+        let attuale = scelta
+        stato.versioneProspetti = nuova
+        archiviato = nil
+        cambiaAnteprima(direzione: nuova == .perTe ? 1 : -1) { stato.prospetto = attuale.conVersione(nuova) }
+    }
+
+    /// Il tavolo con l'iPad riceve sempre la versione per il cliente, dalla prima pagina se sullo schermo c'è quella per te.
+    private func contestoTavolo(_ d: DocumentoStampabile) -> ContestoTavolo {
+        if scelta.versione == .perTe {
+            return ContestoTavolo(documento: stato.documentoProspettoInCache(scelta.conVersione(.perIlCliente)),
+                                  pagina: 0, clienteId: stato.clienteAttivoId)
+        }
+        return ContestoTavolo(documento: d, pagina: indiceAnteprima(d), clienteId: stato.clienteAttivoId)
+    }
+    #endif
 
     /// La seconda lettura del PDF (parole a rischio): se è pulito si va avanti, altrimenti il foglio con gli avvisi.
     private func rileggiPoi(_ d: DocumentoStampabile, dati: Data, _ poi: @escaping () -> Void) {
@@ -384,9 +442,10 @@ extension AppProspetti {
             }
             #if os(macOS)
             // Il tavolo con l'iPad (Shell/AlTavolo.swift): mai il portafoglio, che parla di tutti i clienti
-            if scelta.tipo != .portafoglio {
+            // Migliorie d'uso 22: all'iPad non va mai la versione per te (i documenti solo per te restano sul Mac)
+            if scelta.tipo != .portafoglio && scelta.soloPer != .perTe {
                 PulsanteAlTavolo(tavolo: stato.tavolo,
-                                 contesto: ContestoTavolo(documento: d, pagina: indiceAnteprima(d), clienteId: stato.clienteAttivoId),
+                                 contesto: contestoTavolo(d),
                                  soloIcona: soloIcona)
             }
             #endif
@@ -400,7 +459,11 @@ extension AppProspetti {
                 }
                 .buttonStyle(.apple)
                 .fixedSize()
-                .help("Mostra al cliente: il documento a tutto schermo dalla pagina mostrata (← → per sfogliare, esc per uscire), nella vista pulita")
+                // Migliorie d'uso 22 (decisione 22-d): posizione, confronto e riesame sono solo per te
+                .disabled(scelta.soloPer == .perTe)
+                .help(scelta.soloPer == .perTe ? TestiVersioneProspetto.aiutoSoloPerTe
+                      : scelta.versione == .perTe ? "Mostra al cliente: la versione per il cliente a tutto schermo, dalla prima pagina, nella vista pulita"
+                      : "Mostra al cliente: il documento a tutto schermo dalla pagina mostrata (← → per sfogliare, esc per uscire), nella vista pulita")
                 #else
                 Button { presentaApple(d) } label: {
                     etichettaAzione("Presenta all'incontro", simbolo: "play.fill", soloIcona: soloIcona)
@@ -432,7 +495,14 @@ extension AppProspetti {
                 // Il portafoglio è per te: il foglio della password resta, senza proposta dai dati di un cliente
                 if let dati = pdf(d) {
                     rileggiPoi(d, dati: dati) {
-                        daSalvare = PDFDaSalvare(dati: dati, nome: StampaCarta.nomeFile(d), cliente: scelta.tipo == .portafoglio ? nil : stato.clienteAttivo)
+                        #if os(macOS)
+                        // Migliorie d'uso 22: dopo il salvataggio l'avviso dice quale versione è stata salvata
+                        let avviso: String? = TestiVersioneProspetto.pdfSalvato(d.titolo, versione: scelta.versione)
+                        #else
+                        let avviso: String? = nil
+                        #endif
+                        daSalvare = PDFDaSalvare(dati: dati, nome: StampaCarta.nomeFile(d), cliente: scelta.tipo == .portafoglio ? nil : stato.clienteAttivo,
+                                                 avvisoSalvato: avviso)
                     }
                 }
             } label: {
@@ -457,6 +527,14 @@ extension AppProspetti {
         // Presentare il prospetto del riesame salva la fotografia di oggi (memoria del riesame)
         if case .riesame = scelta { stato.fotografaRiesame(stato.clienteAttivoId, origine: .prospetto) }
         #if os(macOS)
+        // Migliorie d'uso 22: al cliente si mostra sempre la versione per lui, dalla prima pagina (la pagina girata
+        // è della versione per te, che ha altre pagine)
+        if scelta.versione == .perTe {
+            guard let perIlCliente = stato.documentoProspetto(scelta.conVersione(.perIlCliente)) else { return }
+            stato.mostraAvviso(TestiVersioneProspetto.avvisoMostra)
+            stato.mostraProspetto(perIlCliente, daPagina: 0)
+            return
+        }
         stato.mostraProspetto(d, daPagina: indiceAnteprima(d))
         #else
         stato.presenta(d, daPagina: indiceAnteprima(d))

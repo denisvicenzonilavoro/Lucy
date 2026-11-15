@@ -14,6 +14,10 @@ extension Istantanee {
                 preparaProspettiApple(s)
                 if let d = s.documentoProspetto(sceltaProspettiApple) { s.presenta(d) }
             }),
+            // Migliorie d'uso 22: il check-up di Giulia nella versione per te, con «Per il cliente | Per te» sopra la
+            // pagina e il timbro «SOLO PER TE» sulla carta (la 460 mostra già «Solo per il cliente» di «Un anno insieme»)
+            ("466-prospetti-per-te", { s in preparaProspettiPerTe(s) }),
+            ("466-prospetti-per-te-scuro", { s in preparaProspettiPerTe(s) }),
         ]
     }
 
@@ -24,6 +28,13 @@ extension Istantanee {
     nonisolated static func preparaProspettiApple(_ s: StatoShell) {
         s.clienteAttivoId = "giulia"
         s.apriProspetto(sceltaProspettiApple)
+    }
+
+    /// Prospetti aperto su Giulia, con il check-up nella versione per te (ricordata per la sessione).
+    nonisolated static func preparaProspettiPerTe(_ s: StatoShell) {
+        s.clienteAttivoId = "giulia"
+        s.versioneProspetti = .perTe
+        s.apriProspetto(.checkUp(report: false))
     }
 }
 #endif
