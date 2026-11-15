@@ -15,6 +15,9 @@ import SwiftUI
 /// da più di due settimane» e il dettaglio nuovo (853: Davide Sala senza incontro fissato, «Fissa l'incontro»); in più
 /// - 1146: dopo «Passa a…» (Marta Conti da «Analisi» a «Proposta»): la nota sotto le colonne con «Annulla»;
 /// - 1147: il dettaglio di Davide Sala con il primo incontro fissato fra tre giorni alle 18: «Prepara l'incontro».
+/// Migliorie d'uso 48 (solo Mac): le 854-857 mostrano la nota nuova sotto l'albero («Tocca una persona…»); in più
+/// - 1148: Sofia scelta (un'ambasciatrice): l'albero con il suo ramo acceso e il resto al 20%, la card «Il ramo di»;
+/// - 1149: Chiara Marino scelta (non ha presentato nessuno): «… non ti ha ancora presentato nessuno.».
 /// DATI DI PROVA DICHIARATI: `PotenzialiDiProva` (la vista dice «dati di prova»); i tre clienti del template
 /// presentati (Chiara Marino, Elena Marchi, Paola Leone) vivono solo nella scena.
 extension Istantanee {
@@ -85,6 +88,18 @@ extension Istantanee {
             }),
             ("857-clienti-passaparola-calmo", { s in
                 s.dati.impostazioni.riduciMovimento = true
+                passaparola(s)
+            }),
+            ("1148-uso-passaparola-ramo", { s in
+                s.potenziali.evidenziato = "sofia"
+                passaparola(s)
+            }),
+            ("1148-uso-passaparola-ramo-scuro", { s in
+                s.potenziali.evidenziato = "sofia"
+                passaparola(s)
+            }),
+            ("1149-uso-passaparola-ramo-vuoto", { s in
+                s.potenziali.evidenziato = "scena-chiara-marino"
                 passaparola(s)
             }),
         ]

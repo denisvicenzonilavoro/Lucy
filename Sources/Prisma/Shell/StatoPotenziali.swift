@@ -19,9 +19,60 @@ extension StatoShell {
 
     /// Migliorie d'uso 47: il prossimo passo di ogni potenziale (id → passo), calcolato una volta per tutti finché non
     /// cambiano i dati dei calcoli (potenziali, clienti, agenda), il giorno o l'ora (il primo incontro è «futuro»).
+    /// Migliorie d'uso 48: i potenziali sono neutri per i calcoli (`DatiVivi.potenziali`), quindi la loro impronta va
+    /// nella chiave (prima uno spostamento lasciava il passo di prima finché non cambiava un dato dei calcoli).
     func passiPotenziali() -> [String: PassoPotenziale] {
-        ricavato("potenziali-passi|\(DerivatiDati.ora())") {
-            MotorePassaparola.passi(dati.potenziali, clienti: dati.clienti, appuntamenti: dati.appuntamenti, oggi: Date())
+        let potenziali = dati.potenziali
+        return ricavato("potenziali-passi|\(DerivatiDati.ora())|\(potenziali.hashValue)") {
+            MotorePassaparola.passi(potenziali, clienti: dati.clienti, appuntamenti: dati.appuntamenti, oggi: Date())
+        }
+    }
+
+    /// Migliorie d'uso 48 (punto 6): albero, ambasciatori, quota, nuovi per anno e i patrimoni netti, calcolati una volta
+    /// finché non cambiano i dati dei calcoli (clienti, potenziali, posizioni) o il giorno: il body del passaparola non
+    /// rifà più i motori su tutto l'archivio a ogni ridisegno.
+    /// I potenziali non entrano nei dati dei calcoli (`DatiVivi.potenziali` è neutro): la loro impronta va nella chiave,
+    /// e leggerli qui iscrive la vista ai loro cambi.
+    func datiPassaparola() -> DatiPassaparola {
+        let potenziali = dati.potenziali
+        return ricavato("passaparola|\(potenziali.hashValue)") {
+            let oggi = Date()
+            let clienti = dati.clienti
+            let posizioni = dati.posizioni
+            let netti = MotorePassaparola.patrimoni(posizioni)
+            return DatiPassaparola(
+                albero: MotorePassaparola.albero(clienti: clienti, potenziali: potenziali, posizioni: posizioni, netti: netti),
+                ambasciatori: MotorePassaparola.ambasciatori(clienti: clienti, potenziali: potenziali, posizioni: posizioni, netti: netti),
+                quota: MotorePassaparola.quotaPassaparola(clienti: clienti, posizioni: posizioni, oggi: oggi, netti: netti),
+                anni: MotorePassaparola.nuoviPerAnno(clienti: clienti, oggi: oggi),
+                netti: netti)
+        }
+    }
+
+    /// Il momento giusto per chiedere (decisione 17), in cache come il resto: le pratiche non entrano nei dati dei calcoli
+    /// (`stessiCalcoli`), quindi la chiave porta l'impronta di ciò che il motore ne legge (posizione e data d'apertura).
+    /// Vuoto sull'iPad e in sola lettura (si guarda soltanto).
+    func momentiPassaparola() -> [MomentoPerChiedere] {
+        guard !potenzialiInSolaLettura else { return [] }
+        let pratiche = dati.pratiche
+        var impronta = Hasher()
+        for p in pratiche {
+            impronta.combine(p.posizioneId)
+            impronta.combine(p.apertaIl)
+        }
+        return ricavato("passaparola-momenti|\(pratiche.count)|\(impronta.finalize())") {
+            var x = datiDeiCalcoli()
+            x.pratiche = pratiche
+            return MotorePassaparola.momentoGiusto(dati: x, oggi: Date())
+        }
+    }
+
+    /// Migliorie d'uso 48: il ramo della persona scelta (tutte le persone che ha presentato), in cache per persona.
+    func ramoPassaparola(_ clienteId: String) -> RamoPassaparola? {
+        let netti = datiPassaparola().netti
+        let potenziali = dati.potenziali
+        return ricavato("passaparola-ramo|\(clienteId)|\(potenziali.hashValue)") {
+            MotorePassaparola.ramo(di: clienteId, clienti: dati.clienti, potenziali: potenziali, netti: netti)
         }
     }
 
@@ -201,10 +252,53 @@ extension StatoShell {
         preparaMessaggio(occasione: o)
     }
 
+    /// Migliorie d'uso 48: «Ringrazia …». La bozza del grazie (modello fisso, tono cordiale, nessun nome delle persone
+    /// presentate, nessuna cifra) entra nel dossier del cliente e la si trova in Messaggi; il passaparola resta aperto e
+    /// lo dice l'avviso. Prisma non spedisce. Non fa nulla in sola lettura o in modalità cliente; un secondo tocco nello
+    /// stesso giorno non crea un'altra bozza.
+    func preparaRingraziamento(clienteId: String) {
+        guard !potenzialiInSolaLettura, !inModoCliente,
+              let c = dati.clienti.first(where: { $0.id == clienteId }) else { return }
+        guard !ringraziamentoPreparato(clienteId: clienteId) else {
+            mostraAvviso(TestiPassaparola.ringraziamentoPronto(c.nome))
+            return
+        }
+        let o = MotorePassaparola.occasioneRingraziamento(cliente: c, posizioni: dati.posizioni, oggi: Date())
+        let tono = TonoMessaggio.cordiale
+        // Messaggi con un cellulare, altrimenti Mail (come le bozze di «Il mercato per i tuoi clienti»)
+        let canale: CanaleMessaggio = c.telefono.filter(\.isNumber).count >= 6 ? .messaggi : .mail
+        let t = ModelliMessaggi.testo(o, tono: tono, canale: canale, cliente: c, firma: firmaMessaggio(o.canale, tono: tono))
+        let bozza = MessaggioCliente(clienteId: c.id, occasioneId: o.id, origine: o.origine, canaleLavoro: o.canale, tono: tono,
+                                     canale: canale, oggetto: canale == .mail ? t.oggetto : nil, testo: t.completo, cifre: o.cifre,
+                                     autore: .modelloFisso, modello: nil, creatoIl: MessaggioCliente.adesso)
+        dati.messaggi = dati.messaggi + [bozza]
+        mostraAvviso(TestiPassaparola.ringraziamentoPronto(c.nome))
+    }
+
+    /// Il grazie di oggi esiste già (bozza, aperto o salvato): il pulsante diventa «✓ Messaggio pronto».
+    func ringraziamentoPreparato(clienteId: String) -> Bool {
+        let giorno = Calendar.current.startOfDay(for: Date())
+        return ricavato("passaparola-grazie|\(clienteId)") {
+            dati.messaggi.contains { m in
+                m.clienteId == clienteId && m.origine.tipo == .ringraziamentoPresentazione && m.creatoIl >= giorno
+            }
+        }
+    }
+
     /// Il messaggio della richiesta esiste (preparato, aperto o salvato) da quando il momento è nato.
     func richiestaPreparata(_ m: MomentoPerChiedere) -> Bool {
         let id = potenziali.occasioniRichieste[m.id]
             ?? OccasioneMessaggio.id(tipo: .richiestaPresentazione, clienteId: m.clienteId, riferimento: m.riferimento)
         return dati.messaggi.contains { $0.occasioneId == id && $0.creatoIl >= Calendar.current.startOfDay(for: m.data) }
     }
+}
+
+/// Ciò che la vista Passaparola mostra, calcolato una volta (Migliorie d'uso 48, punto 6).
+struct DatiPassaparola {
+    let albero: AlberoPassaparola
+    let ambasciatori: [Ambasciatore]
+    let quota: QuotaPassaparola?
+    let anni: [(anno: Int, dalPassaparola: Int, totali: Int)]
+    /// I patrimoni netti per cliente (per il ramo della persona scelta).
+    let netti: [String: Double]
 }

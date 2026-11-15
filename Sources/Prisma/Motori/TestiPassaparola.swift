@@ -183,7 +183,12 @@ enum TestiPassaparola {
         anno.map { "CHI TI HA PRESENTATO CHI · DAL \($0)" } ?? "CHI TI HA PRESENTATO CHI"
     }
 
+    #if os(macOS)
+    /// Migliorie d'uso 48: toccare una persona accende il suo ramo.
+    static let notaAlbero = "La grandezza di ogni cerchio è il patrimonio. Le persone in grigio sono ancora potenziali clienti. Tocca una persona per vedere il suo ramo."
+    #else
     static let notaAlbero = "La grandezza di ogni cerchio è il patrimonio. Le persone in grigio sono ancora potenziali clienti."
+    #endif
     static let vuotoAlbero = "Nessuna presentazione registrata per ora. Quando un cliente te ne presenta un altro, scrivilo nel suo dossier («Presentato da»): qui nasce l'albero."
     static let tu = "Tu"
 
@@ -259,6 +264,53 @@ enum TestiPassaparola {
 
     static func titoloRichiesta(_ nome: String) -> String { "Chiedere una presentazione a \(TestiTraguardi.primoNome(nome))" }
     static let oggettoRichiesta = "Un grazie"
+
+    // MARK: - Il ramo di una persona (Migliorie d'uso 48)
+
+    static let ramoDi = "Il ramo di"
+    static let tutti = "Tutti"
+    static let apriDossier = "Apri il dossier"
+    static let capsulaCliente = "Cliente"
+    static let capsulaPotenziale = "Potenziale"
+    static let chiediPresentazione = "Chiedi una presentazione"
+    /// Decisione 48-a: senza un fatto bello in corso, niente richiesta.
+    static let momentoDaPrisma = "Il momento giusto per chiedere te lo dice Prisma, dopo un fatto bello."
+    static let suggerimentoNodo = "Clic: il suo ramo · ⌘-clic: il dossier"
+
+    /// «Ringrazia Sofia».
+    static func ringrazia(_ nome: String) -> String { "Ringrazia " + TestiTraguardi.primoNome(nome) }
+
+    /// La frase del ramo: «Ti ha presentato 3 persone: 2 sono già clienti (328.000 €), una è ancora un potenziale.»;
+    /// senza clienti «… nessuna è ancora cliente…»; senza presentati «Sofia non ti ha ancora presentato nessuno.».
+    /// Il valore è dei soli già clienti: mai sommato alle stime dei potenziali (decisione 95).
+    static func ramo(nome: String, clienti: Int, valoreClienti: Double, potenziali: Int) -> String {
+        let totale = clienti + potenziali
+        guard totale > 0 else { return "\(TestiTraguardi.primoNome(nome)) non ti ha ancora presentato nessuno." }
+        var frase = "Ti ha presentato " + (totale == 1 ? "una persona" : "\(totale) persone") + ": "
+        switch clienti {
+        case 0: frase += "nessuna è ancora cliente"
+        case 1: frase += "una è già cliente (\(Formati.euro(valoreClienti)))"
+        default: frase += "\(clienti) sono già clienti (\(Formati.euro(valoreClienti)))"
+        }
+        switch potenziali {
+        case 0: break
+        case 1: frase += ", una è ancora un potenziale"
+        default: frase += ", \(potenziali) sono ancora potenziali"
+        }
+        return frase + "."
+    }
+
+    /// La cifra a destra di un presentato: patrimonio o stima, «—» se non nota.
+    static func cifraPresentato(_ p: PresentatoRamo) -> String { p.cifra.map { Formati.euro($0) } ?? "—" }
+
+    static func titoloRingraziamento(_ nome: String) -> String { "Ringraziare \(TestiTraguardi.primoNome(nome)) per le presentazioni" }
+    static let percheRingraziamento = "Ti ha presentato delle persone"
+    static let oggettoRingraziamento = "Grazie di cuore"
+
+    /// L'avviso dopo «Ringrazia…»: la bozza è in Messaggi, la spedisce il consulente.
+    static func ringraziamentoPronto(_ nome: String) -> String {
+        "Per \(TestiTraguardi.primoNome(nome)): un grazie per le persone che ti ha presentato. Lo trovi in Messaggi"
+    }
 
     // MARK: - Colonne degli anni
 

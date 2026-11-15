@@ -418,6 +418,8 @@ enum ProvaCalcoliMessaggi {
                                          fatto: "ha raggiunto «Rendita integrativa» ieri", riferimento: "obiettivo-prova",
                                          data: oggi)
         occasioni.append(MotorePassaparola.occasioneRichiesta(momento, cliente: sofia, posizioni: []))
+        // Il grazie per le presentazioni (Migliorie d'uso 48): nessuna cifra, nessun nome delle persone presentate
+        occasioni.append(MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: [], oggi: oggi))
         // Il messaggio detto nella nota vocale («Luce» giro 13): solo la cosa promessa, nessuna cifra in più
         if let giulia = x.clienti.first(where: { $0.id == "giulia" }) {
             let nota = NotaVocaleDiProva.inArrivo(x, oggi: oggi)

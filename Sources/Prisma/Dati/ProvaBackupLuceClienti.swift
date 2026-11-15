@@ -2,7 +2,7 @@ import Foundation
 
 // Clienti: potenziali e passaparola, e le campagne (versione 27, «Luce» giro 12) dentro `Prisma --prova-backup`:
 // - i potenziali clienti, lo storico delle campagne, chi ha presentato ogni cliente (`presentatoDa`, `presentatoIl`), i
-//   messaggi di campagna e di richiesta di presentazione e l'interruttore «Porta anche i potenziali clienti» tornano
+//   messaggi di campagna, di richiesta di presentazione e di grazie per le presentazioni (Migliorie d'uso 48) e l'interruttore «Porta anche i potenziali clienti» tornano
 //   uguali dal backup;
 // - un archivio della versione 26 (senza le chiavi nuove) si apre con potenziali e campagne vuoti, nessun presentatore e
 //   il resto uguale;
@@ -65,6 +65,12 @@ extension ProvaBackup {
             r.stato = .apertoInMessaggi
             r.apertoIl = t
             d.messaggi.append(r)
+            // Migliorie d'uso 48: il grazie per le presentazioni (bozza, nessuna cifra, nessun nome dei presentati)
+            let g = MessaggioCliente(clienteId: c.id, occasioneId: "ringraziamentoPresentazione-\(c.id)-prova",
+                                     origine: OrigineMessaggio(tipo: .ringraziamentoPresentazione, riferimento: "prova"),
+                                     canaleLavoro: nil, tono: .cordiale, canale: .mail, oggetto: "Grazie di cuore",
+                                     testo: "Testo di prova", cifre: [], autore: .modelloFisso, modello: nil, creatoIl: t)
+            d.messaggi.append(g)
         }
         d.campagne = [Campagna(id: "campagna-backup", gruppoId: "protezioneFamiglia", gruppoTipo: .protezioneFamiglia,
                                titolo: "Famiglia senza protezione", avviataIl: t, tono: .cordiale, canale: .mail,
@@ -86,10 +92,10 @@ extension ProvaBackup {
               estratto.clienti.map(\.presentatoIl) == originale.clienti.map(\.presentatoIl) else {
             return "chi ha presentato i clienti non torna uguale dal backup"
         }
-        let nuovi: Set<TipoOccasioneMessaggio> = [.campagna, .richiestaPresentazione]
+        let nuovi: Set<TipoOccasioneMessaggio> = [.campagna, .richiestaPresentazione, .ringraziamentoPresentazione]
         guard estratto.messaggi.filter({ nuovi.contains($0.origine.tipo) }) == originale.messaggi.filter({ nuovi.contains($0.origine.tipo) }),
-              originale.messaggi.filter({ nuovi.contains($0.origine.tipo) }).count == 3 else {
-            return "i messaggi di campagna e di richiesta di presentazione non tornano uguali dal backup"
+              originale.messaggi.filter({ nuovi.contains($0.origine.tipo) }).count == 4 else {
+            return "i messaggi di campagna, di richiesta di presentazione e di grazie per le presentazioni non tornano uguali dal backup"
         }
         guard estratto.impostazioni.ovunque.potenzialiNelloSpazio else {
             return "l'interruttore «Porta anche i potenziali clienti» non torna dal backup"
@@ -136,6 +142,12 @@ extension ProvaBackup {
         strano["id"] = "messaggio-tipo-sconosciuto"
         strano["origine"] = ["tipo": "tipo di un Prisma più nuovo", "riferimento": "x"]
         messaggi.append(strano)
+        // Migliorie d'uso 48: un Prisma di prima legge «ringraziamentoPresentazione» come un tipo sconosciuto; si simula
+        // con un altro valore che questo Prisma non conosce: il messaggio si scarta, gli altri (anche il grazie) restano
+        var grazieFuturo = unMessaggio
+        grazieFuturo["id"] = "messaggio-grazie-sconosciuto"
+        grazieFuturo["origine"] = ["tipo": "ringraziamentoPresentazioneDiUnPrismaNuovo", "riferimento": "y"]
+        messaggi.append(grazieFuturo)
         var radiceStrana = originaliRadice
         radiceStrana["potenziali"] = potenziali
         radiceStrana["campagne"] = campagne
@@ -151,7 +163,8 @@ extension ProvaBackup {
             return "campagne illeggibili: campagna senza id non scartata o campagna di un tipo nuovo persa"
         }
         guard illeggibile.messaggi.count == originale.messaggi.count,
-              !illeggibile.messaggi.contains(where: { $0.id == "messaggio-tipo-sconosciuto" }) else {
+              !illeggibile.messaggi.contains(where: { $0.id == "messaggio-tipo-sconosciuto" || $0.id == "messaggio-grazie-sconosciuto" }),
+              illeggibile.messaggi.contains(where: { $0.origine.tipo == .ringraziamentoPresentazione }) else {
             return "un messaggio con un tipo d'occasione sconosciuto non si scarta (o fa perdere gli altri)"
         }
         return nil

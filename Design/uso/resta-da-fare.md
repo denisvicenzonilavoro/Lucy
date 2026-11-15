@@ -1614,3 +1614,35 @@ Resta / da decidere:
 - «Annulla» non vale per «Indietro» dal menu (chiude l'annullamento, come ogni altro spostamento).
 - Il volo dopo «Passa a…» parte quando il dettaglio è tornato sulla scheda (`chiudi(poi:)`), con la molla di sempre
   (`Tema.Apple.Moto.Potenziali.avanza`).
+
+## 48. Il passaparola segue la persona
+
+Fatto (solo Mac, dentro `#if os(macOS)`; iPhone e iPad restano come prima):
+- Clic su un cliente dell'albero (a qualsiasi livello) o su un ambasciatore: si sceglie la persona
+  (`stato.potenziali.evidenziato`, solo in memoria); secondo clic, o «Tutti», spegne. ⌘-clic apre il dossier (48-c);
+  un potenziale apre il suo dettaglio come prima. `NodoDisposto.antenati` dà il ramo di chiunque: restano pieni la
+  persona, chi scende da lei e i loro legami (anche il legame verso la persona scelta, come nel template); il resto al
+  20% (`Tema.Apple.Passaparola.opacitaSpenta`, 0,2 solo sul Mac) con `Tema.Apple.Moto.Passaparola.animazioneRamo`.
+- Card «Il ramo di» (`RamoPassaparolaCard`) al posto degli ambasciatori, entrata 0,26 s dal basso di 6 punti: avatar 42,
+  nome 19 bold, frase `TestiPassaparola.ramo(nome:clienti:valoreClienti:potenziali:)`, elenco con capsula «Cliente» /
+  «Potenziale» (con la fase) e cifra, «Ringrazia …» e «Apri il dossier». Senza presentati: «Chiedi una presentazione»
+  solo se c'è un momento giusto per quella persona (48-a), altrimenti la riga «Il momento giusto per chiedere te lo dice
+  Prisma, dopo un fatto bello.».
+- Le persone del ramo vengono da `MotorePassaparola.ramo(di:…)` (tutte, non solo le otto disegnate per persona e le tre
+  generazioni dell'albero: con il «+ N» l'albero non basta), con le regole di `ambasciatori`; valore dei soli clienti.
+- «Ringrazia …»: `TipoOccasioneMessaggio.ringraziamentoPresentazione` in fondo all'enum (non commerciale), modello nei
+  tre toni in `ModelliMessaggi`, `StatoShell.preparaRingraziamento(clienteId:)` mette la bozza nel dossier senza
+  cambiare app (come le campagne) e lo dice l'avviso; «✓ Messaggio pronto» quando la bozza di oggi esiste.
+- Prestazioni: albero, ambasciatori, quota, nuovi per anno e patrimoni in `stato.datiPassaparola()` (`ricavato`), il
+  momento giusto in `momentiPassaparola()` con l'impronta delle pratiche nella chiave. I potenziali sono neutri per i
+  calcoli (`DatiVivi.potenziali`): la loro impronta va nella chiave. Corretto anche `passiPotenziali()` della 47, che
+  senza l'impronta restava al passo di prima dopo uno spostamento.
+- Istantanee 1148 (chiara e scura) e 1149; prove del ramo e del grazie in `ProvaCalcoliPassaparola`, il grazie nel
+  campionario dei modelli (`ProvaCalcoliMessaggi`), andata e ritorno e tipo sconosciuto in `ProvaBackupLuceClienti`.
+
+Resta / da decidere:
+- 48-b: il testo del grazie nei tre toni va fatto vedere all'utente prima dell'unione (cordiale: «volevo dirti grazie:
+  so che hai parlato di me a persone a cui tieni…»; formale con il lei; breve «grazie per aver parlato di me…»).
+- La bozza del grazie è sempre nel tono cordiale e con il canale dal telefono (Messaggi con un cellulare, altrimenti
+  Mail); si cambia in Messaggi prima di aprirla.
+- L'avviso del template non ha un collegamento diretto a Messaggi: la bozza si trova nel dossier e in Messaggi.

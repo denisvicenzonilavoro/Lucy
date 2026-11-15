@@ -48,6 +48,84 @@ enum ProvaCalcoliPassaparola {
         testoRichiesta(verifica)
         dallaCarta(verifica)
         prossimoPasso(verifica)
+        ramo(verifica)
+    }
+
+    // MARK: - 11 Il ramo di una persona e il grazie (Migliorie d'uso 48)
+
+    private static func ramo(_ verifica: VerificaCalcoli) {
+        // Frasi: singolari, plurali, nessun cliente, nessun presentato
+        let euro = Formati.euro(328_000)
+        verifica.vero("Ramo: «Ti ha presentato 3 persone: 2 sono già clienti (…), una è ancora un potenziale.»",
+                      TestiPassaparola.ramo(nome: "Sofia Romano", clienti: 2, valoreClienti: 328_000, potenziali: 1)
+                      == "Ti ha presentato 3 persone: 2 sono già clienti (\(euro)), una è ancora un potenziale.")
+        verifica.vero("Ramo: una persona già cliente, nessun potenziale",
+                      TestiPassaparola.ramo(nome: "Marco Bianchi", clienti: 1, valoreClienti: 65_000, potenziali: 0)
+                      == "Ti ha presentato una persona: una è già cliente (\(Formati.euro(65_000))).")
+        verifica.vero("Ramo: nessuna è ancora cliente, due potenziali",
+                      TestiPassaparola.ramo(nome: "Marco Bianchi", clienti: 0, valoreClienti: 0, potenziali: 2)
+                      == "Ti ha presentato 2 persone: nessuna è ancora cliente, 2 sono ancora potenziali.")
+        verifica.vero("Ramo: una persona sola, ancora potenziale",
+                      TestiPassaparola.ramo(nome: "Marco Bianchi", clienti: 0, valoreClienti: 0, potenziali: 1)
+                      == "Ti ha presentato una persona: nessuna è ancora cliente, una è ancora un potenziale.")
+        verifica.vero("Ramo: chi non ha presentato nessuno",
+                      TestiPassaparola.ramo(nome: "Giulia Verdi", clienti: 0, valoreClienti: 0, potenziali: 0)
+                      == "Giulia non ti ha ancora presentato nessuno.")
+
+        // Il motore: tutti i presentati (anche oltre quelli disegnati), il valore dei soli clienti, mai le stime
+        let clienti = [cliente("sofia", "Sofia Romano"),
+                       cliente("elena", "Elena Marchi", da: "sofia", il: d(2024, 1, 10)),
+                       cliente("paola", "Paola Leone", da: "sofia", il: d(2022, 3, 5)),
+                       cliente("nuovo", "Nuovo Senza Posizioni", da: "sofia", il: d(2025, 6, 1)),
+                       cliente("giulia", "Giulia Verdi")]
+        var interessato = potenziale("davide", da: "sofia", stima: 320_000, fase: .analisi)
+        interessato.nome = "Davide Sala"
+        let noInteresse = potenziale("no", da: "sofia", stima: 90_000, fase: .nonInteressato)
+        var diventato = potenziale("diventato", da: "sofia", stima: 50_000, fase: .cliente)
+        diventato.clienteId = "elena"
+        let altrui = potenziale("altrui", da: "giulia", stima: 10_000)
+        let posizioni = [liquidita("elena", 140_000), liquidita("paola", 188_000)]
+        let netti = MotorePassaparola.patrimoni(posizioni)
+        let r = MotorePassaparola.ramo(di: "sofia", clienti: clienti, potenziali: [interessato, noInteresse, diventato, altrui],
+                                       netti: netti)
+        verifica.vero("Ramo: tre clienti e un potenziale (non interessati e già clienti fuori), prima i clienti dal più vecchio",
+                      r?.presentati.map(\.id) == ["c-paola", "c-elena", "c-nuovo", "p-davide"]
+                      && r?.clienti == 3 && r?.potenziali == 1)
+        verifica.vero("Ramo: il valore è dei soli clienti (328.000 €), senza la stima del potenziale",
+                      r?.valoreClienti == 328_000 && r?.presentati.last?.cifra == 320_000
+                      && r?.presentati.first(where: { $0.id == "c-nuovo" })?.cifra == nil)
+        let vuoto = MotorePassaparola.ramo(di: "giulia", clienti: clienti, potenziali: [altrui], netti: netti)
+        verifica.vero("Ramo: un cliente con solo un potenziale presentato; uno sconosciuto non ha ramo",
+                      vuoto?.presentati.map(\.id) == ["p-altrui"]
+                      && MotorePassaparola.ramo(di: "nessuno", clienti: clienti, potenziali: [], netti: netti) == nil)
+        if let r {
+            verifica.vero("Ramo: la frase con le cifre del motore",
+                          TestiPassaparola.ramo(nome: r.nome, clienti: r.clienti, valoreClienti: r.valoreClienti, potenziali: r.potenziali)
+                          == "Ti ha presentato 4 persone: 3 sono già clienti (\(euro)), una è ancora un potenziale.")
+        }
+
+        // Il grazie: in ogni tono e canale nessun nome delle persone presentate, nessuna cifra, non commerciale
+        let sofia = clienti[0]
+        let o = MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: posizioni, oggi: oggi, cal: cal)
+        let nomi = (r?.presentati.map(\.nome) ?? []).flatMap { n in [n, TestiTraguardi.primoNome(n)] }
+        var sbagliati: [String] = []
+        for tono in TonoMessaggio.allCases {
+            for canale in CanaleMessaggio.allCases {
+                let t = ModelliMessaggi.testo(o, tono: tono, canale: canale, cliente: sofia, firma: "Denis")
+                let nome = "\(tono.rawValue)/\(canale.rawValue)"
+                if nomi.contains(where: { t.completo.contains($0) }) { sbagliati.append("\(nome): nome di un presentato") }
+                if t.completo.contains(where: \.isNumber) || !CommentoVera.cifre(t.completo).isEmpty { sbagliati.append("\(nome): cifre") }
+                if (t.oggetto ?? "").contains(where: \.isNumber) { sbagliati.append("\(nome): cifre nell'oggetto") }
+                if tono == .breve, t.completo.count > RegoleMessaggi.caratteriBreve { sbagliati.append("\(nome): lunghezza") }
+            }
+        }
+        verifica.vero("Ramo: il grazie per le presentazioni non nomina i presentati, non ha cifre e non è commerciale"
+                      + (sbagliati.isEmpty ? "" : " (\(sbagliati.joined(separator: "; ")))"),
+                      sbagliati.isEmpty && !o.commerciale && o.cifre.isEmpty && o.tipo == .ringraziamentoPresentazione)
+        let domani = cal.date(byAdding: .day, value: 1, to: oggi) ?? oggi
+        verifica.vero("Ramo: un grazie al giorno (stesso giorno stessa occasione, il giorno dopo un'altra)",
+                      MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: [], oggi: oggi.addingTimeInterval(3600), cal: cal).id == o.id
+                      && MotorePassaparola.occasioneRingraziamento(cliente: sofia, posizioni: [], oggi: domani, cal: cal).id != o.id)
     }
 
     // MARK: - 10 Il prossimo passo (Migliorie d'uso 47)

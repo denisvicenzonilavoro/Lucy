@@ -1,4 +1,7 @@
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 // Clienti › Passaparola (Design/template-luce-specifica.md §9.2.1 punto 1.2 e §9.2.4, «Luce» giro 12):
 //
@@ -15,6 +18,10 @@ import SwiftUI
 // - Passaggio su un nodo: il suggerimento (sul Mac); clic su un cliente: il dossier; clic su un potenziale: il suo
 //   dettaglio in Potenziali; clic su un ambasciatore: i suoi rami (gli altri al 30%); «Prepara la richiesta» apre
 //   Messaggi e diventa «✓ Messaggio pronto» solo quando il messaggio esiste.
+// - Sul Mac (Migliorie d'uso 48, «il passaparola segue la persona»): il clic su un cliente (a qualsiasi livello) o su un
+//   ambasciatore sceglie la persona: il suo ramo resta pieno (lei, chi ha presentato e i legami), il resto scende al 20%,
+//   e a destra la card «Il ramo di» prende il posto degli ambasciatori, con «Ringrazia …» (una bozza in Messaggi, mai
+//   spedita) e «Apri il dossier»; ⌘-clic apre subito il dossier.
 // - Movimento: legami pieni tracciati, tratteggiati in dissolvenza, nodi da scala 0,6, colonne degli anni da 0 (valori
 //   in Tema.Apple.Moto.Passaparola). «Riduci movimento» e istantanee: tutto fermo nello stato finale.
 
@@ -27,26 +34,14 @@ struct VistaPassaparola: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
-        let oggi = Date()
+        // Migliorie d'uso 48 (punto 6): albero, ambasciatori, quota e nuovi per anno in cache (`datiPassaparola`), il
+        // momento giusto pure (con l'impronta delle pratiche nella chiave): il body non rifà i motori su tutto l'archivio
+        let d = stato.datiPassaparola()
+        let momenti = stato.momentiPassaparola()
+        let albero = d.albero
         let clienti = stato.dati.clienti
-        let potenziali = stato.dati.potenziali
-        let posizioni = stato.dati.posizioni
-        // I patrimoni una volta sola, per albero, ambasciatori e quota
-        let netti = MotorePassaparola.patrimoni(posizioni)
-        let albero = MotorePassaparola.albero(clienti: clienti, potenziali: potenziali, posizioni: posizioni, netti: netti)
-        let ambasciatori = MotorePassaparola.ambasciatori(clienti: clienti, potenziali: potenziali, posizioni: posizioni, netti: netti)
-        let quota = MotorePassaparola.quotaPassaparola(clienti: clienti, posizioni: posizioni, oggi: oggi, netti: netti)
-        let anni = MotorePassaparola.nuoviPerAnno(clienti: clienti, oggi: oggi)
-        // Le pratiche non entrano nei calcoli in cache (DatiPrisma.stessiCalcoli): si leggono vive per la data della firma
-        let momenti: [MomentoPerChiedere] = {
-            // iPad (§9.2.4) e archivio in sola lettura: si guarda soltanto, niente «Prepara la richiesta»
-            guard !stato.potenzialiInSolaLettura else { return [] }
-            var x = stato.datiDeiCalcoli()
-            x.pratiche = stato.dati.pratiche
-            return MotorePassaparola.momentoGiusto(dati: x, oggi: oggi)
-        }()
-        // Il rametto evidenziato e la comparsa (tracciati) li leggono l'albero, gli ambasciatori e le colonne: un clic su
-        // un ambasciatore o l'avvio dei tratti ridisegnano solo loro, senza rifare qui i motori su tutti i clienti
+        // La persona scelta e la comparsa (tracciati) le leggono l'albero e la colonna di destra: un clic su una persona o
+        // l'avvio dei tratti ridisegnano solo loro
         return HStack(alignment: .top, spacing: P.spazio) {
             VStack(alignment: .leading, spacing: P.spazio) {
                 DisegnoAlbero(albero: albero, clienti: clienti, statoFinale: statoFinale,
@@ -61,13 +56,14 @@ struct VistaPassaparola: View {
             }
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: P.spazio) {
-                    AmbasciatoriCard(ambasciatori: ambasciatori, quota: quota)
+                    ColonnaChiPassaparola(ambasciatori: d.ambasciatori, quota: d.quota, momenti: momenti,
+                                          calmo: calmo || statoFinale)
                     if let m = momenti.first, let c = stato.cliente(m.clienteId) {
                         MomentoGiustoCard(momento: m, cliente: c, pronto: stato.richiestaPreparata(m)) {
                             stato.preparaRichiestaPresentazione(m)
                         }
                     }
-                    ColonneAnniPassaparola(anni: anni, statoFinale: statoFinale, calmo: calmo || statoFinale)
+                    ColonneAnniPassaparola(anni: d.anni, statoFinale: statoFinale, calmo: calmo || statoFinale)
                 }
             }
             .frame(width: P.larghezzaColonnaDestra)
@@ -76,13 +72,21 @@ struct VistaPassaparola: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
-    /// Clic su un nodo: il dossier del cliente o il dettaglio del potenziale.
+    /// Clic su un nodo: sul Mac (Migliorie d'uso 48) un cliente si sceglie (il suo ramo e la card «Il ramo di»; un secondo
+    /// clic spegne la scelta) e con ⌘-clic si apre il suo dossier; su iPhone e iPad il dossier come prima. Un potenziale
+    /// apre il suo dettaglio in Potenziali.
     private func tocca(_ n: NodoPassaparola) {
         switch n.tipo {
         case .cliente(let id):
-            stato.clienteAttivoId = id
-            stato.schedaCliente = .panoramica
-            stato.vistaClienti = .rubrica
+            #if os(macOS)
+            if NSEvent.modifierFlags.contains(.command) {
+                apriDossier(id)
+            } else {
+                stato.potenziali.evidenziato = stato.potenziali.evidenziato == id ? nil : id
+            }
+            #else
+            apriDossier(id)
+            #endif
         case .potenziale(let id):
             stato.potenziali.scelto = id
             stato.potenziali.dettaglioIstantanea = id
@@ -90,6 +94,12 @@ struct VistaPassaparola: View {
         case .tu, .altri:
             break
         }
+    }
+
+    private func apriDossier(_ id: String) {
+        stato.clienteAttivoId = id
+        stato.schedaCliente = .panoramica
+        stato.vistaClienti = .rubrica
     }
 }
 
@@ -105,7 +115,23 @@ private struct NodoDisposto: Identifiable {
     let indice: Int
     /// L'id del cliente del primo livello da cui scende (per evidenziare i rami di un ambasciatore).
     let ramo: String?
+    /// Gli id dei clienti da cui scende, dal primo livello al padre (Migliorie d'uso 48: il ramo di una persona qualsiasi).
+    var antenati: [String] = []
     var id: String { nodo.id }
+
+    /// Il cliente del nodo (nil per potenziali e «+ N»).
+    var clienteId: String? { if case .cliente(let id) = nodo.tipo { return id } else { return nil } }
+
+    /// Fuori dal ramo scelto: al 20% (sul Mac: né la persona scelta né chi scende da lei; il legame verso il nodo segue il
+    /// nodo, come nel template). Su iPhone e iPad come prima: fuori dal ramo del primo livello.
+    func spento(_ scelto: String?) -> Bool {
+        guard let scelto else { return false }
+        #if os(macOS)
+        return clienteId != scelto && !antenati.contains(scelto)
+        #else
+        return ramo != scelto
+        #endif
+    }
 }
 
 /// La disposizione dell'albero nella larghezza data (le x del template, scalate).
@@ -136,6 +162,7 @@ private struct DisposizioneAlbero {
             let rPrimo = P.raggio(patrimonio: primo.patrimonio, livello: 1)
             let cPrimo = CGPoint(x: xPrimo, y: y + alto / 2)
             let ramo: String? = { if case .cliente(let id) = primo.tipo { return id } else { return nil } }()
+            let antenatiSecondo: [String] = ramo.map { [$0] } ?? []
             if elenco.count < P.nodiMassimi {
                 elenco.append(NodoDisposto(nodo: primo, centro: cPrimo, raggio: rPrimo, padre: tu, raggioPadre: P.raggioTu,
                                            indice: elenco.count, ramo: ramo))
@@ -149,16 +176,19 @@ private struct DisposizioneAlbero {
                 let r2 = P.raggio(patrimonio: secondo.patrimonio, livello: 2)
                 if elenco.count < P.nodiMassimi {
                     elenco.append(NodoDisposto(nodo: secondo, centro: c2, raggio: r2, padre: cPrimo, raggioPadre: rPrimo,
-                                               indice: elenco.count, ramo: ramo))
+                                               indice: elenco.count, ramo: ramo, antenati: antenatiSecondo))
                 } else {
                     tagliati += 1
                 }
+                let antenatiTerzo: [String] = {
+                    if case .cliente(let id) = secondo.tipo { return antenatiSecondo + [id] } else { return antenatiSecondo }
+                }()
                 for (k, terzo) in secondo.figli.enumerated() {
                     let c3 = CGPoint(x: xTerzo, y: riga + CGFloat(k) * P.passoSecondo)
                     let r3 = P.raggio(patrimonio: terzo.patrimonio, livello: 3)
                     if elenco.count < P.nodiMassimi {
                         elenco.append(NodoDisposto(nodo: terzo, centro: c3, raggio: r3, padre: c2, raggioPadre: r2,
-                                                   indice: elenco.count, ramo: ramo))
+                                                   indice: elenco.count, ramo: ramo, antenati: antenatiTerzo))
                     } else {
                         tagliati += 1
                     }
@@ -171,6 +201,16 @@ private struct DisposizioneAlbero {
         self.tagliati = tagliati
         altezza = max(y, tu.y + P.raggioTu + P.margineSopra)
     }
+}
+
+/// La transizione del ramo scelto (Migliorie d'uso 48): 0,3 s al ritmo sul Mac, subito con «Riduci movimento» e nelle
+/// istantanee; su iPhone e iPad subito, come prima.
+private func animazioneRamo(_ calmo: Bool) -> Animation? {
+    #if os(macOS)
+    return calmo ? nil : Tema.Apple.Moto.Passaparola.animazioneRamo
+    #else
+    return nil
+    #endif
 }
 
 /// La curva di un legame: Bézier orizzontale dal padre al figlio.
@@ -217,7 +257,7 @@ private struct DisegnoAlbero: View {
                     tu(d.tu)
                     ForEach(d.nodi) { n in
                         NodoPassaparolaVista(disposto: n, mostra: mostra, calmo: calmo,
-                                             spento: evidenziato != nil && n.ramo != evidenziato, tocca: tocca)
+                                             spento: n.spento(evidenziato), tocca: tocca)
                     }
                     piedeAlbero(d)
                         .padding(.leading, P.padding)
@@ -236,7 +276,7 @@ private struct DisegnoAlbero: View {
 
     @ViewBuilder private func legami(_ d: DisposizioneAlbero, evidenziato: String?, mostra: Bool) -> some View {
         ForEach(d.nodi) { n in
-            let spento = evidenziato != nil && n.ramo != evidenziato
+            let spento = n.spento(evidenziato)
             let curva = CurvaLegame(da: CGPoint(x: n.padre.x + n.raggioPadre, y: n.padre.y),
                                     a: CGPoint(x: n.centro.x - n.raggio, y: n.centro.y))
             if n.nodo.giaCliente {
@@ -245,11 +285,13 @@ private struct DisegnoAlbero: View {
                     .stroke(P.cliente, lineWidth: n.nodo.livello <= 1 ? P.spessoreTronco : P.spessorePotenziale)
                     .opacity(spento ? P.opacitaSpenta : 1)
                     .animation(calmo ? nil : M.animazioneLegame.ritardoPrisma(M.ritardoLegame(n.indice)), value: mostra)
+                    .animation(animazioneRamo(calmo), value: spento)
             } else {
                 curva
                     .stroke(P.bordoPotenziale, style: StrokeStyle(lineWidth: P.spessorePotenziale, dash: P.tratteggio))
                     .opacity((mostra ? P.opacitaPotenziale : 0) * (spento ? P.opacitaSpenta : 1))
                     .animation(calmo ? nil : M.animazioneTratteggio.ritardoPrisma(M.ritardoLegame(n.indice)), value: mostra)
+                    .animation(animazioneRamo(calmo), value: spento)
             }
         }
     }
@@ -314,11 +356,20 @@ private struct NodoPassaparolaVista: View {
         .scaleEffect(mostra ? 1 : M.scalaNodo, anchor: .leading)
         .opacity((mostra ? 1 : 0) * (spento ? P.opacitaSpenta : 1))
         .animation(calmo ? nil : M.animazioneNodo.ritardoPrisma(M.ritardoNodo(disposto.indice)), value: mostra)
+        .animation(animazioneRamo(calmo), value: spento)
         .position(x: disposto.centro.x - r + larghezzaStimata(n, r: r) / 2, y: disposto.centro.y)
         .onTapGesture { tocca(n) }
-        .help(TestiPassaparola.suggerimento(n))
+        .help(suggerimento(n))
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
+    }
+
+    /// Il suggerimento al passaggio; sul Mac, sui clienti, anche che cosa fanno clic e ⌘-clic (Migliorie d'uso 48).
+    private func suggerimento(_ n: NodoPassaparola) -> String {
+        #if os(macOS)
+        if n.giaCliente { return TestiPassaparola.suggerimento(n) + "\n" + TestiPassaparola.suggerimentoNodo }
+        #endif
+        return TestiPassaparola.suggerimento(n)
     }
 
     /// La larghezza approssimata di cerchio e scritte (per posizionare il gruppo con il cerchio sul centro calcolato).
@@ -352,6 +403,157 @@ private struct NodoPassaparolaVista: View {
 }
 
 // MARK: - Colonna destra
+
+/// La prima card della colonna di destra: gli ambasciatori, oppure sul Mac (Migliorie d'uso 48) «Il ramo di» la persona
+/// scelta. Legge lei sola la scelta, così cambiarla non ridisegna la vista intera.
+private struct ColonnaChiPassaparola: View {
+    @Environment(StatoShell.self) var stato
+    let ambasciatori: [Ambasciatore]
+    let quota: QuotaPassaparola?
+    let momenti: [MomentoPerChiedere]
+    let calmo: Bool
+
+    private typealias M = Tema.Apple.Moto.Passaparola
+
+    var body: some View {
+        #if os(macOS)
+        let scelto = stato.potenziali.evidenziato
+        Group {
+            if let id = scelto, let ramo = stato.ramoPassaparola(id) {
+                RamoPassaparolaCard(ramo: ramo, momento: momenti.first(where: { $0.clienteId == id }))
+                    .id(id)
+                    .transition(.opacity.combined(with: .offset(y: M.spostamentoCarta)))
+            } else {
+                AmbasciatoriCard(ambasciatori: ambasciatori, quota: quota)
+            }
+        }
+        .animation(calmo ? nil : M.animazioneCarta, value: scelto)
+        #else
+        AmbasciatoriCard(ambasciatori: ambasciatori, quota: quota)
+        #endif
+    }
+}
+
+#if os(macOS)
+/// «Il ramo di» (Migliorie d'uso 48): chi ha presentato la persona scelta, con il valore dei già clienti (mai sommato alle
+/// stime dei potenziali, decisione 95), «Ringrazia …» (o, senza presentati, «Chiedi una presentazione» solo con un
+/// momento giusto in corso, decisione 48-a) e «Apri il dossier».
+private struct RamoPassaparolaCard: View {
+    @Environment(StatoShell.self) var stato
+    let ramo: RamoPassaparola
+    /// Il momento giusto per chiedere a questa persona, se c'è (decisione 17).
+    let momento: MomentoPerChiedere?
+
+    private typealias P = Tema.Apple.Passaparola
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: P.spazioRighe) {
+            testata
+            Text(TestiPassaparola.ramo(nome: ramo.nome, clienti: ramo.clienti, valoreClienti: ramo.valoreClienti,
+                                       potenziali: ramo.potenziali))
+                .carattereApple(P.fraseRamo)
+                .foregroundColor(Tema.Apple.Colore.inchiostro)
+                .fixedSize(horizontal: false, vertical: true)
+            if !ramo.presentati.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(ramo.presentati) { p in riga(p) }
+                }
+            }
+            pulsanti
+        }
+        .padding(P.padding)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(Tema.Apple.Superficie.cardPiatta)
+    }
+
+    private var testata: some View {
+        HStack(spacing: P.spazioRighe + 2) {
+            AvatarCliente(iniziali: ramo.iniziali, tinta: ramo.tinta.colori, lato: P.avatarRamo)
+            VStack(alignment: .leading, spacing: P.spazioMinimo * 2) {
+                Text(TestiPassaparola.ramoDi.uppercased())
+                    .carattereApple(Tema.Apple.Carattere.etichetta)
+                    .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                Text(ramo.nome)
+                    .carattereApple(P.nomeRamo)
+                    .foregroundColor(Tema.Apple.Colore.inchiostro)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            Spacer(minLength: P.spazioMedio)
+            Button(TestiPassaparola.tutti) { stato.potenziali.evidenziato = nil }
+                .buttonStyle(.appleSobrio)
+                .help("Torna ai tuoi ambasciatori")
+        }
+    }
+
+    private func riga(_ p: PresentatoRamo) -> some View {
+        HStack(spacing: P.spazioMedio) {
+            VStack(alignment: .leading, spacing: P.spazioMinimo) {
+                Text(p.nome)
+                    .carattereApple(P.rigaRamo)
+                    .foregroundColor(Tema.Apple.Colore.inchiostro)
+                    .lineLimit(1)
+                if !p.giaCliente, let f = p.fase {
+                    Text(f.titolo)
+                        .carattereApple(P.faseRamo)
+                        .foregroundColor(Tema.Apple.Colore.inchiostro3)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: P.spazioPiccolo)
+            CapsulaStatoApple(testo: p.giaCliente ? TestiPassaparola.capsulaCliente : TestiPassaparola.capsulaPotenziale,
+                              tono: p.giaCliente ? .ok : .neutro)
+            Text(TestiPassaparola.cifraPresentato(p))
+                .carattereApple(P.cifraRamo)
+                .foregroundColor(Tema.Apple.Colore.inchiostro)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+                .frame(width: P.larghezzaCifraRamo, alignment: .trailing)
+        }
+        .padding(.vertical, P.paddingRigaRamo)
+        .overlay(alignment: .bottom) {
+            Rectangle().fill(P.separatoreRamo).frame(height: 1)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    @ViewBuilder private var pulsanti: some View {
+        let soloLettura = stato.potenzialiInSolaLettura
+        HStack(spacing: P.spazioMedio) {
+            if !ramo.presentati.isEmpty {
+                if !soloLettura {
+                    let pronto = stato.ringraziamentoPreparato(clienteId: ramo.clienteId)
+                    Button(pronto ? TestiPassaparola.messaggioPronto : TestiPassaparola.ringrazia(ramo.nome)) {
+                        stato.preparaRingraziamento(clienteId: ramo.clienteId)
+                    }
+                    .buttonStyle(.applePrimario)
+                    .disabled(pronto)
+                }
+            } else if let m = momento {
+                // Decisione 48-a: la richiesta solo dopo un fatto bello (il momento giusto di oggi)
+                let pronta = stato.richiestaPreparata(m)
+                Button(pronta ? TestiPassaparola.messaggioPronto : TestiPassaparola.chiediPresentazione) {
+                    stato.preparaRichiestaPresentazione(m)
+                }
+                .buttonStyle(.applePrimario)
+                .disabled(pronta)
+            }
+            Button(TestiPassaparola.apriDossier) {
+                stato.clienteAttivoId = ramo.clienteId
+                stato.schedaCliente = .panoramica
+                stato.vistaClienti = .rubrica
+            }
+            .buttonStyle(.appleSobrio)
+        }
+        if ramo.presentati.isEmpty && momento == nil {
+            Text(TestiPassaparola.momentoDaPrisma)
+                .carattereApple(Tema.Apple.Carattere.secondario)
+                .foregroundColor(Tema.Apple.Colore.inchiostro3)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+    }
+}
+#endif
 
 private struct AmbasciatoriCard: View {
     @Environment(StatoShell.self) var stato

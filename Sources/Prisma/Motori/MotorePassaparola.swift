@@ -76,6 +76,34 @@ struct Ambasciatore: Identifiable, Equatable {
     let inArrivo: Double
 }
 
+/// Una persona presentata, nella card «Il ramo di» (Migliorie d'uso 48).
+struct PresentatoRamo: Identifiable, Equatable {
+    /// "c-\(clienteId)" o "p-\(potenzialeId)", come i nodi dell'albero.
+    let id: String
+    let nome: String
+    /// Già cliente (capsula «Cliente») o ancora potenziale (capsula «Potenziale» con la fase).
+    let giaCliente: Bool
+    let fase: FasePotenziale?
+    /// Il patrimonio netto per i clienti, la stima per i potenziali; nil = non noto («—»).
+    let cifra: Double?
+}
+
+/// Il ramo di una persona scelta nell'albero del passaparola (Migliorie d'uso 48): chi ha presentato, con il valore dei
+/// già clienti separato dalle stime dei potenziali (decisione 95: mai sommati).
+struct RamoPassaparola: Equatable {
+    let clienteId: String
+    let nome: String
+    let iniziali: String
+    let tinta: TintaAvatar
+    /// Prima i già clienti, poi i potenziali, ognuno dal più vecchio.
+    let presentati: [PresentatoRamo]
+
+    var clienti: Int { presentati.filter(\.giaCliente).count }
+    var potenziali: Int { presentati.count - clienti }
+    /// Σ dei patrimoni netti dei già clienti (lo stesso `portato` di `Ambasciatore`).
+    var valoreClienti: Double { presentati.filter(\.giaCliente).reduce(0) { $0 + max(0, $1.cifra ?? 0) } }
+}
+
 /// Il momento giusto per chiedere una presentazione (decisione 17).
 struct MomentoPerChiedere: Identifiable, Equatable {
     /// "\(clienteId)-\(riferimento)".
@@ -472,6 +500,33 @@ enum MotorePassaparola {
         }
     }
 
+    /// Il ramo di un cliente (Migliorie d'uso 48): tutte le persone che ha presentato (non solo quelle disegnate
+    /// nell'albero, che si ferma a otto per persona e a tre generazioni), con le stesse regole di `ambasciatori`: i
+    /// clienti con «Presentato da», i potenziali non «Non interessato» e non già diventati clienti dell'archivio. nil se
+    /// il cliente non c'è.
+    static func ramo(di clienteId: String, clienti: [Cliente], potenziali: [PotenzialeCliente],
+                     netti: [String: Double]) -> RamoPassaparola? {
+        guard let c = clienti.first(where: { $0.id == clienteId }) else { return nil }
+        let ids = Set(clienti.map(\.id))
+        let presentatiClienti = clienti
+            .filter { x in x.presentatoDa == clienteId && x.id != clienteId }
+            .sorted { a, b in
+                let da = a.presentatoIl ?? a.creatoIl, db = b.presentatoIl ?? b.creatoIl
+                return da != db ? da < db : a.id < b.id
+            }
+            .map { x in PresentatoRamo(id: "c-\(x.id)", nome: x.nome, giaCliente: true, fase: nil, cifra: netti[x.id]) }
+        let presentatiPotenziali = potenziali
+            .filter { p in
+                guard p.presentatoDa == clienteId, p.fase != .nonInteressato else { return false }
+                if let cid = p.clienteId, ids.contains(cid) { return false }
+                return true
+            }
+            .sorted { a, b in a.creatoIl != b.creatoIl ? a.creatoIl < b.creatoIl : a.id < b.id }
+            .map { p in PresentatoRamo(id: "p-\(p.id)", nome: p.nome, giaCliente: false, fase: p.fase, cifra: p.patrimonioStimato) }
+        return RamoPassaparola(clienteId: c.id, nome: c.nome, iniziali: c.iniziali, tinta: c.tinta,
+                               presentati: presentatiClienti + presentatiPotenziali)
+    }
+
     /// La data d'inizio del cliente: «Cliente dal» se scritta, altrimenti la data della scheda.
     static func inizio(_ c: Cliente) -> Date { c.clienteDal ?? c.creatoIl }
 
@@ -617,6 +672,20 @@ enum MotorePassaparola {
         q.clienteId = clienteId
         q.storia.append(CambioFase(fase: .cliente, il: il))
         return q
+    }
+
+    /// L'occasione del grazie per le presentazioni (Migliorie d'uso 48, non commerciale): nessuna cifra, nessun nome delle
+    /// persone presentate. Una al giorno per cliente (il riferimento è il giorno).
+    static func occasioneRingraziamento(cliente: Cliente, posizioni: [Posizione], oggi: Date,
+                                        cal: Calendar = .current) -> OccasioneMessaggio {
+        let giorno = cal.startOfDay(for: oggi)
+        let riferimento = "grazie-\(Int(giorno.timeIntervalSinceReferenceDate))"
+        return OccasioneMessaggio(origine: OrigineMessaggio(tipo: .ringraziamentoPresentazione, riferimento: riferimento),
+                                  clienteId: cliente.id,
+                                  canale: MotoreOccasioniMessaggi.canaleComune(cliente, posizioni.filter { $0.clienteId == cliente.id }),
+                                  gruppo: .oggi, titolo: TestiPassaparola.titoloRingraziamento(cliente.nome),
+                                  perche: TestiPassaparola.percheRingraziamento, oggetto: TestiPassaparola.oggettoRingraziamento,
+                                  cifre: [], priorita: .media, data: oggi)
     }
 
     /// L'occasione «richiesta di presentazione» per Messaggi (commerciale): il fatto come sola cifra.

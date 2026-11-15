@@ -44,7 +44,8 @@ enum VistaMessaggi: String, CaseIterable, Identifiable, Hashable {
 /// Lo stato in memoria di Potenziali e Passaparola. Il dettaglio aperto non sta qui: è lo `StatoDettaglio` della vista
 /// Potenziali (come in Pratiche › Dopo la firma).
 @Observable final class StatoPotenziali {
-    /// L'ambasciatore evidenziato nell'albero (gli altri rami al 30%).
+    /// L'ambasciatore evidenziato nell'albero (gli altri rami al 30%). Sul Mac (Migliorie d'uso 48) la persona scelta
+    /// nell'albero o fra gli ambasciatori: il suo ramo acceso (il resto al 20%) e a destra la card «Il ramo di».
     var evidenziato: String?
     /// La scheda che si sta trascinando.
     var trascinato: String?

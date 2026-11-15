@@ -139,7 +139,22 @@ extension Tema.Apple {
         static let spessorePotenziale: CGFloat = 1.4
         static let opacitaPotenziale: Double = 0.45
         static let spessoreTronco: CGFloat = 1.6
+        #if os(macOS)
+        /// Migliorie d'uso 48: il resto dell'albero scende al 20% quando si sceglie una persona (come il template).
+        static let opacitaSpenta: Double = 0.2
+        #else
         static let opacitaSpenta: Double = 0.30
+        #endif
+        /// La card «Il ramo di» (Migliorie d'uso 48): avatar 42, nome 19 bold, righe dei presentati 13,5.
+        static let avatarRamo: CGFloat = 42
+        static let nomeRamo = Tema.Apple.Carattere(dimensione: 19, peso: .bold)
+        static let fraseRamo = Tema.Apple.Carattere(dimensione: 14, peso: .regular, interlinea: 1.5)
+        static let rigaRamo = Tema.Apple.Carattere(dimensione: 13.5, peso: .regular)
+        static let cifraRamo = Tema.Apple.Carattere(dimensione: 13.5, peso: .semibold, tabellare: true)
+        static let faseRamo = Tema.Apple.Carattere(dimensione: 11, peso: .regular)
+        static let larghezzaCifraRamo: CGFloat = 86
+        static let paddingRigaRamo: CGFloat = 6
+        static let separatoreRamo = Tema.Apple.Colore.separatore
         static let nomePrimo = Tema.Apple.Carattere(dimensione: 13, peso: .semibold)
         static let nomeSecondo = Tema.Apple.Carattere(dimensione: 11.5, peso: .medium)
         static let cifra = Tema.Apple.Carattere(dimensione: 11, peso: .regular, tabellare: true)
@@ -284,6 +299,13 @@ extension Tema.Apple.Moto {
         static var animazioneNodo: Animation { Curva.molla.animazione(nodo) }
         static var animazioneColonna: Animation { Curva.uscita.animazione(colonna) }
         static var animazioneTratteggio: Animation { Curva.easeOut.animazione(tratteggio) }
+        /// Migliorie d'uso 48: il ramo scelto si accende (gli altri si spengono) in 0,3 s.
+        static let ramo = 0.3
+        static var animazioneRamo: Animation { Curva.ease.animazione(ramo) }
+        /// La card «Il ramo di» entra dal basso di 6 punti in 0,26 s.
+        static let carta = 0.26
+        static let spostamentoCarta: CGFloat = 6
+        static var animazioneCarta: Animation { Curva.easeOut.animazione(carta) }
     }
 
     enum Campagne {
