@@ -23,8 +23,22 @@ struct AzioniPratiche: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
+        #if os(macOS)
+        // Migliorie d'uso 33: su «Dopo la firma» il numerino rosso delle pratiche ferme (del cliente scelto, o di tutti),
+        // dagli stessi stati in cache della scheda: MotorePratiche non si rifà a ogni disegno
+        let ferme = stato.praticheFermeVisibili()
+        SegmentatoPillola(selezione: Bindable(stato).schedaPratiche, valori: SchedaPratiche.allCases, titolo: { $0.titolo },
+                          numero: { (scheda: SchedaPratiche) -> NumeroVoceSegmentato? in
+                              guard scheda == .dopoLaFirma, ferme > 0 else { return nil }
+                              return NumeroVoceSegmentato(valore: ferme, fondo: Tema.Apple.PraticheDopo.fondoNumeroFerme,
+                                                          testo: Tema.Apple.PraticheDopo.testoNumeroFerme,
+                                                          parlato: TestiPratiche.ferme(ferme))
+                          })
+            .fixedSize()
+        #else
         SegmentatoPillola(selezione: Bindable(stato).schedaPratiche, valori: SchedaPratiche.allCases, titolo: { $0.titolo })
             .fixedSize()
+        #endif
     }
 }
 

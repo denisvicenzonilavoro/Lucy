@@ -52,6 +52,13 @@ extension Tema.Apple {
         static let fraseVuota = K.corpo
         static let notaVuota = K.secondario
         static let larghezzaVuota: CGFloat = 420
+        /// Lo stato vuoto per il cliente scelto (Migliorie d'uso 33, `pratVuoto`): titolo display 22 grassetto tracking
+        /// −0,4, testo 14 interlinea 1,5 largo al più 470, 8 fra titolo e testo, 18 sopra il pulsante.
+        static let titoloVuotoCliente = K(dimensione: 22, peso: .bold, tracking: -0.4)
+        static let testoVuotoCliente = K(dimensione: 14, peso: .regular, interlinea: 1.5)
+        static let larghezzaVuotoCliente: CGFloat = 470
+        static let sopraTestoVuotoCliente: CGFloat = 8
+        static let sottoTestoVuotoCliente: CGFloat = 18
         /// L'etichetta «dati di prova» (catalogo d'esempio).
         static let datiDiProva = K(dimensione: 11, peso: .semibold)
         static let coloreDatiDiProva = C.inchiostro3
@@ -75,6 +82,11 @@ extension Tema.Apple {
             static let tratteggio: [CGFloat] = [5, 4]
             static let coloreSpento = C.inchiostro3
             static let opacitaSpento = 0.7
+            /// La riga del passo spento che dice cosa conterrà (Migliorie d'uso 33, `.stH`): 12,5 interlinea 1,4,
+            /// `inchiostro2`, 12 sotto l'etichetta.
+            static let anticipo = K(dimensione: 12.5, peso: .regular, interlinea: 1.4)
+            static let coloreAnticipo = C.inchiostro2
+            static let sopraAnticipo: CGFloat = 12
             /// Acceso: fondo `cardPiena` (#283642 in scuro), bordo 1 separatore, ombra della card.
             static let fondoAcceso = C.cardPiena
             static let bordoAcceso = C.separatore
@@ -178,6 +190,8 @@ extension Tema.Apple {
         /// «Compila da solo»: barra larga 290 con le voci a tassello 32, la pagina del modulo su un piano `chip`, la
         /// colonna «Compila per» larga 300. Sulla carta i colori sono fissi (uguali in scuro, regola dei documenti).
         enum Moduli {
+            /// Il nome del cliente dopo «Compilo per» (Migliorie d'uso 33): 13,5 in inchiostro, non maiuscolo.
+            static let nomeCompila = K(dimensione: 13.5, peso: .semibold)
             /// Il tassello della voce: 32, blu se scelta, grigio (#9FB3C2) se no.
             static let tassello: CGFloat = 32
             static let tasselloScelto = C.anello2

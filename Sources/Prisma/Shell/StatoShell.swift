@@ -88,6 +88,9 @@ enum VoceConfronto: Hashable {
     @ObservationIgnored private var ultimaVersioneClienti = 0
     /// I motori dei singoli clienti, per cliente (CacheClienti.swift).
     @ObservationIgnored let cacheClienti = CacheClienti()
+    /// Gli stati delle pratiche mostrati in Pratiche (Migliorie d'uso 33, PraticheCliente.swift): una sola cache per la
+    /// testata e la scheda «Dopo la firma».
+    @ObservationIgnored let cacheStatiPratiche = CacheStatiPratiche()
 
     /// Finestre interne, pannelli e blocco (StatoShellFinestre.swift ne inoltra le proprietà con i nomi di sempre):
     /// cambiarli non pubblica StatoShell, così le app aperte e i widget non si ricalcolano.

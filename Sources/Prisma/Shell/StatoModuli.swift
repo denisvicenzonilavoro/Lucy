@@ -13,8 +13,6 @@ import CoreGraphics
     /// Il modello mostrato (nil = il primo).
     var scelto: String?
     var pagina = 0
-    /// Il cliente da compilare (nil = il cliente attivo).
-    var clienteId: String?
     /// La proposta a cui si riferisce il modulo (nil = la più recente del canale del modulo).
     var posizioneId: String?
     /// La compilazione in corso: un'anteprima, finché non si salva.
@@ -223,24 +221,9 @@ import CoreGraphics
 // MARK: - Nello stato di Prisma
 
 extension StatoShell {
-    /// Il cliente da compilare: quello scelto in «Compila per», altrimenti il cliente attivo.
-    var clienteModulo: Cliente? {
-        if let id = moduli.clienteId, let c = cliente(id) { return c }
-        return clienteAttivo
-    }
-
-    /// I clienti come chip in «Compila per»: il cliente attivo, quello scelto e quelli con proposte aperte, al più 5.
-    var clientiRecentiModulo: [Cliente] {
-        var ids: [String] = []
-        for id in [moduli.clienteId, clienteAttivo?.id].compactMap({ $0 }) where !ids.contains(id) { ids.append(id) }
-        let conProposte = dati.posizioni.filter { $0.stato == .proposta && $0.esito != .rifiutata }
-            .sorted { $0.creataIl > $1.creataIl }.map(\.clienteId)
-        for id in conProposte where !ids.contains(id) { ids.append(id) }
-        for c in dati.clienti where !ids.contains(c.id) { ids.append(c.id) }
-        return ids.prefix(Self.chipModuli).compactMap { cliente($0) }
-    }
-
-    static let chipModuli = 5
+    /// Il cliente da compilare: il cliente della barra (Migliorie d'uso 33: niente più «Compila per»; con «Tutti i
+    /// clienti» nessuno, e il pulsante apre la scelta del cliente).
+    var clienteModulo: Cliente? { clienteAttivo }
 
     /// Le proposte del cliente nel canale del modulo (la più recente prima).
     func proposteModulo(_ c: Cliente, _ m: ModelloModulo) -> [Posizione] {
@@ -264,8 +247,8 @@ extension StatoShell {
                                  conservaIban: dati.impostazioni.pratiche.ibanConservato)
     }
 
-    /// L'anteprima di adesso, solo se è del cliente e del modello mostrati: cambiato il cliente attivo (o tolto quello
-    /// di «Compila per»), l'anteprima di prima non si mostra, non si salva nel dossier e non va al cliente.
+    /// L'anteprima di adesso, solo se è del cliente e del modello mostrati: cambiato il cliente della barra, l'anteprima
+    /// di prima non si mostra, non si salva nel dossier e non va al cliente.
     var anteprimaModulo: AnteprimaCompilazione? {
         guard let a = moduli.anteprima, let c = clienteModulo, let m = moduli.modelloScelto,
               a.clienteId == c.id, a.modelloId == m.id else { return nil }
@@ -289,13 +272,6 @@ extension StatoShell {
         guard moduli.scelto != id else { return }
         moduli.scelto = id
         moduli.pagina = 0
-        moduli.azzeraCompilazione()
-    }
-
-    func scegliClienteModulo(_ id: String) {
-        guard moduli.clienteId != id || moduli.anteprima != nil else { return }
-        moduli.clienteId = id
-        moduli.posizioneId = nil
         moduli.azzeraCompilazione()
     }
 

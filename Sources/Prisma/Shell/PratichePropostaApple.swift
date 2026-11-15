@@ -30,33 +30,46 @@ private struct CorpoPraticheProposta: View {
                           nota: "Le proposte nascono dai bisogni che le analisi dei tuoi clienti scoprono.",
                           pulsante: "Apri Clienti") { stato.apri(.clienti) }
         } else {
-            let bisogni = stato.bisogniProposta()
+            // Migliorie d'uso 33: con un cliente scelto nella barra solo i suoi bisogni (la cache resta su tutti)
+            let clienteScelto = stato.clientePratiche
+            let bisogni = stato.bisogniProposta(solo: clienteScelto?.id)
             let scelto = stato.bisognoSceltoProposta(bisogni)
-            HStack(alignment: .top, spacing: P.spazioLaterale) {
-                barra(bisogni, scelto: scelto)
-                    .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
-                Group {
-                    if let scelto {
-                        ColonnaProposta(stato: stato, vista: stato.vistaProposta(scelto))
-                            .id(scelto.id)
-                            .transition(.asymmetric(insertion: .opacity,
-                                                    removal: .opacity.combined(with: .offset(y: P.Moto.spostamentoCambio))))
-                    } else {
-                        VuotoPratiche(glifo: .proposta, frase: "Niente da costruire, per ora.")
-                    }
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .entrataCascata(1, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+            if let c = clienteScelto, bisogni.isEmpty {
+                VuotoClientePratiche(titolo: TestiPratiche.nessunBisogno(StatoShell.nomeBreve(c)),
+                                     testo: TestiPratiche.notaNessunBisogno,
+                                     pulsante: TestiPratiche.apriAnalisi) { stato.apri(.analisi360) }
+                    .onDisappear { proposta.fermaSequenza() }
+            } else {
+                colonne(bisogni, scelto: scelto, cliente: clienteScelto)
             }
-            .animation(Tema.Apple.Moto.animazione(P.Moto.cambio, calmo: calmo, istantanea: istantanea), value: scelto?.id)
-            // I modelli di Pratiche › Moduli per la tappa 5 (si leggono una volta, mai dentro il body)
-            .onAppear { stato.moduli.carica() }
-            .onDisappear { proposta.fermaSequenza() }
         }
     }
 
-    @ViewBuilder private func barra(_ bisogni: [BisognoScoperto], scelto: BisognoScoperto?) -> some View {
-        BarraLateralePratiche(titolo: "Bisogni scoperti dall'analisi") {
+    @ViewBuilder private func colonne(_ bisogni: [BisognoScoperto], scelto: BisognoScoperto?, cliente: Cliente?) -> some View {
+        HStack(alignment: .top, spacing: P.spazioLaterale) {
+            barra(bisogni, scelto: scelto, cliente: cliente)
+                .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+            Group {
+                if let scelto {
+                    ColonnaProposta(stato: stato, vista: stato.vistaProposta(scelto))
+                        .id(scelto.id)
+                        .transition(.asymmetric(insertion: .opacity,
+                                                removal: .opacity.combined(with: .offset(y: P.Moto.spostamentoCambio))))
+                } else {
+                    VuotoPratiche(glifo: .proposta, frase: "Niente da costruire, per ora.")
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .entrataCascata(1, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+        }
+        .animation(Tema.Apple.Moto.animazione(P.Moto.cambio, calmo: calmo, istantanea: istantanea), value: scelto?.id)
+        // I modelli di Pratiche › Moduli per la tappa 5 (si leggono una volta, mai dentro il body)
+        .onAppear { stato.moduli.carica() }
+        .onDisappear { proposta.fermaSequenza() }
+    }
+
+    @ViewBuilder private func barra(_ bisogni: [BisognoScoperto], scelto: BisognoScoperto?, cliente: Cliente?) -> some View {
+        BarraLateralePratiche(titolo: cliente.map { TestiPratiche.bisogniPer(StatoShell.nomeBreve($0)) } ?? "Bisogni scoperti dall'analisi") {
             if bisogni.isEmpty {
                 Text("Nessun bisogno scoperto. Le analisi dei clienti sono in ordine o hanno già una proposta aperta.")
                     .carattereApple(P.motivoVoce)
@@ -166,12 +179,22 @@ private struct ColonnaProposta: View {
 
     private static let etichette = ["Il prodotto", "L'importo", "Il prospetto", "L'adeguatezza", "I moduli"]
 
+    /// Migliorie d'uso 33: cosa conterrà il passo, scritto nel riquadro spento (solo Mac).
+    private static func anticipo(_ i: Int) -> String? {
+        #if os(macOS)
+        return i < TestiPratiche.anticipiPassi.count ? TestiPratiche.anticipiPassi[i] : nil
+        #else
+        return nil
+        #endif
+    }
+
     @ViewBuilder private func passi(unaRiga: Bool) -> some View {
         let colonne = Array(repeating: GridItem(.flexible(), spacing: Q.spazioPassi, alignment: .top),
                             count: unaRiga ? 5 : Q.colonneStrette)
         LazyVGrid(columns: colonne, alignment: .leading, spacing: Q.spazioPassi) {
             ForEach(0..<5, id: \.self) { i in
-                RiquadroPassoProposta(numero: i + 1, etichetta: Self.etichette[i], aspetto: aspetto(i)) {
+                RiquadroPassoProposta(numero: i + 1, etichetta: Self.etichette[i], aspetto: aspetto(i),
+                                      anticipo: Self.anticipo(i)) {
                     contenuto(i)
                 }
             }
@@ -407,7 +430,7 @@ private struct ColonnaProposta: View {
 
     private func nelFascicolo() {
         let b = vista.bisogno
-        stato.clienteAttivoId = b.clienteId
+        stato.portaAlClientePratiche(b.clienteId)
         let adesso = Date()
         let prossimo = stato.appuntamentiCliente(b.clienteId).filter { $0.inizio > adesso }.min { $0.inizio < $1.inizio }
         if let a = prossimo {
@@ -488,6 +511,8 @@ struct RiquadroPassoProposta<Contenuto: View>: View {
     let numero: Int
     let etichetta: String
     let aspetto: AspettoPasso
+    /// Cosa conterrà il passo, scritto sotto il numero finché il riquadro è spento (Migliorie d'uso 33).
+    var anticipo: String? = nil
     @ViewBuilder let contenuto: () -> Contenuto
 
     @Environment(\.prismaCalmo) private var calmo
@@ -498,6 +523,11 @@ struct RiquadroPassoProposta<Contenuto: View>: View {
 
     var body: some View {
         let forma = RoundedRectangle(cornerRadius: Q.raggioPasso, style: .continuous)
+        // VoiceOver: «1. Il prodotto», e da spento anche cosa conterrà (Migliorie d'uso 33)
+        let voce: String = {
+            if aspetto.spento, let anticipo { return "\(numero). \(etichetta): \(anticipo)" }
+            return "\(numero). \(etichetta)"
+        }()
         VStack(alignment: .leading, spacing: Q.spazioDentro) {
             HStack(spacing: Q.spazioNumero) {
                 Text("\(numero)")
@@ -512,6 +542,13 @@ struct RiquadroPassoProposta<Contenuto: View>: View {
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
                     .lineLimit(1)
                     .minimumScaleFactor(0.75)
+            }
+            if aspetto.spento, let anticipo {
+                Text(anticipo)
+                    .carattereApple(Q.anticipo)
+                    .foregroundColor(Q.coloreAnticipo)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, Q.sopraAnticipo - Q.spazioDentro)
             }
             if !aspetto.spento {
                 contenuto()
@@ -530,7 +567,7 @@ struct RiquadroPassoProposta<Contenuto: View>: View {
         .opacity(aspetto.spento ? Q.opacitaSpento : 1)
         .animation(Tema.Apple.Moto.animazione(M.Passo.accensione, calmo: calmo, istantanea: istantanea), value: aspetto)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel(Text("\(numero). \(etichetta)"))
+        .accessibilityLabel(Text(voce))
     }
 
     private var fondoNumero: Color {

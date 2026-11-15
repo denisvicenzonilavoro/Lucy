@@ -29,25 +29,20 @@ private struct CorpoPraticheSinistri: View {
 
     var body: some View {
         let oggi = Date()
-        let elenco = MotoreSinistri.elenco(stato.sinistriVisibili, oggi: oggi)
-        let scelto = sceltoEffettivo(elenco)
+        // Migliorie d'uso 33: con un cliente scelto nella barra solo i suoi sinistri (e il primo è scelto)
+        let cliente = stato.clientePratiche
+        let visibili = sinistriMostrati(cliente?.id)
+        let elenco = MotoreSinistri.elenco(visibili, oggi: oggi)
+        let scelto = sceltoEffettivo(elenco, visibili: visibili)
         ZStack {
-            HStack(alignment: .top, spacing: P.spazioLaterale) {
-                BarraSinistri(stato: stato, elenco: elenco, scelto: scelto?.id, oggi: oggi)
-                    .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
-                Group {
-                    if let s = scelto {
-                        SpedizioneSinistro(stato: stato, sinistri: sinistri, sinistro: s, oggi: oggi)
-                            .id(s.id)
-                    } else {
-                        VuotoPratiche(glifo: .sinistro, frase: TestiSinistri.fraseVuota, nota: TestiSinistri.notaVuota,
-                                      pulsante: stato.solaLettura || stato.clienti.isEmpty ? nil : TestiSinistri.titoloModulo) {
-                            stato.apriNuovoSinistro()
-                        }
-                    }
+            if let cliente, visibili.isEmpty {
+                VuotoClientePratiche(titolo: TestiPratiche.nessunSinistro(StatoShell.nomeBreve(cliente)),
+                                     testo: TestiPratiche.notaNessunSinistro,
+                                     pulsante: stato.solaLettura ? nil : TestiSinistri.titoloModulo) {
+                    stato.apriNuovoSinistro()
                 }
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-                .entrataCascata(1, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+            } else {
+                colonne(elenco, scelto: scelto, oggi: oggi)
             }
             if sinistri.moduloAperto {
                 VeloModuloSinistro()
@@ -57,10 +52,36 @@ private struct CorpoPraticheSinistri: View {
         }
     }
 
+    /// I sinistri dei clienti visibili, solo quelli del cliente `solo` se c'è.
+    private func sinistriMostrati(_ solo: String?) -> [Sinistro] {
+        let tutti = stato.sinistriVisibili
+        guard let solo else { return tutti }
+        return tutti.filter { $0.clienteId == solo }
+    }
+
+    @ViewBuilder private func colonne(_ elenco: [Sinistro], scelto: Sinistro?, oggi: Date) -> some View {
+        HStack(alignment: .top, spacing: P.spazioLaterale) {
+            BarraSinistri(stato: stato, elenco: elenco, scelto: scelto?.id, oggi: oggi)
+                .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+            Group {
+                if let s = scelto {
+                    SpedizioneSinistro(stato: stato, sinistri: sinistri, sinistro: s, oggi: oggi)
+                        .id(s.id)
+                } else {
+                    VuotoPratiche(glifo: .sinistro, frase: TestiSinistri.fraseVuota, nota: TestiSinistri.notaVuota,
+                                  pulsante: stato.solaLettura || stato.clienti.isEmpty ? nil : TestiSinistri.titoloModulo) {
+                        stato.apriNuovoSinistro()
+                    }
+                }
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .entrataCascata(1, base: Tema.Apple.Moto.Cascata.baseDentroApp)
+        }
+    }
+
     /// Il sinistro da mostrare: quello delle istantanee, poi quello scelto (anche un chiuso più vecchio, aperto dal
-    /// dossier), poi il primo della barra.
-    private func sceltoEffettivo(_ elenco: [Sinistro]) -> Sinistro? {
-        let visibili = stato.sinistriVisibili
+    /// dossier), poi il primo della barra. Uno di un altro cliente (Migliorie d'uso 33) lascia il posto al primo.
+    private func sceltoEffettivo(_ elenco: [Sinistro], visibili: [Sinistro]) -> Sinistro? {
         if let id = sinistri.istantanea, let s = visibili.first(where: { $0.id == id }) { return s }
         if let id = sinistri.scelto, let s = visibili.first(where: { $0.id == id }) { return s }
         return elenco.first

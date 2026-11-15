@@ -345,6 +345,27 @@ enum MotorePratiche {
 /// Le frasi delle pratiche. Quelle del template: «Emissione in corso presso la compagnia», «Fermo da 9 giorni: manca il
 /// primo premio», «Completata il 28 ottobre»; le altre sono nel tono del template (dichiarate nel resoconto del giro).
 enum TestiPratiche {
+    // MARK: Migliorie d'uso 33: Pratiche segue il cliente della barra
+
+    static func bisogniPer(_ nome: String) -> String { "Bisogni scoperti per \(nome)" }
+    static func nessunBisogno(_ nome: String) -> String { "Nessun bisogno scoperto per \(nome)." }
+    static let notaNessunBisogno = "I bisogni arrivano dall’Analisi 360: quando un’area resta scoperta, qui trovi la proposta da costruire."
+    static let apriAnalisi = "Apri Analisi 360"
+    static func nessunaPratica(_ nome: String) -> String { "Nessuna pratica aperta per \(nome)." }
+    static let notaNessunaPratica = "Quando una proposta viene firmata, qui segui i passi fino alla consegna."
+    static func nessunSinistro(_ nome: String) -> String { "Nessun sinistro per \(nome)." }
+    static let notaNessunSinistro = "Quando ne apri uno, qui segui la denuncia, i documenti e la liquidazione."
+    /// Cosa conterrà ogni passo della proposta prima di costruirla (`PASSI_COSA` del template).
+    static let anticipiPassi = ["Quello adatto al bisogno, con il suo canale", "Quanto, e per quanto tempo",
+                                "Le pagine da mostrare al cliente", "Il controllo su profilo, obiettivo e orizzonte",
+                                "Già compilati con i dati del dossier"]
+    static let compiloPer = "Compilo per"
+    static let perChiCompilo = "Per chi lo compilo?"
+    static let scegliCliente = "Scegli il cliente"
+    static let compilaConCliente = "✦ Compila con i dati del cliente"
+    /// VoiceOver sul segmento «Dopo la firma»: «1 pratica ferma», «3 pratiche ferme».
+    static func ferme(_ n: Int) -> String { n == 1 ? "1 pratica ferma" : "\(n) pratiche ferme" }
+
     static let daScheda = "dalla scheda di adeguatezza (documenti consegnati)"
     static let daConformita = "dal documento d'identità valido in Conformità"
     static let daNumeroContratto = "dal numero di contratto"

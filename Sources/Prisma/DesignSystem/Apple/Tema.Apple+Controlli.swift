@@ -21,6 +21,10 @@ extension Tema.Apple {
             static let spazioIcona: CGFloat = 6
             /// Lato dell'avatar nella voce (`avatar(c, 24)`).
             static let latoIcona: CGFloat = Misura.Avatar.minimo
+            /// Il numerino dopo il titolo (`.bN2`, Migliorie d'uso 33): 11 grassetto, capsula 1×7, 2 dopo il titolo.
+            static let numero = Carattere(dimensione: 11, peso: .bold, tabellare: true)
+            static let paddingNumero = Misura.padding(1, 7)
+            static let spazioNumero: CGFloat = 2
         }
 
         /// `.sw` (§2.9).

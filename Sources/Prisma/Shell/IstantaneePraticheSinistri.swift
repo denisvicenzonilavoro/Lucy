@@ -9,7 +9,9 @@ import Foundation
 /// - 832: nessun sinistro (i sinistri di prova tolti nella scena);
 /// - 833: il modulo «Nuovo sinistro» aperto da Marco e dalla sua polizza;
 /// - 834: Marco con gli aggiornamenti spenti (la colonna del telefono spenta, «Aggiorna Marco» spento);
-/// - 835: Giulia, «Furto della bicicletta» respinto (il nodo rosso dopo le fasi raggiunte).
+/// - 835: Giulia, «Furto della bicicletta» respinto (il nodo rosso dopo le fasi raggiunte);
+/// - 1111 e 1112 (Migliorie d'uso 33): Marco scelto nella barra (solo i suoi sinistri) e un cliente senza sinistri
+///   («Nessun sinistro per …» con «Nuovo sinistro»). Le 830-835 sono su «Tutti i clienti».
 /// DATI DI PROVA DICHIARATI: i tre sinistri di `SinistriDiProva` (fatti, numeri e importi fittizi); le scene 834 e 835
 /// cambiano un sinistro di prova nel solo stato dell'istantanea (che non si salva).
 extension Istantanee {
@@ -25,6 +27,7 @@ extension Istantanee {
         coppia("830-pratiche-sinistri") { s in mostraSinistro(s, SinistriDiProva.idMarco) }
         coppia("831-pratiche-sinistri-pagato") { s in mostraSinistro(s, SinistriDiProva.idSofia) }
         una("832-pratiche-sinistri-vuoto") { s in
+            s.scegliCliente(nil)
             s.dati.sinistri = []
             s.sinistri.istantanea = nil
             s.sinistri.scelto = nil
@@ -49,12 +52,22 @@ extension Istantanee {
             }
             mostraSinistro(s, SinistriDiProva.idGiulia)
         }
+        // Migliorie d'uso 33: solo i sinistri di Marco, e un cliente senza sinistri (con «Nuovo sinistro»)
+        una("1111-uso-pratiche-sinistri-cliente") { s in
+            mostraSinistro(s, SinistriDiProva.idMarco)
+            s.scegliCliente("marco")
+        }
+        una("1112-uso-pratiche-sinistri-cliente-vuoto") { s in
+            mostraSinistro(s, SinistriDiProva.idMarco)
+            let conSinistri = Set(s.dati.sinistri.map(\.clienteId))
+            if let c = s.dati.clienti.first(where: { !conSinistri.contains($0.id) }) { s.scegliCliente(c.id) }
+        }
         return scene
     }
 
-    /// Pratiche › Sinistri sul sinistro di prova dato (il cliente attivo è il suo).
+    /// Pratiche › Sinistri sul sinistro di prova dato, con «Tutti i clienti» nella barra (Migliorie d'uso 33).
     nonisolated static func mostraSinistro(_ s: StatoShell, _ id: String) {
-        if let x = s.dati.sinistri.first(where: { $0.id == id }) { s.clienteAttivoId = x.clienteId }
+        s.scegliCliente(nil)
         s.sinistri.istantanea = id
         s.sinistri.scelto = id
         s.apriPratiche(.sinistri)

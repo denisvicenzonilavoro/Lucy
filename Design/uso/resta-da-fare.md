@@ -1255,3 +1255,38 @@ Resta:
 - La prova di fluidità per «cambiare cliente non rifà `territorioOggi`» non è stata scritta.
 - Guardare sul Mac 1100-1103: se Giulia ha vicini con i 35 clienti di prova, la posizione della scheda vicino al bordo
   (l'altezza per tenerla dentro la mappa è stimata, 170) e la lunghezza della riga patrimonio + due canali.
+
+## 33. Pratiche segue il cliente, e i passi vuoti dicono cosa conterranno
+
+Fatto (solo Mac; su iPhone e iPad `clientePratiche` è sempre nil e Pratiche resta com'era):
+- **Chi è il cliente**: `StatoShell.clientePratiche` (Shell/PraticheCliente.swift), nil con «Tutti i clienti».
+  Le strade che portano Pratiche su un cliente passano da `portaAlClientePratiche` (sul Mac `scegliCliente` in
+  silenzio): riquadro finale, «Rimedia», prospetto, «Presenta», tappa 5 dei moduli, `proponiDaAzienda`, i bisogni chiesti
+  da fuori (`richiediBisognoProposta`, se la barra è su un altro cliente), la carta «moduli» della notte, un sinistro
+  aperto o salvato di un altro cliente.
+- **Proposta**: `bisogniProposta(solo:)` filtra dopo la cache su tutti; barra «Bisogni scoperti per <Nome>»; senza
+  bisogni lo stato vuoto nuovo `VuotoClientePratiche` con «Apri Analisi 360». Il clic su un bisogno con «Tutti i
+  clienti» non cambia il cliente. I passi spenti dicono cosa conterranno (`RiquadroPassoProposta.anticipo`, testi
+  `TestiPratiche.anticipiPassi`), anche con «Tutti i clienti»; VoiceOver legge «1. Il prodotto: …».
+- **Moduli**: tolti `StatoModuli.clienteId`, `clientiRecentiModulo`, `scegliClienteModulo`, i chip e la ricerca «Altri».
+  Con un cliente «Compilo per <Nome Cognome>»; senza, «Per chi lo compilo?» con «Scegli il cliente» e «✦ Compila con i
+  dati del cliente», che aprono il pannello della barra. Al cambio di cliente la proposta e la compilazione del cliente
+  di prima si azzerano (`onChange` in PraticheModuli).
+- **Dopo la firma**: la cache degli stati è in `StatoShell.cacheStatiPratiche` con il cliente negli ingressi; tile
+  ricontate sulle sue pratiche (la terza resta «Concluse a <mese>», proposta); senza pratiche del cliente «Nessuna pratica
+  aperta per <Nome>.» al posto di tile ed elenco (come il `pratVuoto` del template).
+- **Sinistri**: solo quelli del cliente, il primo scelto; senza «Nessun sinistro per <Nome>.» con «Nuovo sinistro»
+  (proposta). Il modulo del nuovo sinistro con «Tutti i clienti» parte senza cliente («Scegli il cliente», «Salva»
+  spento).
+- **Il numero sul segmento**: `SegmentatoPillola` ha il parametro facoltativo `numero` (`NumeroVoceSegmentato`, token in
+  `Tema.Apple.Controlli.Segmentato`); su «Dopo la firma» le pratiche ferme in rosso, VoiceOver «Dopo la firma, 1
+  pratica ferma».
+- Istantanee: 800-807, 820-823 e 830-835 su «Tutti i clienti» esplicito; nuove 1105 e 1106 (chiare e scure), 1107-1112.
+
+Resta:
+- La prova di `--prova-fluidita` («la testata di Pratiche non rifà MotorePratiche a ogni disegno», «scegliere un cliente
+  filtra senza rifare `bisogniProposta`») non è stata scritta.
+- Guardare sul Mac 801 e 1105: che la riga dei passi spenti si legga con l'opacità 0,7 del riquadro (se no va fuori
+  dall'opacità), e 1106 se nessun cliente di prova è senza bisogni (la scena apre proposte presentate per il primo).
+- I token dei chip di «Compila per» (`Tema.Apple.Pratiche.Moduli.chip…`, `paddingPopover`) restano nel tema, non più
+  usati.

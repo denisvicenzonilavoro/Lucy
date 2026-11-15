@@ -577,7 +577,10 @@ extension StatoShell {
             }
         case .moduli:
             if let cid = c.clienteId {
-                scegliClienteModulo(cid)
+                // Migliorie d'uso 33: è un'azione dell'utente, quindi sceglie il cliente della barra
+                portaAlClientePratiche(cid)
+                moduli.posizioneId = nil
+                moduli.azzeraCompilazione()
                 scegliPropostaModulo(c.riferimento)
             }
             apriPratiche(.moduli)

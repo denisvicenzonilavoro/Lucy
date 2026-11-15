@@ -101,6 +101,8 @@ enum TestiSinistri {
     // MARK: Modulo
 
     static let titoloModulo = "Nuovo sinistro"
+    /// Il cliente del modulo quando la barra dice «Tutti i clienti» (Migliorie d'uso 33).
+    static let scegliCliente = "Scegli il cliente"
     static let titoloModifica = "Modifica il sinistro"
     static let nessunaPolizza = "Nessuna polizza (da collegare)"
     static let tipo = "Tipo di sinistro"
