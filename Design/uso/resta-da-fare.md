@@ -1075,3 +1075,45 @@ Resta:
 - La 25 rifà la barra in basso dello stesso pannello («L'hai spedito?», «Mandati oggi»): partire da `controlliMac` così
   com'è.
 - La 49 (campagna in tre passi) riusa «Tono» e «Invia con»: i testi stanno in `TestiMessaggi.tono` e `inviaCon`.
+
+## 25. Messaggi segue il cliente, e si vede cosa è già partito
+
+Fatto (solo Mac; iPhone e iPad come prima):
+- **Il motore filtra prima del taglio**: `MotoreOccasioniMessaggi.calcola(…, soloCliente:)` e `dividi(…, soloCliente:)` tengono
+  solo le occasioni del cliente prima del limite di 8 per gruppo (nil di base: iPhone e prove di prima invariati).
+  `StatoShell.occasioniMessaggi(cliente:)` le tiene con `ricavato("messaggi-occasioni|<id>")`; la modalità cliente passa
+  dalla stessa via (prima filtrava dopo il taglio), anche nel calcolo fuori di «Scrivi a …» del dossier.
+- **L'elenco segue la barra**: con un cliente scelto solo i suoi messaggi (anche quelli chiesti dalle altre app), con «Tutti
+  i clienti» tutti. Una richiesta per un altro cliente (`preparaMessaggio`) porta la barra su di lui, in silenzio.
+- **La copertura sull'occasione** (`CoperturaMessaggio`: id, stato, canale, ora, segno «spedito», oggetto e testo del
+  messaggio più recente di oggi), riempita da `dividi` e da `occasioniMessaggiConRichieste`: colonna e barra non cercano
+  nell'archivio.
+- **Il segno «spedito»**: `MessaggioCliente.speditoIl` (facoltativo, letto con tolleranza, nel file del cliente e nei
+  backup; nessuna versione nuova), `segnaSpedito(messaggioId:)` e `togliSpedito(messaggioId:)`, `nomeStato` («Spedito il
+  4 novembre») nel dossier, nelle Campagne e nel messaggio riaperto dal dossier.
+- **Colonna**: numero in pillola accanto a ogni occhiello (`NumeroOcchielloApple`, voci ancora da mandare), «Mandati oggi»
+  in fondo con la spunta verde e «Spedito alle …», «Aperto in Mail alle …» per i messaggi aperti e non confermati, titolo
+  senza larghezza massima, vuoto per cliente («Nessun messaggio da preparare per …»); pannello vuoto «Niente da scrivere,
+  per ora.».
+- **Barra a tre stati** (pannello incorniciato e non compatto): «Aperto in Mail. L’hai spedito?» con «Sì, spedito» e «Non
+  ancora» (`SessioneMessaggi.domandeChiuse`, in memoria; una nuova apertura la riapre), la pillola verde «Spedito oggi
+  alle … con Mail» con «È nel dossier di …» e «Non è partito»; il testo spedito si rilegge (niente scrittura, niente «↻
+  Riscrivi», tono e canale fermi). Entrata breve al cambio di stato (`Moto.cambioBarra`). «Sì, spedito» passa al prossimo
+  messaggio da mandare (prima i non traguardi) con l'avviso «Segnato come spedito: resta nel dossier di …».
+- **Prove**: M13 in `--prova-calcoli` (spedito oggi, tolto, spedito ieri, solo salvato, `nomeStato`, filtro prima del
+  limite di 8, senza cliente identico); in `--prova-backup` `speditoIl` torna uguale e un messaggio senza il campo si legge.
+- **Istantanee**: 1040 (Giulia scelta, con il riepilogo in «Mandati oggi»), 1041 («L’hai spedito?»), 1042 (spedito), chiare
+  e scure, e 1043 (cliente di prova senza messaggi). 490-496, 730 e Campagne restano su «Tutti i clienti» (stesso elenco di
+  prima, con i numeri accanto agli occhielli).
+
+Resta:
+- **Istantanee**: rigenerarle sul Mac e guardare 490-496 (numeri), 1040-1043, 730 (traguardi) e la pagina delle anteprime.
+  In 1040 se Giulia non ha altre occasioni il pannello mostra lo spedito (come 1042); in 1043 controllare che il cliente di
+  prova «Elena Fabbri» non abbia davvero occasioni (traguardi o consensi).
+- **`--prova-fluidita`**: aggiungere il controllo che «Sì, spedito» rifà `MotoreOccasioniMessaggi` una volta sola.
+- **«Mandati oggi» per un messaggio aperto ieri e segnato oggi**: oggi l'occasione è coperta dal giorno prima e sparisce
+  (come prima della miglioria); se serve, la copertura potrebbe contare anche `speditoIl`.
+- **Le «Occasioni» dell'Agenda** (gruppo 03) possono usare `NumeroOcchielloApple`: i token stanno oggi in
+  `Tema.Apple.Messaggi.Colonna`; se lo usano altre app conviene spostarli in un enum comune.
+- **iPhone e iPad**: la barra a tre stati e «Mandati oggi» arriveranno con il loro aggiornamento (l'iPhone non segna
+  spediti e il giornale di «Prisma ovunque» non porta il segno).

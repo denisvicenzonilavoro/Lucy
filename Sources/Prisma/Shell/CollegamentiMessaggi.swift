@@ -50,7 +50,13 @@ extension StatoShell {
         }
         let scelta = occasione?.id ?? occasioneId
         if let scelta, !allegati.isEmpty { allegatiMessaggi[scelta] = allegati }
-        richiestaMessaggi = RichiestaMessaggi(clienteId: clienteId ?? occasione?.clienteId ?? bozza?.clienteId, occasioneId: scelta,
+        let perCliente = clienteId ?? occasione?.clienteId ?? bozza?.clienteId
+        #if os(macOS)
+        // Migliorie d'uso 25: Messaggi segue il cliente della barra; una richiesta per un altro cliente porta la barra su
+        // di lui (in silenzio, come le altre strade che portano a un cliente). Con «Tutti i clienti» resta tutto.
+        if let c = perCliente, !tuttiIClienti, clienteAttivoId != c { scegliCliente(c) }
+        #endif
+        richiestaMessaggi = RichiestaMessaggi(clienteId: perCliente, occasioneId: scelta,
                                               messaggioId: messaggioId, bozza: bozza)
         // Un messaggio si prepara nella vista Messaggi, non in Campagne («Luce» giro 12)
         if vistaMessaggi != .messaggi { vistaMessaggi = .messaggi }
@@ -66,21 +72,24 @@ extension StatoShell {
 
     /// Le occasioni di Messaggi con in testa a «Da mandare oggi» quelle su richiesta che il motore non dà (dei clienti
     /// che ci sono ancora; in modalità cliente solo le sue). Quelle preparate oggi hanno la spunta, come le altre.
-    func occasioniMessaggiConRichieste(oggi: Date = Date()) -> OccasioniMessaggi {
-        let base = occasioniMessaggi(oggi: oggi)
+    /// Migliorie d'uso 25: con `cliente` solo le sue (anche quelle su richiesta).
+    func occasioniMessaggiConRichieste(oggi: Date = Date(), cliente: String? = nil) -> OccasioniMessaggi {
+        let base = occasioniMessaggi(oggi: oggi, cliente: cliente)
         guard !occasioniSuRichiesta.isEmpty else { return base }
         let cal = Calendar.current
         let presenti = Set(base.tutte.map(\.id))
         let clienti = Set(dati.clienti.map(\.id))
         let extra = occasioniSuRichiesta.compactMap { o -> OccasioneMessaggio? in
             guard !presenti.contains(o.id), clienti.contains(o.clienteId) else { return nil }
-            if let solo = modoCliente, o.clienteId != solo { return nil }
+            if let solo = modoCliente ?? cliente, o.clienteId != solo { return nil }
             // Chiesta apposta: resta anche se un messaggio di giorni fa la copriva (si manda di nuovo); con la spunta se
-            // un messaggio aperto o salvato oggi la copre
+            // un messaggio aperto o salvato oggi la copre (e la copertura, migliorie d'uso 25)
             var copia = o
-            copia.preparatoIl = dati.messaggi
+            let copre = dati.messaggi
                 .filter { m in m.occasioneId == o.id && m.stato.copreOccasione && cal.isDate(m.dataMostrata, inSameDayAs: oggi) }
-                .map(\.dataMostrata).max()
+                .max { a, b in a.dataMostrata < b.dataMostrata }
+            copia.preparatoIl = copre?.dataMostrata
+            copia.copertura = copre.map { m in CoperturaMessaggio(m) }
             return copia
         }
         guard !extra.isEmpty else { return base }

@@ -20,6 +20,9 @@ import SwiftUI
 //   scelta cambia fondo in 0,25 s. Le voci non si inclinano.
 // - Stato vuoto onesto: nessuna occasione oggi né in settimana, nessun messaggio inventato.
 // - «Riduci movimento»: niente cascata né uscita laterale, una dissolvenza di 0,15 s; istantanee: stato finale.
+// - Migliorie d'uso 25 (solo Mac): l'elenco segue il cliente della barra (con «Tutti i clienti» tutti), ogni occhiello ha
+//   il numero delle voci da mandare, i messaggi segnati come spediti oggi vanno in fondo in «Mandati oggi» con la spunta
+//   verde, e la barra del pannello chiede «L'hai spedito?» dopo un'apertura in Mail o in Messaggi (PannelloMessaggio).
 // Valori in DesignSystem/Apple/Tema.Apple+Messaggi.swift.
 
 // MARK: - Istantanee
@@ -40,9 +43,12 @@ final class RichiestaIstantaneaMessaggi {
     let motivoNonPronta: String?
     /// Migliorie d'uso 26 (solo Mac): la scheda «Da dove vengono le cifre» aperta.
     let datiAperti: Bool
+    /// Migliorie d'uso 25 (solo Mac): lo stato della barra della scena. La barra lo ricava dalla copertura
+    /// dell'occasione (i dati della scena); qui resta per dire che cosa la scena vuole mostrare.
+    let barra: StatoBarraMessaggio
 
     private init(stato: StatoShell, tipo: TipoOccasioneMessaggio?, clienteId: String?, tono: TonoMessaggio,
-                 canale: CanaleMessaggio, vera: Bool, motivoNonPronta: String?, datiAperti: Bool) {
+                 canale: CanaleMessaggio, vera: Bool, motivoNonPronta: String?, datiAperti: Bool, barra: StatoBarraMessaggio) {
         self.stato = stato
         self.tipo = tipo
         self.clienteId = clienteId
@@ -51,13 +57,14 @@ final class RichiestaIstantaneaMessaggi {
         self.vera = vera
         self.motivoNonPronta = motivoNonPronta
         self.datiAperti = datiAperti
+        self.barra = barra
     }
 
     static func chiedi(_ s: StatoShell, tipo: TipoOccasioneMessaggio? = nil, cliente: String? = nil, tono: TonoMessaggio = .cordiale,
                        canale: CanaleMessaggio = .mail, vera: Bool = true, motivoNonPronta: String? = nil,
-                       datiAperti: Bool = false) {
+                       datiAperti: Bool = false, barra: StatoBarraMessaggio = .normale) {
         attuale = RichiestaIstantaneaMessaggi(stato: s, tipo: tipo, clienteId: cliente, tono: tono, canale: canale, vera: vera,
-                                              motivoNonPronta: motivoNonPronta, datiAperti: datiAperti)
+                                              motivoNonPronta: motivoNonPronta, datiAperti: datiAperti, barra: barra)
     }
 
     static func per(_ s: StatoShell) -> RichiestaIstantaneaMessaggi? {
@@ -65,10 +72,12 @@ final class RichiestaIstantaneaMessaggi {
         return r
     }
 
-    /// L'occasione chiesta (la prima con quel tipo e quel cliente), o la prima dell'elenco.
+    /// L'occasione chiesta (la prima con quel tipo e quel cliente), o la prima dell'elenco. Senza tipo prima quelle non
+    /// ancora spedite (migliorie d'uso 25: lo spedito sta in fondo, in «Mandati oggi»).
     func occasione(in elenco: OccasioniMessaggi) -> OccasioneMessaggio? {
-        elenco.tutte.first { o in (tipo == nil || o.tipo == tipo) && (clienteId == nil || o.clienteId == clienteId) }
-            ?? elenco.tutte.first
+        let adatte = elenco.tutte.filter { o in (tipo == nil || o.tipo == tipo) && (clienteId == nil || o.clienteId == clienteId) }
+        let daMandare = tipo == nil ? adatte.first { o in o.speditoIl == nil } : nil
+        return daMandare ?? adatte.first ?? elenco.tutte.first
     }
 
     /// Il testo della scena: il modello fisso compilato con le cifre dell'occasione.
@@ -134,27 +143,38 @@ struct AppMessaggi: View {
     /// L'elenco delle occasioni e il pannello del messaggio scelto.
     private var elencoEPannello: some View {
         let richiesta = scatto ? RichiestaIstantaneaMessaggi.per(stato) : nil
-        let elenco = sessione.elenco(stato.occasioniMessaggiConRichieste())
+        let perCliente = clienteElenco
+        let elenco = sessione.elenco(stato.occasioniMessaggiConRichieste(cliente: perCliente))
         let scelta = richiesta?.occasione(in: elenco) ?? sessione.occasione(in: elenco)
         return GeometryReader { geo in
             let colonna = min(D.larghezzaColonna, max(D.larghezzaColonnaMinima, geo.size.width * D.quotaColonna))
             let resto = max(0, geo.size.width - colonna - D.gioco)
             HStack(alignment: .top, spacing: D.gioco) {
-                ColonnaOccasioniMessaggi(elenco: elenco, scelta: toccata ?? scelta?.id, base: M.baseApertura) { id in
+                ColonnaOccasioniMessaggi(elenco: elenco, scelta: toccata ?? scelta?.id, base: M.baseApertura,
+                                         nomeCliente: perCliente.flatMap { id in stato.cliente(id)?.nome }) { id in
                     scegli(id, attuale: scelta?.id)
                 }
                 .frame(width: colonna)
                 .frame(maxHeight: .infinity, alignment: .top)
                 pannello(scelta, richiesta: richiesta, compatto: resto < D.pannelloCompatto,
-                         voci: min(elenco.tutte.count, M.voceMassima))
+                         voci: min(elenco.tutte.count, M.voceMassima), cliente: perCliente)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
         }
     }
 
+    /// Migliorie d'uso 25: sul Mac l'elenco segue il cliente della barra (nil con «Tutti i clienti»); su iPad tutti.
+    private var clienteElenco: String? {
+        #if os(macOS)
+        return stato.tuttiIClienti ? nil : stato.clienteAttivoId
+        #else
+        return nil
+        #endif
+    }
+
     @ViewBuilder private func pannello(_ o: OccasioneMessaggio?, richiesta: RichiestaIstantaneaMessaggi?, compatto: Bool,
-                                       voci: Int) -> some View {
+                                       voci: Int, cliente perCliente: String?) -> some View {
         if let o, o.tipo == .traguardo, let c = stato.cliente(o.clienteId) {
             // Un traguardo da festeggiare: il biglietto e «Il momento, già pronto» (Luce giro 5, PannelloTraguardo.swift)
             PannelloTraguardo(occasione: o, cliente: c, base: cambiato ? M.baseCambio : M.baseApertura,
@@ -176,7 +196,8 @@ struct AppMessaggi: View {
                                   ?? RichiestaIstantaneaMessaggi.testo(o, cliente: c, stato: stato, tono: sessione.tono,
                                                                        canale: sessione.canale, vera: false,
                                                                        motivo: stato.disponibilitaLocale.motivo)) : nil,
-                              datiIstantanea: scatto && (richiesta?.datiAperti ?? false))
+                              datiIstantanea: scatto && (richiesta?.datiAperti ?? false),
+                              dopoSpedito: { passaAlProssimo(dopo: o.id, cliente: perCliente) })
                 .id(o.id)
                 .opacity(esce ? 0 : 1)
                 .offset(x: esce ? M.spostamentoCambio : 0)
@@ -186,11 +207,30 @@ struct AppMessaggi: View {
         }
     }
 
+    /// Migliorie d'uso 25 (Mac): dopo «Sì, spedito» il pannello passa al prossimo messaggio da mandare, nello stesso
+    /// ordine dell'elenco (prima quelli che non sono traguardi); se non ce ne sono resta sul messaggio spedito.
+    private func passaAlProssimo(dopo id: String, cliente perCliente: String?) {
+        let elenco = sessione.elenco(stato.occasioniMessaggiConRichieste(cliente: perCliente))
+        let daMandare = elenco.tutte.filter { o in o.id != id && o.speditoIl == nil }
+        guard let prossima = daMandare.first(where: { o in o.tipo != .traguardo }) ?? daMandare.first else { return }
+        toccata = nil
+        esce = false
+        if calmo || scatto {
+            cambiato = true
+            sessione.scelta = prossima.id
+        } else {
+            withAnimation(Tema.Apple.Moto.animazione(M.cambioBarra, calmo: calmo)) {
+                cambiato = true
+                sessione.scelta = prossima.id
+            }
+        }
+    }
+
     // MARK: Fare
 
     private func prendiRichiesta() {
         guard !scatto, let r = stato.prendiRichiestaMessaggi() else { return }
-        sessione.applica(r, elenco: stato.occasioniMessaggiConRichieste(), stato: stato)
+        sessione.applica(r, elenco: stato.occasioniMessaggiConRichieste(cliente: clienteElenco), stato: stato)
         toccata = nil
         esce = false
     }
@@ -233,38 +273,65 @@ struct ColonnaOccasioniMessaggi: View {
     let elenco: OccasioniMessaggi
     let scelta: String?
     let base: Double
+    /// Migliorie d'uso 25 (Mac): il cliente scelto nella barra (nil con «Tutti i clienti»), per il vuoto.
+    var nomeCliente: String? = nil
     let tocca: (String) -> Void
 
     private typealias C = Tema.Apple.Messaggi.Colonna
     private typealias M = Tema.Apple.Messaggi.Moto
 
+    /// Un gruppo della colonna con il numero da mostrare accanto all'occhiello (nil: senza numero).
+    private typealias GruppoColonna = (titolo: String, voci: [OccasioneMessaggio], numero: Int?)
+
+    private var gruppi: [GruppoColonna] {
+        #if os(macOS)
+        // Migliorie d'uso 25: i messaggi segnati come spediti oggi escono dal loro gruppo e vanno in fondo, in «Mandati
+        // oggi»; il numero conta le voci ancora da mandare (i traguardi non finiscono mai fra i mandati)
+        let cal = Calendar.current
+        func mandata(_ o: OccasioneMessaggio) -> Bool {
+            o.tipo != .traguardo && (o.speditoIl.map { d in cal.isDateInToday(d) } ?? false)
+        }
+        var righe: [GruppoColonna] = GruppoMessaggio.allCases.map { g -> GruppoColonna in
+            let voci = elenco.voci(g).filter { o in !mandata(o) }
+            return (titolo: g.titolo, voci: voci, numero: voci.count)
+        }
+        let mandati = elenco.tutte.filter { o in mandata(o) }
+        righe.append((titolo: TestiMessaggi.mandatiOggi, voci: mandati, numero: mandati.count))
+        return righe
+        #else
+        // «Da festeggiare» in cima (i traguardi, Luce giro 5), poi «Da mandare oggi» e «Questa settimana»
+        return GruppoMessaggio.allCases.map { g -> GruppoColonna in (titolo: g.titolo, voci: elenco.voci(g), numero: nil) }
+        #endif
+    }
+
     var body: some View {
         let _ = ContaCorpi.segna()
         let forma = RoundedRectangle(cornerRadius: C.raggio, style: .continuous)
-        // «Da festeggiare» in cima (i traguardi, Luce giro 5), poi «Da mandare oggi» e «Questa settimana»
-        let gruppi: [(String, [OccasioneMessaggio])] = GruppoMessaggio.allCases.map { g in (g.titolo, elenco.voci(g)) }
-        // La posizione di ogni voce per la cascata, in un passaggio (non una ricerca nell'elenco per ogni voce)
-        let tutte = elenco.tutte
+        let gruppi = self.gruppi
+        // La posizione di ogni voce per la cascata, in un passaggio (non una ricerca nell'elenco per ogni voce),
+        // nell'ordine in cui le voci compaiono
+        let tutte = gruppi.flatMap { g in g.voci }
         let indici = Dictionary(tutte.enumerated().map { ($1.id, $0) }, uniquingKeysWith: { primo, _ in primo })
         // I traguardi del menu «Da festeggiare» dalla cache, non il motore dei traguardi per ogni voce a ogni passaggio
         // (il menu contestuale si costruisce insieme al body)
         let traguardi = tutte.contains { $0.tipo == .traguardo } ? traguardiDelMenu() : [:]
         return VStack(alignment: .leading, spacing: 0) {
             if elenco.nessuna {
-                occhiello(GruppoMessaggio.oggi.titolo, primo: true)
-                Text(TestiMessaggi.nienteOggi)
+                occhiello(GruppoMessaggio.oggi.titolo, numero: nil, primo: true)
+                Text(nomeCliente.map { n in TestiMessaggi.vuotoPer(n) } ?? TestiMessaggi.nienteOggi)
                     .carattereApple(C.vuoto)
                     .foregroundColor(C.coloreVuoto)
+                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.horizontal, C.rientroVuoto)
                     .entrataCascata(0, base: base)
                 Spacer(minLength: 0)
             } else {
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: Tema.Apple.Messaggi.Voce.fraVoci) {
-                        let visibili = gruppi.filter { !$0.1.isEmpty }
+                        let visibili = gruppi.filter { !$0.voci.isEmpty }
                         ForEach(Array(visibili.enumerated()), id: \.offset) { g, gruppo in
-                            occhiello(gruppo.0, primo: g == 0)
-                            ForEach(gruppo.1) { o in
+                            occhiello(gruppo.titolo, numero: gruppo.numero, primo: g == 0)
+                            ForEach(gruppo.voci) { o in
                                 let i = indici[o.id] ?? 0
                                 VoceOccasioneMessaggio(occasione: o, cliente: stato.cliente(o.clienteId), scelta: o.id == scelta) {
                                     tocca(o.id)
@@ -322,13 +389,19 @@ struct ColonnaOccasioniMessaggi: View {
         }
     }
 
-    private func occhiello(_ titolo: String, primo: Bool) -> some View {
-        Text(titolo)
-            .carattereApple(C.occhiello)
-            .foregroundColor(C.coloreOcchiello)
-            .lineLimit(1)
-            .padding(primo ? C.occhielloPrimo : C.occhielloAltri)
-            .accessibilityAddTraits(.isHeader)
+    /// L'occhiello del gruppo; sul Mac (migliorie d'uso 25) con il numero delle voci da mandare accanto.
+    private func occhiello(_ titolo: String, numero: Int?, primo: Bool) -> some View {
+        HStack(alignment: .center, spacing: C.spazioNumeroOcchiello) {
+            Text(titolo)
+                .carattereApple(C.occhiello)
+                .foregroundColor(C.coloreOcchiello)
+                .lineLimit(1)
+                .accessibilityAddTraits(.isHeader)
+            if let numero, numero > 0 {
+                NumeroOcchielloApple(numero: numero)
+            }
+        }
+        .padding(primo ? C.occhielloPrimo : C.occhielloAltri)
     }
 }
 
@@ -368,8 +441,14 @@ struct VoceOccasioneMessaggio: View {
                         .foregroundColor(V.coloreTitolo)
                         .lineLimit(1)
                         .truncationMode(.tail)
-                        .frame(maxWidth: V.larghezzaTitolo, alignment: .leading)
-                    if let p = occasione.preparatoIl {
+                        .frame(maxWidth: larghezzaTitolo, alignment: .leading)
+                    if let r = rigaStatoMac {
+                        // Migliorie d'uso 25 (Mac): «Spedito alle …» o «Aperto in Mail alle …»
+                        Text(r.testo)
+                            .carattereApple(V.preparato)
+                            .foregroundColor(r.colore)
+                            .lineLimit(1)
+                    } else if let p = occasione.preparatoIl {
                         // Un traguardo festeggiato oggi (telefonata messa o segnato a mano) resta con la spunta fino a domani
                         Text(occasione.tipo == .traguardo ? TestiTraguardi.festeggiato : TestiMessaggi.preparato(p))
                             .carattereApple(V.preparato)
@@ -383,6 +462,13 @@ struct VoceOccasioneMessaggio: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                if spedita {
+                    Image(systemName: V.simboloSpedito)
+                        .carattereApple(V.spuntaSpedito)
+                        .foregroundColor(V.coloreSpedito)
+                        .padding(.leading, V.spazioSpunta)
+                        .accessibilityLabel(Text(TestiMessaggi.siSpedito))
+                }
             }
             .padding(V.padding)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -395,6 +481,37 @@ struct VoceOccasioneMessaggio: View {
         .animation(animazione, value: sopra)
         .accessibilityAddTraits(scelta ? AccessibilityTraits.isSelected : AccessibilityTraits())
         .help(occasione.titolo + " · " + occasione.perche)
+    }
+
+    /// Il titolo: largo al massimo 260 su iPad e iPhone; sul Mac (migliorie d'uso 25) senza larghezza massima.
+    private var larghezzaTitolo: CGFloat? {
+        #if os(macOS)
+        return nil
+        #else
+        return V.larghezzaTitolo
+        #endif
+    }
+
+    /// Migliorie d'uso 25 (Mac): segnato come spedito (la spunta verde a destra). Mai un traguardo.
+    private var spedita: Bool {
+        #if os(macOS)
+        return occasione.tipo != .traguardo && occasione.speditoIl != nil
+        #else
+        return false
+        #endif
+    }
+
+    /// Migliorie d'uso 25 (Mac): la riga sotto il titolo per un messaggio spedito o aperto e non ancora confermato
+    /// (nil: quella di sempre, il perché o «✓ Preparato alle …»).
+    private var rigaStatoMac: (testo: String, colore: Color)? {
+        #if os(macOS)
+        guard occasione.tipo != .traguardo, let c = occasione.copertura else { return nil }
+        if let s = c.speditoIl { return (testo: TestiMessaggi.spedito(s), colore: V.coloreSpedito) }
+        if c.aperto { return (testo: TestiMessaggi.aperto(c.quando, canale: c.canale), colore: V.coloreAperto) }
+        return nil
+        #else
+        return nil
+        #endif
     }
 
     @ViewBuilder private var avatar: some View {
@@ -433,7 +550,7 @@ struct VuotoMessaggi: View {
                 .carattereApple(v.carattereSimbolo)
                 .foregroundColor(v.coloreSimbolo)
                 .accessibilityHidden(true)
-            Text(TestiMessaggi.vuoto)
+            Text(testo)
                 .carattereApple(v.testo)
                 .foregroundColor(v.coloreTesto)
                 .multilineTextAlignment(.center)
@@ -443,5 +560,14 @@ struct VuotoMessaggi: View {
         .padding(p.padding)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .superficieApple(p.superficie, raggio: p.raggio)
+    }
+
+    /// Sul Mac (migliorie d'uso 25) «Niente da scrivere, per ora.»: il perché sta nella colonna.
+    private var testo: String {
+        #if os(macOS)
+        return TestiMessaggi.nienteDaScrivere
+        #else
+        return TestiMessaggi.vuoto
+        #endif
     }
 }

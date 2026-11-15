@@ -550,7 +550,7 @@ private struct MessaggiNoteDossier: View {
                         VStack(alignment: .leading, spacing: 0) {
                             Text(m.oggetto ?? m.origine.tipo.nome)
                                 .font(Tipo.campoValore).foregroundColor(Colori.Rubrica.testo).lineLimit(1)
-                            Text("\(m.canale.nome) · \(m.tono.nome) · \(m.stato.nome) · \(m.autore.nome)")
+                            Text("\(m.canale.nome) · \(m.tono.nome) · \(m.nomeStato) · \(m.autore.nome)")
                                 .font(Tipo.rubricaTema).foregroundColor(Colori.Rubrica.secondario).lineLimit(1)
                         }
                         Spacer()
@@ -598,16 +598,17 @@ private struct MessaggiNoteDossier: View {
             trovata = (k, Self.prima(pronte, cliente: id))
             return
         }
-        // Come `occasioniMessaggi()`: tutto il portafoglio, poi in modalità cliente solo le sue
+        // Come `occasioniMessaggi()`: tutto il portafoglio, in modalità cliente solo le sue (filtrate dal motore prima del
+        // limite per gruppo, migliorie d'uso 25)
         let dati = stato.datiDeiCalcoli()
         let modo = stato.modoCliente
         let oggi = Date()
         let tutte = await Task.detached(priority: .userInitiated) {
-            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi)
+            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi, soloCliente: modo)
         }.value
         // Nel frattempo i dati, il giorno o la modalità sono cambiati: vale il calcolo della chiave nuova
         guard !Task.isCancelled, stato.derivatiValidi().chiave == k else { return }
-        trovata = (k, Self.prima(modo.map { tutte.soloCliente($0) } ?? tutte, cliente: id))
+        trovata = (k, Self.prima(tutte, cliente: id))
     }
 }
 

@@ -37,6 +37,9 @@ struct ChiaveTestoMessaggio: Hashable {
     private(set) var giri: [ChiaveTestoMessaggio: Int] = [:]
     /// Un messaggio del dossier riaperto (dalla scheda Note) la cui occasione il motore non propone più.
     private(set) var dalDossier: OccasioneMessaggio?
+    /// Migliorie d'uso 25 (Mac): le occasioni su cui il consulente ha chiuso la domanda «L'hai spedito?» con «Non ancora»
+    /// o «Non è partito», solo in memoria. Una nuova apertura in Mail o in Messaggi la riapre.
+    var domandeChiuse: Set<String> = []
     /// L'id nel dossier del messaggio salvato o aperto per ogni testo: salvare di nuovo aggiorna lo stesso.
     /// Non si vede: nessuna vista lo osserva.
     @ObservationIgnored private var salvati: [ChiaveTestoMessaggio: String] = [:]
@@ -253,6 +256,43 @@ enum TestiMessaggi {
     static let inviaCon = "Invia con"
     static let daDoveCifre = "Da dove vengono le cifre"
     static let chiudi = "Chiudi"
+    /// Migliorie d'uso 25 (Mac): Messaggi segue il cliente, e si vede cosa è già partito.
+    static let mandatiOggi = "Mandati oggi"
+    static let nienteDaScrivere = "Niente da scrivere, per ora."
+    static let siSpedito = "Sì, spedito"
+    static let nonAncora = "Non ancora"
+    static let nonPartito = "Non è partito"
+
+    /// «Nessun messaggio da preparare per Giulia Rossi. Quando c’è un incontro, una scadenza o un compleanno, lo trovi qui.»
+    static func vuotoPer(_ nome: String) -> String {
+        "Nessun messaggio da preparare per \(nome). Quando c’è un incontro, una scadenza o un compleanno, lo trovi qui."
+    }
+
+    /// «Aperto in Mail. L’hai spedito?»
+    static func haiSpedito(_ canale: CanaleMessaggio) -> String { "Aperto in \(canale.nome). L’hai spedito?" }
+
+    /// «Spedito oggi alle 10:42 con Mail».
+    static func speditoAlle(ora: Date, canale: CanaleMessaggio) -> String {
+        "Spedito oggi alle \(Formati.ora.string(from: ora)) con \(canale.nome)"
+    }
+
+    /// «È nel dossier di Giulia.» (il primo nome).
+    static func nelDossier(_ nome: String) -> String { "È nel dossier di \(primoNome(nome))." }
+
+    /// «Segnato come spedito: resta nel dossier di Giulia».
+    static func segnatoSpedito(_ nome: String) -> String { "Segnato come spedito: resta nel dossier di \(primoNome(nome))" }
+
+    /// Sotto il titolo di una voce: «Spedito alle 10:42».
+    static func spedito(_ d: Date) -> String { "Spedito alle \(Formati.ora.string(from: d))" }
+
+    /// Sotto il titolo di una voce aperta ma non confermata: «Aperto in Mail alle 10:42».
+    static func aperto(_ d: Date, canale: CanaleMessaggio) -> String {
+        "Aperto in \(canale.nome) alle \(Formati.ora.string(from: d))"
+    }
+
+    private static func primoNome(_ nome: String) -> String {
+        nome.split(separator: " ").first.map(String.init) ?? nome
+    }
 
     /// «Vera ha usato 1 dato del dossier ›» / «Vera ha usato 5 dati del dossier ›».
     static func datiUsati(_ n: Int) -> String {
@@ -315,7 +355,8 @@ enum TestiMessaggi {
     static func occasioneDalDossier(_ m: MessaggioCliente) -> OccasioneMessaggio {
         var o = OccasioneMessaggio(origine: m.origine, clienteId: m.clienteId, canale: m.canaleLavoro, gruppo: .oggi,
                                    titolo: m.oggetto ?? m.origine.tipo.nome,
-                                   perche: "\(m.stato.nome) " + ModelliMessaggi.il(Formati.dataEstesa.string(from: m.dataMostrata)),
+                                   perche: m.speditoIl.map { s in "Spedito " + ModelliMessaggi.il(Formati.dataEstesa.string(from: s)) }
+                                       ?? ("\(m.stato.nome) " + ModelliMessaggi.il(Formati.dataEstesa.string(from: m.dataMostrata))),
                                    oggetto: m.oggetto ?? m.origine.tipo.nome, cifre: m.cifre, priorita: .media,
                                    data: m.dataMostrata)
         o.preparatoIl = m.dataMostrata

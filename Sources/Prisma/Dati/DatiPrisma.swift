@@ -237,6 +237,8 @@ struct DatiPrisma: Codable, Equatable {
     ///     la traccia delle cose date al cliente (`uscite`), lo stato del Prisma del cliente (`Cliente.prismaCliente`), il
     ///     consenso a WhatsApp (`Consensi.whatsapp`) e le avvertenze del file e del film con l'interruttore dell'HTML
     ///     (`ImpostazioniSala`), tutti letti con tolleranza (un elemento illeggibile si scarta).
+    ///     Migliorie d'uso 25: `MessaggioCliente.speditoIl` (il segno «Sì, spedito» del consulente), facoltativo e letto
+    ///     con tolleranza, nel file del cliente con i suoi messaggi: nessuna versione nuova.
     static let versioneAttuale = 27
 
     init(clienti: [Cliente], appuntamenti: [Appuntamento], attivita: [Attivita], posizioni: [Posizione],
