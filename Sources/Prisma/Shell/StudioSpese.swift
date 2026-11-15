@@ -1,5 +1,8 @@
 import SwiftUI
 import UniformTypeIdentifiers
+#if os(macOS)
+import AppKit
+#endif
 
 // Studio › Spese, «Chilometri, spese e scadenze» (Design/template-luce-specifica.md §6.3, template `speseHTML` righe
 // 2050-2061, «Luce» giro 9):
@@ -18,6 +21,14 @@ import UniformTypeIdentifiers
 //   «Aggiungi la spesa».
 // - «Prepara il pacchetto per il commercialista»: zip salvato dove sceglie l'utente, nessun invio (decisione 14).
 // - Modalità cliente: Studio non si mostra (CorpoStudio). «Riduci movimento» e istantanee: tutto subito fermo.
+//
+// Migliorie d'uso 57 (Design/uso/gruppo-09.md §57, «Le spese, mese per mese»; Studio › Spese c'è solo sul Mac):
+// - «I chilometri» con la scelta del mese a destra («‹ Ottobre 2026 ›»): la › si spegne sul mese di calendario di oggi,
+//   la ‹ non ha limite. Le colonne restano ferme (la serie finisce col mese di oggi se il mese scelto è fra gli ultimi
+//   10) e si accende quella scelta; toccarne una sceglie quel mese. Cambiare mese ridisegna le tre card.
+// - «Le spese di <mese>» con «n spese · k senza scontrino» (arancio) e la miniatura tratteggiata arancio senza scontrino.
+// - Le scadenze portano all'Agenda sul giorno, nella vista mese («›»; «Modifica…» nel menu contestuale); l'anello delle
+//   ore lascia il posto a «I tuoi corsi e gli attestati ›»; prima del pulsante la tessera «Nel pacchetto di <mese>».
 
 /// I testi di Studio › Spese.
 enum TestiSpese {
@@ -109,6 +120,71 @@ enum TestiSpese {
     }
 
     static func erroreBreve(_ m: String) -> String { "Il pacchetto non è stato creato: \(m)" }
+
+    // MARK: Migliorie d'uso 57
+
+    /// Il titolo della prima card, con il mese a destra.
+    static let titoloKmBreve = "I chilometri"
+    /// Sotto il numero grande, dopo «22 visite · 14 clienti».
+    static let fonteVisite = "contati dalle visite dell’agenda, da soli"
+    static let manca = "manca lo scontrino"
+    static let tutteConScontrino = "tutte con lo scontrino"
+    static let corsi = "I tuoi corsi e gli attestati ›"
+    static let modifica = "Modifica…"
+    static let vaiAllAgenda = "Apri l’Agenda su questo giorno"
+
+    private static let formatoMeseAnno = Formati.formato("MMMM yyyy")
+
+    /// «Ottobre 2026»: il mese con l'iniziale maiuscola e l'anno.
+    static func meseAnno(_ d: Date) -> String {
+        let t = formatoMeseAnno.string(from: d)
+        return t.prefix(1).uppercased() + t.dropFirst()
+    }
+
+    /// «22 visite · 14 clienti · contati dalle visite dell’agenda, da soli».
+    static func visiteConFonte(_ visite: Int, _ clienti: Int) -> String {
+        visiteClienti(visite, clienti) + " · " + fonteVisite
+    }
+
+    /// «Le spese di ottobre».
+    static func titoloSpese(_ mese: Date) -> String { "Le spese di \(Self.mese(mese))" }
+
+    /// «3 spese», «1 spesa», «nessuna spesa».
+    static func numeroSpese(_ n: Int) -> String { n == 0 ? "nessuna spesa" : n == 1 ? "1 spesa" : "\(n) spese" }
+
+    /// «1 senza scontrino».
+    static func senzaScontrinoBreve(_ k: Int) -> String { "\(k) senza scontrino" }
+
+    /// «3 spese · 1 senza scontrino» o «3 spese · tutte con lo scontrino».
+    static func conteggio(spese: [SpesaStudio]) -> String {
+        let k = spese.filter { $0.scontrino == nil }.count
+        return numeroSpese(spese.count) + " · " + (k > 0 ? senzaScontrinoBreve(k) : tutteConScontrino)
+    }
+
+    /// «Nel pacchetto di ottobre».
+    static func nelPacchetto(_ mese: Date) -> String { "Nel pacchetto di \(Self.mese(mese))" }
+
+    /// «412 km in 22 visite · 5 spese (358,80 €) · 3 parcelle emesse»; le parti a zero si dicono, e con i km non completi
+    /// «almeno 412 km».
+    static func contenutoPacchetto(km: Double, completo: Bool, visite: Int, spese: Int, totale: Double, parcelle: Int) -> String {
+        let parteKm = visite == 0 ? "nessuna visita"
+            : (completo ? "" : "almeno ") + Self.km(km) + " in " + (visite == 1 ? "1 visita" : "\(visite) visite")
+        let parteSpese = spese == 0 ? numeroSpese(0) : numeroSpese(spese) + " (" + Formati.euroDecimali(totale) + ")"
+        let parteParcelle = parcelle == 0 ? "nessuna parcella emessa"
+            : parcelle == 1 ? "1 parcella emessa" : "\(parcelle) parcelle emesse"
+        return [parteKm, parteSpese, parteParcelle].joined(separator: " · ")
+    }
+
+    /// «Una spesa è senza scontrino: parte lo stesso, segnata.» / «2 spese sono senza scontrino: partono lo stesso,
+    /// segnate.»; nil se hanno tutte lo scontrino.
+    static func senzaScontrino(_ k: Int) -> String? {
+        if k <= 0 { return nil }
+        return k == 1 ? "Una spesa è senza scontrino: parte lo stesso, segnata."
+            : "\(k) spese sono senza scontrino: partono lo stesso, segnate."
+    }
+
+    /// «Prepara il pacchetto di ottobre».
+    static func pacchettoDi(_ mese: Date) -> String { "Prepara il pacchetto di \(Self.mese(mese))" }
 }
 
 // MARK: - La scheda
@@ -123,15 +199,23 @@ struct SpeseStudioVista: View {
     var body: some View {
         let s = stato.studioSpese
         let imp = stato.dati.impostazioni.studio.spese
-        let mese = s.mese(impostazioni: imp)
-        // I motori sono puri e leggeri (un mese di appuntamenti): si calcolano qui, sui campi osservati dell'archivio
+        let oggi = Date()
+        let mese = s.mese(oggi: oggi, impostazioni: imp)
+        // I motori sono puri e leggeri (un mese di appuntamenti): si calcolano qui, sui campi osservati dell'archivio.
+        // Migliorie d'uso 57: la serie delle colonne resta ferma (finisce col mese di oggi se il mese scelto è fra gli
+        // ultimi 10)
         let km = MotoreChilometri.riepilogo(mese: mese, appuntamenti: stato.dati.appuntamenti, impostazioni: imp,
-                                            kmClienti: stato.dati.kmClienti, visiteTolte: stato.dati.speseStudio.visiteTolte)
+                                            kmClienti: stato.dati.kmClienti, visiteTolte: stato.dati.speseStudio.visiteTolte,
+                                            fineSerie: MotoreChilometri.fineSerie(scelto: mese, oggi: oggi))
         let spese = MotoreSpese.delMese(stato.dati.speseStudio.spese, mese: mese)
         let archivio = stato.dati.speseStudio
+        // Le parcelle emesse nel mese: un filtro piccolo, lo stesso elenco che entra nel pacchetto
+        let parcelle = PacchettoCommercialista.parcelleDelMese(stato.dati.parcelle, mese: mese).count
+        let avanti = s.puoAvanzare(oggi: oggi, impostazioni: imp)
         return GeometryReader { geo in
             ScrollView(.vertical, showsIndicators: false) {
-                griglia(misura: geo.size, mese: mese, km: km, spese: spese, archivio: archivio, imp: imp)
+                griglia(misura: geo.size, mese: mese, km: km, spese: spese, archivio: archivio, imp: imp,
+                        parcelle: parcelle, avanti: avanti)
             }
         }
         .sheet(item: Bindable(s).foglio) { f in
@@ -152,11 +236,13 @@ struct SpeseStudioVista: View {
     }
 
     @ViewBuilder private func griglia(misura: CGSize, mese: Date, km: MotoreChilometri.Riepilogo, spese: [SpesaStudio],
-                                      archivio: ArchivioSpese, imp: ImpostazioniSpese) -> some View {
+                                      archivio: ArchivioSpese, imp: ImpostazioniSpese, parcelle: Int,
+                                      avanti: Bool) -> some View {
         let d = Tema.Apple.Studio.Spese.Disposizione.self
-        let card1 = CardKmSpese(stato: stato, mese: mese, km: km, imp: imp).cardSpese(0, base: base)
+        let card1 = CardKmSpese(stato: stato, mese: mese, km: km, imp: imp, avanti: avanti).cardSpese(0, base: base)
         let card2 = CardSpeseStudio(stato: stato, mese: mese, spese: spese).cardSpese(1, base: base)
-        let card3 = CardScadenzeSpese(stato: stato, archivio: archivio, imp: imp, ritardoAnelli: ritardoAnelli)
+        let card3 = CardScadenzeSpese(stato: stato, archivio: archivio, imp: imp, ritardoAnelli: ritardoAnelli,
+                                      dentro: DentroPacchetto(mese: mese, km: km, spese: spese, parcelle: parcelle))
             .cardSpese(2, base: base)
         if misura.width < d.larghezzaColonna {
             VStack(alignment: .leading, spacing: d.spazio) {
@@ -272,6 +358,8 @@ private struct CardKmSpese: View {
     let mese: Date
     let km: MotoreChilometri.Riepilogo
     let imp: ImpostazioniSpese
+    /// La freccia › è attiva (il mese mostrato è prima del mese di oggi).
+    let avanti: Bool
 
     private typealias K = Tema.Apple.Studio.Spese.Km
 
@@ -280,13 +368,20 @@ private struct CardKmSpese: View {
     var body: some View {
         let c = Tema.Apple.Studio.Spese.Card.self
         return VStack(alignment: .leading, spacing: 0) {
-            HStack(alignment: .firstTextBaseline, spacing: K.spazioFrecce) {
-                freccia("chevron.left", -1, aiuto: "Il mese prima")
-                TitoloSpese(testo: TestiSpese.titoloKm(mese), prova: prova)
-                freccia("chevron.right", 1, aiuto: "Il mese dopo")
+            // Migliorie d'uso 57: «I chilometri» e, a destra, «‹ Ottobre 2026 ›»
+            HStack(alignment: .center, spacing: K.spazioFrecce) {
+                TitoloSpese(testo: TestiSpese.titoloKmBreve, prova: prova)
                 Spacer(minLength: K.spazioFrecce)
-                NotaSpese(TestiSpese.fonteKm)
-                    .lineLimit(1)
+                HStack(alignment: .center, spacing: 0) {
+                    freccia("chevron.left", -1, aiuto: "Il mese prima", attiva: true)
+                    Text(TestiSpese.meseAnno(mese))
+                        .carattereApple(K.meseScelto)
+                        .foregroundColor(K.coloreMeseScelto)
+                        .lineLimit(1)
+                        .frame(minWidth: K.larghezzaMese)
+                    freccia("chevron.right", 1, aiuto: "Il mese dopo", attiva: avanti)
+                }
+                .fixedSize()
             }
             if km.vuoto {
                 NotaSpese(TestiSpese.nessunKm(mese))
@@ -299,7 +394,7 @@ private struct CardKmSpese: View {
             } else {
                 totale
                     .padding(.top, K.numeroSopra)
-                NotaSpese(TestiSpese.visiteClienti(km.visite, km.clienti))
+                NotaSpese(TestiSpese.visiteConFonte(km.visite, km.clienti))
                 elenco
                     .padding(.top, K.elencoSopra)
             }
@@ -312,16 +407,21 @@ private struct CardKmSpese: View {
         }
     }
 
-    private func freccia(_ simbolo: String, _ passo: Int, aiuto: String) -> some View {
+    private func freccia(_ simbolo: String, _ passo: Int, aiuto: String, attiva: Bool) -> some View {
         Button {
             stato.studioSpese.sposta(passo, impostazioni: imp)
         } label: {
             Image(systemName: simbolo)
-                .carattereApple(K.freccia)
+                .carattereApple(K.frecciaMese)
                 .foregroundColor(K.coloreFreccia)
+                .padding(K.paddingFreccia)
+                .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .opacity(attiva ? 1 : K.frecciaSpenta)
+        .disabled(!attiva)
         .help(aiuto)
+        .accessibilityLabel(aiuto)
     }
 
     private var totale: some View {
@@ -375,22 +475,19 @@ private struct CardKmSpese: View {
     private var grafico: some View {
         let t = Tema.Apple.Studio.Spese.Colonne.self
         let massimo = km.serie.map(\.km).max() ?? 0
+        let scelto = km.indiceScelto
+        let ultimo = StatoSpese.ultimoMese()
         return VStack(alignment: .leading, spacing: 0) {
             TitoloSpese(testo: "Chilometri per mese", prova: false)
             HStack(alignment: .bottom, spacing: t.spazio) {
+                // Migliorie d'uso 57: le colonne restano ferme e si accende quella del mese scelto; toccarne una sceglie
+                // quel mese (mai oltre il mese di oggi)
                 ForEach(Array(km.serie.enumerated()), id: \.element.id) { i, m in
-                    VStack(spacing: t.etichettaSopra) {
-                        ColonnaKmSpese(altezza: massimo > 0 ? t.massima * CGFloat(m.km / massimo) : 0,
-                                       colore: i == km.serie.count - 1 ? t.mese : t.altri, indice: i)
-                        Text(TestiSpese.iniziale(m.inizio))
-                            .carattereApple(t.etichetta)
-                            .foregroundColor(t.coloreEtichetta)
-                            .lineLimit(1)
+                    ColonnaMeseSpese(mese: m, indice: i, scelta: i == scelto,
+                                     altezza: massimo > 0 ? t.massima * CGFloat(m.km / massimo) : 0,
+                                     attiva: m.inizio <= ultimo) {
+                        stato.studioSpese.scegli(m.inizio)
                     }
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
-                    .onTapGesture { stato.studioSpese.scegli(m.inizio) }
-                    .help("\(TestiSpese.mese(m.inizio)) · \(TestiSpese.km(m.km))")
                 }
             }
             .frame(height: t.altezza, alignment: .bottom)
@@ -439,6 +536,59 @@ private struct RigaGiroSpese: View {
             FiloSpese()
         }
         .help(percorso)
+    }
+}
+
+/// Migliorie d'uso 57: una colonna del grafico con la sua iniziale. Quella del mese scelto in accento (iniziale in
+/// grassetto); al passaggio (Mac) si scurisce e mostra la mano; il tocco sceglie il mese.
+private struct ColonnaMeseSpese: View {
+    let mese: MotoreChilometri.Mese
+    let indice: Int
+    let scelta: Bool
+    let altezza: CGFloat
+    /// Un mese oltre quello di oggi non si sceglie.
+    let attiva: Bool
+    let azione: () -> Void
+
+    @State private var sopra = false
+    #if os(macOS)
+    @State private var mano = false
+    #endif
+
+    var body: some View {
+        let t = Tema.Apple.Studio.Spese.Colonne.self
+        VStack(spacing: t.etichettaSopra) {
+            ColonnaKmSpese(altezza: altezza, colore: scelta ? t.mese : t.altri, indice: indice)
+                .brightness(sopra && attiva ? t.ombraSopra : 0)
+            Text(TestiSpese.iniziale(mese.inizio))
+                .carattereApple(scelta ? t.etichettaScelta : t.etichetta)
+                .foregroundColor(scelta ? t.coloreEtichettaScelta : t.coloreEtichetta)
+                .lineLimit(1)
+        }
+        .frame(maxWidth: .infinity)
+        .contentShape(Rectangle())
+        .onTapGesture { if attiva { azione() } }
+        .help("\(TestiSpese.mese(mese.inizio)) · \(TestiSpese.km(mese.km))")
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(TestiSpese.meseAnno(mese.inizio)), \(TestiSpese.km(mese.km))")
+        .accessibilityAddTraits(scelta ? [.isButton, .isSelected] : .isButton)
+        .accessibilityAction { if attiva { azione() } }
+        #if os(macOS)
+        .onHover { dentro in
+            sopra = dentro
+            if dentro, attiva, !mano {
+                NSCursor.pointingHand.push()
+                mano = true
+            } else if !dentro, mano {
+                NSCursor.pop()
+                mano = false
+            }
+        }
+        .onDisappear {
+            if mano { NSCursor.pop() }
+            mano = false
+        }
+        #endif
     }
 }
 
@@ -491,7 +641,7 @@ private struct CardSpeseStudio: View {
         let visibili = Array(ordinate.prefix(p.righeVisibili))
         return VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .center, spacing: c.spazioProva) {
-                TitoloSpese(testo: "Le spese", prova: prova)
+                TitoloSpese(testo: TestiSpese.titoloSpese(mese), prova: prova)
                 Spacer(minLength: c.spazioProva)
                 Button {
                     stato.studioSpese.foglio = .inquadra(nil)
@@ -515,7 +665,8 @@ private struct CardSpeseStudio: View {
                     .foregroundColor(p.coloreTotale)
                     .lineLimit(1)
                     .padding(.top, p.totaleSopra)
-                NotaSpese(TestiSpese.sottoTotale(mese, spese: spese))
+                // Migliorie d'uso 57: «3 spese · 1 senza scontrino» (arancio, grassetto) o «… · tutte con lo scontrino»
+                conteggio
                 VStack(alignment: .leading, spacing: 0) {
                     ForEach(visibili) { s in
                         RigaSpesaStudio(spesa: s, nuova: s.id == nuova, stato: stato.studioSpese) {
@@ -550,6 +701,23 @@ private struct CardSpeseStudio: View {
             }
             return true
         }
+    }
+}
+
+extension CardSpeseStudio {
+    /// «3 spese · 1 senza scontrino», con la parte senza scontrino in arancio grassetto.
+    fileprivate var conteggio: some View {
+        let c = Tema.Apple.Studio.Spese.Card.self
+        let senza = spese.filter { $0.scontrino == nil }.count
+        let prima = TestiSpese.numeroSpese(spese.count) + " · "
+        let testo: Text = senza > 0
+            ? Text(verbatim: prima) + Text(verbatim: TestiSpese.senzaScontrinoBreve(senza)).bold().foregroundColor(c.coloreAvviso)
+            : Text(verbatim: prima + TestiSpese.tutteConScontrino)
+        return testo
+            .carattereApple(c.nota)
+            .foregroundColor(c.coloreNota)
+            .fixedSize(horizontal: false, vertical: true)
+            .accessibilityLabel(TestiSpese.conteggio(spese: spese))
     }
 }
 
@@ -628,6 +796,8 @@ private struct RigaSpesaStudio: View {
         let g = TestiSpese.giorno(spesa.data)
         if spesa.daControllare { return "\(g) · da controllare" }
         if nuova && spesa.letta { return "\(Calendar.current.isDateInToday(spesa.data) ? "oggi" : g) · letto dallo scontrino" }
+        // Migliorie d'uso 57: si dice che manca lo scontrino
+        if spesa.scontrino == nil { return "\(g) · \(TestiSpese.manca)" }
         return g
     }
 }
@@ -639,8 +809,15 @@ struct MiniaturaScontrino: View {
     var body: some View {
         let t = Tema.Apple.Studio.Spese.Scontrino.self
         let forma = RoundedRectangle(cornerRadius: t.raggio, style: .continuous)
+        // Migliorie d'uso 57: senza scontrino nessun fondo e il bordo arancio tratteggiato
         forma.fill(conScontrino ? t.fondo : Color.clear)
-            .overlay(forma.strokeBorder(t.bordo, lineWidth: Tema.Apple.Misura.bordo))
+            .overlay {
+                if conScontrino {
+                    forma.strokeBorder(t.bordo, lineWidth: Tema.Apple.Misura.bordo)
+                } else {
+                    forma.strokeBorder(t.coloreMancante, style: StrokeStyle(lineWidth: t.bordoMancante, dash: t.trattino))
+                }
+            }
             .overlay {
                 if conScontrino {
                     Image(systemName: "doc.text")
@@ -655,11 +832,27 @@ struct MiniaturaScontrino: View {
 
 // MARK: - Card 3 · Le scadenze
 
+/// Migliorie d'uso 57: cosa c'è nel pacchetto del mese, dalle cifre che la scheda ha già calcolato.
+struct DentroPacchetto {
+    let mese: Date
+    let km: MotoreChilometri.Riepilogo
+    let spese: [SpesaStudio]
+    /// Le parcelle emesse nel mese (`PacchettoCommercialista.parcelleDelMese`).
+    let parcelle: Int
+
+    var senzaScontrino: Int { spese.filter { $0.scontrino == nil }.count }
+    var riga: String {
+        TestiSpese.contenutoPacchetto(km: km.totale, completo: km.completo, visite: km.visite, spese: spese.count,
+                                      totale: MotoreSpese.totale(spese), parcelle: parcelle)
+    }
+}
+
 private struct CardScadenzeSpese: View {
     let stato: StatoShell
     let archivio: ArchivioSpese
     let imp: ImpostazioniSpese
     let ritardoAnelli: Double
+    let dentro: DentroPacchetto
 
     var body: some View {
         let c = Tema.Apple.Studio.Spese.Card.self
@@ -686,9 +879,12 @@ private struct CardScadenzeSpese: View {
                 }
             } else {
                 VStack(alignment: .leading, spacing: 0) {
+                    // Migliorie d'uso 57: la riga porta all'Agenda sul giorno (vista mese); la modifica resta nel menu
+                    // contestuale e nell'elenco completo
                     ForEach(prossime) { s in
                         RigaScadenzaSpese(scadenza: s, oggi: oggi, riga: riga(s, fatte: fatte, obiettivo: obiettivo),
-                                          apri: { stato.studioSpese.foglio = .scadenza(s.id) },
+                                          apri: { stato.apriAgendaMese(s.data) },
+                                          modifica: { stato.studioSpese.foglio = .scadenza(s.id) },
                                           fatta: { stato.segnaScadenzaFatta(s.id) })
                     }
                 }
@@ -701,7 +897,9 @@ private struct CardScadenzeSpese: View {
             }
             ore(fatte: fatte, obiettivo: obiettivo)
                 .padding(.top, Tema.Apple.Studio.Spese.Ore.sopra)
-            Spacer(minLength: Tema.Apple.Studio.Spese.Ore.sopra)
+            Spacer(minLength: Tema.Apple.Studio.Spese.Pacchetto.dentroSopra)
+            DentroPacchettoSpese(dentro: dentro)
+                .padding(.bottom, Tema.Apple.Studio.Spese.Pacchetto.dentroSotto)
             pacchetto
         }
     }
@@ -717,31 +915,13 @@ private struct CardScadenzeSpese: View {
         return parti.joined(separator: " · ")
     }
 
+    /// Migliorie d'uso 57: l'anello delle ore lascia il posto alla tessera del pacchetto. Le ore fatte stanno nella riga
+    /// «Aggiornamento professionale · 22 ore su 30»; qui il collegamento ai corsi (o, senza le ore richieste,
+    /// «Imposta le ore richieste per l’anno»).
     @ViewBuilder private func ore(fatte: Double, obiettivo: Double?) -> some View {
-        let o = Tema.Apple.Studio.Spese.Ore.self
         if let obiettivo, obiettivo > 0 {
-            Button {
-                stato.studioSpese.foglio = .corsi
-            } label: {
-                HStack(alignment: .center, spacing: o.spazio) {
-                    AnelliConcentrici(voci: [VoceAnello(id: "ore", valore: MotoreSpese.percentualeOre(fatte: fatte, obiettivo: obiettivo) ?? 0,
-                                                        colore: o.colore)],
-                                      misura: o.anello, spessore: o.spessore, ritardo: ritardoAnelli) {
-                        Text(TestiSpese.oreSu(fatte, obiettivo))
-                            .carattereApple(o.centro)
-                            .foregroundColor(o.coloreCentro)
-                    }
-                    .frame(width: o.anello, height: o.anello)
-                    Text(TestiSpese.ore(ente: imp.enteAggiornamento))
-                        .carattereApple(o.testo)
-                        .foregroundColor(o.coloreTesto)
-                        .multilineTextAlignment(.leading)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .help("I tuoi corsi dell’anno, con le ore e gli attestati")
+            CollegamentoSpese(testo: TestiSpese.corsi) { stato.studioSpese.foglio = .corsi }
+                .help("I tuoi corsi dell’anno, con le ore e gli attestati")
         } else {
             VStack(alignment: .leading, spacing: 0) {
                 Button {
@@ -765,7 +945,7 @@ private struct CardScadenzeSpese: View {
                 stato.preparaPacchettoSpese()
                 #endif
             } label: {
-                Text(TestiSpese.pacchetto)
+                Text(TestiSpese.pacchettoDi(dentro.mese))
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.applePrimarioGrande)
@@ -799,7 +979,10 @@ private struct RigaScadenzaSpese: View {
     let scadenza: ScadenzaStudio
     let oggi: Date
     let riga: String
+    /// Migliorie d'uso 57: l'Agenda sul giorno, nella vista mese.
     let apri: () -> Void
+    /// Il foglio della scadenza (menu contestuale «Modifica…»).
+    let modifica: () -> Void
     let fatta: () -> Void
 
     var body: some View {
@@ -830,8 +1013,10 @@ private struct RigaScadenzaSpese: View {
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .contentShape(Rectangle())
-                .onTapGesture(perform: apri)
+                Text("›")
+                    .carattereApple(t.freccia)
+                    .foregroundColor(t.coloreFreccia)
+                    .accessibilityHidden(true)
                 Button(action: fatta) {
                     Image(systemName: "circle")
                         .resizable()
@@ -842,8 +1027,46 @@ private struct RigaScadenzaSpese: View {
                 .help(scadenza.ricorrenza == nil ? "Segna fatta" : "Segna fatta: nasce la prossima")
             }
             .padding(.vertical, t.padding)
+            // Il tocco su tutta la riga (blocco della data, testi e freccia) porta all'Agenda; il cerchio resta un
+            // pulsante a sé
+            .contentShape(Rectangle())
+            .onTapGesture(perform: apri)
+            .help(TestiSpese.vaiAllAgenda)
+            .contextMenu {
+                Button(TestiSpese.modifica, action: modifica)
+            }
+            .accessibilityAction(named: Text(TestiSpese.vaiAllAgenda), apri)
+            .accessibilityAction(named: Text(TestiSpese.modifica), modifica)
             FiloSpese()
         }
+    }
+}
+
+/// Migliorie d'uso 57: «Nel pacchetto di ottobre» e «412 km in 22 visite · 5 spese (358,80 €) · 3 parcelle emesse», con
+/// l'avviso arancio se qualche spesa è senza scontrino (parte lo stesso, segnata «manca» nel CSV).
+private struct DentroPacchettoSpese: View {
+    let dentro: DentroPacchetto
+
+    var body: some View {
+        let t = Tema.Apple.Studio.Spese.Pacchetto.self
+        VStack(alignment: .leading, spacing: 0) {
+            NotaSpese(TestiSpese.nelPacchetto(dentro.mese))
+            Text(dentro.riga)
+                .carattereApple(t.dentro)
+                .foregroundColor(t.coloreDentro)
+                .fixedSize(horizontal: false, vertical: true)
+            if let avviso = TestiSpese.senzaScontrino(dentro.senzaScontrino) {
+                Text(avviso)
+                    .carattereApple(t.dentroAvviso)
+                    .foregroundColor(t.coloreDentroAvviso)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, t.dentroAvvisoSopra)
+            }
+        }
+        .padding(t.paddingTile)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(t.tile, raggio: t.raggioTile)
+        .accessibilityElement(children: .combine)
     }
 }
 

@@ -73,6 +73,14 @@ extension Tema.Apple.Studio {
             static let graficoSopra: CGFloat = 22
             /// Il km corretto a mano: in `accento`, con il fumetto «corretto a mano».
             static let coloreCorretto = Colore.accento
+            /// Migliorie d'uso 57: la scelta del mese a destra del titolo, «‹  Ottobre 2026  ›». Frecce `.spFr` 15 con
+            /// padding 3×10; il mese 14 bold, centrato, largo almeno 112; la freccia senza mesi spenta a 0,3.
+            static let frecciaMese = Carattere(dimensione: 15, peso: .semibold)
+            static let paddingFreccia = Tema.Apple.Misura.padding(3, 10)
+            static let meseScelto = Carattere(dimensione: 14, peso: .bold)
+            static let coloreMeseScelto = Colore.inchiostro
+            static let larghezzaMese: CGFloat = 112
+            static let frecciaSpenta: Double = 0.3
         }
 
         // MARK: Righe degli elenchi
@@ -115,6 +123,11 @@ extension Tema.Apple.Studio {
             /// Il mese mostrato in `accento`, gli altri in `binario`.
             static let mese = Colore.accento
             static let altri = Colore.binario
+            /// Migliorie d'uso 57: l'iniziale del mese scelto in accento e grassetto; al passaggio la colonna si scurisce
+            /// (`brightness(.92)` del template, −0,04 in SwiftUI).
+            static let etichettaScelta = Carattere(dimensione: 10.5, peso: .bold)
+            static let coloreEtichettaScelta = Colore.accento
+            static let ombraSopra: Double = -0.04
         }
 
         // MARK: Card 2 · Le spese
@@ -142,6 +155,10 @@ extension Tema.Apple.Studio {
             static let bordo = Colore.separatore
             static let simbolo = Carattere(dimensione: 11, peso: .regular)
             static let coloreSimbolo = Colore.inchiostro3
+            /// Migliorie d'uso 57: senza scontrino la miniatura è vuota, con il bordo arancio tratteggiato (1,5).
+            static let bordoMancante: CGFloat = 1.5
+            static let trattino: [CGFloat] = [3, 2]
+            static let coloreMancante = Colore.arancio
             /// L'anteprima grande nel dettaglio della spesa.
             static let anteprima = CGSize(width: 220, height: 300)
             static let raggioAnteprima: CGFloat = 10
@@ -168,6 +185,9 @@ extension Tema.Apple.Studio {
             /// Il cerchio per segnarla fatta.
             static let spunta: CGFloat = 18
             static let coloreSpunta = Colore.inchiostro3
+            /// Migliorie d'uso 57: la freccia «›» a destra della riga, che porta all'Agenda sul giorno.
+            static let freccia = Carattere(dimensione: 13, peso: .semibold)
+            static let coloreFreccia = Colore.inchiostro3
 
             /// Il colore del mese secondo il tipo: fiscale #E08A00, polizza #0A84FF, aggiornamento #8B5CF6, altra `inchiostro2`.
             static func colore(_ t: TipoScadenza) -> Color {
@@ -208,6 +228,15 @@ extension Tema.Apple.Studio {
             static let coloreFatto = Colore.verde
             static let coloreErrore = Colore.rosso
             static let spazioTile: CGFloat = 4
+            /// Migliorie d'uso 57: la tessera «Nel pacchetto di <mese>» prima del pulsante (tile piatta, 13,5 con
+            /// interlinea 1,5; l'avviso arancio semibold 3 sotto; 12 sopra la tessera, 10 fra tessera e pulsante).
+            static let dentroSopra: CGFloat = 12
+            static let dentroSotto: CGFloat = 10
+            static let dentro = Carattere(dimensione: 13.5, peso: .regular, interlinea: 1.5)
+            static let coloreDentro = Colore.inchiostro
+            static let dentroAvviso = Carattere(dimensione: 13.5, peso: .semibold, interlinea: 1.5)
+            static let coloreDentroAvviso = Colore.arancioTesto
+            static let dentroAvvisoSopra: CGFloat = 3
         }
 
         // MARK: Fogli e moduli

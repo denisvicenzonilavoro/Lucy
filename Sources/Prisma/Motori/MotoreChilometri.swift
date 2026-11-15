@@ -105,10 +105,13 @@ enum MotoreChilometri {
         let senzaKm: Int
         /// Visite senza luogo indicato (fra quelle senza km).
         let senzaLuogo: Int
-        /// Gli ultimi mesi fino a quello mostrato (il più vecchio prima).
+        /// Gli ultimi mesi fino alla fine della serie (il più vecchio prima): il mese mostrato o, dalla miglioria 57,
+        /// il mese di calendario di oggi.
         let serie: [Mese]
 
         var completo: Bool { senzaKm == 0 }
+        /// La colonna del mese mostrato (nil se la serie non lo contiene).
+        var indiceScelto: Int? { serie.firstIndex { $0.inizio == mese } }
         var vuoto: Bool { giri.isEmpty }
     }
 
@@ -208,17 +211,29 @@ enum MotoreChilometri {
         }
     }
 
+    /// Migliorie d'uso 57: dove finisce la serie delle colonne. Se il mese scelto è dentro gli ultimi `mesiSerie` mesi
+    /// fino al mese di calendario di oggi, la serie finisce col mese di oggi (le colonne restano ferme e si accende
+    /// quella scelta); altrimenti finisce col mese scelto.
+    static func fineSerie(scelto: Date, oggi: Date, calendario cal: Calendar = .current) -> Date {
+        let s = inizioMese(scelto, cal)
+        let o = inizioMese(oggi, cal)
+        guard s <= o, let primo = cal.date(byAdding: .month, value: -(mesiSerie - 1), to: o), s >= primo else { return s }
+        return o
+    }
+
     /// Il riepilogo del mese: giri, totale dei km noti, visite, clienti, visite senza km e la serie dei mesi.
+    /// `fineSerie`: l'ultimo mese delle colonne (di base il mese stesso, come prima della miglioria 57).
     static func riepilogo(mese: Date, appuntamenti: [Appuntamento], impostazioni: ImpostazioniSpese,
-                          kmClienti: [String: Double], visiteTolte: [VisitaTolta] = [],
+                          kmClienti: [String: Double], visiteTolte: [VisitaTolta] = [], fineSerie: Date? = nil,
                           calendario cal: Calendar = .current) -> Riepilogo {
         let inizio = inizioMese(mese, cal)
+        let fine = fineSerie.map { inizioMese($0, cal) } ?? inizio
         let g = giri(mese: inizio, appuntamenti: appuntamenti, impostazioni: impostazioni, kmClienti: kmClienti,
                      visiteTolte: visiteTolte, calendario: cal)
         let visite = g.flatMap(\.visite)
         let serie: [Mese] = (0..<mesiSerie).reversed().compactMap { indietro in
-            guard let m = cal.date(byAdding: .month, value: -indietro, to: inizio) else { return nil }
-            let km = indietro == 0 ? g.map(\.kmNoti).reduce(0, +)
+            guard let m = cal.date(byAdding: .month, value: -indietro, to: fine) else { return nil }
+            let km = m == inizio ? g.map(\.kmNoti).reduce(0, +)
                 : giri(mese: m, appuntamenti: appuntamenti, impostazioni: impostazioni, kmClienti: kmClienti,
                        visiteTolte: visiteTolte, calendario: cal).map(\.kmNoti).reduce(0, +)
             return Mese(inizio: m, km: km)

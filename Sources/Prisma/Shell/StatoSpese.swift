@@ -67,20 +67,34 @@ import UniformTypeIdentifiers
     /// Solo per l'istantanea 787: Impostazioni › Studio mostra in cima la sezione dei chilometri e delle spese.
     var impostazioniInCima = false
 
-    /// Il mese mostrato.
+    /// Il mese mostrato. Migliorie d'uso 57: mai oltre il mese di calendario di oggi (un mese futuro scelto in altro
+    /// modo si riporta al mese di oggi).
     func mese(oggi: Date = Date(), impostazioni: ImpostazioniSpese) -> Date {
-        meseScelto ?? MotoreChilometri.meseMostrato(oggi: oggi, giornoCambio: impostazioni.giornoCambioMese)
+        let scelto = meseScelto ?? MotoreChilometri.meseMostrato(oggi: oggi, giornoCambio: impostazioni.giornoCambioMese)
+        return min(scelto, Self.ultimoMese(oggi: oggi))
     }
 
-    /// Cambia il mese di `passo` mesi (‹ ›); il pacchetto pronto riguarda il mese di prima e si toglie.
+    /// L'ultimo mese che si può scegliere: il mese di calendario di oggi (anche nei primi giorni, quando il mese
+    /// mostrato all'apertura è ancora il precedente).
+    static func ultimoMese(oggi: Date = Date()) -> Date { MotoreChilometri.inizioMese(oggi) }
+
+    /// La freccia › è attiva: il mese mostrato è prima del mese di oggi.
+    func puoAvanzare(oggi: Date = Date(), impostazioni: ImpostazioniSpese) -> Bool {
+        mese(oggi: oggi, impostazioni: impostazioni) < Self.ultimoMese(oggi: oggi)
+    }
+
+    /// Cambia il mese di `passo` mesi (‹ ›), senza andare oltre il mese di oggi; il pacchetto pronto riguarda il mese
+    /// di prima e si toglie.
     func sposta(_ passo: Int, oggi: Date = Date(), impostazioni: ImpostazioniSpese) {
         let attuale = mese(oggi: oggi, impostazioni: impostazioni)
         guard let nuovo = Calendar.current.date(byAdding: .month, value: passo, to: attuale) else { return }
-        scegli(nuovo)
+        scegli(nuovo, oggi: oggi)
     }
 
-    func scegli(_ mese: Date) {
-        meseScelto = MotoreChilometri.inizioMese(mese)
+    /// Sceglie un mese (frecce, colonne, spesa salvata): mai oltre il mese di oggi.
+    func scegli(_ mese: Date, oggi: Date = Date()) {
+        let nuovo = min(MotoreChilometri.inizioMese(mese), Self.ultimoMese(oggi: oggi))
+        meseScelto = nuovo
         nuovaSpesaId = nil
         if case .inPreparazione = pacchetto { return }
         pacchetto = .nessuno
@@ -235,6 +249,12 @@ extension StatoShell {
         apri(.agenda)
     }
 
+    /// Migliorie d'uso 57: apre l'Agenda sul giorno di una scadenza dello Studio, nella vista mese.
+    func apriAgendaMese(_ giorno: Date) {
+        vistaAgenda = .mese
+        apriAgendaGiorno(giorno)
+    }
+
     /// Apre Impostazioni › Studio sulla sezione dei chilometri e delle spese.
     func apriImpostazioniSpese() {
         schedaImpostazioni = .studio
@@ -262,7 +282,8 @@ extension StatoShell {
         guard pannello.runModal() == .OK, let destinazione = pannello.url else { return }
         let contenuto = contenutoPacchetto(mese: mese)
         s.pacchetto = .inPreparazione(0)
-        let descrizione = PacchettoCommercialista.descrizione(scontrini: contenuto.scontrini.count, pdf: contenuto.pdf != nil)
+        let descrizione = PacchettoCommercialista.descrizione(scontrini: contenuto.scontrini.count, pdf: contenuto.pdf != nil,
+                                                              parcelle: contenuto.csvParcelle != nil)
         Task.detached(priority: .userInitiated) {
             do {
                 try PacchettoCommercialista.scrivi(contenuto, in: destinazione) { fatti, totale in
@@ -289,6 +310,8 @@ extension StatoShell {
         let nomi: [String: String]? = imp.nomiNelPacchetto
             ? Dictionary(dati.clienti.map { ($0.id, $0.nome) }, uniquingKeysWith: { a, _ in a }) : nil
         let file = PacchettoCommercialista.scontrini(spese, cartella: Archivio.cartellaScontrini())
+        // Migliorie d'uso 57: le parcelle emesse nel mese (lo stesso elenco che conta la tessera «Nel pacchetto di …»)
+        let parcelle = PacchettoCommercialista.parcelleDelMese(dati.parcelle, mese: mese)
         let testi = TestiRiepilogoSpese(mese: mese, riepilogo: riepilogo, spese: spese, nomi: nomi,
                                         consulente: dati.impostazioni.studio.fatturazione.nome.isEmpty
                                             ? nomeUtente : dati.impostazioni.studio.fatturazione.nome,
@@ -297,6 +320,7 @@ extension StatoShell {
             nome: PacchettoCommercialista.nome(mese: mese), suffisso: PacchettoCommercialista.suffisso(mese: mese),
             csvChilometri: PacchettoCommercialista.csvChilometri(riepilogo.giri, nomi: nomi, euroPerKm: imp.euroPerKm),
             csvSpese: PacchettoCommercialista.csvSpese(spese, scontrini: file.perSpesa, nomi: nomi),
-            pdf: StampaCarta.pdf(DocumentoStampabile(testi)), scontrini: file.file)
+            pdf: StampaCarta.pdf(DocumentoStampabile(testi)), scontrini: file.file,
+            csvParcelle: parcelle.isEmpty ? nil : PacchettoCommercialista.csvParcelle(parcelle, nomi: nomi))
     }
 }

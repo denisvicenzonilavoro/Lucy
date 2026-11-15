@@ -7,6 +7,8 @@ import Foundation
 /// - scadenze: mensile al 16 → la prossima dopo «fatta», le prossime entro 90 giorni; ore 22/30 → 73%;
 /// - lettore dello scontrino su tre testi finti (totale «TOTALE EURO», data gg/mm/aa, importo con la virgola);
 /// - pacchetto: CSV con le righe giuste e senza nomi dei clienti con `nomiNelPacchetto` spento; lo zip si rilegge.
+/// - Migliorie d'uso 57: la serie ferma (`fineSerie`), il limite della freccia › sul mese di calendario di oggi, «manca»
+///   nel CSV delle spese, il CSV delle parcelle emesse nel mese, i testi della tessera «Nel pacchetto di …».
 /// Chiamata da `ProvaCalcoli.esegui()`.
 enum ProvaCalcoliSpese {
     static func esegui(_ verifica: VerificaCalcoli) {
@@ -16,6 +18,7 @@ enum ProvaCalcoliSpese {
         scadenze(verifica)
         scontrini(verifica)
         pacchetto(verifica)
+        uso57(verifica)
     }
 
     private static let cal = Calendar(identifier: .gregorian)
@@ -385,5 +388,111 @@ enum ProvaCalcoliSpese {
         } catch {
             verifica.vero("Pacchetto: zip scritto e riletto (\(error.localizedDescription))", false)
         }
+    }
+
+    /// Migliorie d'uso 57: «Le spese, mese per mese».
+    private static func uso57(_ verifica: VerificaCalcoli) {
+        let ottobre = AiutiProva.data(2026, 10, 1)
+        let novembre = AiutiProva.data(2026, 11, 1)
+        let dueNovembre = AiutiProva.data(2026, 11, 2)
+        let inizio = { (d: Date) in MotoreChilometri.inizioMese(d, cal) }
+        // La fine della serie: il mese di oggi se il mese scelto è fra gli ultimi 10, altrimenti il mese scelto
+        verifica.vero("Spese 57: ottobre scelto il 2 novembre, la serie finisce a novembre",
+                      MotoreChilometri.fineSerie(scelto: ottobre, oggi: dueNovembre, calendario: cal) == inizio(novembre))
+        verifica.vero("Spese 57: febbraio è ancora fra gli ultimi 10 mesi",
+                      MotoreChilometri.fineSerie(scelto: AiutiProva.data(2026, 2, 1), oggi: dueNovembre, calendario: cal)
+                          == inizio(novembre))
+        verifica.vero("Spese 57: gennaio è fuori dagli ultimi 10, la serie finisce a gennaio",
+                      MotoreChilometri.fineSerie(scelto: AiutiProva.data(2026, 1, 1), oggi: dueNovembre, calendario: cal)
+                          == inizio(AiutiProva.data(2026, 1, 1)))
+        let appuntamenti = [visita("v1", cliente: "a", 3, ora: 10), visita("v2", cliente: "b", 3, ora: 15),
+                            visita("v3", cliente: "c", 8, ora: 11), visita("n1", cliente: "a", 2, ora: 9, mese: 11)]
+        let prima = MotoreChilometri.riepilogo(mese: ottobre, appuntamenti: appuntamenti, impostazioni: impostazioni(),
+                                               kmClienti: km, calendario: cal)
+        let ferma = MotoreChilometri.riepilogo(mese: ottobre, appuntamenti: appuntamenti, impostazioni: impostazioni(),
+                                               kmClienti: km, fineSerie: novembre, calendario: cal)
+        verifica("Spese 57: la serie ferma ha sempre 10 colonne", Double(ferma.serie.count), 10)
+        verifica.vero("Spese 57: l'ultima colonna è novembre", ferma.serie.last?.inizio == inizio(novembre))
+        verifica.vero("Spese 57: la colonna accesa è ottobre, la penultima", ferma.indiceScelto == 8)
+        verifica("Spese 57: la colonna di ottobre ha i km del mese", ferma.serie[8].km, ferma.totale)
+        verifica("Spese 57: novembre ha i suoi km nella serie", ferma.serie.last?.km ?? -1, 28)
+        verifica("Spese 57: i km del mese scelto non cambiano con la serie ferma", ferma.totale, prima.totale)
+        verifica.vero("Spese 57: senza fineSerie la colonna accesa è l'ultima, come prima", prima.indiceScelto == 9)
+        // La freccia ›: il 2 novembre si apre su ottobre, novembre si raggiunge, dicembre no
+        let s = StatoSpese()
+        let imp = impostazioni()
+        verifica.vero("Spese 57: il 2 novembre si apre su ottobre",
+                      s.mese(oggi: dueNovembre, impostazioni: imp) == MotoreChilometri.inizioMese(ottobre))
+        verifica.vero("Spese 57: da ottobre la › è attiva", s.puoAvanzare(oggi: dueNovembre, impostazioni: imp))
+        s.sposta(1, oggi: dueNovembre, impostazioni: imp)
+        verifica.vero("Spese 57: novembre, il mese di oggi, si raggiunge",
+                      s.mese(oggi: dueNovembre, impostazioni: imp) == MotoreChilometri.inizioMese(novembre))
+        verifica.vero("Spese 57: sul mese di oggi la › è spenta", !s.puoAvanzare(oggi: dueNovembre, impostazioni: imp))
+        s.sposta(1, oggi: dueNovembre, impostazioni: imp)
+        verifica.vero("Spese 57: oltre il mese di oggi non si va",
+                      s.mese(oggi: dueNovembre, impostazioni: imp) == MotoreChilometri.inizioMese(novembre))
+        s.scegli(AiutiProva.data(2027, 3, 1), oggi: dueNovembre)
+        verifica.vero("Spese 57: una colonna o una spesa nel futuro riporta al mese di oggi",
+                      s.mese(oggi: dueNovembre, impostazioni: imp) == MotoreChilometri.inizioMese(novembre))
+        s.meseScelto = MotoreChilometri.inizioMese(AiutiProva.data(2027, 1, 1))
+        verifica.vero("Spese 57: un mese futuro scelto in altro modo si mostra come il mese di oggi",
+                      s.mese(oggi: dueNovembre, impostazioni: imp) == MotoreChilometri.inizioMese(novembre))
+        s.sposta(-14, oggi: dueNovembre, impostazioni: imp)
+        verifica.vero("Spese 57: la ‹ non ha limite", s.mese(oggi: dueNovembre, impostazioni: imp)
+                          == MotoreChilometri.inizioMese(AiutiProva.data(2025, 9, 1)))
+        // «manca» nel CSV delle spese senza scontrino
+        let senza = SpesaStudio(data: AiutiProva.data(2026, 10, 14), descrizione: "Parcheggio", importo: 6.5, categoria: .parcheggio)
+        let csv = PacchettoCommercialista.csvSpese([senza], scontrini: [:], nomi: nil)
+        verifica.vero("Spese 57: la spesa senza scontrino è segnata «manca» nel CSV", csv.contains(";6,50;;;manca;"))
+        // Il CSV delle parcelle emesse nel mese: bozze, annullate e altri mesi fuori
+        func parcella(_ id: String, _ giorno: Int, mese: Int = 10, stato: StatoParcella, numero: String?, cliente: String = "a",
+                      importo: Double = 500) -> Parcella {
+            var p = Parcella(id: id, clienteId: cliente, data: AiutiProva.data(2026, mese, giorno),
+                             righe: [RigaParcella(descrizione: "Consulenza", importo: importo)])
+            p.stato = stato
+            p.numero = numero
+            p.progressivo = numero == nil ? nil : 1
+            return p
+        }
+        let tutte = [parcella("e1", 20, stato: .emessa, numero: "=2/2026"), parcella("p1", 5, stato: .pagata, numero: "1/2026", cliente: "b"),
+                     parcella("b1", 10, stato: .bozza, numero: nil), parcella("x1", 12, stato: .annullata, numero: "3/2026"),
+                     parcella("n1", 2, mese: 11, stato: .emessa, numero: "4/2026")]
+        let delMese = PacchettoCommercialista.parcelleDelMese(tutte, mese: ottobre, calendario: cal)
+        verifica.vero("Spese 57: parcelle di ottobre emesse o pagate, in ordine di data", delMese.map(\.id) == ["p1", "e1"])
+        let nomi = ["a": "Cliente Prova Uno", "b": "Cliente Prova Due"]
+        let senzaNomi = PacchettoCommercialista.csvParcelle(delMese, nomi: nil)
+        let righe = senzaNomi.dropFirst().components(separatedBy: "\r\n").filter { !$0.isEmpty }
+        verifica("Spese 57: CSV delle parcelle, una riga per parcella più l'intestazione", Double(righe.count), 3)
+        verifica.vero("Spese 57: CSV delle parcelle con numero, data, imponibile, totale e stato",
+                      righe.dropFirst().first == "1/2026;05/10/2026;500,00;500,00;Pagata")
+        verifica.vero("Spese 57: nessun nome nel CSV delle parcelle con i nomi spenti", !nomi.values.contains { senzaNomi.contains($0) })
+        verifica.vero("Spese 57: «=2/2026» non diventa una formula", senzaNomi.contains("'=2/2026"))
+        let conNomi = PacchettoCommercialista.csvParcelle(delMese, nomi: nomi)
+        verifica.vero("Spese 57: il cliente solo con i nomi accesi", conNomi.contains(";Pagata;Cliente Prova Due"))
+        // La descrizione del file pronto e i testi della tessera
+        verifica.vero("Spese 57: descrizione con il numero degli scontrini e «lo mandi tu»",
+                      PacchettoCommercialista.descrizione(scontrini: 6, pdf: true)
+                          == "chilometri, spese e 6 scontrini, in CSV e PDF: lo mandi tu al commercialista")
+        verifica.vero("Spese 57: descrizione con le parcelle",
+                      PacchettoCommercialista.descrizione(scontrini: 6, pdf: true, parcelle: true)
+                          == "chilometri, spese, parcelle e 6 scontrini, in CSV e PDF: lo mandi tu al commercialista")
+        verifica.vero("Spese 57: descrizione senza scontrini",
+                      PacchettoCommercialista.descrizione(scontrini: 0, pdf: true)
+                          == "chilometri e spese, in CSV e PDF: lo mandi tu al commercialista")
+        verifica.vero("Spese 57: la tessera dice cosa c'è dentro",
+                      TestiSpese.contenutoPacchetto(km: 412, completo: true, visite: 22, spese: 5, totale: 358.8, parcelle: 3)
+                          == "412 km in 22 visite · 5 spese (\(Formati.euroDecimali(358.8))) · 3 parcelle emesse")
+        verifica.vero("Spese 57: le parti a zero si dicono, e «almeno» con i km non completi",
+                      TestiSpese.contenutoPacchetto(km: 40, completo: false, visite: 1, spese: 0, totale: 0, parcelle: 0)
+                          == "almeno 40 km in 1 visita · nessuna spesa · nessuna parcella emessa")
+        verifica.vero("Spese 57: l'avviso della spesa senza scontrino",
+                      TestiSpese.senzaScontrino(1) == "Una spesa è senza scontrino: parte lo stesso, segnata."
+                          && TestiSpese.senzaScontrino(2) == "2 spese sono senza scontrino: partono lo stesso, segnate."
+                          && TestiSpese.senzaScontrino(0) == nil)
+        var con = senza
+        con.scontrino = "x.jpg"
+        verifica.vero("Spese 57: «tutte con lo scontrino»", TestiSpese.conteggio(spese: [con, con]) == "2 spese · tutte con lo scontrino")
+        verifica.vero("Spese 57: «1 spesa · 1 senza scontrino»", TestiSpese.conteggio(spese: [senza]) == "1 spesa · 1 senza scontrino")
+        verifica.vero("Spese 57: il mese con l'anno, «Ottobre 2026»", TestiSpese.meseAnno(ottobre) == "Ottobre 2026")
     }
 }

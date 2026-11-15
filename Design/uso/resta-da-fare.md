@@ -1841,3 +1841,42 @@ codice fiscale (`SchedaRecita.femminile`). Prove «Palestra 56» in `ProvaPalest
   regola della difficoltà resta quella di prima, quindi Qwen non li riceve dalla scheda.
 - Gli esempi `Vera/Esempi/palestra.json` non mostrano `migliore` (non servono alle prove delle regole).
 - Guardare con un Qwen vero (qwen3.5:4b) che in Facile `migliore` arrivi e che la risposta non diventi troppo lunga.
+
+## 57. Le spese, mese per mese
+
+Fatto (Studio › Spese c'è solo sul Mac, `SchedaStudio.speseSulDispositivo`):
+- **La serie ferma**: `MotoreChilometri.riepilogo(…, fineSerie:)` e `MotoreChilometri.fineSerie(scelto:oggi:)` (il mese di
+  calendario di oggi se il mese scelto è fra gli ultimi 10, altrimenti il mese scelto); `Riepilogo.indiceScelto`. Le colonne
+  (`ColonnaMeseSpese`) accendono quella scelta (iniziale in accento e grassetto), al passaggio si scuriscono (−0,04) con la
+  mano, il tocco sceglie il mese.
+- **Il mese a destra**: «I chilometri» e «‹ Ottobre 2026 ›» (14 bold, largo almeno 112); la › si spegne (0,3) sul mese di
+  calendario di oggi. `StatoSpese.ultimoMese`, `puoAvanzare`; `sposta` e `scegli` non vanno oltre il mese di oggi e
+  `mese(…)` riporta un mese futuro al mese di oggi. Sotto il numero «22 visite · 14 clienti · contati dalle visite
+  dell’agenda, da soli».
+- **Le spese**: «Le spese di ottobre», «3 spese · 1 senza scontrino» (arancio grassetto) o «… · tutte con lo scontrino»,
+  la miniatura senza scontrino vuota con il bordo arancio tratteggiato (anche nel foglio delle spese), «· manca lo
+  scontrino» nella data.
+- **Le scadenze**: il tocco sulla riga apre l'Agenda sul giorno nella vista mese (`StatoShell.apriAgendaMese`), con «›»
+  a destra; «Modifica…» nel menu contestuale (e fra le azioni di VoiceOver); il cerchio «fatta» resta. L'anello delle ore
+  lascia il posto a «I tuoi corsi e gli attestati ›» (senza le ore richieste resta «Imposta le ore richieste per l’anno»).
+- **Il pacchetto**: la tessera «Nel pacchetto di ottobre» (`DentroPacchettoSpese`) con «412 km in 22 visite · 5 spese
+  (358,80 €) · 3 parcelle emesse» («almeno» con i km non completi, le parti a zero dette) e l'avviso arancio per le spese
+  senza scontrino; il pulsante «Prepara il pacchetto di ottobre». Nel CSV delle spese «manca» nella colonna «Scontrino»;
+  le parcelle emesse nel mese (emesse o pagate) vanno in `parcelle-aaaa-mm.csv` (numero, data, imponibile, totale, stato;
+  il cliente solo con «nomi nel pacchetto»), contate dallo stesso elenco della tessera
+  (`PacchettoCommercialista.parcelleDelMese`). La descrizione del file pronto finisce con «: lo mandi tu al commercialista».
+- Prove «Spese 57» in `ProvaCalcoliSpese` (`--prova-calcoli`). Istantanee nuove 1095-uso-spese-mese-prima (chiara e scura),
+  1095-uso-spese-mese-di-oggi, 1095-uso-spese-senza-scontrino; 780-788 cambiano da sole.
+
+Resta:
+- **Le scadenze dello Studio nell'Agenda** (proposta di 57.6): oggi il tocco apre l'Agenda sul giorno, nella vista mese,
+  ma la vista mese non le mostra ancora. Va aggiunto all'indice dell'Agenda (`scadenzePerGiorno` in Dati/Modelli.swift è
+  solo di posizioni) un elenco di scadenze dello Studio per giorno, disegnate come «Scade …» col pallino arancio nelle celle
+  (`CellaMeseUso`, `RegoleMeseAgenda.righe`) e nella colonna del giorno, solo sul Mac e mai in modalità cliente; la chiave
+  della cache deve contenere `speseStudio` (esclusa da `stessiCalcoli`). Da coordinare con il «Da fare» della miglioria 3.
+- **Il PDF del riepilogo** non elenca ancora le parcelle (sono solo nel CSV).
+- I calcoli restano nel body come prima (dieci mesi di giri, la tessera non aggiunge motori); se `--prova-fluidita` lo
+  chiede, portarli in `stato.ricavato` con la chiave che contiene mese scelto, fine della serie,
+  `impostazioni.studio.spese`, `speseStudio` e `kmClienti`.
+- Istantanee da rigenerare sul Mac (780, 781, 782 con «almeno … km» nella tessera, 785, 788 in colonna: la tessera non
+  deve tagliarsi) e pagina delle anteprime da aggiornare; il passaggio sulle colonne chiede uno screenshot.
