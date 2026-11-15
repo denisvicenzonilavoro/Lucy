@@ -256,6 +256,8 @@ extension StatoShell {
 
     /// «Aggiungi…»: il pannello per scegliere i PDF (o le immagini delle scansioni).
     func scegliDocumentiBiblioteca() {
+        // Migliorie d'uso 37: il pannello non si apre neppure durante la dimostrazione
+        guard !inDimostrazione else { return mostraAvviso(TestiDimostrazione.nonDurante) }
         let p = NSOpenPanel()
         p.allowedContentTypes = [.pdf, .png, .jpeg, .tiff, .heic]
         p.allowsMultipleSelection = true

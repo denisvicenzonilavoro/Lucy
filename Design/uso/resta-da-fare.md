@@ -682,10 +682,9 @@ Resta:
 - **CLAUDE.md**: la regola del canale («Alleanza = etichetta in vetro blu con il logo Alleanza; indipendente = …») va
   aggiornata dall'utente come in §38.6.1 (con un nome scelto l'etichetta perde il logo e mostra il nome, sempre nel suo
   colore). Non l'ho toccata.
-- **Miglioria 37**: «Guardo Prisma con i clienti di prova» oggi mostra solo l'avviso «Si comincia con la dimostrazione»
-  (i dati di prova ci sono già al primo avvio); con la 37 deve chiamare `accendiDimostrazione(.trentacinque)`, e «Porto i
-  miei clienti» / «Parto da zero» devono spegnere la dimostrazione accesa (`spegniDimostrazione()`) prima di proseguire
-  (`StatoShell.cominciaPrimoAvvio`, PrimoAvvio.swift).
+- ~~**Miglioria 37**: «Porto i miei clienti» / «Parto da zero» spengono la dimostrazione accesa~~ fatto nella rifinitura
+  32-39: `cominciaPrimoAvvio` passa da `dopoLaDimostrazione`, che spegne senza avviso e prosegue con `poi` di
+  `spegniDimostrazione` a archivio vero riletto («Guardo Prisma con i clienti di prova» accendeva già la dimostrazione).
 - **«Come funziona» della guida** (§38.6.3): per ora resta nel «?» come scheda in più (alternativa della specifica), con
   la riga «Come funziona Prisma» di Impostazioni › Aspetto e la voce del menu Aiuto; le istantanee 222-224 e 229 restano
   quelle dell'introduzione. Se l'utente sceglie la proposta: togliere la scheda sul Mac e far aprire `PrimoAvvio` dal menu.
@@ -728,8 +727,8 @@ Resta:
   NotaVocaleTelefono, AperturaBackup); con «Nota a voce» spenta sul Mac l'iPhone riceve «rifiutata»: va verificato che la
   nota resti nella coda cifrata come quando il Mac non risponde (oggi la coda scatta solo senza collegamento).
 - **Il codice breve che scade** (decisione 2): richiede un abbinamento nuovo su Mac, iPhone e iPad.
-- **La scheda del codice** resta aperta se si blocca Prisma o si chiudono le Impostazioni (sotto la schermata di
-  benvenuto non si vede); se serve, chiuderla in `blocca()` e alla chiusura di Impostazioni.
+- ~~**La scheda del codice** resta aperta se si blocca Prisma o si chiudono le Impostazioni~~ fatto nella rifinitura
+  32-39: si chiude in `blocca()` (nel blocco animato) e in `chiudi(.impostazioni)`.
 - **Istantanee**: rigenerare sul Mac 560-566 (la pagina ha il nuovo ordine), 251 (riga che rimanda), le scene di
   Inquadra senza ponte e «Come funziona» della nota (compare «Collega l’iPhone»), guardare 1069-1071 chiare e scure e
   aggiornare la pagina delle anteprime.
@@ -764,24 +763,33 @@ Prova `ProvaBackupDimostrazione` in `--prova-backup`. Istantanee nuove 1060 (chi
 scura), 1063; 85 mostra la pagina nuova, 86 le misure in Impostazioni › Vera.
 
 Resta:
-- **Primo avvio senza dati di prova** (37.3 D, decisione 5): `Archivio.carica` scrive ancora `DatiPrisma.demo()` in una
-  cartella vuota (Archivio.swift, ramo finale e `caricaVecchio`). Va cambiato in un archivio vuoto controllando le prove
-  che partono da una cartella vuota; per l'utente non cambia nulla.
-- **Altre scritte «di prova»** che guardano la nota o il prefisso del dato e non sono ancora spente in dimostrazione:
-  PraticheComuniApple (`dati di prova`), SalaGiornataPensione, PaginePrismaCliente (`c.diProva`), SmontaggioApple,
-  DettaglioDocumento («documento di prova»), FamiglieComeLaSua, `TestiStudio.datiDiProva`, StudioSpese, StudioEsameOCF,
-  TestiPassaparola, MotoreTraguardi, TestiSinistri (chiudere con `grep -rn "di prova" Sources/Prisma/Shell
-  Sources/Prisma/Motori`). `scritteProva` non guarda la modalità cliente (la specifica lo propone): aggiungerlo cambierebbe
-  le istantanee della Sala in modalità cliente, da decidere guardandole.
-- **Pulsanti disattivati** con l'aiuto «Non durante la dimostrazione» (documenti, scontrini, attestati, Biblioteca,
-  moduli): oggi la guardia è nello stato (avviso), non nei pulsanti. Un documento aggiunto ai Documenti di un cliente di
-  prova copia comunque il file nella cartella Documenti: non entra nell'archivio vero e la pulizia dei file orfani lo
-  sposta nel Cestino al primo avvio dopo la dimostrazione. Da guardare anche le scritture di capsule e sinistri
-  (StatoCapsule, StatoSinistri).
-- **Prove**: `--prova-ovunque` (con la dimostrazione accesa `sincronizzaOvunque` non scrive e non unisce) e `--prova-vera`
-  (la guida e il contesto di Vera senza id di clienti veri) non sono estese: la prova del backup lavora su uno stato non
-  persistente e controlla dati, ricerca, guida, pulizie e scritture ferme; la lettura dal disco allo spegnimento non è
-  provata (servirebbe uno StatoShell persistente su una cartella di prova).
+- **Primo avvio senza dati di prova** (37.3 D, decisione 5): fatto nella rifinitura 32-39, solo sul Mac
+  (`Archivio.archivioIniziale` = `ArchivioPezzi.vuoto`; su iPhone e iPad resta `DatiPrisma.demo()` fino al loro giro),
+  nel ramo della cartella vuota e in `caricaVecchio` (avviso «…e ripartito da un archivio vuoto»). I due rami in sola
+  lettura tengono `demo()` come segnaposto, come diceva la specifica. Resta da guardare sul Mac vero un primo avvio da
+  zero (rubrica vuota, guida, tre domande) e che nessuna prova della CI partisse da una cartella vuota aspettandosi i 5
+  clienti (le prove e le istantanee non persistenti partono ancora da `demo()`).
+- **Altre scritte «di prova»**: nella rifinitura 32-39 tacciono in dimostrazione l'etichetta di Pratiche sui sinistri e
+  sulle proposte (`EtichettaDatiDiProvaPratiche(deiClienti: true)`; le tabelle e i moduli d'esempio la tengono, sono
+  risorse e non clienti), la giornata della pensione nella Sala e «documento di prova» nel dettaglio di un documento
+  (i PDF archiviati in dimostrazione non hanno file). Restano da setacciare: PaginePrismaCliente (`c.diProva`, dentro il
+  documento per il cliente), StudioSpese (le card non hanno lo stato nell'ambiente), TestiPassaparola, MotoreTraguardi,
+  `TestiStudio.datiDiProva` dove non passa già da `scritteProva`; SmontaggioApple, FamiglieComeLaSua e StudioEsameOCF
+  parlano di fac-simile e tabelle d'esempio (risorse), da lasciare. Manca la prova a dimostrazione accesa sui testi
+  principali (sono viste, non stato). `scritteProva` non guarda la modalità cliente (la specifica lo propone): aggiungerlo
+  cambierebbe le istantanee della Sala in modalità cliente, da decidere guardandole.
+- **Pulsanti e guardie** (rifinitura 32-39, fatto): «+» dei Documenti e i due pulsanti della Biblioteca spenti con l'aiuto
+  «Non durante la dimostrazione»; il pannello dei documenti e quello della Biblioteca non si aprono; `importaDocumenti`,
+  `importaFileSinistro` e l'archiviazione di un file trascinato su Vera si fermano con l'avviso; `archiviaPDF` e
+  `archiviaFile` (moduli compilati, Prisma del cliente, film, capsula) tengono il documento solo in memoria, senza file;
+  la capsula si sigilla con la chiave in memoria e non tocca il Portachiavi. Scontrini, attestati e moduli avevano già la
+  guardia nello stato; i loro pulsanti (FogliSpese, PraticheModuli) non sono ancora spenti.
+- **Prove** (rifinitura 32-39): `ProvaBackupDimostrazione` controlla anche sinistro, documento trascinato e capsula;
+  `--prova-vera` ha `ProvaVeraDimostrazione` (schede di Vera e del portafoglio senza il cliente vero, guida, routine
+  ferme, nota dettata rifiutata, il cliente vero che torna). Resta `--prova-ovunque`: le guardie di `sincronizzaOvunque`
+  stanno dietro `persistente`, quindi servirebbe uno StatoShell persistente su una cartella di prova (con Portachiavi e
+  cartella dello spazio finti): troppo rischioso senza un Mac per provarlo; anche la lettura dal disco allo spegnimento
+  resta non provata.
 - **«Riapri ora»** (dimensione del testo) durante la dimostrazione: la misura scelta non si salva e Prisma riparte con
   quella dell'archivio vero (in dimostrazione).
 - **Istantanee**: rigenerare sul Mac 85, 86 (chiara e scura), le pagine di Vera, Promemoria e Archivio (righe nuove in
@@ -1318,7 +1326,8 @@ Fatto (solo Mac, dentro `#if os(macOS)`; l'iPad tiene il clic che apre il dossie
 Resta:
 - La caduta delle luci spente in 0,4 s del template: l'opacità cambia di colpo (le luci sono disegnate in un `Canvas`).
 - Al passaggio i riquadri non si alzano di 1 e non hanno l'anello azzurro (l'app li accende con il fondo, come prima).
-- La prova di fluidità per «cambiare cliente non rifà `territorioOggi`» non è stata scritta.
+- ~~La prova di fluidità per «cambiare cliente non rifà `territorioOggi`»~~ fatto nella rifinitura 32-39
+  (`ProvaFluidita.controllaCacheCliente`: stessa `DerivatiDati` e mappa di Oggi ancora in cache dopo la scelta).
 - Guardare sul Mac 1100-1103: se Giulia ha vicini con i 35 clienti di prova, la posizione della scheda vicino al bordo
   (l'altezza per tenerla dentro la mappa è stimata, 170) e la lunghezza della riga patrimonio + due canali.
 
@@ -1350,8 +1359,9 @@ Fatto (solo Mac; su iPhone e iPad `clientePratiche` è sempre nil e Pratiche res
 - Istantanee: 800-807, 820-823 e 830-835 su «Tutti i clienti» esplicito; nuove 1105 e 1106 (chiare e scure), 1107-1112.
 
 Resta:
-- La prova di `--prova-fluidita` («la testata di Pratiche non rifà MotorePratiche a ogni disegno», «scegliere un cliente
-  filtra senza rifare `bisogniProposta`») non è stata scritta.
+- ~~La prova di `--prova-fluidita` («la testata di Pratiche non rifà MotorePratiche a ogni disegno», «scegliere un cliente
+  filtra senza rifare `bisogniProposta`»)~~ fatto nella rifinitura 32-39 (`controllaCacheCliente`, con
+  `bisogniPropostaInCache` e il contatore `CacheStatiPratiche.calcoli`).
 - Guardare sul Mac 801 e 1105: che la riga dei passi spenti si legga con l'opacità 0,7 del riquadro (se no va fuori
   dall'opacità), e 1106 se nessun cliente di prova è senza bisogni (la scena apre proposte presentate per il primo).
 - I token dei chip di «Compila per» (`Tema.Apple.Pratiche.Moduli.chip…`, `paddingPopover`) restano nel tema, non più

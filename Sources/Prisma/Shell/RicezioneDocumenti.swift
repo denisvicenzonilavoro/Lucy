@@ -19,6 +19,8 @@ enum ImportaDocumenti {
     /// `gestioneDocumenti` (si apre mettendo `scelta` a true).
     static func scegli(_ stato: StatoShell, scelta: Binding<Bool>) {
         #if os(macOS)
+        // Migliorie d'uso 37: durante la dimostrazione il pannello non si apre (i file andrebbero nella cartella vera)
+        guard !stato.inDimostrazione else { return stato.mostraAvviso(TestiDimostrazione.nonDurante) }
         let pannello = NSOpenPanel()
         pannello.allowedContentTypes = [.pdf, .png, .jpeg, .tiff, .heic]
         pannello.allowsMultipleSelection = true

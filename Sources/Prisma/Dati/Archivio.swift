@@ -297,9 +297,20 @@ enum Archivio {
             // La cartella è già stata usata: niente dati di prova scritti sopra
             return EsitoCarica(dati: DatiPrisma.demo(), avviso: "L'archivio di Prisma manca ma la cartella contiene documenti: non salvo nulla. Ripristina un backup da Impostazioni (o chiedi aiuto prima di continuare).", solaLettura: true)
         }
-        let d = DatiPrisma.demo()
+        let d = archivioIniziale
         try? salva(d, in: cartella)
         return EsitoCarica(dati: d)
+    }
+
+    /// L'archivio che nasce in una cartella vuota. Sul Mac un archivio vuoto, con le impostazioni di base (migliorie
+    /// d'uso 37, decisione 5): i clienti di prova si guardano con la dimostrazione, che non li scrive mai sul disco. Su
+    /// iPhone e iPad, finché non si fa il loro giro, i dati di prova come prima.
+    static var archivioIniziale: DatiPrisma {
+        #if os(macOS)
+        return ArchivioPezzi.vuoto
+        #else
+        return DatiPrisma.demo()
+        #endif
     }
 
     static func copieNonLeggibili(in cartella: URL) -> [URL] {
@@ -508,9 +519,14 @@ enum Archivio {
             }
             let copia = cartella.appendingPathComponent("\(prefissoNonLeggibile) \(Formati.nomeFile.string(from: Date())).json")
             try? fm.moveItem(at: file, to: copia)
-            let d = DatiPrisma.demo()
+            let d = archivioIniziale
             try? salva(d, in: cartella)
-            return EsitoCarica(dati: d, avviso: "L'archivio non era leggibile: ne ho conservato una copia nella cartella di Prisma e caricato i dati di prova. I backup automatici sono fermi finché non ripristini un backup da Impostazioni.")
+            #if os(macOS)
+            let caricato = "ripartito da un archivio vuoto"
+            #else
+            let caricato = "caricato i dati di prova"
+            #endif
+            return EsitoCarica(dati: d, avviso: "L'archivio non era leggibile: ne ho conservato una copia nella cartella di Prisma e \(caricato). I backup automatici sono fermi finché non ripristini un backup da Impostazioni.")
         }
     }
 

@@ -1202,6 +1202,8 @@ enum ProvaVera {
         ProvaMessaggiVera.esegui(controlla)
         // Il copilota dell'incontro (giro 5 di Orizzonte): consenso, regole, Qwen finto, conferma, archivio, ponte (ProvaCopilota.swift)
         ProvaCopilota.esegui(controlla)
+        // Migliorie d'uso 37: la dimostrazione accesa (Vera vede solo i clienti di prova, nota e routine ferme) (ProvaVeraDimostrazione.swift)
+        ProvaVeraDimostrazione.esegui(controlla)
         // «Luce» giro 13: la nota vocale (busta, arrivo, cliente, proposte, conferma senza doppioni, coda cifrata dell'iPhone,
         // fuori da Prisma ovunque, Novità) (ProvaNotaVocale.swift)
         ProvaNotaVocale.esegui(controlla)

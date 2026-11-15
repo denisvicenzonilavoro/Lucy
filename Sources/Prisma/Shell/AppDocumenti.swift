@@ -171,6 +171,19 @@ struct ElencoDocumenti: View {
     /// sua riga. nil = il tocco sceglie il documento, come sempre.
     var apriLettore: ((String) -> Void)? = nil
 
+    /// Migliorie d'uso 37 (solo Mac): durante la dimostrazione «+» è spento, il file finirebbe nella cartella vera.
+    private var spentoInDimostrazione: Bool {
+        #if os(macOS)
+        return stato.inDimostrazione
+        #else
+        return false
+        #endif
+    }
+
+    private var aiutoAggiungi: String {
+        spentoInDimostrazione ? TestiDimostrazione.nonDurante : "Aggiungi documenti (anche trascinandoli qui)"
+    }
+
     var body: some View {
         let _ = ContaCorpi.segna()
         let m = Tema.Misura.Documenti.self
@@ -178,7 +191,8 @@ struct ElencoDocumenti: View {
         VStack(spacing: 0) {
             HStack(spacing: Misure.ColonneStrumento.spazioTestata) {
                 CampoRicerca(testo: $ricerca, segnaposto: "Cerca nei documenti")
-                PulsanteIcona(simbolo: "plus", aiuto: "Aggiungi documenti (anche trascinandoli qui)", azione: importa)
+                PulsanteIcona(simbolo: "plus", aiuto: aiutoAggiungi, azione: importa)
+                    .disabled(spentoInDimostrazione)
                 if let comprimi {
                     PulsanteIcona(simbolo: "sidebar.left", aiuto: "Stringi l'elenco: più spazio al documento", azione: comprimi)
                 }

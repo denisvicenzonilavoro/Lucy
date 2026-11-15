@@ -198,7 +198,7 @@ private struct TestataSinistro: View {
                         .carattereApple(P.titolo)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
                         .lineLimit(2)
-                    if sinistro.id.hasPrefix(SinistriDiProva.prefisso) { EtichettaDatiDiProvaPratiche() }
+                    if sinistro.id.hasPrefix(SinistriDiProva.prefisso) { EtichettaDatiDiProvaPratiche(deiClienti: true) }
                 }
                 HStack(spacing: S.spazioEtichetta) {
                     Text((cliente?.nome ?? "Cliente") + " · ")

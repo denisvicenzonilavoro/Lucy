@@ -1593,6 +1593,8 @@ enum VoceConfronto: Hashable {
 
     /// Copia i file nella cartella Documenti del cliente e li legge.
     func importaDocumenti(_ urls: [URL]) {
+        // Migliorie d'uso 37: i clienti in memoria sono di prova, il file finirebbe nella cartella Documenti vera
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else { return }
         guard !solaLettura else {
             mostraAvviso("Archivio in sola lettura: aggiorna Prisma per importare documenti.")
@@ -2090,7 +2092,8 @@ enum VoceConfronto: Hashable {
         let pagine = StampaCarta.testo(pdf)
         d.pagine = pagine.count
         d.dimensione = Int64(pdf.count)
-        if persistente {
+        // Migliorie d'uso 37: in dimostrazione il documento resta solo in memoria (come nelle istantanee), senza file
+        if persistente && !inDimostrazione {
             let cartella = Archivio.cartellaDocumenti.appendingPathComponent(cliente, isDirectory: true)
             do {
                 try FileManager.default.createDirectory(at: cartella, withIntermediateDirectories: true)
@@ -4556,7 +4559,9 @@ extension StatoShell {
     /// Spegne la dimostrazione: l'archivio vero si rilegge dal disco (fuori dal thread principale, come all'avvio), con
     /// le scelte di aspetto, nomi dei canali e Vera fatte intanto (decisione 7); tutto il resto fatto in dimostrazione si
     /// perde, «senza niente da ripulire».
-    func spegniDimostrazione(avviso: String? = TestiDimostrazione.spenta) {
+    /// `poi`: quel che va fatto con i dati veri al loro posto (dopo la rilettura dall'archivio, che è asincrona); non
+    /// parte se la dimostrazione era già spenta o si sta già spegnendo.
+    func spegniDimostrazione(avviso: String? = TestiDimostrazione.spenta, poi: (() -> Void)? = nil) {
         guard inDimostrazione, !spegnimentoDimostrazione else { return }
         guard persistente else {
             // Prove e istantanee: nessun archivio sul disco, i dati di prima sono in memoria
@@ -4564,6 +4569,7 @@ extension StatoShell {
             Self.riportaImpostazioni(&d.impostazioni, da: dati.impostazioni)
             datiPrimaDellaDimostrazione = nil
             concludiSpegnimento(d, avviso: avviso)
+            poi?()
             return
         }
         spegnimentoDimostrazione = true
@@ -4579,6 +4585,7 @@ extension StatoShell {
                 var d = letto.dati
                 if !letto.solaLettura { Self.riportaImpostazioni(&d.impostazioni, da: self.dati.impostazioni) }
                 self.concludiSpegnimento(d, avviso: letto.avviso ?? avviso)
+                poi?()
             }
         }
     }

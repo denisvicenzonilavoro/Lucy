@@ -309,6 +309,8 @@ extension StatoShell {
         guard fm.fileExists(atPath: origine.path) else {
             return EsitoAzioneVera(fatta: false, messaggio: "Il file trascinato non c'è più: trascinalo di nuovo.")
         }
+        // Migliorie d'uso 37: il cliente è di prova, il file finirebbe nella cartella Documenti vera
+        guard !inDimostrazione else { return EsitoAzioneVera(fatta: false, messaggio: TestiDimostrazione.nonDurante) }
         var d = Documento(clienteId: id, titolo: arg["titolo"] ?? origine.deletingPathExtension().lastPathComponent,
                           tipo: Documento.Tipo(rawValue: arg["tipo"] ?? "") ?? .altro)
         d.importatoIl = Appuntamento.alMinuto(Date())

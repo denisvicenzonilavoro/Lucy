@@ -43,6 +43,22 @@ extension ProvaBackup {
         guard !stato.scritteProva, !stato.guidaVisibile, !stato.passiGuida.contains(where: { $0.azione == .togliProva }) else {
             return "dimostrazione: le scritte «dati di prova», la guida o «Togli i clienti di prova» compaiono ancora"
         }
+        // Rifinitura 32-39: i file di un sinistro e i documenti trascinati non vanno nella cartella Documenti vera; la capsula
+        // si sigilla con la chiave in memoria (mai il Portachiavi) e si apre finché la dimostrazione resta accesa
+        let documentiPrima = stato.dati.documenti.count
+        let finto = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("prova-dimostrazione.pdf")
+        stato.importaFileSinistro("sinistro-qualsiasi", documento: nil, urls: [finto])
+        guard stato.avviso == TestiDimostrazione.nonDurante else {
+            return "dimostrazione: l'importazione dei file di un sinistro non si ferma con l'avviso"
+        }
+        stato.importaDocumenti([finto])
+        guard stato.dati.documenti.count == documentiPrima else { return "dimostrazione: un documento trascinato è entrato" }
+        if let c = stato.dati.clienti.first {
+            guard stato.sigillaCapsula("Prova della dimostrazione", apertura: .data(Date().addingTimeInterval(365 * 86_400)), cliente: c),
+                  let capsula = stato.dati.capsule.last, stato.chiaveCapsula(capsula) != nil else {
+                return "dimostrazione: la capsula non si sigilla con la chiave in memoria"
+            }
+        }
         // Il gruppo si cambia anche con la dimostrazione accesa
         stato.accendiDimostrazione(.trentacinque, avviso: false)
         guard stato.inDimostrazione, stato.gruppoProva == .trentacinque,

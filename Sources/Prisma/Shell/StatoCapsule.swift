@@ -56,7 +56,7 @@ extension StatoShell {
         if !persistente, sala.provaUscite.capsulaChiaveMancante, c.stato == .sigillata { return nil }
         if c.diProva == true, c.chiaveId == SigilloCapsule.chiaveIdDiProva { return SigilloCapsule.chiaveDiProva }
         if let k = ChiaviCapsuleInMemoria.chiave(c.chiaveId) { return k }
-        guard persistente, let k = PortachiaviCapsule.chiave(id: c.chiaveId) else { return nil }
+        guard persistente, !inDimostrazione, let k = PortachiaviCapsule.chiave(id: c.chiaveId) else { return nil }
         ChiaviCapsuleInMemoria.ricorda(k)
         return k
     }
@@ -68,7 +68,9 @@ extension StatoShell {
         let pulito = testo.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !solaLettura, !pulito.isEmpty, dati.clienti.contains(where: { $0.id == cliente.id }) else { return false }
         let chiave: SymmetricKey
-        if persistente {
+        // Migliorie d'uso 37: in dimostrazione la capsula si sigilla con la chiave in memoria (mai il Portachiavi) e si
+        // perde allo spegnimento con gli altri dati di prova
+        if persistente && !inDimostrazione {
             guard let k = PortachiaviCapsule.creaSeManca() else { return false }
             ChiaviCapsuleInMemoria.ricorda(k)
             chiave = k

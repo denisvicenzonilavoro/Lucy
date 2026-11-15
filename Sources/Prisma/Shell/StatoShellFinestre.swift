@@ -326,6 +326,10 @@ extension StatoShell {
         if app == .sala, sala.momento != nil { sala.momento = nil }
         // Migliorie d'uso 59: neanche il copione aperto
         if app == .sala, sala.copioneAperto { sala.copioneAperto = false }
+        #if os(macOS)
+        // Migliorie d'uso 39: la scheda con il codice di abbinamento si chiude con Impostazioni (il codice è un segreto)
+        if app == .impostazioni, dispositivi.schedaCodice { dispositivi.schedaCodice = false }
+        #endif
     }
 
     /// La finestra rientra nella sua icona del dock; resta nell'elenco finché il volo non finisce (`rientrano`:
@@ -495,6 +499,8 @@ extension StatoShell {
             if schermataNeutraMac { schermataNeutraMac = false }
             // e gli avvisi trattenuti mentre si mostrava si scartano (portano nomi di altri clienti)
             avvisiTrattenuti.removeAll()
+            // Migliorie d'uso 39: la scheda con il codice di abbinamento non sopravvive al blocco
+            if dispositivi.schedaCodice { dispositivi.schedaCodice = false }
             #endif
             // La guida si chiude senza segnare l'introduzione come vista: riparte al prossimo sblocco
             if sistema.guida != nil { sistema.guida = nil }
