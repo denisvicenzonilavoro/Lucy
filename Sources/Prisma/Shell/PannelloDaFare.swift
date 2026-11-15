@@ -166,6 +166,8 @@ struct PannelloDaFare: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
+    /// I gruppi aperti con «Mostra tutte» (si richiudono con il pannello).
+    @State private var gruppiInteri: Set<Int> = []
 
     private typealias F = Tema.Apple.ElencoDaFare
 
@@ -198,7 +200,7 @@ struct PannelloDaFare: View {
             // che scorre). Con molte righe (con 200 clienti sono centinaia) le due misure creavano due volte ogni riga
             // del pannello, decine di secondi all'apertura e alla chiusura: se le righe non possono stare nell'altezza
             // dell'elenco (ognuna è alta almeno `altezzaRiga`), si scorre subito e le righe nascono solo quando si vedono.
-            if arrivi.count + nastro.blocchi.reduce(0, { $0 + $1.voci.count }) > F.righeSenzaScorrere {
+            if arrivi.count + nastro.blocchi.reduce(0, { $0 + mostrate($1).count }) > F.righeSenzaScorrere {
                 ScrollView { elenco(nastro, arrivi: arrivi, conNome: solo == nil, pigro: !istantanea) }
                     .scrollIndicators(.hidden)
                     .frame(maxHeight: F.altezzaElenco)
@@ -267,11 +269,48 @@ struct PannelloDaFare: View {
             }
             ForEach(nastro.blocchi) { b in
                 titoloGruppo("\(b.gruppo.titolo) · \(b.totale)", primo: arrivi.isEmpty && b.id == nastro.blocchi.first?.id)
-                ForEach(b.voci) { v in
+                let voci = mostrate(b)
+                ForEach(voci) { v in
                     RigaDaFare(voce: v, conNome: conNome, conCanali: true, titoloACapo: true,
                                fatto: { stato.fattoDaFare(v) }, apri: { stato.apriVoceDaFare(v) })
                 }
+                if b.voci.count > voci.count {
+                    altre(b.voci.count - voci.count, gruppo: b.id)
+                }
             }
+    }
+
+    /// Le voci mostrate di un gruppo: le prime `righePerGruppo`, tutte dopo «Mostra tutte» (nelle istantanee sempre le
+    /// prime). Con 200 clienti un gruppo ha centinaia di voci: crearle tutte costava secondi all'apertura e alla chiusura.
+    private func mostrate(_ b: NastroDaFare.Blocco) -> [VoceDaFare] {
+        guard b.voci.count > F.righePerGruppo, istantanea || !gruppiInteri.contains(b.id) else { return b.voci }
+        return Array(b.voci.prefix(F.righePerGruppo))
+    }
+
+    /// «e altre N · Mostra tutte» in fondo a un gruppo tagliato (nelle istantanee solo «e altre N»).
+    private func altre(_ n: Int, gruppo: Int) -> some View {
+        HStack(spacing: 0) {
+            Text(TestiDaFare.eAltre(n))
+                .carattereApple(F.piede)
+                .foregroundColor(Tema.Apple.Colore.inchiostro2)
+            if !istantanea {
+                Text(" · ")
+                    .carattereApple(F.piede)
+                    .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                Button(TestiDaFare.mostraTutte) {
+                    withAnimation(Tema.Apple.Moto.animazione(Tema.Moto.passaggio, calmo: calmo)) {
+                        _ = gruppiInteri.insert(gruppo)
+                    }
+                }
+                .buttonStyle(StileSemplice())
+                .carattereApple(F.collegamento)
+                .foregroundColor(F.coloreCollegamento)
+            }
+            Spacer(minLength: 0)
+        }
+        .lineLimit(1)
+        .padding(F.paddingRiga)
+        .frame(minHeight: F.altezzaRiga)
     }
 
     private func titoloGruppo(_ testo: String, primo: Bool) -> some View {

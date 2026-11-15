@@ -167,6 +167,8 @@ extension Tema.Apple {
         /// Oltre queste righe (alte almeno `altezzaRiga`) l'elenco non può stare in `altezzaElenco`: scorre subito, con le
         /// righe create solo quando si vedono.
         static let righeSenzaScorrere = Int((altezzaElenco / altezzaRiga).rounded(.up))
+        /// Righe al più per gruppo nel pannello; le altre con «e altre N · Mostra tutte».
+        static let righePerGruppo = 12
         /// La testata: «Da fare» 16 bold, il numero, a destra il segmentato o «in ordine di tempo».
         static let titolo = Carattere(dimensione: 16, peso: .bold)
         static let spazioTitolo: CGFloat = 6

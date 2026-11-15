@@ -41,6 +41,9 @@ enum TestiDaFare {
     }
     static func fatteOggi(_ n: Int) -> String { "Fatte oggi: \(n) · " }
     static func altre(_ n: Int) -> String { "altre \(n) · " }
+    /// In fondo a un gruppo del pannello tagliato a `righePerGruppo` righe.
+    static func eAltre(_ n: Int) -> String { "e altre \(n)" }
+    static let mostraTutte = "Mostra tutte"
 
     /// «Giulia Rossi: fatto. La voce sparisce da tutta Prisma» (per una voce «Per te» senza il nome).
     static func fatto(_ v: VoceDaFare) -> String {
