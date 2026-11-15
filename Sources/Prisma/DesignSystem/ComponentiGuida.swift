@@ -36,7 +36,7 @@ struct InfoTermine: View {
     }
 }
 
-/// Il popover della «i»: termine, per esteso, spiegazione, esempio, «Apri nel glossario».
+/// Il popover della «i»: termine, per esteso, spiegazione, esempio, «Apri nel glossario» («Tutte le parole ›» sul Mac).
 struct SchedaTermine: View {
     let voce: VoceGlossario
     let apriGlossario: () -> Void
@@ -67,7 +67,12 @@ struct SchedaTermine: View {
                 EsempioGuida(testo: esempio)
             }
             Button(action: apriGlossario) {
+                // Migliorie d'uso 66: sul Mac lo stesso collegamento della scheda della parola
+                #if os(macOS)
+                Text("Tutte le parole ›")
+                #else
                 Label("Apri nel glossario", systemImage: "book")
+                #endif
             }
             .buttonStyle(StileCollegamento())
         }
@@ -99,7 +104,8 @@ struct EsempioGuida: View {
     }
 }
 
-/// Un'etichetta che mette da sé la «i» se il suo testo ha una voce nel glossario.
+/// Un'etichetta che mette da sé la «i» se il suo testo ha una voce nel glossario. Sul Mac (migliorie d'uso 66, un solo
+/// modo di spiegare) niente «i»: l'etichetta stessa ha il filo tratteggiato e un tocco apre la scheda della parola.
 struct EtichettaConTermine: View {
     let testo: String
     let font: Font
@@ -108,6 +114,23 @@ struct EtichettaConTermine: View {
     var righe: Int? = nil
 
     var body: some View {
+        #if os(macOS)
+        if let v = Glossario.voce(perEtichetta: testo) {
+            TestoConParole(etichetta: testo, chiave: v.chiave, colore: colore, righe: righe)
+                .font(font)
+                .help("\(v.termine): \(v.breve)")
+        } else {
+            Text(testo)
+                .font(font)
+                .foregroundColor(colore)
+                .lineLimit(righe)
+        }
+        #else
+        conLaI
+        #endif
+    }
+
+    private var conLaI: some View {
         HStack(alignment: .center, spacing: Tema.Misura.Guida.spazioInfo) {
             Text(testo)
                 .font(font)
@@ -119,6 +142,52 @@ struct EtichettaConTermine: View {
         }
     }
 }
+
+#if os(macOS)
+/// La scheda della parola (migliorie d'uso 66, template `glApri`): occhiello azzurro «Le parole», il termine, la riga breve
+/// e la spiegazione, e «Tutte le parole ›» che apre il glossario su quella parola. Sta in un popover ancorato al testo
+/// (SwiftUI non sa ancorare alla singola parola): Esc e il clic fuori la chiudono.
+struct SchedaParola: View {
+    let voce: VoceGlossario
+    let tutte: () -> Void
+
+    private typealias P = Tema.Apple.Parole
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Le parole")
+                .carattereApple(P.occhiello)
+                .foregroundColor(P.coloreOcchiello)
+            Text(voce.termine)
+                .carattereApple(P.termine)
+                .foregroundColor(P.coloreTermine)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, P.sottoOcchiello)
+            Text(voce.breve)
+                .carattereApple(P.definizione)
+                .foregroundColor(P.coloreDefinizione)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, P.sottoTermine)
+            Text(voce.spiegazione)
+                .carattereApple(P.definizione)
+                .foregroundColor(P.coloreSpiegazione)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, P.sottoTermine)
+            Button(action: tutte) {
+                Text("Tutte le parole ›")
+                    .carattereApple(P.collegamento)
+                    .foregroundColor(P.coloreCollegamento)
+                    .contentShape(Rectangle())
+            }
+            .buttonStyle(StileSemplice())
+            .padding(.top, P.sopraCollegamento)
+        }
+        .padding(P.schedaMargine)
+        .frame(width: P.schedaLarghezza, alignment: .leading)
+        .accessibilityElement(children: .contain)
+    }
+}
+#endif
 
 /// Vuoto iniziale che spiega: icona, titolo, perché serve, tre passi, pulsante principale e, se serve, uno
 /// secondario. Si mostra solo quando non c'è proprio niente (non quando un filtro non trova risultati).

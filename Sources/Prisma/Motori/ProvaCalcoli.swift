@@ -1367,6 +1367,38 @@ enum ProvaCalcoli {
                     .filter { Glossario.voce($0)?.categoria != .prisma }.count), 0)
         verifica("Parole: nessun'altra app si dice «il centro della consulenza»",
                  Double(AppPrisma.allCases.filter { $0.occhiello.lowercased().contains("centro della consulenza") }.count), 0)
+        // Migliorie d'uso 66: le parole si spiegano dove sono (forme, una volta per schermata, collegamenti interni)
+        verifica("Parole 66: ogni forma ha la sua voce", Double(Glossario.forme.filter { Glossario.voce($0.0) == nil }.count), 0)
+        verifica("Parole 66: tutte le forme preparate", Double(Glossario.forme.count), 16)
+        verifica("Parole 66: «plusvalenza» e «divario previdenziale» entro 110 caratteri",
+                 Double([VoceGlossario.Chiave.plusvalenza, .divarioPrevidenziale]
+                    .filter { (Glossario.voce($0)?.breve.count ?? 999) > 110 }.count), 0)
+        verifica("Parole 66: «plusvalenza» fra previdenza e tasse",
+                 Glossario.voce(.plusvalenza)?.categoria == .previdenzaFisco ? 1 : 0, 1)
+        let schermata = ParoleSchermata.segna(["Il rischio SRI è 3.", "Anche qui SRI e un riscatto.", "Premi pagati e riscatti."])
+        verifica("Parole 66: «SRI» in due testi si segna solo nel primo",
+                 schermata[0].contains(.sri) && !schermata[1].contains(.sri) ? 1 : 0, 1)
+        verifica("Parole 66: parole diverse nello stesso testo si segnano tutte",
+                 schermata[1].contains(.riscatto) && !schermata[2].contains(.riscatto) && schermata[2].contains(.premio) ? 1 : 0, 1)
+        verifica("Parole 66: i plurali trovano la voce («premi», «riscatti», «deducibili»)",
+                 ParoleSchermata.segna(["premi"]).first == Set([VoceGlossario.Chiave.premio])
+                    && ParoleSchermata.segna(["riscatti"]).first == Set([VoceGlossario.Chiave.riscatto])
+                    && ParoleSchermata.segna(["versamenti deducibili"]).first == Set([VoceGlossario.Chiave.deducibilita]) ? 1 : 0, 1)
+        verifica("Parole 66: nessuna parola dentro un'altra («premiato», «riscattabile»)",
+                 Double(ParoleSchermata.segna(["un cliente premiato", "riscattabile"]).flatMap { $0 }.count), 0)
+        verifica("Parole 66: le sigle solo in maiuscolo («sri» e «kid» no)",
+                 Double(ParoleSchermata.segna(["il kid del fondo e lo sri"]).flatMap { $0 }.count), 0)
+        verifica("Parole 66: la gestione separata senza badare alle maiuscole",
+                 ParoleSchermata.segna(["Gestione Separata"]).first == Set([VoceGlossario.Chiave.gestioneSeparata]) ? 1 : 0, 1)
+        let segnato = TestoParole.costruisci("Nel KID il premio e i premi, poi la gestione separata.", parole: nil, intera: nil)
+        let collegamenti = segnato.map { TestoParole.collegamenti($0) } ?? []
+        verifica("Parole 66: una sola occorrenza per parola (KID, premio, gestione separata)", Double(collegamenti.count), 3)
+        verifica("Parole 66: solo collegamenti interni, che tornano alla loro parola",
+                 Double(collegamenti.filter { $0.scheme != TestoParole.schema || TestoParole.chiave(di: $0) == nil }.count), 0)
+        verifica("Parole 66: un indirizzo esterno non è una parola",
+                 URL(string: "https://example.com").flatMap { TestoParole.chiave(di: $0) } == nil ? 1 : 0, 1)
+        verifica("Parole 66: un testo senza parole resta semplice",
+                 TestoParole.costruisci("Nessuna parola qui.", parole: nil, intera: nil) == nil ? 1 : 0, 1)
         #endif
         verifica("Guida: app senza 3 passi", Double(AppPrisma.allCases.filter { $0.aiuto.passi.count != 3 }.count), 0)
         verifica("Guida: riga del dock entro 60 caratteri", Double(AppPrisma.allCases.filter { $0.aiuto.inBreve.count > 60 }.count), 0)

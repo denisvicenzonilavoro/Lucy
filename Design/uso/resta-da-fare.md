@@ -1994,3 +1994,29 @@ Resta:
   non c'è una riga (alternative di 60-a non fatte).
 - Il segno da solo per la lettera e la giornata con «✦ Aggiungi al Prisma di …» non c'è (decisione 60-b: aggiungere al file
   non vuol dire averla fatta).
+
+## 66. Le parole si spiegano dove sono
+
+Fatto (solo sul Mac): le forme delle parole (`Glossario.forme`, nell'ordine del template, sigle solo in maiuscolo), la
+voce nuova «Plusvalenza» (Previdenza e tasse; «Divario previdenziale» c'era già dalla miglioria 1), la regola «una volta
+per schermata» (`ParoleSchermata.segna`, tenuta fra i dati ricavati con `stato.paroleSchermata`), `TestoConParole` (filo a
+puntini color accento, collegamento interno `prisma-parola://` gestito da `OpenURLAction`, testo semplice sui documenti
+e in modalità cliente), `SchedaParola` nel popover con «Tutte le parole ›», le etichette di `EtichettaConTermine` col filo
+al posto della «i» («Apri nel glossario» diventa «Tutte le parole ›»), la frase sotto il campo del glossario e «Nessuna
+parola così.», i token `Tema.Apple.Parole`, le prove in `--prova-calcoli` e le istantanee 1308 e 1309 (chiare e scure).
+Prima vista adottata: Posizioni › Peso dei costi (nota del pannello, costi mancanti, nota di metodo: una schermata sola);
+`PannelloAnalisi` ha `paroleNota` per le altre analisi.
+
+Resta:
+- **Adozione nelle altre viste** (la miglioria si estende a pezzi): le frasi delle aree di Analisi 360
+  (`TestiAree360`), i dettagli di Posizioni (`PannelliPosizione`: riscatto, gestione separata, composizione;
+  `DettaglioPosizione` come seconda schermata con la sua chiave), la scheda di un prodotto (`ComponentiProdotti`), le
+  spiegazioni del TFR e del simulatore previdenza, le note di metodo (`NotaMetodo`: va passato l'insieme della schermata,
+  non segnata da sola, altrimenti la stessa parola si segnerebbe due volte). Le frasi composte con interpolazioni vanno
+  prima scritte come stringa intera.
+- **Il colore al passaggio del mouse** e il cursore d'aiuto del template: SwiftUI su macOS 14 non li dà per una sola
+  parola di un `Text`; la scheda è ancorata al paragrafo, non alla parola (decisione 66.6).
+- **Da guardare nelle istantanee**: che la tinta del `Text` tenga la parola del colore del paragrafo (se macOS colora i
+  collegamenti d'accento, la parola resta azzurra: accettabile, è il colore del passaggio nel template); 227 e 228 con la
+  frase nuova; le etichette con il filo in Prodotti, Rubrica e Multiramo («106-posizioni-multiramo»).
+- `InfoTermine` resta nel codice (oggi non la usa più nessuno sul Mac): serve dove l'etichetta è un simbolo.

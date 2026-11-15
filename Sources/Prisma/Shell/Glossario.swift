@@ -20,6 +20,8 @@ struct VoceGlossario: Identifiable, Equatable {
         case daFare, mostraAlCliente, tuttiIClienti, ilQuadro
         // Migliorie d'uso 1: la parola che il quadro della vista pulita fa toccare al cliente
         case divarioPrevidenziale
+        // Migliorie d'uso 66: la parola che il filo tratteggiato riconosce e che il glossario non aveva
+        case plusvalenza
         #endif
     }
 
@@ -321,6 +323,11 @@ enum Glossario {
               "La differenza tra la pensione che ti aspetti e il reddito che vorresti avere quando smetti di lavorare.",
               "Prisma confronta la pensione pubblica stimata con il reddito che desideri: la differenza, al mese, è il divario. I piani di previdenza complementare servono a colmarlo, in tutto o in parte.",
               nil, [.analisi360]),
+            v(.plusvalenza, "Plusvalenza", nil, .previdenzaFisco,
+              "Il guadagno tra quanto hai pagato un investimento e quanto lo vendi. Su quel guadagno si pagano le tasse.",
+              "Se vendi un fondo, un ETF o un titolo a più di quanto l'hai pagato, la differenza è una plusvalenza. Si paga il \(pct(RegoleFiscali.ordinaria)) (il \(pct(RegoleFiscali.titoliStato)) sulla parte in titoli di Stato); le perdite, le minusvalenze, possono ridurre le plusvalenze degli anni dopo.",
+              "Compri a 10.000 € e vendi a 12.000 €: la plusvalenza è di 2.000 €, le tasse \(Formati.euro(2_000 * RegoleFiscali.ordinaria / 100)).",
+              [.posizioni, .simulazioni]),
         ]
         #else
         return []
@@ -391,3 +398,75 @@ enum Glossario {
                       spiegazione: spiegazione, esempio: esempio, dove: dove)
     }
 }
+
+#if os(macOS)
+// MARK: - Migliorie d'uso 66: le parole si spiegano dove sono
+
+extension Glossario {
+    /// Le forme delle parole del mestiere che il filo tratteggiato riconosce nelle frasi (template `GLRE`), nell'ordine
+    /// del template: il primo che corrisponde vince. Le sigle SRI, KID e TFR solo in maiuscolo, le altre senza badare a
+    /// maiuscole e minuscole, sempre a parola intera. Preparate una volta.
+    static let forme: [(VoceGlossario.Chiave, NSRegularExpression)] = {
+        let elenco: [(VoceGlossario.Chiave, String, Bool)] = [
+            (.sri, #"\bSRI\b"#, false),
+            (.kid, #"\bKID\b"#, false),
+            (.gestioneSeparata, #"\bgestione separata\b"#, true),
+            (.riscatto, #"\briscatt[oi]\b"#, true),
+            (.capitaleMorte, #"\bcaso morte\b"#, true),
+            (.divarioPrevidenziale, #"\bdivario\b"#, true),
+            (.multiramo, #"\bmultiramo\b"#, true),
+            (.tfr, #"\bTFR\b"#, false),
+            (.caricamento, #"\bcaricament[oi]\b"#, true),
+            (.deducibilita, #"\bdeduzion[ei]\b|\bdeducibil[ei]\b"#, true),
+            (.adeguatezza, #"\badeguatezza\b"#, true),
+            (.consolidamento, #"\bconsolidament[oi]\b"#, true),
+            (.plusvalenza, #"\bplusvalenz[ae]\b"#, true),
+            (.patrimonioNetto, #"\bpatrimonio netto\b"#, true),
+            (.rendita, #"\brendita\b"#, true),
+            (.premio, #"\bpremi[oi]\b"#, true),
+        ]
+        return elenco.compactMap { chiave, schema, senzaMaiuscole in
+            guard let re = try? NSRegularExpression(pattern: schema, options: senzaMaiuscole ? [.caseInsensitive] : [])
+            else { return nil }
+            return (chiave, re)
+        }
+    }()
+
+    /// La prima occorrenza di una parola nel testo (nil: non c'è). Gli intervalli sono di `NSString`.
+    static func occorrenza(_ chiave: VoceGlossario.Chiave, in testo: String) -> NSRange? {
+        guard testo.count >= 3, let re = forme.first(where: { $0.0 == chiave })?.1 else { return nil }
+        let r = re.rangeOfFirstMatch(in: testo, options: [], range: NSRange(location: 0, length: (testo as NSString).length))
+        return r.location == NSNotFound ? nil : r
+    }
+
+    /// Le parole da segnare in un solo testo, ciascuna alla sua prima occorrenza, nell'ordine delle forme e senza
+    /// sovrapposizioni (una parola dentro un'altra già segnata resta senza filo).
+    static func occorrenze(in testo: String, solo parole: Set<VoceGlossario.Chiave>? = nil) -> [(VoceGlossario.Chiave, NSRange)] {
+        var trovate: [(VoceGlossario.Chiave, NSRange)] = []
+        for (chiave, _) in forme where parole == nil || parole!.contains(chiave) {
+            guard let r = occorrenza(chiave, in: testo) else { continue }
+            if trovate.contains(where: { NSIntersectionRange($0.1, r).length > 0 }) { continue }
+            trovate.append((chiave, r))
+        }
+        return trovate
+    }
+}
+
+/// Una volta per schermata (template `glSegna`): riceve i testi di una schermata nell'ordine in cui si leggono e dice,
+/// per ognuno, quali parole segnare. Ogni parola si segna solo alla sua prima occorrenza nell'intera schermata; parole
+/// diverse nello stesso testo si segnano tutte. Funzione pura: il risultato non dipende dall'ordine in cui SwiftUI
+/// disegna, e la prova dei calcoli la controlla.
+enum ParoleSchermata {
+    static func segna(_ testi: [String]) -> [Set<VoceGlossario.Chiave>] {
+        var esito = Array(repeating: Set<VoceGlossario.Chiave>(), count: testi.count)
+        for (chiave, _) in Glossario.forme {
+            for (i, testo) in testi.enumerated() {
+                guard Glossario.occorrenza(chiave, in: testo) != nil else { continue }
+                esito[i].insert(chiave)
+                break
+            }
+        }
+        return esito
+    }
+}
+#endif

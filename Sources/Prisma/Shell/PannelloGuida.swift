@@ -517,6 +517,15 @@ struct GlossarioVista: View {
         return elenco
     }()
 
+    /// Senza risultati (migliorie d'uso 66: sul Mac la frase del template).
+    private static var nessuna: String {
+        #if os(macOS)
+        return "Nessuna parola così."
+        #else
+        return "Nessuna parola trovata. Prova con una parte della parola, o chiedi a Vera."
+        #endif
+    }
+
     var body: some View {
         let _ = ContaCorpi.segna()
         let m = Tema.Misura.Guida.self
@@ -526,6 +535,13 @@ struct GlossarioVista: View {
         VStack(alignment: .leading, spacing: m.spazio) {
             TextField("Cerca una parola: SRI, riscatto, TFR…", text: $testo)
                 .campoTesto()
+            #if os(macOS)
+            // Migliorie d'uso 66: dove si trovano le parole nelle schermate
+            Text("Nelle schermate, le parole con il filo tratteggiato si aprono con un tocco. Nella vista del cliente restano spiegate.")
+                .font(Tema.Testo.Guida.breveElenco)
+                .foregroundColor(Tema.Colore.inchiostroSecondario)
+                .fixedSize(horizontal: false, vertical: true)
+            #endif
             ViewThatFits(in: .horizontal) {
                 ControlloSegmenti(opzioni: GlossarioVista.opzioni, selezione: $categoria)
                 ControlloSegmenti(opzioni: GlossarioVista.opzioni, selezione: $categoria, compatto: true)
@@ -538,7 +554,7 @@ struct GlossarioVista: View {
                     if let v = scelta {
                         ScrollView { dettaglio(v).frame(maxWidth: .infinity, alignment: .leading) }
                     } else {
-                        Text("Nessuna parola trovata. Prova con una parte della parola, o chiedi a Vera.")
+                        Text(GlossarioVista.nessuna)
                             .font(Tema.Testo.Guida.testoBlocco)
                             .foregroundColor(Tema.Colore.inchiostroSecondario)
                             .fixedSize(horizontal: false, vertical: true)

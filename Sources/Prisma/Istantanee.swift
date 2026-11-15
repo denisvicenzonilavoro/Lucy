@@ -1738,6 +1738,8 @@ enum Istantanee {
         tutteLeScene += sceneDaFare
         // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (IstantaneeMostra.swift)
         tutteLeScene += sceneMostra
+        // Migliorie d'uso 66: le parole si spiegano dove sono (IstantaneeParole.swift)
+        tutteLeScene += sceneParole
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu
@@ -1868,6 +1870,7 @@ enum Istantanee {
                 // Il foglio della fattura a grandezza piena (515): solo la carta, sempre chiara
                 let carta = cartaIstantanea(scena.nome, stato) ?? moduloAziendaIstantanea(scena.nome, stato)
                     ?? moduloProdottoClienteIstantanea(scena.nome, stato) ?? tavolaLuce(scena.nome)
+                    ?? tavolaParola(scena.nome)
                 let vista = ZStack(alignment: .topTrailing) {
                     if vetrina {
                         VetrinaApple(intensita: stato.dati.impostazioni.pioggia.forza)
