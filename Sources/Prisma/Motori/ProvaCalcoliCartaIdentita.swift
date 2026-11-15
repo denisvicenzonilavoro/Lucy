@@ -12,7 +12,28 @@ enum ProvaCalcoliCartaIdentita {
         fronte(verifica)
         doppioni(verifica)
         creazione(verifica)
+        telefonoECanali(verifica)
         potenziale(verifica)
+    }
+
+    /// Migliorie d'uso 43: il telefono e i canali scritti nella scheda vanno nel cliente; vuoti, niente.
+    private static func telefonoECanali(_ verifica: VerificaCalcoli) {
+        let s = StatoShell(persistente: false)
+        s.nuovoCliente.apri(fase: .trascina)
+        s.nuovoCliente.mostra(righe: CartaIdentitaFacSimile.righe(), origine: "prova", subito: true)
+        s.nuovoCliente.telefono = " 333 000 0000 "
+        s.nuovoCliente.canali = [.indipendente, .alleanza]
+        let bozza = s.clienteDaCarta()
+        verifica.vero("Carta: telefono e canali scritti nella scheda entrano nel cliente, nell'ordine dei canali",
+                      bozza.telefono == "333 000 0000" && bozza.canali == [.alleanza, .indipendente])
+        s.nuovoCliente.telefono = "   "
+        s.nuovoCliente.canali = []
+        let vuota = s.clienteDaCarta()
+        verifica.vero("Carta: senza telefono né canali scritti, il cliente non ne ha", vuota.telefono == "" && vuota.canali.isEmpty)
+        s.nuovoCliente.telefono = "333 000 0000"
+        s.nuovoCliente.canali = [.alleanza]
+        s.nuovoCliente.chiudi()
+        verifica.vero("Carta: chiusa la scena, telefono e canali si scartano", s.nuovoCliente.telefono.isEmpty && s.nuovoCliente.canali.isEmpty)
     }
 
     /// Una data di nascita come le scrive la carta: giorno a mezzanotte nel calendario gregoriano.

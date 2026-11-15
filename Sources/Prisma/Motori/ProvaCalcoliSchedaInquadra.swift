@@ -83,5 +83,82 @@ enum ProvaCalcoliSchedaInquadra {
                           doc?.file == nil && doc?.campi.allSatisfy(\.confermato) == true && doc?.posizioneId == nuova?.id)
             verifica.vero("IQ13 La scena si chiude", !s.inquadra.aperto && s.inquadra.dati == nil)
         }
+
+        controllo(verifica, d: d, senzaCompagnia: senzaCompagnia)
+    }
+
+    /// Migliorie d'uso 43 («Prima di aggiungere, si controlla»): le regole dei dati da controllare, le correzioni scritte
+    /// nella scheda (nei campi e negli estratti, da cui nasce la posizione) e i dubbi nello stato della scena.
+    private static func controllo(_ verifica: VerificaCalcoli, d: DatiInquadrati, senzaCompagnia: DatiInquadrati) {
+        let cal = Calendar(identifier: .gregorian)
+        let oggi = cal.date(from: DateComponents(year: 2026, month: 11, day: 15)) ?? Date()
+
+        // IQ14. Le regole: nessuna riga in dubbio per posizione, solo per quello che i dati dicono
+        verifica.vero("IQ14 Foglio intero: niente da controllare", MotoreInquadra.daControllare(d, canale: .indipendente, oggi: oggi).isEmpty)
+        verifica.vero("IQ14 Senza compagnia, indipendente: il «Tipo» da controllare",
+                      MotoreInquadra.daControllare(senzaCompagnia, canale: .indipendente, oggi: oggi) == ["tipo"])
+        verifica.vero("IQ14 Senza compagnia, Alleanza: niente da controllare",
+                      MotoreInquadra.daControllare(senzaCompagnia, canale: .alleanza, oggi: oggi).isEmpty)
+        var senzaFrequenza = d
+        senzaFrequenza.frequenza = nil
+        verifica.vero("IQ14 Frequenza non scritta: il premio da controllare",
+                      MotoreInquadra.daControllare(senzaFrequenza, canale: .indipendente, oggi: oggi) == ["premio"])
+        let capitalePiccolo = MotoreInquadra.applica(d, correzioni: ["capitale": "500"])
+        verifica.vero("IQ14 Premio dell'anno sopra il capitale: premio e capitale da controllare",
+                      MotoreInquadra.daControllare(capitalePiccolo, canale: .indipendente, oggi: oggi) == ["premio", "capitale"])
+        let futura = MotoreInquadra.applica(d, correzioni: ["decorrenza": "01/03/2030"])
+        let antica = MotoreInquadra.applica(d, correzioni: ["decorrenza": "01/03/1940"])
+        verifica.vero("IQ14 Decorrenza nel futuro o prima del 1950: da controllare",
+                      MotoreInquadra.daControllare(futura, canale: .indipendente, oggi: oggi) == ["decorrenza"]
+                        && MotoreInquadra.daControllare(antica, canale: .indipendente, oggi: oggi) == ["decorrenza"])
+
+        // IQ15. Le correzioni: nei campi e negli estratti; una che non si legge lascia il dato com'era
+        verifica.vero("IQ15 Senza correzioni i dati restano identici", MotoreInquadra.applica(d, correzioni: [:]) == d)
+        let mese = MotoreInquadra.applica(d, correzioni: ["premio": "120 € al mese"])
+        verifica("IQ15 «120 € al mese»: premio 120", mese.premio ?? -1, 120)
+        verifica("IQ15 «120 € al mese»: 1.440 € l'anno", mese.premioAnnuo ?? -1, 1_440)
+        let estrattoPremio = mese.estratti.first { $0.chiave == .premio }
+        verifica.vero("IQ15 L'estratto del premio dice la frequenza (la posizione la legge da lì)",
+                      estrattoPremio?.valore == "120" && estrattoPremio.flatMap { MotoreConfrontoDossier.frequenzaPremio($0.estratto) } == .mensile
+                        && estrattoPremio?.origine == MotoreInquadra.origineCorrezione)
+        let documento = MotoreInquadra.documento(mese, clienteId: "prova", titolo: "Polizza")
+        verifica.vero("IQ15 Il documento prende il premio corretto", documento.campo(.premio)?.valore == "120")
+        verifica("IQ15 «300 l'anno»: annuale", MotoreInquadra.applica(d, correzioni: ["premio": "300 l'anno"]).premioAnnuo ?? -1, 300)
+        let soloCifra = MotoreInquadra.applica(d, correzioni: ["premio": "95"])
+        verifica.vero("IQ15 Solo la cifra: la frequenza letta resta", soloCifra.premio == 95 && soloCifra.frequenza == .mensile)
+        verifica.vero("IQ15 Capitale illeggibile: resta quello letto",
+                      !MotoreInquadra.correzioneLeggibile(id: "capitale", testo: "molto")
+                        && MotoreInquadra.applica(d, correzioni: ["capitale": "molto"]).capitale == 50_000)
+        let marzo = MotoreInquadra.applica(d, correzioni: ["decorrenza": "marzo 2022"]).decorrenza
+        verifica.vero("IQ15 «marzo 2022»: il primo marzo 2022", marzo == cal.date(from: DateComponents(year: 2022, month: 3, day: 1)))
+        let tipo = MotoreInquadra.applica(senzaCompagnia, correzioni: ["tipo": "Temporanea caso morte · Altra Vita S.p.A."])
+        verifica.vero("IQ15 Tipo e compagnia corretti", tipo.tipo == "Temporanea caso morte" && tipo.compagnia == "Altra Vita S.p.A.")
+        let altra = MotoreInquadra.applica(senzaCompagnia, correzioni: ["tipo": "Vita intera · altra compagnia"])
+        verifica.vero("IQ15 «altra compagnia» non diventa una compagnia", altra.tipo == "Vita intera" && altra.compagnia == nil)
+        let contraente = MotoreInquadra.applica(d, correzioni: ["contraente": "Marco Bianchi"])
+        verifica.vero("IQ15 Contraente corretto: il cliente probabile cambia",
+                      MotoreInquadra.clienteProbabile(contraente: contraente.contraente, clienti: DatiPrisma.demo().clienti)?.id == "marco")
+
+        // IQ16. Nello stato: dubbi, «Va bene», correzione che non si legge e posizione dai dati corretti
+        let s = StatoShell(persistente: false)
+        let prima = s.dati.posizioni.count
+        s.apriInquadra()
+        s.inquadra.mostra(righe: FoglioInquadraDiProva.senzaCompagnia(), origine: "iPhone di prova", subito: true)
+        verifica.vero("IQ16 Il «Tipo» in dubbio", s.inquadra.dubbi(canale: .indipendente, oggi: oggi) == ["tipo"])
+        s.inquadra.confermate.insert("tipo")
+        verifica.vero("IQ16 «Va bene»: niente da controllare", s.inquadra.dubbi(canale: .indipendente, oggi: oggi).isEmpty)
+        s.inquadra.correzioni["capitale"] = "molto"
+        verifica.vero("IQ16 Una correzione che non si legge torna da controllare e resta com'è scritta",
+                      s.inquadra.dubbi(canale: .indipendente, oggi: oggi) == ["capitale"]
+                        && s.inquadra.righeCorrette(canale: .indipendente).first { $0.id == "capitale" }?.valore == "molto")
+        s.inquadra.correzioni["capitale"] = nil
+        s.inquadra.correzioni["premio"] = "120 € al mese"
+        verifica.vero("IQ16 Riga corretta: la matita", s.inquadra.corretta("premio") && !s.inquadra.corretta("capitale"))
+        s.aggiungiInquadrata()
+        let nuova = s.dati.posizioni.count == prima + 1 ? s.dati.posizioni.last : nil
+        verifica.vero("IQ16 La posizione nasce dai dati corretti: 120 € al mese, 1.440 € l'anno",
+                      nuova?.frequenza == .mensile && abs((nuova?.premioAnnuo ?? 0) - 1_440) < 0.01)
+        verifica.vero("IQ16 Chiusa la scena, le correzioni si scartano",
+                      s.inquadra.correzioni.isEmpty && s.inquadra.confermate.isEmpty && s.inquadra.inModifica == nil)
     }
 }

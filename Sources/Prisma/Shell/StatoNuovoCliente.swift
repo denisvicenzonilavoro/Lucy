@@ -62,6 +62,10 @@ enum FaseNuovoCliente: Equatable {
     /// Il potenziale da cui si è aperta la scena (Clienti › Potenziali, «Diventa cliente», §9.2.4): il nome è già scritto
     /// e la scheda dice chi l'ha presentato. Solo in memoria, come il resto; nil = scena aperta dalla testata.
     private(set) var potenzialeId: String?
+    /// Migliorie d'uso 43 (solo Mac): il telefono e i canali scritti nella scheda («＋ Telefono», «＋ Canale»), che il
+    /// cliente prende con «Crea il dossier». Nessun canale acceso di base. Solo in memoria, come il resto della carta.
+    var telefono = ""
+    var canali: Set<Canale> = []
     /// Ogni apertura, foglio nuovo o chiusura cambia il giro: i passi in attesa di un giro vecchio non fanno nulla.
     @ObservationIgnored private(set) var giro = 0
 
@@ -103,10 +107,14 @@ enum FaseNuovoCliente: Equatable {
     /// Torna all'attesa (o al trascinamento) dopo «Riprova».
     func ricomincia(fase: FaseNuovoCliente) {
         let potenziale = potenzialeId
+        let telefonoScritto = telefono
+        let canaliScelti = canali
         giro += 1
         svuota()
         self.fase = fase
         potenzialeId = potenziale
+        telefono = telefonoScritto
+        canali = canaliScelti
     }
 
     private func svuota() {
@@ -127,6 +135,8 @@ enum FaseNuovoCliente: Equatable {
         inInvio = false
         facce = 0
         potenzialeId = nil
+        telefono = ""
+        canali = []
     }
 
     /// Il Mac comincia a leggere un file: il giro nuovo, da passare a `mostra`. Le facce già lette restano.

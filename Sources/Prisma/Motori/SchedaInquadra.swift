@@ -184,6 +184,135 @@ extension MotoreInquadra {
     }
 }
 
+// MARK: - Prima di aggiungere, si controlla (migliorie d'uso 43)
+
+extension MotoreInquadra {
+    /// Le righe della scheda che si correggono a mano (tutte e cinque).
+    static let righeCorreggibili: [String] = righeScheda.map { $0.id }
+
+    /// I dati da controllare prima di aggiungere, per id di riga. Regole fisse (nessuna riga è in dubbio per posizione):
+    /// - «tipo»: la compagnia non è letta e il canale è indipendente («altra compagnia»), o manca la tipologia;
+    /// - «premio»: la frequenza non è scritta, o il premio dell'anno supera il capitale;
+    /// - «capitale»: è minore del premio dell'anno;
+    /// - «decorrenza»: è nel futuro o prima del 1950.
+    /// Solo le righe con un valore: quelle «non lette» restano grigie, non sono dubbi.
+    static func daControllare(_ d: DatiInquadrati, canale: Canale, oggi: Date = Date()) -> Set<String> {
+        var s: Set<String> = []
+        if tipo(d, canale: canale) != nil, (d.compagnia == nil && canale == .indipendente) || d.tipo == nil {
+            s.insert("tipo")
+        }
+        if d.premio != nil {
+            let annuo = d.premioAnnuo ?? 0
+            if d.frequenza == nil || annuo > (d.capitale ?? .infinity) {
+                s.insert("premio")
+            }
+        }
+        if let c = d.capitale, let annuo = d.premioAnnuo, c < annuo {
+            s.insert("capitale")
+        }
+        if let x = d.decorrenza {
+            let cal = Calendar(identifier: .gregorian)
+            let limite = cal.date(from: DateComponents(year: 1950, month: 1, day: 1)) ?? .distantPast
+            if x > oggi || x < limite { s.insert("decorrenza") }
+        }
+        return s
+    }
+
+    /// La correzione scritta nella riga si legge: un nome non vuoto, una cifra maggiore di zero, una data vera.
+    static func correzioneLeggibile(id: String, testo: String) -> Bool {
+        let t = testo.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !t.isEmpty else { return false }
+        switch id {
+        case "premio", "capitale": return (cifra(t).flatMap { EstrattoreDocumento.numero($0) } ?? 0) > 0
+        case "decorrenza": return dataScritta(t) != nil
+        default: return true
+        }
+    }
+
+    /// I dati letti con le correzioni scritte a mano (per id di riga). Ogni correzione leggibile va **sia nei campi
+    /// della scheda sia negli estratti** (da cui nascono il documento e la posizione); una che non si legge lascia il
+    /// dato com'era (la riga torna da controllare). Senza correzioni i dati restano identici.
+    static func applica(_ d: DatiInquadrati, correzioni: [String: String]) -> DatiInquadrati {
+        guard !correzioni.isEmpty else { return d }
+        var x = d
+        for id in righeCorreggibili {
+            guard let grezzo = correzioni[id] else { continue }
+            let t = grezzo.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard correzioneLeggibile(id: id, testo: t) else { continue }
+            switch id {
+            case "contraente":
+                imposta(&x, .contraente, valore: t, estratto: "Contraente: " + t)
+            case "premio":
+                guard let c = cifra(t) else { continue }
+                x.frequenza = MotoreConfrontoDossier.frequenzaPremio(t) ?? x.frequenza
+                imposta(&x, .premio, valore: c, estratto: t)
+                // La riga del documento dice anche la frequenza («120 € al mese»): la posizione la legge da lì
+                if let scritto = premio(x) { imposta(&x, .premio, valore: c, estratto: "Premio: " + scritto) }
+            case "capitale":
+                guard let c = cifra(t) else { continue }
+                imposta(&x, .capitaleAssicurato, valore: c, estratto: "Capitale assicurato: " + t)
+            case "decorrenza":
+                guard let data = dataScritta(t) else { continue }
+                let cal = Calendar(identifier: .gregorian)
+                let g = cal.dateComponents([.day, .month, .year], from: data)
+                let valore = String(format: "%02d/%02d/%04d", g.day ?? 1, g.month ?? 1, g.year ?? 2000)
+                imposta(&x, .decorrenza, valore: valore, estratto: "Decorrenza: " + valore)
+            default:
+                // «Vita intera · Esempio Vita S.p.A.»: la tipologia e, se scritta, la compagnia («altra compagnia» no)
+                let parti = t.components(separatedBy: "·").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                if let tipologia = parti.first,
+                   !(x.tipo == nil && MotoreConfrontoDossier.normaleTesto(tipologia) == "polizza") {
+                    imposta(&x, .tipologia, valore: tipologia, estratto: "Tipo: " + tipologia)
+                }
+                if parti.count > 1 {
+                    let compagnia = parti.dropFirst().joined(separator: " · ")
+                    if MotoreConfrontoDossier.normaleTesto(compagnia) != "altra compagnia" {
+                        imposta(&x, .emittente, valore: compagnia, estratto: "Compagnia: " + compagnia)
+                    }
+                }
+            }
+        }
+        return x
+    }
+
+    /// La cifra scritta in una correzione: «120 € al mese» → «120», «€ 50.000,00» → «50.000,00».
+    static func cifra(_ t: String) -> String? {
+        guard let r = t.range(of: #"\d[\d.]*(?:,\d+)?"#, options: .regularExpression) else { return nil }
+        return String(t[r])
+    }
+
+    /// La data scritta in una correzione: «01/03/2021», «1 marzo 2021» o «marzo 2021» (il primo del mese).
+    static func dataScritta(_ t: String) -> Date? {
+        if let d = EstrattoreDocumento.data(t) { return d }
+        let parole = t.split(separator: " ").map(String.init)
+        guard parole.count == 2 else { return nil }
+        return EstrattoreDocumento.data("1 " + parole[0].lowercased() + " " + parole[1])
+    }
+
+    /// Scrive il valore nel campo della scheda (o lo aggiunge, nell'ordine della scheda) e nell'estratto del documento.
+    private static func imposta(_ d: inout DatiInquadrati, _ campo: CampoDocumento, valore: String, estratto: String) {
+        if let i = d.campi.firstIndex(where: { $0.campo == campo }) {
+            d.campi[i].valore = valore
+        } else {
+            let nuovo = CampoInquadrato(campo: campo, valore: valore, intervallo: IntervalloTesto(0, 0), righe: [], riquadro: nil)
+            let ordine = campiPosizione.firstIndex(of: campo) ?? d.campi.count
+            let dove = d.campi.firstIndex { (campiPosizione.firstIndex(of: $0.campo) ?? 0) > ordine } ?? d.campi.count
+            d.campi.insert(nuovo, at: dove)
+        }
+        let riga = String(estratto.prefix(160))
+        if let i = d.estratti.firstIndex(where: { $0.chiave == campo }) {
+            d.estratti[i].valore = valore
+            d.estratti[i].estratto = riga
+            d.estratti[i].origine = origineCorrezione
+        } else {
+            d.estratti.append(CampoEstratto(chiave: campo, valore: valore, pagina: 1, estratto: riga, origine: origineCorrezione))
+        }
+    }
+
+    /// Da dove viene un dato corretto nella scheda.
+    static let origineCorrezione = "Scritto da te"
+}
+
 // MARK: - Il foglio di prova
 
 /// Il foglio di prova delle istantanee e della scena senza iPhone: una vita intera di una compagnia inventata
@@ -201,6 +330,11 @@ enum FoglioInquadraDiProva {
             RigaLetta(testo: "Tipo: Vita intera a premio ricorrente", riquadro: RiquadroPagina(x: 0.10, y: 0.42, larghezza: 0.60, altezza: 0.03)),
             RigaLetta(testo: "Compagnia: Esempio Vita S.p.A.", riquadro: RiquadroPagina(x: 0.10, y: 0.48, larghezza: 0.50, altezza: 0.03)),
         ]
+    }
+
+    /// Lo stesso foglio senza la riga della compagnia (migliorie d'uso 43): il «Tipo» resta da controllare.
+    static func senzaCompagnia(contraente: String = "Giulia Rossi") -> [RigaLetta] {
+        Array(righe(contraente: contraente).prefix(7))
     }
 
     /// Lo stesso foglio letto solo in parte (contraente e premio): la scena «pochi dati».

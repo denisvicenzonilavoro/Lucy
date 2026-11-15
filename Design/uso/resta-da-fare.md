@@ -1416,3 +1416,35 @@ Resta:
   da guardare sul Mac (il calcolo dei gruppi è lineare sulle righe mostrate).
 - «Prepara il messaggio» del dettaglio apre Messaggi come prima (`preparaMessaggio`): la bozza non si salva da sola; il
   template la crea e apre Messaggi su quel messaggio.
+
+## 43. Prima di aggiungere, si controlla (Inquadra e Nuovo cliente)
+
+Fatto (solo sul Mac; la `RigaSchedaInquadra` comune e la schermata dell'iPhone restano come sono):
+- Motore (solo funzioni nuove, in `Motori/SchedaInquadra.swift`): `MotoreInquadra.daControllare` (le quattro regole di
+  43.3 punto 2, solo righe con un valore), `applica(_:correzioni:)` (scrive le correzioni leggibili nei campi **e negli
+  estratti**: il documento e la posizione nascono dai dati corretti; senza correzioni i dati restano identici),
+  `correzioneLeggibile`, `cifra`, `dataScritta` («01/03/2021», «1 marzo 2021», «marzo 2021»).
+- Stato (`StatoInquadra`): `correzioni`, `confermate`, `inModifica`, `scosse`, `datiCorretti`, `righeCorrette`,
+  `dubbi(canale:)`; si azzerano con la scena e con un foglio nuovo. `clienteInquadra`, `canaleEAreaInquadra`,
+  `posizioneGiaInquadrata`, `aggiungiInquadrata`, `confrontaInquadrata…` usano i dati corretti; il documento arrivato
+  dall'iPhone prende i campi corretti. Nuovi (solo Mac): `origineClienteInquadra`, `avvisoClienteInquadra`,
+  `scuotiDubbiInquadra`.
+- Scheda: `RigaSchedaInquadraMac` (clic per correggere, Invio/Esc, matita, fondo arancio e «?» con «Va bene», scossa con
+  `ScuotiEffetto`), «Di chi è» in testa alle righe con i quattro casi e l'avviso arancio, titolo «Letta: un dato da
+  controllare» / «Letta e controllata», «Controlla il dato in arancione» (non blu, scuote e avvisa), poi «Aggiungi alle
+  posizioni di …» e la conferma di sempre; «Senza iPhone? Scegli un file dal Mac» in fondo. Esc chiude prima la modifica.
+- Nuovo cliente: sottotitolo «Letta dal documento: controlla e completa», righe «＋ Telefono» (dal potenziale con
+  «Diventa cliente») e «＋ Canale» (nessuno acceso di base, nomi delle impostazioni), riga in fondo con «Scrivi tu i dati» e
+  «Scegli un file dal Mac»; `clienteDaCarta` prende telefono e canali scritti.
+- Istantanee: 604 con il «Tipo» in dubbio (foglio senza la compagnia, `FoglioInquadraDiProva.senzaCompagnia`); nuove
+  1160 (chiara e scura), 1161, 1162, 1163. Prove IQ14-IQ16 in `ProvaCalcoliSchedaInquadra`, telefono e canali in
+  `ProvaCalcoliCartaIdentita`.
+
+Resta:
+- «Va bene» usa il pulsante `.apple` (12,5 con padding 7×14) invece del 4×11 del template; «Cambia» è un menu sobrio
+  (testo blu) e non un `.btn`.
+- La riga «Tipo» si corregge in un campo solo («Vita intera · Esempio Vita S.p.A.»: la parte dopo «·» è la compagnia),
+  non in due campi come le righe a più campi di Nuovo cliente.
+- Esc con due significati (modifica, poi scena) e Invio nel campo con il pulsante principale accanto: serve uno
+  screenshot o una prova sul Mac.
+- Le istantanee 605, 606, 608, 609 e 841-849 cambiano (titolo, «Di chi è», righe in più, riga in fondo): vanno guardate.

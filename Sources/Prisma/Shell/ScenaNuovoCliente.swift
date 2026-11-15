@@ -229,13 +229,18 @@ private struct SchedaNuovoClienteMac: View {
             rigaCliente
                 .padding(.top, S.rigaClienteSopra)
             contenuto
-            Button("Scrivi a mano") { stato.scriviAManoDaCarta() }
-                .buttonStyle(StileSemplice())
-                .carattereApple(S.link)
-                .foregroundColor(S.coloreLink)
-                .padding(.top, S.linkSopra)
-                .disabled(stato.solaLettura)
-                .help("Apri il modulo del cliente con i dati letti fin qui")
+            if nuovoCliente.fase == .letto && nuovoCliente.finito {
+                // Migliorie d'uso 43: in fondo, sopra un filo, le due vie senza documento
+                rigaInFondo
+            } else {
+                Button("Scrivi a mano") { stato.scriviAManoDaCarta() }
+                    .buttonStyle(StileSemplice())
+                    .carattereApple(S.link)
+                    .foregroundColor(S.coloreLink)
+                    .padding(.top, S.linkSopra)
+                    .disabled(stato.solaLettura)
+                    .help("Apri il modulo del cliente con i dati letti fin qui")
+            }
         }
         .padding(I.padding)
         .frame(width: S.larghezza, alignment: .leading)
@@ -321,7 +326,9 @@ private struct SchedaNuovoClienteMac: View {
         case .illeggibile: return "Nessun dato letto"
         case .letto:
             guard nuovoCliente.finito else { return "Leggo il documento" }
-            return MotoreCartaIdentita.sottotitolo(nuovoCliente.letturaCorretta)
+            // Migliorie d'uso 43: con tutti i dati, «controlla e completa»; se ne mancano, la frase di sempre
+            let l = nuovoCliente.letturaCorretta
+            return MotoreCartaIdentita.mancanti(l).isEmpty ? "Letta dal documento: controlla e completa" : MotoreCartaIdentita.sottotitolo(l)
         }
     }
 
@@ -376,6 +383,12 @@ private struct SchedaNuovoClienteMac: View {
                     tilePotenziale(p, nota: TestiPassaparola.notaPotenzialeLetto)
                         .entrataStile(.tabellaInquadra)
                 }
+                // Migliorie d'uso 43: «＋ Telefono» e «＋ Canale», scritti dall'utente sul Mac
+                VStack(alignment: .leading, spacing: 0) {
+                    RigaTelefonoNuovoCliente(nuovoCliente: nuovoCliente, scrivibile: !stato.solaLettura)
+                    RigaCanaliNuovoCliente(nuovoCliente: nuovoCliente)
+                }
+                .entrataStile(.rigaInquadra)
                 tileModuli
                     .entrataStile(.tabellaInquadra)
                 copia
@@ -488,6 +501,41 @@ private struct SchedaNuovoClienteMac: View {
                 .foregroundColor(S.coloreCopia)
                 .padding(.top, S.copiaSopra)
         }
+    }
+
+    /// «Telefono ed email si possono aggiungere anche dopo, dal dossier. Senza documento? Scrivi tu i dati · Scegli un
+    /// file dal Mac», sopra un filo.
+    private var rigaInFondo: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Telefono ed email si possono aggiungere anche dopo, dal dossier.")
+                .carattereApple(S.rigaFondo)
+                .foregroundColor(S.coloreRigaFondo)
+                .fixedSize(horizontal: false, vertical: true)
+            HStack(spacing: S.spazioCampi) {
+                Text("Senza documento?")
+                    .carattereApple(S.rigaFondo)
+                    .foregroundColor(S.coloreRigaFondo)
+                Button("Scrivi tu i dati") { stato.scriviAManoDaCarta() }
+                    .buttonStyle(StileSemplice())
+                    .carattereApple(S.link)
+                    .foregroundColor(S.coloreLink)
+                    .disabled(stato.solaLettura)
+                    .help("Si apre la scheda del cliente: i campi si scrivono a mano")
+                Text("·")
+                    .carattereApple(S.rigaFondo)
+                    .foregroundColor(S.coloreRigaFondo)
+                Button("Scegli un file dal Mac") { stato.scegliFileNuovoCliente() }
+                    .buttonStyle(StileSemplice())
+                    .carattereApple(S.link)
+                    .foregroundColor(S.coloreLink)
+                    .disabled(stato.solaLettura)
+                    .help("Si sceglie un PDF o una foto dal Mac, come con «Importa»")
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.top, S.rigaFondoDalFilo)
+        .overlay(alignment: .top) { Rectangle().fill(S.filoRigaFondo).frame(height: Tema.Apple.Misura.bordo) }
+        .padding(.top, S.rigaFondoSopra)
     }
 
     /// «Crea il dossier di Elena», o «Completa e crea il dossier» se mancano dati (apre il modulo con i dati letti).
@@ -621,6 +669,143 @@ private struct RigaSchedaNuovoCliente: View {
 
     private func annulla() {
         nuovoCliente.inModifica = nil
+    }
+}
+
+// MARK: - Le righe in più (migliorie d'uso 43)
+
+/// «＋ Telefono  da aggiungere»: un clic apre il campo sul posto (Invio conferma, Esc annulla, come le altre righe).
+private struct RigaTelefonoNuovoCliente: View {
+    let nuovoCliente: StatoNuovoCliente
+    let scrivibile: Bool
+    @State private var testo = ""
+    @State private var sopra = false
+    @FocusState private var fuoco: Bool
+
+    static let id = "telefono"
+
+    private typealias I = Tema.Apple.Inquadra.Scheda
+    private typealias S = Tema.Apple.NuovoCliente.Scheda
+
+    private var inModifica: Bool { nuovoCliente.inModifica == Self.id }
+
+    var body: some View {
+        let vuoto = nuovoCliente.telefono.isEmpty
+        HStack(alignment: .firstTextBaseline, spacing: I.spazioTesta) {
+            Text(S.segnoPiu)
+                .carattereApple(S.carattereSegnoPiu)
+                .foregroundColor(S.coloreSegnoPiu)
+                .frame(width: I.larghezzaSpunta, alignment: .leading)
+            Text("Telefono")
+                .carattereApple(I.etichettaRiga)
+                .foregroundColor(I.coloreEtichettaRiga)
+                .frame(width: S.larghezzaEtichetta, alignment: .leading)
+            if inModifica {
+                TextField("da aggiungere", text: $testo)
+                    .textFieldStyle(.roundedBorder)
+                    .font(S.campo.font)
+                    .focused($fuoco)
+                    .onSubmit(conferma)
+                    .onExitCommand(perform: annulla)
+                    .onAppear { fuoco = true }
+            } else {
+                Text(vuoto ? "da aggiungere" : nuovoCliente.telefono)
+                    .carattereApple(vuoto ? S.telefonoVuoto : I.valore)
+                    .foregroundColor(vuoto ? S.coloreTelefonoVuoto : I.coloreValore)
+                    .frame(minWidth: S.larghezzaTelefono, alignment: .leading)
+                    .padding(I.paddingValore)
+                    .background {
+                        RoundedRectangle(cornerRadius: I.raggioValore, style: .continuous)
+                            .fill(sopra && scrivibile ? I.fondoValoreSopra : Color.clear)
+                    }
+                    .padding(.horizontal, -I.paddingValore.leading)
+                    .contentShape(Rectangle())
+                    .onHover { sopra = $0 }
+                    .onTapGesture { if scrivibile { apri() } }
+                    .help(scrivibile ? "Tocca per scrivere il telefono" : "")
+                    .accessibilityLabel(Text("Telefono, \(vuoto ? "da aggiungere" : nuovoCliente.telefono)"))
+                    .accessibilityAddTraits(scrivibile ? .isButton : [])
+                    .accessibilityAction { if scrivibile { apri() } }
+                Spacer(minLength: 0)
+            }
+        }
+        .padding(.vertical, I.paddingRiga)
+        .overlay(alignment: .bottom) { Rectangle().fill(I.filo).frame(height: Tema.Apple.Misura.bordo) }
+    }
+
+    private func apri() {
+        testo = nuovoCliente.telefono
+        nuovoCliente.inModifica = Self.id
+    }
+
+    private func conferma() {
+        nuovoCliente.telefono = testo.trimmingCharacters(in: .whitespacesAndNewlines)
+        nuovoCliente.inModifica = nil
+    }
+
+    private func annulla() {
+        nuovoCliente.inModifica = nil
+    }
+}
+
+/// «＋ Canale  (● Alleanza) (● Indipendente)»: le due capsule col pallino del colore del canale e il nome scelto nelle
+/// impostazioni; un clic accende o spegne. Nessuna accesa di base.
+private struct RigaCanaliNuovoCliente: View {
+    let nuovoCliente: StatoNuovoCliente
+
+    private typealias I = Tema.Apple.Inquadra.Scheda
+    private typealias S = Tema.Apple.NuovoCliente.Scheda
+
+    var body: some View {
+        HStack(alignment: .center, spacing: I.spazioTesta) {
+            Text(S.segnoPiu)
+                .carattereApple(S.carattereSegnoPiu)
+                .foregroundColor(S.coloreSegnoPiu)
+                .frame(width: I.larghezzaSpunta, alignment: .leading)
+            Text("Canale")
+                .carattereApple(I.etichettaRiga)
+                .foregroundColor(I.coloreEtichettaRiga)
+                .frame(width: S.larghezzaEtichetta, alignment: .leading)
+            HStack(spacing: S.spazioCapsule) {
+                ForEach(Canale.allCases) { c in
+                    capsula(c)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, I.paddingRiga)
+    }
+
+    private func capsula(_ c: Canale) -> some View {
+        let accesa = nuovoCliente.canali.contains(c)
+        let forma = Capsule(style: .continuous)
+        return Button {
+            if accesa { _ = nuovoCliente.canali.remove(c) } else { _ = nuovoCliente.canali.insert(c) }
+        } label: {
+            HStack(spacing: S.spazioPallino) {
+                Circle()
+                    .fill(S.coloreCanale(c))
+                    .frame(width: S.pallinoCanale, height: S.pallinoCanale)
+                Text(c.nomeBreve)
+                    .carattereApple(S.capsulaCanale)
+                    .foregroundColor(accesa ? S.testoCapsulaCanaleAccesa : S.testoCapsulaCanale)
+                    .lineLimit(1)
+                    .fixedSize()
+            }
+            .padding(S.paddingCapsulaCanale)
+            .frame(height: S.altezzaCapsulaCanale)
+            .background {
+                if accesa {
+                    forma.fill(S.fondoCapsulaCanaleAccesa).ombraApple(S.ombraCapsulaCanaleAccesa)
+                } else {
+                    forma.fill(S.fondoCapsulaCanale)
+                }
+            }
+            .contentShape(forma)
+        }
+        .buttonStyle(StileSemplice())
+        .accessibilityLabel(Text("Canale \(c.nomeBreve)"))
+        .accessibilityValue(Text(accesa ? "acceso" : "spento"))
     }
 }
 

@@ -7,6 +7,9 @@ import Foundation
 /// - 601: in attesa del testo dall'iPhone (ponte acceso); 602: ponte spento, la zona dove trascinare;
 /// - 603: a metà lettura (due righe); 604: lettura finita con i due pulsanti; 605: dopo «Confronta»;
 /// - 606: pochi dati; 607: illeggibile; 608: la conferma prima di aggiungere; 609: con «Riduci movimento».
+/// Migliorie d'uso 43: 604 con il «Tipo» in dubbio (foglio senza la compagnia); 1160 il dubbio risolto con «Va bene»
+/// (pulsante blu, chiara e scura); 1161 l'avviso «Stai lavorando su …» (cliente attivo Marco, documento di Giulia);
+/// 1162 il campo della correzione aperto sul premio.
 /// L'iPhone (la schermata della fotocamera, con il foglio disegnato al posto della foto) sta nelle istantanee di iOS.
 ///
 /// DATI DI PROVA DICHIARATI: il foglio è quello di `FoglioInquadraDiProva` (una vita intera di «Compagnia Esempio
@@ -33,7 +36,8 @@ extension Istantanee {
             preparaInquadra(s, righe: FoglioInquadraDiProva.righe())
             s.inquadra.fermaCascata(a: 2)
         }
-        coppia("604-posizioni-inquadra-fatto") { s in preparaInquadra(s, righe: FoglioInquadraDiProva.righe()) }
+        // Migliorie d'uso 43: il foglio senza la riga della compagnia, il «Tipo» in dubbio («altra compagnia»)
+        coppia("604-posizioni-inquadra-fatto") { s in preparaInquadra(s, righe: FoglioInquadraDiProva.senzaCompagnia()) }
         coppia("605-posizioni-inquadra-confronta") { s in
             preparaInquadra(s, righe: FoglioInquadraDiProva.righe())
             s.confrontaInquadrata()
@@ -50,6 +54,19 @@ extension Istantanee {
         una("609-posizioni-inquadra-calma") { s in
             s.dati.impostazioni.riduciMovimento = true
             preparaInquadra(s, righe: FoglioInquadraDiProva.righe())
+        }
+        // Migliorie d'uso 43 («Prima di aggiungere, si controlla»)
+        coppia("1160-uso-inquadra-controllata") { s in
+            preparaInquadra(s, righe: FoglioInquadraDiProva.senzaCompagnia())
+            s.inquadra.confermate.insert("tipo")
+        }
+        una("1161-uso-inquadra-altro-cliente") { s in
+            preparaInquadra(s, righe: FoglioInquadraDiProva.righe())
+            s.scegliCliente("marco")
+        }
+        una("1162-uso-inquadra-correzione") { s in
+            preparaInquadra(s, righe: FoglioInquadraDiProva.senzaCompagnia())
+            s.inquadra.inModifica = "premio"
         }
         return scene
     }
