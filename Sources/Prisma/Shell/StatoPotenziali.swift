@@ -17,6 +17,14 @@ extension StatoShell {
         #endif
     }
 
+    /// Migliorie d'uso 47: il prossimo passo di ogni potenziale (id → passo), calcolato una volta per tutti finché non
+    /// cambiano i dati dei calcoli (potenziali, clienti, agenda), il giorno o l'ora (il primo incontro è «futuro»).
+    func passiPotenziali() -> [String: PassoPotenziale] {
+        ricavato("potenziali-passi|\(DerivatiDati.ora())") {
+            MotorePassaparola.passi(dati.potenziali, clienti: dati.clienti, appuntamenti: dati.appuntamenti, oggi: Date())
+        }
+    }
+
     /// Le tinte degli avatar dei clienti nuovi, a giro.
     private static let tinteNuovi: [TintaAvatar] = [.blu, .rosa, .verde, .viola, .oro]
 
@@ -33,6 +41,7 @@ extension StatoShell {
     /// Salva le modifiche di un potenziale (dal modulo o dal dettaglio).
     func salvaPotenziale(_ p: PotenzialeCliente) {
         guard !solaLettura else { return }
+        potenziali.ultimoSpostamento = nil
         if let i = dati.potenziali.firstIndex(where: { $0.id == p.id }) {
             guard dati.potenziali[i] != p else { return }
             dati.potenziali[i] = p
@@ -42,7 +51,9 @@ extension StatoShell {
     }
 
     /// Sposta un potenziale in una fase. In «Cliente» non va da solo: si apre il modulo del nuovo cliente.
+    /// Ogni spostamento chiude l'annullamento di quello prima (Migliorie d'uso 47).
     func spostaPotenziale(_ id: String, a fase: FasePotenziale) {
+        potenziali.ultimoSpostamento = nil
         guard !solaLettura, let i = dati.potenziali.firstIndex(where: { $0.id == id }) else { return }
         if fase == .cliente {
             proponiCliente(id)
@@ -51,6 +62,31 @@ extension StatoShell {
         let nuovo = MotorePassaparola.sposta(dati.potenziali[i], a: fase, il: MessaggioCliente.adesso)
         guard nuovo != dati.potenziali[i] else { return }
         dati.potenziali[i] = nuovo
+    }
+
+    /// Migliorie d'uso 47: lo spostamento che si può annullare («Passa a…», trascinamento, ⌘→). Si ricorda la copia di
+    /// prima (in memoria); non vale per «Cliente» (scena del nuovo cliente) né per «Non interessato» (si ripristina dal
+    /// piede).
+    func spostaPotenzialeAnnullabile(_ id: String, a fase: FasePotenziale) {
+        guard fase != .cliente, fase != .nonInteressato,
+              let prima = dati.potenziali.first(where: { $0.id == id }) else {
+            spostaPotenziale(id, a: fase)
+            return
+        }
+        spostaPotenziale(id, a: fase)
+        if let dopo = dati.potenziali.first(where: { $0.id == id }), dopo.fase == fase, dopo != prima {
+            potenziali.ultimoSpostamento = SpostamentoPotenziale(prima: prima, a: fase)
+        }
+    }
+
+    /// «Annulla»: rimette il potenziale com'era prima dell'ultimo spostamento (storia compresa: nessun cambio in più),
+    /// solo se è ancora nella fase dove era arrivato.
+    func annullaSpostamentoPotenziale() {
+        guard let u = potenziali.ultimoSpostamento else { return }
+        potenziali.ultimoSpostamento = nil
+        guard !solaLettura, let i = dati.potenziali.firstIndex(where: { $0.id == u.prima.id }),
+              dati.potenziali[i].fase == u.a else { return }
+        dati.potenziali[i] = u.prima
     }
 
     /// Un passo avanti (il clic sulla scheda).
@@ -111,6 +147,7 @@ extension StatoShell {
     /// Elimina un potenziale (dopo la conferma). I clienti e le campagne non cambiano.
     func eliminaPotenziale(_ id: String) {
         guard !solaLettura, dati.potenziali.contains(where: { $0.id == id }) else { return }
+        potenziali.ultimoSpostamento = nil
         dati.potenziali.removeAll { $0.id == id }
     }
 
@@ -127,7 +164,7 @@ extension StatoShell {
             return nil
         }
         let a = Appuntamento(id: "event-\(UUID().uuidString.prefix(8).lowercased())", clienteId: "",
-                             titolo: "Primo incontro · \(p.nome)", inizio: s.inizio, durataMinuti: 30, luogo: "", note: "",
+                             titolo: TestiPassaparola.titoloPrimoIncontro(p.nome), inizio: s.inizio, durataMinuti: 30, luogo: "", note: "",
                              stato: .pianificato, tipo: .primoIncontro)
         dati.appuntamenti.append(a)
         mostraAvviso(TestiPassaparola.primoIncontroFissato + " · " + Formati.giornoBreve.string(from: a.inizio)

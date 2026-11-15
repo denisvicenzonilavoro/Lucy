@@ -22,6 +22,11 @@ import SwiftUI
 // - iPad (`potenzialiInSolaLettura`, §9.2.4: l'iPad è una copia) e archivio in sola lettura: si guarda soltanto, il clic
 //   apre solo il dettaglio senza i pulsanti che scrivono.
 // - «Riduci movimento» e istantanee: tutto fermo nello stato finale.
+// - Migliorie d'uso 47 (Design/uso/gruppo-08.md §47, solo Mac): ogni scheda dice il prossimo passo (dal codice,
+//   `MotorePassaparola.passi`, tenuto con `stato.passiPotenziali()`) e da quanti giorni è ferma; la quarta tile diventa
+//   «Fermi da più di due settimane» (il probabile va nella nota del patrimonio); il clic sulla scheda la apre
+//   (`DettaglioPotenzialeMac`, Shell/DettaglioPotenzialeMac.swift) invece di farla avanzare; «Passa a…», il
+//   trascinamento e ⌘→ si annullano con «Annulla» sotto le colonne. iPhone e iPad restano come prima.
 
 struct VistaPotenziali: View {
     @Environment(StatoShell.self) var stato
@@ -42,8 +47,13 @@ private struct CorpoPotenziali: View {
     @Environment(\.modoIstantanea) private var modoIstantanea
 
     private typealias P = Tema.Apple.Potenziali
+    #if os(macOS)
+    private static let misuraDettaglio = CGSize(width: Tema.Apple.Potenziali.larghezzaDettaglioPasso,
+                                                height: Tema.Apple.Potenziali.altezzaDettaglioPasso)
+    #else
     private static let misuraDettaglio = CGSize(width: Tema.Apple.Potenziali.larghezzaDettaglio,
                                                 height: Tema.Apple.Potenziali.altezzaDettaglio)
+    #endif
 
     init(stato: StatoShell, dettaglioAperto: String?) {
         self.stato = stato
@@ -62,12 +72,18 @@ private struct CorpoPotenziali: View {
         let nonInteressati = potenziali.filter { $0.fase == .nonInteressato }
         let ordine = FasePotenziale.colonne.flatMap { colonne[$0] ?? [] }.map(\.id)
         let d = dettaglio
+        #if os(macOS)
+        let passi = stato.passiPotenziali()
+        #else
+        let passi: [String: PassoPotenziale] = [:]
+        #endif
+        let fermi = MotorePassaparola.fermi(potenziali, passi: passi)
         return VStack(alignment: .leading, spacing: P.spazioTile) {
             intestazione(prova: potenziali.contains { $0.diProva })
-            tile(totali)
+            tile(totali, fermi: fermi)
             HStack(alignment: .top, spacing: P.spazioColonne) {
                 ForEach(Array(FasePotenziale.colonne.enumerated()), id: \.element) { i, fase in
-                    ColonnaPotenziali(fase: fase, elenco: colonne[fase] ?? [], clienti: clienti, indice: i,
+                    ColonnaPotenziali(fase: fase, elenco: colonne[fase] ?? [], clienti: clienti, passi: passi, indice: i,
                                       modificabile: modificabile, vuota: potenziali.allSatisfy { $0.fase == .nonInteressato },
                                       scelto: stato.potenziali.scelto, volo: volo,
                                       azioni: azioniScheda, aggiungi: { apriModulo(nil) },
@@ -94,9 +110,16 @@ private struct CorpoPotenziali: View {
         }
         .presentatoreDettaglio(dettaglio) { id in
             if let p = stato.dati.potenziali.first(where: { $0.id == id }) {
+                #if os(macOS)
+                DettaglioPotenzialeMac(stato: stato, potenziale: p, modificabile: modificabile,
+                                       azioni: azioniDettaglio(d),
+                                       modifica: { d.chiudi(subito: true); apriModulo(p) },
+                                       chiudi: { d.chiudi() })
+                #else
                 DettaglioPotenziale(stato: stato, potenziale: p, modificabile: modificabile,
                                     modifica: { d.chiudi(subito: true); apriModulo(p) },
                                     chiudi: { d.chiudi() })
+                #endif
             }
         }
         .sheet(item: Bindable(stato.potenziali).modulo) { p in
@@ -120,7 +143,11 @@ private struct CorpoPotenziali: View {
             // tornando in Potenziali non si riapre. Nelle istantanee resta (la scena può costruire la vista più volte).
             if !modoIstantanea, stato.potenziali.dettaglioIstantanea != nil { stato.potenziali.dettaglioIstantanea = nil }
         }
-        .onDisappear { dettaglio.chiudi(subito: true) }
+        .onDisappear {
+            dettaglio.chiudi(subito: true)
+            // L'annullamento vale finché si resta nella vista (nelle istantanee la scena può ricostruirla)
+            if !modoIstantanea { stato.potenziali.ultimoSpostamento = nil }
+        }
     }
 
     // MARK: Intestazione, tile, piede
@@ -139,23 +166,51 @@ private struct CorpoPotenziali: View {
         .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
     }
 
-    private func tile(_ t: TotaliPotenziali) -> some View {
+    private func tile(_ t: TotaliPotenziali, fermi: Int) -> some View {
         HStack(spacing: P.spazioTile) {
             TilePotenziali(titolo: TestiPassaparola.tilePotenziali, valore: Double(t.conteggio), formato: .intero, nota: nil, indice: 0)
+            #if os(macOS)
+            // Migliorie d'uso 47 (decisione 47-b): il probabile entro fine anno va nella nota del patrimonio, la quarta
+            // tile conta i fermi da più di due settimane (in arancio se più di zero)
+            TilePotenziali(titolo: TestiPassaparola.tilePatrimonio, valore: t.patrimonioStimato, formato: .euro,
+                           nota: t.probabileEntroAnno > 0 ? TestiPassaparola.diCuiProbabile(t.probabileEntroAnno)
+                                : (t.senzaStima > 0 ? TestiPassaparola.senzaStima(t.senzaStima) : nil), indice: 1)
+            TilePotenziali(titolo: TestiPassaparola.tilePassaparola, valore: Double(t.dalPassaparola), formato: .intero, nota: nil, indice: 2)
+            TilePotenziali(titolo: TestiPassaparola.tileFermi, valore: Double(fermi), formato: .intero, nota: nil, indice: 3,
+                           coloreValore: fermi > 0 ? P.coloreTileFermi : Tema.Apple.Colore.inchiostro)
+            #else
             TilePotenziali(titolo: TestiPassaparola.tilePatrimonio, valore: t.patrimonioStimato, formato: .euro,
                            nota: t.senzaStima > 0 ? TestiPassaparola.senzaStima(t.senzaStima) : nil, indice: 1)
             TilePotenziali(titolo: TestiPassaparola.tilePassaparola, valore: Double(t.dalPassaparola), formato: .intero, nota: nil, indice: 2)
             TilePotenziali(titolo: TestiPassaparola.tileProbabile, valore: t.probabileEntroAnno, formato: .euro,
                            nota: t.esclusiDalProbabile > 0 ? TestiPassaparola.esclusi(t.esclusiDalProbabile) : nil, indice: 3)
+            #endif
         }
     }
 
     @ViewBuilder private func piede(nonInteressati: [PotenzialeCliente]) -> some View {
         VStack(alignment: .leading, spacing: P.spazioPiccolo + 2) {
-            Text(modificabile ? TestiPassaparola.notaPercorso : TestiPassaparola.notaPercorsoSolaLettura)
-                .carattereApple(P.nota)
-                .foregroundColor(P.coloreNota)
-                .fixedSize(horizontal: false, vertical: true)
+            #if os(macOS)
+            if modificabile, let u = stato.potenziali.ultimoSpostamento {
+                // Migliorie d'uso 47: «**Davide Sala** è passato a «Analisi». Annulla»
+                HStack(alignment: .firstTextBaseline, spacing: P.spazioPiccolo) {
+                    Text(stato.dati.potenziali.first(where: { $0.id == u.prima.id })?.nome ?? u.prima.nome)
+                        .carattereApple(P.notaForte)
+                        .foregroundColor(Tema.Apple.Colore.inchiostro)
+                    Text(TestiPassaparola.passatoA(u.a))
+                        .carattereApple(P.nota)
+                        .foregroundColor(P.coloreNota)
+                    Button("Annulla") { animato { stato.annullaSpostamentoPotenziale() } }
+                        .buttonStyle(StileCollegamento())
+                        .altreAppApple()
+                        .help("Rimette la scheda dov'era")
+                }
+            } else {
+                notaPercorso
+            }
+            #else
+            notaPercorso
+            #endif
             if !nonInteressati.isEmpty {
                 HStack(spacing: P.spazioMedio) {
                     Text(TestiPassaparola.nonInteressati + ":")
@@ -172,6 +227,13 @@ private struct CorpoPotenziali: View {
         .entrataCascata(4, base: Tema.Apple.Moto.Cascata.baseDentroApp)
     }
 
+    private var notaPercorso: some View {
+        Text(modificabile ? TestiPassaparola.notaPercorso : TestiPassaparola.notaPercorsoSolaLettura)
+            .carattereApple(P.nota)
+            .foregroundColor(P.coloreNota)
+            .fixedSize(horizontal: false, vertical: true)
+    }
+
     // MARK: Fare
 
     private var azioniScheda: AzioniSchedaPotenziale {
@@ -185,7 +247,7 @@ private struct CorpoPotenziali: View {
             modifica: { id in
                 if let p = stato.dati.potenziali.first(where: { $0.id == id }) { apriModulo(p) }
             },
-            nonInteressato: { id in animato { stato.spostaPotenziale(id, a: .nonInteressato) } },
+            nonInteressato: { id in togli(id) },
             elimina: { id in stato.potenziali.daEliminare = id },
             dossier: { cid in
                 stato.clienteAttivoId = cid
@@ -208,13 +270,60 @@ private struct CorpoPotenziali: View {
             return
         }
         stato.potenziali.scelto = id
+        #if os(macOS)
+        // Migliorie d'uso 47: ⌘→ e «Avanti» si annullano
+        guard let s = stato.dati.potenziali.first(where: { $0.id == id })?.fase.successiva else { return }
+        animato { stato.spostaPotenzialeAnnullabile(id, a: s) }
+        #else
         animato { stato.avanzaPotenziale(id) }
+        #endif
     }
 
     private func sposta(_ id: String, a fase: FasePotenziale) {
         guard modificabile else { return }
+        #if os(macOS)
+        animato { stato.spostaPotenzialeAnnullabile(id, a: fase) }
+        #else
         animato { stato.spostaPotenziale(id, a: fase) }
+        #endif
     }
+
+    /// «Non interessato»: esce dalle colonne (si ripristina dal piede); sul Mac con l'avviso.
+    private func togli(_ id: String) {
+        guard modificabile else { return }
+        let nome = stato.dati.potenziali.first(where: { $0.id == id })?.nome
+        animato { stato.spostaPotenziale(id, a: .nonInteressato) }
+        #if os(macOS)
+        if let nome { stato.mostraAvviso(TestiPassaparola.toltoDaiPotenziali(nome)) }
+        #else
+        _ = nome
+        #endif
+    }
+
+    #if os(macOS)
+    /// Le azioni del dettaglio nuovo (Migliorie d'uso 47): «Passa a…» chiude il dettaglio e poi fa volare la scheda.
+    private func azioniDettaglio(_ d: StatoDettaglio) -> AzioniDettaglioPotenziale {
+        AzioniDettaglioPotenziale(
+            passaA: { id, fase in
+                d.chiudi(poi: { sposta(id, a: fase) })
+            },
+            nonInteressato: { id in
+                d.chiudi(poi: { togli(id) })
+            },
+            dossier: { cid in
+                d.chiudi(subito: true)
+                azioniScheda.dossier(cid)
+            },
+            diventaCliente: { id in
+                d.chiudi()
+                stato.proponiCliente(id)
+            },
+            apriIncontro: { a in
+                d.chiudi(subito: true)
+                stato.apriAppuntamentoInAgenda(a)
+            })
+    }
+    #endif
 
     private func apriModulo(_ p: PotenzialeCliente?) {
         guard modificabile else { return }
@@ -271,6 +380,7 @@ private struct TilePotenziali: View {
     let formato: FormatoCifra
     let nota: String?
     let indice: Int
+    var coloreValore: Color = Tema.Apple.Colore.inchiostro
 
     private typealias P = Tema.Apple.Potenziali
 
@@ -283,7 +393,7 @@ private struct TilePotenziali: View {
                 .minimumScaleFactor(0.8)
             NumeroCheConta(valore, formato: formato, indice: indice)
                 .carattereApple(P.tileValore)
-                .foregroundColor(Tema.Apple.Colore.inchiostro)
+                .foregroundColor(coloreValore)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             Text(nota ?? " ")
@@ -305,6 +415,8 @@ private struct ColonnaPotenziali: View {
     let fase: FasePotenziale
     let elenco: [PotenzialeCliente]
     let clienti: [Cliente]
+    /// Il prossimo passo di ogni potenziale (Migliorie d'uso 47, solo Mac; vuoto altrove).
+    let passi: [String: PassoPotenziale]
     let indice: Int
     let modificabile: Bool
     /// Nessun potenziale in tutto il percorso: nella prima colonna l'invito ad aggiungere.
@@ -338,7 +450,7 @@ private struct ColonnaPotenziali: View {
                             .fixedSize(horizontal: false, vertical: true)
                     }
                     ForEach(elenco) { p in
-                        SchedaPotenziale(potenziale: p, fonte: TestiPassaparola.fonte(p, clienti: clienti),
+                        SchedaPotenziale(potenziale: p, fonte: TestiPassaparola.fonte(p, clienti: clienti), passo: passi[p.id],
                                          modificabile: modificabile, scelta: scelto == p.id, azioni: azioni)
                             .matchedGeometryEffect(id: p.id, in: volo)
                             .origineDettaglio(id: p.id)
@@ -407,6 +519,8 @@ private struct TrascinabilePotenziale: ViewModifier {
 private struct SchedaPotenziale: View {
     let potenziale: PotenzialeCliente
     let fonte: String?
+    /// Il prossimo passo (Migliorie d'uso 47, solo Mac).
+    let passo: PassoPotenziale?
     let modificabile: Bool
     let scelta: Bool
     let azioni: AzioniSchedaPotenziale
@@ -417,6 +531,112 @@ private struct SchedaPotenziale: View {
     var body: some View {
         let p = potenziale
         VStack(alignment: .leading, spacing: P.spazioPiccolo + 1) {
+            contenuto(p)
+        }
+        .padding(P.paddingScheda)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background {
+            RoundedRectangle(cornerRadius: P.raggioScheda, style: .continuous)
+                .fill(P.fondoScheda)
+                .ombraApple(sopra ? .schedaPotenzialeSopra : .schedaPotenziale)
+        }
+        .overlay {
+            RoundedRectangle(cornerRadius: P.raggioScheda, style: .continuous)
+                .strokeBorder(scelta ? Tema.Apple.Colore.accento : P.bordoScheda, lineWidth: scelta ? P.spessoreScelta : 1)
+        }
+        .contentShape(RoundedRectangle(cornerRadius: P.raggioScheda, style: .continuous))
+        .onTapGesture { tocco(p) }
+        .modifier(TrascinabilePotenziale(attiva: modificabile && p.fase != .cliente, id: p.id))
+        .contextMenu {
+            if modificabile {
+                if p.fase.successiva != nil { Button("Avanti") { azioni.avanti(p.id) } }
+                if p.fase != .cliente, p.fase.precedente != nil { Button("Indietro") { azioni.indietro(p.id) } }
+                #if os(macOS)
+                if p.fase == .cliente, let cid = p.clienteId { Button("Apri il dossier") { azioni.dossier(cid) } }
+                #endif
+                Button("Modifica…") { azioni.modifica(p.id) }
+                if p.fase != .cliente { Button("Non interessato") { azioni.nonInteressato(p.id) } }
+                Divider()
+                Button("Elimina", role: .destructive) { azioni.elimina(p.id) }
+            } else {
+                Button("Apri il dettaglio") { azioni.dettaglio(p.id) }
+            }
+        }
+        #if os(macOS)
+        .onHover { sopra = $0 }
+        .accessibilityElement(children: .combine)
+        .accessibilityHint("Tocca per aprirla")
+        #else
+        .accessibilityElement(children: .combine)
+        .accessibilityHint(modificabile ? "Tocca per farla avanzare" : "")
+        #endif
+    }
+
+    /// Sul Mac (Migliorie d'uso 47) il clic apre la scheda, anche per chi è già cliente; altrove la fa avanzare (un
+    /// cliente apre il dossier).
+    private func tocco(_ p: PotenzialeCliente) {
+        #if os(macOS)
+        azioni.dettaglio(p.id)
+        #else
+        if p.fase == .cliente, let cid = p.clienteId {
+            azioni.dossier(cid)
+        } else {
+            azioni.avanti(p.id)
+        }
+        #endif
+    }
+
+    @ViewBuilder private func contenuto(_ p: PotenzialeCliente) -> some View {
+        #if os(macOS)
+        contenutoPasso(p)
+        #else
+        contenutoBase(p)
+        #endif
+    }
+
+    #if os(macOS)
+    /// Nome, fonte, il prossimo passo e in fondo la stima e i giorni di fermo (niente barra della probabilità).
+    @ViewBuilder private func contenutoPasso(_ p: PotenzialeCliente) -> some View {
+        Text(p.nome)
+            .carattereApple(P.nomeSchedaPasso)
+            .foregroundColor(Tema.Apple.Colore.inchiostro)
+            .lineLimit(1)
+        if let fonte {
+            Text(fonte)
+                .carattereApple(P.fonteSchedaPasso)
+                .foregroundColor(P.coloreFonte)
+                .lineLimit(1)
+        }
+        if let passo, !passo.testo.isEmpty {
+            Text(passo.testo)
+                .carattereApple(P.passoScheda)
+                .foregroundColor(p.fase == .cliente ? P.colorePassoCliente : P.colorePasso)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        HStack(alignment: .firstTextBaseline, spacing: P.spazioPiccolo) {
+            Text(TestiPassaparola.stima(p.patrimonioStimato))
+                .carattereApple(p.patrimonioStimato == nil ? P.fonteScheda : P.cifraScheda)
+                .foregroundColor(p.patrimonioStimato == nil ? Tema.Apple.Colore.inchiostro3 : Tema.Apple.Colore.inchiostro)
+                .lineLimit(1)
+            Spacer(minLength: P.spazioPiccolo)
+            if p.fase != .cliente, let passo {
+                Text(TestiPassaparola.fermoDa(passo.giorniFermo))
+                    .carattereApple(passo.fermo ? P.fermoSchedaOltre : P.fermoScheda)
+                    .foregroundColor(passo.fermo ? P.coloreFermoOltre : P.coloreFermo)
+                    .lineLimit(1)
+            }
+        }
+        if p.informativaIl == nil && p.fase != .cliente {
+            Text(TestiPassaparola.informativaDaDare)
+                .carattereApple(P.segno)
+                .foregroundColor(P.coloreSegno)
+                .padding(P.paddingSegno)
+                .background(Capsule().fill(P.fondoSegno))
+        }
+    }
+    #endif
+
+    @ViewBuilder private func contenutoBase(_ p: PotenzialeCliente) -> some View {
             HStack(alignment: .firstTextBaseline, spacing: P.spazioPiccolo + 2) {
                 Text(p.nome)
                     .carattereApple(P.nomeScheda)
@@ -448,44 +668,6 @@ private struct SchedaPotenziale: View {
                     .padding(P.paddingSegno)
                     .background(Capsule().fill(P.fondoSegno))
             }
-        }
-        .padding(P.paddingScheda)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background {
-            RoundedRectangle(cornerRadius: P.raggioScheda, style: .continuous)
-                .fill(P.fondoScheda)
-                .ombraApple(sopra ? .schedaPotenzialeSopra : .schedaPotenziale)
-        }
-        .overlay {
-            RoundedRectangle(cornerRadius: P.raggioScheda, style: .continuous)
-                .strokeBorder(scelta ? Tema.Apple.Colore.accento : P.bordoScheda, lineWidth: scelta ? P.spessoreScelta : 1)
-        }
-        .contentShape(RoundedRectangle(cornerRadius: P.raggioScheda, style: .continuous))
-        .onTapGesture {
-            if p.fase == .cliente, let cid = p.clienteId {
-                azioni.dossier(cid)
-            } else {
-                azioni.avanti(p.id)
-            }
-        }
-        .modifier(TrascinabilePotenziale(attiva: modificabile && p.fase != .cliente, id: p.id))
-        .contextMenu {
-            if modificabile {
-                if p.fase.successiva != nil { Button("Avanti") { azioni.avanti(p.id) } }
-                if p.fase != .cliente, p.fase.precedente != nil { Button("Indietro") { azioni.indietro(p.id) } }
-                Button("Modifica…") { azioni.modifica(p.id) }
-                if p.fase != .cliente { Button("Non interessato") { azioni.nonInteressato(p.id) } }
-                Divider()
-                Button("Elimina", role: .destructive) { azioni.elimina(p.id) }
-            } else {
-                Button("Apri il dettaglio") { azioni.dettaglio(p.id) }
-            }
-        }
-        #if os(macOS)
-        .onHover { sopra = $0 }
-        #endif
-        .accessibilityElement(children: .combine)
-        .accessibilityHint(modificabile ? "Tocca per farla avanzare" : "")
     }
 }
 

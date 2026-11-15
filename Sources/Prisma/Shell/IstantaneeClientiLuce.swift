@@ -11,6 +11,10 @@ import SwiftUI
 /// - 855: nessun passaparola (nessun presentatore, nessun potenziale);
 /// - 856: i clienti fittizi, con il passaparola di prova a tre generazioni;
 /// - 857: come 854 con «Riduci movimento».
+/// Migliorie d'uso 47 (solo Mac): le 850-853 mostrano il prossimo passo e i giorni di fermo sulle schede, la tile «Fermi
+/// da più di due settimane» e il dettaglio nuovo (853: Davide Sala senza incontro fissato, «Fissa l'incontro»); in più
+/// - 1146: dopo «Passa a…» (Marta Conti da «Analisi» a «Proposta»): la nota sotto le colonne con «Annulla»;
+/// - 1147: il dettaglio di Davide Sala con il primo incontro fissato fra tre giorni alle 18: «Prepara l'incontro».
 /// DATI DI PROVA DICHIARATI: `PotenzialiDiProva` (la vista dice «dati di prova»); i tre clienti del template
 /// presentati (Chiara Marino, Elena Marchi, Paola Leone) vivono solo nella scena.
 extension Istantanee {
@@ -38,6 +42,25 @@ extension Istantanee {
             }),
             ("853-clienti-potenziale-dettaglio", { s in
                 conTemplate(s)
+                s.potenziali.dettaglioIstantanea = PotenzialiDiProva.prefisso + "sala"
+                s.vistaClienti = .potenziali
+                s.apri(.clienti)
+            }),
+            ("1146-uso-potenziali-annulla", { s in
+                conTemplate(s)
+                s.spostaPotenzialeAnnullabile(PotenzialiDiProva.prefisso + "conti", a: .proposta)
+                s.vistaClienti = .potenziali
+                s.apri(.clienti)
+            }),
+            ("1147-uso-potenziale-dettaglio-incontro", { s in
+                conTemplate(s)
+                let cal = Calendar.current
+                let giorno = cal.date(byAdding: .day, value: 3, to: cal.startOfDay(for: Date())) ?? Date()
+                let inizio = cal.date(bySettingHour: 18, minute: 0, second: 0, of: giorno) ?? giorno
+                let a = Appuntamento(id: "event-scena-primo-incontro-sala", clienteId: "",
+                                     titolo: TestiPassaparola.titoloPrimoIncontro("Davide Sala"), inizio: inizio, durataMinuti: 30,
+                                     luogo: "", note: "", stato: .pianificato, tipo: .primoIncontro)
+                s.dati.appuntamenti = s.dati.appuntamenti + [a]
                 s.potenziali.dettaglioIstantanea = PotenzialiDiProva.prefisso + "sala"
                 s.vistaClienti = .potenziali
                 s.apri(.clienti)

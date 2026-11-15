@@ -68,6 +68,41 @@ extension Tema.Apple {
         static let spazioMedio: CGFloat = 8
         static let spazioRiga: CGFloat = 12
         static let spessoreScelta: CGFloat = 1.5
+
+        // Migliorie d'uso 47 (solo Mac): il prossimo passo sulla scheda, i giorni di fermo, il dettaglio nuovo
+        static let nomeSchedaPasso = Tema.Apple.Carattere(dimensione: 14, peso: .bold)
+        static let fonteSchedaPasso = Tema.Apple.Carattere(dimensione: 12, peso: .regular)
+        /// `.kPasso`: 12,5 semibold, interlinea 1,35, colore accento (in «Cliente» verde).
+        static let passoScheda = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, interlinea: 1.35)
+        static let colorePasso = Tema.Apple.Colore.accento
+        static let colorePassoCliente = Tema.Apple.Colore.verde
+        /// «fermo da 3 giorni»: grigio; oltre la soglia arancio scuro (--orangeT) e semibold.
+        static let fermoScheda = Tema.Apple.Carattere(dimensione: 12.5, peso: .regular, tabellare: true)
+        static let fermoSchedaOltre = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, tabellare: true)
+        static let coloreFermo = Tema.Apple.Colore.inchiostro3
+        static let coloreFermoOltre = Tema.Apple.Colore.arancioTesto
+        /// La quarta tile «Fermi da più di due settimane»: il numero in arancio se più di zero.
+        static let coloreTileFermi = Tema.Apple.Colore.arancio
+        /// La nota sotto le colonne dopo uno spostamento: il nome in neretto.
+        static let notaForte = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, interlinea: 1.45)
+        // Il dettaglio (820 × 460: il template è 820 × 430, le righe di oggi scorrono sotto i pulsanti)
+        static let larghezzaDettaglioPasso: CGFloat = 820
+        static let altezzaDettaglioPasso: CGFloat = 460
+        static let avatarDettaglio: CGFloat = 54
+        static let inizialiDettaglio = Tema.Apple.Carattere(dimensione: 19, peso: .bold)
+        static let fondoAvatar = Tema.Apple.Colore.chip
+        static let bordoAvatar = Tema.Apple.Colore.separatore
+        static let testoAvatar = Tema.Apple.Colore.inchiostro2
+        static let spazioTesta: CGFloat = 14
+        static let spazioTileDettaglio: CGFloat = 10
+        static let paddingTileDettaglio: CGFloat = 14
+        static let tileDettaglioValore = Tema.Apple.Carattere(dimensione: 22, peso: .bold, tracking: -0.4, tabellare: true)
+        static let tileDettaglioNota = Tema.Apple.Carattere(dimensione: 11.5, peso: .regular)
+        static let testoPassoDettaglio = Tema.Apple.Carattere(dimensione: 15, peso: .semibold, interlinea: 1.35)
+        static let puntoPasso: CGFloat = 8
+        static let numeroChiama = Tema.Apple.Carattere(dimensione: 28, peso: .bold, tracking: -0.5, tabellare: true)
+        static let paddingChiama: CGFloat = 18
+        static let larghezzaChiama: CGFloat = 280
     }
 
     // MARK: - Passaparola (§9.2.2)

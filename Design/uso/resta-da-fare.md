@@ -1583,3 +1583,34 @@ Resta / da decidere:
   si confrontano come 50): da confermare.
 - Le card delle voci sono un solo elemento per VoiceOver (`children: .ignore`, come prima): «Apri l'area ›» e «Completa»
   non si raggiungono da VoiceOver dentro la card; il pulsante della card principale sì.
+
+## 47. Ogni potenziale ha il suo prossimo passo
+
+Fatto (solo Mac, dentro `#if os(macOS)` o in `Shell/DettaglioPotenzialeMac.swift`; iPhone e iPad restano come prima):
+- `MotorePassaparola.prossimoPasso` / `passi` / `primiIncontri` / `fermi` / `giorniFermo`, `PassoPotenziale`,
+  `AzionePotenziale`, `RegolePassaparola.giorniFermo = 14`; testi in `TestiPassaparola` (sezione «Il prossimo passo»).
+  Nessun campo nuovo (47-a); il primo incontro si riconosce dal tipo e dal titolo `titoloPrimoIncontro` (47-d), che ora
+  usa anche `fissaPrimoIncontro`. I passi si tengono con `stato.passiPotenziali()` (`ricavato`, chiave con l'ora).
+- Scheda: nome 14 neretto, fonte, passo (accento, verde in «Cliente»), stima e «fermo da N giorni» (arancio scuro e
+  semibold oltre 14); niente barra né probabilità. Il clic apre il dettaglio (anche per chi è cliente); menu con
+  «Apri il dossier» per i clienti; ⌘→ e «Avanti» restano.
+- Tile: la quarta è «Fermi da più di due settimane» (arancio se > 0); il probabile entro fine anno va nella nota del
+  patrimonio (47-b).
+- Dettaglio 820 × 460 (`DettaglioPotenzialeMac`): avatar 54 con le iniziali, occhiello «fase · fonte», tre tile, «Il
+  prossimo passo», pulsanti (Chiama con il riquadro del numero e «Copia il numero», 47-c; Scrivi; Fissa l'incontro;
+  Prepara l'incontro → Agenda), «Passa a «…»» o «Diventa cliente», «Non interessato»; per un cliente «Fatto», «Va bene»,
+  «Apri il dossier»; sotto le righe di prima, «Modifica…» e «Scrivigli».
+- «Passa a…», trascinamento e ⌘→ si annullano: `StatoPotenziali.ultimoSpostamento`, `spostaPotenzialeAnnullabile`,
+  `annullaSpostamentoPotenziale` e la nota «**Nome** è passato a «fase». Annulla». Avviso di «Non interessato».
+- Istantanee 1146, 1147 (e le 850-853 aggiornate da sole); prove del prossimo passo e dei giorni di fermo in
+  `ProvaCalcoliPassaparola`.
+
+Resta / da decidere:
+- La nota della tile del patrimonio mostra il probabile quando c'è, altrimenti «N senza stima»: le due insieme non
+  stanno su una riga. Da decidere quale prevale.
+- I dati di prova hanno sette potenziali su otto fermi da più di 14 giorni (le date della storia erano già così): il
+  template ne mostra meno. Si possono avvicinare le date se l'utente vuole un quadro più vario.
+- Dopo «Chiama» Prisma non chiede com'è andata (non esiste ancora per i potenziali, 47-c).
+- «Annulla» non vale per «Indietro» dal menu (chiude l'annullamento, come ogni altro spostamento).
+- Il volo dopo «Passa a…» parte quando il dettaglio è tornato sulla scheda (`chiudi(poi:)`), con la molla di sempre
+  (`Tema.Apple.Moto.Potenziali.avanza`).
