@@ -1117,6 +1117,10 @@ Resta:
   `Tema.Apple.Messaggi.Colonna`; se lo usano altre app conviene spostarli in un enum comune.
 - **iPhone e iPad**: la barra a tre stati e «Mandati oggi» arriveranno con il loro aggiornamento (l'iPhone non segna
   spediti e il giornale di «Prisma ovunque» non porta il segno).
+- **Modalità cliente su iPhone e iPad**: sul Mac le occasioni del cliente si filtrano nel motore prima del limite di 8
+  per gruppo (`soloCliente`); su iPhone e iPad `occasioniMessaggi` e il dossier filtrano ancora dopo il limite, come
+  prima (dentro `#if os(macOS)`), e perdono le occasioni del cliente fuori dalle prime 8 di tutti. Portare la stessa
+  correzione con l'aggiornamento di iPhone e iPad.
 
 ## 27. Vera dice cosa sa fare
 

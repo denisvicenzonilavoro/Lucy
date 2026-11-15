@@ -603,12 +603,21 @@ private struct MessaggiNoteDossier: View {
         let dati = stato.datiDeiCalcoli()
         let modo = stato.modoCliente
         let oggi = Date()
+        #if os(macOS)
         let tutte = await Task.detached(priority: .userInitiated) {
             MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi, soloCliente: modo)
         }.value
         // Nel frattempo i dati, il giorno o la modalità sono cambiati: vale il calcolo della chiave nuova
         guard !Task.isCancelled, stato.derivatiValidi().chiave == k else { return }
         trovata = (k, Self.prima(tutte, cliente: id))
+        #else
+        // iPhone e iPad come prima: il filtro della modalità cliente dopo il limite per gruppo
+        let tutte = await Task.detached(priority: .userInitiated) {
+            MotoreOccasioniMessaggi.calcola(dati: dati, oggi: oggi)
+        }.value
+        guard !Task.isCancelled, stato.derivatiValidi().chiave == k else { return }
+        trovata = (k, Self.prima(modo.map { tutte.soloCliente($0) } ?? tutte, cliente: id))
+        #endif
     }
 }
 
