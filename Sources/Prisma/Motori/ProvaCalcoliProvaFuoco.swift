@@ -172,6 +172,77 @@ enum ProvaCalcoliProvaFuoco {
                           MotoreProvaFuoco.ordina([c, a, d, b, e]).map(\.clienteId) == ["e", "b", "a", "d", "c"])
         }
 
+        // P17. Migliorie d'uso 41: gruppi dai livelli, quote e anni nella riga, il «Perché».
+        do {
+            func riga(_ oggi: Double, _ dopo: Double, obiettivo: String? = "o", anni: Int? = nil, azioni: Double? = nil,
+                      obbligazioni: Double? = nil, stimate: Bool = false) -> RigaProvaFuoco {
+                RigaProvaFuoco(clienteId: "x", nome: "X", telefono: "", obiettivoId: obiettivo, titoloObiettivo: obiettivo == nil ? nil : "O",
+                               coperturaOggi: oggi, coperturaDopo: dopo, perdita: 0, voci: [], collegateAssenti: false,
+                               quotaAzioni: azioni, quotaObbligazioni: obbligazioni, quoteStimate: stimate, anniAllObiettivo: anni)
+            }
+            verifica.vero("P17 Gruppi: 10 punti esatti «da tenere d'occhio», 10,01 «da chiamare»",
+                          riga(0.9, 0.8).gruppo == .daTenereDOcchio && riga(0.9, 0.7999).gruppo == .daChiamare)
+            verifica.vero("P17 Gruppi: 5 punti «reggono», 5,01 «da tenere d'occhio», senza obiettivo in fondo",
+                          riga(0.9, 0.85).gruppo == .reggono && riga(0.9, 0.8499).gruppo == .daTenereDOcchio
+                          && riga(0.9, 0.5, obiettivo: nil).gruppo == .senzaObiettivo)
+            let e = MotoreProvaFuoco.calcola(.mercati(calo: 25), clienti: clienti, posizioni: posizioni, obiettivi: obiettivi, oggi: oggi)
+            let r = Dictionary(uniqueKeysWithValues: e.righe.map { ($0.clienteId, $0) })
+            verifica("P17 Anna: tutto in azioni", r["anna"]?.quotaAzioni ?? -1, 1, tolleranza: 1e-9)
+            verifica("P17 Anna: nessuna obbligazione", r["anna"]?.quotaObbligazioni ?? -1, 0, tolleranza: 1e-9)
+            verifica.vero("P17 Anna: quota azionaria indicata, non stimata", r["anna"]?.quoteStimate == false)
+            verifica("P17 Anna: 10 anni all'obiettivo", Double(r["anna"]?.anniAllObiettivo ?? -1), 10)
+            verifica("P17 Anna: patrimonio 100.000 €", r["anna"]?.patrimonio ?? -1, 100_000)
+            verifica("P17 Carla: patrimonio delle sole posizioni in essere", r["carla"]?.patrimonio ?? -1, 100_000)
+            verifica.vero("P17 Carla: senza obiettivo niente anni", r["carla"]?.anniAllObiettivo == nil)
+            verifica("P17 Carla: 40% in azioni", r["carla"]?.quotaAzioni ?? -1, 0.4, tolleranza: 1e-9)
+            verifica.vero("P17 Gruppi contigui nell'ordine del motore",
+                          e.righe.map(\.gruppo.rawValue) == e.righe.map(\.gruppo.rawValue).sorted())
+            let poco = TestiProvaFuoco.perche(riga(0.9, 0.7, anni: 3, azioni: 0.38, obbligazioni: 0.34)) ?? ""
+            verifica.vero("P17 Perché con 3 anni: quote e poco tempo",
+                          poco.hasPrefix("Ha il ") && poco.contains("in obbligazioni.") && poco.contains("mancano solo 3 anni")
+                          && poco.contains("poco tempo per recuperare"))
+            let tanto = TestiProvaFuoco.perche(riga(0.9, 0.7, anni: 10, azioni: 0.38, obbligazioni: 0.34, stimate: true)) ?? ""
+            verifica.vero("P17 Perché con 10 anni: c'è tempo, quote stimate con «circa»",
+                          tanto.contains("circa il") && tanto.contains("mancano 10 anni") && tanto.contains("c’è tempo per recuperare"))
+            verifica.vero("P17 Perché senza quote: solo gli anni",
+                          TestiProvaFuoco.perche(riga(0.9, 0.7, anni: 10))?.hasPrefix("All’obiettivo mancano 10 anni") == true)
+            verifica.vero("P17 Perché senza quote né anni: niente riquadro", TestiProvaFuoco.perche(riga(0.9, 0.7)) == nil)
+            verifica.vero("P17 Cifra «oggi → dopo»", TestiProvaFuoco.oggiDopo(0.52, 0.38)
+                          == MotoreProvaFuoco.percento(0.52) + " → " + MotoreProvaFuoco.percento(0.38))
+            verifica.vero("P17 Pulsante: «Prepara il messaggio» per uno, «Prepara i 3 messaggi» per tre",
+                          TestiProvaFuoco.prepara(1) == "Prepara il messaggio" && TestiProvaFuoco.prepara(3) == "Prepara i 3 messaggi")
+        }
+
+        #if os(macOS)
+        // P18. Migliorie d'uso 41: «Prepara i N messaggi» e «Segna «da chiamare»» non creano doppioni.
+        do {
+            let s = StatoShell(persistente: false)
+            if let c = s.dati.clienti.first {
+                let r = RigaProvaFuoco(clienteId: c.id, nome: c.nome, telefono: "", obiettivoId: "o", titoloObiettivo: "Pensione",
+                                       coperturaOggi: 0.9, coperturaDopo: 0.7, perdita: 12_000, voci: [], collegateAssenti: false)
+                let scenario = ScenarioFuoco.mercati(calo: 25)
+                let prima = s.dati.messaggi.count
+                verifica("P18 Prepara: una bozza", Double(s.preparaMessaggiProvaFuoco([r], scenario: scenario, oggi: oggi)), 1)
+                verifica("P18 Prepara: un messaggio in più", Double(s.dati.messaggi.count - prima), 1)
+                let bozza = s.dati.messaggi.last
+                verifica.vero("P18 Prepara: bozza del modello fisso, in Mail, del cliente",
+                              bozza?.stato == .bozza && bozza?.autore == .modelloFisso && bozza?.canale == .mail && bozza?.clienteId == c.id)
+                verifica("P18 Prepara di nuovo: nessuna bozza", Double(s.preparaMessaggiProvaFuoco([r], scenario: scenario, oggi: oggi)), 0)
+                verifica("P18 Prepara di nuovo: nessun messaggio in più", Double(s.dati.messaggi.count - prima), 1)
+                verifica.vero("P18 Segna: l'attività di oggi", s.segnaDaChiamare(riga: r, scenario: scenario, oggi: oggi))
+                verifica.vero("P18 Segna di nuovo: niente doppione", !s.segnaDaChiamare(riga: r, scenario: scenario, oggi: oggi))
+                let id = StatoShell.idAttivitaFuoco(clienteId: c.id, oggi: oggi)
+                let attivita = s.dati.attivita.filter { $0.id == id }
+                verifica("P18 Segna: una sola attività", Double(attivita.count), 1)
+                verifica.vero("P18 Segna: per oggi, priorità alta, «Chiamare …»",
+                              attivita.first?.priorita == .alta && attivita.first?.titolo == "Chiamare \(c.nome)"
+                              && attivita.first.map { Calendar.current.isDate($0.scadenza, inSameDayAs: oggi) } == true)
+            } else {
+                verifica.vero("P18 Dati di prova con almeno un cliente", false)
+            }
+        }
+        #endif
+
         // P15. Annullamento: il calcolo si ferma appena il cursore si muove di nuovo; vince l'ultimo ricalcolo.
         do {
             guard let base = MotoreProvaFuoco.prepara(clienti: clienti, posizioni: posizioni, obiettivi: obiettivi, oggi: oggi) else {

@@ -72,7 +72,21 @@ struct RigaProvaFuoco: Identifiable, Equatable, Sendable {
     let voci: [VoceProvaFuoco]
     /// L'obiettivo mostrato non ha posizioni collegate in essere: la barra non si muove (tranne con l'inflazione).
     let collegateAssenti: Bool
+    // Migliorie d'uso 41 (il «Perché» del dettaglio): solo dati in più, i calcoli delle coperture non cambiano.
+    /// Quota azionaria e obbligazionaria (titoli di Stato e societari) sul patrimonio finanziario in essere, pesate sul
+    /// valore delle posizioni che hanno la composizione (0…1); nil se nessuna l'ha.
+    var quotaAzioni: Double? = nil
+    var quotaObbligazioni: Double? = nil
+    /// true se una delle composizioni usate per le quote è stimata (il «Perché» dice «circa»).
+    var quoteStimate = false
+    /// Gli anni interi che mancano alla scadenza dell'obiettivo mostrato (nil senza obiettivo).
+    var anniAllObiettivo: Int? = nil
+    /// Il valore di tutte le posizioni finanziarie in essere del cliente (non solo di quelle che cambiano valore).
+    var patrimonio: Double = 0
     var id: String { clienteId }
+
+    /// Il gruppo di «Chi sentire, in ordine» (migliorie d'uso 41).
+    var gruppo: GruppoProvaFuoco { MotoreProvaFuoco.gruppo(self) }
 
     /// Il calo della copertura, in punti (0…100), arrotondato al milionesimo di punto: 10,0 punti restano 10,0
     /// anche quando la sottrazione in virgola mobile dà 9,999999999999998.
@@ -81,6 +95,12 @@ struct RigaProvaFuoco: Identifiable, Equatable, Sendable {
     var stimata: Bool { voci.contains(where: \.stimata) }
     var posizioniStimate: Int { voci.filter(\.stimata).count }
     var oltreSoglia: Bool { obiettivoId != nil && calo > MotoreProvaFuoco.sogliaAllarme }
+}
+
+/// I gruppi di «Chi sentire, in ordine» (migliorie d'uso 41), dai livelli del motore: da chiamare (oltre
+/// `sogliaAllarme`), da tenere d'occhio (oltre `sogliaAttenzione`), reggono; in fondo i clienti senza obiettivo.
+enum GruppoProvaFuoco: Int, CaseIterable, Sendable {
+    case daChiamare, daTenereDOcchio, reggono, senzaObiettivo
 }
 
 /// L'esito della prova del fuoco su tutti i clienti.
@@ -151,6 +171,19 @@ enum MotoreProvaFuoco {
         if calo > sogliaAllarme { return .allarme }
         return calo > sogliaAttenzione ? .attenzione : .tranquillo
     }
+
+    /// Il gruppo di una riga: dal livello del calo, o «senza obiettivo».
+    static func gruppo(_ r: RigaProvaFuoco) -> GruppoProvaFuoco {
+        guard r.obiettivoId != nil else { return .senzaObiettivo }
+        switch livello(calo: r.calo) {
+        case .allarme: return .daChiamare
+        case .attenzione: return .daTenereDOcchio
+        case .tranquillo: return .reggono
+        }
+    }
+
+    /// Sotto questi anni all'obiettivo c'è «poco tempo per recuperare una discesa» (il «Perché» del dettaglio).
+    static let anniPocoTempo = 5
 
     /// Una differenza di copertura (frazione) in punti, mai negativa, arrotondata al milionesimo di punto.
     static func punti(_ differenza: Double) -> Double { max(0, (differenza * 100 * 1e6).rounded() / 1e6) }
@@ -336,10 +369,28 @@ enum MotoreProvaFuoco {
             }
             scelto = (o, dopo, calo)
         }
+        // Quote sul patrimonio finanziario (pesate sul valore delle posizioni con la composizione) e anni all'obiettivo
+        var patrimonio = 0.0, conComposizione = 0.0, azioni = 0.0, obbligazioni = 0.0
+        var quoteStimate = false
+        for x in c.finanziarie {
+            patrimonio += x.posizione.valore
+            guard let k = x.composizione else { continue }
+            conComposizione += x.posizione.valore
+            azioni += x.posizione.valore * k.azioni
+            obbligazioni += x.posizione.valore * (k.governativi + k.societarie)
+            if k.stimata { quoteStimate = true }
+        }
+        let anni = scelto.map { x -> Int in
+            max(0, Calendar.current.dateComponents([.year], from: oggi, to: x.base.obiettivo.scadenza).year ?? 0)
+        }
         return RigaProvaFuoco(clienteId: c.cliente.id, nome: c.cliente.nome, telefono: c.cliente.telefono,
                               obiettivoId: scelto?.base.obiettivo.id, titoloObiettivo: scelto?.base.obiettivo.titolo,
                               coperturaOggi: scelto?.base.coperturaOggi ?? 0, coperturaDopo: scelto?.dopo ?? 0,
-                              perdita: perditaTotale, voci: voci, collegateAssenti: scelto.map { $0.base.collegate.isEmpty } ?? false)
+                              perdita: perditaTotale, voci: voci, collegateAssenti: scelto.map { $0.base.collegate.isEmpty } ?? false,
+                              quotaAzioni: conComposizione > 0 ? azioni / conComposizione : nil,
+                              quotaObbligazioni: conComposizione > 0 ? obbligazioni / conComposizione : nil,
+                              quoteStimate: conComposizione > 0 && quoteStimate,
+                              anniAllObiettivo: anni, patrimonio: patrimonio)
     }
 }
 

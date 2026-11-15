@@ -179,12 +179,46 @@ struct ProvaDelFuocoApple: View, Equatable {
     @State private var riordinaAlRisultato = true
     /// «Chiama»: la conferma (con il numero) o l'avviso che il numero manca.
     @State private var chiamata: ChiamataProvaFuoco?
+    #if os(macOS)
+    /// Migliorie d'uso 41: il gruppo di ogni riga, preso insieme all'ordine (mentre si trascina il cursore le testate
+    /// restano ferme come le righe; al rilascio si rifanno).
+    @State private var gruppiMostrati: [String: GruppoProvaFuoco] = [:]
+    /// «✓ Preparati»: la chiave dello scenario (con il valore) per cui le bozze sono state preparate.
+    @State private var preparatiPer: String?
+    /// Il dettaglio che nasce dalla riga.
+    @StateObject private var dettaglio: StatoDettaglio
+    #endif
+
+    init(stato: StatoShell, prova: StatoProvaFuoco, chiave: ChiaveVista, solaLettura: Bool) {
+        self.stato = stato
+        self.prova = prova
+        self.chiave = chiave
+        self.solaLettura = solaLettura
+        #if os(macOS)
+        _dettaglio = StateObject(wrappedValue: prova.dettaglioIstantanea.map {
+            StatoDettaglio(aperto: $0, misura: Tema.Apple.Posizioni.Fuoco.Dettaglio.misura)
+        } ?? StatoDettaglio())
+        #endif
+    }
 
     nonisolated static func == (a: ProvaDelFuocoApple, b: ProvaDelFuocoApple) -> Bool {
         a.chiave == b.chiave && a.solaLettura == b.solaLettura
     }
 
     var body: some View {
+        #if os(macOS)
+        let d = dettaglio
+        return corpo
+            .presentatoreDettaglio(dettaglio) { id in dettaglioRiga(id) }
+            // Il dettaglio si chiude con dati nuovi (la riga può cambiare gruppo) e quando la vista se ne va
+            .onChange(of: chiave) { _ in d.chiudi(subito: true) }
+            .onDisappear { d.chiudi(subito: true) }
+        #else
+        return corpo
+        #endif
+    }
+
+    private var corpo: some View {
         let f = Tema.Apple.Posizioni.Fuoco.self
         let d = Tema.Apple.Posizioni.Disposizione.self
         let e = esito
@@ -200,7 +234,7 @@ struct ProvaDelFuocoApple: View, Equatable {
                 if vuoto {
                     vuotoGuidato
                 } else {
-                    titoloLista
+                    titoloLista(MisuraRigaFuoco(larghezza: g.size.width))
                         .entrataCascata(1, base: f.Moto.baseCascata)
                     lista(e, misura: MisuraRigaFuoco(larghezza: g.size.width))
                 }
@@ -265,6 +299,33 @@ struct ProvaDelFuocoApple: View, Equatable {
     private func applica(_ e: EsitoProvaFuoco?) {
         guard let e else { return }
         let nuovo = e.righe.map(\.id)
+        #if os(macOS)
+        // Migliorie d'uso 41: i gruppi si prendono insieme all'ordine (le testate scivolano con le righe)
+        var gruppi: [String: GruppoProvaFuoco] = [:]
+        for r in e.righe { gruppi[r.id] = r.gruppo }
+        guard nuovo != ordine || (riordinaAlRisultato && gruppi != gruppiMostrati) else { return }
+        var senza = Transaction()
+        senza.disablesAnimations = true
+        if Set(nuovo) != Set(ordine) {
+            withTransaction(senza) {
+                ordine = nuovo
+                gruppiMostrati = gruppi
+            }
+            return
+        }
+        guard riordinaAlRisultato else { return }
+        if calmo {
+            withTransaction(senza) {
+                ordine = nuovo
+                gruppiMostrati = gruppi
+            }
+        } else {
+            withAnimation(Tema.Apple.Moto.Riordino.animazione) {
+                ordine = nuovo
+                gruppiMostrati = gruppi
+            }
+        }
+        #else
         guard nuovo != ordine else { return }
         var senza = Transaction()
         senza.disablesAnimations = true
@@ -278,6 +339,7 @@ struct ProvaDelFuocoApple: View, Equatable {
         } else {
             withAnimation(Tema.Apple.Moto.Riordino.animazione) { ordine = nuovo }
         }
+        #endif
     }
 
     /// Le righe nell'ordine mostrato (quello dell'esito finché l'ordine non ha gli stessi clienti).
@@ -347,7 +409,51 @@ struct ProvaDelFuocoApple: View, Equatable {
 
     // MARK: Parti della schermata
 
-    private var titoloLista: some View {
+    private func titoloLista(_ misura: MisuraRigaFuoco) -> some View {
+        #if os(macOS)
+        return legendaLista(misura)
+        #else
+        return titoloListaConNota
+        #endif
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 41: «Chi sentire, in ordine», le due barrette della legenda e, sopra la colonna delle cifre,
+    /// «patrimonio in meno». Il criterio d'ordine resta nell'aiuto.
+    private func legendaLista(_ misura: MisuraRigaFuoco) -> some View {
+        let t = Tema.Apple.Posizioni.Fuoco.Titolo.self
+        let r = Tema.Apple.Posizioni.Fuoco.Riga.self
+        let b = Tema.Apple.Posizioni.Fuoco.Barra.self
+        let spazio = misura == .minima ? r.spazioMinimo : r.spazio
+        // «patrimonio in meno» finisce dove finisce la colonna della perdita: dopo ci sono la «›», il padding della
+        // riga e il margine della barra di scorrimento
+        let destra = r.margineScorrimento + r.padding.trailing + spazio + r.larghezzaFreccia - t.lati
+        return HStack(alignment: .center, spacing: t.spazioNota) {
+            Text(TestiProvaFuoco.titoloLista)
+                .carattereApple(t.titolo)
+                .foregroundColor(t.coloreTitolo)
+                .lineLimit(1)
+                .layoutPriority(1)
+            BarrettaLegendaFuoco(colore: b.oggi, testo: TestiProvaFuoco.legendaOggi)
+            BarrettaLegendaFuoco(colore: b.colore(.tranquillo), testo: TestiProvaFuoco.legendaDopo)
+            Spacer(minLength: 0)
+            Text(TestiProvaFuoco.legendaPatrimonio)
+                .carattereApple(t.nota)
+                .foregroundColor(t.coloreNota)
+                .lineLimit(1)
+                .fixedSize()
+                .frame(minWidth: misura.larghezzaPerdita, alignment: .trailing)
+        }
+        .padding(.top, t.sopra)
+        .padding(.leading, t.lati)
+        .padding(.trailing, max(t.lati, t.lati + destra))
+        .padding(.bottom, t.sotto)
+        .help(MotoreProvaFuoco.criterioOrdine)
+        .accessibilityElement(children: .combine)
+    }
+    #endif
+
+    private var titoloListaConNota: some View {
         let t = Tema.Apple.Posizioni.Fuoco.Titolo.self
         return HStack(alignment: .firstTextBaseline, spacing: t.spazioNota) {
             Text(TestiProvaFuoco.titoloLista)
@@ -377,6 +483,9 @@ struct ProvaDelFuocoApple: View, Equatable {
                 IndiceProvaFuoco(clienti: Dictionary(stato.dati.clienti.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a }),
                                  canali: Self.canaliInEssere(stato.posizioni))
             }
+            #if os(macOS)
+            listaGruppi(e, indice: indice, misura: misura)
+            #else
             let clienti = indice.clienti
             let canali = indice.canali
             let righe = righeMostrate(e)
@@ -404,10 +513,108 @@ struct ProvaDelFuocoApple: View, Equatable {
                 .padding(.trailing, r.margineScorrimento)
                 .padding(.bottom, r.fondoLista)
             }
+            #endif
         } else {
             Spacer(minLength: 0)
         }
     }
+
+    #if os(macOS)
+    // MARK: Gruppi e dettaglio (migliorie d'uso 41, Mac)
+
+    /// Il gruppo mostrato di una riga: quello preso con l'ordine (istantanee e righe nuove: quello di adesso).
+    private func gruppoMostrato(_ r: RigaProvaFuoco) -> GruppoProvaFuoco {
+        istantanea ? r.gruppo : (gruppiMostrati[r.id] ?? r.gruppo)
+    }
+
+    /// Le righe mostrate divise per gruppo (l'ordine dentro il gruppo resta), ognuno con la sua testata.
+    private func elementiLista(_ e: EsitoProvaFuoco) -> [ElementoListaFuoco] {
+        var perGruppo: [GruppoProvaFuoco: [RigaProvaFuoco]] = [:]
+        for r in righeMostrate(e) { perGruppo[gruppoMostrato(r), default: []].append(r) }
+        var elementi: [ElementoListaFuoco] = []
+        for g in GruppoProvaFuoco.allCases {
+            guard let righe = perGruppo[g], !righe.isEmpty else { continue }
+            elementi.append(.testata(g, righe: righe, primo: elementi.isEmpty))
+            elementi.append(contentsOf: righe.map { ElementoListaFuoco.riga($0) })
+        }
+        return elementi
+    }
+
+    @ViewBuilder private func listaGruppi(_ e: EsitoProvaFuoco, indice: IndiceProvaFuoco, misura: MisuraRigaFuoco) -> some View {
+        let r = Tema.Apple.Posizioni.Fuoco.Riga.self
+        let elementi = elementiLista(e)
+        let preparati = preparatiPer == MotoreProvaFuoco.chiave(e.scenario)
+        let d = dettaglio
+        ScrollView(.vertical) {
+            // Testate e righe nello stesso LazyVStack con id distinti: il riordino animato le sposta insieme
+            LazyVStack(alignment: .leading, spacing: r.passo) {
+                ForEach(elementi) { el in
+                    switch el {
+                    case let .testata(g, righe, primo):
+                        TestataGruppoFuoco(gruppo: g, numero: righe.count, primo: primo, preparati: preparati,
+                                           solaLettura: solaLettura,
+                                           prepara: { preparaMessaggi(righe, scenario: e.scenario) })
+                    case let .riga(riga):
+                        let c = indice.clienti[riga.clienteId]
+                        RigaProvaFuocoMac(riga: riga, iniziali: c?.iniziali ?? "", tinta: c?.tinta ?? .blu,
+                                          canali: indice.canali[riga.clienteId] ?? c?.canali ?? [], misura: misura,
+                                          apri: { d.apri(riga.id, misura: Tema.Apple.Posizioni.Fuoco.Dettaglio.misura) },
+                                          aggiungiObiettivo: { apriDossier(riga.clienteId, scheda: .obiettivi, obiettivo: nil) })
+                            .equatable()
+                            .origineDettaglio(id: riga.id)
+                    }
+                }
+                if e.posizioniStimate > 0 {
+                    Text(TestiProvaFuoco.notaStime(e.posizioniStimate))
+                        .carattereApple(r.nota)
+                        .foregroundColor(r.coloreNota)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, r.notaSopra)
+                        .padding(.horizontal, Tema.Apple.Posizioni.Fuoco.Titolo.lati)
+                }
+            }
+            .padding(.trailing, r.margineScorrimento)
+            .padding(.bottom, r.fondoLista)
+        }
+    }
+
+    /// «Prepara i N messaggi»: le bozze in Messaggi, poi «✓ Preparati» finché scenario e valore non cambiano.
+    private func preparaMessaggi(_ righe: [RigaProvaFuoco], scenario: ScenarioFuoco) {
+        stato.preparaMessaggiProvaFuoco(righe, scenario: scenario)
+        preparatiPer = MotoreProvaFuoco.chiave(scenario)
+    }
+
+    /// Il dettaglio della riga `id` con i numeri dell'esito di adesso.
+    @ViewBuilder private func dettaglioRiga(_ id: String) -> some View {
+        if let e = esito, let riga = e.righe.first(where: { $0.id == id }) {
+            let indice: IndiceProvaFuoco = stato.ricavato("prova-fuoco-indice") {
+                IndiceProvaFuoco(clienti: Dictionary(stato.dati.clienti.map { ($0.id, $0) }, uniquingKeysWith: { a, _ in a }),
+                                 canali: Self.canaliInEssere(stato.posizioni))
+            }
+            let c = indice.clienti[id]
+            let suoi = indice.canali[id] ?? c?.canali ?? []
+            let d = dettaglio
+            DettaglioProvaFuoco(riga: riga, iniziali: c?.iniziali ?? "", tinta: c?.tinta ?? .blu, scenario: e.scenario,
+                                solaLettura: solaLettura,
+                                prepara: {
+                                    d.chiudi(subito: true)
+                                    scrivi(riga, canali: suoi, scenario: e.scenario)
+                                },
+                                segna: {
+                                    stato.segnaDaChiamare(riga: riga, scenario: e.scenario)
+                                    d.chiudi()
+                                },
+                                resistenza: {
+                                    d.chiudi(subito: true)
+                                    stato.apriResistenzaDaFuoco(riga.clienteId)
+                                },
+                                obiettivo: {
+                                    d.chiudi(subito: true)
+                                    apriDossier(riga.clienteId, scheda: .obiettivi, obiettivo: riga.obiettivoId)
+                                })
+        }
+    }
+    #endif
 
     private var vuotoGuidato: some View {
         VuotoGuidato(
@@ -435,6 +642,21 @@ struct ProvaDelFuocoApple: View, Equatable {
         return insiemi.mapValues { s in Canale.allCases.filter { s.contains($0) } }
     }
 }
+
+#if os(macOS)
+/// Un elemento della lista a gruppi (migliorie d'uso 41): la testata di un gruppo o una riga.
+private enum ElementoListaFuoco: Identifiable {
+    case testata(GruppoProvaFuoco, righe: [RigaProvaFuoco], primo: Bool)
+    case riga(RigaProvaFuoco)
+
+    var id: String {
+        switch self {
+        case let .testata(g, _, _): return "testata-gruppo-\(g.rawValue)"
+        case let .riga(r): return r.id
+        }
+    }
+}
+#endif
 
 /// Ciò che le righe di «Chi chiamare» leggono dei clienti: il cliente per id e i canali delle posizioni in essere.
 private struct IndiceProvaFuoco {
@@ -829,16 +1051,30 @@ enum TestiProvaFuoco {
 
     static let etichettaCard = "La prova del fuoco · tutto il portafoglio"
     static let ricalcolo = "Ricalcolo…"
+    #if os(macOS)
+    /// Migliorie d'uso 41: «Chi sentire» (l'iPad resta su «Chi chiamare» fino al suo giro).
+    static let titoloLista = "Chi sentire, in ordine"
+    #else
     static let titoloLista = "Chi chiamare, in ordine"
+    #endif
     static let notaLista = "la barra chiara è l’obiettivo oggi, quella piena dopo lo scenario"
 
-    private static var soglia: String {
-        Formati.numeroFormatter.string(from: NSNumber(value: MotoreProvaFuoco.sogliaAllarme)) ?? "10"
+    private static var soglia: String { numero(MotoreProvaFuoco.sogliaAllarme) }
+
+    /// Un numero come lo scrive Prisma («10», «5», «3,5»).
+    static func numero(_ v: Double) -> String {
+        Formati.numeroFormatter.string(from: NSNumber(value: v)) ?? "\(v)"
     }
 
     static func sottoClienti(_ n: Int) -> String {
-        n == 1 ? "cliente scende di più di \(soglia) punti sul suo obiettivo"
-               : "clienti scendono di più di \(soglia) punti sui loro obiettivi"
+        #if os(macOS)
+        // Migliorie d'uso 41
+        return n == 1 ? "da chiamare: il suo obiettivo perde più di \(soglia) punti"
+                      : "da chiamare: il loro obiettivo perde più di \(soglia) punti"
+        #else
+        return n == 1 ? "cliente scende di più di \(soglia) punti sul suo obiettivo"
+                      : "clienti scendono di più di \(soglia) punti sui loro obiettivi"
+        #endif
     }
 
     static let sottoPatrimonio = "di patrimonio, su tutto il portafoglio"
@@ -900,3 +1136,106 @@ enum TestiProvaFuoco {
         return parti.joined(separator: ", ")
     }
 }
+
+// MARK: - Testi dei gruppi e del dettaglio (migliorie d'uso 41, Mac)
+
+extension TestiProvaFuoco {
+    static let legendaOggi = "obiettivo coperto oggi"
+    static let legendaDopo = "dopo lo scenario"
+    static let legendaPatrimonio = "patrimonio in meno"
+    static let freccia = "›"
+    static let aiutoRigaDettaglio = "Apri il dettaglio: perché scende e cosa fare"
+
+    /// Il nome del gruppo.
+    static func nomeGruppo(_ g: GruppoProvaFuoco) -> String {
+        switch g {
+        case .daChiamare: return "Da chiamare"
+        case .daTenereDOcchio: return "Da tenere d’occhio"
+        case .reggono: return "Reggono"
+        case .senzaObiettivo: return "Senza obiettivo"
+        }
+    }
+
+    /// «Da chiamare · 3».
+    static func capsulaGruppo(_ g: GruppoProvaFuoco, numero n: Int) -> String { "\(nomeGruppo(g)) · \(n)" }
+
+    /// La frase della testata, con le soglie del motore.
+    static func fraseGruppo(_ g: GruppoProvaFuoco, numero n: Int) -> String {
+        let allarme = numero(MotoreProvaFuoco.sogliaAllarme)
+        let attenzione = numero(MotoreProvaFuoco.sogliaAttenzione)
+        switch g {
+        case .daChiamare: return n == 1 ? "il suo obiettivo perde più di \(allarme) punti" : "il loro obiettivo perde più di \(allarme) punti"
+        case .daTenereDOcchio: return "perde tra \(attenzione) e \(allarme) punti"
+        case .reggono: return "perde meno di \(attenzione) punti"
+        case .senzaObiettivo: return "aggiungi un obiettivo per vedere quanto regge"
+        }
+    }
+
+    /// «Prepara i 3 messaggi» («Prepara il messaggio» se è uno solo).
+    static func prepara(_ n: Int) -> String { n == 1 ? "Prepara il messaggio" : "Prepara i \(n) messaggi" }
+    static let preparati = "✓ Preparati"
+
+    /// «52% → 38%».
+    static func oggiDopo(_ oggi: Double, _ dopo: Double) -> String {
+        MotoreProvaFuoco.percento(oggi) + " → " + MotoreProvaFuoco.percento(dopo)
+    }
+
+    // Il dettaglio
+    static func occhielloDettaglio(_ g: GruppoProvaFuoco, scenario: ScenarioFuoco) -> String {
+        "\(nomeGruppo(g)) · \(scenario.titolo)"
+    }
+    static func obiettivoDettaglio(_ titolo: String) -> String { "Obiettivo: \(titolo)" }
+    static let coperturaOggiRiquadro = "Obiettivo coperto oggi"
+    static let dopoScenarioRiquadro = "Dopo lo scenario"
+    static let patrimonioRiquadro = "Patrimonio in meno"
+    static let tiene = "tiene"
+    static func puntiInMeno(_ n: Int) -> String { "\(Formati.meno)\(n) \(n == 1 ? "punto" : "punti")" }
+    static func suPatrimonio(_ p: Double) -> String { "su \(Formati.euro(p))" }
+    static let percheTitolo = "Perché"
+    static let preparaMessaggio = "Prepara il messaggio"
+    static let segnaDaChiamare = "Segna «da chiamare»"
+    static let apriResistenza = "Apri la sua prova di resistenza"
+
+    /// Il «Perché»: le quote di azioni e obbligazioni («circa» se stimate) e gli anni all'obiettivo; nil se non c'è
+    /// niente da dire (nessuna composizione e nessun obiettivo).
+    static func perche(_ r: RigaProvaFuoco) -> String? {
+        var parti: [String] = []
+        if let a = r.quotaAzioni, let o = r.quotaObbligazioni {
+            let il = r.quoteStimate ? "circa il" : "il"
+            parti.append("Ha \(il) \(MotoreProvaFuoco.percento(a)) in azioni e \(il) \(MotoreProvaFuoco.percento(o)) in obbligazioni.")
+        }
+        if r.obiettivoId != nil, let n = r.anniAllObiettivo {
+            if n < MotoreProvaFuoco.anniPocoTempo {
+                let quanto = n == 0 ? "manca meno di un anno" : (n == 1 ? "manca solo 1 anno" : "mancano solo \(n) anni")
+                parti.append("All’obiettivo \(quanto): c’è poco tempo per recuperare una discesa.")
+            } else {
+                parti.append("All’obiettivo mancano \(n) anni: c’è tempo per recuperare, ma va detto prima che lo scopra da solo.")
+            }
+        }
+        return parti.isEmpty ? nil : parti.joined(separator: " ")
+    }
+
+    /// L'avviso di «Prepara i N messaggi».
+    static func avvisoPreparati(_ n: Int, gia: Int) -> String {
+        if n == 1 { return "Un messaggio preparato: è in Messaggi, da rileggere e spedire" }
+        if n > 1 { return "\(n) messaggi preparati: li trovi in Messaggi, da rileggere e spedire" }
+        return gia == 1 ? "Il messaggio è già in Messaggi, da rileggere e spedire"
+                        : "I messaggi sono già in Messaggi, da rileggere e spedire"
+    }
+
+    /// «Chiamare Elisa Ferri» (il titolo dell'attività).
+    static func titoloDaChiamare(_ nome: String) -> String { "Chiamare \(nome)" }
+    static func aggiuntoAlDaFare(_ nome: String) -> String { "«\(titoloDaChiamare(nome))» aggiunto al Da fare di oggi" }
+    static let giaNelDaFare = "È già nel Da fare di oggi"
+
+    /// Le note dell'attività: lo scenario e le coperture (o la perdita, senza obiettivo).
+    static func noteDaChiamare(_ r: RigaProvaFuoco, scenario: ScenarioFuoco) -> String {
+        var righe = ["Prova del fuoco: \(scenario.titolo)."]
+        if let t = r.titoloObiettivo, r.obiettivoId != nil {
+            righe.append("«\(t)»: \(oggi(r.coperturaOggi)), \(dopo(r.coperturaDopo)).")
+        }
+        if r.perdita >= 0.5 { righe.append("Patrimonio in meno: \(Formati.euro(r.perdita)).") }
+        return righe.joined(separator: "\n")
+    }
+}
+

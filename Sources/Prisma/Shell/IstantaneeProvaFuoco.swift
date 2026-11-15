@@ -7,7 +7,8 @@ import CoreGraphics
 /// - 590: «Mercati −25%»; 591: cursore a −45%; 592: «Tassi +2 punti»; 593: «Inflazione al 5%»;
 /// - 594: «Come nel 2008» (card senza cursore, con la frase storica); 595: «Come nel 2020», con il recupero;
 /// - 596: i cinque clienti del template, tre senza obiettivi (in fondo, con «Aggiungi un obiettivo»);
-/// - 597: archivio senza clienti (card spenta e vuoto guidato); 598: finestra stretta.
+/// - 597: archivio senza clienti (card spenta e vuoto guidato); 598: finestra stretta;
+/// - 599 (migliorie d'uso 41): il dettaglio della prima riga «Da chiamare», aperto.
 ///
 /// DATI DI PROVA DICHIARATI: i clienti sono quelli di prova (5 del template e 30 fittizi). Gli obiettivi «di prova» dei
 /// clienti del template che non ne hanno (Laura, Andrea, Sofia) e i collegamenti fra obiettivi e posizioni in essere
@@ -42,6 +43,13 @@ extension Istantanee {
             preparaProvaFuoco(s, .mercati)
             s.alternaIngrandimento(.posizioni)
             s.ridimensiona(.posizioni, dimensione: CGSize(width: 760, height: 640))
+        }
+        // Migliorie d'uso 41: il dettaglio aperto sulla prima riga «Da chiamare» (o sulla prima, se nessuno lo è)
+        coppia("599-posizioni-fuoco-dettaglio") { s in
+            preparaProvaFuoco(s, .mercati)
+            let e = MotoreProvaFuoco.calcola(s.provaFuoco.scenario, clienti: s.clienti, posizioni: s.posizioni,
+                                             obiettivi: s.dati.obiettivi, oggi: Calendar.current.startOfDay(for: Date()))
+            s.provaFuoco.dettaglioIstantanea = (e.righe.first { $0.gruppo == .daChiamare } ?? e.righe.first)?.id
         }
         return scene
     }

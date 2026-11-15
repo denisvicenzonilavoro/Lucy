@@ -62,6 +62,8 @@ struct CursoreScenarioFuoco {
     var calo: Double = SceltaScenarioFuoco.mercati.cursore?.iniziale ?? 25
     var punti: Double = SceltaScenarioFuoco.tassi.cursore?.iniziale ?? 2
     var tasso: Double = SceltaScenarioFuoco.inflazione.cursore?.iniziale ?? 5
+    /// Migliorie d'uso 41 (istantanee): il cliente della riga il cui dettaglio è già aperto (nil = chiuso).
+    @ObservationIgnored var dettaglioIstantanea: String?
 
     /// Lo scenario scelto con il valore del suo cursore.
     var scenario: ScenarioFuoco { scenario(scelta) }

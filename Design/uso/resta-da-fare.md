@@ -1385,3 +1385,34 @@ Resta:
 - La card «chi» che occupa l'altezza va guardata nelle istantanee 890, 895 (elenco lungo che scorre dentro) e 897
   (finestra stretta: l'elenco si allunga nello scorrimento della pagina).
 - Il nome sotto i punti piccoli al passaggio (`.rNm2`): il fumetto mostra già nome e distanza, non si è aggiunto altro.
+
+## 41. La prova del fuoco in tre gruppi
+
+Fatto (solo sul Mac; l'iPad tiene la lista, la riga con «Chiama» e «Messaggio» e i testi di prima fino al suo giro):
+- Motore: `RigaProvaFuoco` ha in più `quotaAzioni`, `quotaObbligazioni`, `quoteStimate`, `anniAllObiettivo` e
+  `patrimonio` (tutte le finanziarie in essere); `GruppoProvaFuoco` (da chiamare, da tenere d'occhio, reggono, senza
+  obiettivo) da `livello(calo:)`; `anniPocoTempo = 5`. Coperture e ordine non cambiano.
+- Lista a gruppi (`ProvaDelFuocoApple.listaGruppi`): testate (`TestataGruppoFuoco`, capsula `CapsulaStatoApple` con il
+  conto e la frase con le soglie del motore) nello stesso `LazyVStack` delle righe con id distinti; i gruppi si prendono
+  insieme all'ordine (`gruppiMostrati`): mentre si trascina il cursore restano fermi, al rilascio scivolano con le righe.
+- «Chi sentire, in ordine» con la legenda (`BarrettaLegendaFuoco`) e «patrimonio in meno» sopra la colonna della perdita.
+- Riga Mac (`RigaProvaFuocoMac`): avatar 34, «oggi → dopo» (rossa per chi è da chiamare, «≈» delle stime), perdita
+  larga 104, «›», fondo `chip` al passaggio, tutta la riga apre il dettaglio; il canale resta; via «Chiama» e
+  «Messaggio».
+- Dettaglio 840×440 (`DettaglioProvaFuoco`): occhiello del gruppo con lo scenario, «Obiettivo: …» che apre il dossier
+  sull'obiettivo, tre riquadri, «Perché» (`TestiProvaFuoco.perche`), «Prepara il messaggio» (Messaggi sull'occasione),
+  «Segna «da chiamare»» (`segnaDaChiamare`, attività `task-fuoco-<cliente>-<giorno>`, idempotente), «Apri la sua prova di
+  resistenza» (`apriResistenzaDaFuoco`, ancora «resistenza»). Senza obiettivo: «Nessun obiettivo nel dossier» e
+  «Aggiungi un obiettivo». Si chiude con dati nuovi.
+- «Prepara i N messaggi» (`preparaMessaggiProvaFuoco`): bozze del modello fisso (cordiale, Mail), una sola assegnazione a
+  `dati.messaggi`, idempotente sull'occasione; «✓ Preparati» finché scenario e valore non cambiano (stato della vista).
+- Istantanea nuova 599-posizioni-fuoco-dettaglio (chiara e scura); prove P17 (gruppi, quote, anni, «Perché», testi) e
+  P18 (solo Mac: niente doppioni di bozze e attività) in `ProvaCalcoliProvaFuoco`.
+
+Resta:
+- Le istantanee 590-598 cambiano (gruppi, legenda, «oggi → dopo», niente pulsanti): vanno guardate, in particolare 598
+  (finestra stretta: la legenda può troncarsi) e 596 (il quarto gruppo «Senza obiettivo»).
+- `--prova-carico` e `--prova-fluidita` non hanno un passo nuovo per le testate e il riordino a gruppi con 200 clienti:
+  da guardare sul Mac (il calcolo dei gruppi è lineare sulle righe mostrate).
+- «Prepara il messaggio» del dettaglio apre Messaggi come prima (`preparaMessaggio`): la bozza non si salva da sola; il
+  template la crea e apre Messaggi su quel messaggio.
