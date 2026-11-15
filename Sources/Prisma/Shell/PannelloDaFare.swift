@@ -165,6 +165,7 @@ struct EtichettaPillolaDaFare: View {
 struct PannelloDaFare: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.modoIstantanea) private var istantanea
 
     private typealias F = Tema.Apple.ElencoDaFare
 
@@ -193,12 +194,22 @@ struct PannelloDaFare: View {
         let arrivi = solo == nil ? stato.arriviDaFare : []
         return VStack(alignment: .leading, spacing: 0) {
             testa(numero: nastro.totale)
-            ViewThatFits(in: .vertical) {
-                elenco(nastro, arrivi: arrivi, conNome: solo == nil)
-                ScrollView { elenco(nastro, arrivi: arrivi, conNome: solo == nil) }
+            // Con poche righe l'elenco prende solo l'altezza che serve (ViewThatFits misura l'elenco intero, poi quello
+            // che scorre). Con molte righe (con 200 clienti sono centinaia) le due misure creavano due volte ogni riga
+            // del pannello, decine di secondi all'apertura e alla chiusura: se le righe non possono stare nell'altezza
+            // dell'elenco (ognuna è alta almeno `altezzaRiga`), si scorre subito e le righe nascono solo quando si vedono.
+            if arrivi.count + nastro.blocchi.reduce(0, { $0 + $1.voci.count }) > F.righeSenzaScorrere {
+                ScrollView { elenco(nastro, arrivi: arrivi, conNome: solo == nil, pigro: !istantanea) }
                     .scrollIndicators(.hidden)
+                    .frame(maxHeight: F.altezzaElenco)
+            } else {
+                ViewThatFits(in: .vertical) {
+                    elenco(nastro, arrivi: arrivi, conNome: solo == nil)
+                    ScrollView { elenco(nastro, arrivi: arrivi, conNome: solo == nil) }
+                        .scrollIndicators(.hidden)
+                }
+                .frame(maxHeight: F.altezzaElenco)
             }
-            .frame(maxHeight: F.altezzaElenco)
             PiedeDaFare()
         }
         .padding(F.padding)
@@ -226,8 +237,21 @@ struct PannelloDaFare: View {
         .padding(F.paddingTesta)
     }
 
-    private func elenco(_ nastro: NastroDaFare, arrivi: [Notifica], conNome: Bool) -> some View {
-        VStack(alignment: .leading, spacing: 0) {
+    /// Le righe del pannello; `pigro` (dentro lo ScrollView, con molte righe) le crea solo quando entrano in vista
+    /// (nelle istantanee no: la schermata ferma le disegna tutte subito).
+    @ViewBuilder
+    private func elenco(_ nastro: NastroDaFare, arrivi: [Notifica], conNome: Bool, pigro: Bool = false) -> some View {
+        if pigro {
+            LazyVStack(alignment: .leading, spacing: 0) { righe(nastro, arrivi: arrivi, conNome: conNome) }
+                .padding(.horizontal, F.paddingElenco)
+        } else {
+            VStack(alignment: .leading, spacing: 0) { righe(nastro, arrivi: arrivi, conNome: conNome) }
+                .padding(.horizontal, F.paddingElenco)
+        }
+    }
+
+    @ViewBuilder
+    private func righe(_ nastro: NastroDaFare, arrivi: [Notifica], conNome: Bool) -> some View {
             if !arrivi.isEmpty {
                 titoloGruppo("\(TestiDaFare.arrivati) · \(arrivi.count)", primo: true)
                 ForEach(arrivi) { n in
@@ -248,8 +272,6 @@ struct PannelloDaFare: View {
                                fatto: { stato.fattoDaFare(v) }, apri: { stato.apriVoceDaFare(v) })
                 }
             }
-        }
-        .padding(.horizontal, F.paddingElenco)
     }
 
     private func titoloGruppo(_ testo: String, primo: Bool) -> some View {
