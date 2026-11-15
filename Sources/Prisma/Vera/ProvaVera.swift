@@ -785,8 +785,10 @@ enum ProvaVera {
         menu.scegliCliente(nil)
         menu.alternaMenuApp()
         controlla(menu.clienteNelMenu(per: .clienti) == nil, "Menu delle app: con «Tutti i clienti» niente nome accanto")
+        menu.scegliCliente("giulia")
+        if !menu.menuApp { menu.alternaMenuApp() }
         menu.entraModoCliente(avviso: false)
-        controlla(!menu.menuApp, "Menu delle app: la modalità cliente lo chiude")
+        controlla(menu.inModoCliente && !menu.menuApp, "Menu delle app: la modalità cliente lo chiude")
         menu.alternaMenuApp()
         controlla(!menu.menuApp, "Menu delle app: in modalità cliente non si apre")
         menu.esciModoCliente()
