@@ -210,7 +210,7 @@ extension StatoShell {
     func tavoloDalPannello() {
         sceltaMostra = false
         guard let c = clienteAttivo else { return }
-        apri(.prospetti)
+        apri(.presentazioni)
         mostraAvviso(TestiMostra.tavoloAvviso(TestiTraguardi.primoNome(c.nome)))
     }
 
