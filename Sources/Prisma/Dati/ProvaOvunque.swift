@@ -382,6 +382,16 @@ enum ProvaOvunque {
             try controlla(mac.appuntamenti[i].daConfermare == nil,
                           "la conferma fatta sul dispositivo non arriva sul Mac (esito \(esito))")
         }
+        #if os(macOS)
+        // Migliorie d'uso 51 (decisione 51-a): «Manda il giro all'iPhone» con lo spazio spento non scrive nulla
+        let stato = StatoShell(persistente: false)
+        stato.dati.impostazioni.ovunque.acceso = false
+        let giri = stato.ovunque.giri
+        stato.mandaGiroAlliPhone(Date())
+        try controlla(stato.territorio.giroIPhone == nil && stato.ovunque.giri == giri && !stato.ovunque.inCorso
+                        && !stato.giroSulliPhone(Date()),
+                      "con «Prisma ovunque» spento «Manda il giro all'iPhone» ha cercato di scrivere l'istantanea")
+        #endif
     }
 
     /// Le pratiche dopo la firma sull'iPhone («Luce» §7.3.4, decisione 44): entrano nell'istantanea; un passo segnato sul

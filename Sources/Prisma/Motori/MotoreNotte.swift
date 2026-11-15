@@ -105,7 +105,6 @@ enum MotoreNotte {
                             giro: GiroGiorno?, riesamiConDati: Set<String>, modelli: [ModelloModulo],
                             occasioni: [OccasioneMessaggio], cal: Calendar = .current) -> [PreparativoNotte] {
         let giorno = cal.startOfDay(for: g)
-        let domani = cal.date(byAdding: .day, value: 1, to: giorno) ?? giorno
         var clienti: [String: Cliente] = [:]
         for c in dati.clienti where clienti[c.id] == nil { clienti[c.id] = c }
         var perTipo: [TipoCartaNotte: [PreparativoNotte]] = [:]
@@ -127,27 +126,20 @@ enum MotoreNotte {
             }
         }
 
-        // Documento d'identità: vale solo la scadenza scritta, entro `giorniDocumenti` (o già scaduto)
+        // Documento d'identità: vale solo la scadenza scritta, entro `giorniDocumenti` (o già scaduto), senza una richiesta
+        // già in Messaggi (le regole stanno in MotoreBorsa, Migliorie d'uso 51)
         var conDocumento = Set<String>()
         if imp.prepara(.documento) {
-            let limite = cal.date(byAdding: .day, value: imp.giorniDocumenti, to: giorno) ?? giorno
-            let esiti = MotoreConformita.calcola(clienti: dati.clienti, posizioni: dati.posizioni, regole: dati.impostazioni.conformita,
-                                                 oggi: giorno, calendario: cal)
             var elenco: [PreparativoNotte] = []
-            for e in esiti {
-                guard let v = e.voci.first(where: { $0.tipo == .documento }), v.stato != .nonRichiesta,
-                      let s = v.scadenza, s <= limite else { continue }
-                let riferimento = "\(e.cliente.id)·\(NotteDiLavoro.chiave(s, cal: cal))"
-                let occasione = OccasioneMessaggio.id(tipo: .documentoIdentita, clienteId: e.cliente.id, riferimento: riferimento)
-                // Una richiesta già salvata in Messaggi (anche da una notte prima): niente carta nuova
-                guard !dati.messaggi.contains(where: { $0.occasioneId == occasione }) else { continue }
-                let nomeDoc = e.cliente.conformita?.documento?.tipo?.nome ?? "Il documento d'identità"
+            for r in MotoreBorsa.documentiDaRinnovare(dati: dati, giorno: giorno, giorni: imp.giorniDocumenti, cal: cal) {
+                let s = r.scadenza
+                let nomeDoc = r.cliente.conformita?.documento?.tipo?.nome ?? "Il documento d'identità"
                 let scaduto = s < giorno
-                let bozza = bozzaDocumento(e.cliente, scadenza: s, scaduto: scaduto, documento: nomeDoc, riferimento: riferimento,
+                let bozza = bozzaDocumento(r.cliente, scadenza: s, scaduto: scaduto, documento: nomeDoc, riferimento: r.riferimento,
                                            giorno: giorno, impostazioni: dati.impostazioni, cal: cal)
-                elenco.append(PreparativoNotte(tipo: .documento, clienteId: e.cliente.id, riferimento: riferimento,
+                elenco.append(PreparativoNotte(tipo: .documento, clienteId: r.cliente.id, riferimento: r.riferimento,
                                                dettagli: .documento(scadenza: s, scaduto: scaduto, documento: nomeDoc, bozza: bozza)))
-                conDocumento.insert(e.cliente.id)
+                conDocumento.insert(r.cliente.id)
             }
             perTipo[.documento] = elenco
         }
@@ -169,18 +161,14 @@ enum MotoreNotte {
         }
 
         // Gli appuntamenti del giorno servito (con un cliente vero, confermati)
-        let delGiorno = dati.appuntamenti.filter {
-            $0.stato == .pianificato && $0.tipo != .nonDisponibile && $0.daConfermare != true
-                && $0.inizio >= giorno && $0.inizio < domani && clienti[$0.clienteId] != nil
-        }.sorted { ($0.inizio, $0.id) < ($1.inizio, $1.id) }
+        let delGiorno = MotoreBorsa.incontriDelGiorno(dati.appuntamenti, clienti: clienti, giorno: giorno, cal: cal)
 
         // Fascicolo: i report adatti a ogni incontro, al più `massimoFascicoli`; non se è già nei Documenti
         var conFascicolo = Set<String>()
         if imp.prepara(.fascicolo), imp.massimoFascicoli > 0 {
             var elenco: [PreparativoNotte] = []
             for a in delGiorno where elenco.count < imp.massimoFascicoli {
-                let titolo = "Report · " + StatoShell.titoloFascicolo(a.inizio)
-                guard !dati.documenti.contains(where: { $0.clienteId == a.clienteId && $0.titolo == titolo }) else { continue }
+                guard !MotoreBorsa.fascicoloNeiDocumenti(a, documenti: dati.documenti) else { continue }
                 let posizione = a.posizioneId.flatMap { id in dati.posizioni.first { $0.id == id } }
                 let scelta = TipoProspetto.perIncontro(a, posizione: posizione, oggi: giorno)
                 let prospetti = TipoProspetto.inFascicolo.filter { scelta.contains($0) }.map(\.rawValue)
@@ -196,20 +184,12 @@ enum MotoreNotte {
         // Moduli: le proposte aperte con un appuntamento entro 7 giorni (preferendo quello di firma) e i modelli compatibili
         var moduliPerCliente: [String: Int] = [:]
         if imp.prepara(.moduli), !modelli.isEmpty {
-            let entro = cal.date(byAdding: .day, value: 7, to: giorno) ?? giorno
             let f = dati.impostazioni.studio.fatturazione
             let consulente = [f.nome, f.cognome].map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }.joined(separator: " ")
             var elenco: [PreparativoNotte] = []
-            let proposte = dati.posizioni.filter { $0.stato == .proposta && $0.esito != .rifiutata && clienti[$0.clienteId] != nil }
-                .sorted { ($0.clienteId, $0.creataIl) < ($1.clienteId, $1.creataIl) }
-            for p in proposte {
+            for p in MotoreBorsa.proposteConIncontro(dati: dati, clienti: clienti, giorno: giorno, cal: cal) {
                 guard let c = clienti[p.clienteId] else { continue }
-                let futuri = dati.appuntamenti.filter { $0.clienteId == c.id && $0.stato == .pianificato && $0.inizio >= giorno && $0.inizio < entro }
-                guard !futuri.isEmpty else { continue }
-                let compatibili = modelli.filter { m in
-                    m.compilabile && m.mappaConfermata && (m.canale == nil || m.canale == p.canale)
-                        && (m.prodottoIds.isEmpty || p.prodottoId.map { m.prodottoIds.contains($0) } == true)
-                }
+                let compatibili = MotoreBorsa.modelliCompatibili(p, modelli: modelli)
                 guard !compatibili.isEmpty else { continue }
                 let fonte = FonteCompilazione(cliente: c, posizione: p,
                                               prodotto: p.prodottoId.flatMap { id in dati.prodotti.first { $0.id == id } },
@@ -249,10 +229,7 @@ enum MotoreNotte {
             var righe: [String] = []
             var daPortare = 0
             for a in delGiorno {
-                var cose: [String] = []
-                if conFascicolo.contains(a.id) { cose.append(TestiNotte.borsaFascicolo) }
-                if let n = moduliPerCliente[a.clienteId], n > 0 { cose.append(TestiNotte.borsaModuli(n)) }
-                if conDocumento.contains(a.clienteId) { cose.append(TestiNotte.borsaDocumento) }
+                let cose = MotoreBorsa.cose(a, conFascicolo: conFascicolo, moduliPerCliente: moduliPerCliente, conDocumento: conDocumento)
                 daPortare += cose.count
                 righe.append(TestiNotte.rigaBorsa(ora: a.inizio, nome: clienti[a.clienteId]?.nome, cose: cose))
             }

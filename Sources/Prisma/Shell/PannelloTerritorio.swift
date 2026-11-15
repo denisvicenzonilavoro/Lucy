@@ -356,6 +356,22 @@ struct PannelloCrescita: View {
                                  }),
                                  intervallo: Double(primo.anno)...Double(ultimo.anno), passo: 1, etichetta: "Anno della crescita")
                         .padding(.vertical, P.spazioCursore)
+                    #if os(macOS)
+                    // Migliorie d'uso 51: primo anno, anno di mezzo e ultimo anno sotto il cursore (solo con almeno tre anni)
+                    if crescita.anni.count >= 3 {
+                        HStack(spacing: 0) {
+                            Text(verbatim: "\(primo.anno)")
+                            Spacer(minLength: 0)
+                            Text(verbatim: "\(crescita.anni[crescita.anni.count / 2].anno)")
+                            Spacer(minLength: 0)
+                            Text(verbatim: "\(ultimo.anno)")
+                        }
+                        .carattereApple(P.dateCursore)
+                        .foregroundColor(P.coloreTesto2)
+                        .padding(.top, P.sopraDateCursore)
+                        .accessibilityHidden(true)
+                    }
+                    #endif
                     Button {
                         let parti = anno >= ultimo.anno ? primo.anno : anno
                         t.annoCrescita = parti
@@ -366,6 +382,9 @@ struct PannelloCrescita: View {
                     .buttonStyle(.applePrimarioGrande)
                     .disabled(t.crescitaInCorso)
                 }
+                #if os(macOS)
+                chiHaCominciato(a, primo: anno == primo.anno)
+                #endif
                 Text("Ogni luce che si accende è una famiglia che ha cominciato con te.")
                     .carattereApple(P.testo)
                     .foregroundColor(P.coloreTesto2)
@@ -389,6 +408,31 @@ struct PannelloCrescita: View {
         .onDisappear { stato.territorio.fermaCrescita() }
     }
 
+    #if os(macOS)
+    /// Migliorie d'uso 51: chi ha cominciato nell'anno mostrato (si aggiorna con l'anno, anche durante «Guarda la
+    /// crescita»: è lo stato). Il primo anno comprende anche quelli di prima. «Famiglie» come nella frase sotto; i nomi
+    /// sono quelli dei clienti, al più `P.nomiCrescita`.
+    private func chiHaCominciato(_ a: AnnoCrescita, primo: Bool) -> some View {
+        let nomi = a.nuovi.compactMap { stato.cliente($0)?.nome }
+            .sorted { $0.localizedStandardCompare($1) == .orderedAscending }
+        let f = TestiTerritorio.famiglieNuove(nomi, massimo: P.nomiCrescita)
+        return VStack(alignment: .leading, spacing: P.spazioRighe) {
+            Text(TestiTerritorio.cominciatoNel(a.anno, primo: primo))
+                .carattereApple(P.testoChi)
+                .foregroundColor(P.coloreTesto2)
+            (Text(f.forte).bold() + Text(f.resto))
+                .carattereApple(P.testoChi)
+                .foregroundColor(P.coloreTesto)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(P.paddingTile)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: P.raggioTile, style: .continuous).fill(P.fondoTile))
+        .padding(.top, P.sopraChi)
+        .accessibilityElement(children: .combine)
+    }
+    #endif
+
     /// Partenza da sola 0,7 s dopo l'entrata, solo la prima volta; con calmo (o nelle istantanee) si vede l'ultimo anno.
     private func avvio() {
         let t = stato.territorio
@@ -411,6 +455,11 @@ struct PannelloGiro: View {
     private static let giornoNumero = Formati.formato("EEEE d")
 
     var body: some View {
+        #if os(macOS)
+        let borsa = stato.borsaGiro(giro)
+        #else
+        let borsa: [String: [String]] = [:]
+        #endif
         VStack(alignment: .leading, spacing: P.spazio) {
             testata
             if giro.vuoto {
@@ -430,16 +479,65 @@ struct PannelloGiro: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: G.spazioRighe) {
                         ForEach(Array(giro.tappe.enumerated()), id: \.element.id) { i, t in
-                            riga(t, indice: i)
+                            riga(t, indice: i, borsa: borsa)
                         }
                         note
                     }
                 }
                 if let s = giro.suggerimenti.first { lungoLaStrada(s) }
                 ForEach(giro.suggerimenti.dropFirst()) { s in altroSuggerimento(s) }
+                #if os(macOS)
+                piedeIPhone
+                #endif
             }
         }
+        #if os(macOS)
+        // Migliorie d'uso 51: i modelli di modulo per «Da portare» (letti una volta, mai nel body)
+        .onAppear { stato.moduli.carica() }
+        #endif
     }
+
+    #if os(macOS)
+    // MARK: Il pulsante in fondo (Migliorie d'uso 51, decisione 51-a)
+
+    /// Con «Prisma ovunque» acceso sul Mac: «Manda il giro all'iPhone» a tutta larghezza (scrive subito l'istantanea
+    /// cifrata, nessun dato nuovo), poi «✓ Il giro è sull'iPhone». Spento: una riga con il collegamento alle Impostazioni.
+    /// Niente Mappe: la privacy del Territorio non le ammette.
+    @ViewBuilder private var piedeIPhone: some View {
+        let o = stato.dati.impostazioni.ovunque
+        if o.acceso && o.ruolo == .mac {
+            let inviato = stato.giroSulliPhone(giro.giorno)
+            VStack(spacing: G.sottoPulsante) {
+                Button { stato.mandaGiroAlliPhone(giro.giorno) } label: {
+                    Text(inviato ? TestiTerritorio.giroSulliPhone : TestiTerritorio.mandaGiro).frame(maxWidth: .infinity)
+                }
+                .buttonStyle(StilePulsanteApple(inviato ? .secondaria : .principale, grande: true))
+                Text(TestiTerritorio.notaGiroIPhone)
+                    .carattereApple(G.notaIPhone)
+                    .foregroundColor(P.coloreTesto2)
+                    .multilineTextAlignment(.center)
+                    .frame(maxWidth: .infinity)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.top, G.sopraPulsante)
+        } else {
+            VStack(alignment: .leading, spacing: P.spazioRighe) {
+                Text(TestiTerritorio.accendiOvunque)
+                    .carattereApple(G.notaIPhone)
+                    .foregroundColor(P.coloreTesto2)
+                    .fixedSize(horizontal: false, vertical: true)
+                Button(TestiTerritorio.apriOvunque) {
+                    stato.schedaImpostazioni = .ovunque
+                    stato.apri(.impostazioni)
+                }
+                .buttonStyle(.plain)
+                .carattereApple(G.collegamento)
+                .foregroundColor(G.coloreCollegamento)
+            }
+            .padding(.top, G.sopraPulsante)
+        }
+    }
+    #endif
 
     // MARK: Testata con le frecce
 
@@ -541,8 +639,9 @@ struct PannelloGiro: View {
         }
     }
 
-    @ViewBuilder private func riga(_ t: TappaGiro, indice i: Int) -> some View {
+    @ViewBuilder private func riga(_ t: TappaGiro, indice i: Int, borsa: [String: [String]]) -> some View {
         let nuova = t.appuntamento.map { $0.id == stato.territorio.rigaNuovaId || $0.daConfermare == true } ?? false
+        let cose = t.appuntamento.flatMap { borsa[$0.id] } ?? []
         let contenuto = HStack(alignment: .center, spacing: P.spazio) {
             Text(ora(t, indice: i).map { Formati.ora.string(from: $0) } ?? "")
                 .carattereApple(G.ora)
@@ -565,11 +664,37 @@ struct PannelloGiro: View {
                     .carattereApple(G.motivo)
                     .foregroundColor(P.coloreTesto2)
                     .lineLimit(1)
+                // Migliorie d'uso 51: cosa portare (senza cose nessuna riga, mai «niente di particolare»)
+                if !cose.isEmpty {
+                    Text(TestiNotte.notaBorsa + cose.joined(separator: ", "))
+                        .carattereApple(G.daPortare)
+                        .foregroundColor(G.coloreDaPortare)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                #if os(macOS)
+                // Migliorie d'uso 51: «✓ Conferma in Agenda» diventa un collegamento; accanto, per la tappa proposta e non
+                // ancora confermata, «Togli»
+                if nuova, let a = t.appuntamento {
+                    HStack(spacing: G.spazioTogli) {
+                        Button(TestiTerritorio.confermaInAgenda) { stato.apriAppuntamentoInAgenda(a) }
+                            .buttonStyle(.plain)
+                            .carattereApple(G.motivo)
+                            .foregroundColor(G.titoloSuggerimento)
+                        if a.daConfermare == true {
+                            Button(TestiTerritorio.togli) { stato.togliDalGiro(a.id) }
+                                .buttonStyle(.plain)
+                                .carattereApple(G.collegamento)
+                                .foregroundColor(G.coloreCollegamento)
+                        }
+                    }
+                }
+                #else
                 if nuova {
-                    Text("✓ Conferma in Agenda")
+                    Text(TestiTerritorio.confermaInAgenda)
                         .carattereApple(G.motivo)
                         .foregroundColor(G.titoloSuggerimento)
                 }
+                #endif
             }
             Spacer(minLength: 0)
             if giro.tappe.indices.contains(i + 1) {
@@ -580,12 +705,31 @@ struct PannelloGiro: View {
         }
         .padding(G.paddingRiga)
         .background(RoundedRectangle(cornerRadius: G.raggioRigaNuova, style: .continuous).fill(nuova ? G.fondoRigaNuova : Color.clear))
+        #if os(macOS)
+        // Migliorie d'uso 51 (decisione 51-b): la tappa confermata con un cliente apre la preparazione dell'incontro (senza
+        // creare nulla: l'incontro entra nell'archivio al primo gesto che scrive); quella ancora da confermare apre
+        // l'Agenda come prima, perché un incontro su un appuntamento solo proposto non va creato. I collegamenti dentro
+        // la riga hanno la precedenza sul tocco della riga.
+        if let a = t.appuntamento {
+            let prepara = t.cliente != nil && a.daConfermare != true
+            contenuto
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    if prepara { stato.apriIncontro(per: a, scheda: .preparazione) } else { stato.apriAppuntamentoInAgenda(a) }
+                }
+                .help(prepara ? TestiTerritorio.preparaIncontro : TestiTerritorio.apriInAgenda)
+                .accessibilityAddTraits(.isButton)
+        } else {
+            contenuto
+        }
+        #else
         if let a = t.appuntamento {
             Button { stato.apriAppuntamentoInAgenda(a) } label: { contenuto.contentShape(Rectangle()) }
                 .buttonStyle(.plain)
         } else {
             contenuto
         }
+        #endif
     }
 
     private func motivo(_ t: TappaGiro) -> String {

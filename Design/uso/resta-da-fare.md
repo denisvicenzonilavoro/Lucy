@@ -1713,3 +1713,41 @@ Resta:
   del puntatore sulla colonna (la colonna sta in `ParteAgenda`, la griglia resta `Equatable`).
 - Istantanee da rigenerare sul Mac e pagina delle anteprime da aggiornare; l'entrata della colonna e il passaggio del
   puntatore chiedono uno screenshot.
+
+## 51. Il giro di domani si porta in tasca
+
+Fatto (solo Mac, decisioni 51-a e 51-b come da proposta):
+- **«La borsa» estratta** in `Motori/MotoreBorsa.swift`: incontri del giorno, fascicolo già nei Documenti, modelli di
+  modulo compatibili, proposte con un incontro entro 7 giorni, moduli per cliente, documenti da rinnovare (senza
+  richiesta già in Messaggi) e le cose di un incontro. `MotoreNotte` la usa al posto del suo codice (stesse carte: prova
+  «Borsa» in `ProvaCalcoliNotte`, che confronta la carta della notte con il giro).
+- **Nel giro**: «Da portare: …» (11,5, accento) sotto il motivo, da `stato.borsaGiro(giro)` in `ricavato` (giorno, tappe,
+  giorni del documento e modelli nella chiave); senza cose nessuna riga. Nel giro il fascicolo conta solo se è già nei
+  Documenti (la notte lo prepara, il giro non lo inventa).
+- **La tappa** confermata con un cliente apre la preparazione dell'incontro (`apriIncontro(per:scheda: .preparazione)`,
+  suggerimento «Prepara l'incontro», nessun incontro creato); quella da confermare apre l'Agenda come prima.
+  «✓ Conferma in Agenda» è un collegamento; accanto «Togli» (`togliDalGiro`: elimina solo un appuntamento ancora
+  `daConfermare`, avviso «{nome} tolto dal giro»).
+- **Il pulsante in fondo** solo con «Prisma ovunque» acceso sul Mac: `mandaGiroAlliPhone` (in `StatoOvunque.swift`, fuori
+  dai file del Territorio) chiama `sincronizzaOvunque()`; «✓ Il giro è sull'iPhone» quando `ovunque.giri` cresce dopo il
+  tocco (stato in memoria per quel giorno, `territorio.giroIPhone`). Sotto: «Sull'iPhone lo trovi in Agenda. Tocca una
+  tappa per prepararla.». Niente Mappe. Spento: la riga «Per averlo sull'iPhone accendi «Prisma ovunque» in
+  Impostazioni.» con il collegamento a Impostazioni › iPhone e iPad. In dimostrazione un avviso, nessuna scrittura.
+- **La crescita**: le tre date sotto il cursore (con almeno tre anni) e la tile «Hanno cominciato nel {anno}{ o prima}»
+  con «**{n} famiglie**: nomi{ e un'altra / e altre n}» o «**Nessuna famiglia nuova**», che segue l'anno.
+- Prove: `ProvaCalcoliTerritorio` (nomi dell'anno, «tolto dal giro», niente Mappe nel testo), `ProvaCalcoliNotte`
+  (le due strade della borsa), `--prova-ovunque` (con lo spazio spento il pulsante non scrive nulla). Istantanee nuove
+  1155-uso-territorio-giro-borsa (chiara e scura), 1156-uso-territorio-giro-iphone, 1157-uso-territorio-crescita-nomi;
+  701-704 e 707 mostrano già le novità.
+
+Resta:
+- **Il puntatore a mano** sulle tappe toccabili: nel progetto non c'è un aiuto per il cursore; per ora il suggerimento
+  «Prepara l'incontro» e il tratto di pulsante per VoiceOver.
+- **«Il giro è sull'iPhone»** si basa sul contatore delle scritture riuscite: se una sincronizzazione era già in corso al
+  tocco, la «✓» può arrivare con quella (che ha comunque già gli appuntamenti del giro). Una vista del giro sull'iPhone
+  appartiene all'aggiornamento di iPhone e iPad (allora cambierà la frase sotto il pulsante).
+- Nel giro la borsa non conta i fascicoli che la notte preparerebbe: solo quelli già nei Documenti.
+- La data di mezzo sotto il cursore è centrata nella riga, non sotto la manopola dell'anno di mezzo con un numero pari di
+  anni.
+- Istantanee da rigenerare sul Mac e pagina delle anteprime da aggiornare; il tocco sulla tappa e il pulsante chiedono
+  uno screenshot.

@@ -208,6 +208,40 @@ enum ProvaCalcoliNotte {
         verifica.vero("Notte: campagna una per notte, solo con un gruppo da almeno due", camp.count == (gruppi.isEmpty ? 0 : 1))
 
         verifica.vero("Notte: nessun dato → nessun preparativo", prepara(dati([])).isEmpty)
+
+        borsa(verifica, modello: modello)
+    }
+
+    /// Migliorie d'uso 51: «la borsa» estratta in MotoreBorsa. La carta della notte e il giro del Territorio arrivano alle
+    /// stesse cose (moduli e documento, senza fascicolo da preparare); il giro conta il fascicolo solo se è già nei
+    /// Documenti, e senza cose non dice nulla (mai «niente di particolare»).
+    private static func borsa(_ verifica: VerificaCalcoli, modello: ModelloModulo) {
+        var giulia = cliente("giulia", "Giulia Prova", documento: ora(12, giorni: 20))
+        giulia.codiceFiscale = "PRVGLI80A41H501X"
+        var proposta = posizione("giulia", "Proposta casa di prova")
+        proposta.stato = .proposta
+        let firma = appuntamento("app-firma", "giulia", ora(10, 30), tipo: .firma)
+        let marco = cliente("marco", "Marco Prova")
+        let libero = appuntamento("app-marco", "marco", ora(15, 0))
+        let d = dati([giulia, marco], posizioni: [proposta, posizione("giulia"), posizione("marco")], appuntamenti: [firma, libero])
+        let imp = solo([.documento, .moduli, .domani])
+        let giro = MotoreBorsa.cose(per: [firma, libero], dati: d, modelli: [modello], oggi: giorno, cal: cal)
+        verifica.vero("Borsa: il giro porta i moduli e il documento", giro["app-firma"] == [TestiNotte.borsaModuli(1), TestiNotte.borsaDocumento])
+        verifica.vero("Borsa: senza cose da portare nessuna voce", giro["app-marco"] == nil)
+        if case let .domani(_, righe, n, _, _)? = prepara(d, imp, modelli: [modello]).first(where: { $0.tipo == .domani })?.dettagli {
+            let attese = [firma, libero].map { a in
+                TestiNotte.rigaBorsa(ora: a.inizio, nome: d.clienti.first { $0.id == a.clienteId }?.nome, cose: giro[a.id] ?? [])
+            }
+            verifica.vero("Borsa: la carta della notte e il giro dicono le stesse cose", righe == attese && n == 2)
+        } else {
+            verifica.vero("Borsa: la carta della notte c'è", false)
+        }
+        var conFascicolo = d
+        conFascicolo.documenti = [Documento(clienteId: "marco", titolo: MotoreBorsa.titoloFascicolo(libero), tipo: .report)]
+        let g2 = MotoreBorsa.cose(per: [libero], dati: conFascicolo, modelli: [], oggi: giorno, cal: cal)
+        verifica.vero("Borsa: il fascicolo già nei Documenti va nel giro", g2["app-marco"] == [TestiNotte.borsaFascicolo])
+        verifica.vero("Borsa: senza modelli niente moduli", MotoreBorsa.moduliPerCliente(dati: d, clienti: ["giulia": giulia], modelli: [],
+                                                                                         giorno: giorno, cal: cal).isEmpty)
     }
 
     // MARK: - 4 Ricalcolo
