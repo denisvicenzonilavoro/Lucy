@@ -2305,6 +2305,18 @@ enum VoceConfronto: Hashable {
         schedaIncontro = .preparazione
     }
 
+    #if os(macOS)
+    /// Migliorie d'uso 20 (decisione 20-d): «Nuovo incontro» sul Mac crea davvero un incontro senza appuntamento, così
+    /// compare fra gli incontri sciolti dell'elenco e non si sovrappone a quello di un appuntamento.
+    func nuovoIncontroSenzaAppuntamento(cliente id: String) {
+        let i = bozzaIncontro(cliente: id, appuntamento: nil)
+        salvaIncontro(i)
+        incontroAperto = i.id
+        appuntamentoIncontro = nil
+        schedaIncontro = .preparazione
+    }
+    #endif
+
     /// L'incontro che nascerebbe da un appuntamento (o senza), con i temi delle priorità del cliente: non si salva.
     func bozzaIncontro(cliente id: String, appuntamento a: Appuntamento?) -> Incontro {
         var i = Incontro(clienteId: id, titolo: a?.titolo ?? "Incontro di consulenza", data: a?.inizio ?? Appuntamento.alMinuto(Date()),

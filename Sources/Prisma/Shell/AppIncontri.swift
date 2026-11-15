@@ -236,7 +236,7 @@ struct AppIncontri: View {
         return HStack(spacing: Misure.IncontriImpaginazione.spazio) {
             Spacer()
             // Migliorie d'uso 20 (decisione 20-d): resta, per gli incontri senza appuntamento, ma non più blu
-            Button { stato.nuovoIncontro(cliente: perChi) } label: { Label("Nuovo incontro", systemImage: "plus") }
+            Button { stato.nuovoIncontroSenzaAppuntamento(cliente: perChi) } label: { Label("Nuovo incontro", systemImage: "plus") }
                 .buttonStyle(StileVetro())
                 .fixedSize()
                 .disabled(stato.cliente(perChi) == nil)

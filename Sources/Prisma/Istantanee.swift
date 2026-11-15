@@ -769,9 +769,13 @@ enum Istantanee {
         }),
         // Giro 3 · riesami del mese in Agenda (specifica 6)
         ("124-agenda-riesami-mese", { s in
-            // La striscia «Riesami del mese»: Sofia mai incontrata, Laura e Marco scaduti
+            // Sofia mai incontrata, Laura e Marco scaduti. Sul Mac (migliorie d'uso 3 e 18) la striscia «Riesami del mese»
+            // non c'è più: i riesami sono voci del pannello «Da fare», aperto sopra l'Agenda; su iPad resta la striscia
             ProvaRiesamiAgenda.prepara(s)
             s.apri(.agenda)
+            #if os(macOS)
+            s.apriDaFare()
+            #endif
         }),
         ("125-agenda-riesame-pianificato", { s in
             // «Pianifica» per Laura: il riesame nel primo spazio libero, con canale e ordine del giorno
@@ -786,9 +790,13 @@ enum Istantanee {
             s.apri(.impostazioni)
         }),
         ("127-agenda-riesami-schermo-basso", { s in
-            // Finestra bassa (1280×760): fascia e striscia compatte su una riga
+            // Finestra bassa (1280×760): sul Mac i riesami nel pannello «Da fare» sopra la settimana (migliorie d'uso 3 e
+            // 18); su iPad fascia e striscia compatte su una riga
             ProvaRiesamiAgenda.prepara(s)
             s.apri(.agenda)
+            #if os(macOS)
+            s.apriDaFare()
+            #endif
         }),
         // Giro 4 · calendario delle occasioni (specifica 4)
         ("130-agenda-occasioni", { s in
@@ -1327,8 +1335,12 @@ enum Istantanee {
             s.apri(.clienti)
         }),
         ("124-agenda-riesami-mese-scuro", { s in
+            // Sul Mac i riesami nel pannello «Da fare» (migliorie d'uso 3 e 18)
             ProvaRiesamiAgenda.prepara(s)
             s.apri(.agenda)
+            #if os(macOS)
+            s.apriDaFare()
+            #endif
         }),
         ("130-agenda-occasioni-scuro", { s in
             Istantanee.preparaOccasioni(s)
