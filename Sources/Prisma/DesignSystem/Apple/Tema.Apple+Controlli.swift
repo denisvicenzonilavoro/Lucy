@@ -42,6 +42,21 @@ extension Tema.Apple {
             }
         }
 
+        /// I filtri a chip (`.fch`, Migliorie d'uso 54): capsula alta 30, padding 0×11, 12,5 semibold; spenta fondo
+        /// `chip` con il testo `inchiostro2`, accesa fondo `cardPiena` con il testo `inchiostro` e l'ombra della pillola.
+        enum ChipFiltro {
+            static let altezza: CGFloat = 30
+            static let paddingOrizzontale: CGFloat = 11
+            static let carattere = Carattere(dimensione: 12.5, peso: .semibold)
+            static let testo = Colore.inchiostro2
+            static let testoAcceso = Colore.inchiostro
+            static let fondo = Colore.chip
+            static let fondoAcceso = Colore.cardPiena
+            /// Fondo e colore cambiano in 0,2 s.
+            static let durata = 0.2
+            static var animazione: Animation { Moto.Curva.ease.animazione(durata) }
+        }
+
         /// `.sw` (§2.9).
         enum Interruttore {
             /// Spazio minimo fra l'etichetta e l'interruttore spinto a destra.

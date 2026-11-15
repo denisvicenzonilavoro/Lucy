@@ -8,7 +8,10 @@ import Foundation
 /// - 522: il dettaglio della rifiutata (senza cifra né linee);
 /// - 523: lo stato vero dei dati di prova, senza raccomandazioni registrate (stato vuoto);
 /// - 524: accettate senza valori aggiornati e con un riferimento mancante («da misurare», tile 4 «—»);
-/// - 525: un'accettata con risultato negativo, in rosso.
+/// - 525: un'accettata con risultato negativo, in rosso;
+/// - 1092 (Migliorie d'uso 54): il track record di un cliente scelto nella barra, il filtro «Rimandate», un cliente
+///   senza raccomandazioni e la rimandata dopo «Riproponi» («✓ Tra le proposte»).
+/// Le scene 520-525 partono da «Tutti i clienti» (il track record segue il cliente della barra).
 ///
 /// DATI DI PROVA DICHIARATI: le raccomandazioni, le posizioni «pos-prova-track-…» e l'indice «Conto deposito (di prova)»
 /// con i suoi valori annui esistono SOLO dentro queste scene (lo stato dell'istantanea non si salva). Sono cifre
@@ -34,18 +37,34 @@ extension Istantanee {
             ("524-studio-track-da-misurare-scuro", { s in preparaTrackRecord(s, .daMisurare, dettaglio: nil) }),
             ("525-studio-track-negativo", { s in preparaTrackRecord(s, .negativo, dettaglio: nil) }),
             ("525-studio-track-negativo-scuro", { s in preparaTrackRecord(s, .negativo, dettaglio: nil) }),
+            // Migliorie d'uso 54: il track record segue il cliente
+            ("1092-uso-track-cliente", { s in preparaTrackRecord(s, .completo, dettaglio: nil, cliente: "marco") }),
+            ("1092-uso-track-cliente-scuro", { s in preparaTrackRecord(s, .completo, dettaglio: nil, cliente: "marco") }),
+            ("1092-uso-track-filtro", { s in preparaTrackRecord(s, .completo, dettaglio: nil, filtro: .rimandate) }),
+            // Nel caso «da misurare» il piano di Giulia resta fuori: Giulia non ha raccomandazioni
+            ("1092-uso-track-cliente-vuoto", { s in preparaTrackRecord(s, .daMisurare, dettaglio: nil, cliente: "giulia") }),
+            ("1092-uso-track-riproposta", { s in
+                trackRecordDiProva(s, .completo)
+                s.scegliCliente(nil)
+                s.riproponiRaccomandazione(idTrackSofia)
+                s.apriStudio(.track)
+            }),
         ]
     }
 
     nonisolated static let idTrackMarco = "racc-pos-prova-track-marco"
     nonisolated static let idTrackAndrea = "racc-pos-prova-track-andrea"
+    nonisolated static let idTrackSofia = "racc-pos-prova-track-sofia"
     /// L'indice di prova delle scene: un «conto deposito» con valori annui inventati.
     nonisolated static let indiceTrackDiProva = "indice-prova-conto-deposito"
 
     /// Studio › Track record con le raccomandazioni di prova del caso, ed eventualmente un dettaglio già aperto.
-    nonisolated static func preparaTrackRecord(_ s: StatoShell, _ caso: CasoTrackRecordIstantanee, dettaglio: String?) {
+    /// `cliente`: il cliente della barra (nil = «Tutti i clienti»); `filtro`: il filtro per esito già scelto.
+    nonisolated static func preparaTrackRecord(_ s: StatoShell, _ caso: CasoTrackRecordIstantanee, dettaglio: String?,
+                                               cliente: String? = nil, filtro: FiltroTrackRecord = .tutte) {
         trackRecordDiProva(s, caso)
-        if let dettaglio { RichiestaIstantaneaTrack.chiedi(s, dettaglio: dettaglio) }
+        s.scegliCliente(cliente)
+        if dettaglio != nil || filtro != .tutte { RichiestaIstantaneaTrack.chiedi(s, dettaglio: dettaglio, filtro: filtro) }
         s.apriStudio(.track)
     }
 

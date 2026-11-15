@@ -1778,3 +1778,25 @@ raggiunti); 570, 571, 572 e 574 cambiano da sole. Resta:
 - «Il più indietro» nel mese di dicembre dice sempre «entro fine anno» (i mesi alla fine sono arrotondati per eccesso).
 - `--prova-fluidita`: nessuna prova nuova che il passaggio sulle colonne non rifaccia i motori (lo stato è nella card,
   fuori dalla `ChiaveVista`).
+
+## 54. Il track record segue il cliente
+
+Fatto (solo sul Mac, iPhone e iPad tengono il track record di prima): il track record segue il cliente della barra
+(tessere «Raccomandazioni a <Nome>», «Accettate», «Rimandate o rifiutate», «In più rispetto all’alternativa» con la
+somma stimata degli scarti; titolo «Le raccomandazioni a <Nome>»; solo le sue voci), i filtri a chip «Tutte · Accettate ·
+Rimandate · Rifiutate» a destra del titolo (nuovo componente `ChipFiltroApple`, token `Controlli.ChipFiltro`; il filtro
+si azzera cambiando cliente), la nota sulle stime in fondo, gli elenchi vuoti («Nessuna con questo esito.», «Nessuna
+raccomandazione registrata per <Nome>…»), la colonna destra a 132 e «Riproponi» sulle rimandate
+(`StatoShell.riproponiRaccomandazione`: proposta di nuovo bozza, ripresa tolta e attività completata, nota datata nel
+registro, scelte intatte; nella card poi «✓ Tra le proposte»). Motore: `PresentazioneTrackRecord.perCliente`, `filtra`,
+`traLeProposte`, `riproponibile`, `FiltroTrackRecord`, `TrackRecordCliente`, con le prove in
+`ProvaCalcoliPresentazioneTrack` (anche «Riproponi» nello stato e la sola lettura). Istantanee nuove 1092 (cliente chiara
+e scura, filtro «Rimandate», cliente senza raccomandazioni, dopo «Riproponi»); 520, 524 e 525 partono da «Tutti i
+clienti» e cambiano da sole. Resta:
+- `--prova-backup`: nessuna estensione; la nota di «Riproponi» è una nota del registro come le altre, già coperta dalla
+  prova delle note.
+- `--prova-fluidita`: nessuna prova nuova che cambiare cliente non rifaccia `MotoreTrackRecord.calcola` (il cliente non
+  entra nella cache del track record, e le voci per cliente vengono dalle voci di oggi in `ricavato`).
+- Guardare nelle istantanee che i quattro chip stiano accanto al titolo lungo «Le raccomandazioni e come sono andate»
+  alla larghezza minima della finestra (il titolo è su una riga e ha la precedenza), e che «Riproponi» stia nei 132.
+- Il dettaglio della card non ha «Riproponi» (il template non lo chiede); VoceOver lo trova fra le azioni della card.

@@ -68,6 +68,59 @@ enum PresentazioneTrackRecord {
         }
     }
 
+    // MARK: - Il cliente e il filtro (Migliorie d'uso 54)
+
+    /// Il track record di un cliente solo: le sue voci nell'ordine dell'elenco e le quattro cifre delle tessere.
+    /// «Rimandate o rifiutate» conta solo quelle: con proposte in attesa le tre cifre non sommano al totale (voluto).
+    static func perCliente(_ t: TrackRecord, clienteId: String) -> TrackRecordCliente {
+        perCliente(voci: t.voci, clienteId: clienteId)
+    }
+
+    static func perCliente(voci tutte: [TrackRecord.Voce], clienteId: String) -> TrackRecordCliente {
+        let voci = ordinate(tutte.filter { $0.raccomandazione.clienteId == clienteId })
+        var accettate = 0, rimandateORifiutate = 0, inAttesa = 0, misurate = 0
+        var somma = 0.0
+        for v in voci {
+            switch esito(v) {
+            case .accettata:
+                accettate += 1
+                if let d = differenza(v), d.isFinite {
+                    somma += d
+                    misurate += 1
+                }
+            case .rifiutata, .rimandata:
+                rimandateORifiutate += 1
+            case .inAttesa:
+                inAttesa += 1
+            }
+        }
+        return TrackRecordCliente(clienteId: clienteId, raccomandazioni: voci.count, accettate: accettate,
+                                  rimandateORifiutate: rimandateORifiutate, inAttesa: inAttesa, misurate: misurate,
+                                  differenzaTotale: misurate > 0 ? somma : nil, voci: voci)
+    }
+
+    /// Le voci con l'esito del filtro, nell'ordine in cui arrivano. Le «in attesa» compaiono solo in «Tutte».
+    static func filtra(_ voci: [TrackRecord.Voce], esito filtro: FiltroTrackRecord) -> [TrackRecord.Voce] {
+        guard filtro != .tutte else { return voci }
+        return voci.filter { v in
+            switch (filtro, esito(v)) {
+            case (.accettate, .accettata), (.rifiutate, .rifiutata), (.rimandate, .rimandata): return true
+            default: return false
+            }
+        }
+    }
+
+    /// Riproposta con «Riproponi»: la scelta è ancora «in attesa» e la proposta collegata è tornata una bozza.
+    static func traLeProposte(_ v: TrackRecord.Voce) -> Bool {
+        v.raccomandazione.scelta == .inAttesa && v.posizione?.esito == .bozza
+    }
+
+    /// «Riproponi» si offre solo per le rimandate la cui proposta c'è ancora.
+    static func riproponibile(_ v: TrackRecord.Voce) -> Bool {
+        if case .rimandata = esito(v), v.posizione != nil { return true }
+        return false
+    }
+
     // MARK: - Il confronto nel tempo
 
     /// Le due linee di una raccomandazione accettata, normalizzate 0…1 (x nel tempo, y dal basso) su una scala comune.
@@ -124,4 +177,25 @@ enum PresentazioneTrackRecord {
         let pb = b.indices.map { CGPoint(x: x($0, di: b.count), y: y(b[$0])) }
         return (pa, pb)
     }
+}
+
+// MARK: - Migliorie d'uso 54: il cliente e il filtro
+
+/// Il filtro a chip del track record: per esito. Le «in attesa» non hanno un filtro loro (solo «Tutte»).
+enum FiltroTrackRecord: String, CaseIterable, Equatable {
+    case tutte, accettate, rimandate, rifiutate
+}
+
+/// Il track record di un cliente (Migliorie d'uso 54): le cifre delle sue tessere e le sue voci.
+struct TrackRecordCliente: Equatable {
+    let clienteId: String
+    let raccomandazioni: Int
+    let accettate: Int
+    let rimandateORifiutate: Int
+    let inAttesa: Int
+    /// Le accettate con uno scarto misurato.
+    let misurate: Int
+    /// La somma degli scarti delle accettate misurate (sempre una stima); nil se nessuna è misurata.
+    let differenzaTotale: Double?
+    let voci: [TrackRecord.Voce]
 }

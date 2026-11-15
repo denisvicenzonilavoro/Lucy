@@ -17,6 +17,10 @@ import SwiftUI
 // - Niente cifre inventate: senza raccomandazioni lo stato vuoto dice come si riempie; un'accettata senza valori
 //   aggiornati o senza riferimenti dice «da misurare» e perché; un risultato negativo si mostra in rosso.
 // - «Riduci movimento» e istantanee: lo fanno i componenti del tema (numeri, linee, cascata, inclinazione, dettaglio).
+// - Migliorie d'uso 54 (Design/uso/gruppo-09.md §54, solo sul Mac): il track record segue il cliente della barra (tessere
+//   e titolo suoi, solo le sue voci), i filtri a chip per esito a destra del titolo (si azzerano cambiando cliente), la
+//   nota sulle stime in fondo e «Riproponi» sulle rimandate (`StatoShell.riproponiRaccomandazione`, StatoSeguito.swift).
+//   Cliente e filtro entrano nell'uguaglianza dell'elenco; le voci per cliente e filtro stanno in `ricavato`.
 // Valori in DesignSystem/Apple/Tema.Apple+TrackRecord.swift.
 
 // MARK: - Testi
@@ -47,6 +51,55 @@ enum TestiTrackRecord {
     static let lAlternativa = "l’alternativa, stima"
     static let confrontoNelTempo = "Il confronto nel tempo · stima"
     static let testoOggi = "oggi"
+
+    // Migliorie d'uso 54: il track record segue il cliente della barra, con i filtri per esito e «Riproponi»
+    static let accettate = "Accettate"
+    static let rimandateORifiutate = "Rimandate o rifiutate"
+    static let inPiuRispettoAllAlternativa = "In più rispetto all’alternativa"
+    static let notaStime = "L’alternativa è ricostruita con i riferimenti del periodo. Sono stime: servono a te; al "
+        + "cliente le mostri solo spiegandole."
+    static let riproponi = "Riproponi"
+    static let traLeProposte = "✓ Tra le proposte"
+    static let nessunaConEsito = "Nessuna con questo esito."
+    static func raccomandazioniA(nome: String) -> String { "Raccomandazioni a \(nome)" }
+    static func titoloCliente(nome: String) -> String { "Le raccomandazioni a \(nome)" }
+    static func nessunaPer(nome: String) -> String {
+        "Nessuna raccomandazione registrata per \(nome): la prima nasce quando presenti una proposta."
+    }
+    static func riproposta(_ proposta: String, nome: String) -> String {
+        "«\(proposta)» torna tra le proposte di \(nome), con i numeri di oggi"
+    }
+    /// La nota datata che «Riproponi» aggiunge al registro (la data la porta la nota stessa).
+    static func notaRiproposta(_ d: Date) -> String { "Riproposta il \(giorno(d))" }
+
+    static func filtro(_ f: FiltroTrackRecord) -> String {
+        switch f {
+        case .tutte: return "Tutte"
+        case .accettate: return "Accettate"
+        case .rimandate: return "Rimandate"
+        case .rifiutate: return "Rifiutate"
+        }
+    }
+
+    /// Le didascalie delle tessere di un cliente.
+    static func didascaliaRaccomandazioniCliente(_ t: TrackRecordCliente) -> String {
+        t.inAttesa == 0 ? "registrate alla presentazione" : (t.inAttesa == 1 ? "1 in attesa" : "\(t.inAttesa) in attesa")
+    }
+
+    static func didascaliaAccettateCliente(_ t: TrackRecordCliente) -> String {
+        t.raccomandazioni == 1 ? "su 1 raccomandazione" : "su \(t.raccomandazioni) raccomandazioni"
+    }
+
+    static func didascaliaRimandateCliente(_ t: TrackRecordCliente) -> String {
+        t.rimandateORifiutate == 0 ? "nessuna" : "la scelta del cliente"
+    }
+
+    static func didascaliaInPiuCliente(_ t: TrackRecordCliente) -> String {
+        if t.differenzaTotale != nil {
+            return t.misurate == 1 ? "stima su 1 misurata" : "stima su \(t.misurate) misurate"
+        }
+        return t.accettate > 0 ? "stima · servono valori aggiornati" : "stima · nessuna accettata"
+    }
 
     private static let formatoMeseAnno = Formati.formato("MMMM yyyy")
     private static let formatoGiorno = Formati.formato("d MMMM yyyy")
@@ -122,6 +175,12 @@ enum TestiTrackRecord {
                 let testo = quando.map { "da riproporre a " + meseAnno($0) } ?? "rimandata dal cliente"
                 return Risultato(cifra: nil, stato: nil, tono: .neutro, didascalia: testo)
             case .inAttesa, .accettata:
+                #if os(macOS)
+                // Migliorie d'uso 54: riproposta con «Riproponi», la proposta è tornata fra le bozze
+                if PresentazioneTrackRecord.traLeProposte(v) {
+                    return Risultato(cifra: nil, stato: nil, tono: .neutro, didascalia: traLeProposte)
+                }
+                #endif
                 return Risultato(cifra: nil, stato: nil, tono: .neutro, didascalia: "in attesa della scelta del cliente")
             }
         }
@@ -185,14 +244,17 @@ final class RichiestaIstantaneaTrack {
 
     private weak var stato: StatoShell?
     let dettaglio: String?
+    /// Migliorie d'uso 54: il filtro per esito già scelto.
+    let filtro: FiltroTrackRecord
 
-    private init(stato: StatoShell, dettaglio: String?) {
+    private init(stato: StatoShell, dettaglio: String?, filtro: FiltroTrackRecord) {
         self.stato = stato
         self.dettaglio = dettaglio
+        self.filtro = filtro
     }
 
-    static func chiedi(_ s: StatoShell, dettaglio: String?) {
-        attuale = RichiestaIstantaneaTrack(stato: s, dettaglio: dettaglio)
+    static func chiedi(_ s: StatoShell, dettaglio: String?, filtro: FiltroTrackRecord = .tutte) {
+        attuale = RichiestaIstantaneaTrack(stato: s, dettaglio: dettaglio, filtro: filtro)
     }
 
     static func per(_ s: StatoShell) -> RichiestaIstantaneaTrack? {
@@ -236,7 +298,33 @@ private extension StatoShell {
     func memoriaTrackRecord() -> MemoriaTrackRecord {
         ricavato("studio.track.linee") { MemoriaTrackRecord(tabella: TabellaRiferimenti(dati.impostazioniDeiCalcoli.riferimenti)) }
     }
+
+    /// Migliorie d'uso 54: il track record di un cliente, dalle voci di oggi (non rifà MotoreTrackRecord).
+    func trackRecordCliente(_ id: String) -> TrackRecordCliente {
+        ricavato("studio.track.cliente|" + id) { PresentazioneTrackRecord.perCliente(trackRecord(), clienteId: id) }
+    }
+
+    /// Le voci da mostrare: di tutti o del cliente, con il filtro per esito.
+    func vociTrackRecord(cliente: String?, filtro: FiltroTrackRecord) -> [TrackRecord.Voce] {
+        ricavato("studio.track.voci|" + (cliente ?? "") + "|" + filtro.rawValue) {
+            let tutte = cliente.map { trackRecordCliente($0).voci } ?? vociTrackRecordOrdinate()
+            return PresentazioneTrackRecord.filtra(tutte, esito: filtro)
+        }
+    }
 }
+
+/// Migliorie d'uso 54: il cliente scelto nella barra, per il track record (id e nome proprio).
+private struct ClienteTrack: Equatable {
+    let id: String
+    let nome: String
+}
+
+/// Le migliorie d'uso valgono solo sul Mac: iPhone e iPad tengono il track record di prima (tutti, senza filtri).
+#if os(macOS)
+private let trackUsoMac = true
+#else
+private let trackUsoMac = false
+#endif
 
 // MARK: - La scheda
 
@@ -245,11 +333,24 @@ struct TrackRecordStudioVista: View {
     /// La base della cascata (0,14 all'apertura, 0 dopo un cambio di scheda).
     let base: Double
     @StateObject private var dettaglio: StatoDettaglio
+    /// Migliorie d'uso 54: il filtro per esito; si azzera cambiando cliente (un filtro vuoto sul cliente nuovo confonde).
+    @State private var filtro: FiltroTrackRecord
 
     init(stato: StatoShell, base: Double) {
         self.stato = stato
         self.base = base
         _dettaglio = StateObject(wrappedValue: Self.dettaglioIniziale(stato))
+        _filtro = State(initialValue: RichiestaIstantaneaTrack.per(stato)?.filtro ?? .tutte)
+    }
+
+    /// Il cliente della barra (sul Mac); nil con «Tutti i clienti» e su iPhone e iPad.
+    private var cliente: ClienteTrack? {
+        #if os(macOS)
+        guard !stato.tuttiIClienti, let c = stato.clienteAttivo else { return nil }
+        return ClienteTrack(id: c.id, nome: StatoShell.nomeBreve(c))
+        #else
+        return nil
+        #endif
     }
 
     private static func dettaglioIniziale(_ s: StatoShell) -> StatoDettaglio {
@@ -262,8 +363,11 @@ struct TrackRecordStudioVista: View {
         let apri: (String) -> Void = { id in
             d.apri(id, misura: Tema.Apple.Studio.Track.Dettaglio.misura)
         }
-        return ElencoTrackRecord(stato: stato, chiave: stato.chiaveVista, base: base, apri: apri)
+        let scelto = cliente
+        return ElencoTrackRecord(stato: stato, chiave: stato.chiaveVista, base: base, cliente: scelto,
+                                 filtro: trackUsoMac ? filtro : .tutte, scegliFiltro: { filtro = $0 }, apri: apri)
             .equatable()
+            .onChange(of: scelto?.id) { filtro = .tutte }
             .presentatoreDettaglio(dettaglio) { id in
                 DettaglioRaccomandazione(stato: stato, id: id)
             }
@@ -276,10 +380,16 @@ private struct ElencoTrackRecord: View, Equatable {
     let stato: StatoShell
     let chiave: ChiaveVista
     let base: Double
+    /// Migliorie d'uso 54: il cliente della barra (nil = tutti) e il filtro per esito, nell'uguaglianza (la
+    /// `ChiaveVista` non li contiene).
+    let cliente: ClienteTrack?
+    let filtro: FiltroTrackRecord
+    /// Sceglie il filtro: scrive sempre lo stesso stato della scheda, quindi non conta nel confronto.
+    let scegliFiltro: (FiltroTrackRecord) -> Void
     let apri: (String) -> Void
 
     nonisolated static func == (a: ElencoTrackRecord, b: ElencoTrackRecord) -> Bool {
-        a.stato === b.stato && a.chiave == b.chiave && a.base == b.base
+        a.stato === b.stato && a.chiave == b.chiave && a.base == b.base && a.cliente == b.cliente && a.filtro == b.filtro
     }
 
     var body: some View {
@@ -288,51 +398,96 @@ private struct ElencoTrackRecord: View, Equatable {
         let prova = stato.scritteProva
         // Anche l'ordine e le linee delle card vengono dalla cache, fuori dal GeometryReader: a ogni passo del
         // ridimensionamento cambiano solo la larghezza e ciò che ne dipende (grafico e colonne delle tile)
-        let voci: [TrackRecord.Voce] = t.raccomandazioni == 0 ? [] : stato.vociTrackRecordOrdinate()
+        // Migliorie d'uso 54: le voci del cliente scelto e del filtro, anche queste in memoria (`ricavato`)
+        let tc: TrackRecordCliente? = t.raccomandazioni == 0 ? nil : cliente.map { stato.trackRecordCliente($0.id) }
+        let voci: [TrackRecord.Voce] = t.raccomandazioni == 0 ? [] : stato.vociTrackRecord(cliente: cliente?.id, filtro: filtro)
         let memoria = stato.memoriaTrackRecord()
         return GeometryReader { geo in
             ScrollView(.vertical, showsIndicators: false) {
-                contenuto(t, voci: voci, memoria: memoria, prova: prova, larghezza: geo.size.width)
+                contenuto(t, tc: tc, voci: voci, memoria: memoria, prova: prova, larghezza: geo.size.width)
                     .frame(width: geo.size.width, alignment: .topLeading)
             }
         }
     }
 
-    @ViewBuilder private func contenuto(_ t: TrackRecord, voci: [TrackRecord.Voce], memoria: MemoriaTrackRecord,
-                                        prova: Bool, larghezza: CGFloat) -> some View {
+    @ViewBuilder private func contenuto(_ t: TrackRecord, tc: TrackRecordCliente?, voci: [TrackRecord.Voce],
+                                        memoria: MemoriaTrackRecord, prova: Bool, larghezza: CGFloat) -> some View {
         if t.raccomandazioni == 0 {
             VuotoTrackRecord(apriPosizioni: { stato.apri(.posizioni) })
                 .entrataCascata(0, base: base)
         } else {
-            pieno(t, voci: voci, memoria: memoria, prova: prova, larghezza: larghezza)
+            pieno(t, tc: tc, voci: voci, memoria: memoria, prova: prova, larghezza: larghezza)
         }
     }
 
-    private func pieno(_ t: TrackRecord, voci: [TrackRecord.Voce], memoria: MemoriaTrackRecord, prova: Bool,
-                       larghezza: CGFloat) -> some View {
+    private func pieno(_ t: TrackRecord, tc: TrackRecordCliente?, voci: [TrackRecord.Voce], memoria: MemoriaTrackRecord,
+                       prova: Bool, larghezza: CGFloat) -> some View {
         let d = Tema.Apple.Studio.Track.Disposizione.self
         let conGrafico = larghezza >= d.larghezzaConGrafico
         let colonne = larghezza < d.larghezzaTileStrette ? d.colonneTileStrette : d.colonneTile
+        let titolo = cliente.map { TestiTrackRecord.titoloCliente(nome: $0.nome) } ?? TestiTrackRecord.titolo
         return VStack(alignment: .leading, spacing: 0) {
-            TileTrackRecord(t: t, colonne: colonne, base: base)
-            TitoloTrackRecord(prova: prova)
+            if let tc, let scelto = cliente {
+                TileClienteTrackRecord(t: tc, nome: scelto.nome, colonne: colonne, base: base)
+            } else {
+                TileTrackRecord(t: t, colonne: colonne, base: base)
+            }
+            TitoloTrackRecord(titolo: titolo, prova: prova, conFiltri: trackUsoMac, filtro: filtro, scegli: scegliFiltro)
                 .padding(.top, d.titoloSopra)
                 .padding(.horizontal, d.titoloLati)
                 .padding(.bottom, d.titoloSotto)
                 .entrataCascata(d.primaCard - 1, base: base)
             VStack(alignment: .leading, spacing: d.spazioCard) {
+                if voci.isEmpty {
+                    elencoVuoto(tc: tc)
+                }
                 ForEach(Array(voci.enumerated()), id: \.element.id) { i, v in
                     // `.equatable()`: a un ridimensionamento o a un cambio d'altre voci le card uguali non rifanno il corpo
                     CardRaccomandazione(voce: v, cliente: stato.cliente(v.raccomandazione.clienteId),
                                         linee: conGrafico ? memoria.linee(v) : nil,
                                         conGrafico: conGrafico, indiceLinee: 2 * i,
+                                        riproponi: azioneRiproponi(v),
                                         apri: { apri(v.id) })
                         .equatable()
                         .entrataCascata(min(d.primaCard + i, d.indiceMassimoCascata), base: base)
                 }
             }
-            .padding(.bottom, d.fondo)
+            if trackUsoMac {
+                Text(TestiTrackRecord.notaStime)
+                    .carattereApple(d.notaStime)
+                    .foregroundColor(d.coloreNotaStime)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.top, d.notaStimeSopra)
+                    .padding(.horizontal, d.titoloLati)
+                    .entrataCascata(min(d.primaCard + voci.count, d.indiceMassimoCascata), base: base)
+            }
+            Color.clear.frame(height: d.fondo)
         }
+    }
+
+    /// «Riproponi» (Migliorie d'uso 54, solo sul Mac): per le rimandate la cui proposta c'è ancora.
+    private func azioneRiproponi(_ v: TrackRecord.Voce) -> (() -> Void)? {
+        guard trackUsoMac, PresentazioneTrackRecord.riproponibile(v) else { return nil }
+        let s = stato
+        let id = v.raccomandazione.id
+        return { _ = s.riproponiRaccomandazione(id) }
+    }
+
+    /// L'elenco vuoto: un cliente senza raccomandazioni, o un filtro senza voci.
+    private func elencoVuoto(tc: TrackRecordCliente?) -> some View {
+        let d = Tema.Apple.Studio.Track.Disposizione.self
+        let testo: String = {
+            if let tc, tc.raccomandazioni == 0, let scelto = cliente { return TestiTrackRecord.nessunaPer(nome: scelto.nome) }
+            return TestiTrackRecord.nessunaConEsito
+        }()
+        return Text(testo)
+            .carattereApple(d.vuoto)
+            .foregroundColor(d.coloreVuoto)
+            .multilineTextAlignment(.center)
+            .fixedSize(horizontal: false, vertical: true)
+            .padding(.vertical, d.vuotoSopra)
+            .frame(maxWidth: .infinity)
+            .entrataCascata(d.primaCard, base: base)
     }
 }
 
@@ -369,6 +524,45 @@ private struct TileTrackRecord: View {
             TileCifraTrack(etichetta: "Rispetto all’alternativa, in media", valore: scarto,
                            formato: .personalizzato(TestiTrackRecord.puntiAnno), indice: 3, colore: coloreScarto,
                            didascalia: TestiTrackRecord.didascaliaScarto(t))
+                .entrataCascata(3, base: base)
+        }
+    }
+}
+
+/// Migliorie d'uso 54: le quattro tessere di un cliente scelto nella barra. Le cifre si contano come le altre; lo
+/// scarto in euro è sempre una stima (la didascalia lo dice).
+private struct TileClienteTrackRecord: View {
+    let t: TrackRecordCliente
+    let nome: String
+    let colonne: Int
+    let base: Double
+
+    var body: some View {
+        let d = Tema.Apple.Studio.Track.Disposizione.self
+        let tile = Tema.Apple.Studio.Track.Tile.self
+        let griglia = Array(repeating: GridItem(.flexible(), spacing: d.spazioTile, alignment: .topLeading), count: colonne)
+        let totale = t.differenzaTotale
+        let coloreTotale: Color = {
+            guard let v = totale?.rounded() else { return tile.coloreValore }
+            if v > 0 { return Tema.Apple.Studio.Track.coloreSale }
+            if v < 0 { return Tema.Apple.Studio.Track.coloreScende }
+            return tile.coloreValore
+        }()
+        return LazyVGrid(columns: griglia, alignment: .leading, spacing: d.spazioTile) {
+            TileCifraTrack(etichetta: TestiTrackRecord.raccomandazioniA(nome: nome), valore: Double(t.raccomandazioni),
+                           formato: .intero, indice: 0, colore: tile.coloreValore,
+                           didascalia: TestiTrackRecord.didascaliaRaccomandazioniCliente(t))
+                .entrataCascata(0, base: base)
+            TileCifraTrack(etichetta: TestiTrackRecord.accettate, valore: Double(t.accettate), formato: .intero, indice: 1,
+                           colore: tile.coloreValore, didascalia: TestiTrackRecord.didascaliaAccettateCliente(t))
+                .entrataCascata(1, base: base)
+            TileCifraTrack(etichetta: TestiTrackRecord.rimandateORifiutate, valore: Double(t.rimandateORifiutate),
+                           formato: .intero, indice: 2, colore: tile.coloreValore,
+                           didascalia: TestiTrackRecord.didascaliaRimandateCliente(t))
+                .entrataCascata(2, base: base)
+            TileCifraTrack(etichetta: TestiTrackRecord.inPiuRispettoAllAlternativa, valore: totale,
+                           formato: .personalizzato(TestiTrackRecord.euroConSegno), indice: 3, colore: coloreTotale,
+                           didascalia: TestiTrackRecord.didascaliaInPiuCliente(t))
                 .entrataCascata(3, base: base)
         }
     }
@@ -418,21 +612,28 @@ private struct TileCifraTrack: View {
 // MARK: - Riga del titolo
 
 private struct TitoloTrackRecord: View {
+    let titolo: String
     let prova: Bool
+    /// Migliorie d'uso 54 (solo sul Mac): i filtri a chip a destra; la nota sulle stime scende in fondo all'elenco.
+    let conFiltri: Bool
+    let filtro: FiltroTrackRecord
+    let scegli: (FiltroTrackRecord) -> Void
 
     var body: some View {
         let t = Tema.Apple.Studio.Track.Titolo.self
         let d = Tema.Apple.Studio.Track.Disposizione.self
-        return HStack(alignment: .firstTextBaseline, spacing: d.spazioNota) {
-            Text(TestiTrackRecord.titolo)
+        return HStack(alignment: conFiltri ? .center : .firstTextBaseline, spacing: d.spazioNota) {
+            Text(titolo)
                 .carattereApple(t.titolo)
                 .foregroundColor(t.coloreTitolo)
                 .lineLimit(1)
                 .layoutPriority(1)
-            Text(TestiTrackRecord.notaTitolo)
-                .carattereApple(t.nota)
-                .foregroundColor(t.coloreNota)
-                .lineLimit(1)
+            if !conFiltri {
+                Text(TestiTrackRecord.notaTitolo)
+                    .carattereApple(t.nota)
+                    .foregroundColor(t.coloreNota)
+                    .lineLimit(1)
+            }
             if prova {
                 Text(TestiStudio.datiDiProva)
                     .carattereApple(t.nota)
@@ -440,6 +641,14 @@ private struct TitoloTrackRecord: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
+            if conFiltri {
+                HStack(spacing: d.spazioFiltri) {
+                    ForEach(FiltroTrackRecord.allCases, id: \.self) { f in
+                        ChipFiltroApple(titolo: TestiTrackRecord.filtro(f), acceso: filtro == f) { scegli(f) }
+                    }
+                }
+                .fixedSize()
+            }
         }
     }
 }
@@ -495,12 +704,15 @@ private struct CardRaccomandazione: View, Equatable {
     let conGrafico: Bool
     /// Indice del primo tracciato della card nella schermata (alternativa, poi proposta).
     let indiceLinee: Int
+    /// Migliorie d'uso 54: «Riproponi» per una rimandata (nil = nessun pulsante). Dipende solo dalla voce: conta nel
+    /// confronto solo se c'è.
+    let riproponi: (() -> Void)?
     /// Apre il dettaglio di questa voce: chiama sempre lo stesso presentatore della scheda, quindi non conta nel confronto.
     let apri: () -> Void
 
     nonisolated static func == (a: CardRaccomandazione, b: CardRaccomandazione) -> Bool {
         a.voce == b.voce && a.cliente == b.cliente && a.linee == b.linee && a.conGrafico == b.conGrafico
-            && a.indiceLinee == b.indiceLinee
+            && a.indiceLinee == b.indiceLinee && (a.riproponi == nil) == (b.riproponi == nil)
     }
 
     var body: some View {
@@ -528,7 +740,9 @@ private struct CardRaccomandazione: View, Equatable {
                 .frame(width: c.grafico.width, height: c.grafico.height)
                 .accessibilityHidden(true)
             }
-            RisultatoCardTrackRecord(risultato: TestiTrackRecord.risultato(voce))
+            RisultatoCardTrackRecord(risultato: TestiTrackRecord.risultato(voce),
+                                     traLeProposte: trackUsoMac && PresentazioneTrackRecord.traLeProposte(voce),
+                                     riproponi: riproponi)
                 .frame(width: c.larghezzaDestra, alignment: .trailing)
         }
         .padding(c.padding)
@@ -540,6 +754,11 @@ private struct CardRaccomandazione: View, Equatable {
         .origineDettaglio(id: voce.id)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
+        .accessibilityActions {
+            if let azione = riproponi {
+                Button(TestiTrackRecord.riproponi, action: azione)
+            }
+        }
     }
 
     private var testi: some View {
@@ -563,8 +782,29 @@ private struct CardRaccomandazione: View, Equatable {
 /// La colonna destra della card: la cifra (o lo stato) e la didascalia.
 private struct RisultatoCardTrackRecord: View {
     let risultato: TestiTrackRecord.Risultato
+    /// Migliorie d'uso 54: la proposta riproposta (la didascalia «✓ Tra le proposte» si scrive in verde).
+    var traLeProposte = false
+    /// «Riproponi» al posto della didascalia (solo le rimandate con la proposta ancora in archivio). Il pulsante sta
+    /// sopra il tocco della card: il clic non apre il dettaglio.
+    var riproponi: (() -> Void)? = nil
 
     var body: some View {
+        let c = Tema.Apple.Studio.Track.Card.self
+        if let azione = riproponi {
+            Button(TestiTrackRecord.riproponi, action: azione)
+                .buttonStyle(.apple)
+        } else if traLeProposte {
+            Text(risultato.didascalia)
+                .carattereApple(c.traLeProposte)
+                .foregroundColor(c.coloreTraLeProposte)
+                .lineLimit(1)
+                .minimumScaleFactor(c.riduzione)
+        } else {
+            colonna
+        }
+    }
+
+    private var colonna: some View {
         let c = Tema.Apple.Studio.Track.Card.self
         return VStack(alignment: .trailing, spacing: c.spazioDestra) {
             if let cifra = risultato.cifra {
