@@ -550,3 +550,21 @@ Resta:
   aperto (alert di «Elimina», modulo).
 - **Istantanee e prove sul Mac**: rigenerare 8, 10, 91-94, 106, 119, 121, 235 e le scene con le ancore «dettaglio-…»,
   più le nuove 1072-1074; aggiornare la pagina delle anteprime.
+
+## 36. Il dock è in gruppi
+
+Fatto: `AppPrisma.gruppiDockMac` e `dockMac` (sul Mac; `allCases` e `delDock` non cambiano, iPhone e iPad come prima),
+il dock con un filo (`DivisoreDock`, tutti uguali) fra un gruppo e l'altro e i gruppi vuoti tolti in modalità cliente,
+`DisposizioneDock.disposizione(gruppi:)` e `centroIcona(_:tra:gruppi…)` con i fili (le finestre escono e rientrano
+dall'icona giusta), ⌥1…⌥9 sulle prime nove del dock in gruppi (fino a Messaggi; Territorio senza scorciatoia), il menu
+Vai con un divisore fra i gruppi, la pagina Scorciatoie, le prove in `--prova-vera` (gruppi, scorciatoie, centri con e
+senza modalità cliente), le scene «1125-uso-dock-gruppi» (chiara e scura) e «1126-uso-dock-gruppi-modo-cliente».
+
+Resta:
+- **Istantanee**: rigenerare sul Mac le scene con il dock in vista (410-415, 616, 617, scrivania di «Prisma istantaneo»)
+  e la pagina Scorciatoie; controllare a 1440 e in «415-scrivania-apple-schermo-basso» che il dock con le icone
+  ingrandite stia nella finestra (i quattro fili in più valgono circa 28 pt; se non sta, il token
+  `Tema.Misura.Shell.divisoreGruppiMargine`). Guardare una finestra ridotta per verificare il genio verso l'icona.
+- **CLAUDE.md**: aggiornare la frase sull'ordine del dock («Nel dock dopo Agenda, Messaggi e Prospetti…») con i gruppi
+  nuovi quando la miglioria entra in main.
+- `ProvaFluidita` apre ancora le app nell'ordine di `delDock` (lì l'ordine non conta).

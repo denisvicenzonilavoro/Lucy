@@ -88,7 +88,7 @@ extension StatoShell {
     /// è nascosto: l'icona è sul bordo in basso. `nascosto`: come sarà il dock a movimento finito.
     /// nil per le app senza icona nel dock (accorpate, Prodotti, Note, Ricerca): la finestra compare al suo posto.
     fileprivate func centroDock(_ app: AppPrisma, nascosto: Bool? = nil) -> CGPoint? {
-        DisposizioneDock.centroIcona(app, tra: AppPrisma.delDock.filter { appConsentita($0) },
+        DisposizioneDock.centroIcona(app, tra: AppPrisma.gruppiDockConsentiti { appConsentita($0) },
                                      in: sistema.misura, nascosto: nascosto ?? !finestreVisibili.isEmpty)
     }
 

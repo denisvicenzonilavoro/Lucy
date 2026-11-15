@@ -1,5 +1,6 @@
 import AVFoundation
 import Foundation
+import CoreGraphics
 
 /// Prova automatica di Vera (`Prisma --prova-vera`), eseguita dal workflow.
 /// Controlla le istruzioni nel pacchetto, la scheda del cliente (entro la finestra del modello),
@@ -431,7 +432,53 @@ enum ProvaVera {
                   "Dock di «Luce»: Clienti, Posizioni, Analisi 360, Incontri, Agenda, Territorio, Messaggi, Pratiche, Prospetti, Sala, Biblioteca, Mercato, Studio, Vera, Impostazioni; Prodotti, Note e Ricerca fuori dal dock")
         controlla(Array(AppPrisma.delDock.prefix(9)) == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio,
                                                          .messaggi, .pratiche, .presentazioni],
-                  "Scorciatoie ⌥1…⌥9: da Clienti a Prospetti (Mercato e Studio senza scorciatoia, decisione 120)")
+                  "iPhone e iPad: il dock resta nell'ordine di sempre, da Clienti a Prospetti nelle prime nove")
+        #if os(macOS)
+        // Migliorie d'uso 36: sul Mac il dock è in gruppi, nell'ordine del lavoro, e nessuna app si perde
+        controlla(Set(AppPrisma.dockMac) == Set(AppPrisma.delDock) && AppPrisma.dockMac.count == AppPrisma.delDock.count
+                  && AppPrisma.dockInFila == AppPrisma.dockMac,
+                  "Dock del Mac in gruppi: le stesse 15 app di `delDock`, ognuna una volta sola")
+        controlla(AppPrisma.dockMac == [.clienti, .posizioni, .analisi360, .agenda, .incontri, .presentazioni, .sala, .pratiche,
+                                        .messaggi, .territorio, .mercato, .biblioteca, .studio, .vera, .impostazioni]
+                  && AppPrisma.gruppiDockMac.map(\.count) == [3, 5, 2, 3, 2],
+                  "Gruppi del dock: Clienti, Posizioni, Analisi 360 | Agenda, Incontri, Prospetti, Sala, Pratiche | Messaggi, Territorio | Mercato, Biblioteca, Studio | Vera, Impostazioni")
+        controlla(Array(AppPrisma.dockMac.prefix(9)) == [.clienti, .posizioni, .analisi360, .agenda, .incontri, .presentazioni,
+                                                         .sala, .pratiche, .messaggi],
+                  "Scorciatoie ⌥1…⌥9 del Mac: le prime nove del dock in gruppi, da Clienti a Messaggi (Territorio senza scorciatoia)")
+        // Le finestre escono e rientrano dall'icona giusta: i centri contano i fili fra i gruppi
+        let misuraDock = CGSize(width: 1440, height: 900)
+        let tuttiGruppi = AppPrisma.gruppiDockConsentiti { _ in true }
+        let lato = Tema.Misura.dockIcona
+        let passo = lato + DisposizioneDock.spazio
+        let passoFilo = passo + DisposizioneDock.larghezzaDivisore + DisposizioneDock.spazio
+        func centroX(_ app: AppPrisma, _ gruppi: [[AppPrisma]]) -> CGFloat? {
+            DisposizioneDock.centroIcona(app, tra: gruppi, in: misuraDock, nascosto: false)?.x
+        }
+        let tutti = DisposizioneDock.disposizione(gruppi: [1] + tuttiGruppi.map(\.count))
+        if let imp = centroX(.impostazioni, tuttiGruppi), let vera = centroX(.vera, tuttiGruppi),
+           let studio = centroX(.studio, tuttiGruppi), let clienti = centroX(.clienti, tuttiGruppi),
+           let ultimo = tutti.centri.last, let primo = tutti.centri.first {
+            controlla(abs(imp - (misuraDock.width / 2 + ultimo)) < 0.01 && abs(imp - vera - passo) < 0.01
+                      && abs(vera - studio - passoFilo) < 0.01 && abs(clienti - (misuraDock.width / 2 + primo) - passoFilo) < 0.01
+                      && abs(tutti.larghezza - (2 * DisposizioneDock.margineLato + 16 * lato + 15 * DisposizioneDock.spazio
+                                                + 5 * (DisposizioneDock.larghezzaDivisore + DisposizioneDock.spazio))) < 0.01,
+                      "Dock in gruppi: Impostazioni è l'ultima icona e fra Studio e Vera, come fra la Scrivania e Clienti, c'è un filo")
+        } else {
+            controlla(false, "Dock in gruppi: i centri delle icone ci sono tutti")
+        }
+        let gruppiCliente = AppPrisma.gruppiDockConsentiti { !StatoShell.appRiservate.contains($0) }
+        if let vera = centroX(.vera, gruppiCliente), let studio = centroX(.studio, gruppiCliente),
+           let sala = centroX(.sala, gruppiCliente), let mercato = centroX(.mercato, gruppiCliente),
+           let ultimo = DisposizioneDock.disposizione(gruppi: [1] + gruppiCliente.map(\.count)).centri.last {
+            controlla(gruppiCliente.count == 4 && centroX(.impostazioni, gruppiCliente) == nil
+                      && centroX(.messaggi, gruppiCliente) == nil && centroX(.territorio, gruppiCliente) == nil
+                      && abs(vera - (misuraDock.width / 2 + ultimo)) < 0.01 && abs(vera - studio - passoFilo) < 0.01
+                      && abs(mercato - sala - passoFilo) < 0.01,
+                      "Modalità cliente: il gruppo «il contatto» sparisce con il suo filo (niente filo doppio), Vera è l'ultima icona")
+        } else {
+            controlla(false, "Modalità cliente: i centri delle icone consentite ci sono")
+        }
+        #endif
         controlla(StatoShell.appRiservate.isSuperset(of: [.territorio, .pratiche])
                   && !StatoShell.appRiservate.contains(.sala) && !StatoShell.appRiservate.contains(.biblioteca),
                   "Modalità cliente: Territorio e Pratiche riservate, Sala e Biblioteca consentite (decisione 50)")

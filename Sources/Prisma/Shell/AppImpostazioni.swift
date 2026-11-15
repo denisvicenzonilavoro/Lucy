@@ -516,7 +516,7 @@ struct AppImpostazioni: View {
     // MARK: Scorciatoie
 
     private var scorciatoie: some View {
-        let app = Array(AppPrisma.delDock.prefix(9))
+        let app = Array(AppPrisma.dockInFila.prefix(9))
         return VStack(alignment: .leading, spacing: M.spazioGruppi) {
             GruppoImpostazioni {
                 RigaImpostazione(titolo: "Cerca ovunque") { TastiScorciatoia(tasti: ["⌘", "K"]) }

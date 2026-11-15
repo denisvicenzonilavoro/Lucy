@@ -134,13 +134,18 @@ struct ComandiPrisma: Commands {
             Button("Scrivania") { stato.mostraScrivania() }
                 .keyboardShortcut("0", modifiers: .option)
             Divider()
-            ForEach(Array(AppPrisma.delDock.prefix(9).enumerated()), id: \.element) { indice, app in
-                Button(app.titolo) { stato.apriApp(app) }
-                    .keyboardShortcut(KeyEquivalent(Character("\(indice + 1)")), modifiers: .option)
-            }
-            Divider()
-            ForEach(Array(AppPrisma.delDock.dropFirst(9))) { app in
-                Button(app.titolo) { stato.apriApp(app) }
+            // Migliorie d'uso 36: le app nei gruppi del dock, con un filo fra un gruppo e l'altro; ⌥1…⌥9 le prime nove
+            ForEach(Array(AppPrisma.gruppiDockMac.enumerated()), id: \.offset) { g, gruppo in
+                if g > 0 { Divider() }
+                ForEach(gruppo) { app in
+                    let indice = AppPrisma.dockMac.firstIndex(of: app) ?? 9
+                    if indice < 9 {
+                        Button(app.titolo) { stato.apriApp(app) }
+                            .keyboardShortcut(KeyEquivalent(Character("\(indice + 1)")), modifiers: .option)
+                    } else {
+                        Button(app.titolo) { stato.apriApp(app) }
+                    }
+                }
             }
             // Le app con una finestra propria fuori dal dock (versione «Orizzonte»): Prodotti e Note.
             // La Ricerca è «Cerca ovunque» (⌘K), qui sopra

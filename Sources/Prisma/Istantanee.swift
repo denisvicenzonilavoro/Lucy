@@ -1443,6 +1443,14 @@ enum Istantanee {
         ("414-scrivania-apple-calma", { s in s.dati.posizioni.removeAll() }),
         // Su uno schermo più basso le righe si accorciano in proporzione
         ("415-scrivania-apple-schermo-basso", { s in propostaFermaGiulia(s) }),
+        // Migliorie d'uso 36: il dock in gruppi separati da un filo (le persone, l'incontro, il contatto, il mestiere,
+        // Vera e Impostazioni); in modalità cliente il gruppo «il contatto» sparisce con il suo filo
+        ("1125-uso-dock-gruppi", { _ in }),
+        ("1125-uso-dock-gruppi-scuro", { _ in }),
+        ("1126-uso-dock-gruppi-modo-cliente", { s in
+            s.clienteAttivoId = "giulia"
+            s.entraModoCliente(avviso: false)
+        }),
         // «Orizzonte», parte comune: Messaggi con i dati di prova veri dei motori (dal giro 3, senza Qwen: il testo di
         // Prisma) e Mercato (dal giro 7 l'app vera: senza dati di prova, mai aggiornato e con «Dati di mercato» spento).
         // Il pannello «Le novità» di Orizzonte (501) non c'è più: con «Luce» è il 614 (IstantaneeLuce.swift)
