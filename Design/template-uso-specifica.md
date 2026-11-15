@@ -43,7 +43,7 @@ prove, decisioni e rischi, dimensione)
 
 Ogni giro: un branch di lavoro (`uso/giri`), build verde nel workflow, poi unione in main.
 
-## Decisioni prese in attesa dell'utente (si cambiano se l'utente sceglie diversamente)
+## Decisioni (le quattro principali confermate dall'utente il 15 novembre 2026: colori solo Mac, etichetta «Qwen», nessun campo nuovo nei prodotti, fascicolo in memoria)
 
 Regola generale: dove la specifica di un gruppo dà una «proposta», vale la proposta. In più:
 

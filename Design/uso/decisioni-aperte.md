@@ -3,7 +3,7 @@
 Raccolti il 15 novembre 2026 da Design/uso/resta-da-fare.md, dopo i 12 giri e il primo giro di rifinitura.
 Le decisioni sono dell'utente; i controlli si fanno sulle istantanee o sul Mac vero.
 
-## Decisioni prese in attesa dell'utente (Design/template-uso-specifica.md)
+## Decisioni confermate dall'utente il 15 novembre 2026
 
 - Colori nuovi (testi piccoli, totale) solo sul Mac; iPhone e iPad con il loro aggiornamento.
 - Etichetta sotto le risposte di Vera: resta «Qwen» (regola bloccata del cervello grande).
