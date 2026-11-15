@@ -8,7 +8,8 @@ import CoreGraphics
 /// - 631: esploso con le pillole degli strati (chiaro e scuro); 632: cliente senza posizioni in essere;
 /// - 633: il gioco del rischio con «Il cliente risponde sull'iPad» (chiaro e scuro); 634: Lancia l'anno al tavolo;
 /// - 635: la riga di conferma delle cifre (decisione 49) in testa al palco; 636: i Documenti di Giulia con lo scatto;
-/// - 695: la testata del palco del prisma di luce con «▣ Mostra sul tavolo» acceso e l'iPad collegato.
+/// - 695: la testata del palco del prisma di luce con l'iPad collegato (dalla miglioria d'uso 58 senza «▣ Mostra sul
+///   tavolo» né «▶︎ Presenta»: l'iPad si sceglie dall'etichetta del luogo nella vista del cliente).
 /// DATI DI PROVA DICHIARATI: lo stato di prova `ScenaRealtaDiProva`, lo scatto disegnato da `CristalloFermo` (nessuna
 /// foto, nessuna stanza), la partita di Lancia l'anno a seme fisso; le cifre le calcola MotoreRealtaAumentata.
 extension Istantanee {

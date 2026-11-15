@@ -55,9 +55,6 @@ enum TestiMostra {
         "Per tornare al lavoro: «\(iniziali)» in alto a destra, oppure ⌥⌘M"
     }
     static let chiusa = "Vista del cliente chiusa"
-    static func tavoloAvviso(_ nome: String) -> String {
-        "«Al tavolo» resta com’è: da Prospetti si apre con \(nome) già scelto."
-    }
     static let senzaProspetto = "Il report del cliente non è pronto: aprilo da Prospetti."
     static let fine = "Fine: torna al lavoro"
     static let tastoFine = "⌥⌘M"
@@ -165,6 +162,8 @@ extension StatoShell {
         schedaMostra = nil
         menuUscitaMostra = false
         schermataNeutraMac = false
+        // Migliorie d'uso 58: si entra sempre con il cliente davanti a questo schermo
+        azzeraLuogo()
         vistaCliente = capitolo
         if capitolo == .sala { apri(.sala) }
         if !zitto && !avvisoVistaVisto {
@@ -206,7 +205,9 @@ extension StatoShell {
         presenta(d, daPagina: daPagina)
     }
 
-    /// «Sull’iPad sul tavolo»: il tavolo resta quello dei Prospetti, con il cliente già scelto.
+    /// «Sull’iPad sul tavolo»: entra nella vista del cliente su «Il quadro» con il cliente sull'iPad (migliorie d'uso 58).
+    /// Il pannello è prima della vista: con «Al tavolo» spento porta a Impostazioni › iPhone e iPad (miglioria 39); con
+    /// l'iPad non collegato apre il tavolo e manda appena l'iPad arriva.
     func tavoloDalPannello() {
         sceltaMostra = false
         // Migliorie d'uso 39: con «Al tavolo» spento si va a Impostazioni › iPhone e iPad
@@ -214,14 +215,17 @@ extension StatoShell {
             apriCollegamenti()
             return
         }
-        guard let c = clienteAttivo else { return }
-        apri(.presentazioni)
-        mostraAvviso(TestiMostra.tavoloAvviso(TestiTraguardi.primoNome(c.nome)))
+        guard clienteAttivo != nil else { return }
+        mostra(.quadro, zitto: true)
+        guard inVistaCliente else { return }
+        mandaAlTavolo(avviso: TestiLuogo.avvisoQuadro)
     }
 
     /// «Fine: torna al lavoro» (e ⌥⌘M): esce dalla modalità cliente, torna l'app di prima (o la scrivania).
     func fineMostra() {
         guard inVistaCliente else { return }
+        // Migliorie d'uso 58: l'iPad torna alla schermata neutra, il tavolo resta in ascolto (decisione 58-c)
+        azzeraLuogo()
         let prima = appPrimaDellaVista
         if presentazione != nil { chiudiPresentazione() }
         chiudiVistaClienteSenzaRitorno()
@@ -238,6 +242,7 @@ extension StatoShell {
     /// modalità cliente: blocco, cliente eliminato).
     func chiudiVistaClienteSenzaRitorno() {
         appPrimaDellaVista = nil
+        azzeraLuogo()
         if schermataNeutraMac { schermataNeutraMac = false }
         if schedaMostra != nil { schedaMostra = nil }
         if menuUscitaMostra { menuUscitaMostra = false }
@@ -262,6 +267,8 @@ extension StatoShell {
     func mostraNeutra() {
         sceltaMostra = false
         menuUscitaMostra = false
+        menuLuogo = false
+        presaVisioneAperta = false
         schedaMostra = nil
         schermataNeutraMac = true
     }
@@ -276,7 +283,9 @@ extension StatoShell {
         if schermataNeutraMac { schermataNeutraMac = false; return true }
         if sceltaMostra { sceltaMostra = false; return true }
         guard inVistaCliente else { return false }
+        if presaVisioneAperta { presaVisioneAperta = false; return true }
         if schedaMostra != nil { schedaMostra = nil; return true }
+        if menuLuogo { menuLuogo = false; return true }
         if menuUscitaMostra { menuUscitaMostra = false; return true }
         return true
     }
@@ -330,7 +339,14 @@ enum ProvaMostraAlCliente {
         s.mostraNeutra()
         controlla(s.schermataNeutraMac && s.escMostra() && !s.schermataNeutraMac && s.inVistaCliente,
                   "Mostra al cliente: Esc chiude la schermata neutra e si resta nella vista")
+        // Migliorie d'uso 58: con il cliente sull'iPad il consulente rivede i suoi pulsanti; «Fine» lo rimette sullo schermo
+        controlla(s.luogoCliente == .schermo, "Mostra al cliente: si entra con il cliente davanti a questo schermo")
+        s.luogoCliente = .tavolo
+        controlla(s.consulenteVede, "Mostra al cliente: con il cliente sull'iPad il consulente vede i suoi pulsanti")
+        s.menuLuogo = true
+        controlla(s.escMostra() && !s.menuLuogo && s.inVistaCliente, "Mostra al cliente: Esc chiude il menu del luogo")
         s.fineMostra()
+        controlla(s.luogoCliente == .schermo && !s.tavoloTocca, "Mostra al cliente: «Fine» rimette il cliente su questo schermo")
         controlla(!s.inVistaCliente && !s.inModoCliente && s.sistema.appAttiva == .agenda,
                   "Mostra al cliente: «Fine: torna al lavoro» esce e riporta l'app di prima")
         s.alternaMostraAlCliente()

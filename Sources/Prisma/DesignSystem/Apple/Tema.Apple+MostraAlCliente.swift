@@ -215,6 +215,29 @@ extension Tema.Apple {
             static let distanza: CGFloat = 5
         }
 
+        // MARK: L'etichetta del luogo (migliorie d'uso 58, `#bTav`)
+
+        enum Luogo {
+            /// Pillola di vetro come le altre della barra: glifo 14, testo 13 semibold, freccina 11 al 60%.
+            static let carattere = Carattere(dimensione: 13, peso: .semibold)
+            static let glifo = Carattere(dimensione: 14, peso: .regular)
+            static let freccia = Carattere(dimensione: 11, peso: .semibold)
+            static let opacitaFreccia: Double = 0.6
+            static let spazio: CGFloat = 6
+            /// Il menu sotto la pillola, 8 più in basso, allineato al suo bordo destro (la pillola sta subito prima
+            /// dell'avatar): largo 300, come il menu dell'avatar.
+            static let dallAlto: CGFloat = 8
+            static let larghezza: CGFloat = 300
+            static var rientroMenu: CGFloat { BarraAlta.margineDestro + BarraAlta.tasto + BarraAlta.spazio }
+            static let filo = Colore.separatore
+            static let paddingFilo = EdgeInsets(top: 4, leading: 12, bottom: 4, trailing: 12)
+            static let opacitaSpenta: Double = 0.5
+            /// La riga di conferma delle cifre dei capitoli: sotto la barra, al centro.
+            static let sottoBarraConferma: CGFloat = 14
+            /// L'iPad segue la vista dopo che il capitolo si è fermato (le entrate a cascata), mai durante.
+            static let attesaSegui: Double = 0.6
+        }
+
         // MARK: La schermata neutra
 
         enum Neutra {

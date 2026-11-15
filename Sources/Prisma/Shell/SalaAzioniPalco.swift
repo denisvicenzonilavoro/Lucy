@@ -9,9 +9,12 @@ import SwiftUI
 
 extension StatoShell {
     /// I pulsanti del consulente sul palco (e il copione) si vedono solo a lui: fuori dalla modalità cliente e dalla vista
-    /// pulita di «Mostra al cliente». La miglioria 58 li mostrerà anche nella vista del cliente quando il cliente guarda
-    /// l'iPad sul tavolo.
-    var consulenteVede: Bool { !inModoCliente && !inVistaCliente }
+    /// pulita di «Mostra al cliente», e (migliorie d'uso 58) nella vista del cliente quando il cliente guarda l'iPad sul
+    /// tavolo e non questo schermo.
+    var consulenteVede: Bool {
+        if inVistaCliente { return luogoCliente == .tavolo }
+        return !inModoCliente
+    }
 }
 
 /// I pulsanti del consulente nella testata del palco. Osserva da solo `StatoSala.copioneAperto`: aprire o chiudere il

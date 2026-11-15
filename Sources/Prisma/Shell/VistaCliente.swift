@@ -73,6 +73,23 @@ struct StratoSopraVistaCliente: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         ZStack(alignment: .topTrailing) {
+            #if os(macOS)
+            if stato.inVistaCliente {
+                // Migliorie d'uso 58: l'iPad segue la vista del cliente; la riga di conferma delle cifre dei capitoli
+                OsservatoreLuogo(tavolo: stato.tavolo)
+                ConfermaCifreLuogo()
+                    .padding(.top, Tema.Apple.Misura.Barra.altezza + Tema.Apple.MostraAlCliente.Luogo.sottoBarraConferma)
+                    .frame(maxWidth: .infinity, alignment: .top)
+            }
+            if stato.inVistaCliente && stato.menuLuogo {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .onTapGesture { stato.menuLuogo = false }
+                MenuLuogo(tavolo: stato.tavolo)
+                    .padding(.top, Tema.Apple.Misura.Barra.altezza + Tema.Apple.MostraAlCliente.Luogo.dallAlto)
+                    .padding(.trailing, Tema.Apple.MostraAlCliente.Luogo.rientroMenu)
+            }
+            #endif
             if stato.inVistaCliente && stato.menuUscitaMostra {
                 Color.clear
                     .contentShape(Rectangle())
@@ -85,6 +102,12 @@ struct StratoSopraVistaCliente: View {
                 SchedaVistaCliente(scheda: s)
                     .prismaScalaTesto(max(scala, V.scalaMinima))
             }
+            #if os(macOS)
+            // Migliorie d'uso 58: la presa visione di ciò che si vede (PresaVisioneMac.swift)
+            if stato.inVistaCliente && stato.presaVisioneAperta, let c = stato.clienteAttivo {
+                SchedaPresaVisione(tavolo: stato.tavolo, cliente: c)
+            }
+            #endif
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topTrailing)
     }
@@ -204,6 +227,67 @@ private struct RigaMenuUscita: View {
         }
         .buttonStyle(StileSemplice())
         .onHover { s in withAnimation(Tema.Moto.passaggio) { sopra = s } }
+    }
+}
+
+// MARK: - Il menu dell'etichetta del luogo (migliorie d'uso 58)
+
+/// Il menu sotto «Su questo schermo» / «iPad sul tavolo», con le voci del template nell'ordine. Osserva il tavolo per la
+/// voce spenta «iPad non collegato».
+private struct MenuLuogo: View {
+    @Environment(StatoShell.self) var stato
+    @ObservedObject var tavolo: TavoloMac
+
+    private typealias U = Tema.Apple.MostraAlCliente.Uscita
+    private typealias L = Tema.Apple.MostraAlCliente.Luogo
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            if stato.luogoCliente == .tavolo {
+                RigaMenuUscita(glifo: TestiLuogo.glifoSchermo, testo: TestiLuogo.torna, tasto: nil) { stato.tornaSulloSchermo() }
+                Rectangle()
+                    .fill(L.filo)
+                    .frame(height: 1)
+                    .padding(L.paddingFilo)
+                RigaMenuUscita(glifo: "hand.tap", testo: TestiLuogo.tocca(stato.tavoloTocca), tasto: nil) { stato.cambiaTocco() }
+            } else {
+                // Decisione 58-d: con il tavolo aperto e l'iPad non ancora collegato la voce resta, spenta
+                let spenta = tavolo.acceso && !tavolo.collegato
+                RigaMenuUscita(glifo: TestiLuogo.glifoTavolo, testo: TestiLuogo.manda,
+                               tasto: tavolo.collegato ? nil : TestiLuogo.nonCollegato) { stato.mandaAlTavolo() }
+                    .disabled(spenta)
+                    .opacity(spenta ? L.opacitaSpenta : 1)
+            }
+            RigaMenuUscita(glifo: "hand.draw", testo: TestiLuogo.presa, tasto: nil) { stato.apriPresaVisione() }
+        }
+        .padding(U.padding)
+        .frame(width: L.larghezza)
+        .superficieApple(U.superficie, raggio: U.raggio)
+    }
+}
+
+// MARK: - La vista ferma di un capitolo (migliorie d'uso 58)
+
+/// Il contenuto di un capitolo nello stato finale, per l'immagine mandata all'iPad sul tavolo e per la pagina della presa
+/// visione. Il capitolo «La Sala» è la griglia ferma.
+struct CapitoloClienteFermo: View {
+    let capitolo: CapitoloCliente
+    let cliente: Cliente
+
+    var body: some View {
+        Group {
+            switch capitolo {
+            case .quadro: CapitoloQuadro(cliente: cliente)
+            case .posizioni: CapitoloPosizioni(cliente: cliente)
+            case .obiettivi: CapitoloObiettivi(cliente: cliente)
+            case .tempo: CapitoloNelTempo(cliente: cliente)
+            case .sala: GrigliaSalaFerma(cliente: cliente)
+            }
+        }
+        .frame(maxWidth: V.larghezzaMassima, alignment: .topLeading)
+        .padding(V.margini)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .prismaScalaTesto(V.scalaMinima)
     }
 }
 

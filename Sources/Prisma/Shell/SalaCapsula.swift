@@ -445,7 +445,8 @@ struct CapsulaDelTempo: View {
 }
 
 #if os(macOS)
-/// «Scrivi sull'iPad» accanto a «Sigilla» (giro 16, D-C4): osserva il tavolo e compare solo con l'iPad collegato. Durante
+/// «Scrivi sull'iPad» accanto a «Sigilla» (giro 16, D-C4): osserva il tavolo e compare solo con l'iPad collegato, il
+/// cliente sull'iPad e «può toccare: sì» (migliorie d'uso 58). Durante
 /// l'attesa: l'indicatore, «Giulia scrive sull'iPad…» e «Annulla». Il testo arrivato si sigilla subito qui, con
 /// l'apertura scelta alla richiesta e lo stesso `sigillaCapsula` del sigillo sul Mac: non passa da nessuno `@State`, campo
 /// o registro, e a chi sta sopra arriva solo l'id della capsula nuova (nil se il sigillo non è riuscito).
@@ -477,7 +478,9 @@ struct ScriviCapsulaSullIPad: View {
                         .buttonStyle(.apple)
                         .help(TestiRealta.annullaAttesaCapsula)
                 }
-            } else if tavolo.collegato {
+            } else if tavolo.collegato && stato.inVistaCliente && stato.luogoCliente == .tavolo && stato.tavoloTocca {
+                // Migliorie d'uso 58: solo con il cliente sull'iPad e «Il cliente può toccare l’iPad: sì» (fuori dalla
+                // vista del cliente l'iPad non mostra nulla)
                 Button { chiedi(primo: primo) } label: { Text(TestiRealta.scriviSullIPad) }
                     .buttonStyle(.apple)
                     .disabled(!attivo)

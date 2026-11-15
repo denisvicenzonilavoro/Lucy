@@ -76,7 +76,7 @@ final class MonitorEscFinestra {
             if s.inVistaCliente && !s.schermataNeutraMac {
                 if s.presentazione != nil { return e }
                 // Solo la Sala nel suo capitolo si vede: le altre finestre, nascoste, non devono prendere Esc
-                if s.salaNellaVistaCliente, s.schedaMostra == nil && !s.menuUscitaMostra,
+                if s.salaNellaVistaCliente, s.schedaMostra == nil && !s.menuUscitaMostra && !s.menuLuogo && !s.presaVisioneAperta,
                    finestra.performKeyEquivalent(with: e) { return nil }
             }
             return s.escMostra() ? nil : e

@@ -473,6 +473,24 @@ enum VoceConfronto: Hashable {
     var menuUscitaMostra = false
     @ObservationIgnored var appPrimaDellaVista: AppPrisma?
     @ObservationIgnored var avvisoVistaVisto = false
+    /// Migliorie d'uso 58 «Un solo modo di mostrare» (LuogoCliente.swift, PresaVisioneMac.swift), tutto in memoria come la
+    /// vista pulita: dove guarda il cliente (lo schermo del Mac o l'iPad sul tavolo), se può toccare l'iPad, il menu
+    /// dell'etichetta del luogo, la scheda della presa visione e la riga di conferma delle cifre dei capitoli.
+    var luogoCliente: LuogoCliente = .schermo
+    var tavoloTocca = false
+    var menuLuogo = false
+    var presaVisioneAperta = false
+    var cifreLuogoDaConfermare = false
+    /// Il tavolo è stato aperto dall'etichetta: appena l'iPad si collega, il cliente passa sull'iPad.
+    @ObservationIgnored var tavoloInArrivo = false
+    /// L'avviso «Per far rispondere il cliente sull’iPad…» del gioco del rischio, una volta per vista.
+    @ObservationIgnored var avvisoRischioToccoVisto = false
+    /// Il prospetto già mandato da sfogliare (con «può toccare: sì»): non si rimanda a ogni pagina.
+    @ObservationIgnored var documentoSeguito: String?
+    /// Quante prese visione dall'iPad erano archiviate quando la scheda l'ha chiesta (si accende «Registra» al cambio).
+    @ObservationIgnored var presaVisioneConteggio = 0
+    /// Solo istantanee: la scheda della presa visione sul Mac con il tratto di prova.
+    @ObservationIgnored var trattoProvaIstantanea = false
     #else
     /// Migliorie d'uso 37: su iPhone e iPad la dimostrazione non c'è, resta sempre falsa.
     let inDimostrazione = false

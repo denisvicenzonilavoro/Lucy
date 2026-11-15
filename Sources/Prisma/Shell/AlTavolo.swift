@@ -274,6 +274,13 @@ struct StrisciaTavoloSala: View {
 
 // MARK: - La pagina della presa visione (carta)
 
+/// Il sottotitolo della pagina della presa visione: dove è stato mostrato il documento (migliorie d'uso 58).
+enum TestiPresaVisione {
+    static let iPadPagine = "Il documento è stato mostrato al cliente sull'iPad, al tavolo, pagina per pagina. Il segno qui sotto dice solo che l'ha visto."
+    static let iPadUna = "Il documento è stato mostrato al cliente sull'iPad, al tavolo. Il segno qui sotto dice solo che l'ha visto."
+    static let schermo = "Il documento è stato mostrato al cliente su questo schermo. Il segno qui sotto dice solo che l'ha visto."
+}
+
 /// L'ultima pagina del PDF con la presa visione: il documento, la scritta esatta, il tratto del cliente e la data.
 /// Su carta: sempre chiara, colori opachi e fissi, niente vetro. Stesso formato delle pagine del documento.
 struct PaginaPresaVisione: View {
@@ -287,6 +294,8 @@ struct PaginaPresaVisione: View {
     let formato: CGSize
     let tratto: CGImage
     let data: Date
+    /// Migliorie d'uso 58: dove e come è stato mostrato (`TestiPresaVisione`).
+    var testo: String = TestiPresaVisione.iPadPagine
 
     var body: some View {
         FoglioDocumento(formato: formato) {
@@ -307,7 +316,7 @@ struct PaginaPresaVisione: View {
                     .font(T.pSezione)
                     .foregroundColor(C.titolo)
                     .fixedSize(horizontal: false, vertical: true)
-                Text(verbatim: "Il documento è stato mostrato al cliente sull'iPad, al tavolo, pagina per pagina. Il segno qui sotto dice solo che l'ha visto.")
+                Text(verbatim: testo)
                     .font(T.pCorpo)
                     .foregroundColor(C.tenue)
                     .fixedSize(horizontal: false, vertical: true)

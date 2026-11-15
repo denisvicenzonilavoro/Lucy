@@ -239,8 +239,9 @@ struct VistaPresentazione: View {
                         .opacity(cresciuta ? 1 : 0)
                     }
                     #if os(macOS)
-                    // I comandi del tavolo con l'iPad, aperti da «Al tavolo» (Shell/AlTavolo.swift)
-                    if !scrivendo { StrisciaTavoloSala(tavolo: stato.tavolo, contesto: contestoTavolo) }
+                    // I comandi del tavolo con l'iPad, aperti da «Al tavolo» (Shell/AlTavolo.swift). Migliorie d'uso 58: nella
+                    // vista del cliente l'iPad segue la pagina da sé (l'etichetta del luogo), niente striscia
+                    if !scrivendo && !stato.inVistaCliente { StrisciaTavoloSala(tavolo: stato.tavolo, contesto: contestoTavolo) }
                     #endif
                     Group { if scrivendo { editor } else { comandi } }
                         .frame(height: s.altezzaComandi)
@@ -319,7 +320,7 @@ struct VistaPresentazione: View {
                 .disabled(p.pagina >= ultima)
             HStack(spacing: s.spazio) {
                 #if os(macOS)
-                PulsanteTavoloSala(tavolo: stato.tavolo)
+                if !stato.inVistaCliente { PulsanteTavoloSala(tavolo: stato.tavolo) }
                 #endif
                 if p.clienteId != nil {
                     Button { inizia() } label: {

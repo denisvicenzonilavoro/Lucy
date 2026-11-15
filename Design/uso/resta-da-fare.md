@@ -1910,3 +1910,55 @@ Resta:
   verificare con 618-app-nuove-sala e una scena stretta del palco.
 - Istantanee da rigenerare sul Mac (684, 685, 691; controllare che 693-sala-modo-cliente non mostri «Cosa dire»; 681 con
   la 58) e pagina delle anteprime da aggiornare; l'entrata a molla chiede uno screenshot.
+
+## 58. Un solo modo di mostrare (e i comandi del tavolo in un'etichetta)
+
+Fatto (solo sul Mac, `#if os(macOS)` o file solo Mac): lo stato in memoria in `StatoShell` (`luogoCliente`, `tavoloTocca`,
+`menuLuogo`, `presaVisioneAperta`, `cifreLuogoDaConfermare`) e le funzioni in Shell/LuogoCliente.swift (`mandaAlTavolo`,
+`tornaSulloSchermo`, `cambiaTocco`, `azzeraLuogo`, `seguiSulTavolo`, `mandaImmagineVista`, `documentoDiCioCheSiVede`).
+Nella barra della vista pulita l'etichetta «Su questo schermo» / «iPad sul tavolo» subito prima di «DV», con il menu
+disegnato come quello dell'avatar (voci del template nell'ordine; con il tavolo aperto e l'iPad non collegato «Manda
+sull’iPad» resta spenta con «iPad non collegato»; a tavolo chiuso lo apre e manda appena l'iPad arriva, decisione 58-d;
+con «Al tavolo» spento solo un avviso, mai le Impostazioni nella vista). L'iPad segue la vista (`OsservatoreLuogo`, a
+vista ferma dopo `attesaSegui`): immagine ferma del capitolo (`CapitoloClienteFermo`) o della griglia della Sala
+(`GrigliaSalaFerma`, senza conferma delle cifre), immagine del palco o, con «può toccare: sì», i generi vivi di oggi
+(rischio, Lancia l'anno, disegno, realtà aumentata) e la lettera come la sua pagina; il prospetto a tutto schermo pagina per
+pagina (con «sì» tutto il documento da sfogliare). Le cifre del cliente passano sempre dalla conferma: nel palco la riga di
+oggi, nei capitoli e nel prospetto la riga nuova `ConfermaCifreLuogo` sotto la barra. «Fine: torna al lavoro» (e il blocco)
+rimette l'iPad sulla schermata neutra e lascia il tavolo in ascolto (58-c); la schermata neutra copre anche l'iPad e alla
+ripresa l'iPad torna a seguire. «Sull’iPad sul tavolo» del pannello entra in «Il quadro» e manda all'iPad con l'avviso del
+template. I pulsanti del consulente del palco (copione) tornano visibili con il cliente sull'iPad (`consulenteVede`). La
+presa visione (Shell/PresaVisioneMac.swift): la scheda del template; sul Mac il tratto con mouse o trackpad (Canvas),
+«Registra» spento senza tratto, PDF con la pagina di ciò che si vede su carta e `PaginaPresaVisione` («su questo schermo»);
+sull'iPad la richiesta di oggi anche per l'immagine mandata (`mandaImmagine` ricorda la pagina su carta), «Registra» si
+accende quando il PDF è archiviato (`presaVisioneArchiviate`). Il sottotitolo della pagina PDF è un parametro
+(`TestiPresaVisione`: più pagine, una pagina, questo schermo). Tolti dal palco «▣ Mostra sul tavolo»
+(`PulsanteMostraSulTavolo` eliminato) e, sul Mac, «▶︎ Presenta» (su iPhone e iPad resta); nella presentazione dentro la vista
+del cliente niente «Al tavolo» né striscia. «Scrivi sull’iPad» della capsula solo con il cliente sull'iPad e «può toccare:
+sì». Prove: `--prova-tavolo` (fuori dalla vista niente; immagine del quadro e dei capitoli; conferma delle cifre; rischio
+come immagine con «no» e vivo con «sì»; presa visione dell'immagine sull'iPad e sul Mac, PDF di 2 pagine; «Fine» con iPad
+neutro e tavolo aperto), `--prova-vera` (`ProvaMostraAlCliente`: luogo all'ingresso, pulsanti del consulente, Esc, «Fine»).
+Istantanee nuove 680-683 (chiare e scure).
+
+Resta:
+- **Istantanee**: generarle sul Mac (680-683) e guardare in particolare la posizione del menu sotto l'etichetta (allineato a
+  destra della pillola con `rientroMenu`), la riga di conferma sotto la barra e la scheda della presa visione; rigenerare
+  470 e 471 (non cambiano fuori dalla vista), 691, 620-678, 633-635, 695 (senza «▣ Mostra sul tavolo» e «▶︎ Presenta») e
+  aggiornare la pagina delle anteprime. «694-sala-presenta» resta (la funzione `presentaEsperienza` c'è ancora per
+  iPhone e iPad e per la prova di Vera) ma sul Mac non si raggiunge più dal palco: da togliere o sostituire con la vista
+  del cliente sul capitolo «La Sala».
+- **Il prospetto a tutto schermo dentro la vista** copre la barra: l'etichetta non si raggiunge finché la presentazione è
+  aperta (il luogo scelto prima resta e la pagina segue). Nel template il prospetto è un capitolo della vista.
+- **Le immagini dei capitoli** sono alla misura fissa del palco (1280×800): un capitolo più lungo (il quadro con testo
+  «Grande», molte posizioni) si taglia in basso. Da guardare sull'iPad vero; eventualmente più pagine.
+- **«Nel tempo» con «può toccare: sì»**: il cursore del versamento (`lasciaCursore`) non è collegato; resta l'immagine.
+- **Il Prisma del cliente sull'iPad** (decisione 58-f): va controllato nell'immagine del palco che non compaia la password;
+  se compare, nasconderla con `inSala`.
+- **Il menu del luogo** è disegnato (come quello dell'avatar), non un menu del Mac; l'iPad collegato si vede dal testo
+  «iPad non collegato» (non c'è il `PuntinoTavolo`).
+- **La presa visione**: chiedere all'utente conferma che basti un tratto fatto con il trackpad (58-e); la scheda non ha il
+  tratto che si disegna da solo del template (scelta della specifica). «Annulla» con il cliente sull'iPad ritira la
+  richiesta mettendo l'iPad sulla schermata neutra e poi lo fa tornare a seguire.
+- La prova della modalità cliente in `--prova-backup` (`provaModoClienteLuce`) non è stata estesa: il caso «fuori dalla
+  vista `mandaAlTavolo()` non fa nulla» è in `--prova-tavolo`. `--prova-realta` non ha un caso nuovo per la conferma
+  passando dall'etichetta. `EsperienzaSala.mostraSulTavolo` e `tavoloPronto` restano (li conta la prova di Vera).

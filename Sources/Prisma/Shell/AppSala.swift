@@ -68,6 +68,17 @@ struct AzioniSala: View {
 }
 
 #if os(macOS)
+/// Migliorie d'uso 58: la griglia della Sala ferma, senza indicazioni di lavoro, per l'immagine mandata all'iPad sul tavolo
+/// (capitolo «La Sala» senza un'esperienza sul palco) e per la pagina della presa visione.
+struct GrigliaSalaFerma: View {
+    let cliente: Cliente
+    @Namespace private var spazio
+
+    var body: some View {
+        GrigliaSala(cliente: cliente, spazio: spazio, apri: { _ in })
+    }
+}
+
 /// Migliorie d'uso 34: «Tutte · Per aprire · Per spiegare · Per chiudere · Dopo l’incontro» nella testata della Sala.
 /// Osserva da solo l'esperienza sul palco e il momento scelto: la testata non si iscrive al resto di `StatoSala`.
 private struct FiltroMomentiSala: View {
@@ -542,13 +553,8 @@ private struct PalcoSala: View {
                     AzioniPalco(sala: stato.sala)
                 }
                 #endif
-                // «▣ Mostra sul tavolo» (giro 16, decisioni 48 e 111): sul Mac osserva il tavolo; su iPhone e iPad il
-                // tavolo lato Mac non c'è. «✦ Aggiungi al Prisma» si accende con il giro 15 (decisione 7)
-                #if os(macOS)
-                if esperienza.mostraSulTavolo {
-                    PulsanteMostraSulTavolo(tavolo: stato.tavolo, esperienza: esperienza, cliente: cliente)
-                }
-                #endif
+                // Migliorie d'uso 58: «▣ Mostra sul tavolo» non c'è più, sul Mac l'iPad lo sceglie l'etichetta del luogo
+                // nella vista del cliente. «✦ Aggiungi al Prisma» si accende con il giro 15 (decisione 7)
                 if esperienza.aggiungeAlPrisma {
                     // Giro 15: accende la voce nel file del cliente (Shell/StatoPrismaCliente.swift); il disegno entra
                     // nel file solo come obiettivo salvato (decisione 7)
@@ -562,9 +568,13 @@ private struct PalcoSala: View {
                           ? "Il disegno entra nel file quando lo salvi come obiettivo"
                           : "Nel file personale del cliente (Il Prisma del cliente). Prisma non manda nulla da solo")
                 }
+                // Migliorie d'uso 58: sul Mac «▶︎ Presenta» lo sostituisce «Mostra al cliente» nella testata della Sala (la vista
+                // del cliente sul capitolo «La Sala», con il palco aperto); su iPhone e iPad resta
+                #if !os(macOS)
                 Button { stato.presentaEsperienza(esperienza) } label: { Text("▶︎ Presenta") }
                     .buttonStyle(.applePrimario)
                     .help("Mostra l'esperienza a tutto schermo, in modalità cliente")
+                #endif
             }
             .fixedSize()
         }
