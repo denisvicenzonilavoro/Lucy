@@ -572,6 +572,10 @@ struct Impostazioni: Codable, Equatable {
     /// Impostazioni › Vera › «Stanotte» (versione 27, «Luce» giro 14): il lavoro della notte, spento di base, l'ora di
     /// inizio, le bozze di Vera, i tipi di carta e la notifica del mattino (spenta). Letta con tolleranza: senza, spento.
     var notte = ImpostazioniNotte()
+    /// Migliorie d'uso 38: i nomi scritti sulle etichette dei due canali (Impostazioni › Profilo, primo avvio). nil = quelli
+    /// di base («Alleanza», «Indipendente»). Letto con tolleranza, senza alzare la versione: gli archivi e i backup di
+    /// prima si aprono con i nomi di base. Entra nei calcoli in cache (testi delle notifiche, di Vera, di Studio).
+    var nomiCanali: NomiCanali?
 
     init() {}
 
@@ -593,6 +597,7 @@ struct Impostazioni: Codable, Equatable {
         case tagliando, stileVera
         case territorio
         case notte
+        case nomiCanali
     }
 
     init(from decoder: Decoder) throws {
@@ -658,6 +663,11 @@ struct Impostazioni: Codable, Equatable {
         territorio = ((try? c.decodeIfPresent(ImpostazioniTerritorio.self, forKey: .territorio)) ?? nil) ?? ImpostazioniTerritorio()
         // Stanotte (versione 27, giro 14): senza o illeggibile, spento
         notte = ((try? c.decodeIfPresent(ImpostazioniNotte.self, forKey: .notte)) ?? nil) ?? ImpostazioniNotte()
+        // Nomi dei canali (migliorie d'uso 38): senza o illeggibili, quelli di base; ripuliti come dal campo
+        nomiCanali = ((try? c.decodeIfPresent(NomiCanali.self, forKey: .nomiCanali)) ?? nil).flatMap { n in
+            let puliti = NomiCanali.scelti(primo: n.primo, secondo: n.secondo)
+            return puliti.personalizzati ? puliti : nil
+        }
     }
 }
 

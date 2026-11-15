@@ -60,6 +60,8 @@ enum ProvaBackup {
             originale.impostazioni.acquaDellaScrivania = false
             // «Riduci movimento» di Prisma acceso (spento di base): deve tornare acceso dal backup
             originale.impostazioni.riduciMovimento = true
+            // Migliorie d'uso 38: i nomi scelti per i due canali (campo letto con tolleranza): devono tornare dal backup
+            originale.impostazioni.nomiCanali = NomiCanali(primo: "Agenzia", secondo: "Studio")
             // E gli orari di lavoro dell'agenda (nelle impostazioni)
             originale.impostazioni.orari.giorni = [2, 3, 4]
             originale.impostazioni.orari.margineMinuti = 30
@@ -458,6 +460,11 @@ enum ProvaBackup {
                 print("ERRORE: «Riduci movimento» acceso non torna acceso dal backup")
                 return 1
             }
+            // Migliorie d'uso 38: i nomi scelti per i canali tornano uguali
+            guard estratto.dati.impostazioni.nomiCanali == NomiCanali(primo: "Agenzia", secondo: "Studio") else {
+                print("ERRORE: i nomi scelti per i canali non tornano uguali dal backup")
+                return 1
+            }
             // Esperienza per tipo di prodotto (versione 21): griglia e capacità di Giulia identiche dal backup
             guard let g = estratto.dati.clienti.first(where: { $0.id == "giulia" })?.profilo.esperienzaProdotti,
                   g == originale.clienti.first(where: { $0.id == "giulia" })?.profilo.esperienzaProdotti,
@@ -566,6 +573,19 @@ enum ProvaBackup {
             guard !lettoSenzaCalma.impostazioni.riduciMovimento, lettoSenzaCalma.impostazioni == attesoSenzaCalma.impostazioni,
                   lettoSenzaCalma.clienti.count == originale.clienti.count, lettoSenzaCalma.versione == originale.versione else {
                 print("ERRORE: archivio senza «Riduci movimento» non letto correttamente (atteso: movimento normale)")
+                return 1
+            }
+            // Migliorie d'uso 38: un archivio (o un backup) di prima, senza i nomi dei canali, si apre con quelli di base
+            guard let senzaNomi = try ProvaBackup.senzaCampo("nomiCanali", in: Archivio.codificatore.encode(originale)) else {
+                print("ERRORE: archivio di prova senza i nomi dei canali non preparato")
+                return 1
+            }
+            let lettoSenzaNomi = try Archivio.decodifica(senzaNomi)
+            var attesoSenzaNomi = try Archivio.decodifica(Archivio.codificatore.encode(originale))
+            attesoSenzaNomi.impostazioni.nomiCanali = nil
+            guard lettoSenzaNomi.impostazioni.nomiCanali == nil, lettoSenzaNomi.impostazioni == attesoSenzaNomi.impostazioni,
+                  lettoSenzaNomi.clienti.count == originale.clienti.count else {
+                print("ERRORE: archivio senza i nomi dei canali non letto correttamente (attesi i nomi di base)")
                 return 1
             }
 

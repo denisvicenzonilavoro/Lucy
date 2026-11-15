@@ -409,7 +409,12 @@ extension StatoShell {
         // «Luce» giro 5: gli obiettivi raggiunti prendono la loro data (i traguardi, StatoTraguardi.swift)
         segnaObiettiviRaggiunti()
         if !dati.impostazioni.introduzioneVista {
+            #if os(macOS)
+            // Migliorie d'uso 38: sul Mac le tre domande del primo avvio (PrimoAvvio.swift) al posto dell'introduzione
+            if primoAvvio == nil { apriPrimoAvvio() }
+            #else
             apriGuida(.introduzione(0))
+            #endif
         } else {
             // Le novità non si aprono più da sole (scelta dell'utente, 10 novembre 2026)
             // «Luce» giro 14: le carte della notte si aprono da sole una volta (prima della storia: vince la notte)

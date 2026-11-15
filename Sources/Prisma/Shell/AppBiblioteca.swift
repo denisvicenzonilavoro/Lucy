@@ -492,7 +492,7 @@ private struct LateraleBiblioteca: View {
             }
         }
         Menu("Canale") {
-            Button { stato.classificaBiblioteca(d.id, canale: .some(.alleanza)) } label: { marcato("Alleanza", d.canale == .alleanza) }
+            Button { stato.classificaBiblioteca(d.id, canale: .some(.alleanza)) } label: { marcato(Canale.alleanza.nomeBreve, d.canale == .alleanza) }
             Button { stato.classificaBiblioteca(d.id, canale: .some(.indipendente)) } label: { marcato("Consulenza indipendente", d.canale == .indipendente) }
             Button { stato.classificaBiblioteca(d.id, canale: .some(nil)) } label: { marcato("Nessuno (di riferimento)", d.canale == nil) }
         }

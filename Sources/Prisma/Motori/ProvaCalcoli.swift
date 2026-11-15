@@ -1341,6 +1341,8 @@ enum ProvaCalcoli {
         ProvaCalcoliDettaglioPosizione.esegui(verificaEsterna)
         // Migliorie d'uso 31: «Da sistemare» (ordine di gravità, etichette della colonna, «A posto» solo per ciò che è attivo)
         ProvaMotoreDaSistemare.esegui(verificaEsterna)
+        // Migliorie d'uso 38: il nome dei canali (pulizia, nomi di base e scelti, archivio) e le tre domande del primo avvio
+        ProvaNomiCanali.esegui(verificaEsterna)
         #if os(macOS)
         // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
         MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }

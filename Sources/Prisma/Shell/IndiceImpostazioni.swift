@@ -217,10 +217,11 @@ enum IndiceImpostazioni {
 
     private static let profilo: [V] = [
         V(titolo: "Il tuo nome", spiegazione: "Come ti accoglie la scrivania.", pagina: .profilo, parole: ["nome"]),
-        V(titolo: "Canale Alleanza", spiegazione: "Etichetta in vetro blu con il logo Alleanza. Solo prodotti Alleanza.",
-          pagina: .profilo, parole: ["canale"]),
-        V(titolo: "Canale indipendente", spiegazione: "Investimenti, risparmio, previdenza, protezione.", pagina: .profilo,
-          parole: ["canale", "consulenza"]),
+        // Migliorie d'uso 38: i nomi dei canali e le tre domande del primo avvio
+        V(titolo: "I tuoi canali", spiegazione: "I nomi scritti sulle due etichette.", pagina: .profilo,
+          ancora: "imp-profilo-canali", parole: ["canale", "Alleanza", "indipendente", "etichetta"]),
+        V(titolo: "Il primo avvio", spiegazione: "Le tre domande della prima volta.", pagina: .profilo,
+          ancora: "imp-profilo-avvio", parole: ["benvenuto", "introduzione", "rivedi"]),
     ]
 
     private static let studio: [V] = [

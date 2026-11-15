@@ -34,7 +34,7 @@ struct AppPosizioni: View {
     /// L'aiuto di una voce del canale: il secondo clic sulla voce scelta toglie il filtro.
     static func aiutoCanale(_ c: Canale, attivo: Bool) -> String {
         if attivo { return "Clic di nuovo per vedere tutti i canali" }
-        return c == .alleanza ? "Solo le posizioni Alleanza" : "Solo le posizioni indipendenti"
+        return c == .alleanza ? "Solo le posizioni \(c.nomeBreve)" : "Solo le posizioni \(c.nomeInFrase == "indipendente" ? "indipendenti" : c.nomeInFrase)"
     }
 
     /// Le posizioni del cliente attivo, o di tutti i clienti nella vista Portafoglio.

@@ -131,7 +131,7 @@ enum TestiStudio {
     /// Il fumetto di una colonna degli incassi: «dicembre · Alleanza 1.200 € · Indipendente 0 €».
     static func mese(_ m: CruscottoStudio.MeseIncasso) -> String {
         let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
-        return "\(mese(m.inizio)) · Alleanza \(alleanza) · Indipendente \(euro(m.indipendente))"
+        return "\(mese(m.inizio)) · \(Canale.alleanza.nomeBreve) \(alleanza) · \(Canale.indipendente.nomeBreve) \(euro(m.indipendente))"
     }
 }
 

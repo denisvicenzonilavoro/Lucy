@@ -7,6 +7,7 @@ import Foundation
 /// backup automatico settimanale, «Dove salvare» e «Ripristina…». Ferme nello stato finale (`\.modoIstantanea`).
 /// Migliorie d'uso 30: la colonna con il campo «Cerca nelle impostazioni» e i gruppi con un nome; 1054 e 1055 la ricerca.
 /// Migliorie d'uso 31: la colonna con «Da sistemare» e le etichette; 1056-1058 la pagina «Da sistemare».
+/// Migliorie d'uso 38: 1064-1066 le tre domande del primo avvio, 1067 Profilo con i nomi dei canali, 1068 i nomi scelti.
 extension Istantanee {
     nonisolated static var sceneImpostazioniApple: [(nome: String, prepara: (StatoShell) -> Void)] {
         [
@@ -49,6 +50,22 @@ extension Istantanee {
                 preparaDaSistemare(s)
                 s.disponibilitaLocale = .nonDisponibile("Ollama non è aperto.")
                 s.segnaSolaLetturaPerIstantanea()
+            }),
+            // Migliorie d'uso 38: le tre domande del primo avvio (la seconda con un nome scritto: l'etichetta cambia),
+            // Profilo con i due campi e «Rivedi», e una scheda di Posizioni con i nomi scelti (etichetta senza logo)
+            ("1064-uso-primo-avvio-benvenuto", { s in s.apriPrimoAvvio(pagina: 0) }),
+            ("1064-uso-primo-avvio-benvenuto-scuro", { s in s.apriPrimoAvvio(pagina: 0) }),
+            ("1065-uso-primo-avvio-canali", { s in
+                s.dati.impostazioni.nomiCanali = NomiCanali(primo: "Agenzia Rossi", secondo: "Indipendente")
+                s.apriPrimoAvvio(pagina: 1)
+            }),
+            ("1066-uso-primo-avvio-da-dove", { s in s.apriPrimoAvvio(pagina: 2) }),
+            ("1067-uso-impostazioni-profilo", { s in preparaImpostazioniApple(s, sezione: .profilo) }),
+            ("1067-uso-impostazioni-profilo-scuro", { s in preparaImpostazioniApple(s, sezione: .profilo) }),
+            ("1068-uso-canale-rinominato", { s in
+                s.dati.impostazioni.nomiCanali = NomiCanali(primo: "Agenzia Rossi", secondo: "Studio Bianchi")
+                s.clienteAttivoId = "giulia"
+                s.apri(.posizioni)
             }),
         ]
     }

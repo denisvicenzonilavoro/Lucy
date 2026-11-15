@@ -606,7 +606,7 @@ struct ElencoOccasioniAgenda: View {
         let indipendente = gruppi.indipendente
         var testo = Text("\(n)").font(Tipo.notaSettimanaForte) + Text(n == 1 ? " occasione" : " occasioni")
         if alleanza > 0 {
-            testo = testo + Text(" · ") + Text("\(alleanza)").font(Tipo.notaSettimanaForte) + Text(" Alleanza")
+            testo = testo + Text(" · ") + Text("\(alleanza)").font(Tipo.notaSettimanaForte) + Text(" " + Canale.alleanza.nomeBreve)
         }
         if indipendente > 0 {
             testo = testo + Text(" · ") + Text("\(indipendente)").font(Tipo.notaSettimanaForte) + Text(" indipendente")

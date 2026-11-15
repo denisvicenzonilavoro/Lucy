@@ -426,6 +426,17 @@ struct CorpoShell: View {
             .animation(curvaPannello(stato.sceltaMostra, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
                        value: stato.sceltaMostra)
             .opacity(nascosti ? 0 : 1)
+            // Migliorie d'uso 38: le tre domande del primo avvio (PrimoAvvio.swift), con il velo, sopra barra e dock
+            ZStack {
+                if stato.primoAvvio != nil {
+                    PrimoAvvio()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                }
+            }
+            .animation(curvaPannello(stato.primoAvvio != nil, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
+                       value: stato.primoAvvio != nil)
+            .opacity(nascosti ? 0 : 1)
             #endif
 
             ZStack {

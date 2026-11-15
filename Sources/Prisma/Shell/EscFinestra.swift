@@ -103,7 +103,9 @@ final class MonitorEscFinestra {
               !s.pannelloRicerca, !s.pannelloSpazi, !s.pannelloNotifiche, !s.pannelloAppAperte, !s.pannelloCliente,
               !sistema.pannelloNovita, s.notaVocale.mostrata == nil, s.notaVocale.inModifica == nil,
               // Migliorie d'uso 3: il dettaglio di una voce del «Da fare» al centro chiude da sé (✕, velo, Esc)
-              s.voceDaFareAperta == nil
+              s.voceDaFareAperta == nil,
+              // Migliorie d'uso 38: le tre domande del primo avvio chiudono da sé (velo, Esc)
+              s.primoAvvio == nil
         else { return false }
         switch app {
         // Territorio chiude da sé una cosa alla volta (`onExitCommand`, AppTerritorio.swift)

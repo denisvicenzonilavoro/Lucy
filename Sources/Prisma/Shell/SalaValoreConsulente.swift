@@ -342,7 +342,7 @@ struct ValoreConsulenteVista: View {
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .frame(width: V.larghezzaCifra, alignment: .trailing)
         }
-        .help("Alleanza (provvigioni stimate) \(Formati.euro(provvigioni)) · Indipendente (parcelle) \(Formati.euro(v.parcellePagate))")
+        .help("\(Canale.alleanza.nomeBreve) (provvigioni stimate) \(Formati.euro(provvigioni)) · \(Canale.indipendente.nomeBreve) (parcelle) \(Formati.euro(v.parcellePagate))")
     }
 
     private func barra(_ etichetta: String, valore: Double, frazione: Double, colore: Color, indice: Int) -> some View {

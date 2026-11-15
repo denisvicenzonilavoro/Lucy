@@ -418,6 +418,8 @@ enum VoceConfronto: Hashable {
     /// l'avviso «Per tornare al lavoro…» già mostrato in questa sessione.
     var vistaCliente: CapitoloCliente? = nil { didSet { menu.aggiornaVista(vistaCliente != nil) } }
     var sceltaMostra = false
+    /// Migliorie d'uso 38: le tre domande del primo avvio aperte, con la pagina (0…2; nil = chiuse). Solo in memoria.
+    var primoAvvio: Int? = nil
     var schermataNeutraMac = false
     var schedaMostra: SchedaMostra? = nil
     var menuUscitaMostra = false
@@ -798,6 +800,18 @@ enum VoceConfronto: Hashable {
     /// Collega i dati a `datiCambiati` (dopo le pulizie di init, che come prima non contano come modifiche).
     private func collegaDati() {
         dati.aggancio = { [weak self] cambio in self?.datiCambiati(cambio) }
+        applicaNomiCanali()
+    }
+
+    /// Migliorie d'uso 38: i nomi dei canali dell'archivio diventano quelli in uso (`NomiCanaliCorrenti` per motori e
+    /// Vera, `SegnaleNomiCanali` per le etichette), prima che `versioneCalcoli` cambi. Solo sul Mac: su iPhone e iPad
+    /// restano quelli di base anche se il campo arriva con «Prisma ovunque».
+    func applicaNomiCanali() {
+        #if os(macOS)
+        let nomi = dati.impostazioni.nomiCanali ?? .base
+        if NomiCanaliCorrenti.valore != nomi { NomiCanaliCorrenti.imposta(nomi) }
+        if SegnaleNomiCanali.condiviso.nomi != nomi { SegnaleNomiCanali.condiviso.nomi = nomi }
+        #endif
     }
 
     /// L'unico punto da cui parte tutto ciò che segue una modifica dei dati: i contatori delle cache (la regola di
@@ -836,6 +850,7 @@ enum VoceConfronto: Hashable {
         case .clienteAttivo(let prima):
             if dati.clienteAttivoId != prima { clienteAttivoCambiato.send(dati.clienteAttivoId) }
         case .impostazioni(let prima):
+            if dati.impostazioni.nomiCanali != prima.nomiCanali { applicaNomiCanali() }
             versioneDatiNotifiche &+= 1
             if !dati.impostazioni.stessiCalcoli(di: prima) {
                 versioneCalcoli &+= 1
@@ -847,6 +862,7 @@ enum VoceConfronto: Hashable {
             if dati.impostazioni.tagliando != prima.tagliando { programmaTagliando() }
             #endif
         case .tutto(let prima):
+            applicaNomiCanali()
             versioneDatiNotifiche &+= 1
             neutriNotifiche = NeutriNotifiche(dati)
             // Gli array non toccati condividono la memoria con i vecchi: confrontarli costa O(1)

@@ -424,3 +424,122 @@ struct AnelloBackupApple: View {
         }
     }
 }
+
+// MARK: - Il nome dei canali e le tre domande del primo avvio (migliorie d'uso 38)
+
+/// Il campo del nome di un canale (`campoCh` del template): pallino del colore del canale, campo largo 150 e alto 32 e,
+/// a destra, l'etichetta del canale che cambia mentre si scrive. Il nome entra nei calcoli in cache e nei documenti:
+/// passa all'archivio solo a fine scrittura (Invio, fuoco perso, campo che sparisce), con `salva`.
+///
+///     CampoNomeCanale(canale: .alleanza, nome: Canale.alleanza.nomeBreve) { stato.impostaNomeCanale(.alleanza, $0) }
+struct CampoNomeCanale: View {
+    let canale: Canale
+    /// Il nome in uso adesso (dall'archivio).
+    let nome: String
+    let salva: (String) -> Void
+    @State private var bozza: String
+    @FocusState private var fuoco: Bool
+
+    private typealias F = Tema.Apple.Impostazioni.CampoCanale
+
+    init(canale: Canale, nome: String, salva: @escaping (String) -> Void) {
+        self.canale = canale
+        self.nome = nome
+        self.salva = salva
+        _bozza = State(initialValue: nome)
+    }
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: F.raggio, style: .continuous)
+        HStack(spacing: F.spazio) {
+            Circle()
+                .fill(canale == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente)
+                .frame(width: F.pallino, height: F.pallino)
+                .accessibilityHidden(true)
+            TextField("", text: $bozza, prompt: Text(NomiCanali.base.nome(canale)))
+                .textFieldStyle(.plain)
+                .carattereApple(F.carattere)
+                .foregroundColor(F.coloreTesto)
+                .autocorrectionDisabled()
+                .focused($fuoco)
+                .padding(.horizontal, F.paddingOrizzontale)
+                .frame(width: F.larghezza, height: F.altezza)
+                .background { forma.fill(F.fondo) }
+                .overlay { forma.strokeBorder(F.filo, lineWidth: F.spessoreFilo) }
+                .overlay {
+                    if fuoco {
+                        forma.inset(by: -F.spessoreAnello).strokeBorder(F.anelloFuoco, lineWidth: F.spessoreAnello)
+                    }
+                }
+                .onSubmit { scrivi() }
+                .onChange(of: bozza) { nuovo in
+                    // Come `maxlength` 18 del template, senza i caratteri che non vanno su un'etichetta
+                    let ripulito = NomiCanali.ripulisciScrittura(nuovo)
+                    if ripulito != nuovo { bozza = ripulito }
+                }
+                .onChange(of: fuoco) { attivo in
+                    if !attivo { scrivi() }
+                }
+                // Cambiato da fuori (il primo avvio, un ripristino) mentre non si scrive: vale l'archivio
+                .onChange(of: nome) { esterno in
+                    if !fuoco && esterno != bozza { bozza = esterno }
+                }
+                .onDisappear { scrivi() }
+                .accessibilityLabel(Text(canale == .alleanza ? "Il primo canale" : "Il secondo canale"))
+            EtichettaCanaleApple(canale: canale, compatta: canale == .indipendente, nomeScelto: bozza)
+        }
+    }
+
+    /// Fine della scrittura: il nome ripulito passa all'archivio (vuoto = quello di base) e il campo lo mostra.
+    private func scrivi() {
+        let pulito = NomiCanali.pulisci(bozza)
+        let mostrato = pulito.isEmpty ? NomiCanali.base.nome(canale) : pulito
+        if mostrato != nome { salva(pulito) }
+        if bozza != mostrato { bozza = mostrato }
+    }
+}
+
+/// Un'opzione della terza domanda del primo avvio (`.avO` del template): riquadro raggio 16 con il cerchio di scelta 20
+/// a sinistra, titolo e spiegazione; la scelta ha il filo blu e il cerchio pieno.
+struct OpzioneInizio: View {
+    let titolo: String
+    let testo: String
+    let scelta: Bool
+    let azione: () -> Void
+
+    private typealias P = Tema.Apple.PrimoAvvio
+    @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.modoIstantanea) private var modoIstantanea
+
+    var body: some View {
+        let forma = RoundedRectangle(cornerRadius: P.raggioOpzione, style: .continuous)
+        Button(action: azione) {
+            HStack(spacing: P.spazioOpzione) {
+                Circle()
+                    .strokeBorder(scelta ? P.filoScelta : P.coloreCerchio, lineWidth: scelta ? P.filoCerchioScelto : P.filoCerchio)
+                    .frame(width: P.cerchio, height: P.cerchio)
+                VStack(alignment: .leading, spacing: P.sottoTitoloOpzione) {
+                    Text(titolo)
+                        .carattereApple(P.titoloOpzione)
+                        .foregroundColor(P.coloreTitolo)
+                    Text(testo)
+                        .carattereApple(P.testoOpzione)
+                        .foregroundColor(P.coloreTestoOpzione)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(P.paddingOpzione)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background { forma.fill(P.fondoOpzione) }
+            .overlay {
+                forma.strokeBorder(scelta ? P.filoScelta : P.filoOpzione, lineWidth: scelta ? P.spessoreFiloScelta : P.spessoreFiloOpzione)
+            }
+            .contentShape(forma)
+        }
+        .buttonStyle(.plain)
+        .animation(Tema.Apple.Moto.animazione(P.animazioneScelta, calmo: calmo, istantanea: modoIstantanea), value: scelta)
+        .accessibilityElement(children: .combine)
+        .accessibilityAddTraits(scelta ? .isSelected : [])
+    }
+}

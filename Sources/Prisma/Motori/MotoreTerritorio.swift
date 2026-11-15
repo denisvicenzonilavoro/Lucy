@@ -56,8 +56,8 @@ enum CanaleLuce: Equatable {
 
     var nome: String {
         switch self {
-        case .alleanza: return "Alleanza"
-        case .indipendente: return "Indipendente"
+        case .alleanza: return Canale.alleanza.nomeBreve
+        case .indipendente: return Canale.indipendente.nomeBreve
         case .entrambi: return "Entrambi i canali"
         }
     }

@@ -620,3 +620,49 @@ Resta:
 - **«N su M» dei dati per le fatture**: la frase dice «ne mancano N»; il totale richiederebbe un conteggio dei dati
   richiesti in `MotoreFattura`.
 - I token vecchi della Panoramica (`Tema.Misura.Impostazioni`, `Tema.Apple.Impostazioni.Tessera`) restano per l'iPad.
+
+## 38. I canali hanno il nome che scegli
+
+Fatto (solo sul Mac): `NomiCanali` (Dati/NomiCanali.swift: `pulisci` toglie `< > & "` e i caratteri di controllo, gli
+spazi ai lati, al più 18 caratteri; `scelti` riporta un nome vuoto a quello di base) e il campo
+`Impostazioni.nomiCanali` (nil = «Alleanza» e «Indipendente»; letto con tolleranza, nell'indice dell'archivio con le
+impostazioni, nei backup, nell'istantanea di «Prisma ovunque» come le altre impostazioni del Mac; entra nei calcoli in
+cache). Il nome in uso sta in `NomiCanaliCorrenti` (protetto da un lucchetto: lo leggono motori e Vera) e in
+`SegnaleNomiCanali` (osservato dalle etichette); li aggiorna `StatoShell.applicaNomiCanali()` al caricamento, a ogni
+cambio delle impostazioni e al ripristino, prima di `versioneCalcoli`, solo sul Mac. `Canale.nomeBreve` legge il nome in
+uso; `Canale.nome` con i nomi di base resta «Alleanza Assicurazioni» / «Denis Vicenzoni · Consulenza finanziaria», con un
+nome scelto è il nome scelto (anche nei PDF, proposta §38.6.2); il logo Alleanza (vetro, stampa, capsula) solo con il
+primo nome di base (`Canale.conLogo`), altrimenti il pallino blu. Impostazioni › Profilo sul Mac: «I tuoi canali» con la
+nota, «Il primo canale» · «Blu, sempre.» e «Il secondo canale» · «Cuoio, sempre.» con `CampoNomeCanale` (l'etichetta
+accanto cambia mentre si scrive, l'archivio a fine scrittura: Invio, fuoco perso, campo che sparisce), «Il primo avvio»
+con «Rivedi». Le tre domande `PrimoAvvio` (Shell/PrimoAvvio.swift) al posto dell'introduzione dopo il primo sblocco, con
+`PuntiPagine`, «Indietro», «Avanti» / «Comincia», frecce (non sulla pagina dei nomi), Invio ed Esc; la scelta
+`OpzioneInizio`. Sostituite le scritte fisse più evidenti (legenda del Territorio, filtri di Posizioni e Prodotti,
+segmenti del canale in importazione e documenti, Biblioteca, sinistri, Studio: «Produzione …», «Le tue aliquote …», il
+fumetto degli incassi, la storia della settimana, le colonne del riesame, la Sala). Istruzioni della chat di Vera: il
+canale si chiama come nella scheda. Prove `ProvaNomiCanali` in `--prova-calcoli` e i nomi nel backup in `--prova-backup`;
+istantanee nuove 1064 (chiara e scura), 1065, 1066, 1067 (chiara e scura), 1068.
+
+Resta:
+- **CLAUDE.md**: la regola del canale («Alleanza = etichetta in vetro blu con il logo Alleanza; indipendente = …») va
+  aggiornata dall'utente come in §38.6.1 (con un nome scelto l'etichetta perde il logo e mostra il nome, sempre nel suo
+  colore). Non l'ho toccata.
+- **Miglioria 37**: «Guardo Prisma con i clienti di prova» oggi mostra solo l'avviso «Si comincia con la dimostrazione»
+  (i dati di prova ci sono già al primo avvio); con la 37 deve chiamare `accendiDimostrazione(.trentacinque)`, e «Porto i
+  miei clienti» / «Parto da zero» devono spegnere la dimostrazione accesa (`spegniDimostrazione()`) prima di proseguire
+  (`StatoShell.cominciaPrimoAvvio`, PrimoAvvio.swift).
+- **«Come funziona» della guida** (§38.6.3): per ora resta nel «?» come scheda in più (alternativa della specifica), con
+  la riga «Come funziona Prisma» di Impostazioni › Aspetto e la voce del menu Aiuto; le istantanee 222-224 e 229 restano
+  quelle dell'introduzione. Se l'utente sceglie la proposta: togliere la scheda sul Mac e far aprire `PrimoAvvio` dal menu.
+- **Scritte fisse rimaste**: testi in prosa che nominano la compagnia o il canale («Le percentuali che Alleanza ti
+  riconosce…», le note di Studio sulle posizioni Alleanza senza decorrenza, coerenza e adeguatezza «nel canale
+  Alleanza», le firme dei documenti «Consulente Alleanza Assicurazioni» nei Testi* dei PDF, il glossario, la guida, il
+  copilota). Molti parlano davvero della compagnia; vanno decisi uno per uno guardando le istantanee.
+- **Etichette che non osservano il nome**: le capsule dei canali si ridisegnano da sole (`SegnaleNomiCanali`); gli altri
+  testi con `nomeBreve` cambiano al primo ridisegno della loro vista (di solito subito, perché il nome alza
+  `versioneCalcoli`).
+- **iPhone e iPad**: il campo arriva con «Prisma ovunque» ma i nomi restano quelli di base finché non si fa il loro giro.
+- **Istantanee**: rigenerare sul Mac 252 e le scene con le etichette dei canali, guardare 1064-1068 chiare e scure (la
+  pagina dei nomi deve stare in 640 con l'etichetta accanto al campo) e aggiornare la pagina delle anteprime.
+- **Da provare sul Mac vero**: che Invio nel campo dei nomi non faccia anche «Avanti» (se lo fa, il nome si salva
+  comunque quando la pagina cambia) e che il fuoco perso salvi il nome anche cliccando fuori dal campo.

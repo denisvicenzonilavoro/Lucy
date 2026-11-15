@@ -192,8 +192,8 @@ struct LegendaTerritorio: View {
     var body: some View {
         VStack(alignment: .leading, spacing: Lg.spazio) {
             HStack(spacing: Lg.spazio * 2) {
-                voce(colore: L.alleanza, "Alleanza")
-                voce(colore: L.indipendente, "Indipendente")
+                voce(colore: L.alleanza, Canale.alleanza.nomeBreve)
+                voce(colore: L.indipendente, Canale.indipendente.nomeBreve)
                 HStack(spacing: Lg.spazio) {
                     Circle().stroke(Lg.bordoEntrambi, lineWidth: Lg.spessoreBordo).frame(width: Lg.pallino, height: Lg.pallino)
                     Text("entrambi").carattereApple(Lg.testo).foregroundColor(Lg.colore)

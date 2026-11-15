@@ -85,9 +85,9 @@ enum TestiStorie {
         var parti: [String] = []
         for t in MotoreStudio.TipoProvvigione.allCases where tipi.contains(t) {
             switch t {
-            case .nuovaProduzione: parti.append("nuova produzione Alleanza")
-            case .ricorrente: parti.append("ricorrenti Alleanza")
-            case .rinnovo: parti.append("rinnovi Alleanza")
+            case .nuovaProduzione: parti.append("nuova produzione \(Canale.alleanza.nomeBreve)")
+            case .ricorrente: parti.append("ricorrenti \(Canale.alleanza.nomeBreve)")
+            case .rinnovo: parti.append("rinnovi \(Canale.alleanza.nomeBreve)")
             }
         }
         if parcelle > 0 { parti.append(numeroParcelle(parcelle)) }

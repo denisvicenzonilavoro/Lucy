@@ -279,5 +279,112 @@ extension Tema.Apple {
             static let campoTesto: CGFloat = 380
             static let carattereCampi = Carattere.secondario
         }
+
+        // MARK: Il nome dei canali (migliorie d'uso 38)
+
+        /// Il campo del nome di un canale (`.impIn` e `campoCh` del template): pallino 12 del colore del canale, campo
+        /// largo 150 e alto 32, raggio 9, filo, fondo della carta, testo 13,5 semibold; al fuoco l'anello blu al 35%.
+        /// A destra l'etichetta del canale com'è adesso.
+        enum CampoCanale {
+            static let larghezza: CGFloat = 150
+            static let altezza: CGFloat = 32
+            static let raggio: CGFloat = 9
+            static let pallino: CGFloat = 12
+            static let carattere = Carattere(dimensione: 13.5, peso: .semibold)
+            static let coloreTesto = Colore.inchiostro
+            static let fondo = Colore.cardPiena
+            static let filo = Colore.separatore
+            static let spessoreFilo: CGFloat = 1
+            static let anelloFuoco = Colore.accento.opacity(0.35)
+            static let spessoreAnello: CGFloat = 2
+            static let paddingOrizzontale: CGFloat = 10
+            static let spazio: CGFloat = 10
+        }
+
+        /// Gli occhielli della pagina Profilo (`.lbl` 16 sopra, 4 sotto; la nota dei canali 13,5, 10 sotto).
+        enum ProfiloCanali {
+            static let sopraOcchiello: CGFloat = 16
+            static let sottoOcchiello: CGFloat = 4
+            static let sottoOcchielloAvvio: CGFloat = 8
+            static let nota = Carattere(dimensione: 13.5, peso: .regular)
+            static let coloreNota = Colore.inchiostro2
+            static let sottoNota: CGFloat = 10
+            static let rientro: CGFloat = 4
+        }
+    }
+
+    // MARK: Le tre domande del primo avvio (migliorie d'uso 38)
+
+    /// La scheda del primo avvio (`apriAvvio` del template): larga 640, contenuto alto almeno 300, sul vetro sopra la
+    /// scrivania con il velo; il contenuto di ogni pagina entra da destra di 14 pt in 320 ms (curva `--out`).
+    enum PrimoAvvio {
+        static let larghezza: CGFloat = 640
+        static let altezzaMinima: CGFloat = 300
+        static let raggio: CGFloat = Raggio.dettaglioAperto
+        static let padding: CGFloat = 28
+        static let bordo: CGFloat = 40
+        static let superficie = Superficie.vetroSopra
+        static let velo = Colore.velo
+        static let entrataY: CGFloat = 18
+        static let entrataScala: CGFloat = 0.97
+        static var animazione: Animation { Moto.Curva.uscita.animazione(0.48) }
+        /// Il cambio di pagina: da destra di 14 pt, 0,32 s.
+        static let spostamentoPagina: CGFloat = 14
+        static var animazionePagina: Animation { Moto.Curva.uscita.animazione(0.32) }
+        /// Pagina 1: il logo 54 a sinistra, 20 dal testo.
+        static let logo: CGFloat = 54
+        static let coloreLogo = Colore.logo
+        static let spazioLogo: CGFloat = 20
+        static let occhiello = Carattere.etichetta
+        static let coloreOcchiello = Colore.inchiostro2
+        /// `.avT`: titolo 28 bold, 4 sopra e 8 sotto.
+        static let titolo = Carattere(dimensione: 28, peso: .bold, tracking: -0.6)
+        static let coloreTitolo = Colore.inchiostro
+        static let sopraTitolo: CGFloat = 4
+        static let sottoTitolo: CGFloat = 8
+        /// `.avS`: testo 15, interlinea 1,55, al più 520 di larghezza, 10 sotto.
+        static let testo = Carattere(dimensione: 15, peso: .regular, interlinea: 6)
+        static let coloreTesto = Colore.inchiostro2
+        static let larghezzaTesto: CGFloat = 520
+        static let sottoTesto: CGFloat = 10
+        /// I tre punti della pagina 1: pallino blu 7, testo 14,5, 5 sopra e sotto.
+        static let pallinoPunto: CGFloat = 7
+        static let colorePallino = Colore.accento
+        static let punto = Carattere(dimensione: 14.5, peso: .regular)
+        static let colorePunto = Colore.inchiostro
+        static let spazioPunto: CGFloat = 10
+        static let paddingPunto: CGFloat = 5
+        /// Pagina 2: la scheda dei due canali (padding 6×18, senza ombra, 14 sopra) e la nota 10 sotto.
+        static let paddingSchedaCanali = Misura.padding(6, 18)
+        static let sopraScheda: CGFloat = 14
+        static let rigaCanale = Carattere(dimensione: 14, peso: .regular)
+        static let paddingRigaCanale: CGFloat = 8
+        static let nota = Carattere.secondario
+        static let coloreNota = Colore.inchiostro2
+        static let sopraNota: CGFloat = 10
+        /// Pagina 3: le tre opzioni (`.avO`): padding 13×16, raggio 16, filo, fondo della carta, 8 fra l'una e l'altra;
+        /// cerchio 20 con il filo di 2 del binario, la scelta con il filo blu (anello 1) e il cerchio pieno a 6.
+        static let paddingOpzione = Misura.padding(13, 16)
+        static let raggioOpzione: CGFloat = 16
+        static let fondoOpzione = Colore.cardPiena
+        static let filoOpzione = Colore.separatore
+        static let filoScelta = Colore.accento
+        static let spessoreFiloOpzione: CGFloat = 1
+        static let spessoreFiloScelta: CGFloat = 2
+        static let sottoTitoloOpzione: CGFloat = 2
+        static let spazioOpzioni: CGFloat = 8
+        static let spazioOpzione: CGFloat = 14
+        static let sopraOpzioni: CGFloat = 12
+        static let cerchio: CGFloat = 20
+        static let filoCerchio: CGFloat = 2
+        static let filoCerchioScelto: CGFloat = 6
+        static let coloreCerchio = Colore.binario
+        static let titoloOpzione = Carattere(dimensione: 15, peso: .bold)
+        static let testoOpzione = Carattere.secondario
+        static let coloreTestoOpzione = Colore.inchiostro2
+        static var animazioneScelta: Animation { Moto.Curva.molla.animazione(0.25) }
+        /// Il piede: i punti delle pagine (`PuntiPagine`, come l'introduzione), 18 sopra; i pulsanti a destra.
+        static let sopraPiede: CGFloat = 18
+        static let spazioPulsanti: CGFloat = 8
     }
 }
