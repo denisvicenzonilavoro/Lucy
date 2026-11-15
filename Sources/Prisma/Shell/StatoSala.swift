@@ -71,6 +71,73 @@ enum EsperienzaSala: String, CaseIterable, Identifiable {
 
     /// Le dieci schede piccole della griglia (la prima, grande, è il Prisma del cliente).
     static var piccole: [EsperienzaSala] { allCases.filter { $0 != .prismaCliente } }
+
+    // MARK: Migliorie d'uso 34: il momento giusto
+
+    /// Il momento dell'incontro in cui l'esperienza serve (`SALA_M` del template).
+    var momento: MomentoSala {
+        switch self {
+        case .prismaLuce, .disegna, .realtaAumentata: return .apre
+        case .giocoRischio, .giornataPensione, .lanciaAnno: return .spiega
+        case .lettera, .valoreConsulente, .capsula: return .chiude
+        case .film, .prismaCliente: return .dopo
+        }
+    }
+
+    /// Quanto dura, circa, in minuti: una stima editoriale fissa del template, non una cifra del cliente. Il Prisma del
+    /// cliente non ha durata (si prepara e si manda). Per Lancia l'anno non dipende dagli anni della partita.
+    var minuti: Int? {
+        switch self {
+        case .prismaLuce, .realtaAumentata, .valoreConsulente, .capsula: return 2
+        case .disegna: return 5
+        case .giocoRischio: return 4
+        case .giornataPensione, .lanciaAnno, .lettera: return 3
+        case .film: return 1
+        case .prismaCliente: return nil
+        }
+    }
+
+    /// L'area di Analisi 360 a cui l'esperienza risponde (il risparmio non ha un'esperienza sua).
+    var areaConsigliata: AreaAnalisi? {
+        switch self {
+        case .giocoRischio: return .investimenti
+        case .giornataPensione: return .previdenza
+        case .lanciaAnno: return .protezione
+        default: return nil
+        }
+    }
+
+    /// Al più quante esperienze si consigliano per un cliente.
+    static let consigliateMassime = 2
+
+    /// Le esperienze consigliate dalle priorità del cliente (`PrioritaAree360`, in ordine dalla prima): al più due,
+    /// nell'ordine delle priorità; le aree senza esperienza si saltano. Senza priorità nessun consiglio.
+    static func consigliate(priorita: [AreaAnalisi]) -> [EsperienzaSala] {
+        var esito: [EsperienzaSala] = []
+        for area in priorita {
+            guard esito.count < consigliateMassime else { break }
+            if let e = allCases.first(where: { $0.areaConsigliata == area }), !esito.contains(e) {
+                esito.append(e)
+            }
+        }
+        return esito
+    }
+}
+
+/// Migliorie d'uso 34: i quattro momenti dell'incontro, nell'ordine del filtro della Sala.
+enum MomentoSala: String, CaseIterable, Identifiable, Hashable {
+    case apre, spiega, chiude, dopo
+
+    var id: String { rawValue }
+
+    var titolo: String {
+        switch self {
+        case .apre: return "Per aprire"
+        case .spiega: return "Per spiegare"
+        case .chiude: return "Per chiudere"
+        case .dopo: return "Dopo l’incontro"
+        }
+    }
 }
 
 /// Le schede di Pratiche (§1.2.1: Proposta · Moduli · Dopo la firma · Sinistri).
@@ -168,6 +235,11 @@ enum VistaTerritorio: String, CaseIterable, Identifiable, Hashable {
     @ObservationIgnored var realtaIstantanea: ScenaRealtaDiProva?
     /// iPhone e iPad: la realtà aumentata a tutto schermo è aperta («Apri in realtà aumentata»).
     var realtaAperta = false
+    /// Migliorie d'uso 34: il momento scelto nel filtro della griglia (nil = «Tutte»). Osservato, non salvato: si azzera
+    /// alla chiusura della Sala.
+    var momento: MomentoSala?
+    /// Solo istantanee (1117): il cliente come se non avesse priorità (etichette dei momenti senza consigli).
+    @ObservationIgnored var senzaPrioritaIstantanea = false
 }
 
 /// Che cosa lascia a metà il gioco del rischio (§4.1.4): il ritorno alla griglia («‹ Sala» o Esc) o il cambio di cliente.

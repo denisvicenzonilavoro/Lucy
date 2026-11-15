@@ -1290,3 +1290,29 @@ Resta:
   dall'opacità), e 1106 se nessun cliente di prova è senza bisogni (la scena apre proposte presentate per il primo).
 - I token dei chip di «Compila per» (`Tema.Apple.Pratiche.Moduli.chip…`, `paddingPopover`) restano nel tema, non più
   usati.
+
+## 34. Le esperienze della Sala, al momento giusto
+
+Fatto (solo Mac, `Tema.Apple.SalaEsperienze.Momento.ammesso`; iPhone e iPad tengono la griglia di prima):
+- **Il modello** (Shell/StatoSala.swift): `MomentoSala` (Per aprire · Per spiegare · Per chiudere · Dopo l’incontro);
+  in `EsperienzaSala` `momento`, `minuti` (le stime del template, come «circa»; il Prisma del cliente senza durata),
+  `areaConsigliata` e la funzione pura `consigliate(priorita:)` (al più due, il risparmio saltato).
+- **Le priorità** sono quelle della miglioria 17 (`PrioritaAree360.calcola`, stessa fonte e stesso ripiego delle card di
+  Analisi 360), in cache con `stato.ricavato` (`prioritaAree360`, `esperienzeConsigliate` in Shell/SalaMomenti.swift).
+- **Le schede**: «<momento> · <n> min» in alto a destra (perde la durata se accanto al tassello non c'è posto),
+  «Consigliata per <Nome>» verde sotto il tassello delle piccole, dentro la colonna (non copre il titolo); le schede di
+  un altro momento a 0,26 in 0,35 s × ritmo, cliccabili e inclinabili. VoiceOver legge momento, durata e consiglio.
+- **Il filtro** nella testata (`FiltroMomentiSala`, osserva solo `sala.esperienza` e `sala.momento`), nascosto sul
+  palco; `StatoSala.momento` in memoria, si azzera alla chiusura della Sala.
+- Niente indicazioni senza cliente, in modalità cliente e nella vista pulita (`StatoShell.indicazioniSala`); presentazione
+  e tavolo non mostrano la griglia.
+- Prova `ProvaCalcoliSalaMomenti` in `--prova-calcoli`; istantanee nuove 1115-uso-sala-momenti (chiara e scura),
+  1115-uso-sala-momenti-stretta, 1116-uso-sala-momento-filtrato, 1117-uso-sala-senza-priorita (con il campo di prova
+  `StatoSala.senzaPrioritaIstantanea`). 618-app-nuove-sala e 690 ora mostrano le etichette.
+
+Resta:
+- La prova «in modalità cliente nessuna indicazione» con uno `StatoShell` vero non è stata scritta (la regola è in
+  `indicazioniSala`); controllare 692 e 693 nelle istantanee.
+- Guardare sul Mac 1115-stretta: con le schede piccole basse l'etichetta verde toglie spazio a titolo e frase.
+- Analisi 360 calcola ancora le priorità per conto suo (`ingressiCard`): potrebbe usare `prioritaAree360` per avere un
+  solo punto.

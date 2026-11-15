@@ -9,7 +9,8 @@ import SwiftUI
 /// - 617: la tavola delle icone nell'ordine del dock su fondo chiaro e scuro (Pratiche e Incontri, Biblioteca e Clienti,
 ///   Sala e Vera a confronto, decisione 122); 619: la tavola dei 29 glifi nei tasselli;
 /// - 618: le quattro finestre nuove con la testata e lo stato «in arrivo»;
-/// - 690-694: la Sala (griglia, palco, senza cliente, in modalità cliente, presentazione sulla sala opaca).
+/// - 690-694: la Sala (griglia, palco, senza cliente, in modalità cliente, presentazione sulla sala opaca);
+/// - 1115-1117 (migliorie d'uso 34): i momenti e le consigliate sulla griglia, il filtro, un cliente senza priorità.
 /// I clienti sono quelli di prova del template (dati di prova): nessun dato nuovo nell'archivio.
 extension Istantanee {
     /// La finestra di Prisma alla larghezza minima (`ShellView`: 1100 × 720).
@@ -59,6 +60,28 @@ extension Istantanee {
         coppia("694-sala-presenta") { s in
             s.apriEsperienza(.prismaLuce, cliente: "giulia")
             s.presentaEsperienza(.prismaLuce)
+        }
+        // Migliorie d'uso 34: le esperienze dicono il loro momento e quanto durano, due sono consigliate per il cliente
+        coppia("1115-uso-sala-momenti") { s in
+            s.clienteAttivoId = "giulia"
+            s.apri(.sala)
+        }
+        // La stessa griglia alla larghezza minima: le etichette non coprono tassello e titolo
+        una("1115-uso-sala-momenti-stretta") { s in
+            s.clienteAttivoId = "giulia"
+            s.apri(.sala)
+        }
+        // «Per spiegare» scelto nel filtro: le altre schede attenuate, non nascoste
+        una("1116-uso-sala-momento-filtrato") { s in
+            s.clienteAttivoId = "giulia"
+            s.sala.momento = .spiega
+            s.apri(.sala)
+        }
+        // Un cliente senza priorità: le etichette dei momenti, nessun consiglio inventato
+        una("1117-uso-sala-senza-priorita") { s in
+            s.clienteAttivoId = "giulia"
+            s.sala.senzaPrioritaIstantanea = true
+            s.apri(.sala)
         }
         return scene
     }

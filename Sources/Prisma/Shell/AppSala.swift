@@ -51,6 +51,10 @@ struct AzioniSala: View {
                 .equatable()
         }
         #if os(macOS)
+        // Migliorie d'uso 34: il filtro dei momenti, solo con le indicazioni di lavoro (nascosto sul palco)
+        if stato.indicazioniSala {
+            FiltroMomentiSala(sala: stato.sala)
+        }
         // Migliorie d'uso 1: con un cliente scelto, il blu «Mostra al cliente» porta nella vista pulita sulla Sala (non
         // c'è dentro la vista pulita, che è già la vista del cliente)
         if !stato.inModoCliente, stato.clienteAttivo != nil {
@@ -62,6 +66,26 @@ struct AzioniSala: View {
         #endif
     }
 }
+
+#if os(macOS)
+/// Migliorie d'uso 34: «Tutte · Per aprire · Per spiegare · Per chiudere · Dopo l’incontro» nella testata della Sala.
+/// Osserva da solo l'esperienza sul palco e il momento scelto: la testata non si iscrive al resto di `StatoSala`.
+private struct FiltroMomentiSala: View {
+    @Bindable var sala: StatoSala
+
+    var body: some View {
+        if sala.esperienza == nil {
+            SegmentatoPillola(selezione: $sala.momento, voci: Self.voci)
+                .fixedSize()
+                .help(TestiSala.aiutoFiltro)
+        }
+    }
+
+    private static var voci: [(MomentoSala?, String)] {
+        [(nil, TestiSala.tutte)] + MomentoSala.allCases.map { (Optional($0), $0.titolo) }
+    }
+}
+#endif
 
 private struct CorpoSala: View {
     @Environment(StatoShell.self) var stato
@@ -81,7 +105,12 @@ private struct CorpoSala: View {
                 // Migliorie d'uso 2: con «Tutti i clienti» la Sala chiede la persona
                 vuotoSala
             } else {
-                GrigliaSala(cliente: cliente, spazio: spazio, apri: apri)
+                // Migliorie d'uso 34: le indicazioni di lavoro (momenti, filtro, consigli), lette una volta qui
+                let indicazioni = stato.indicazioniSala
+                GrigliaSala(cliente: cliente, spazio: spazio, apri: apri,
+                            indicazioni: indicazioni,
+                            consigliate: indicazioni ? (cliente.map { stato.esperienzeConsigliate($0.id) } ?? []) : [],
+                            momento: indicazioni ? sala.momento : nil)
                     .transition(.opacity)
             }
             EscSala(sistema: stato.sistema, palco: sala.esperienza != nil)
@@ -182,6 +211,10 @@ private struct GrigliaSala: View {
     let cliente: Cliente?
     let spazio: Namespace.ID
     let apri: (EsperienzaSala) -> Void
+    /// Migliorie d'uso 34: momento e durata sulle schede, le consigliate per il cliente e il momento del filtro.
+    var indicazioni = false
+    var consigliate: [EsperienzaSala] = []
+    var momento: MomentoSala?
 
     private typealias G = Tema.Apple.SalaEsperienze.Griglia
 
@@ -192,14 +225,18 @@ private struct GrigliaSala: View {
             let piccole = EsperienzaSala.piccole
             let righe = stride(from: 0, to: piccole.count, by: G.colonne).map { Array(piccole[$0..<min($0 + G.colonne, piccole.count)]) }
             HStack(alignment: .top, spacing: G.spazio) {
-                SchedaGrandeSala(cliente: cliente, spazio: spazio, apri: apri)
+                SchedaGrandeSala(cliente: cliente, spazio: spazio, apri: apri, indicazioni: indicazioni,
+                                 attenuata: attenuata(.prismaCliente))
                     .frame(width: unita * G.quotaPrima)
                     .entrataCascata(0)
                 VStack(spacing: G.spazio) {
                     ForEach(Array(righe.enumerated()), id: \.offset) { r, riga in
                         HStack(spacing: G.spazio) {
                             ForEach(Array(riga.enumerated()), id: \.element) { c, e in
-                                SchedaPiccolaSala(esperienza: e, spenta: cliente == nil, spazio: spazio, apri: apri)
+                                SchedaPiccolaSala(esperienza: e, spenta: cliente == nil, spazio: spazio, apri: apri,
+                                                  indicazioni: indicazioni,
+                                                  consigliata: consigliate.contains(e) ? cliente.map { StatoShell.nomeBreve($0) } : nil,
+                                                  attenuata: attenuata(e))
                                     .frame(width: unita)
                                     .entrataCascata(1 + r * G.colonne + c)
                             }
@@ -210,6 +247,62 @@ private struct GrigliaSala: View {
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
         }
     }
+
+    /// Un altro momento è scelto nel filtro: la scheda si attenua (non sparisce).
+    private func attenuata(_ e: EsperienzaSala) -> Bool {
+        guard indicazioni, let momento else { return false }
+        return e.momento != momento
+    }
+}
+
+/// Migliorie d'uso 34: «Per aprire · 2 min» in alto a destra della scheda. Se accanto al tassello non c'è posto,
+/// l'etichetta perde la durata. È un'indicazione di lavoro: VoiceOver la legge con il nome della scheda.
+private struct EtichettaMomentoSala: View {
+    let esperienza: EsperienzaSala
+    /// Lo spazio da sinistra occupato dal tassello (padding della scheda più il lato del tassello).
+    let rientro: CGFloat
+
+    private typealias M = Tema.Apple.SalaEsperienze.Momento
+
+    var body: some View {
+        ViewThatFits(in: .horizontal) {
+            capsula(TestiSala.momento(esperienza))
+            capsula(esperienza.momento.titolo)
+        }
+        .padding(.top, M.dallAlto)
+        .padding(.trailing, M.daDestra)
+        .padding(.leading, rientro + M.accantoTassello)
+        .frame(maxWidth: .infinity, alignment: .trailing)
+        .accessibilityHidden(true)
+    }
+
+    private func capsula(_ testo: String) -> some View {
+        Text(testo)
+            .carattereApple(M.carattere)
+            .foregroundColor(M.colore)
+            .lineLimit(1)
+            .fixedSize()
+            .padding(M.padding)
+            .background { Capsule(style: .continuous).fill(M.fondo) }
+    }
+}
+
+/// Migliorie d'uso 34: l'etichetta verde «Consigliata per <Nome>» sotto il tassello delle esperienze consigliate.
+private struct EtichettaConsigliataSala: View {
+    let nome: String
+
+    private typealias M = Tema.Apple.SalaEsperienze.Momento
+
+    var body: some View {
+        Text(TestiSala.consigliata(nome))
+            .carattereApple(M.consiglio)
+            .foregroundColor(M.testoConsiglio)
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .padding(M.paddingConsiglio)
+            .background { Capsule(style: .continuous).fill(M.fondoConsiglio) }
+            .accessibilityHidden(true)
+    }
 }
 
 /// La scheda grande «Il Prisma del cliente»: il saluto e gli anelli dei primi tre obiettivi del cliente attivo.
@@ -218,8 +311,15 @@ private struct SchedaGrandeSala: View {
     let cliente: Cliente?
     let spazio: Namespace.ID
     let apri: (EsperienzaSala) -> Void
+    /// Migliorie d'uso 34: l'etichetta «Dopo l’incontro» e l'attenuazione del filtro.
+    var indicazioni = false
+    var attenuata = false
+
+    @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.modoIstantanea) private var istantanea
 
     private typealias S = Tema.Apple.SalaEsperienze.Scheda
+    private typealias M = Tema.Apple.SalaEsperienze.Momento
 
     var body: some View {
         let _ = ContaCorpi.segna()
@@ -255,15 +355,23 @@ private struct SchedaGrandeSala: View {
             .multilineTextAlignment(.leading)
             .padding(S.paddingGrande)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .overlay(alignment: .topTrailing) {
+                if indicazioni {
+                    EtichettaMomentoSala(esperienza: e, rientro: S.paddingGrande + S.tasselloGrande)
+                }
+            }
             .matchedGeometryEffect(id: e.id, in: spazio, isSource: true)
             .superficieApple(S.superficie, raggio: S.raggio)
             .clipShape(RoundedRectangle(cornerRadius: S.raggio, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: S.raggio, style: .continuous))
+            .opacity(attenuata ? M.opacitaAttenuata : 1)
+            .animation(Tema.Apple.Moto.animazione(M.cambio, calmo: calmo, istantanea: istantanea), value: attenuata)
         }
         .buttonStyle(StileSemplice())
         .inclinazione(massimo: Tema.Apple.Moto.Inclinazione.massimoSalaGrande, raggio: S.raggio)
         .help(cliente == nil ? "Scegli prima un cliente in Clienti" : "Apri «\(e.titolo)»")
-        .accessibilityLabel(Text("\(e.titolo): \(e.frase)"))
+        .accessibilityLabel(Text(indicazioni ? "\(e.titolo): \(e.frase). \(TestiSala.accessibilita(e, consigliata: nil))"
+                                              : "\(e.titolo): \(e.frase)"))
     }
 
     /// I primi tre obiettivi: quanto è già da parte rispetto al traguardo (decisione 81), mai anelli inventati.
@@ -305,13 +413,27 @@ private struct SchedaPiccolaSala: View {
     let spenta: Bool
     let spazio: Namespace.ID
     let apri: (EsperienzaSala) -> Void
+    /// Migliorie d'uso 34: momento e durata in alto a destra, il nome del cliente se l'esperienza è consigliata per
+    /// lui, l'attenuazione del filtro (la scheda resta cliccabile e si inclina).
+    var indicazioni = false
+    var consigliata: String?
+    var attenuata = false
+
+    @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.modoIstantanea) private var istantanea
 
     private typealias S = Tema.Apple.SalaEsperienze.Scheda
+    private typealias M = Tema.Apple.SalaEsperienze.Momento
 
     var body: some View {
         Button { apri(esperienza) } label: {
             VStack(alignment: .leading, spacing: 0) {
                 TasselloGlifo(glifo: esperienza.glifo, lato: S.tassello, raggio: S.raggioTassello)
+                if indicazioni, let consigliata {
+                    // Dentro la colonna, fra il tassello e il titolo: non copre mai il testo
+                    EtichettaConsigliataSala(nome: consigliata)
+                        .padding(.top, M.sottoTasselloConsiglio)
+                }
                 Spacer(minLength: S.sopraFrase)
                 Text(esperienza.titolo)
                     .carattereApple(S.titolo)
@@ -326,16 +448,25 @@ private struct SchedaPiccolaSala: View {
             .multilineTextAlignment(.leading)
             .padding(S.paddingPiccola)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .overlay(alignment: .topTrailing) {
+                if indicazioni {
+                    EtichettaMomentoSala(esperienza: esperienza, rientro: S.paddingPiccola + S.tassello)
+                }
+            }
             .matchedGeometryEffect(id: esperienza.id, in: spazio, isSource: true)
             .superficieApple(S.superficie, raggio: S.raggio)
             .clipShape(RoundedRectangle(cornerRadius: S.raggio, style: .continuous))
             .contentShape(RoundedRectangle(cornerRadius: S.raggio, style: .continuous))
             .opacity(spenta ? S.opacitaSpenta : 1)
+            .opacity(attenuata ? M.opacitaAttenuata : 1)
+            .animation(Tema.Apple.Moto.animazione(M.cambio, calmo: calmo, istantanea: istantanea), value: attenuata)
         }
         .buttonStyle(StileSemplice())
         .inclinazione(massimo: Tema.Apple.Moto.Inclinazione.massimoSala, raggio: S.raggio, attiva: !spenta)
         .help(spenta ? "Scegli prima un cliente in Clienti" : "Apri «\(esperienza.titolo)»")
-        .accessibilityLabel(Text("\(esperienza.titolo): \(esperienza.frase)"))
+        .accessibilityLabel(Text(indicazioni
+                                 ? "\(esperienza.titolo): \(esperienza.frase). \(TestiSala.accessibilita(esperienza, consigliata: consigliata))"
+                                 : "\(esperienza.titolo): \(esperienza.frase)"))
     }
 }
 

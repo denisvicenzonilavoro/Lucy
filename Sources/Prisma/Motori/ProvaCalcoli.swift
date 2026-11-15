@@ -1335,6 +1335,8 @@ enum ProvaCalcoli {
         ProvaCalcoliArrivoObiettivo.esegui(verificaEsterna)
         // Migliorie d'uso 17: le priorità di Analisi 360 in ordine, senza doppioni, e dall'area più scoperta senza ruota
         ProvaCalcoliPrioritaAree360.esegui(verificaEsterna)
+        // Migliorie d'uso 34: il momento e la durata di ogni esperienza della Sala, le due consigliate dalle priorità
+        ProvaCalcoliSalaMomenti.esegui(verificaEsterna)
         // Migliorie d'uso 11: i gruppi dell'indice del dossier e «L'azienda» solo per chi ce l'ha
         ProvaCalcoliIndiceDossier.esegui(verificaEsterna)
         // Migliorie d'uso 15: la frase della scheda di una posizione non inventa cifre, i dati vuoti pertinenti al tipo
