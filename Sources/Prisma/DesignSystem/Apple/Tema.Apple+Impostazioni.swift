@@ -343,7 +343,7 @@ extension Tema.Apple {
         static let sopraTitolo: CGFloat = 4
         static let sottoTitolo: CGFloat = 8
         /// `.avS`: testo 15, interlinea 1,55, al più 520 di larghezza, 10 sotto.
-        static let testo = Carattere(dimensione: 15, peso: .regular, interlinea: 6)
+        static let testo = Carattere(dimensione: 15, peso: .regular, interlinea: 1.55)
         static let coloreTesto = Colore.inchiostro2
         static let larghezzaTesto: CGFloat = 520
         static let sottoTesto: CGFloat = 10

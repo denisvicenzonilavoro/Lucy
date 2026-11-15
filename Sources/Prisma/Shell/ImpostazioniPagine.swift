@@ -297,14 +297,14 @@ extension AppImpostazioni {
                 RigaImpostazione(titolo: "Qwen sul Mac",
                                  sottotitolo: pronta ? stato.qwen.descrizione : (stato.disponibilitaLocale.motivo ?? "Non collegata"),
                                  stato: Pillola(testo: pronta ? "Collegata" : "Non collegata", tono: pronta ? .ok : .attenzione),
-                                 aiuto: "Vera usa Qwen del tuo Mac: Prisma aperto sul Mac, «iPhone e iPad» attivo in Impostazioni › Vera, stessa rete Wi‑Fi") {
+                                 aiuto: "Vera usa Qwen del tuo Mac: Prisma aperto sul Mac, il ponte attivo sul Mac in Impostazioni › iPhone e iPad, stessa rete Wi‑Fi") {
                     Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
                 }
                 RigaImpostazione(titolo: "Codice del Mac",
-                                 sottotitolo: ponte.abbinato ? "Abbinato" : "Da Impostazioni › Vera sul Mac",
-                                 aiuto: ponte.abbinato ? "Lo trovi sul Mac in Impostazioni › Vera (arriva anche con il backup)"
-                                                       : "Scrivi il codice che compare sul Mac in Impostazioni › Vera › iPhone e iPad") {
+                                 sottotitolo: ponte.abbinato ? "Abbinato" : "Da Impostazioni › iPhone e iPad sul Mac",
+                                 aiuto: ponte.abbinato ? "Lo trovi sul Mac in Impostazioni › iPhone e iPad (arriva anche con il backup)"
+                                                       : "Scrivi il codice che compare sul Mac in Impostazioni › iPhone e iPad") {
                     TextField("ABCD-EFGH-JKLM", text: Bindable(stato.dati).impostazioni.vera.ponte.codice)
                         .campoTesto()
                         .textInputAutocapitalization(.characters)

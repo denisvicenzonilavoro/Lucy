@@ -458,10 +458,19 @@ enum ProvaVera {
         if let imp = centroX(.impostazioni, tuttiGruppi), let vera = centroX(.vera, tuttiGruppi),
            let studio = centroX(.studio, tuttiGruppi), let clienti = centroX(.clienti, tuttiGruppi),
            let ultimo = tutti.centri.last, let primo = tutti.centri.first {
-            controlla(abs(imp - (misuraDock.width / 2 + ultimo)) < 0.01 && abs(imp - vera - passo) < 0.01
-                      && abs(vera - studio - passoFilo) < 0.01 && abs(clienti - (misuraDock.width / 2 + primo) - passoFilo) < 0.01
-                      && abs(tutti.larghezza - (2 * DisposizioneDock.margineLato + 16 * lato + 15 * DisposizioneDock.spazio
-                                                + 5 * (DisposizioneDock.larghezzaDivisore + DisposizioneDock.spazio))) < 0.01,
+            // Spezzato in costanti con il tipo scritto: il controllo dei tipi resta veloce
+            let meta: CGFloat = misuraDock.width / 2
+            let margini: CGFloat = 2 * DisposizioneDock.margineLato
+            let icone: CGFloat = 16 * lato
+            let spazi: CGFloat = 15 * DisposizioneDock.spazio
+            let fili: CGFloat = 5 * (DisposizioneDock.larghezzaDivisore + DisposizioneDock.spazio)
+            let attesa: CGFloat = margini + icone + spazi + fili
+            let okImp: Bool = abs(imp - (meta + ultimo)) < 0.01
+            let okVera: Bool = abs(imp - vera - passo) < 0.01
+            let okStudio: Bool = abs(vera - studio - passoFilo) < 0.01
+            let okClienti: Bool = abs(clienti - (meta + primo) - passoFilo) < 0.01
+            let okLarghezza: Bool = abs(tutti.larghezza - attesa) < 0.01
+            controlla(okImp && okVera && okStudio && okClienti && okLarghezza,
                       "Dock in gruppi: Impostazioni è l'ultima icona e fra Studio e Vera, come fra la Scrivania e Clienti, c'è un filo")
         } else {
             controlla(false, "Dock in gruppi: i centri delle icone ci sono tutti")
@@ -470,10 +479,16 @@ enum ProvaVera {
         if let vera = centroX(.vera, gruppiCliente), let studio = centroX(.studio, gruppiCliente),
            let sala = centroX(.sala, gruppiCliente), let mercato = centroX(.mercato, gruppiCliente),
            let ultimo = DisposizioneDock.disposizione(gruppi: [1] + gruppiCliente.map(\.count)).centri.last {
-            controlla(gruppiCliente.count == 4 && centroX(.impostazioni, gruppiCliente) == nil
-                      && centroX(.messaggi, gruppiCliente) == nil && centroX(.territorio, gruppiCliente) == nil
-                      && abs(vera - (misuraDock.width / 2 + ultimo)) < 0.01 && abs(vera - studio - passoFilo) < 0.01
-                      && abs(mercato - sala - passoFilo) < 0.01,
+            let quattroGruppi: Bool = gruppiCliente.count == 4
+            let senzaImpostazioni: Bool = centroX(.impostazioni, gruppiCliente) == nil
+            let senzaMessaggi: Bool = centroX(.messaggi, gruppiCliente) == nil
+            let senzaTerritorio: Bool = centroX(.territorio, gruppiCliente) == nil
+            let meta: CGFloat = misuraDock.width / 2
+            let okVeraUltima: Bool = abs(vera - (meta + ultimo)) < 0.01
+            let okStudio: Bool = abs(vera - studio - passoFilo) < 0.01
+            let okMercato: Bool = abs(mercato - sala - passoFilo) < 0.01
+            let senzaRiservate: Bool = senzaImpostazioni && senzaMessaggi && senzaTerritorio
+            controlla(quattroGruppi && senzaRiservate && okVeraUltima && okStudio && okMercato,
                       "Modalità cliente: il gruppo «il contatto» sparisce con il suo filo (niente filo doppio), Vera è l'ultima icona")
         } else {
             controlla(false, "Modalità cliente: i centri delle icone consentite ci sono")
