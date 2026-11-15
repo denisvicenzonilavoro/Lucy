@@ -98,6 +98,54 @@ extension Tema.Apple {
             static let spazioAmbito: CGFloat = 8
             static let fondoSopra = Colore.chip
             static let raggioVoce: CGFloat = Raggio.voce
+
+            // Migliorie d'uso 27 (template .card.st di `veraDiChi` e `veraUsaHTML`)
+            /// «Parliamo di»: avatar 26 (o il glifo persone 18) e il nome 14 semibold, a 7 dall'occhiello, spazio 9.
+            static let avatarAmbito: CGFloat = 26
+            static let glifoAmbito: CGFloat = 18
+            static let nomeAmbito = Carattere(dimensione: 14, peso: .semibold)
+            static let ambitoSopra: CGFloat = 7
+            static let spazioNomeAmbito: CGFloat = 9
+            /// «Per rispondere uso»: righe 13,5 con la spunta verde 14 (padding verticale 3, spazio 8), a 6
+            /// dall'occhiello; la nota `.k` a 8, interlinea 1,4.
+            static let rigaFonte = Carattere(dimensione: 13.5, peso: .regular)
+            static let spuntaFonte: CGFloat = 14
+            static let coloreSpuntaFonte = Colore.verde
+            static let paddingRigaFonte: CGFloat = 3
+            static let spazioRigaFonte: CGFloat = 8
+            static let fontiSopra: CGFloat = 6
+            static let notaFonti = Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.4)
+            static let notaFontiSopra: CGFloat = 8
+        }
+
+        // MARK: Esempi a conversazione vuota (migliorie d'uso 27, template .vGr/.vCard)
+
+        enum Esempi {
+            /// «Puoi chiedermi, per esempio»: occhiello a 22 sotto il saluto e a 10 sopra i riquadri.
+            static let occhielloSopra: CGFloat = 22
+            static let occhielloSotto: CGFloat = 10
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            /// Griglia a due colonne, spazio 12, larghezza massima 660.
+            static let colonne = 2
+            static let spazio: CGFloat = 12
+            static let larghezzaMassima: CGFloat = 660
+            /// Il riquadro: card con l'ombra, padding 16×18, spazio interno 5.
+            static let superficie = Superficie.card
+            static let raggio: CGFloat = Raggio.card
+            static let padding = Misura.padding(16, 18)
+            static let spazioInterno: CGFloat = 5
+            /// Il tipo in occhiello blu 11, la domanda 15 bold (interlinea 1,3), lo scopo `.k`.
+            static let tipo = Carattere(dimensione: 11, peso: .semibold, tracking: 0.6, maiuscolo: true)
+            static let coloreTipo = Colore.accento
+            static let domanda = Carattere(dimensione: 15, peso: .bold, interlinea: 1.3)
+            static let coloreDomanda = Colore.inchiostro
+            static let scopo = Carattere.secondario
+            static let coloreScopo = Colore.inchiostro2
+            /// Si inclina verso il puntatore di 4°.
+            static let inclinazione: Double = 4
+            /// Entrano a cascata: 0,26 s, poi un riquadro dopo l'altro (il passo è quello della cascata del tema).
+            static let cascataBase = 0.26
         }
 
         // MARK: Chat

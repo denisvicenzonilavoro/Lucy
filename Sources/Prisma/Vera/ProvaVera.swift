@@ -1139,6 +1139,8 @@ enum ProvaVera {
         ProvaFalloTu.esegui(controlla)
         // La fase 2: ricerca, memoria, lezioni, filo lungo, 30 secondi, norme, lascia cadere (ProvaFaseDueVera.swift)
         ProvaFaseDueVera.esegui(controlla)
+        // Migliorie d'uso 27: gli esempi a conversazione vuota e le fonti della colonna (EsempiVera.swift)
+        ProvaEsempiVera.esegui(controlla)
         // «Luce», giro 6: Biblioteca · Trova la pagina (frase verificata sul passo, cifre, nomi, Qwen finto) (ProvaTrovaPaginaVera.swift)
         ProvaTrovaPaginaVera.esegui(controlla)
         // Giro 0 di «Prisma istantaneo»: i tempi di Vera (caricamento, prima parola, parole al secondo) (ProvaMisuraVera.swift)

@@ -125,7 +125,8 @@ private struct CorpoAppVera: View {
 // MARK: - Colonna di sinistra
 
 /// La colonna di Vera: la sfera, il saluto, lo stato di Qwen, «Oggi», di chi si parla, il tagliando, i documenti
-/// archiviati, cosa non dimenticare e il quadro del cliente. Una vista a sé con la sola larghezza: si ridisegna con i
+/// archiviati, cosa non dimenticare e il quadro del cliente. Sul Mac (migliorie d'uso 27) solo lo stato di Vera,
+/// «Parliamo di», «Per rispondere uso» e i documenti archiviati oggi. Una vista a sé con la sola larghezza: si ridisegna con i
 /// suoi dati, non con la chat.
 private struct ColonnaAppVera: View {
     let larghezza: CGFloat
@@ -136,7 +137,9 @@ private struct ColonnaAppVera: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         let col = Tema.Apple.Vera.Colonna.self
+        #if !os(macOS)
         let interna = larghezza - col.padding.leading - col.padding.trailing
+        #endif
         // Senza barra di scorrimento; in fondo le card sfumano invece di finire tagliate
         ScrollView(.vertical, showsIndicators: false) {
             VStack(spacing: 0) {
@@ -150,6 +153,17 @@ private struct ColonnaAppVera: View {
                     .carattereApple(col.motto)
                     .foregroundColor(col.coloreMotto)
                 VStack(spacing: col.fraSchede) {
+                    #if os(macOS)
+                    // Migliorie d'uso 27: la colonna dice tre cose, se Vera è pronta, di chi si parla e cosa usa per
+                    // rispondere. «Oggi», «Da non dimenticare» e il quadro del cliente stanno in Agenda, nel «Da fare» e
+                    // nel dossier; il tagliando dei dati in Impostazioni › Da sistemare e in Impostazioni › Vera.
+                    let conversazione = stato.modalitaVeraMostrata == .conversazione
+                    schedaMotore
+                    if !conversazione { schedaAmbitoMac }
+                    schedaFonti(conversazione: conversazione)
+                    // «Lascia cadere qui»: i documenti archiviati oggi e dove sono andati (VisteLasciaCadereVera.swift)
+                    ArchiviatiOggiVeraVista()
+                    #else
                     schedaMotore
                     schedaOggi
                     schedaAmbito(larghezza: interna - col.paddingScheda.leading - col.paddingScheda.trailing)
@@ -159,6 +173,7 @@ private struct ColonnaAppVera: View {
                     ArchiviatiOggiVeraVista()
                     if let t = urgente { schedaAvviso(t) }
                     if let c = cliente, !stato.veraPortafoglio { quadro(c) }
+                    #endif
                 }
                 .padding(.top, col.primaScheda)
             }
@@ -314,6 +329,81 @@ private struct ColonnaAppVera: View {
             .contentShape(Rectangle())
     }
 
+    #if os(macOS)
+    /// «Parliamo di» (migliorie d'uso 27): l'avatar e il nome del cliente della barra, oppure il glifo persone e
+    /// «Tutti i clienti». Nessun controllo: il cliente si cambia dalla pillola della barra (migliorie d'uso 2).
+    private var schedaAmbitoMac: some View {
+        let col = Tema.Apple.Vera.Colonna.self
+        let c = stato.veraPortafoglio ? nil : stato.clienteAttivo
+        return VStack(alignment: .leading, spacing: 0) {
+            Text(TestiVera.parliamoDi)
+                .carattereApple(col.etichetta)
+                .foregroundColor(col.coloreEtichetta)
+            HStack(spacing: col.spazioNomeAmbito) {
+                if let c {
+                    AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: col.avatarAmbito)
+                } else {
+                    Image(systemName: "person.2")
+                        .font(.system(size: col.glifoAmbito))
+                        .foregroundColor(col.coloreNota)
+                        .frame(width: col.avatarAmbito, height: col.avatarAmbito)
+                        .accessibilityHidden(true)
+                }
+                Text(c?.nome ?? TestiSceltaCliente.tuttiIClienti)
+                    .carattereApple(col.nomeAmbito)
+                    .foregroundColor(col.coloreTesto)
+                    .lineLimit(1)
+            }
+            .padding(.top, col.ambitoSopra)
+        }
+        .multilineTextAlignment(.leading)
+        .padding(col.paddingScheda)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(col.superficieScheda, raggio: col.raggioScheda)
+        .accessibilityElement(children: .combine)
+    }
+
+    /// «Per rispondere uso» (migliorie d'uso 27): le fonti che Vera legge davvero (`EsempiVera.fonti`), con la spunta
+    /// verde, e «Non invento cifre». In modalità Conversazione «In questa conversazione»: le tue domande, senza i dati
+    /// dei clienti.
+    private func schedaFonti(conversazione: Bool) -> some View {
+        let col = Tema.Apple.Vera.Colonna.self
+        let nome = stato.veraPortafoglio ? nil : stato.clienteAttivo?.nome
+        let fonti = EsempiVera.fonti(nomeCliente: nome, conversazione: conversazione)
+        return VStack(alignment: .leading, spacing: 0) {
+            Text(conversazione ? TestiVera.inQuestaConversazione : TestiVera.perRispondereUso)
+                .carattereApple(col.etichetta)
+                .foregroundColor(col.coloreEtichetta)
+            VStack(alignment: .leading, spacing: 0) {
+                ForEach(fonti, id: \.self) { fonte in
+                    HStack(spacing: col.spazioRigaFonte) {
+                        Image(systemName: "checkmark")
+                            .font(.system(size: col.spuntaFonte, weight: .semibold))
+                            .foregroundColor(col.coloreSpuntaFonte)
+                            .accessibilityHidden(true)
+                        Text(fonte)
+                            .carattereApple(col.rigaFonte)
+                            .foregroundColor(col.coloreTesto)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    .padding(.vertical, col.paddingRigaFonte)
+                }
+            }
+            .padding(.top, col.fontiSopra)
+            Text(conversazione ? TestiVera.senzaClienti : TestiVera.nonInvento)
+                .carattereApple(col.notaFonti)
+                .foregroundColor(col.coloreNota)
+                .fixedSize(horizontal: false, vertical: true)
+                .padding(.top, col.notaFontiSopra)
+        }
+        .multilineTextAlignment(.leading)
+        .padding(col.paddingScheda)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(col.superficieScheda, raggio: col.raggioScheda)
+        .accessibilityElement(children: .combine)
+    }
+    #endif
+
     /// Di chi si parla: un cliente (scelto dalla tendina) o tutto il portafoglio.
     private func schedaAmbito(larghezza: CGFloat) -> some View {
         let col = Tema.Apple.Vera.Colonna.self
@@ -452,8 +542,16 @@ extension CorpoAppVera {
             messaggiVista
                 .frame(maxHeight: .infinity)
             conVoce { v in notaVoce(v) }
+            #if os(macOS)
+            // Migliorie d'uso 27: con i riquadri degli esempi la fila dei suggerimenti sparisce; torna dopo la prima domanda
+            if !mostraEsempi {
+                suggerimenti
+                    .padding(.top, ch.sopraSuggerimenti)
+            }
+            #else
             suggerimenti
                 .padding(.top, ch.sopraSuggerimenti)
+            #endif
             conVoce { v in campoScrittura(v) }
                 .padding(.top, ch.sopraCampo)
                 .padding(.bottom, ch.sottoCampo)
@@ -481,6 +579,10 @@ extension CorpoAppVera {
             ScrollView {
                 VStack(alignment: .leading, spacing: ch.spazioMessaggi) {
                     if elenco.isEmpty && !stato.veraInCorso { benvenuto }
+                    #if os(macOS)
+                    // Migliorie d'uso 27: a conversazione vuota le domande d'esempio sotto il saluto, in riquadri
+                    if mostraEsempi { GrigliaEsempiVera(esempi: esempi) }
+                    #endif
                     ForEach(Array(elenco.enumerated()), id: \.element.id) { i, msg in
                         BollaAppVera(messaggio: msg, nomeUtente: stato.nomeUtente, portafoglio: portafoglio,
                                      quadro: msg.id == ultima?.id ? quadro : nil,
@@ -544,6 +646,24 @@ extension CorpoAppVera {
         }
         return trovata.first
     }
+
+    #if os(macOS)
+    /// I riquadri degli esempi si vedono a conversazione vuota, in modalità Lavoro (in Conversazione restano i
+    /// suggerimenti in fila: gli esempi leggono i dati del cliente). «Nuova conversazione» svuota l'elenco e tornano.
+    private var mostraEsempi: Bool {
+        messaggi.isEmpty && !stato.veraInCorso && stato.modalitaVeraMostrata == .lavoro
+    }
+
+    /// Le domande d'esempio (`EsempiVera.per`): per il portafoglio, o per il cliente dalle sue posizioni in essere,
+    /// ricavate una volta finché non cambiano i dati dei calcoli.
+    private var esempi: [EsempioVera] {
+        if stato.veraPortafoglio { return EsempiVera.per(cliente: nil, portafoglio: true) }
+        let id = stato.clienteAttivoId
+        return stato.ricavato("vera-esempi-\(id)") {
+            EsempiVera.per(cliente: EsempiVera.Profilo(posizioni: stato.posizioniCliente(id)), portafoglio: false)
+        }
+    }
+    #endif
 
     /// La conversazione vuota: Vera saluta per prima, come nel template, con i numeri veri della giornata.
     private var benvenuto: some View {

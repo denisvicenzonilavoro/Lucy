@@ -1117,3 +1117,41 @@ Resta:
   `Tema.Apple.Messaggi.Colonna`; se lo usano altre app conviene spostarli in un enum comune.
 - **iPhone e iPad**: la barra a tre stati e «Mandati oggi» arriveranno con il loro aggiornamento (l'iPhone non segna
   spediti e il giornale di «Prisma ovunque» non porta il segno).
+
+## 27. Vera dice cosa sa fare
+
+Fatto (solo Mac, `#if os(macOS)`; iPhone e iPad tengono la colonna di prima e la fila dei suggerimenti sempre):
+- **La colonna** dice tre cose: lo stato («Vera · pronta» / «non pronta» con «Verifica», già dalla 9), **«Parliamo di»**
+  (`schedaAmbitoMac`: avatar 26 e nome del cliente della barra, o il glifo `person.2` e «Tutti i clienti», nessun
+  controllo) e **«Per rispondere uso»** (`schedaFonti`: le righe con la spunta verde da `EsempiVera.fonti`, «Non invento
+  cifre: se un dato manca, te lo dico.»). `ArchiviatiOggiVeraVista` resta. Escono «Oggi», «Da non dimenticare», il quadro
+  del cliente e il tagliando (proposta di §27.6: sta in Impostazioni › Da sistemare dalla 31 e in Impostazioni › Vera).
+- **Modalità Conversazione** (quella mostrata, `modalitaVeraMostrata`): «Parliamo di» si nasconde, «In questa
+  conversazione» con «Le tue domande» e «Qui non uso i dati dei clienti.»; i riquadri non compaiono e resta la fila dei
+  suggerimenti di sempre.
+- **Gli esempi a conversazione vuota** (`GrigliaEsempiVera`, nuovo file Shell/GrigliaEsempiVera.swift; il nome
+  `EsempiVera.swift` era già del motore e SwiftPM non vuole due file con lo stesso nome): «Puoi chiedermi, per esempio» e
+  riquadri a due colonne (card con l'ombra, inclinazione 4°, cascata da 0,26 s senza sfocatura; fermi con «Riduci
+  movimento» e nelle istantanee). Un clic chiama `chiediVera`/`chiediVeraPortafoglio` con lo spunto. La fila sopra il
+  campo sparisce finché la conversazione è vuota e torna dopo la prima domanda; «Nuova conversazione» riporta i riquadri.
+- **Il motore** `EsempiVera.per(cliente:portafoglio:)` (Vera/EsempiVera.swift, puro): con un cliente «Il cliente in
+  breve» (`riepilogo`), «Una spiegazione» (`pensione` se ha previdenza in essere, altrimenti `protezione`), «Uno scenario»
+  (`resistenza` con investimenti, `cambiare` con altre posizioni, nessuno senza posizioni); con «Tutti i clienti» quattro
+  spunti del portafoglio (settimana, ricontattare, scadenze, quadro). Le domande restano quelle degli spunti (generiche):
+  il catalogo non riconosce le frasi con il nome. Profilo del cliente in `ricavato("vera-esempi-<id>")`.
+- Testi in `TestiVera` (nuovo, nello stesso file), token in `Tema.Apple.Vera.Colonna` (ambito, fonti) e nel nuovo
+  `Tema.Apple.Vera.Esempi`. Prova `ProvaEsempiVera` in `--prova-vera`. Istantanee nuove `1045-uso-vera-tutti-i-clienti`
+  e `1046-uso-vera-conversazione` (chiare e scure).
+
+Resta:
+- **«La giornata» con un cliente scelto** («Cosa ho oggi?»): non c'è, perché non è provato che la Vera grande la tenga
+  nella conversazione del cliente (passa da `smistaVera` e dai comandi dell'agenda). Provarla con `--prova-vera` e, se
+  resta nel dossier, aggiungerla come primo esempio con un caso in `ProvaEsempiVera`.
+- Il passo della cascata è quello del tema (0,048 s) e non 0,07 del template: serve un `ritardo` con passo proprio in
+  `EntrataApple` se lo si vuole esatto.
+- I token di «Oggi», dell'avviso e delle tessere in `Tema.Apple.Vera.Colonna` restano: li usano ancora iPhone e iPad.
+- Il tagliando nella colonna rifaceva l'esito in memoria all'apertura di Vera: sul Mac ora lo rifà solo la sua pagina e
+  il controllo notturno; verificare che la riga di Da sistemare resti in pari dopo correzioni fatte a mano.
+- `--prova-fluidita`: la colonna sul Mac non legge più `attivitaAperte` né `posizioniCliente`; nessun controllo nuovo.
+- Rigenerare sul Mac 480-487, 19-vera, 46-vera-pensione, 47-vera-checkup e guardare 1045 e 1046 (la colonna stretta a
+  metà schermo e la griglia nella finestra piccola).
