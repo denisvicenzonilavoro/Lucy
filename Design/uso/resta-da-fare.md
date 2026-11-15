@@ -1448,3 +1448,44 @@ Resta:
 - Esc con due significati (modifica, poi scena) e Invio nel campo con il pulsante principale accanto: serve uno
   screenshot o una prova sul Mac.
 - Le istantanee 605, 606, 608, 609 e 841-849 cambiano (titolo, «Di chi è», righe in più, riga in fondo): vanno guardate.
+
+## 42. Lo smontaggio ha i numeri
+
+Fatto (solo Mac, `Shell/SmontaggioMac.swift`; l'iPad tiene `SmontaggioApple` con le note ai margini):
+- Foglio senza note: accanto a ogni ellisse il cerchio rosso pieno con il numero della voce (raggio 11, 12 bold), che
+  compare con la sua ellisse; il foglio non ha più i margini delle note (la scala cresce).
+- Colonna a destra (520) con tre card: il documento («Documento di {nome} · valore {euro}», «Documento da assegnare»,
+  l'origine nell'aiuto, avatar 38, titolo su una riga, «Cambia ⌄», «Costi l’anno, oggi» → «Con la tua proposta» e a
+  destra «In 10 anni» con il netto del confronto di oggi); «Le voci cerchiate, in ordine sul documento» (numero 22,
+  nome, cifra del motore o «—», valore scritto · spiegazione, accensione con l'ellisse da 0,4 a 1, menu «Non è un
+  costo»); in basso grafico piccolo 186×60 con la didascalia del motore, «Confronta con», «Crea la proposta di
+  sostituzione» e «Smonta un altro documento».
+- Voce accesa in comune (`SopraSmontaggio`, letto solo da ellissi e righe): puntatore sulla riga → ellisse con tratto 3,6
+  e fondo rosso tenue; sull'ellisse → riga con fondo rosso 0,09.
+- Documenti smontati (`StatoShell.documentiSmontati`, dato ricavato) e riapertura senza ricalcolo
+  (`StatoShell.riapriSmontaggio`, `MotoreSmontaggio.righe(da:titolo:)`, `vociRiaperte`, `valoreDaVoci`,
+  `versatoDaVoci`): con il testo in memoria il foglio vero, altrimenti ricostruito dalle voci; le cifre sono sempre
+  quelle conservate. Un conservato non si modifica e non si aggiunge di nuovo al dossier.
+- La vista segue il cliente: `StatoSmontaggio.documentoScelto` per vista (cliente o «Tutti»); il documento letto resta in
+  memoria e ricompare tornando alla sua vista. Vuoto nuovo del cliente (avatar 58, «Nessun documento smontato per …»,
+  «Inquadra un documento», «Vedi quelli degli altri clienti», che in modalità cliente non c'è).
+- Indice delle Posizioni del cliente: «Smontaggio di un documento» con il numero, prima di «Passaggio generazionale»
+  (`VistaPosizioniCliente.smontaggio`, ancora "smontaggio"), anche in modalità cliente.
+- «Apri l'esempio (fac-simile)» solo con i dati di prova (`haDatiDiProva`); le proposte del cliente fra i dati ricavati.
+- Istantanee nuove 887 (voce accesa, chiara e scura), 888 (cliente senza documenti, chiara e scura), 889 (indice di
+  Giulia con il documento conservato ricostruito dalle voci). Prove «Smontaggio 42» in `ProvaCalcoliSmontaggio`
+  (numerazione, foglio ricostruito, voci riaperte, valore e versato, documenti per cliente e per tutti, riapertura senza
+  e con testo in memoria). Nessun campo nuovo nell'archivio.
+
+Resta:
+- Le istantanee 880-886 cambiano (numeri al posto delle note, elenco, cifre su una riga): vanno guardate, in particolare
+  la finestra stretta (886) e la card delle voci quando la colonna è bassa.
+- Le righe dell'iPhone che arrivano da sole (senza la scena di Inquadra) vanno allo Smontaggio solo nella vista
+  «Smontaggio» del portafoglio (`provaFuoco.vista == .smontaggio`), non nella schermata del cliente: dal cliente si passa
+  da «Smonta un altro documento» / «Inquadra un documento».
+- I token delle note (`nota`, `larghezzaNota`, `distanzaNota`, richiamo) restano perché l'iPad li usa ancora: si tolgono
+  con il giro dell'iPad.
+- L'accensione al passaggio non ha animazione propria (cambia subito); le ellissi accese si vedono solo con il puntatore
+  vero: serve uno screenshot sul Mac.
+- Un documento conservato con il valore scritto ma senza voci calcolate e senza posizione collegata si riapre senza
+  valore («Con la tua proposta» e il confronto restano «—»), perché il testo non è conservato (decisione 42.6).

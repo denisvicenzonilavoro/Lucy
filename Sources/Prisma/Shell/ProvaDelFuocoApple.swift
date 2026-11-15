@@ -83,8 +83,13 @@ struct VistePortafoglioApple<Portafoglio: View>: View {
             ProvaDelFuocoApple(stato: stato, prova: prova, chiave: stato.chiaveVista, solaLettura: stato.solaLettura)
                 .equatable()
         case .smontaggio:
-            // Posizioni › Smontaggio («Luce» giro 2, SmontaggioApple.swift)
+            // Posizioni › Smontaggio («Luce» giro 2, SmontaggioApple.swift); sul Mac con i numeri e l'elenco delle voci
+            // (migliorie d'uso 42, SmontaggioMac.swift)
+            #if os(macOS)
+            SmontaggioMac(stato: stato)
+            #else
             SmontaggioApple(stato: stato)
+            #endif
         }
     }
 

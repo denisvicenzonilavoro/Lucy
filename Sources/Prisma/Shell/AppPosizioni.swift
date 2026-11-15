@@ -231,6 +231,9 @@ struct AppPosizioni: View {
             if vistaMostrata == .quadro {
                 QuadroPosizioniApple(cliente: c, filtroStato: $filtroStato, filtroCanale: $filtroCanale, area: $area,
                                      elenco: elenco, apri: { stato.posizioneInDettaglio = $0.id })
+            } else if vistaMostrata == .smontaggio {
+                // Migliorie d'uso 42: lo smontaggio dei documenti del cliente, senza passare dal portafoglio
+                SmontaggioMac(stato: stato, clienteScelto: c.id)
             } else {
                 AnalisiPosizioniApple(vista: vistaMostrata, cliente: c)
             }

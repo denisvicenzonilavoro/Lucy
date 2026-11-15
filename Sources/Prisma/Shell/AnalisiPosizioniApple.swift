@@ -32,7 +32,8 @@ struct AnalisiPosizioniApple: View {
     @ViewBuilder private var contenuto: some View {
         let analisi = stato.analisiDossier(cliente.id)
         switch vista {
-        case .quadro:
+        case .quadro, .smontaggio:
+            // Il quadro e lo smontaggio hanno la loro schermata (AppPosizioni.schermataCliente)
             EmptyView()
         case .patrimonio:
             if !analisi.patrimonio.vuoto {

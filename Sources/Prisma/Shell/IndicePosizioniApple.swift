@@ -28,9 +28,10 @@ import SwiftUI
 
 // MARK: - Le schermate
 
-/// Le sei schermate della vista del cliente in Posizioni: il quadro con l'elenco e le cinque analisi.
+/// Le schermate della vista del cliente in Posizioni: il quadro con l'elenco, le cinque analisi e lo smontaggio dei
+/// documenti del cliente (migliorie d'uso 42).
 enum VistaPosizioniCliente: Hashable, CaseIterable {
-    case quadro, patrimonio, resistenza, coerenza, costi, successione
+    case quadro, patrimonio, resistenza, coerenza, costi, smontaggio, successione
 
     /// Le ancore di sempre (colonna di prima, dossier, notifiche, istantanee) aprono la schermata dell'analisi.
     init?(ancora: String) {
@@ -40,6 +41,7 @@ enum VistaPosizioniCliente: Hashable, CaseIterable {
         case "coerenza": self = .coerenza
         case "costi": self = .costi
         case "successione": self = .successione
+        case "smontaggio": self = .smontaggio
         default: return nil
         }
     }
@@ -51,12 +53,13 @@ enum VistaPosizioniCliente: Hashable, CaseIterable {
         case .resistenza: return "Prova di resistenza"
         case .coerenza: return "Coerenza con il profilo"
         case .costi: return "Peso dei costi"
+        case .smontaggio: return TestiSmontaggio.voceIndice
         case .successione: return "Passaggio generazionale"
         }
     }
 
-    /// Le cinque analisi, nell'ordine dell'indice.
-    static let analisi: [VistaPosizioniCliente] = [.patrimonio, .resistenza, .coerenza, .costi, .successione]
+    /// Le analisi, nell'ordine dell'indice: lo smontaggio di un documento prima del passaggio generazionale.
+    static let analisi: [VistaPosizioniCliente] = [.patrimonio, .resistenza, .coerenza, .costi, .smontaggio, .successione]
 }
 
 // MARK: - Indice
@@ -97,7 +100,8 @@ struct IndicePosizioniApple: View {
                     voce(.quadro, numero: inEssere)
                     etichetta("Le analisi")
                     ForEach(VistaPosizioniCliente.analisi, id: \.self) { v in
-                        voce(v, numero: 0)
+                        // Lo smontaggio porta il numero dei documenti smontati del cliente (dato ricavato)
+                        voce(v, numero: v == .smontaggio ? stato.documentiSmontati(clienteId: cliente.id).count : 0)
                     }
                     etichetta("Collegati")
                     collegamento("Il dossier") { stato.apri(.clienti) }

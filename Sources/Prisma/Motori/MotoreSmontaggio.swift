@@ -259,6 +259,58 @@ enum MotoreSmontaggio {
 
     static func arrotonda(_ v: Double) -> Double { (v * 100).rounded() / 100 }
 
+    // MARK: Un documento conservato (migliorie d'uso 42)
+
+    /// L'occhiello del foglio ricostruito dalle voci di un documento conservato.
+    static let occhielloRiaperto = "Dal dossier · le voci di costo"
+
+    /// Il foglio di un documento già nei Documenti del cliente quando il testo letto non c'è più (dopo un riavvio il
+    /// testo non si conserva, 42.2): l'occhiello, il titolo e una riga per voce («{etichetta} {valoreScritto}»),
+    /// nell'ordine in cui le voci stavano sul documento.
+    static func righe(da voci: [VoceCostoTrovata], titolo: String) -> [RigaLetta] {
+        let ordinate = voci.sorted { $0.riga < $1.riga }
+        let testa = [RigaLetta(testo: occhielloRiaperto), RigaLetta(testo: titolo.isEmpty ? "Estratto conto" : titolo)]
+        return testa + ordinate.map { v in
+            RigaLetta(testo: (v.etichetta + " " + v.valoreScritto).trimmingCharacters(in: .whitespaces))
+        }
+    }
+
+    /// Le voci conservate riportate sulle righe di `righe(da:titolo:)`: stesso ordine, stesse cifre (nessun ricalcolo:
+    /// gli euro sono quelli fatti da Prisma quando il documento è entrato nel dossier), riga spostata dopo la testata.
+    static func vociRiaperte(_ voci: [VoceCostoTrovata]) -> [VoceCostoTrovata] {
+        voci.sorted { $0.riga < $1.riga }.enumerated().map { i, v in
+            var w = v
+            w.riga = i + 2
+            w.riquadro = nil
+            return w
+        }
+    }
+
+    /// Il valore che Prisma aveva usato per una voce calcolata dalla percentuale (gestione o altro costo): serve a
+    /// riaprire un documento conservato senza la posizione e senza il testo, per «Con la tua proposta» e il confronto.
+    static func valoreDaVoci(_ voci: [VoceCostoTrovata]) -> Double? {
+        for v in voci where v.fonte == .calcolata && (v.tipo == .gestione || v.tipo == .altro) {
+            guard let e = v.euroAnno, let p = numeri(v.valoreScritto, dopo: "%").first, p > 0 else { continue }
+            return (e / (p / 100)).rounded()
+        }
+        return nil
+    }
+
+    /// Il versato che Prisma aveva usato per i costi d'ingresso calcolati dalla percentuale.
+    static func versatoDaVoci(_ voci: [VoceCostoTrovata]) -> Double? {
+        guard let v = voci.first(where: { $0.tipo == .ingresso && $0.fonte == .calcolata }), let e = v.euroUnaVolta,
+              let p = numeri(v.valoreScritto, dopo: "%").first, p > 0 else { return nil }
+        return (e / (p / 100)).rounded()
+    }
+
+    /// L'anno del documento, dalle prime righe («Estratto annuale 2025»), per «1.890 € nel 2025».
+    static func annoDocumento(_ righe: [RigaLetta]) -> Int? {
+        for r in righe.prefix(5) {
+            if let a = corrispondenze(#"\b((?:19|20)\d{2})\b"#, in: r.testo).first.flatMap({ Int($0) }) { return a }
+        }
+        return nil
+    }
+
     // MARK: Il confronto con una proposta
 
     /// La posizione provvisoria, in memoria e mai salvata, costruita dai dati letti (o la posizione vera aggiornata in
@@ -335,6 +387,38 @@ enum TestiSmontaggio {
     static let nessunCosto = "Non ho trovato voci di costo in questo documento. Se ci sono, segnale tu: clic sulla riga."
     static let scegliProposta = "Scegli un prodotto da confrontare"
     static let provvisoria = "Posizione non registrata: crea la posizione per salvarla."
+
+    // Migliorie d'uso 42 «Lo smontaggio ha i numeri» (solo Mac)
+    static let titoloVoci = "Le voci cerchiate, in ordine sul documento"
+    static let cambia = "Cambia"
+    static let smontaUnAltro = "Smonta un altro documento"
+    static let inquadraUnDocumento = "Inquadra un documento"
+    static let vediAltri = "Vedi quelli degli altri clienti"
+    static let voceIndice = "Smontaggio di un documento"
+    static let costiOggi = "Costi l’anno, oggi"
+    static let conLaProposta = "Con la tua proposta"
+    static let fraseVuotoCliente = "Inquadra un estratto conto o un rendiconto: Prisma cerchia i costi e li mette in fila, in euro."
+    static let daAssegnare = "Documento da assegnare"
+    static let conservato = "Già nei Documenti del cliente: le voci e le cifre sono quelle di quando è stato aggiunto."
+    static func vuotoCliente(_ nome: String) -> String { "Nessun documento smontato per \(nome)." }
+    static func inAnni(_ n: Int) -> String { "In \(n) anni" }
+    /// «Documento di Giulia · valore 90.000 €»; senza valore «Documento di Giulia»; senza cliente «Documento da assegnare».
+    static func occhielloDocumento(nome: String?, valore: Double?) -> String {
+        guard let nome else { return daAssegnare }
+        return "Documento di \(nome)" + (valore.map { " · valore \(Formati.euro($0))" } ?? "")
+    }
+    /// La voce del menu «Cambia ⌄»: «{titolo} · {nome}».
+    static func voceDocumento(titolo: String, nome: String?) -> String {
+        (titolo.isEmpty ? "Estratto conto" : titolo) + (nome.map { " · \($0)" } ?? "")
+    }
+    /// La riga grigia sotto la voce: il valore scritto e, se c'è, la spiegazione di Prisma.
+    static func dettaglioVoce(_ v: VoceCostoTrovata, in s: SmontaggioCosti, nomeCliente: String) -> String {
+        [v.valoreScritto, nota(v, in: s, nomeCliente: nomeCliente)].compactMap { $0 }.filter { !$0.isEmpty }.joined(separator: " · ")
+    }
+    /// La cifra a destra della voce, con le parole del motore («1.890 € nel 2025»); senza euro «—».
+    static func cifraVoce(_ v: VoceCostoTrovata, anno: Int?) -> String {
+        v.euro == nil ? "—" : cifra(v, anno: anno)
+    }
 
     static func didascalia(rendimento: Double, anni: Int) -> String {
         "Con la penale, i costi d'ingresso e le tasse. Stima con rendimento lordo del \(percento(rendimento)) l'anno, su \(anni) anni: le ipotesi di Prisma, che puoi cambiare."

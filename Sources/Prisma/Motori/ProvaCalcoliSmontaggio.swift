@@ -10,6 +10,7 @@ enum ProvaCalcoliSmontaggio {
         numeri(verifica)
         template(verifica)
         confronto(verifica)
+        riapertura(verifica)
     }
 
     private static func righe(_ testi: [String]) -> [RigaLetta] { testi.map { RigaLetta(testo: $0) } }
@@ -75,5 +76,67 @@ enum ProvaCalcoliSmontaggio {
         verifica("Smontaggio: confronto su dieci anni", Double(e.anni), Double(IpotesiCalcolo.orizzontePredefinito))
         verifica.vero("Smontaggio: con costi più bassi la proposta rende di più a dieci anni", (e.finale?.differenza ?? 0) > 0)
         verifica.vero("Smontaggio: il confronto conta la penale d'uscita", e.penaleUscita > 0)
+    }
+
+    /// Migliorie d'uso 42: la numerazione segue l'ordine delle voci sul documento; un documento conservato si riapre
+    /// dalle sue voci, anche senza il testo in memoria, con le stesse cifre di quando è stato aggiunto (compresa la
+    /// gestione calcolata dalla percentuale); i documenti smontati per cliente e per tutti.
+    private static func riapertura(_ verifica: VerificaCalcoli) {
+        let s = MotoreSmontaggio.smonta(righe(TestiSmontaggio.righeFacSimile), versato: 78_000)
+        let righeVoci = s.voci.map(\.riga)
+        verifica.vero("Smontaggio 42: numeri nell'ordine delle voci sul documento", righeVoci == righeVoci.sorted() && Set(righeVoci).count == righeVoci.count)
+        let foglio = MotoreSmontaggio.righe(da: Array(s.voci.reversed()), titolo: "Fondo Esempio Globale")
+        verifica("Smontaggio 42: foglio ricostruito, testata e una riga per voce", Double(foglio.count), Double(s.voci.count + 2))
+        verifica.vero("Smontaggio 42: le righe ricostruite nell'ordine del documento",
+                      foglio.count > 2 && foglio[1].testo == "Fondo Esempio Globale" && foglio[2].testo.hasPrefix("Commissione di gestione"))
+        let riaperte = MotoreSmontaggio.vociRiaperte(s.voci)
+        verifica.vero("Smontaggio 42: voci riaperte sulle righe del foglio, stesse cifre",
+                      riaperte.map(\.riga) == Array(2..<(2 + s.voci.count)) && riaperte.map(\.euro) == s.voci.map(\.euro))
+        verifica.vero("Smontaggio 42: ogni voce riaperta trova la sua riga",
+                      riaperte.allSatisfy { v in foglio[v.riga].testo.hasPrefix(v.etichetta) })
+        verifica("Smontaggio 42: valore usato da Prisma ricavato dalla gestione calcolata", MotoreSmontaggio.valoreDaVoci(s.voci) ?? -1, 90_000)
+        verifica("Smontaggio 42: versato ricavato dai costi d'ingresso calcolati", MotoreSmontaggio.versatoDaVoci(s.voci) ?? -1, 78_000)
+        verifica("Smontaggio 42: anno del documento", Double(MotoreSmontaggio.annoDocumento(righe(TestiSmontaggio.righeFacSimile)) ?? 0), 2025)
+        verifica.vero("Smontaggio 42: cifra della voce senza euro «—»",
+                      s.voci.first { $0.fonte == .mancante }.map { TestiSmontaggio.cifraVoce($0, anno: 2025) == "—" } ?? true)
+        verifica.vero("Smontaggio 42: testi della card", TestiSmontaggio.occhielloDocumento(nome: "Giulia", valore: nil) == "Documento di Giulia"
+                      && TestiSmontaggio.occhielloDocumento(nome: nil, valore: 90_000) == TestiSmontaggio.daAssegnare
+                      && TestiSmontaggio.vuotoCliente("Marco") == "Nessun documento smontato per Marco.")
+
+        #if os(macOS)
+        let stato = StatoShell(persistente: false)
+        guard let c = stato.dati.clienti.first, let altro = stato.dati.clienti.dropFirst().first else {
+            verifica.vero("Smontaggio 42: dati di prova con due clienti", false)
+            return
+        }
+        // Il documento com'era al momento dell'aggiunta (senza testo in memoria: come dopo un riavvio)
+        let conImporto = MotoreSmontaggio.smonta(righe(TestiSmontaggio.righeFacSimile))
+        var doc = Documento(clienteId: c.id, titolo: "Fondo Esempio Globale", tipo: .estrattoConto)
+        doc.id = "doc-prova-42-smontaggio"
+        doc.costiTrovati = conImporto.voci
+        var secondo = Documento(clienteId: altro.id, titolo: "Rendiconto di prova", tipo: .estrattoConto)
+        secondo.id = "doc-prova-42-altro"
+        secondo.costiTrovati = [conImporto.voci[0]]
+        stato.dati.documenti.removeAll { !($0.costiTrovati ?? []).isEmpty }
+        stato.dati.documenti.append(doc)
+        stato.dati.documenti.append(secondo)
+        verifica.vero("Smontaggio 42: documenti smontati del cliente", stato.documentiSmontati(clienteId: c.id).map(\.id) == [doc.id])
+        verifica("Smontaggio 42: documenti smontati di tutti", Double(stato.documentiSmontati(clienteId: nil).count), 2)
+        let senzaTesto = stato.riapriSmontaggio(doc)
+        verifica.vero("Smontaggio 42: senza testo il foglio si ricostruisce dalle voci", senzaTesto.ricostruito
+                      && senzaTesto.righe.count == conImporto.voci.count + 2)
+        verifica("Smontaggio 42: riaperto senza testo, stesso costo annuo", senzaTesto.costi.costoAnnuo ?? -1, conImporto.costoAnnuo ?? -2)
+        verifica("Smontaggio 42: riaperto senza testo, la gestione calcolata resta 1.890",
+                 senzaTesto.costi.voci.first { $0.tipo == .gestione }?.euro ?? -1, 1_890)
+        verifica.vero("Smontaggio 42: riaperto senza testo, stesse cifre voce per voce",
+                      senzaTesto.costi.voci.map(\.euro) == conImporto.voci.map(\.euro)
+                      && senzaTesto.costi.voci.map(\.fonte) == conImporto.voci.map(\.fonte))
+        verifica("Smontaggio 42: riaperto senza testo, il valore di Prisma", senzaTesto.costi.valore ?? -1, 90_000)
+        stato.memorizzaTesto(doc.id, [TestiSmontaggio.righeFacSimile.joined(separator: "\n")])
+        let conTesto = stato.riapriSmontaggio(doc)
+        verifica.vero("Smontaggio 42: con il testo in memoria il foglio è quello vero, le voci quelle conservate",
+                      !conTesto.ricostruito && conTesto.righe.count == TestiSmontaggio.righeFacSimile.count && conTesto.costi.voci == conImporto.voci)
+        verifica("Smontaggio 42: con il testo, valore letto dal documento", conTesto.costi.valore ?? -1, 90_000)
+        #endif
     }
 }
