@@ -24,7 +24,7 @@ enum TestiVera {
     }
 
     /// Il tipo (occhiello) e lo scopo di un riquadro d'esempio. Le prime quattro coppie sono quelle del template.
-    static func tipoEsempio(_ tipo: EsempioVera.Tipo) -> (tipo: String, scopo: String) {
+    static func tipoEsempio(_ tipo: EsempioDomandaVera.Tipo) -> (tipo: String, scopo: String) {
         switch tipo {
         case .giornata: return ("La giornata", "Impegni e cose urgenti, in ordine")
         case .clienteInBreve: return ("Il cliente in breve", "Chi è, cosa ha, cosa manca")
@@ -38,7 +38,7 @@ enum TestiVera {
 
 /// Una domanda d'esempio: il tipo, la domanda e lo spunto che Vera riconosce (del cliente o del portafoglio, mai tutti
 /// e due).
-struct EsempioVera: Equatable, Identifiable {
+struct EsempioDomandaVera: Equatable, Identifiable {
     enum Tipo: String, CaseIterable {
         case giornata, clienteInBreve, spiegazione, scenario, portafoglioInBreve, chiSentire
     }
@@ -103,25 +103,25 @@ enum EsempiVera {
     /// quattro, mai due dello stesso tipo. Con un cliente scelto nessun esempio va nella conversazione del portafoglio.
     /// «La giornata» («Cosa ho oggi?») non c'è con un cliente scelto: «Cosa ho questa settimana?» è uno spunto del
     /// portafoglio e porterebbe la domanda fuori dal dossier (Design/uso/resta-da-fare.md, 27).
-    static func per(cliente: Profilo?, portafoglio: Bool) -> [EsempioVera] {
+    static func per(cliente: Profilo?, portafoglio: Bool) -> [EsempioDomandaVera] {
         if portafoglio || cliente == nil {
             return [
-                EsempioVera(.giornata, portafoglio: .settimana),
-                EsempioVera(.chiSentire, portafoglio: .ricontattare),
-                EsempioVera(.spiegazione, portafoglio: .scadenze),
-                EsempioVera(.portafoglioInBreve, portafoglio: .quadro),
+                EsempioDomandaVera(.giornata, portafoglio: .settimana),
+                EsempioDomandaVera(.chiSentire, portafoglio: .ricontattare),
+                EsempioDomandaVera(.spiegazione, portafoglio: .scadenze),
+                EsempioDomandaVera(.portafoglioInBreve, portafoglio: .quadro),
             ]
         }
         let p = cliente ?? Profilo()
-        var esempi = [EsempioVera(.clienteInBreve, spunto: .riepilogo)]
+        var esempi = [EsempioDomandaVera(.clienteInBreve, spunto: .riepilogo)]
         // La spiegazione su ciò che il cliente ha: il piano pensione se c'è, altrimenti dove è scoperto
-        esempi.append(EsempioVera(.spiegazione, spunto: p.haPrevidenza ? .pensione : .protezione))
+        esempi.append(EsempioDomandaVera(.spiegazione, spunto: p.haPrevidenza ? .pensione : .protezione))
         // Lo scenario solo se c'è qualcosa da far cambiare: il crollo dei mercati sugli investimenti, altrimenti
         // restare o cambiare sulle posizioni che ha
         if p.haInvestimenti {
-            esempi.append(EsempioVera(.scenario, spunto: .resistenza))
+            esempi.append(EsempioDomandaVera(.scenario, spunto: .resistenza))
         } else if p.haPosizioni {
-            esempi.append(EsempioVera(.scenario, spunto: .cambiare))
+            esempi.append(EsempioDomandaVera(.scenario, spunto: .cambiare))
         }
         return esempi
     }
@@ -139,7 +139,7 @@ enum ProvaEsempiVera {
             ("con investimenti", EsempiVera.Profilo(haPosizioni: true, haInvestimenti: true)),
             ("con tutto", EsempiVera.Profilo(haPosizioni: true, haPrevidenza: true, haInvestimenti: true)),
         ]
-        var casi: [(String, [EsempioVera], Bool)] = profili.map { ("cliente \($0.0)", EsempiVera.per(cliente: $0.1, portafoglio: false), false) }
+        var casi: [(String, [EsempioDomandaVera], Bool)] = profili.map { ("cliente \($0.0)", EsempiVera.per(cliente: $0.1, portafoglio: false), false) }
         casi.append(("tutti i clienti", EsempiVera.per(cliente: nil, portafoglio: true), true))
         for (nome, esempi, portafoglio) in casi {
             controlla((1...4).contains(esempi.count), "Esempi di Vera (\(nome)): da uno a quattro (\(esempi.count))")

@@ -8,7 +8,7 @@ import SwiftUI
 
 /// La griglia degli esempi. Le domande vengono da `EsempiVera.per(cliente:portafoglio:)`.
 struct GrigliaEsempiVera: View {
-    let esempi: [EsempioVera]
+    let esempi: [EsempioDomandaVera]
     @Environment(StatoShell.self) var stato
 
     var body: some View {
@@ -36,7 +36,7 @@ struct GrigliaEsempiVera: View {
     }
 
     /// La domanda va dove va lo spunto: nella conversazione del cliente o in quella del portafoglio.
-    private func chiedi(_ esempio: EsempioVera) {
+    private func chiedi(_ esempio: EsempioDomandaVera) {
         if let s = esempio.spuntoPortafoglio {
             stato.chiediVeraPortafoglio(s.domanda, spunto: s)
         } else if let s = esempio.spunto {
@@ -47,7 +47,7 @@ struct GrigliaEsempiVera: View {
 
 /// Un riquadro d'esempio (`.vCard` del template): tipo, domanda, scopo.
 private struct RiquadroEsempioVera: View {
-    let esempio: EsempioVera
+    let esempio: EsempioDomandaVera
 
     var body: some View {
         let e = Tema.Apple.Vera.Esempi.self

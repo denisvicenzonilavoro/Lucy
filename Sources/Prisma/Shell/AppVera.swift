@@ -656,7 +656,7 @@ extension CorpoAppVera {
 
     /// Le domande d'esempio (`EsempiVera.per`): per il portafoglio, o per il cliente dalle sue posizioni in essere,
     /// ricavate una volta finché non cambiano i dati dei calcoli.
-    private var esempi: [EsempioVera] {
+    private var esempi: [EsempioDomandaVera] {
         if stato.veraPortafoglio { return EsempiVera.per(cliente: nil, portafoglio: true) }
         let id = stato.clienteAttivoId
         return stato.ricavato("vera-esempi-\(id)") {
