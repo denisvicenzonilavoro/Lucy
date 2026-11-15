@@ -31,6 +31,8 @@ enum TestiDaFare {
     static let perTe = "Per te"
     static let niente = "Nient’altro da fare."
     static let dopoMossa = "dopo la mossa del giorno"
+    /// «✓ Fatto» nella mossa del giorno della scrivania (proposta di 3.6).
+    static let fattoMossa = "Fatto"
     static let aiutoPillola = "Da fare: le cose aperte con i clienti, in ordine di tempo"
     static let aiutoCerchio = "Segna come fatto"
     static let massimoCaratteri = Tema.Apple.ElencoDaFare.caratteriCampo
@@ -133,6 +135,33 @@ extension StatoShell {
         daFareSoloCliente = soloCliente && !tuttiIClienti
         daFareScrivo = false
         if !pannelloNotifiche { alternaNotifiche() }
+    }
+
+    // MARK: - La mossa del giorno come prima voce (proposta di 3.6)
+
+    /// La voce del nastro che è la mossa del giorno: sulla scrivania la mossa è la prima cosa da fare, il riquadro «Da
+    /// fare» parte dalla seconda («dopo la mossa del giorno») e «✓ Fatto» sta nella mossa. nil se la mossa non ha una
+    /// voce nel nastro (per esempio i dati incompleti) o se non c'è una mossa.
+    func voceDellaMossa(in voci: [VoceDaFare]) -> VoceDaFare? {
+        guard let m = mossaDelGiorno().mossa else { return nil }
+        return Self.voceDellaMossa(m, in: voci)
+    }
+
+    /// Il motivo principale della mossa nel nastro: la stessa posizione del cliente, altrimenti lo stesso tipo di voce.
+    static func voceDellaMossa(_ m: MossaDelGiorno, in voci: [VoceDaFare]) -> VoceDaFare? {
+        guard let principale = m.segnali.first else { return nil }
+        let delCliente = voci.filter { $0.cliente.id == m.cliente.id }
+        if let p = principale.posizione, let v = delCliente.first(where: { $0.posizioneId == p.id }) { return v }
+        let tipo: VoceDaFare.Tipo?
+        switch principale.tipo {
+        case .propostaFerma: tipo = .proposta
+        case .riesame: tipo = .riesame
+        case .scadenza: tipo = .scadenza
+        case .occasione: tipo = .occasione
+        case .datiIncompleti: tipo = nil
+        }
+        guard let tipo else { return nil }
+        return delCliente.first { $0.tipo == tipo }
     }
 
     // MARK: - Segna come fatto e Annulla l'ultima

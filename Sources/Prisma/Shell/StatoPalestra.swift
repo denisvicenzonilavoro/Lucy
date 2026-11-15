@@ -143,7 +143,8 @@ import Observation
             }
             guard let self, !Task.isCancelled else { return }
             guard stato.disponibilitaLocale.pronto else {
-                self.fase = .nonPronta(stato.disponibilitaLocale.motivo ?? "Qwen non risponde.")
+                self.fase = .nonPronta(TestiStatoVera.inVista(mac: TestiStatoVera.spiegazione,
+                                                         altrove: stato.disponibilitaLocale.motivo ?? "Qwen non risponde."))
                 return
             }
             try? await Task.sleep(nanoseconds: UInt64(Tema.Apple.Moto.Palestra.attesaInizio * 1_000_000_000))

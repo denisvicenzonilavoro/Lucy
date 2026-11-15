@@ -215,7 +215,7 @@ enum TestiDaSistemare {
     }
 
     static let veraNonPronta = "Vera non è pronta"
-    static let veraNonProntaSpiegazione = "Qwen non risponde sul Mac."
+    static let veraNonProntaSpiegazione = TestiStatoVera.inVista(mac: "Vera non risponde ancora sul Mac.", altrove: "Qwen non risponde sul Mac.")
     static let veraPronta = "Vera è pronta"
     static let veraProntaSpiegazione = "Risponde dal Mac: niente esce da qui."
 

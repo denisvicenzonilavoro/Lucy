@@ -669,6 +669,9 @@ enum VoceConfronto: Hashable {
     let persistente: Bool
 
     @ObservationIgnored private var lavoroAvviso: DispatchWorkItem?
+    /// Migliorie d'uso 1 (§1.3 punto 12): gli avvisi interni con il nome o i dati di un altro cliente arrivati mentre la
+    /// vista pulita di «Mostra al cliente» è aperta. Solo in memoria: si mostrano dopo «Fine» e si scartano al blocco.
+    @ObservationIgnored var avvisiTrattenuti: [AvvisoTrattenuto] = []
     /// Le sottoscrizioni dello stato (anche quelle di RipresaSistema.swift).
     @ObservationIgnored var abbonamenti = Set<AnyCancellable>()
     #if os(macOS)
@@ -2966,7 +2969,12 @@ enum VoceConfronto: Hashable {
         }
         guard let modello = generativo else {
             verificaMotoreLocale()
+            #if os(macOS)
+            // Migliorie d'uso 9: niente nomi tecnici in vista; il motivo sta in Impostazioni › Vera
+            mostraAvviso(TestiStatoVera.spiegazione + " Il commento lo scrive Vera: quando è pronta, riprova.")
+            #else
             mostraAvviso((disponibilitaLocale.motivo ?? "Qwen non risponde.") + " Il commento lo scrive Vera con Qwen: quando è pronto, riprova.")
+            #endif
             return
         }
         veraInCorso = true
@@ -4234,7 +4242,16 @@ enum VoceConfronto: Hashable {
 
     // MARK: - Avvisi
 
-    func mostraAvviso(_ testo: String, daVera: Bool = false, azione: AzioneAvviso? = nil) {
+    /// `riservato`: l'avviso porta il nome o i dati di un cliente che può non essere quello mostrato (note e carta
+    /// dall'iPhone, carte della notte, «Prisma ovunque», routine): nella vista pulita di «Mostra al cliente» resta in coda
+    /// e si vede dopo «Fine» (migliorie d'uso 1, solo sul Mac).
+    func mostraAvviso(_ testo: String, daVera: Bool = false, azione: AzioneAvviso? = nil, riservato: Bool = false) {
+        #if os(macOS)
+        if riservato, inVistaCliente {
+            avvisiTrattenuti.append(AvvisoTrattenuto(testo: testo, daVera: daVera, azione: azione))
+            return
+        }
+        #endif
         lavoroAvviso?.cancel()
         avvisoDiVera = daVera
         azioneAvviso = azione
@@ -4489,6 +4506,13 @@ fileprivate struct NeutriNotifiche: Equatable {
 }
 
 /// Il pulsante di un avviso: «Annulla» dopo una creazione rapida (Pratiche › Proposta, §7.1.4).
+/// Un avviso trattenuto mentre si mostra al cliente (migliorie d'uso 1): si mostra dopo «Fine».
+struct AvvisoTrattenuto {
+    let testo: String
+    let daVera: Bool
+    let azione: AzioneAvviso?
+}
+
 struct AzioneAvviso {
     let titolo: String
     let esegui: () -> Void

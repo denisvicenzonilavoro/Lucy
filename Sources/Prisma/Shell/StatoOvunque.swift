@@ -513,7 +513,7 @@ extension StatoShell {
             if !e.unite.isEmpty { ovunque.ultimeUnite = e.unite }
             ovunque.giri += 1
             if !automatica || !e.unite.isEmpty || !e.conflitti.isEmpty {
-                mostraAvviso(TestiOvunque.avviso(unite: e.unite.count, conflitti: e.conflitti.count))
+                mostraAvviso(TestiOvunque.avviso(unite: e.unite.count, conflitti: e.conflitti.count), riservato: automatica)
             }
         case .success(.dispositivo(let e)):
             dati.carica(accogliGiroOvunque(e, partenza: partenza, versione: versione))

@@ -9,7 +9,7 @@ enum TestiDocumenti {
 
     // MARK: Il perché dei dati da controllare
 
-    static let lettoConQwen = "L’ho letto con Qwen: controlla."
+    static let lettoConQwen = TestiStatoVera.inVista(mac: "L’ha letto Vera: controlla.", altrove: "L’ho letto con Qwen: controlla.")
     static let senzaRiga = "Nel testo non trovo la riga da cui viene: controlla."
     static let importoIlleggibile = "Il numero non ha la forma di un importo."
     static let percentualeIlleggibile = "Il numero non ha la forma di una percentuale."

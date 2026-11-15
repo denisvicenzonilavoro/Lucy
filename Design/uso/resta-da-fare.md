@@ -84,12 +84,12 @@ ProvaScenariVera.
 Resta:
 - **L'etichetta del motore sotto le risposte** («Sul Mac · Qwen…», `EtichettaMotore.per`): resta com'è per decisione
   (regola bloccata del cervello grande), finché l'utente non dà il via alla proposta di 9.6.
-- Altri testi con «Qwen» in vista, meno frequenti: VistePassiVera («Piano proposto da Qwen…»), VisteFaseTreVera
-  («spiegati da Qwen», «Scritta da Qwen…»), VisteTreLivelliVera («Parole di Qwen»), VisteStileVera, VisteMotoriVera
-  (pagina dei motori: lì il nome ha senso), CollegaStileShell, VerbaleCopilota («riscrivendo con Qwen»), NotaVocaleArrivo
-  («Capito con Qwen»), AppIncontri («Proposta letta da Qwen»), ComponentiAppDocumenti («p. N · Qwen»), MotoreSintesi
-  («serve Qwen sul Mac»), gli avvisi di StatoShell con il motivo di Ollama (commento del mercato) e il motivo tecnico
-  nella mini Vera (`motivoNonPronta`). Da passare a «Vera» guardando le istantanee.
+- ~~Altri testi con «Qwen» in vista~~: fatto nella rifinitura con `TestiStatoVera.inVista(mac:altrove:)` (sul Mac «Vera»,
+  su iPhone e iPad il testo di prima): VistePassiVera, VisteFaseTreVera, VisteTreLivelliVera, VisteStileVera,
+  CollegaStileShell, VerbaleCopilota, NotaVocaleArrivo, AppIncontri, ComponentiAppDocumenti, CopilotaIncontro,
+  MotoreSintesi, TestiDocumenti, CollegaMotoriShell, MotoreDaSistemare, ImpostazioniNotteVista, NovitaVera, il motivo
+  della palestra e l'avviso del commento del mercato (StatoShell). Il nome resta in VisteMotoriVera, nelle pagine delle
+  Impostazioni, in `EtichettaMotore`, in MisuraVelocita (strumento di misura) e nei nomi interni (`storiaPerQwen`…).
 - «Check-up completo» negli spunti → miglioria 5 («Il quadro»).
 - La riga «Due velocità» di Impostazioni › Vera dice ancora «Qwen sul Mac»: in Impostazioni il nome resta (9.2).
 - **Istantanee**: rigenerare sul Mac «410-scrivania-apple», «296-scrivania-vera», «297-scrivania-vera-risposta»,
@@ -140,7 +140,10 @@ Resta:
 - **Prospetti**: il tipo `.portafoglio` non è diventato una lettura di `tuttiIClienti`. Con «Tutti i clienti» si apre il
   vuoto: il prospetto del portafoglio si raggiunge dalla scrivania o da Posizioni.
 - **Ancora da fare**:
-  - «La tua rubrica» con le quattro cifre e il «Da fare» (con la miglioria 11).
+  - ~~«La tua rubrica» con le quattro cifre e il «Da fare»~~: fatto nella rifinitura (Shell/RubricaTuttiApple.swift,
+    token `Tema.Apple.Clienti.TuttiIClienti`): persone seguite, in regola e riesami dell'anno da `statoDelLavoro`,
+    patrimonio seguito da `riepilogoPortafoglio(canale: nil, area: nil)`, «Da fare» con cinque voci, «Apri tutto ›» e
+    «altre N ›». Istantanea da guardare: la rubrica con «Tutti i clienti» (nessuna scena dedicata per ora).
   - Vera che parla del cliente della barra, con domande d'esempio e «Parliamo di» (miglioria 27).
   - `ContestoFinestra` senza il nome (miglioria 4).
   - La pillola che non si apre nella vista pulita (miglioria 1).
@@ -215,9 +218,12 @@ Resta:
   sinistra, filo bianco al 40% fra le due). Serve una forma del tema per le due metà.
 - **Inquadra senza iPhone collegato**: la voce apre la scena di oggi (con il ponte spento si trascina una foto o un PDF);
   il rimando a Impostazioni › iPhone e iPad arriva con la miglioria 39.
-- **Testi della guida delle altre app** (`GUIDA` del template, righe 3014-3029): non riscritti in questo giro; vanno
-  aggiornati app per app solo dove descrivono ciò che l'app fa già (indice del dossier, settimana a sette giorni, «Da
-  fare» unico… arrivano con le loro migliorie). Il passo 2 della scrivania del template («Spunta le cose da fare:
+- **Testi della guida delle altre app**: fatto nella rifinitura per Clienti, Posizioni, Analisi 360, Incontri, Agenda,
+  Messaggi, Prospetti, Sala, Mercato, Vera e Impostazioni (`GuidaTesti.aiutoMac`, solo sul Mac: frase e passi del
+  template, parole e riga breve di sempre). Restano i testi di prima per Territorio, Pratiche, Biblioteca, Studio e le app
+  ospitate (da riprendere quando quelle schermate fanno ciò che il template dice: «Segui la crescita», il numero rosso
+  delle pratiche ferme, i tre gruppi di Studio, i prodotti dei clienti in cima alla Biblioteca). Prospetti dice «apre la
+  pagina davanti a lui», non «sempre quella per il cliente», finché la miglioria 22 non sceglie la versione da sola. Il passo 2 della scrivania del template («Spunta le cose da fare:
   spariscono da tutta Prisma») è stato scritto senza la seconda parte: va ripreso con la miglioria 3.
 
 ## 3. Un solo «Da fare» al posto di notifiche, scadenze e promemoria
@@ -257,13 +263,16 @@ Resta:
   spuntano). La tabella di 3.3 punto 1 va completata: impegni senza esito → miglioria 19; pratiche e sinistri fermi → 33;
   backup e impostazioni → Impostazioni › Da sistemare (31); le voci per cliente (ricontattare, beneficiari, esperienza,
   adeguatezza) e le voci «Per te» dei documenti come voci del nastro; poi «Arrivati» solo per carta, note, notte e capsule.
-- **La mossa del giorno** resta di `MotoreMossaDelGiorno` e il riquadro «Da fare» parte dalla prima voce del nastro (senza
-  «dopo la mossa del giorno»): da fare l'allineamento proposto in 3.6 (la voce della mossa prima, il riquadro dalla seconda,
-  «✓ Fatto» nella mossa).
-- **Rubrica** con «Tutti i clienti» (cinque voci, miglioria 11), **dossier** «Da fare per <Nome>» con «Apri tutto ›» su «Solo
-  <Nome>» (miglioria 5), **Agenda** «Da fare oggi» al posto di «Da fare e da ricordare» e via «Da non dimenticare» (miglioria
-  18, `RigaDaFare(filoAgenda: true, conCanali: false)` è pronta), **Vera** senza «Da non dimenticare» (miglioria 27), il
-  collegamento «<N> da fare per <Nome> ›» di Posizioni.
+- **La mossa del giorno**: fatto nella rifinitura sulla scrivania (`voceDellaMossa(in:)` in StatoDaFare: la stessa
+  posizione del cliente della mossa, altrimenti lo stesso tipo di voce). Il riquadro «Da fare» parte dalla seconda voce con
+  «dopo la mossa del giorno» e la mossa ha «✓ Fatto». Il nastro del pannello resta in ordine di tempo (la mossa non è
+  spostata in testa: cambierebbe l'ordine provato da `ProvaDaFare`). Da guardare nelle istantanee 410 e 616 che il terzo
+  pulsante della mossa stia nell'altezza del riquadro; manca una prova di `voceDellaMossa`.
+- ~~**Rubrica** con «Tutti i clienti»~~ e ~~**Agenda** «Da fare oggi»~~: fatti nella rifinitura (la card «Da fare oggi»
+  nella colonna di sinistra della settimana con due voci di oggi e la riga comune, al posto di «Da non dimenticare»; la
+  fascia della giornata si chiama «Da fare oggi», «Da fare» negli altri giorni, ma tiene le sue capsule: passarla alla
+  riga comune resta da fare). **Dossier** «Da fare per <Nome>» (miglioria 5), **Vera** senza «Da non dimenticare»
+  (miglioria 27), il collegamento «<N> da fare per <Nome> ›» di Posizioni.
 - **Notifiche viste**: `notificheViste` e il numero delle «nuove» restano nel codice comune (le usano iPhone, iPad e le
   prove); sul Mac non si vedono più. I promemoria del Mac (notifiche di sistema) leggono ancora `MotoreNotifiche.promemoria`:
   da far leggere al nastro.
@@ -321,17 +330,23 @@ all'incontro» (la presentazione dentro la vista pulita); Sala: il blu «Mostra 
 Resta:
 - **Il blocco chiude la vista pulita** (come oggi chiude la modalità cliente, e la prova di Vera lo vuole): la specifica
   dice «allo sblocco si torna dov'eri». Per farlo il blocco dovrebbe tenere la modalità cliente quando la vista è aperta.
-- **Gli avvisi interni con il nome di altri clienti** (note e carta dall'iPhone, carte della notte, «Prisma ovunque»,
-  routine) non sono ancora trattenuti mentre si mostra: vanno messi in coda e mostrati dopo «Fine» (§1.3 punto 12).
+- ~~**Gli avvisi interni con il nome di altri clienti**~~ fatto nella rifinitura: `mostraAvviso(_:riservato:)` mette in
+  coda in memoria (`avvisiTrattenuti`) gli avvisi riservati mentre la vista pulita è aperta; «Fine» mostra l'ultimo (con
+  quanti altri), il blocco li scarta. Riservati: carta dall'iPhone, testo inquadrato, routine finite (portafoglio e dopo
+  la firma), sincronizzazione automatica di «Prisma ovunque». La scheda della nota vocale era già trattenuta dalla
+  modalità cliente; le carte della notte non danno avvisi a lavoro finito. Caso nuovo in `ProvaMostraAlCliente`.
 - **«Sull’iPad sul tavolo»** fa come il template (apre Prospetti con l'avviso), non avvia ancora il tavolo; se l'iPad non è
   collegato dovrebbe portare a Impostazioni › iPhone e iPad (miglioria 39).
 - **«Un prospetto»** mostra il report del check-up del cliente: la scelta del prospetto (e la versione «Per il cliente»
   della miglioria 22) resta da fare.
-- **Le parole** stanno nel piede di ogni capitolo, non dentro le frasi (il template le sottolinea nel testo); da unire con
-  il componente della miglioria 66. «Gli obiettivi» dice «traguardo a <mese anno>» (la data dell'obiettivo), non una data
+- **Le parole**: fatto nella rifinitura per «Il quadro» (`TestoConParole(vistaCliente:)`: nella vista pulita le parole
+  restano segnate e il tocco apre `schedaMostra` (.parola); nel piede restano solo quelle che le frasi non dicono). «Le
+  posizioni» tocca «patrimonio netto» nell'etichetta e tiene «in essere» nel piede; «Nel tempo» resta con il piede (le
+  cifre non hanno frasi). Da guardare nelle istantanee 1010-1013 quali parole del glossario le frasi di `FrasiCliente`
+  fanno davvero comparire. «Gli obiettivi» dice «traguardo a <mese anno>» (la data dell'obiettivo), non una data
   d'arrivo stimata, che Prisma oggi non calcola.
-- **Nel capitolo «La Sala»** la barra dei capitoli si sovrappone al fondo della finestra della Sala; la chiusura della
-  finestra non è nascosta; la Sala aperta su un'esperienza resta aperta solo entrando da lì (`tieni` non è distinto).
+- **Nel capitolo «La Sala»** la barra dei capitoli si sovrappone al fondo della finestra della Sala; ~~la chiusura della
+  finestra non è nascosta~~ (fatto nella rifinitura: nella vista pulita niente chiusura né «Chiudi» nel menu della riga); la Sala aperta su un'esperienza resta aperta solo entrando da lì (`tieni` non è distinto).
 - **Movimento**: il pannello entra con `entrataScheda` (dal basso, 0,97); l'ombra al passaggio delle righe non c'è (solo
   la salita di 2). Il menu dell'avatar è una scheda disegnata, non un menu del Mac.
 - `ContrassegnoModoCliente` resta come ripiego quando la modalità cliente è accesa senza la vista (presentazione della
@@ -781,8 +796,9 @@ Fatto (solo sul Mac, `#if os(macOS)`; l'iPad tiene le quattro viste, la striscia
 Resta:
 - **454-agenda-occasioni-pulsante**: il menu è un popover (finestra a sé), le istantanee non lo vedono: chiedere uno
   screenshot all'utente.
-- **Colonna a sinistra**: «Da non dimenticare» resta; il template mette lì il «Da fare» (con `RigaDaFare(filoAgenda: true,
-  conCanali: false)`). Nella giornata la fascia «Da fare e da ricordare» non è ancora «Da fare oggi» (miglioria 3).
+- **Colonna a sinistra**: fatto nella rifinitura (`DaFareOggiAgendaApple`: «Da fare oggi» con il numero, «Apri tutto ›» e
+  due voci di oggi con `RigaDaFare(filoAgenda: true, conCanali: false)`; vuoto «Niente per oggi[ con <Nome>].»). La fascia
+  della giornata ha il titolo nuovo ma le capsule di prima. Istantanee da rigenerare: 450, 453.
 - **Scala al passaggio** (1,03) non messa: basta l'inclinazione (come chiede 18.3 punto 3).
 - **`--prova-fluidita`**: guardare in CI che la settimana con 30 clienti non faccia crescere i corpi rifatti (ogni colonna
   di oggi ha una `TimelineView` della riga dell'ora e una degli impegni); `ProvaRiesamiAgenda` non tocca la vista e resta.

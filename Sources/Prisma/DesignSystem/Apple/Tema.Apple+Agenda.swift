@@ -74,6 +74,14 @@ extension Tema.Apple {
             static let avvisoSopra: CGFloat = 6
             /// Al massimo tante righe di «Da non dimenticare».
             static let righeAvviso = 4
+            /// Migliorie d'uso 3 e 18, «Da fare oggi» (stesso fondo arancio): due voci, padding 12×14 (4 sotto), il
+            /// numero `.k` a 6 dall'etichetta, «Apri tutto ›» 12,5 in accento, 10 sotto il testo vuoto.
+            static let righeDaFare = 2
+            static let paddingDaFare = EdgeInsets(top: 12, leading: 14, bottom: 4, trailing: 14)
+            static let spazioNumeroDaFare: CGFloat = 6
+            static let collegamentoDaFare = Carattere(dimensione: 12.5, peso: .regular)
+            static let coloreCollegamentoDaFare = Colore.accento
+            static let sottoVuotoDaFare: CGFloat = 10
         }
 
         // MARK: Calendario del mese (barra laterale)

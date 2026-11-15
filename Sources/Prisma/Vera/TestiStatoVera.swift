@@ -29,6 +29,15 @@ enum TestiStatoVera {
     /// L'aiuto di «Verifica».
     static let aiutoVerifica = "Controlla di nuovo se Vera è pronta"
 
+    /// Un testo che sul Mac non nomina il motore (dice «Vera» o «Prisma») e su iPhone e iPad resta quello di prima.
+    static func inVista(mac: String, altrove: String) -> String {
+        #if os(macOS)
+        return mac
+        #else
+        return altrove
+        #endif
+    }
+
     /// true se il titolo è quello di Vera non pronta, di oggi o di prima.
     static func eTitoloNonPronta(_ titolo: String?) -> Bool {
         guard let t = titolo else { return false }

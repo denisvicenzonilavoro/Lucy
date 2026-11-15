@@ -151,7 +151,11 @@ struct FinestraInterna: View {
     /// affiancare stanno nel menu contestuale della riga (e ridurre anche nel dock).
     private var rigaTesta: some View {
         HStack(spacing: RigaTestaTema.spazio) {
-            ChiusuraFinestra { stato.chiudi(finestra.app) }
+            // Nella vista pulita di «Mostra al cliente» la Sala non si chiude (migliorie d'uso 1, riga 500 del
+            // template): chiuderla lascerebbe la vista vuota; si esce con «Fine» della vista.
+            if !stato.inVistaCliente {
+                ChiusuraFinestra { stato.chiudi(finestra.app) }
+            }
             IconaApp(app: finestra.app, lato: RigaTestaTema.icona)
                 .padding(.leading, RigaTestaTema.margineIcona)
             TestaFinestra(app: finestra.app, attiva: attiva)
@@ -168,8 +172,10 @@ struct FinestraInterna: View {
             Button("Riduci nel dock") { stato.riduci(finestra.app) }
             Button(finestra.ingrandita ? "Rimetti a posto" : "Ingrandisci") { stato.alternaIngrandimento(finestra.app) }
             Button("Affianca a sinistra") { stato.affianca(finestra.app) }
-            Divider()
-            Button("Chiudi") { stato.chiudi(finestra.app) }
+            if !stato.inVistaCliente {
+                Divider()
+                Button("Chiudi") { stato.chiudi(finestra.app) }
+            }
         }
     }
     #endif

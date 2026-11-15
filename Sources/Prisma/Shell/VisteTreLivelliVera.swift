@@ -213,7 +213,7 @@ struct TreLivelliVeraVista: View {
         return VStack(alignment: .leading, spacing: T.spazioRighe) {
             HStack(spacing: T.spazioPunto) {
                 if s.livelliQwen.contains(livello) {
-                    PillolaFaseTre(testo: "Parole di Qwen", colore: F.verde)
+                    PillolaFaseTre(testo: TestiStatoVera.inVista(mac: "Parole di Vera", altrove: "Parole di Qwen"), colore: F.verde)
                 } else {
                     PillolaFaseTre(testo: "Scritto da Prisma", colore: F.blu)
                 }

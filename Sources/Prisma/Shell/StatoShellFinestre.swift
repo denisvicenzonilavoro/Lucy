@@ -493,6 +493,8 @@ extension StatoShell {
             // Migliorie d'uso 1: il pannello di «Mostra al cliente» e la schermata neutra si chiudono
             if sceltaMostra { sceltaMostra = false }
             if schermataNeutraMac { schermataNeutraMac = false }
+            // e gli avvisi trattenuti mentre si mostrava si scartano (portano nomi di altri clienti)
+            avvisiTrattenuti.removeAll()
             #endif
             // La guida si chiude senza segnare l'introduzione come vista: riparte al prossimo sblocco
             if sistema.guida != nil { sistema.guida = nil }

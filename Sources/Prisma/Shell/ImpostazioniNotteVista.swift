@@ -23,7 +23,8 @@ struct GruppoImpostazioniNotte: View {
                         .disabled(stato.solaLettura)
                 }
                 RigaImpostazione(titolo: TestiNotte.rigaBozze, sottotitolo: TestiNotte.notaBozze,
-                                 aiuto: "Qwen sul Mac si carica una volta, scrive le bozze una alla volta e libera subito la memoria") {
+                                 aiuto: TestiStatoVera.inVista(mac: "Vera si carica una volta, scrive le bozze una alla volta e libera subito la memoria",
+                                                         altrove: "Qwen sul Mac si carica una volta, scrive le bozze una alla volta e libera subito la memoria")) {
                     interruttore(n.usaQwen) { v in stato.impostaNotte { $0.usaQwen = v } }
                 }
                 RigaImpostazione(titolo: TestiNotte.rigaApri, sottotitolo: "Una volta, dopo lo sblocco; mai con un cliente davanti.") {

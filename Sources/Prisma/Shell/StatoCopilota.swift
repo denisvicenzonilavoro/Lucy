@@ -214,7 +214,7 @@ extension StatoShell {
             if inquadratureInArrivo.count > Self.massimoInquadrature {
                 inquadratureInArrivo.removeFirst(inquadratureInArrivo.count - Self.massimoInquadrature)
             }
-            mostraAvviso("È arrivato il testo inquadrato con \(x.dispositivo): controllalo prima di aggiungerlo a Posizioni.")
+            mostraAvviso("È arrivato il testo inquadrato con \(x.dispositivo): controllalo prima di aggiungerlo a Posizioni.", riservato: true)
             return .accettata()
         case .cartaIdentita(let c):
             // «Luce» giro 13: solo in memoria, mai nell'archivio; con Prisma bloccato si rimanda dall'iPhone (decisione 25)

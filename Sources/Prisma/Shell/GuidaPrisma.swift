@@ -58,6 +58,85 @@ extension AppPrisma {
 /// I testi «Come si usa» delle 23 app.
 enum GuidaTesti {
     static func aiuto(_ app: AppPrisma) -> AiutoApp {
+        let base = aiutoDiSempre(app)
+        #if os(macOS)
+        // Migliorie d'uso 6: sul Mac i testi della guida del template, per le app che fanno già quelle cose
+        if let mac = aiutoMac(app, base: base) { return mac }
+        #endif
+        return base
+    }
+
+    #if os(macOS)
+    /// I testi «Come si usa» del template (`GUIDA`, migliorie d'uso 6) per le schermate rifatte sul Mac. Le parole del
+    /// glossario e la riga breve restano quelle di sempre; `nil` per le app che tengono i testi di prima.
+    private static func aiutoMac(_ app: AppPrisma, base: AiutoApp) -> AiutoApp? {
+        func guida(_ aCosaServe: String, _ passi: [String]) -> AiutoApp {
+            AiutoApp(aCosaServe: aCosaServe, inBreve: base.inBreve, passi: passi, parole: base.parole)
+        }
+        switch app {
+        case .clienti:
+            return guida("Le persone che segui e il dossier di ognuna.",
+                         ["Scegli una persona dalla rubrica, o in alto nella barra; con «Tutti i clienti» torni alla rubrica.",
+                          "A sinistra hai l’indice del suo dossier: tutte le sezioni in vista, in tre gruppi.",
+                          "Il dossier si apre sul suo quadro: le quattro aree in una riga ciascuna."])
+        case .posizioni:
+            return guida("Tutto quello che i clienti hanno già e quello che proponi, diviso per canale. È il cuore di Prisma.",
+                         ["Con «Tutti i clienti» vedi il portafoglio intero, il radar, la prova del fuoco e lo smontaggio.",
+                          "Scegli un cliente in alto: l’elenco delle sue posizioni è nella prima schermata, le analisi nell’indice a sinistra.",
+                          "Tocca una posizione per la sua scheda; con «Aggiungi» ne inserisci una nuova."])
+        case .analisi360:
+            return guida("Previdenza, protezione, investimenti e risparmio di una persona.",
+                         ["Scegli il cliente in alto.",
+                          "Le priorità sono numerate: parti dalla 1.",
+                          "Tocca un’area per il simulatore; «Simula e confronta» mette due strade una accanto all’altra, e fa il conto del TFR."])
+        case .incontri:
+            return guida("L’incontro in tre momenti: prima lo prepari, durante ascolti, dopo confermi.",
+                         ["Scegli l’incontro a sinistra: oggi, prossimi, fatti.",
+                          "Durante, il copilota riconosce obiettivi, polizze, timori ed eventi; oppure prendi appunti a mano.",
+                          "Dopo, decidi tu cosa entra nel dossier."])
+        case .agenda:
+            return guida("Impegni e appuntamenti, a giorno, a settimana o a mese.",
+                         ["«Settimana» mostra i sette giorni affiancati: tocca il nome di un giorno per vederlo in grande.",
+                          "Tocca un impegno: prima dell’ora lo prepari, dopo dici com’è andato.",
+                          "Con un cliente scelto in alto vedi solo i suoi impegni."])
+        case .messaggi:
+            return guida("Vera prepara i messaggi ai clienti, li spedisci tu.",
+                         ["Scegli il messaggio a sinistra: con un cliente scelto vedi solo i suoi.",
+                          "Rileggi, cambia il tono, scegli se inviarlo con Mail o con Messaggi.",
+                          "Dopo averlo aperto, di’ a Prisma se l’hai spedito: resta tra i «Mandati oggi»."])
+        case .presentazioni:
+            return guida("I documenti per l’incontro: il dettaglio per te, l’essenziale per il cliente.",
+                         ["Scegli il cliente in alto e il documento a sinistra.",
+                          "Sopra la pagina scegli la versione: «Per il cliente» o «Per te».",
+                          "«Mostra al cliente» apre la pagina davanti a lui; «Componi il fascicolo» mette insieme i report da lasciargli."])
+        case .sala:
+            return guida("Le esperienze da vivere con il cliente.",
+                         ["Scegli il cliente in alto.",
+                          "Ogni esperienza dice quando usarla e quanto dura.",
+                          "Dentro, «Cosa dire» ti dà il copione; per mostrarla usa «Mostra al cliente»."])
+        case .mercato:
+            return guida("Quote e tassi, avvisi e chi ne è toccato.",
+                         ["Guarda le tessere di oggi.",
+                          "Con un cliente scelto vedi cosa tocca lui.",
+                          "Ogni avviso ha la sua azione; «Silenzia» lo mette da parte."])
+        case .vera:
+            return guida("L’assistente di Prisma: legge i dati e li racconta. Tutto resta su questo Mac.",
+                         ["Scrivi, o scegli una delle domande d’esempio.",
+                          "I numeri li calcola Prisma, Vera li spiega.",
+                          "Con un cliente scelto in alto parla di lui."])
+        case .impostazioni:
+            return guida("Il tuo modo di lavorare: aspetto, dispositivi, backup e le regole del lavoro.",
+                         ["Cerca una voce in alto, o scegli una sezione.",
+                          "«Da sistemare» dice cosa manca, con il numero.",
+                          "In «iPhone e iPad» c’è tutto quello che i dispositivi fanno con il Mac."])
+        default:
+            return nil
+        }
+    }
+    #endif
+
+    /// I testi di sempre (su iPhone e iPad tutti; sul Mac per le app che non hanno ancora i testi del template).
+    private static func aiutoDiSempre(_ app: AppPrisma) -> AiutoApp {
         switch app {
         case .clienti:
             return AiutoApp(

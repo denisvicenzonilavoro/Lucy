@@ -1323,7 +1323,7 @@ struct AppIncontri: View {
             Spacer(minLength: mi.spazioGettoni)
             if stato.estrazioneInCorso {
                 ProgressView().controlSize(.small)
-                    .help("Anche Qwen sta leggendo gli appunti")
+                    .help(TestiStatoVera.inVista(mac: "Anche Vera sta leggendo gli appunti", altrove: "Anche Qwen sta leggendo gli appunti"))
             }
             Button { stato.estraiProposte(i) } label: {
                 Label(proposte == nil ? "Leggi gli appunti" : "Rileggi", systemImage: "text.magnifyingglass")
@@ -1422,7 +1422,7 @@ struct AppIncontri: View {
                 if p.origine == "Qwen" {
                     Image(systemName: "sparkles")
                         .foregroundColor(ci.secondario)
-                        .help("Proposta letta da Qwen")
+                        .help(TestiStatoVera.inVista(mac: "Proposta letta da Vera", altrove: "Proposta letta da Qwen"))
                 }
             }
             .padding(EdgeInsets(top: mi.marginePropostaV, leading: mi.marginePropostaO,

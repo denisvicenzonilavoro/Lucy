@@ -25,12 +25,24 @@ struct TestoConParole: View {
     var intera: VoceGlossario.Chiave? = nil
     let colore: Color
     var righe: Int? = nil
+    /// Nella vista pulita di «Mostra al cliente» (migliorie d'uso 1): le parole restano segnate anche se sotto c'è la
+    /// modalità cliente, e il tocco apre la scheda «Le parole» della vista (`schedaMostra`) al posto del popover.
+    var vistaCliente = false
 
     init(_ testo: String, parole: Set<VoceGlossario.Chiave>? = nil, colore: Color, righe: Int? = nil) {
         self.testo = testo
         self.parole = parole
         self.colore = colore
         self.righe = righe
+    }
+
+    /// Una frase della vista pulita di «Mostra al cliente», con le parole che si toccano dentro il testo.
+    init(vistaCliente testo: String, parole: Set<VoceGlossario.Chiave>? = nil, colore: Color, righe: Int? = nil) {
+        self.testo = testo
+        self.parole = parole
+        self.colore = colore
+        self.righe = righe
+        self.vistaCliente = true
     }
 
     /// L'etichetta intera segnata come la parola `chiave`.
@@ -48,7 +60,8 @@ struct TestoConParole: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
-        let segnato = stampa || stato.modoCliente != nil ? nil : TestoParole.attribuito(testo, parole: parole, intera: intera)
+        let semplice = stampa || (stato.modoCliente != nil && !(vistaCliente && stato.inVistaCliente))
+        let segnato = semplice ? nil : TestoParole.attribuito(testo, parole: parole, intera: intera)
         if let segnato {
             Text(segnato)
                 .foregroundColor(colore)
@@ -75,7 +88,11 @@ struct TestoConParole: View {
     /// Solo i collegamenti interni delle parole: aprono la scheda. Lo stato si legge qui, nell'azione.
     private func apri(_ url: URL) -> OpenURLAction.Result {
         guard let c = TestoParole.chiave(di: url) else { return .discarded }
-        if stato.modoCliente == nil { aperta = c }
+        if vistaCliente && stato.inVistaCliente {
+            stato.schedaMostra = .parola(c)
+        } else if stato.modoCliente == nil {
+            aperta = c
+        }
         return .handled
     }
     #else

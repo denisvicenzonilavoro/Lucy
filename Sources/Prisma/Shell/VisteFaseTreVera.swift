@@ -267,7 +267,7 @@ struct CoperturaVeraVista: View {
                     ForEach(LimiteCopertura.Tipo.allCases, id: \.self) { t in riquadro(t, voci: c.voci(t)) }
                 }
                 HStack {
-                    Text("\(c.articoliLetti) articoli letti in «\(c.titolo)»\(c.conQwen ? " · spiegati da Qwen, controllati con gli articoli" : "")")
+                    Text("\(c.articoliLetti) articoli letti in «\(c.titolo)»\(c.conQwen ? " · " + TestiStatoVera.inVista(mac: "spiegati da Vera", altrove: "spiegati da Qwen") + ", controllati con gli articoli" : "")")
                         .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                     Spacer()
                     if !c.voci.isEmpty, !stato.inModoCliente {
@@ -443,7 +443,7 @@ struct LetturaAdeguatezzaVista: View {
                             inserita = true
                         }
                         .buttonStyle(.applePrimario).disabled(firmata || inserita)
-                        Text(b.conQwen ? "Scritta da Qwen con le sole cifre di Prisma" : "Scritta da Prisma con i controlli della scheda")
+                        Text(b.conQwen ? TestiStatoVera.inVista(mac: "Scritta da Vera con le sole cifre di Prisma", altrove: "Scritta da Qwen con le sole cifre di Prisma") : "Scritta da Prisma con i controlli della scheda")
                             .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                     }
                 }

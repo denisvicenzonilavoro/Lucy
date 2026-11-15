@@ -108,7 +108,7 @@ extension StatoShell {
             return
         }
         #endif
-        mostraAvviso("Una carta d’identità dall’iPhone: crea il cliente.")
+        mostraAvviso("Una carta d’identità dall’iPhone: crea il cliente.", riservato: true)
     }
 
     /// Al blocco di Prisma e al riposo del Mac: le carte in arrivo si scartano (decisione 25).

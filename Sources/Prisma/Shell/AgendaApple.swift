@@ -30,7 +30,16 @@ enum TestiAgendaApple {
     /// Le intestazioni del calendario della barra laterale.
     static let iniziali = ["L", "M", "M", "G", "V", "S", "D"]
     static let vuoto = "Nessun impegno. Un buon giorno per i riesami."
+    #if os(macOS)
+    /// Migliorie d'uso 3 e 18: «Da fare oggi» (e «Da fare» negli altri giorni) al posto di «Da fare e da ricordare».
+    static let fascia = "Da fare oggi"
+    static let fasciaAltroGiorno = "Da fare"
+    /// La card «Da fare oggi» della colonna di sinistra, vuota: «Niente per oggi[ con <Nome>].»
+    static func nienteOggi(_ nome: String?) -> String { "Niente per oggi" + (nome.map { " con \($0)" } ?? "") + "." }
+    #else
     static let fascia = "Da fare e da ricordare"
+    static let fasciaAltroGiorno = fascia
+    #endif
     static let questaSettimana = "Questa settimana"
     static let daNonDimenticare = "Da non dimenticare"
     static let puntiDaToccare = "Punti da toccare"
@@ -286,7 +295,12 @@ struct BarraLateraleAgendaApple: View {
         let _ = ContaCorpi.segna()
         let l = Tema.Apple.Agenda.Laterale.self
         let settimana = CalendarioAgenda.giorni(settimanaDi: giorno)
+        #if os(macOS)
+        // Migliorie d'uso 3 e 18: al posto di «Da non dimenticare» la card «Da fare oggi» con la riga comune
+        let avviso: String? = nil
+        #else
         let avviso = stato.daNonDimenticareAgenda()
+        #endif
         // Negli schermi bassi la barra scorre: il mese resta sempre intero
         return ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: 0) {
@@ -312,6 +326,13 @@ struct BarraLateraleAgendaApple: View {
                         .padding(.top, l.cardSopra)
                         .entrataCascata(3)
                 }
+                #if os(macOS)
+                if !stato.inModoCliente {
+                    DaFareOggiAgendaApple()
+                        .padding(.top, l.cardSopra)
+                        .entrataCascata(3)
+                }
+                #endif
             }
             .padding(l.padding)
         }
@@ -374,6 +395,63 @@ struct BarraLateraleAgendaApple: View {
         .overlay { forma.strokeBorder(l.bordoAvviso, lineWidth: Tema.Apple.Misura.bordo) }
     }
 }
+
+#if os(macOS)
+/// «Da fare oggi» nella colonna di sinistra dell'Agenda (migliorie d'uso 3 e 18, template riga 3209): il numero delle voci
+/// di oggi, «Apri tutto ›» e le prime voci di oggi del cliente della barra (o di tutti) con la riga comune, senza canali e
+/// con il filo arancio; vuoto «Niente per oggi[ con <Nome>].». Il nastro è quello in cache del «Da fare».
+struct DaFareOggiAgendaApple: View {
+    @Environment(StatoShell.self) var stato
+
+    private typealias L = Tema.Apple.Agenda.Laterale
+
+    var body: some View {
+        let cliente = stato.tuttiIClienti ? nil : stato.clienteAttivo
+        let nastro = stato.nastroDaFareCompleto(cliente: cliente?.id)
+        let oggi = nastro.blocchi.first { $0.gruppo == .oggi }
+        let voci = Array((oggi?.voci ?? []).prefix(L.righeDaFare))
+        let totale = oggi?.totale ?? 0
+        let forma = RoundedRectangle(cornerRadius: L.raggioCard, style: .continuous)
+        return VStack(alignment: .leading, spacing: 0) {
+            HStack(alignment: .firstTextBaseline, spacing: L.spazioNumeroDaFare) {
+                Text(TestiAgendaApple.fascia)
+                    .carattereApple(L.etichetta)
+                    .foregroundColor(L.coloreEtichettaAvviso)
+                    .lineLimit(1)
+                if totale > 0 {
+                    Text("\(totale)")
+                        .carattereApple(L.nomeCifra)
+                        .foregroundColor(L.coloreNomeCifra)
+                }
+                Spacer(minLength: 0)
+                Button { stato.apriDaFare(soloCliente: cliente != nil) } label: {
+                    Text(TestiDaFare.apriTutto)
+                        .carattereApple(L.collegamentoDaFare)
+                        .foregroundColor(L.coloreCollegamentoDaFare)
+                        .lineLimit(1)
+                }
+                .buttonStyle(StileSemplice())
+                .fixedSize()
+            }
+            if voci.isEmpty {
+                Text(TestiAgendaApple.nienteOggi(cliente.map { ModelliMessaggi.primoNome($0.nome) }))
+                    .carattereApple(L.nomeCifra)
+                    .foregroundColor(L.coloreNomeCifra)
+                    .padding(.top, L.avvisoSopra)
+                    .padding(.bottom, L.sottoVuotoDaFare)
+            }
+            ForEach(voci) { v in
+                RigaDaFare(voce: v, conNome: cliente == nil, conCanali: false, filoAgenda: true,
+                           fatto: { stato.fattoDaFare(v) }, apri: { stato.apriVoceDaFare(v) })
+            }
+        }
+        .padding(L.paddingDaFare)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background { forma.fill(L.fondoAvviso) }
+        .overlay { forma.strokeBorder(L.bordoAvviso, lineWidth: Tema.Apple.Misura.bordo) }
+    }
+}
+#endif
 
 // MARK: - Calendario del mese con i puntini
 
@@ -533,7 +611,9 @@ struct GiornataImpegniApple: View {
         let forma = RoundedRectangle(cornerRadius: g.raggio, style: .continuous)
         return VStack(spacing: 0) {
             if !voci.isEmpty {
-                FasciaDaFareApple(voci: voci, sceglie: sceglie)
+                FasciaDaFareApple(voci: voci,
+                                  titolo: CalendarioAgenda.cal.isDateInToday(giorno) ? TestiAgendaApple.fascia : TestiAgendaApple.fasciaAltroGiorno,
+                                  sceglie: sceglie)
                 Rectangle()
                     .fill(Tema.Apple.Agenda.Fascia.filo)
                     .frame(height: Tema.Apple.Misura.bordo)
@@ -869,6 +949,8 @@ struct ImpegnoGiornataApple: View {
 
 struct FasciaDaFareApple: View {
     let voci: [VoceFasciaApple]
+    /// «Da fare oggi» per oggi, «Da fare» per gli altri giorni (sul Mac; su iPad sempre «Da fare e da ricordare»).
+    var titolo: String = TestiAgendaApple.fascia
     let sceglie: (VoceFasciaApple) -> Void
 
     var body: some View {
@@ -876,7 +958,7 @@ struct FasciaDaFareApple: View {
         let mostrate = Array(voci.prefix(f.massimo))
         let altre = voci.count - mostrate.count
         return VStack(alignment: .leading, spacing: f.spazio) {
-            Text(TestiAgendaApple.fascia)
+            Text(titolo)
                 .carattereApple(f.etichetta)
                 .foregroundColor(f.coloreEtichetta)
             // Se le voci stanno, ferme; se no la striscia scorre e sfuma sul bordo destro (mai «Marco B» tagliato)

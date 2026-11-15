@@ -37,6 +37,10 @@ enum SchedaMostra: Equatable {
 /// I testi di «Mostra al cliente» (dal template, righe 853, 3285-3349).
 enum TestiMostra {
     static let titolo = Parole.mostraAlCliente
+    /// Dopo «Fine», con più avvisi trattenuti mentre si mostrava: l'ultimo e quanti altri c'erano.
+    static func altriAvvisi(_ altri: Int, _ ultimo: String) -> String {
+        "\(ultimo) (e \(altri == 1 ? "un altro avviso" : "altri \(altri) avvisi") arrivati mentre mostravi)"
+    }
     static let aiutoPillola = "Mostra al cliente: una vista pulita con il suo quadro, per girare lo schermo (⌥⌘M)"
     static func cosaMostri(_ nome: String) -> String { "Cosa mostri a \(nome)?" }
     static let aChi = "A chi vuoi mostrare Prisma?"
@@ -236,7 +240,16 @@ extension StatoShell {
         } else {
             mostraScrivania()
         }
-        mostraAvviso(TestiMostra.chiusa)
+        // Migliorie d'uso 1 (§1.3 punto 12): gli avvisi trattenuti mentre si mostrava escono ora (l'avviso è uno alla
+        // volta: si vede l'ultimo arrivato, con il numero degli altri)
+        let trattenuti = avvisiTrattenuti
+        avvisiTrattenuti = []
+        if let ultimo = trattenuti.last {
+            let testo = trattenuti.count == 1 ? ultimo.testo : TestiMostra.altriAvvisi(trattenuti.count - 1, ultimo.testo)
+            mostraAvviso(testo, daVera: ultimo.daVera, azione: ultimo.azione)
+        } else {
+            mostraAvviso(TestiMostra.chiusa)
+        }
     }
 
     /// Spegne la vista pulita e ciò che le sta sopra, senza riportare l'app di prima (lo chiama anche lo spegnersi della
@@ -353,8 +366,19 @@ enum ProvaMostraAlCliente {
                   "Mostra al cliente: «Fine: torna al lavoro» esce e riporta l'app di prima")
         s.alternaMostraAlCliente()
         controlla(s.vistaCliente == .quadro && !s.sceltaMostra, "Mostra al cliente: con il cliente ⌥⌘M va dritto a «Il quadro»")
+        // §1.3 punto 12: l'avviso con il nome di un altro cliente resta in coda e si vede dopo «Fine»
+        let riservato = "Una nota dall'iPhone su un altro cliente"
+        s.mostraAvviso(riservato, riservato: true)
+        controlla(s.avviso != riservato && s.avvisiTrattenuti.count == 1,
+                  "Mostra al cliente: nella vista pulita l'avviso con il nome di un altro cliente resta in coda")
+        s.fineMostra()
+        controlla(s.avviso == riservato && s.avvisiTrattenuti.isEmpty,
+                  "Mostra al cliente: dopo «Fine» l'avviso trattenuto si vede")
+        s.alternaMostraAlCliente()
+        s.mostraAvviso(riservato, riservato: true)
         s.blocca(animato: false)
         controlla(!s.inVistaCliente && !s.inModoCliente, "Mostra al cliente: il blocco chiude la vista pulita con la modalità cliente")
+        controlla(s.avvisiTrattenuti.isEmpty, "Mostra al cliente: il blocco scarta gli avvisi trattenuti")
     }
 }
 #endif

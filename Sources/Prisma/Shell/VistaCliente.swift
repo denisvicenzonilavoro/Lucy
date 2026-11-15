@@ -418,6 +418,11 @@ private struct PiedeCapitolo: View {
     @Environment(StatoShell.self) var stato
     var parole: [(String, VoceGlossario.Chiave)] = []
 
+    /// Le parole del quadro: nel piede solo quelle che le frasi non dicono già (lì si toccano nel testo).
+    static let paroleQuadro: [(String, VoceGlossario.Chiave)] = [("divario previdenziale", .divarioPrevidenziale),
+                                                                ("capitale caso morte", .capitaleMorte),
+                                                                ("indicatore di rischio (SRI)", .sri)]
+
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: V.spazioPiede) {
             Button { stato.schedaMostra = .ipotesi } label: {
@@ -463,6 +468,13 @@ private struct CapitoloQuadro: View {
             FrasiCliente.quadro(analisi: stato.analisi360(id), posizioni: stato.posizioniCliente(id),
                                 aree: stato.aree360(id), famiglia: famiglia)
         }
+        // Le parole si toccano dentro le frasi (una volta per schermata, `ParoleSchermata`): per ogni area le parole
+        // della frase e della seconda riga; nel piede restano solo quelle che le frasi non dicono
+        let parole: [Set<VoceGlossario.Chiave>] = stato.ricavato("mostra-quadro-parole|\(id)") {
+            ParoleSchermata.segna(frasi.flatMap { [$0.frase, $0.seconda] })
+        }
+        let dette = parole.reduce(into: Set<VoceGlossario.Chiave>()) { $0.formUnion($1) }
+        let piede = PiedeCapitolo.paroleQuadro.filter { !dette.contains($0.1) }
         let righe: [[FraseArea]] = [Array(frasi.prefix(2)), Array(frasi.dropFirst(2).prefix(2))]
         return VStack(alignment: .leading, spacing: 0) {
             TestataCapitolo(titolo: TestiMostra.titoloQuadro(TestiTraguardi.primoNome(cliente.nome)),
@@ -471,15 +483,16 @@ private struct CapitoloQuadro: View {
                 ForEach(0..<righe.count, id: \.self) { r in
                     HStack(spacing: V.spazio) {
                         ForEach(Array(righe[r].enumerated()), id: \.element.id) { k, f in
-                            RiquadroAreaCliente(frase: f, indice: r * 2 + k)
+                            let i = r * 2 + k
+                            RiquadroAreaCliente(frase: f, indice: i,
+                                                paroleFrase: i * 2 < parole.count ? parole[i * 2] : [],
+                                                paroleSeconda: i * 2 + 1 < parole.count ? parole[i * 2 + 1] : [])
                         }
                     }
                 }
             }
             .frame(height: V.altezzaQuadro)
-            PiedeCapitolo(parole: [("divario previdenziale", .divarioPrevidenziale),
-                                   ("capitale caso morte", .capitaleMorte),
-                                   ("indicatore di rischio (SRI)", .sri)])
+            PiedeCapitolo(parole: piede)
         }
     }
 }
@@ -487,6 +500,9 @@ private struct CapitoloQuadro: View {
 private struct RiquadroAreaCliente: View {
     let frase: FraseArea
     let indice: Int
+    /// Le parole da segnare dentro la frase e dentro la seconda riga (migliorie d'uso 1 e 66).
+    var paroleFrase: Set<VoceGlossario.Chiave> = []
+    var paroleSeconda: Set<VoceGlossario.Chiave> = []
 
     var body: some View {
         let colore = Tema.Apple.Aree360.colore(frase.area)
@@ -500,14 +516,12 @@ private struct RiquadroAreaCliente: View {
                     .carattereApple(V.occhiello)
                     .foregroundColor(colore)
                     .lineLimit(1)
-                Text(frase.frase)
+                TestoConParole(vistaCliente: frase.frase, parole: paroleFrase, colore: V.colore)
                     .carattereApple(V.frase)
-                    .foregroundColor(V.colore)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, V.sopraFrase)
-                Text(frase.seconda)
+                TestoConParole(vistaCliente: frase.seconda, parole: paroleSeconda, colore: V.colore2)
                     .carattereApple(V.testo)
-                    .foregroundColor(V.colore2)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, V.sopraTesto)
             }
@@ -598,7 +612,8 @@ private struct CapitoloPosizioni: View {
                     .entrataCascata(1, sfocatura: false)
             }
             .fixedSize(horizontal: false, vertical: true)
-            PiedeCapitolo(parole: [("in essere", .inEssere), ("patrimonio netto", .patrimonioNetto)])
+            // «Patrimonio netto» si tocca già nell'etichetta della colonna di sinistra
+            PiedeCapitolo(parole: [("in essere", .inEssere)])
         }
     }
 

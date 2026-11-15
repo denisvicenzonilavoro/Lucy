@@ -114,7 +114,7 @@ struct BozzaStileVista: View {
                     }
                     Spacer(minLength: 0)
                     if versione == .tua {
-                        PillolaFaseTre(testo: scheda.conQwen ? "Nel tuo stile · Qwen" : "Nel tuo stile", colore: Tema.Apple.stileVera)
+                        PillolaFaseTre(testo: scheda.conQwen ? TestiStatoVera.inVista(mac: "Nel tuo stile · Vera", altrove: "Nel tuo stile · Qwen") : "Nel tuo stile", colore: Tema.Apple.stileVera)
                     } else {
                         PillolaFaseTre(testo: "Generica", colore: F.neutro)
                     }

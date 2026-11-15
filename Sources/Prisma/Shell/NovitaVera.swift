@@ -112,7 +112,8 @@ enum NovitaVera: String, CaseIterable, Identifiable {
         case .ragionaAPassi: return "Un piano visibile, eseguito un passo alla volta con i motori di Prisma"
         case .impara: return "Pollici e correzioni diventano lezioni"
         case .suMisura: return "L’addestramento sui tuoi esempi resi anonimi, solo se supera l’esame"
-        case .dueVelocita: return "Le cose rapide alle regole di Prisma, il resto a Qwen (il modello Apple è spento)"
+        case .dueVelocita: return TestiStatoVera.inVista(mac: "Le cose rapide alle regole di Prisma, il resto a Vera sul Mac",
+                                                   altrove: "Le cose rapide alle regole di Prisma, il resto a Qwen (il modello Apple è spento)")
         case .filoLungo: return "Più contesto e un riassunto progressivo: nelle chat lunghe Vera non perde il filo"
         case .cervelloGrande: return "Un motore esterno predisposto e non collegato: i dati dei clienti restano sul Mac"
         }

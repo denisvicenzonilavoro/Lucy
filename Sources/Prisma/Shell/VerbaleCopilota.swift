@@ -142,7 +142,7 @@ struct CorpoVerbaleCopilota: View {
         if !punti.isEmpty {
             let testo: String = {
                 if copilota.verbaleVera != nil { return TestiCopilota.firmaVera }
-                if copilota.verbaleVeraInCorso { return TestiCopilota.firmaPrisma + " · Vera lo sta riscrivendo con Qwen…" }
+                if copilota.verbaleVeraInCorso { return TestiCopilota.firmaPrisma + TestiStatoVera.inVista(mac: " · Vera lo sta riscrivendo…", altrove: " · Vera lo sta riscrivendo con Qwen…") }
                 if !copilota.qwenPronto(stato) { return TestiCopilota.firmaPrisma + " · " + TestiCopilota.veraNonPronta }
                 return TestiCopilota.firmaPrisma
             }()
