@@ -245,6 +245,29 @@ enum MotoreCompletezza {
         }
     }
 
+    /// Le analisi della completezza che una schermata delle analisi delle posizioni legge (migliorie d'uso 14,
+    /// rifinitura 11-17), dall'ancora della schermata: costi e successione le loro, resistenza e coerenza il rischio
+    /// e gli investimenti, il patrimonio anche la previdenza. Quadro, smontaggio e ancore sconosciute: nessuna.
+    static func analisi(perSchermataPosizioni ancora: String) -> Set<AnalisiCompletezza> {
+        switch ancora {
+        case "costi": return [.costi]
+        case "successione": return [.successione]
+        case "resistenza", "coerenza": return [.investimenti]
+        case "patrimonio": return [.investimenti, .previdenza]
+        default: return []
+        }
+    }
+
+    /// La voce da completare per «Completa …» nel vuoto di un'analisi delle posizioni: fra quelle che toccano la
+    /// schermata, la più pesante (a parità di peso la prima nell'ordine di `daCompletare`); nil se non ce n'è.
+    static func voceDaCompletare(_ c: CompletezzaCliente, schermataPosizioni ancora: String) -> VoceCompletezza? {
+        let toccate = analisi(perSchermataPosizioni: ancora)
+        guard !toccate.isEmpty else { return nil }
+        return c.daCompletare
+            .filter { !$0.analisi.isDisjoint(with: toccate) }
+            .max { $0.peso < $1.peso }
+    }
+
     /// Prima lo stato (mancante, da aggiornare, stimato), poi il peso più alto, poi il titolo
     /// (`localizedCaseInsensitiveCompare`).
     static func ordine(_ a: VoceCompletezza, _ b: VoceCompletezza) -> Bool {

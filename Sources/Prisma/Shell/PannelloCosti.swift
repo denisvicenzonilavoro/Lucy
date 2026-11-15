@@ -1,5 +1,11 @@
 import SwiftUI
 
+/// L'id delle righe che aprono una posizione dalle analisi (rifinitura 11-17 delle migliorie d'uso): al ritorno
+/// dalla scheda AnalisiPosizioniApple riporta in vista la riga. Prefisso proprio, per non urtare le ancore.
+enum RientroPosizione {
+    static func id(_ posizione: String) -> String { "rientro-posizione-\(posizione)" }
+}
+
 /// Il peso dei costi nel dossier Posizioni: quanto costano quest'anno le posizioni del cliente,
 /// quanto tolgono in 10 e 20 anni e dove un'alternativa a parità di rischio lascerebbe di più.
 struct PannelloCosti: View {
@@ -77,6 +83,7 @@ struct PannelloCosti: View {
             ForEach(Array(analisi.voci.enumerated()), id: \.element.id) { i, v in
                 Button { stato.posizioneInDettaglio = v.posizione.id } label: { riga(v, incidenza: incidenze[v.posizione.id]) }
                     .buttonStyle(StileSemplice())
+                    .id(RientroPosizione.id(v.posizione.id))
                     .background(i % 2 == 1 ? Colori.Analisi.tabellaAlternata : Colori.Analisi.principale)
                     .bordoBasso(Colori.Analisi.tabellaRiga)
             }

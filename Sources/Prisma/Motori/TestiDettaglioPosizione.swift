@@ -361,6 +361,21 @@ enum TestiDettaglioPosizione {
         return v
     }
 
+    /// L'etichetta del campo di `ModuloPosizione` per un nome di `campiVuoti` (rifinitura 11-17): il modulo dice «Numero
+    /// di contratto» e «Contraente» anche per depositi e conti, gli altri nomi sono gli stessi.
+    static func etichettaModulo(_ campo: String) -> String {
+        switch campo {
+        case "Numero", "Numero del deposito": return "Numero di contratto"
+        case "Intestatario": return "Contraente"
+        default: return campo
+        }
+    }
+
+    /// Il campo del modulo su cui apre «Completa i dati»: il primo dei campi vuoti (nil: nessuno).
+    static func primoCampoModulo(_ p: Posizione) -> String? {
+        campiVuoti(p).first.map(etichettaModulo)
+    }
+
     /// Le righe di «Dati del contratto» con un valore (le vuote non si mostrano: sono in «Da completare»).
     static func righeContratto(_ p: Posizione, adesso: Date = Date()) -> [(etichetta: String, valore: String)] {
         let tipo = contratto(p)

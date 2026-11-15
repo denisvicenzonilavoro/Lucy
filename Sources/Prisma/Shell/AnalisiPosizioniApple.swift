@@ -8,23 +8,35 @@ import SwiftUI
 // cliente»: il prospetto non esiste.
 //
 // Senza dati (oggi il pannello non compariva) la voce dell'indice resta e la schermata dice in una riga perché è
-// vuota, con «Aggiungi una posizione» (decisione 14.6). Le condizioni di «vuoto» sono quelle di prima.
+// vuota, con «Aggiungi una posizione» e, se manca un dato che la tocca, «Completa «…»» (decisione 14.6, rifinitura
+// 11-17: `MotoreCompletezza.voceDaCompletare`). Le condizioni di «vuoto» sono quelle di prima.
 
 struct AnalisiPosizioniApple: View {
     @Environment(StatoShell.self) var stato
     let vista: VistaPosizioniCliente
     let cliente: Cliente
+    /// Rifinitura 11-17: la posizione da cui si torna (nil: si parte dall'alto). La sua riga torna in vista
+    /// all'apertura, senza movimento (`RientroPosizione.id`, sulle righe di «Peso dei costi» e «Passaggio
+    /// generazionale»); se la riga non c'è non succede niente.
+    var rientro: String? = nil
 
     var body: some View {
         let _ = ContaCorpi.segna()
         let k = Tema.Apple.Posizioni.Quadro.self
-        return ScrollView {
-            VStack(alignment: .leading, spacing: k.spazioAnalisi) {
-                contenuto
-                    .entrataCascata(0, base: 0)
+        return ScrollViewReader { lettore in
+            ScrollView {
+                VStack(alignment: .leading, spacing: k.spazioAnalisi) {
+                    contenuto
+                        .entrataCascata(0, base: 0)
+                }
+                .padding(k.margine)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-            .padding(k.margine)
-            .frame(maxWidth: .infinity, alignment: .topLeading)
+            .onAppear {
+                guard let rientro else { return }
+                // Al giro dopo, a contenuto disposto
+                DispatchQueue.main.async { lettore.scrollTo(RientroPosizione.id(rientro), anchor: .center) }
+            }
         }
     }
 
@@ -77,6 +89,16 @@ struct AnalisiPosizioniApple: View {
                 Button("Aggiungi una posizione") { stato.richiestaNuovaPosizione = .inEssere }
                     .buttonStyle(.appleSobrio)
                     .disabled(stato.solaLettura)
+                // Rifinitura 11-17 (proposta 14.6): il dato mancante più pesante che tocca questa analisi, non in
+                // modalità cliente né in sola lettura (la completezza è in cache per cliente)
+                if !stato.inModoCliente, !stato.solaLettura,
+                   let completezza = stato.completezzaCliente(cliente.id),
+                   let voce = MotoreCompletezza.voceDaCompletare(completezza, schermataPosizioni: vista.ancora) {
+                    Button("Completa «\(voce.titolo)»") { stato.apriCompletamento(voce, cliente: cliente.id) }
+                        .buttonStyle(.appleSobrio)
+                        .lineLimit(1)
+                        .help(voce.perche)
+                }
                 Spacer(minLength: 0)
             }
         }

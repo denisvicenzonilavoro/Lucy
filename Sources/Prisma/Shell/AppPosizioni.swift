@@ -25,6 +25,9 @@ struct AppPosizioni: View {
     @State var vistaScelta: VistaPosizioniCliente = .quadro
     @State var vistaMostrata: VistaPosizioniCliente = .quadro
     @State var esceVista = false
+    /// Rifinitura 11-17: la posizione aperta da una schermata delle analisi («Peso dei costi», «Passaggio
+    /// generazionale»…), per ritrovare lo scorrimento al ritorno. Solo in memoria; si dimentica cambiando schermata.
+    @State var rientroPosizione: String?
     @Environment(\.prismaCalmo) private var calmo
     #endif
 
@@ -136,6 +139,10 @@ struct AppPosizioni: View {
             filtroCanale = nil
             area = stato.areaPosizioniDaAprire
         }
+        // Una posizione aperta dalla schermata di un'analisi: al ritorno la riga torna in vista
+        .onChange(of: stato.posizioneInDettaglio) { _, id in
+            if let id { rientroPosizione = id }
+        }
         #endif
         // «Tutti i campi…»: a modulo chiuso la stessa posizione si apre nel modulo intero
         .sheet(item: $dalCatalogo, onDismiss: {
@@ -192,7 +199,10 @@ struct AppPosizioni: View {
     private var corpo: some View {
         Group {
             if let id = stato.posizioneInDettaglio, let p = stato.posizioni.first(where: { $0.id == id }) {
-                DettaglioPosizione(posizione: p, modifica: { modulo = p })
+                DettaglioPosizione(posizione: p, modifica: { modulo = p }, modificaSuCampo: { campo in
+                    fuocoPosizione = FuocoModulo(campo: campo)
+                    modulo = p
+                })
             } else if let s = stato.aggiornaValori {
                 // Il pannello «Aggiorna i valori»: sopra portafoglio e dossier, sotto il dettaglio («Apri ↗»)
                 #if os(macOS)
@@ -240,7 +250,7 @@ struct AppPosizioni: View {
                 // Migliorie d'uso 42: lo smontaggio dei documenti del cliente, senza passare dal portafoglio
                 SmontaggioMac(stato: stato, clienteScelto: c.id)
             } else {
-                AnalisiPosizioniApple(vista: vistaMostrata, cliente: c)
+                AnalisiPosizioniApple(vista: vistaMostrata, cliente: c, rientro: rientroPosizione)
             }
         }
         .id(vistaMostrata)
@@ -251,6 +261,8 @@ struct AppPosizioni: View {
     /// Un clic su una voce dell'indice: la scheda di una posizione aperta si chiude; la voce già scelta non fa altro.
     private func scegliVista(_ nuova: VistaPosizioniCliente) {
         stato.posizioneInDettaglio = nil
+        // Un'altra schermata riparte dall'alto; la stessa (ritorno dalla scheda) ritrova la riga
+        if nuova != vistaMostrata { rientroPosizione = nil }
         guard nuova != vistaScelta || nuova != vistaMostrata else { return }
         vistaScelta = nuova
         if modoIstantanea || calmo {
@@ -272,6 +284,7 @@ struct AppPosizioni: View {
 
     /// La schermata subito, senza uscita (ancore, cambio di cliente, istantanee).
     private func mostraVista(_ v: VistaPosizioniCliente) {
+        rientroPosizione = nil
         vistaScelta = v
         vistaMostrata = v
         esceVista = false

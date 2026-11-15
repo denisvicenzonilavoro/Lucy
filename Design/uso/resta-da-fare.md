@@ -422,7 +422,8 @@ Resta:
   portata sulle sezioni senza titolo proprio: da fare guardando le istantanee, sezione per sezione.
 - **La sfumatura in fondo all'indice** (come le altre colonne): il tema non ha ancora un modificatore comune; l'indice
   scorre senza indicatori e senza sfumatura.
-- **«La tua rubrica» con le quattro cifre e il «Da fare»** (Tutti i clienti, miglioria 2 §2.3 punto 7) non è in questo giro.
+- ~~**«La tua rubrica» con le quattro cifre e il «Da fare»**~~: fatto (`RubricaTuttiApple`, Shell/RubricaTuttiApple.swift:
+  persone seguite, in regola, riesami dell'anno, patrimonio seguito e il «Da fare» di tutti; verificato nella rifinitura 11-17).
 - **Istantanee**: rigenerare sul Mac 430 e -scuro, 431-clienti-panoramica-apple, 431-clienti-dossier-in-regola, 432, 433,
   434, 1023, 1075, 1050-1052 e le nuove 1028-1029; controllare che il nome lungo si tagli nella testa dell'indice e che
   con la finestra stretta compaia «Sezione: … ⌄». `--prova-fluidita`: guardare i corpi di `IndiceDossierApple` nel passo di
@@ -512,16 +513,22 @@ cima; senza dati una riga che dice perché e «Aggiungi una posizione»). Nella 
 apre la schermata della resistenza. Nessun campo d'archivio nuovo.
 
 Resta:
-- **Vuoto delle analisi con «Completa»**: la proposta 14.6 vuole anche il pulsante che apre il dato mancante
-  (`stato.apriCompletamento` con la prima voce di `completezzaCliente(id)` che tocca quell'analisi); oggi c'è solo
-  «Aggiungi una posizione». Serve una mappa voce di completezza → analisi.
+- ~~**Vuoto delle analisi con «Completa»**~~: fatto nella rifinitura 11-17. `MotoreCompletezza.analisi(perSchermataPosizioni:)`
+  (costi → Costi, successione → Passaggio generazionale, resistenza e coerenza → Rischio e investimenti, patrimonio →
+  anche Previdenza) e `voceDaCompletare(_:schermataPosizioni:)` (la voce più pesante che tocca la schermata); accanto ad
+  «Aggiungi una posizione» c'è «Completa «{voce}»» con `stato.apriCompletamento`, non in modalità cliente né in sola
+  lettura. Prova C19 in `ProvaCalcoliCompletezza`. Da guardare sul Mac: che il titolo lungo della voce («Costi del KID ·
+  {prodotto}») non stringa troppo la riga.
 - **Titolo grande delle analisi** (`PannelloAnalisi.titoloGrande`, 21 bold): non fatto, il pannello tiene il titolo 17
   della card; da decidere guardando le istantanee.
 - **Altezza 92 delle tessere e 304 della ripartizione**: le tessere tengono l'altezza del loro contenuto e la colonna
   destra scorre da sola; i due token non ci sono.
 - **«· x € l'anno» nella quarta tessera**: come nella miglioria 12, resta «per x €» (il valore non è annuo).
-- **Dopo la scheda di una posizione** aperta da «Peso dei costi» o «Passaggio generazionale» si torna alla stessa
-  schermata, ma lo scorrimento riparte dall'alto.
+- ~~**Dopo la scheda di una posizione**~~: fatto nella rifinitura 11-17. `AppPosizioni.rientroPosizione` (in memoria)
+  ricorda la posizione aperta; `AnalisiPosizioniApple(rientro:)` al ritorno porta in vista la riga (`RientroPosizione.id`,
+  sulle righe di `PannelloCosti` e `PannelloSuccessione`) senza movimento; cambiando schermata, cliente o ancora si
+  riparte dall'alto. Da provare sul Mac vero (non si vede nelle istantanee). «Quadro e posizioni» non è coperto: l'elenco
+  scorre dentro la card ed è pigro.
 - **Gruppi 07 e 08**: chi vuole aprire una schermata delle posizioni (radar, smontaggio, «Apri le posizioni di …») scrive
   l'ancora di oggi (`stato.ancoraPosizioni = "coerenza"`), non una proprietà nuova.
 - **Istantanee e prove sul Mac**: rigenerare 2, 9, 10, 71, 74, 76, 79, 95-97 e le nuove 1040-1043; misurare un cliente
@@ -551,8 +558,13 @@ scura), 1073-uso-posizione-contratto, 1074-uso-proposta (1027-1029 della specifi
 94, 119 e 121 aprono ora la scheda giusta. Nessun campo d'archivio nuovo.
 
 Resta:
-- **«Completa i dati» sul primo campo vuoto**: apre «Modifica», ma `ModuloPosizione` non legge `\.fuocoModulo` (lo imposta
-  solo `AppPosizioni` per la completezza): il fuoco sul primo campo vuoto va aggiunto nel modulo.
+- ~~**«Completa i dati» sul primo campo vuoto**~~: fatto nella rifinitura 11-17. `DettaglioPosizione.modificaSuCampo` apre
+  il modulo con `FuocoModulo` sul primo di `campiVuoti`, tradotto in etichetta del modulo da
+  `TestiDettaglioPosizione.etichettaModulo` («Numero» e «Numero del deposito» → «Numero di contratto», «Intestatario» →
+  «Contraente»); `CampoModulo` evidenzia e `CorniceModulo` porta in vista (c'erano già). Prova in
+  `ProvaCalcoliDettaglioPosizione`. Resta un buco del modulo: per conti, immobili e debiti `ModuloPosizione` non ha il
+  campo «Contraente» (la sezione «Persone e date» non c'è o non lo mostra), quindi «Intestatario» non si può completare
+  e il modulo si apre senza evidenza; da decidere se aggiungere il campo per quelle aree.
 - **Rientro al cambio di scheda** (opacità e y +6 in 0,24 s del template): la scheda nuova compare subito.
 - **Grafico piccolo di «Come sta andando»**: è `GraficoAndamento` intero (altezza fissa `Misure.Analisi.grafico`), senza
   una misura ridotta.
