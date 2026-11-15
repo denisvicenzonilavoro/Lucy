@@ -476,7 +476,7 @@ enum VoceConfronto: Hashable {
     /// Migliorie d'uso 58 «Un solo modo di mostrare» (LuogoCliente.swift, PresaVisioneMac.swift), tutto in memoria come la
     /// vista pulita: dove guarda il cliente (lo schermo del Mac o l'iPad sul tavolo), se può toccare l'iPad, il menu
     /// dell'etichetta del luogo, la scheda della presa visione e la riga di conferma delle cifre dei capitoli.
-    var luogoCliente: LuogoCliente = .schermo
+    var luogoCliente: LuogoMostra = .schermo
     var tavoloTocca = false
     var menuLuogo = false
     var presaVisioneAperta = false

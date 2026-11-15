@@ -17,7 +17,7 @@ import SwiftUI
 // PresaVisioneMac.swift. Valori in Tema.Apple.MostraAlCliente.Luogo.
 
 /// Dove guarda il cliente nella vista pulita.
-enum LuogoCliente: Hashable {
+enum LuogoMostra: Hashable {
     case schermo, tavolo
 }
 
@@ -314,7 +314,7 @@ struct OsservatoreLuogo: View {
         let pagina: Int?
         let titolo: String?
         let neutra: Bool
-        let luogo: LuogoCliente
+        let luogo: LuogoMostra
         let tocca: Bool
         let collegato: Bool
         let cliente: String
