@@ -7,7 +7,8 @@ import Foundation
 /// - 580: Giulia con il consenso, «Pronto ad ascoltare», schede vuote; 581: senza consenso (scheda arancio, pulsante spento);
 /// - 582: a metà del dialogo, 4 righe e le loro schede, «Ascolto · 00:09 · solo sul Mac»; 583: le 7 righe e tutte le
 ///   schede, due già confermate («✓ Fatto»);
-/// - 584: il verbale aperto con i pallini vuoti; 585: dopo «Conferma tutto», con le spunte e l'avviso;
+/// - 584: il verbale con i pallini vuoti; 585: dopo «Conferma tutto», con le spunte e l'avviso (dalle Migliorie d'uso 20
+///   il verbale sta nel momento «Dopo», dentro la pagina, sotto la testata con i tre momenti);
 /// - 586: l'ascolto con Vera non pronta (le schede dalle regole di Prisma); 587: il microfono non permesso;
 /// - 588: nessun incontro in agenda oggi; 589: come 582 con «Riduci movimento».
 ///
@@ -47,12 +48,16 @@ extension Istantanee {
         coppia("584-copilota-verbale") { s in
             let sid = DialogoProvaCopilota.prepara(s, righe: 7)
             s.copilota.mostraPerIstantanea(fase: .concluso, sessione: sid, secondi: 18 * 60, qwenPronto: true, verbale: true)
+            // Migliorie d'uso 20: il verbale è il momento «Dopo», dentro la pagina
+            s.schedaIncontro = .passi
             s.apri(.incontri)
         }
         coppia("585-copilota-confermato") { s in
             let sid = DialogoProvaCopilota.prepara(s, righe: 7)
             if let sid { s.confermaSchedeCopilota(nil, sessione: sid) }
             s.copilota.mostraPerIstantanea(fase: .concluso, sessione: sid, secondi: 18 * 60, qwenPronto: true, verbale: true)
+            // Migliorie d'uso 20: il verbale è il momento «Dopo», dentro la pagina
+            s.schedaIncontro = .passi
             s.apri(.incontri)
         }
         coppia("586-copilota-vera-non-pronta") { s in

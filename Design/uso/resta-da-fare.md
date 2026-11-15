@@ -839,3 +839,63 @@ Resta:
   fase. Da guardare in CI.
 - **Istantanee da rigenerare sul Mac**: 21, 22, 105, 215 e 580-589 (il copilota senza la colonna «Oggi», con il consenso
   in testa), più le nuove 476 e 477; aggiornare la pagina delle anteprime.
+
+## 20. L'incontro ha tre momenti: Prima, Durante, Dopo
+
+Fatto (solo sul Mac, `#if os(macOS)`; l'iPad tiene `IndicatorePercorso`, il copilota a tutta finestra e il verbale nel
+dettaglio):
+- **La testata bassa** (`TestataMomentiIncontro` in AppIncontri.swift, card alta 74): avatar 44, il titolo su una riga,
+  sotto «<nome> · oggi, 09:30 · <luogo> · <tipo> · <durata>» con l'etichetta del canale; a destra i tre momenti
+  (`MomentiIncontroApple`, DesignSystem/Apple/MomentiIncontroApple.swift) con la regola pura delle spunte
+  (`RegoleMomentiIncontro.fatto`: mai l'aperto; gli altri se concluso, se vengono prima, o «Durante» con il verbale).
+  Resta sopra anche durante il copilota: `SceltaAscoltoIncontri` sul Mac non si usa più. La spunta di «Durante» legge le
+  sessioni solo quando il copilota non ascolta. Il contenuto del momento si rifà a ogni cambio (`.id`) ed entra a cascata.
+- **Prima**: a sinistra «Punti da toccare» (`puntiDaToccare` dell'appuntamento in `ricavato`, o i temi con la loro
+  domanda), «L'ultima volta · <data>» (prime due frasi delle decisioni, solo per un incontro non concluso), «✦ Preparami
+  l'incontro» (`ListaTiPreparo`, poi il fascicolo in Prospetti come dalla traccia), «Apri il dossier», «Inizia
+  l'incontro ›»; finiti i punti «Chiedi a Vera» sobrio (decisione 20-e). A destra i riquadri condivisi con la traccia
+  (`CifreClienteTraccia`, `RiquadroTracciaApple` in TracciaImpegnoApple.swift), «Da fare per <nome>» (il «Da fare» unico
+  del cliente) e «Proposte aperte» con i premi dell'anno. Sotto, nello scorrimento, priorità, cosa è cambiato e i quattro
+  temi (decisione 20-a). Per un incontro concluso: «Incontro concluso: la preparazione resta da rileggere.»
+- **Durante**: il copilota senza avatar e titolo; la sua testata è la barra alta 66 (`TestataCopilota(barraDurante:)`)
+  con il selettore «Copilota | Appunti a mano» (spento mentre ascolta), lo stato, la riga del consenso («<Nome> ha dato il
+  consenso · l'audio non lascia il Mac» in verde, o in arancio «Manca il consenso all'ascolto · Registra il consenso…»:
+  il tocco apre il modulo di sempre in un foglio, anche per revocare), l'onda stretta (`ParametriOnda.barraDurante`) e
+  «● Avvia il copilota». Per un incontro concluso «Incontro concluso», niente pulsante, e la trascrizione vuota dice «La
+  trascrizione non è stata conservata: resta il verbale, in «Dopo».». «Appunti a mano»: barra con la frase e «Ho
+  finito ›» (→ «Dopo» con le proposte dagli appunti), sotto le domande, appunti e decisioni di sempre. La sessione
+  mostrata è quella dell'incontro (`StatoCopilotaIncontro.sessione(incontro:cliente:in:)`).
+- **Dopo**: con una sessione del copilota per l'incontro, `CorpoVerbaleCopilota` (VerbaleCopilota.swift, rifattorizzato
+  da `VerbaleCopilotaVista`, che resta il dettaglio dell'iPad) dentro la pagina, con «Fissa il prossimo» al posto di «Più
+  tardi» e sotto «Chiudi e archivia l'incontro» (il verbale confermato non archivia da solo); senza copilota ma con
+  appunti i «Prossimi passi» di sempre; senza niente «Il verbale non c'è ancora.» con «Vai all'ascolto» e «Scrivilo a
+  mano». Incontro concluso: «Già nel dossier: l'incontro è archiviato, in sola lettura.» con «Riapri» e l'archivio.
+- **«Riapri»** (`StatoShell.riapriIncontro`, decisione 20-b): torna in preparazione e riapre l'appuntamento;
+  `chiudiIncontro` non crea due volte attività concordata e seguito se ci sono già.
+- **«■ Termina»** (`terminaNelDopo`) porta a «Dopo» con l'avviso «Incontro concluso · il verbale è pronto: conferma cosa
+  entra nel dossier». **«Fermare l'ascolto?»** (decisione 20-c) prima di passare a «Prima» o «Dopo» mentre il copilota
+  ascolta. «Nuovo incontro» resta nella barra, in vetro e non più blu (decisione 20-d).
+- Token in Tema.Apple+Incontri.swift (`Tema.Apple.Copilota.TestataIncontro`, `Momenti`, `Prima`, `Durante`, `Dopo`),
+  testi in `TestiMomentiIncontro`. Prove in `ProvaVistaCopilota` (`--prova-vera`): spunte dei momenti, «■ Termina» →
+  «Dopo», sessione ristretta all'incontro, verbale pronto dopo la conferma, «Riapri» che non duplica. Istantanee nuove
+  472-incontri-dopo-verbale (chiara e scura), 473-incontri-dopo-vuoto, 474-incontri-durante-appunti,
+  475-incontri-senza-consenso; 584 e 585 ora mostrano il verbale in «Dopo».
+
+Resta:
+- **L'uscita del contenuto in 120 ms** (opacità e 6 punti in giù) prima della cascata al cambio di momento: oggi il
+  contenuto nuovo entra a cascata senza l'uscita del vecchio (si può fare come `DossierApple` con `CambioScheda`).
+- **Incontro concluso con il solo verbale del copilota**: in «Dopo» si vede l'archivio degli appunti scritti, non i
+  punti del verbale confermato (da aggiungere in sola lettura, come «Il verbale» del template).
+- **«Fissa il prossimo»** apre il modulo dell'appuntamento fra 30 giorni alle 10 (titolo «Seguito · …», revisione), non
+  l'Agenda: da guardare se l'utente preferisce aprire l'Agenda con il cliente scelto.
+- **Il numero delle domande** degli appunti a mano usa ancora il tondo del tema di prima (`Tema.Misura.Incontri`); il
+  token `Durante.numeroDomanda` (22, `.pzN`) è pronto.
+- La testata con titoli lunghi e finestra stretta: i momenti hanno la precedenza e il titolo si tronca; sotto i 900 punti
+  della parte destra potrebbe non starci tutto (guardare l'istantanea a finestra stretta).
+- Il «?» con «Come funziona» del copilota (miglioria 6): sul Mac il riquadro non si vede più.
+- `CollegamentiCopilota` e la scheda del consenso a riquadro non si usano più sul Mac (restano per l'iPad).
+- **Istantanee da rigenerare sul Mac**: 21, 22, 105, 215, 476, 477, 580-589 (testata con i momenti, barra di «Durante»)
+  e le nuove 472-475; aggiornare la pagina delle anteprime. Il foglio del consenso, l'avviso «Fermare l'ascolto?» e la
+  spunta al passaggio chiedono uno screenshot.
+- Le modifiche a `chiudiIncontro` e `riapriIncontro` (StatoShell.swift) sono finite nel commit della miglioria 37, fatto
+  in parallelo sullo stesso albero.

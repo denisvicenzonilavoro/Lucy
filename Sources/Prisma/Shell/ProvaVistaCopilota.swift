@@ -12,6 +12,77 @@ enum ProvaVistaCopilota {
         dialogo(controlla)
         verbale(controlla)
         senzaConsenso(controlla)
+        momenti(controlla)
+        riapri(controlla)
+    }
+
+    /// Migliorie d'uso 20: le spunte dei tre momenti, «■ Termina» che porta a «Dopo» e la sessione ristretta all'incontro.
+    private static func momenti(_ controlla: (Bool, String) -> Void) {
+        let r = RegoleMomentiIncontro.self
+        controlla(!r.fatto(.ascolto, aperto: .ascolto, concluso: true, verbale: true)
+                  && !r.fatto(.preparazione, aperto: .preparazione, concluso: false, verbale: false),
+                  "Incontri, momenti: quello aperto non ha mai la spunta")
+        controlla(r.fatto(.preparazione, aperto: .ascolto, concluso: false, verbale: false)
+                  && !r.fatto(.passi, aperto: .ascolto, concluso: false, verbale: false)
+                  && !r.fatto(.ascolto, aperto: .preparazione, concluso: false, verbale: false),
+                  "Incontri, momenti: fatti quelli prima dell'aperto, non quelli dopo")
+        controlla(r.fatto(.ascolto, aperto: .preparazione, concluso: false, verbale: true)
+                  && r.fatto(.ascolto, aperto: .passi, concluso: false, verbale: true)
+                  && !r.fatto(.passi, aperto: .preparazione, concluso: false, verbale: true),
+                  "Incontri, momenti: con il verbale del copilota «Durante» ha la spunta")
+        controlla(r.fatto(.passi, aperto: .preparazione, concluso: true, verbale: false)
+                  && r.fatto(.preparazione, aperto: .passi, concluso: true, verbale: false),
+                  "Incontri, momenti: un incontro concluso ha la spunta su tutti tranne l'aperto")
+        controlla(r.nome(.preparazione) == "Prima" && r.sottonome(.ascolto) == "Ascolto" && r.nome(.passi) == "Dopo"
+                  && r.sottonome(.passi) == "Prossimi passi",
+                  "Incontri, momenti: «Prima · Preparazione», «Durante · Ascolto», «Dopo · Prossimi passi»")
+
+        let s = StatoShell(persistente: false)
+        let sid = DialogoProvaCopilota.prepara(s, righe: 7)
+        let c = StatoCopilotaIncontro()
+        s.schedaIncontro = .ascolto
+        c.terminaNelDopo(s)
+        controlla(s.schedaIncontro == .passi, "Incontri, momenti: «■ Termina» porta al momento «Dopo»")
+        let mia = c.sessione(incontro: DialogoProvaCopilota.incontro, cliente: DialogoProvaCopilota.cliente, in: s)
+        let altra = c.sessione(incontro: "incontro-giulia-analisi", cliente: DialogoProvaCopilota.cliente, in: s)
+        controlla(sid != nil && mia?.id == sid && altra == nil,
+                  "Incontri, momenti: il verbale di un incontro non finisce in un altro incontro dello stesso cliente")
+        controlla(c.verbalePronto(incontro: DialogoProvaCopilota.incontro, cliente: DialogoProvaCopilota.cliente, in: s) == false,
+                  "Incontri, momenti: una sessione ancora aperta e non terminata non è un verbale pronto")
+        if let sid, let x = s.sessioneCopilota(sid) {
+            c.confermaVerbale(s, sessione: x)
+        }
+        controlla(c.verbalePronto(incontro: DialogoProvaCopilota.incontro, cliente: DialogoProvaCopilota.cliente, in: s),
+                  "Incontri, momenti: dopo la conferma il verbale è pronto («Durante» con la spunta)")
+    }
+
+    /// Migliorie d'uso 20 (decisione 20-b): «Riapri» rimette l'incontro in preparazione e riapre l'appuntamento; una
+    /// nuova chiusura non crea due volte l'attività concordata né il prossimo incontro.
+    private static func riapri(_ controlla: (Bool, String) -> Void) {
+        let s = StatoShell(persistente: false)
+        let id = DialogoProvaCopilota.incontro
+        guard var i = s.incontro(id) else {
+            controlla(false, "Incontri, Riapri: l'incontro di prova non c'è")
+            return
+        }
+        i.prossimaAttivita = "Mandare il confronto"
+        i.prossimoIncontro = Calendar.current.date(byAdding: .day, value: 30, to: Date())
+        s.salvaIncontro(i)
+        let attivita = s.dati.attivita.count, appuntamenti = s.dati.appuntamenti.count
+        s.chiudiIncontro(id)
+        let chiuso = s.incontro(id)
+        controlla(chiuso?.stato == .concluso && s.dati.attivita.count == attivita + 1 && s.dati.appuntamenti.count == appuntamenti + 1,
+                  "Incontri, Riapri: la chiusura crea l'attività concordata e il prossimo incontro")
+        s.riapriIncontro(id)
+        let riaperto = s.incontro(id)
+        controlla(riaperto?.stato == .preparazione && riaperto?.attivitaCreataId == chiuso?.attivitaCreataId
+                  && s.appuntamento(riaperto?.appuntamentoId)?.stato != .concluso
+                  && s.dati.attivita.count == attivita + 1 && s.dati.appuntamenti.count == appuntamenti + 1,
+                  "Incontri, Riapri: l'incontro torna in preparazione, l'appuntamento si riapre, il resto resta")
+        s.chiudiIncontro(id)
+        controlla(s.incontro(id)?.stato == .concluso && s.dati.attivita.count == attivita + 1
+                  && s.dati.appuntamenti.count == appuntamenti + 1,
+                  "Incontri, Riapri: richiudere non crea due volte attività e appuntamento")
     }
 
     private static func testi(_ controlla: (Bool, String) -> Void) {

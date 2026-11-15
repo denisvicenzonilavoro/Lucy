@@ -203,47 +203,13 @@ struct TracciaImpegnoApple: View {
 
     private func tile(_ c: Cliente) -> some View {
         let t = Tema.Apple.Agenda.Traccia.self
-        let r = stato.riepilogoPosizioniCliente(c.id)
-        let completezza = stato.completezzaCliente(c.id)
         return VStack(alignment: .leading, spacing: t.spazioTile) {
-            riquadro("Patrimonio netto") {
-                NumeroCheConta(r.patrimonioNetto, formato: .euro, indice: 0)
-                    .carattereApple(t.cifraTile)
-                    .foregroundColor(t.coloreCifraTile)
-                    .lineLimit(1)
-                    .minimumScaleFactor(t.scalaMinimaCifra)
-            }
-            if let comp = completezza {
-                riquadro("Dati per l'analisi") {
-                    NumeroCheConta(Double(comp.percentuale), formato: .percentuale, indice: 1)
-                        .carattereApple(t.cifraTile)
-                        .foregroundColor(t.coloreCifraTile)
-                        .lineLimit(1)
-                    BarraPiena(frazione: Double(comp.percentuale) / 100,
-                               colore: comp.percentuale >= t.sogliaVerde ? t.barraCompleta : t.barraParziale)
-                        .frame(height: Tema.Apple.Grafico.Barra.altezza)
-                        .padding(.top, t.barraSopra)
-                }
-            }
+            CifreClienteTraccia(clienteId: c.id)
             Text(TestiPortafoglioApple.cifreDaiMotori)
                 .carattereApple(t.nota)
                 .foregroundColor(t.coloreNota)
                 .fixedSize(horizontal: false, vertical: true)
         }
-    }
-
-    private func riquadro<Contenuto: View>(_ nome: String, @ViewBuilder contenuto: () -> Contenuto) -> some View {
-        let t = Tema.Apple.Agenda.Traccia.self
-        return VStack(alignment: .leading, spacing: t.spazioTesti) {
-            Text(nome)
-                .carattereApple(t.nomeTile)
-                .foregroundColor(t.coloreNomeTile)
-                .lineLimit(1)
-            contenuto()
-        }
-        .padding(t.paddingTile)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .superficieApple(t.superficieTile, raggio: t.raggioTile)
     }
 
     // MARK: Piede
@@ -284,5 +250,60 @@ struct TracciaImpegnoApple: View {
         dettaglio?.chiudi(subito: true)
         stato.preparaFascicolo(per: e)
         stato.mostraAvviso("Fascicolo per \(cliente?.nome ?? e.titolo) pronto in Prospetti")
+    }
+}
+
+// MARK: - Riquadri condivisi (traccia dell'impegno e Incontri › Prima)
+
+/// Un riquadro della traccia: il nome `.k` e sotto il contenuto (la cifra), su tile. Lo usano la traccia dell'impegno e,
+/// con le Migliorie d'uso 20, il momento «Prima» di Incontri.
+struct RiquadroTracciaApple<Contenuto: View>: View {
+    let nome: String
+    @ViewBuilder let contenuto: () -> Contenuto
+
+    var body: some View {
+        let t = Tema.Apple.Agenda.Traccia.self
+        VStack(alignment: .leading, spacing: t.spazioTesti) {
+            Text(nome)
+                .carattereApple(t.nomeTile)
+                .foregroundColor(t.coloreNomeTile)
+                .lineLimit(1)
+            contenuto()
+        }
+        .padding(t.paddingTile)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .superficieApple(t.superficieTile, raggio: t.raggioTile)
+    }
+}
+
+/// «Patrimonio netto» e «Dati per l'analisi» (con la barra verde da `sogliaVerde`, arancio sotto), dai motori: la
+/// traccia dell'impegno e Incontri › Prima mostrano gli stessi riquadri.
+struct CifreClienteTraccia: View {
+    @Environment(StatoShell.self) var stato
+    let clienteId: String
+
+    var body: some View {
+        let t = Tema.Apple.Agenda.Traccia.self
+        let r = stato.riepilogoPosizioniCliente(clienteId)
+        let completezza = stato.completezzaCliente(clienteId)
+        RiquadroTracciaApple(nome: "Patrimonio netto") {
+            NumeroCheConta(r.patrimonioNetto, formato: .euro, indice: 0)
+                .carattereApple(t.cifraTile)
+                .foregroundColor(t.coloreCifraTile)
+                .lineLimit(1)
+                .minimumScaleFactor(t.scalaMinimaCifra)
+        }
+        if let comp = completezza {
+            RiquadroTracciaApple(nome: "Dati per l'analisi") {
+                NumeroCheConta(Double(comp.percentuale), formato: .percentuale, indice: 1)
+                    .carattereApple(t.cifraTile)
+                    .foregroundColor(t.coloreCifraTile)
+                    .lineLimit(1)
+                BarraPiena(frazione: Double(comp.percentuale) / 100,
+                           colore: comp.percentuale >= t.sogliaVerde ? t.barraCompleta : t.barraParziale)
+                    .frame(height: Tema.Apple.Grafico.Barra.altezza)
+                    .padding(.top, t.barraSopra)
+            }
+        }
     }
 }

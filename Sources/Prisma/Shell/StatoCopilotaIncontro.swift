@@ -250,6 +250,30 @@ struct ScenaIstantaneaCopilota: Equatable {
         return stato.sessioneCopilotaAperta(clienteId: clienteId)
     }
 
+    /// Migliorie d'uso 20: la sessione di quell'incontro (mai quella di un altro incontro dello stesso cliente). Prima
+    /// quella di questo ascolto, se è dell'incontro; altrimenti la più recente dell'incontro, aperta (`soloAperta`) o no.
+    /// Senza incontro vale la regola di sempre.
+    func sessione(incontro id: String?, cliente clienteId: String, in stato: StatoShell, soloAperta: Bool = false) -> SessioneCopilota? {
+        guard let id else { return sessione(per: clienteId, in: stato) }
+        if let sid = sessioneId, let s = stato.sessioneCopilota(sid), s.incontroId == id, s.clienteId == clienteId { return s }
+        return stato.sessioniCopilotaCliente(clienteId).first { $0.incontroId == id && (!soloAperta || $0.aperta) }
+    }
+
+    /// Migliorie d'uso 20: c'è il verbale del copilota per l'incontro (la sessione ha qualcosa da mettere a verbale ed è
+    /// finita: «■ Termina», o il verbale confermato). Dà la spunta a «Durante» e apre «Dopo» sul verbale.
+    func verbalePronto(incontro id: String, cliente clienteId: String, in stato: StatoShell) -> Bool {
+        guard let s = sessione(incontro: id, cliente: clienteId, in: stato) else { return false }
+        if s.verbale != nil || !s.aperta { return true }
+        return s.id == sessioneId && fase == .concluso && !(s.schede.isEmpty && s.trascrizione.isEmpty)
+    }
+
+    /// Migliorie d'uso 20, «■ Termina» sul Mac: il verbale non è più un dettaglio che si chiude, è il momento «Dopo».
+    func terminaNelDopo(_ stato: StatoShell) {
+        termina()
+        stato.schedaIncontro = .passi
+        stato.mostraAvviso(TestiMomentiIncontro.verbalePronto)
+    }
+
     // MARK: - Ascolto
 
     /// Avvia (o riprende) l'ascolto dell'incontro: solo con il consenso del cliente (`avviaSessioneCopilota` passa
