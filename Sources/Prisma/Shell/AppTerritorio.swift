@@ -48,6 +48,7 @@ struct AppTerritorio: View {
             let t = stato.territorio
             t.fermaCrescita()
             t.lucePuntata = nil
+            t.luceScelta = nil
             t.zoom = 1
             t.spostamento = .zero
         }
@@ -57,6 +58,13 @@ struct AppTerritorio: View {
         }
         #if os(macOS)
         .onExitCommand { stato.territorio.chiudiUno() }
+        // Migliorie d'uso 32: il Territorio segue il cliente della barra; un altro cliente spegne filtri e scheda
+        .onChange(of: stato.clienteAttivoId) { _ in
+            let t = stato.territorio
+            if t.filtroZona != nil { t.filtroZona = nil }
+            if t.soloDaFare { t.soloDaFare = false }
+            if t.luceScelta != nil { t.luceScelta = nil }
+        }
         #endif
     }
 
@@ -66,8 +74,16 @@ struct AppTerritorio: View {
                            coperto: CGFloat) -> ContenutoMappa {
         let attivo = stato.clienteAttivoId
         let conNome = Set(oggi.luci.filter { $0.cliente.preferito || $0.id == attivo }.prefix(Tema.Apple.Territorio.Luce.nomiMassimi).map(\.id))
-        return ContenutoMappa(luci: oggi.luci, vista: vista, annoCrescita: anno, giro: giro, confini: stato.territorio.confini,
-                              conNome: conNome, coperto: coperto)
+        var c = ContenutoMappa(luci: oggi.luci, vista: vista, annoCrescita: anno, giro: giro, confini: stato.territorio.confini,
+                               conNome: conNome, coperto: coperto)
+        #if os(macOS)
+        // Migliorie d'uso 32: nella vista Oggi, con un cliente scelto che è sulla mappa, lui e i suoi vicini
+        if vista == .oggi, !stato.tuttiIClienti, oggi.luci.contains(where: { $0.id == attivo }) {
+            c.clienteScelto = attivo
+            c.vicini = stato.viciniTerritorio(attivo, luci: oggi.luci)
+        }
+        #endif
+        return c
     }
 
     /// Il pannello della vista: rimonta (0,13 s) al cambio di vista.

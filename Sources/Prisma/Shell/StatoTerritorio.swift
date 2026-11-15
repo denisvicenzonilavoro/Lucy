@@ -16,6 +16,8 @@ import Observation
     /// I confini delle province, caricati in `apri` (mai nel `body`). Osservati per la stessa ragione di `tabella`.
     private(set) var confini: [String: ConfiniProvincia] = [:]
     var lucePuntata: String?
+    /// La luce con la scheda aperta (Migliorie d'uso 32, solo Mac): stato della vista, mai salvato.
+    var luceScelta: String?
     /// Il nome della zona filtrata (le altre luci attenuate).
     var filtroZona: String?
     /// «Con qualcosa da fare»: solo gli anelli e l'elenco nel pannello.
@@ -82,9 +84,10 @@ import Observation
         if crescitaInCorso { crescitaInCorso = false }
     }
 
-    /// Esc: chiude il fumetto, poi l'elenco, poi il filtro, poi la modalità «Sposta». Vero se ha chiuso qualcosa.
+    /// Esc: chiude la scheda della luce, poi il fumetto, poi l’elenco, poi il filtro, poi la modalità «Sposta». Vero se ha chiuso qualcosa.
     @discardableResult
     func chiudiUno() -> Bool {
+        if luceScelta != nil { luceScelta = nil; return true }
         if lucePuntata != nil { lucePuntata = nil; return true }
         if elencoSenzaLuogo { elencoSenzaLuogo = false; return true }
         if soloDaFare { soloDaFare = false; return true }
@@ -101,6 +104,7 @@ import Observation
         tabellaNonLeggibile = false
         confini = [:]
         lucePuntata = nil
+        luceScelta = nil
         filtroZona = nil
         soloDaFare = false
         spostaClienteId = nil
@@ -188,6 +192,16 @@ extension StatoShell {
                                       senzaLuogo: l.senzaLuogo, daFare: daFareTerritorio(), oggi: Date())
         d.territorioOggi = (ora, imp, v)
         return v
+    }
+
+    /// I vicini del cliente scelto (Migliorie d'uso 32): chi gli sta a meno di dieci minuti, stima in linea d'aria. Una
+    /// volta per cliente, dati e impostazioni del Territorio (nella chiave le luci e i parametri della stima).
+    func viciniTerritorio(_ id: String, luci: [LuceCliente]) -> Set<String> {
+        let imp = dati.impostazioni.territorio
+        let chiave = "territorio-vicini|\(id)|\(luci.count)|\(imp.fattoreStrada)|\(imp.velocitaCitta)|\(imp.velocitaFuori)|\(imp.minutiMinimiTratto)"
+        return ricavato(chiave) {
+            Set(MotoreTerritorio.vicini(di: id, luci: luci, impostazioni: imp))
+        }
     }
 
     func crescitaTerritorio() -> CrescitaTerritorio {
@@ -294,6 +308,7 @@ extension StatoShell {
         mostraAvviso(StatoShell.soloSulMacPerOra)
         #else
         territorio.lucePuntata = nil
+        territorio.luceScelta = nil
         territorio.filtroZona = nil
         territorio.soloDaFare = false
         territorio.spostaClienteId = clienteId

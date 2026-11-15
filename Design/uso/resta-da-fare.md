@@ -1222,3 +1222,36 @@ Resta:
   1051 mostra i due vuoti con il nome); la larghezza della riga degli avvisi con due pulsanti nelle finestre strette.
 - Se la miglioria 3 porterà gli avvisi `.nuovo` nel «Da fare», cambiare `TestiAppMercato.silenziato` in «Silenziato:
   non entra più nel «Da fare»».
+
+## 32. La mappa risponde
+
+Fatto (solo Mac, dentro `#if os(macOS)`; l'iPad tiene il clic che apre il dossier):
+- **La scheda della luce**: il clic su una luce scrive `StatoTerritorio.luceScelta` (in memoria) e apre `SchedaLuce`
+  (Shell/MappaTerritorio.swift): avatar 34, nome e zona, il patrimonio in un'etichetta con le etichette dei canali,
+  «Cliente dal <anno>» («In Prisma dal <anno>» se l'anno viene solo dalla scheda, proposta) e « · ha qualcosa da fare»,
+  «Apri il dossier». 22 a destra e 44 sopra la luce, fra il pannello e il bordo destro; entra con la molla del tema
+  (0,26 s × ritmo, scala 0,9 → 1), ferma con calmo e nelle istantanee. Si chiude con un clic fuori, con Esc (prima di
+  tutto il resto), accendendo un riquadro, al cambio di vista o di cliente, al doppio clic, al pizzico e al
+  trascinamento. Il fumetto al passaggio resta, ma non sulla luce con la scheda. Il ⌥ clic passa da `scegliCliente`.
+  VoiceOver: con la scheda aperta la mappa offre l'azione «Apri il dossier di <Nome>».
+- **«Apri «Da fare» ›»** in fondo a «Con qualcosa da fare» (`TileTerritorio.collegamento`, fuori dal clic della tile:
+  con il collegamento la tile si accende con un tocco, non con un Button annidato) apre il «Da fare» su «Tutti».
+- **Il cliente scelto** (solo vista Oggi): `MotoreTerritorio.vicini` (soglia `minutiVicini = 10`, stima di `tratto`),
+  in cache con `stato.viciniTerritorio` (chiave con le luci e i parametri della stima). Senza filtro acceso restano
+  accesi lui e i vicini (le altre a 0,28, proposta §32.6), con l'anello bianco che va e torna (2,4 s, 0,95 → 0,2) e non
+  conta fra i 12; un filtro acceso vince. In cima al pannello `TileClienteTerritorio` (bordo accento al 40%) con la
+  frase `TestiTerritorio.vicini` (anche «Nessun cliente a meno di dieci minuti da <Nome>.», proposta) o, se non è sulla
+  mappa, «<Nome> non è sulla mappa: manca l’indirizzo.» con «Metti la posizione a mano» (la specifica diceva «Mettilo a
+  mano»: Prisma non conosce il genere). Cambiare cliente azzera filtri e scheda.
+- Prove in `--prova-calcoli` (`ProvaCalcoliTerritorio.vicini`): appena sotto e a dieci minuti, stesso comune contro
+  comuni diversi, posizione a mano senza comune, cliente non sulla mappa, frasi.
+- Istantanee: 700, 701, 702, 706 e 708 su «Tutti i clienti» esplicito (700 ora con «Apri «Da fare» ›»); nuove
+  1100-uso-territorio-scheda-luce (anche scura), 1101-uso-territorio-cliente, 1102-uso-territorio-cliente-filtro e
+  1103-uso-territorio-cliente-senza-luogo.
+
+Resta:
+- La caduta delle luci spente in 0,4 s del template: l'opacità cambia di colpo (le luci sono disegnate in un `Canvas`).
+- Al passaggio i riquadri non si alzano di 1 e non hanno l'anello azzurro (l'app li accende con il fondo, come prima).
+- La prova di fluidità per «cambiare cliente non rifà `territorioOggi`» non è stata scritta.
+- Guardare sul Mac 1100-1103: se Giulia ha vicini con i 35 clienti di prova, la posizione della scheda vicino al bordo
+  (l'altezza per tenerla dentro la mappa è stimata, 170) e la lunghezza della riga patrimonio + due canali.

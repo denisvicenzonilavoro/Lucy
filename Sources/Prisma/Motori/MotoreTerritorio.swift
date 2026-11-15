@@ -313,6 +313,26 @@ enum MotoreTerritorio {
         return (km, max(impostazioni.minutiMinimiTratto, minuti))
     }
 
+    // MARK: I vicini del cliente scelto (Migliorie d'uso 32)
+
+    /// La soglia dei vicini: una regola di calcolo, non un'impostazione (proposta §32.6). Stima in linea d'aria.
+    static let minutiVicini = 10
+
+    /// Gli id dei clienti sulla mappa a meno di `minuti` dal cliente `id` (lui escluso), con la stessa stima dei tratti
+    /// del giro (`tratto`: linea d'aria × fattore strada, velocità di città nello stesso comune). Vuoto se il cliente non è
+    /// sulla mappa.
+    static func vicini(di id: String, luci: [LuceCliente], impostazioni: ImpostazioniTerritorio, minuti: Int = MotoreTerritorio.minutiVicini) -> [String] {
+        guard let io = luci.first(where: { $0.id == id }) else { return [] }
+        var r: [String] = []
+        for l in luci where l.id != id {
+            let stesso: Bool
+            if let a = io.luogo.comune?.codice, let b = l.luogo.comune?.codice { stesso = a == b } else { stesso = false }
+            let t = tratto(io.luogo.coordinata, l.luogo.coordinata, stessoComune: stesso, impostazioni: impostazioni)
+            if t.minuti < minuti { r.append(l.id) }
+        }
+        return r
+    }
+
     // MARK: Aiuti
 
     /// Somma di `valore` delle posizioni in essere, esclusi i debiti.
