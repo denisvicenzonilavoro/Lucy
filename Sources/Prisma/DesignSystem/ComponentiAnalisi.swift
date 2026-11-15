@@ -238,6 +238,8 @@ struct KPI<Nota: View>: View {
     let titolo: String
     let valore: String
     var ultimo = false
+    /// Colore del valore (migliorie d'uso 15: guadagno verde, debito rosso…); nil = quello solito.
+    var coloreValore: Color? = nil
     @ViewBuilder let nota: () -> Nota
     @Environment(\.superficiApple) private var apple
 
@@ -257,7 +259,7 @@ struct KPI<Nota: View>: View {
                 .fixedSize(horizontal: false, vertical: true)
             Text(valore)
                 .carattereApple(a.valoreTessera)
-                .foregroundColor(Tema.Apple.Colore.inchiostro)
+                .foregroundColor(coloreValore ?? Tema.Apple.Colore.inchiostro)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             HStack(spacing: a.spazioNota) { nota() }
@@ -279,7 +281,7 @@ struct KPI<Nota: View>: View {
             Text(valore)
                 .font(Tema.Testo.valoreTessera)
                 .tracking(Tema.Testo.Componenti.spaziaturaValore)
-                .foregroundColor(Tema.Colore.inchiostro)
+                .foregroundColor(coloreValore ?? Tema.Colore.inchiostro)
                 .lineLimit(1)
                 .minimumScaleFactor(0.6)
             HStack(spacing: 5) { nota() }

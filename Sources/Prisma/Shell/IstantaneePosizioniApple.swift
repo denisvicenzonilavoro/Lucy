@@ -20,7 +20,48 @@ extension Istantanee {
             }),
         ]
         tutte += sceneQuadroPosizioni
+        tutte += sceneSchedaPosizione
         return tutte
+    }
+
+    /// Migliorie d'uso 15 «La scheda di una posizione si legge dall'alto»: l'ETF di Giulia su «In breve» (frase, cifre,
+    /// grafico, «Se si chiudesse oggi», chiara e scura); il piano rivalutabile di Giulia con cinque dati tolti, sulla
+    /// scheda «Contratto» (righe piene e «Da completare · 5»); il piano previdenziale di Giulia in proposta, presentato da
+    /// 50 giorni: tre pulsanti e la scheda «Adeguatezza». (1050-1052: 1027-1029 della specifica erano già presi)
+    nonisolated private static var sceneSchedaPosizione: [(nome: String, prepara: (StatoShell) -> Void)] {
+        let etf: (StatoShell) -> Void = { s in
+            s.clienteAttivoId = "giulia"
+            s.portafoglio = false
+            s.posizioneInDettaglio = "pos-giulia-etf-azionario-globale"
+            s.apri(.posizioni)
+        }
+        return [
+            ("1050-uso-posizione-in-breve", etf),
+            ("1050-uso-posizione-in-breve-scuro", etf),
+            ("1051-uso-posizione-contratto", { s in
+                let id = "pos-giulia-piano-di-risparmio-rivalutabile"
+                if let i = s.dati.posizioni.firstIndex(where: { $0.id == id }) {
+                    s.dati.posizioni[i].numeroContratto = ""
+                    s.dati.posizioni[i].contraente = ""
+                    s.dati.posizioni[i].assicurato = ""
+                    s.dati.posizioni[i].beneficiari = ""
+                    s.dati.posizioni[i].scadenza = nil
+                }
+                s.clienteAttivoId = "giulia"
+                s.portafoglio = false
+                s.posizioneInDettaglio = id
+                s.apri(.posizioni)
+                s.ancoraPosizioni = "dettaglio-contratto"
+            }),
+            ("1052-uso-proposta", { s in
+                preparaPortafoglioApple(s)
+                s.clienteAttivoId = "giulia"
+                s.portafoglio = false
+                s.posizioneInDettaglio = "pos-giulia-piano-previdenziale-integrativo"
+                s.apri(.posizioni)
+                s.ancoraPosizioni = "dettaglio-adeguatezza"
+            }),
+        ]
     }
 
     /// Migliorie d'uso 14 «Le posizioni prima di tutto»: l'indice delle posizioni di Marco e «Quadro e posizioni» con i

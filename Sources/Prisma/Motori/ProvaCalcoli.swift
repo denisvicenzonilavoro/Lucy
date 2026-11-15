@@ -1337,6 +1337,8 @@ enum ProvaCalcoli {
         ProvaCalcoliPrioritaAree360.esegui(verificaEsterna)
         // Migliorie d'uso 11: i gruppi dell'indice del dossier e «L'azienda» solo per chi ce l'ha
         ProvaCalcoliIndiceDossier.esegui(verificaEsterna)
+        // Migliorie d'uso 15: la frase della scheda di una posizione non inventa cifre, i dati vuoti pertinenti al tipo
+        ProvaCalcoliDettaglioPosizione.esegui(verificaEsterna)
         #if os(macOS)
         // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
         MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }

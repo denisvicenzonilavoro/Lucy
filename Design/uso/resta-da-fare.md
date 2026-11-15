@@ -514,3 +514,41 @@ Resta:
 - **Istantanee e prove sul Mac**: rigenerare 2, 9, 10, 71, 74, 76, 79, 95-97 e le nuove 1040-1043; misurare un cliente
   con 40 posizioni (l'elenco nella card) e `--prova-fluidita` con 200 clienti (il quadro non costruisce le analisi);
   `ProvaDelFuocoApple` e `ProvaSeguito` leggono «seguito», che resta del portafoglio.
+
+## 15. La scheda di una posizione si legge dall'alto
+
+Fatto (solo sul Mac; iPhone e iPad tengono la pagina lunga, `DettaglioPosizione.paginaLunga`): la scheda di una posizione
+è `paginaMac` (Shell/SchedeDettaglioPosizione.swift). In cima la barra alta 34 con «‹ Le posizioni» (torna alla schermata
+della miglioria 14 con i filtri di prima) e al più quattro azioni con il nome, il resto in «Altro ⌄» (proposta: «Segna
+come in essere», «Esito…», «Altro ⌄» con Simula, Confronta, Adeguatezza, Valutazione, Prospetto, Modifica; in essere:
+Simula, Confronta, Prospetto, Modifica, o «Apri un sinistro», Prospetto, Modifica per la protezione); «Elimina la
+posizione…» è in «Altro ⌄» con la conferma di sempre; con poco spazio le secondarie passano in «Altro ⌄», mai icone sole.
+Sotto la testata di oggi la frase (19 semibold) e le cifre (`TestiDettaglioPosizione.frase` e `.cifre`, Motori/
+TestiDettaglioPosizione.swift: solo cifre dei motori, frase corta e tessera assente se manca un dato; «Rende all'anno» è il
+rendimento dei versamenti o, senza, l'atteso netto con «atteso, al netto dei costi»; guadagno verde e perdita rossa con il
+nuovo `KPI.coloreValore`), poi il segmentato delle schede che hanno contenuto (`SchedaPosizione.disponibili`: In breve,
+Andamento, Costi e rischio o «La copertura», Adeguatezza, Contratto) e la sola scheda scelta. Tutte le sezioni di prima
+ci sono ancora, ognuna nella sua scheda. Contratto: le sole righe piene e «Da completare · {n}» con i nomi in capsule e
+«Completa i dati» (`campiVuoti`: solo i campi pertinenti al tipo). In fondo a In breve la striscia «{n} dati da
+completare · … · Vedi ›». Le ancore «dettaglio-…» scelgono la scheda e poi scorrono al giro dopo (nuove «dettaglio-costi»
+e «dettaglio-contratto»). `PillolaStato` sul Mac dice «Scade tra {n} giorni» e «Debito». Esc nella scheda fa un passo
+indietro (EscFinestra.swift, dopo i pulsanti con Esc della finestra). Token in `Tema.Apple.Posizioni.SchedaDettaglio`.
+Prova `ProvaCalcoliDettaglioPosizione` in `--prova-calcoli`. Istantanee nuove 1050-uso-posizione-in-breve (chiara e
+scura), 1051-uso-posizione-contratto, 1052-uso-proposta (1027-1029 della specifica erano già presi); 92, 94, 119 e 121
+aprono ora la scheda giusta. Nessun campo d'archivio nuovo.
+
+Resta:
+- **«Completa i dati» sul primo campo vuoto**: apre «Modifica», ma `ModuloPosizione` non legge `\.fuocoModulo` (lo imposta
+  solo `AppPosizioni` per la completezza): il fuoco sul primo campo vuoto va aggiunto nel modulo.
+- **Rientro al cambio di scheda** (opacità e y +6 in 0,24 s del template): la scheda nuova compare subito.
+- **Grafico piccolo di «Come sta andando»**: è `GraficoAndamento` intero (altezza fissa `Misure.Analisi.grafico`), senza
+  una misura ridotta.
+- **Testata**: resta `rigaIntestazione` di oggi (barretta 8×46, titolo `Tipo.profiloNome`); la barretta 5 e il titolo 24
+  bold del template non sono passati.
+- **Immobili**: «Debiti residui» e «Al netto dei debiti» al posto di «Mutuo residuo» (Posizione non distingue il mutuo).
+- **iPad**: la pillola «Scade tra {n} gg» e «In essere» per i debiti restano com'erano (regola generale: iPhone e iPad con
+  il loro aggiornamento; la specifica di gruppo voleva il ritocco anche lì).
+- **Esc da verificare sul Mac vero**: che il passo indietro scatti con il fuoco fuori dalla scheda e non con un foglio
+  aperto (alert di «Elimina», modulo).
+- **Istantanee e prove sul Mac**: rigenerare 8, 10, 91-94, 106, 119, 121, 235 e le scene con le ancore «dettaglio-…»,
+  più le nuove 1050-1052; aggiornare la pagina delle anteprime.

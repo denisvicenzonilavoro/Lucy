@@ -291,6 +291,66 @@ extension Tema.Apple {
             static let spazioAnalisi: CGFloat = 18
         }
 
+        // MARK: La scheda di una posizione (migliorie d'uso 15, solo Mac)
+
+        /// Il dettaglio di una posizione (`posDettaglioHTML`): barra alta 34 con «‹ Le posizioni» e al più quattro azioni
+        /// più «Altro ⌄», la frase 19 semibold, le quattro cifre, il segmentato delle schede e la scheda scelta. Il nome è
+        /// diverso da `Scheda` (la scheda del nastro «Da fare») e dal tipo `SchedaPosizione` (le schede del dettaglio).
+        enum SchedaDettaglio {
+            static let altezzaBarra: CGFloat = 34
+            /// Sopra e sotto la barra: con i pulsanti da 32 la barra resta alta 40, come prima, sopra il filo.
+            static let paddingBarra: CGFloat = 4
+            static let spazioAzioni: CGFloat = 8
+            static let margineBarra: CGFloat = 12
+            static let freccia = Carattere(dimensione: 11, peso: .semibold)
+            static let spazioFreccia: CGFloat = 5
+            /// Margini del contenuto: come la pagina di prima (14 sopra, 16 ai lati, 18 sotto).
+            static let margine = EdgeInsets(top: 14, leading: 16, bottom: 18, trailing: 16)
+            /// La frase: 19 semibold, interlinea 1,3, 14 sopra e 12 sotto.
+            static let frase = Carattere(dimensione: 19, peso: .semibold, tracking: -0.3, interlinea: 1.3)
+            static let coloreFrase = Colore.inchiostro
+            static let fraseSopra: CGFloat = 14
+            static let fraseSotto: CGFloat = 12
+            /// Il segmentato delle schede: 14 sopra, 12 sotto.
+            static let schedeSopra: CGFloat = 14
+            static let schedeSotto: CGFloat = 12
+            /// Le card delle schede: 12 fra l'una e l'altra; a sinistra 1,25 della destra (In breve e Contratto).
+            static let spazio: CGFloat = 12
+            static let spazioPannelli: CGFloat = 22
+            /// Il testo delle card di In breve: 15, interlinea 1,5.
+            static let testoCard = Carattere(dimensione: 15, peso: .regular, interlinea: 1.5)
+            static let coloreTestoCard = Colore.inchiostro
+            static let etichettaDaFare = Colore.arancioTesto
+            /// «Cosa manca per chiuderla»: pallino 7 e righe 13,5.
+            static let pallino: CGFloat = 7
+            static let colorePallino = Colore.arancio
+            static let riga = Carattere(dimensione: 13.5, peso: .regular)
+            static let spazioRighe: CGFloat = 8
+            /// La striscia dei dati da completare (in fondo a In breve): «{n} dati da completare» arancio grassetto, i nomi
+            /// `.k`, «Vedi ›» a destra; card piatta con padding 12×16.
+            static let striscia = Carattere(dimensione: 13, peso: .bold)
+            static let coloreStriscia = Colore.arancioTesto
+            static let nomiStriscia = Carattere.secondario
+            static let coloreNomiStriscia = Colore.inchiostro2
+            static let paddingStriscia = Misura.padding(12, 16)
+            static let raggioStriscia = Raggio.card
+            static let fondoStriscia = Colore.chip
+            static let spazioStriscia: CGFloat = 10
+            /// «Da completare · {n}»: le capsule dei nomi 12,5 con margini 4×11 su `chip`.
+            static let capsula = Carattere(dimensione: 12.5, peso: .medium)
+            static let coloreCapsula = Colore.inchiostro2
+            static let fondoCapsula = Colore.chip
+            static let paddingCapsula = Misura.padding(4, 11)
+            static let spazioCapsule: CGFloat = 8
+            static let nota = Carattere.secondario
+            static let coloreNota = Colore.inchiostro2
+            /// I colori delle cifre: guadagno verde, debito e perdita rossi, scadenza vicina arancio, proposta viola.
+            static let verde = Colore.verde
+            static let rosso = Colore.rosso
+            static let arancio = Colore.arancioTesto
+            static let viola = Colore.stima
+        }
+
         // MARK: Il colore del cliente (avatar e grafico del dettaglio)
 
         /// Il colore del cliente nel tema: la tinta dell'avatar, con i toni degli impegni dell'Agenda.

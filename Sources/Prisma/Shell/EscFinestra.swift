@@ -86,6 +86,12 @@ final class MonitorEscFinestra {
         guard nienteSopra(s, app: app) else { return e }
         // Prima i pulsanti con Esc della finestra (dettagli, schede, palco…): se uno lo prende, la finestra resta
         if finestra.performKeyEquivalent(with: e) { return nil }
+        // Migliorie d'uso 15: nella scheda di una posizione Esc fa un passo indietro (torna alle posizioni, con la
+        // schermata e i filtri di prima) invece di chiudere la finestra
+        if app == .posizioni, s.posizioneInDettaglio != nil {
+            s.posizioneInDettaglio = nil
+            return nil
+        }
         s.chiudi(app)
         return nil
     }

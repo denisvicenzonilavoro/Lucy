@@ -550,6 +550,8 @@ enum Istantanee {
             s.clienteAttivoId = "giulia"
             s.posizioneInDettaglio = "pos-giulia-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac la gestione separata sta nella scheda «Costi e rischio»
+            s.ancoraPosizioni = "dettaglio-gestione"
         }),
         ("93-posizioni-riscatto-penali", { s in
             // Andrea, proposta con penali e 12 mesi di blocco: il riscatto anno per anno
@@ -563,6 +565,8 @@ enum Istantanee {
             s.clienteAttivoId = "sofia"
             s.posizioneInDettaglio = "pos-sofia-obbligazionario-a-scadenza-2030"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac i costi come nel KID stanno nella scheda «Costi e rischio»
+            s.ancoraPosizioni = "dettaglio-costi"
         }),
         ("95-posizioni-crisi", { s in
             // Giulia: le crisi del 2008, 2020 e 2022 nella prova di resistenza
@@ -726,6 +730,8 @@ enum Istantanee {
             s.clienteAttivoId = "andrea"
             s.posizioneInDettaglio = "pos-andrea-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac l'esito della proposta è una riga della scheda «Contratto»
+            s.ancoraPosizioni = "dettaglio-contratto"
         }),
         // Giro 3 · esperienza per tipo di prodotto (specifica 2)
         ("120-clienti-esperienza", { s in
@@ -739,6 +745,8 @@ enum Istantanee {
             s.clienteAttivoId = "andrea"
             s.posizioneInDettaglio = "pos-andrea-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac la pillola «Esperienza» sta nella scheda «Costi e rischio»
+            s.ancoraPosizioni = "dettaglio-costi"
         }),
         ("122-posizioni-coerenza-esperienza", { s in
             // Giulia: «Coerenza con il profilo» con l'esperienza sul PIP tra i punti da rivedere
@@ -1260,6 +1268,7 @@ enum Istantanee {
             s.clienteAttivoId = "giulia"
             s.posizioneInDettaglio = "pos-giulia-piano-di-risparmio-rivalutabile"
             s.apri(.posizioni)
+            s.ancoraPosizioni = "dettaglio-gestione"
         }),
         ("106-posizioni-multiramo-scuro", { s in
             // La stessa scena della multiramo di Marco, in aspetto scuro (vetro delle due parti)

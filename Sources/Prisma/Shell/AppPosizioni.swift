@@ -824,9 +824,23 @@ struct PillolaStato: View {
                 Pillola(testo: "Scaduta", tono: .errore)
             } else if p.scadeEntro(RiepilogoPosizioni.giorniScadenza), let s = p.scadenza {
                 let giorni = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: Date()), to: s).day ?? 0
+                #if os(macOS)
+                // Migliorie d'uso 15: «Scade tra {n} giorni» per intero (stessa soglia di 90 giorni)
+                Pillola(testo: TestiDettaglioPosizione.scadeTra(giorni), tono: .attenzione)
+                #else
                 Pillola(testo: "Scade tra \(giorni) gg", tono: .attenzione)
+                #endif
             } else {
+                #if os(macOS)
+                // Migliorie d'uso 15: un debito in essere è «Debito», neutro
+                if p.area == .debiti {
+                    Pillola(testo: "Debito", tono: .neutro)
+                } else {
+                    Pillola(testo: "In essere", tono: .ok)
+                }
+                #else
                 Pillola(testo: "In essere", tono: .ok)
+                #endif
             }
         }
     }
