@@ -51,7 +51,10 @@ struct AppAnalisi360: View {
 
     private var cornice: some View {
         CorniceStrumento(
-            notaStato: "Calcoli eseguiti in locale · conteggi semplificati, da verificare con il cliente e sui contratti",
+            // Migliorie d'uso 16: sul Mac il richiamo alle verifiche lo fa la capsula delle stime; resta l'avvertenza sui calcoli
+            notaStato: Tema.Apple.Aree360.Stime.unAvvisoSolo
+                ? "Calcoli eseguiti in locale · conteggi semplificati"
+                : "Calcoli eseguiti in locale · conteggi semplificati, da verificare con il cliente e sui contratti",
             notaDestra: stato.analisiSalvata(cliente)
                 ? "Analisi aggiornata \(analisi.wrappedValue.aggiornataIl.map { Formati.dataOra.string(from: $0) } ?? "")"
                 : "Prima stesura dalle posizioni"
@@ -99,14 +102,17 @@ struct AppAnalisi360: View {
         }
         // Le ipotesi delle aree: con uno strumento aperto non servono (meno testo sempre visibile)
         if stato.strumentoAnalisi == nil {
-            EtichettaRail(testo: "Le ipotesi")
-            Text(stato.analisiSalvata(cliente)
-                 ? "Corrette per questo cliente. Le coperture si leggono sempre dalle posizioni."
-                 : "Ricavate dalle posizioni in essere e dall'anagrafica: rivedile con il cliente.")
-                .font(Tipo.kpiNota)
-                .foregroundColor(Colori.Analisi.kpiNota)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, 3)
+            // Migliorie d'uso 16: sul Mac, sulla griglia delle aree, le stime le dice solo la capsula (resta «Riparti»)
+            if !(Tema.Apple.Aree360.Stime.unAvvisoSolo && stato.areaAnalisi == nil) {
+                EtichettaRail(testo: "Le ipotesi")
+                Text(stato.analisiSalvata(cliente)
+                     ? "Corrette per questo cliente. Le coperture si leggono sempre dalle posizioni."
+                     : "Ricavate dalle posizioni in essere e dall'anagrafica: rivedile con il cliente.")
+                    .font(Tipo.kpiNota)
+                    .foregroundColor(Colori.Analisi.kpiNota)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.horizontal, 3)
+            }
             if stato.analisiSalvata(cliente) {
                 Button { confermaRicalcolo = true } label: {
                     Label("Riparti dalle posizioni", systemImage: "arrow.counterclockwise")

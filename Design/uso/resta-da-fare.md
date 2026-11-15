@@ -445,3 +445,29 @@ Resta:
   1036-1037; controllare che nella stretta compaia «Altro ⌄» con le azioni intere e che il titolo lungo non spinga fuori
   «Prospetti»; la scena del report di fine anno (`IstantaneeAnnoInsieme`) parte da Prospetti e non tocca la testata.
   `--prova-fluidita`: guardare i corpi di `RigaTestaDossier` (legge solo il cliente attivo e la vista di Clienti).
+
+## 16. Un solo avviso sulle stime in Analisi 360
+
+Fatto (solo sul Mac, interruttore `Tema.Apple.Aree360.Stime.unAvvisoSolo`; iPhone e iPad come prima): nella riga del
+segmentato «Le quattro aree | Rispetto alle famiglie come la sua» c'è a destra la capsula `AvvisoStimeAnalisi360`
+(Analisi360Apple.swift), «Stime in uso · {n} dati da completare ›» in arancio con il bordo arancio al 35%, o «✓ Nessuna
+stima: i dati ci sono tutti» in verde; il numero è `daCompletare.count`, lo stesso dell'elenco che apre. Non in modalità
+cliente. Il clic apre, nato dalla capsula (id `DettagliAree360.idStime`, misura `QuadroDossier.misuraDati`), lo stesso
+`DettaglioDatiAnalisiApple` della riga del quadro del dossier (una vista sola, senza stato proprio, due porte):
+«Dati per l'analisi · {nome}», «Completi al {n}%», «Un elenco solo, lo stesso in Clienti e in Analisi 360…» e sotto ogni
+voce l'ipotesi che Prisma usa (o «Finché manca, Prisma usa una stima») con « · pesa su {aree}» (`TestiCompletezza.rigaStima`).
+«Completa» porta dove il dato si completa, come prima. Tolti: la riga della completezza nella testata, lo stato delle
+ipotesi sulle card (resta la riga dei canali), la frase sulle ipotesi nel piede (resta l'avvertenza sulle somme dei
+piani), «da verificare con il cliente e sui contratti» nella nota della cornice e il blocco «Le ipotesi» della colonna
+sulla griglia delle aree (resta «Riparti dalle posizioni»). Restano, come da proposta 16.6, le pillole «stimato» e il
+piede «Ipotesi da verificare con il cliente» dentro un'area aperta. Token in `Tema.Apple.Aree360.Stime`. Istantanee nuove
+1038-uso-analisi360-stime-aperte e 1039-uso-analisi360-nessuna-stima (1030-1031 sono già del pannello «Da fare»).
+Nessun campo d'archivio nuovo.
+
+Resta:
+- **«Dato completato: una stima in meno»**: il template completa al volo e mostra l'avviso; nell'app «Completa» apre il
+  modulo del dato (16.3 punto 4), quindi l'avviso non c'è. Si può aggiungere quando il dato salvato toglie la voce.
+- **Istantanee**: rigenerare sul Mac 440 e -scuro, 443, 444, 17-analisi360, 111-analisi360-ipotesi-stimate (che ora sul
+  Mac mostra la capsula al posto degli stati delle card), 1050 (l'elenco del dossier ha la frase nuova e la riga sotto
+  ogni voce) e le nuove 1038-1039; controllare che la capsula non vada a capo accanto all'etichetta «di prova» delle
+  famiglie in una finestra stretta.

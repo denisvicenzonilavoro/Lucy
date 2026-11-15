@@ -60,6 +60,29 @@ enum TestiCompletezza {
     /// La pillola accanto a un'ipotesi stimata dell'Analisi 360.
     static let stimato = "stimato"
 
+    // MARK: - Un solo avviso sulle stime (migliorie d'uso 16)
+
+    /// La capsula di Analisi 360: "Stime in uso · 3 dati da completare ›" ("1 dato").
+    static func avvisoStime(_ n: Int) -> String { "Stime in uso · \(n) \(n == 1 ? "dato" : "dati") da completare ›" }
+    /// La capsula verde, senza dati da completare.
+    static let nessunaStima = "Nessuna stima: i dati ci sono tutti"
+    static let aiutoAvvisoStime = "Apri l’elenco dei dati da completare: lo stesso della scheda del cliente"
+    /// La frase dell'elenco «Dati per l'analisi», uguale in Clienti e in Analisi 360.
+    static let unElencoSolo = "Un elenco solo, lo stesso in Clienti e in Analisi 360. Più dati ci sono, meno stime fa Prisma."
+    static let tuttiIDati = "Tutti i dati ci sono: nessuna stima in uso."
+    static func completiAl(_ percentuale: Int) -> String { "Completi al \(percentuale)%" }
+    static let stimaGenerica = "Finché manca, Prisma usa una stima"
+
+    /// La riga sotto una voce dell'elenco: l'ipotesi che Prisma usa (o la frase generica) e le aree di Analisi 360
+    /// su cui pesa, "Finché manca, Prisma usa una stima · pesa su Previdenza, Protezione".
+    static func rigaStima(_ v: VoceCompletezza) -> String {
+        var testo = v.ipotesi.trimmingCharacters(in: .whitespacesAndNewlines)
+        if testo.hasSuffix(".") { testo.removeLast() }
+        if testo.isEmpty { testo = stimaGenerica }
+        let aree = v.analisiOrdinate.compactMap(\.areaAnalisi).map(\.nome)
+        return aree.isEmpty ? testo : testo + " · pesa su " + aree.joined(separator: ", ")
+    }
+
     /// Le etichette dei campi dell'Analisi 360 su cui si apre il completamento (identiche a quelle di AppAnalisi360).
     static let campoEta = "Età attuale"
     static let campoFabbisogno = "Fabbisogno della famiglia"

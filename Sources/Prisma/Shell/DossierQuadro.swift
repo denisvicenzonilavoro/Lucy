@@ -46,9 +46,6 @@ enum TestiQuadroDossier {
     static let datiCompleti = "Dati completi"
     static let aiutoDati = "Apri l’elenco dei dati da completare"
     static func titoloDettaglio(_ nome: String) -> String { "Dati per l'analisi · \(nome)" }
-    static func completi(_ percentuale: Int) -> String { "Completi al \(percentuale)%" }
-    static let frase = "Più dati ci sono, meno stime fa Prisma. Questi sono quelli che mancano."
-    static let tuttiCi = "Tutti i dati ci sono: nessuna stima in uso."
     static func daFare(_ nome: String) -> String { "Da fare per \(nome)" }
     static let mese = "mese"
     static let mesi = "mesi"
@@ -286,6 +283,9 @@ struct RigaDatiAnalisi: View {
 
 /// Il dettaglio «Dati per l'analisi · <Nome>»: «Completi al N%», la frase del template e le voci da completare con
 /// «Completa» e la croce «non pertinente» (come la card di prima); sotto, le voci segnate non pertinenti con «Ripristina».
+/// Migliorie d'uso 16: un elenco solo con due porte, la riga del quadro nel dossier e la capsula delle stime di
+/// Analisi 360 (`AvvisoStimeAnalisi360`). Nessuno stato proprio: legge il cliente attivo e `completezzaCliente`, così
+/// le due porte mostrano sempre la stessa cosa; ogni voce dice la stima che Prisma usa e su quali aree pesa.
 struct DettaglioDatiAnalisiApple: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.statoDettaglioApple) private var dettaglio
@@ -301,12 +301,12 @@ struct DettaglioDatiAnalisiApple: View {
                     .carattereApple(P.titolo)
                     .foregroundColor(P.coloreTitolo)
                     .lineLimit(1)
-                Text(TestiQuadroDossier.completi(k.percentuale))
+                Text(TestiCompletezza.completiAl(k.percentuale))
                     .carattereApple(Q.titoloDettaglio)
                     .foregroundColor(Tema.Apple.Colore.inchiostro)
                     .padding(.top, Q.sopraTitoloDettaglio)
                     .help(TestiCompletezza.metodo)
-                Text(TestiQuadroDossier.frase)
+                Text(TestiCompletezza.unElencoSolo)
                     .carattereApple(Q.fraseDettaglio)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -316,7 +316,7 @@ struct DettaglioDatiAnalisiApple: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 0) {
                         if k.daCompletare.isEmpty {
-                            Label(TestiQuadroDossier.tuttiCi, systemImage: "checkmark.circle.fill")
+                            Label(TestiCompletezza.tuttiIDati, systemImage: "checkmark.circle.fill")
                                 .carattereApple(Q.tuttiCi)
                                 .foregroundColor(Q.coloreDatiCompleti)
                                 .padding(.vertical, Q.paddingTuttiCi)
@@ -325,7 +325,8 @@ struct DettaglioDatiAnalisiApple: View {
                             VoceDaCompletareApple(voce: v,
                                                   completa: { completa(v, cliente: c.id) },
                                                   escludi: { escludi(v, cliente: c) },
-                                                  solaLettura: stato.solaLettura)
+                                                  solaLettura: stato.solaLettura,
+                                                  riga: TestiCompletezza.rigaStima(v))
                         }
                         piede(k, cliente: c.id)
                     }

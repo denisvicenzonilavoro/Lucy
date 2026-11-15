@@ -30,6 +30,8 @@ import SwiftUI
 enum DettagliAree360 {
     static let idInvestimenti = "area360-investimenti"
     static let idRisparmio = "area360-risparmio"
+    /// Migliorie d'uso 16: l'elenco «Dati per l'analisi» nato dalla capsula delle stime (lo stesso del dossier).
+    static let idStime = "stime-analisi360"
 
     static func id(_ a: AreaAnalisi) -> String {
         switch a {
@@ -90,8 +92,16 @@ struct PresentatoreAree360<Contenuto: View>: View {
     }
 
     private static func dettaglioIniziale(_ stato: StatoShell) -> StatoDettaglio {
-        if let a = RichiestaIstantaneaAnalisi360.per(stato)?.area {
-            return StatoDettaglio(aperto: DettagliAree360.id(a), misura: DettagliAree360.misura(a))
+        if let r = RichiestaIstantaneaAnalisi360.per(stato) {
+            #if os(macOS)
+            if r.stime {
+                return StatoDettaglio(aperto: DettagliAree360.idStime,
+                                      misura: QuadroDossier.misuraDati(stato.completezzaCliente(stato.clienteAttivoId)))
+            }
+            #endif
+            if let a = r.area {
+                return StatoDettaglio(aperto: DettagliAree360.id(a), misura: DettagliAree360.misura(a))
+            }
         }
         return SimulatoriAnalisiApple.dettaglioIniziale(stato)
     }
@@ -133,6 +143,19 @@ struct DettaglioArea360Apple: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
+        #if os(macOS)
+        if id == DettagliAree360.idStime {
+            // Migliorie d'uso 16: lo stesso elenco della riga «Dati per l'analisi» del dossier (DossierQuadro.swift)
+            DettaglioDatiAnalisiApple()
+        } else {
+            contenutoArea
+        }
+        #else
+        contenutoArea
+        #endif
+    }
+
+    @ViewBuilder private var contenutoArea: some View {
         if SimulatoriAnalisiApple.area(id: id) != nil {
             DettaglioSimulatoreAnalisiApple(id: id)
         } else if let c = stato.cliente(stato.clienteAttivoId), let area = DettagliAree360.area(id: id) {
@@ -149,21 +172,28 @@ struct DettaglioArea360Apple: View {
 }
 
 /// Ciò che una scena delle istantanee chiede ad Analisi 360 (Prisma --istantanee): il dettaglio Investimenti o
-/// Risparmio e liquidità già aperto. Vale solo per lo stato della scena (riferimento debole: le scene dopo non lo
-/// vedono).
+/// Risparmio e liquidità già aperto, o (sul Mac, migliorie d'uso 16) l'elenco dei dati nato dalla capsula delle
+/// stime. Vale solo per lo stato della scena (riferimento debole: le scene dopo non lo vedono).
 final class RichiestaIstantaneaAnalisi360 {
     nonisolated(unsafe) private static var attuale: RichiestaIstantaneaAnalisi360?
 
     private weak var stato: StatoShell?
-    let area: AreaAnalisi
+    let area: AreaAnalisi?
+    /// L'elenco «Dati per l'analisi» della capsula delle stime (solo Mac).
+    let stime: Bool
 
-    private init(stato: StatoShell, area: AreaAnalisi) {
+    private init(stato: StatoShell, area: AreaAnalisi?, stime: Bool) {
         self.stato = stato
         self.area = area
+        self.stime = stime
     }
 
     static func chiedi(_ s: StatoShell, area: AreaAnalisi) {
-        attuale = RichiestaIstantaneaAnalisi360(stato: s, area: area)
+        attuale = RichiestaIstantaneaAnalisi360(stato: s, area: area, stime: false)
+    }
+
+    static func chiediStime(_ s: StatoShell) {
+        attuale = RichiestaIstantaneaAnalisi360(stato: s, area: nil, stime: true)
     }
 
     static func per(_ s: StatoShell) -> RichiestaIstantaneaAnalisi360? {
@@ -219,10 +249,20 @@ struct Analisi360Apple: View {
                     testata(id)
                         .entrataCascata(Tema.Apple.Aree360.Tempi.indiceTestata, base: base)
                     // Le quattro aree o «Rispetto alle famiglie come la sua» (giro 6, FamiglieComeLaSua.swift)
-                    RigaVisteAnalisi360(vista: Bindable(stato).vistaAnalisi360, diProva: stato.tabelleFamiglie?.diProva ?? false,
-                                        modoCliente: stato.inModoCliente,
-                                        apriImpostazioni: { stato.apriImpostazioniFamiglie() })
-                        .padding(.top, d.testataSotto)
+                    HStack(alignment: .center, spacing: Tema.Apple.Aree360.Stime.spazioDalSegmentato) {
+                        RigaVisteAnalisi360(vista: Bindable(stato).vistaAnalisi360,
+                                            diProva: stato.tabelleFamiglie?.diProva ?? false,
+                                            modoCliente: stato.inModoCliente,
+                                            apriImpostazioni: { stato.apriImpostazioniFamiglie() })
+                        // Migliorie d'uso 16: l'unico avviso sulle stime, a destra (non in modalità cliente)
+                        if Tema.Apple.Aree360.Stime.unAvvisoSolo && !stato.inModoCliente,
+                           let k = stato.completezzaCliente(id) {
+                            AvvisoStimeAnalisi360(daCompletare: k.daCompletare.count) {
+                                dettaglio?.apri(DettagliAree360.idStime, misura: Self.misuraStime(k))
+                            }
+                        }
+                    }
+                    .padding(.top, d.testataSotto)
                         .entrataCascata(Tema.Apple.Aree360.Tempi.indiceTestata, base: base)
                     contenutoVista(id, misura: geo.size)
                         .padding(.top, Tema.Apple.Famiglie.sottoSegmentato)
@@ -316,7 +356,8 @@ struct Analisi360Apple: View {
                     .foregroundColor(t.coloreTitolo)
                     .lineLimit(1)
                     .minimumScaleFactor(0.8)
-                if let k = stato.completezzaCliente(id) {
+                // Migliorie d'uso 16: sul Mac le stime le dice solo la capsula nella riga del segmentato
+                if !Tema.Apple.Aree360.Stime.unAvvisoSolo, let k = stato.completezzaCliente(id) {
                     rigaCompletezza(k, cliente: id)
                         .padding(.top, t.completezzaSopra - t.spazioTitolo)
                 }
@@ -414,7 +455,10 @@ struct Analisi360Apple: View {
         let indice = t.indicePrimaArea + (AreaAnalisi.allCases.firstIndex(of: area) ?? 0)
         let sintesi = aree.sintesi(area) ?? SintesiArea360(area: area, frazione: nil, valore: nil, unita: .percentuale,
                                                           titolo: TestiAree360.nomeArea(area), testo: "")
-        let ipotesi = statoIpotesi(area, ingressi)
+        // Migliorie d'uso 16: sul Mac niente stato delle ipotesi sulle card (resta la riga dei canali)
+        let ipotesi = Tema.Apple.Aree360.Stime.unAvvisoSolo
+            ? (testo: "", colore: Tema.Apple.Aree360.Area.coloreDaVerificare)
+            : statoIpotesi(area, ingressi)
         return CardArea360Apple(area: area, sintesi: sintesi, statoIpotesi: ipotesi.testo, coloreStato: ipotesi.colore,
                                 numeroPriorita: ingressi.priorita.numero(area), aiutoPriorita: ingressi.aiutoPriorita,
                                 canali: canali(area, ingressi),
@@ -484,13 +528,24 @@ struct Analisi360Apple: View {
         dettaglio?.apri(DettagliAree360.id(area), misura: DettagliAree360.misura(area))
     }
 
+    /// La misura dell'elenco nato dalla capsula delle stime: la stessa dell'elenco del dossier (680 × 196 + 62 per voce).
+    private static func misuraStime(_ k: CompletezzaCliente) -> CGSize {
+        #if os(macOS)
+        return QuadroDossier.misuraDati(k)
+        #else
+        return Tema.Apple.Misura.DettaglioAperto.predefinito
+        #endif
+    }
+
     // MARK: Piede
 
     private func piede(_ id: String) -> some View {
         let p = Tema.Apple.Aree360.Piede.self
-        let ipotesi = stato.analisiSalvata(id)
-            ? "Ipotesi corrette per questo cliente; le coperture si leggono sempre dalle posizioni."
-            : "Ipotesi ricavate dalle posizioni in essere e dall'anagrafica: rivedile con il cliente."
+        // Migliorie d'uso 16: sul Mac la frase sulle ipotesi la dice la capsula delle stime; resta l'avvertenza sulle somme
+        let ipotesi = Tema.Apple.Aree360.Stime.unAvvisoSolo ? ""
+            : stato.analisiSalvata(id)
+                ? " Ipotesi corrette per questo cliente; le coperture si leggono sempre dalle posizioni."
+                : " Ipotesi ricavate dalle posizioni in essere e dall'anagrafica: rivedile con il cliente."
         return VStack(alignment: .leading, spacing: p.spazioRighe) {
             HStack(spacing: p.spazioPulsanti) {
                 Text("Strumenti")
@@ -506,7 +561,7 @@ struct Analisi360Apple: View {
                 Spacer(minLength: 0)
             }
             HStack(alignment: .center, spacing: p.spazioNota) {
-                Text("Le quattro aree leggono ipotesi dedicate allo stesso cliente. Capitale e versamenti possono sovrapporsi: verifica le allocazioni prima di sommare i piani. " + ipotesi)
+                Text("Le quattro aree leggono ipotesi dedicate allo stesso cliente. Capitale e versamenti possono sovrapporsi: verifica le allocazioni prima di sommare i piani." + ipotesi)
                     .carattereApple(p.nota)
                     .foregroundColor(p.coloreNota)
                     .fixedSize(horizontal: false, vertical: true)
@@ -557,6 +612,43 @@ struct Analisi360Apple: View {
             clienteMostrato = nuovo
             esce = false
         }
+    }
+}
+
+// MARK: - L'avviso sulle stime
+
+/// Migliorie d'uso 16: l'unico avviso sulle stime di Analisi 360, a destra nella riga del segmentato. «Stime in uso ·
+/// {n} dati da completare ›» in arancio (bordo arancio al 35%), o «✓ Nessuna stima: i dati ci sono tutti» in verde.
+/// Il numero è la lunghezza dello stesso elenco che apre (`daCompletare`), come la riga del dossier. Un clic apre
+/// l'elenco «Dati per l'analisi», che nasce dalla capsula.
+struct AvvisoStimeAnalisi360: View {
+    let daCompletare: Int
+    let apri: () -> Void
+
+    var body: some View {
+        let t = Tema.Apple.Aree360.Stime.self
+        let stime = daCompletare > 0
+        return Button(action: apri) {
+            HStack(spacing: t.spazioSimbolo) {
+                if !stime {
+                    Image(systemName: t.simboloNessunaStima)
+                }
+                Text(stime ? TestiCompletezza.avvisoStime(daCompletare) : TestiCompletezza.nessunaStima)
+                    .lineLimit(1)
+            }
+            .carattereApple(t.capsula)
+            .foregroundColor(stime ? t.testoStime : t.testoNessunaStima)
+            .padding(t.paddingCapsula)
+            .background(Capsule(style: .continuous).fill(t.fondo))
+            .overlay(Capsule(style: .continuous)
+                .strokeBorder(stime ? t.bordoStime : t.bordo, lineWidth: Tema.Apple.Misura.bordo))
+            .contentShape(Capsule(style: .continuous))
+        }
+        .buttonStyle(StileSemplice())
+        .fixedSize()
+        .help(TestiCompletezza.aiutoAvvisoStime)
+        .origineDettaglio(id: DettagliAree360.idStime)
+        .accessibilityElement(children: .combine)
     }
 }
 
@@ -705,7 +797,13 @@ private struct CardArea360Apple: View, Equatable {
         }
     }
 
-    private var testoStato: some View {
+    @ViewBuilder private var testoStato: some View {
+        if !statoIpotesi.isEmpty {
+            testoStatoPieno
+        }
+    }
+
+    private var testoStatoPieno: some View {
         Text(statoIpotesi)
             .carattereApple(Tema.Apple.Aree360.Area.stato)
             .foregroundColor(coloreStato)

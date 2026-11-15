@@ -143,6 +143,36 @@ extension Tema.Apple {
             static let collegamentoSopra: CGFloat = 12
         }
 
+        // MARK: Un solo avviso sulle stime (migliorie d'uso 16)
+
+        /// Migliorie d'uso 16 «Un solo avviso sulle stime»: sul Mac l'avviso sulle stime è una capsula sola, a destra
+        /// nella riga del segmentato delle due viste (`#anStime` del template: `.chip` 12,5 semibold, testo
+        /// `arancioTesto` e bordo arancio al 35%; verde con «✓ Nessuna stima…»), che apre lo stesso elenco «Dati per
+        /// l'analisi» del dossier. Spariscono la riga della completezza nella testata, lo stato delle ipotesi sulle card,
+        /// la frase sulle ipotesi nel piede e il blocco «Le ipotesi» della colonna. iPhone e iPad restano come prima
+        /// fino al loro aggiornamento.
+        enum Stime {
+            #if os(macOS)
+            static let unAvvisoSolo = true
+            #else
+            static let unAvvisoSolo = false
+            #endif
+            static let capsula = Carattere(dimensione: 12.5, peso: .semibold)
+            static let paddingCapsula = EdgeInsets(top: 7, leading: 14, bottom: 7, trailing: 14)
+            static let fondo = Colore.cardPiena
+            static let bordo = Colore.separatore
+            static let testoStime = Colore.arancioTesto
+            static let bordoStime = Color(r: 224, g: 138, b: 0, a: 0.35)
+            static let testoNessunaStima = Colore.verde
+            static let simboloNessunaStima = "checkmark"
+            static let spazioSimbolo: CGFloat = 6
+            /// La capsula sta a 12 dal segmentato (o dall'etichetta «di prova»).
+            static let spazioDalSegmentato: CGFloat = 12
+            /// La riga sotto ogni voce dell'elenco: `.k` 12,5 `inchiostro2`.
+            static let rigaVoce = Carattere.secondario
+            static let coloreRigaVoce = Colore.inchiostro2
+        }
+
         // MARK: Piede
 
         enum Piede {

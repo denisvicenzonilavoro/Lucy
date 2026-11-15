@@ -320,6 +320,9 @@ struct VoceDaCompletareApple: View {
     let completa: () -> Void
     let escludi: () -> Void
     let solaLettura: Bool
+    /// Migliorie d'uso 16: la riga sotto il titolo («Finché manca, Prisma usa una stima · pesa su …»), solo
+    /// nell'elenco nato dalla riga del quadro e dalla capsula di Analisi 360 (Mac); nil: nessuna riga.
+    var riga: String? = nil
 
     var body: some View {
         let p = Tema.Apple.Clienti.Panoramica.self
@@ -336,6 +339,14 @@ struct VoceDaCompletareApple: View {
                     .lineLimit(2)
                     .fixedSize(horizontal: false, vertical: true)
                     .help(voce.ipotesi.isEmpty ? voce.perche : voce.ipotesi)
+                if let riga {
+                    Text(riga)
+                        .carattereApple(Tema.Apple.Aree360.Stime.rigaVoce)
+                        .foregroundColor(Tema.Apple.Aree360.Stime.coloreRigaVoce)
+                        .lineLimit(2)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .help(voce.perche)
+                }
                 if let canale = voce.canale {
                     EtichettaCanaleApple(canale: canale, compatta: true)
                 }
