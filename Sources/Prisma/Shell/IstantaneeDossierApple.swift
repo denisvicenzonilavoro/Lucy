@@ -29,13 +29,14 @@ extension Istantanee {
         tutte += sceneArrivoObiettivi
         // Migliorie d'uso 17 «Le priorità in ordine: 1, 2, 3»: la scheda Bisogni di Marco, con la capsula della card di
         // Analisi 360 su ogni riga e la nota sull'ordine (vera per lui), chiara e scura
+        // (1075: il 1032 era già di «1032-da-fare-aggiungi», 1044 è previsto per un altro giro)
         let bisogni: (StatoShell) -> Void = { s in
             s.clienteAttivoId = "marco"
             s.schedaCliente = .bisogni
             s.apri(.clienti)
         }
-        tutte += [(nome: "1032-uso-dossier-bisogni", prepara: bisogni),
-                  (nome: "1032-uso-dossier-bisogni-scuro", prepara: bisogni)]
+        tutte += [(nome: "1075-uso-dossier-bisogni", prepara: bisogni),
+                  (nome: "1075-uso-dossier-bisogni-scuro", prepara: bisogni)]
         // Migliorie d'uso 11 «Il dossier ha un indice»: l'indice di Marco su Panoramica, con i numeri di Panoramica,
         // Obiettivi, Documenti e In regola (chiara e scura), e Giulia su Documenti, una sezione che prima stava in «Altro».
         // (1028-1029: 1020-1022 sono già della barra del cliente, migliorie d'uso 2)

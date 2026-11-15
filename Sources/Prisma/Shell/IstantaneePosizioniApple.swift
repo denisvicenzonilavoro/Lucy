@@ -27,7 +27,7 @@ extension Istantanee {
     /// Migliorie d'uso 15 «La scheda di una posizione si legge dall'alto»: l'ETF di Giulia su «In breve» (frase, cifre,
     /// grafico, «Se si chiudesse oggi», chiara e scura); il piano rivalutabile di Giulia con cinque dati tolti, sulla
     /// scheda «Contratto» (righe piene e «Da completare · 5»); il piano previdenziale di Giulia in proposta, presentato da
-    /// 50 giorni: tre pulsanti e la scheda «Adeguatezza». (1050-1052: 1027-1029 della specifica erano già presi)
+    /// 50 giorni: tre pulsanti e la scheda «Adeguatezza». (1072-1074: 1027-1029 della specifica e 1050-1058 erano già presi o previsti)
     nonisolated private static var sceneSchedaPosizione: [(nome: String, prepara: (StatoShell) -> Void)] {
         let etf: (StatoShell) -> Void = { s in
             s.clienteAttivoId = "giulia"
@@ -36,9 +36,9 @@ extension Istantanee {
             s.apri(.posizioni)
         }
         return [
-            ("1050-uso-posizione-in-breve", etf),
-            ("1050-uso-posizione-in-breve-scuro", etf),
-            ("1051-uso-posizione-contratto", { s in
+            ("1072-uso-posizione-in-breve", etf),
+            ("1072-uso-posizione-in-breve-scuro", etf),
+            ("1073-uso-posizione-contratto", { s in
                 let id = "pos-giulia-piano-di-risparmio-rivalutabile"
                 if let i = s.dati.posizioni.firstIndex(where: { $0.id == id }) {
                     s.dati.posizioni[i].numeroContratto = ""
@@ -53,7 +53,7 @@ extension Istantanee {
                 s.apri(.posizioni)
                 s.ancoraPosizioni = "dettaglio-contratto"
             }),
-            ("1052-uso-proposta", { s in
+            ("1074-uso-proposta", { s in
                 preparaPortafoglioApple(s)
                 s.clienteAttivoId = "giulia"
                 s.portafoglio = false

@@ -47,6 +47,8 @@ enum Istantanee {
             s.clienteAttivoId = "marco"
             s.posizioneInDettaglio = "pos-marco-infortuni-famiglia"
             s.apri(.posizioni)
+            // Migliorie d'uso 15: sul Mac il quadro della copertura sta nella scheda «La copertura»
+            s.ancoraPosizioni = "dettaglio-costi"
         }),
         ("11-agenda", { s in
             // Il giorno con il dettaglio dell'appuntamento (la vista predefinita è il mese; nel tema Apple la

@@ -374,7 +374,7 @@ più scoperta: la ruota dei bisogni è vuota». La scheda Bisogni mette su ogni 
 Protezione», la stessa per due bisogni della stessa area) e sotto la nota del template solo quando le numerazioni
 coincidono, altrimenti «Sulle schede di Analisi 360 due bisogni della stessa area contano una volta.»; con la ruota vuota
 nessuna nota. Tutto solo sul Mac (`Area.numeraPriorita`): iPhone e iPad tengono «★ Priorità» (stesse aree, senza
-ripiego). Prova in `--prova-calcoli` (`ProvaCalcoliPrioritaAree360`), istantanea nuova `1032-uso-dossier-bisogni` (chiara
+ripiego). Prova in `--prova-calcoli` (`ProvaCalcoliPrioritaAree360`), istantanea nuova `1075-uso-dossier-bisogni` (chiara
 e scura).
 
 Resta:
@@ -408,10 +408,8 @@ Resta:
 - **La sfumatura in fondo all'indice** (come le altre colonne): il tema non ha ancora un modificatore comune; l'indice
   scorre senza indicatori e senza sfumatura.
 - **«La tua rubrica» con le quattro cifre e il «Da fare»** (Tutti i clienti, miglioria 2 §2.3 punto 7) non è in questo giro.
-- **Numerazione delle istantanee**: «1032-uso-dossier-bisogni» (miglioria 17) usa lo stesso numero di
-  «1032-da-fare-aggiungi» (miglioria 3); i nomi sono diversi, ma conviene riallineare.
 - **Istantanee**: rigenerare sul Mac 430 e -scuro, 431-clienti-panoramica-apple, 431-clienti-dossier-in-regola, 432, 433,
-  434, 1023, 1032, 1050-1052 e le nuove 1028-1029; controllare che il nome lungo si tagli nella testa dell'indice e che
+  434, 1023, 1075, 1050-1052 e le nuove 1028-1029; controllare che il nome lungo si tagli nella testa dell'indice e che
   con la finestra stretta compaia «Sezione: … ⌄». `--prova-fluidita`: guardare i corpi di `IndiceDossierApple` nel passo di
   Clienti (i conti sono in `ricavato`).
 
@@ -441,7 +439,7 @@ Resta:
   tolgono con il giro dell'iPad.
 - **Le altre app**: le azioni della riga in testa delle altre app passano ancora alla sola icona quando lo spazio manca
   (`TestaFinestra`, miglioria 4); «sempre con il nome» qui vale solo per il dossier.
-- **Istantanee**: rigenerare sul Mac tutte le scene del dossier (430-434, 1023, 1028-1029, 1032, 1050-1052) e le nuove
+- **Istantanee**: rigenerare sul Mac tutte le scene del dossier (430-434, 1023, 1028-1029, 1075, 1050-1052) e le nuove
   1036-1037; controllare che nella stretta compaia «Altro ⌄» con le azioni intere e che il titolo lungo non spinga fuori
   «Prospetti»; la scena del report di fine anno (`IstantaneeAnnoInsieme`) parte da Prospetti e non tocca la testata.
   `--prova-fluidita`: guardare i corpi di `RigaTestaDossier` (legge solo il cliente attivo e la vista di Clienti).
@@ -533,9 +531,9 @@ ci sono ancora, ognuna nella sua scheda. Contratto: le sole righe piene e «Da c
 completare · … · Vedi ›». Le ancore «dettaglio-…» scelgono la scheda e poi scorrono al giro dopo (nuove «dettaglio-costi»
 e «dettaglio-contratto»). `PillolaStato` sul Mac dice «Scade tra {n} giorni» e «Debito». Esc nella scheda fa un passo
 indietro (EscFinestra.swift, dopo i pulsanti con Esc della finestra). Token in `Tema.Apple.Posizioni.SchedaDettaglio`.
-Prova `ProvaCalcoliDettaglioPosizione` in `--prova-calcoli`. Istantanee nuove 1050-uso-posizione-in-breve (chiara e
-scura), 1051-uso-posizione-contratto, 1052-uso-proposta (1027-1029 della specifica erano già presi); 92, 94, 119 e 121
-aprono ora la scheda giusta. Nessun campo d'archivio nuovo.
+Prova `ProvaCalcoliDettaglioPosizione` in `--prova-calcoli`. Istantanee nuove 1072-uso-posizione-in-breve (chiara e
+scura), 1073-uso-posizione-contratto, 1074-uso-proposta (1027-1029 della specifica e 1050-1058 erano già presi o previsti); 10, 92,
+94, 119 e 121 aprono ora la scheda giusta. Nessun campo d'archivio nuovo.
 
 Resta:
 - **«Completa i dati» sul primo campo vuoto**: apre «Modifica», ma `ModuloPosizione` non legge `\.fuocoModulo` (lo imposta
@@ -551,4 +549,4 @@ Resta:
 - **Esc da verificare sul Mac vero**: che il passo indietro scatti con il fuoco fuori dalla scheda e non con un foglio
   aperto (alert di «Elimina», modulo).
 - **Istantanee e prove sul Mac**: rigenerare 8, 10, 91-94, 106, 119, 121, 235 e le scene con le ancore «dettaglio-…»,
-  più le nuove 1050-1052; aggiornare la pagina delle anteprime.
+  più le nuove 1072-1074; aggiornare la pagina delle anteprime.

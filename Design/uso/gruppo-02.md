@@ -947,7 +947,7 @@ Nessun campo nuovo. La ruota dei bisogni è già nel file del cliente (`Cliente.
 ### 17.5 Istantanee e prove
 
 - Aggiornare `440-analisi360-apple` e `-scuro`, `99-analisi360-pensione`, `300`, `301` (le card con «Priorità n»).
-- Nuova `1032-uso-dossier-bisogni` (Marco, sezione Bisogni con la nota sull'ordine).
+- Nuova `1075-uso-dossier-bisogni` (era 1032, già preso) (Marco, sezione Bisogni con la nota sull'ordine).
 - `--prova-calcoli`: un caso con due bisogni sulla stessa area (famiglia e salute in testa) → «Priorità 1»
   Protezione, «Priorità 2» l'area del terzo bisogno, nessuna «Priorità 3», mai due capsule uguali; un caso senza ruota
   (fallback dall'area più scoperta, se l'utente lo approva).
