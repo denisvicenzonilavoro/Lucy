@@ -8,7 +8,7 @@ import SwiftUI
 extension Tema.Apple.Colore {
     /// Il testo arancio delle pillole (la pillola «Senza Mac · copia cifrata»): `#B45309` in chiaro; in scuro un arancio
     /// più chiaro (`#F5A84B`), perché `#B45309` sul fondo arancio al 16% del vetro scuro non si legge.
-    static let arancioTesto = Color.dinamico(chiaro: Color(hex: "#B45309"), scuro: Color(hex: "#F5A84B"))
+    static let arancioTestoPillola = Color.dinamico(chiaro: Color(hex: "#B45309"), scuro: Color(hex: "#F5A84B"))
 }
 
 extension Tema.Apple {
@@ -128,7 +128,7 @@ extension Tema.Apple {
             /// Padding 3×8, capsula, fondo arancio al 16%, testo `#B45309` 10,5.
             static let padding = Misura.padding(3, 8)
             static let fondo = Colore.arancio.opacity(0.16)
-            static let testo = Colore.arancioTesto
+            static let testo = Colore.arancioTestoPillola
             static let carattere = Carattere(dimensione: 10.5, peso: .semibold)
             /// Nella barra di iPhone e iPad: un filo più grande, alta quanto il marchio.
             static let carattereBarra = Carattere(dimensione: 12, peso: .semibold)
