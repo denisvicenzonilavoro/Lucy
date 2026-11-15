@@ -534,10 +534,21 @@ enum ProvaProspetti {
             stato.sceltaFascicolo = [.resoconto, .patrimonio, .successione]
             let parti = [SceltaProspetto.resoconto(report: true), .patrimonio(report: true), .successione(report: true)].compactMap { stato.documentoProspetto($0) }
             if let d = stato.documentoFascicolo(), let pdf = StampaCarta.pdf(d), let documento = PDFDocument(data: pdf) {
-                let attese = 2 + parti.reduce(0) { $0 + $1.pagine.count }
-                verifica("fascicolo-marco: \(attese) pagine (copertina, indice, tre report)", documento.pageCount == attese, "\(documento.pageCount) pagine")
+                let attese = StatoShell.pagineAperturaFascicolo(parti.count) + parti.reduce(0) { $0 + $1.pagine.count }
+                verifica("fascicolo-marco: \(attese) pagine (copertina con l'indice e tre report)", documento.pageCount == attese, "\(documento.pageCount) pagine")
                 let testo = spazi(StampaCarta.testo(pdf).joined(separator: "\n"))
                 verifica("fascicolo-marco: l'indice elenca i documenti", parti.allSatisfy { testo.contains(spazi($0.titolo)) })
+                #if os(macOS)
+                // Migliorie d'uso 70: l'indice sta sulla copertina, la prima voce comincia a pagina 2 e le pagine dei
+                // report sono quelle contate dalla scheda
+                let primaPagina = spazi(StampaCarta.testo(pdf).first ?? "")
+                verifica("fascicolo-marco: l'indice è sulla copertina, nell'ordine scelto",
+                         StatoShell.indiceInCopertina(parti.count)
+                         && primaPagina.lowercased().contains(TestiFascicolo.dentro.lowercased())
+                         && Self.inOrdine(parti.map { spazi($0.titolo) }, in: primaPagina), primaPagina)
+                verifica("fascicolo-marco: le pagine dei report contate come nel PDF",
+                         [TipoProspetto.resoconto, .patrimonio, .successione].map { stato.pagineFascicolo($0) ?? -1 } == parti.map(\.pagine.count))
+                #endif
                 if let cartella { try? pdf.write(to: cartella.appendingPathComponent("fascicolo-marco.pdf")) }
             } else {
                 verifica("fascicolo-marco: PDF creato", false)
@@ -545,9 +556,15 @@ enum ProvaProspetti {
             // Dall'Agenda: i report adatti all'incontro, la data nel titolo, l'archivio per appuntamento
             if let a = stato.appuntamenti.first(where: { $0.clienteId == "marco" && $0.stato == .pianificato }) {
                 stato.preparaFascicolo(per: a)
+                #if os(macOS)
+                // Migliorie d'uso 70: Prospetti si apre con la scheda del fascicolo, non con la voce
+                let apreIlFascicolo = stato.fascicoloDaAprire && stato.prospetto == .fascicolo
+                #else
+                let apreIlFascicolo = stato.prospetto == .fascicolo
+                #endif
                 verifica("Fascicolo dall'Agenda: report scelti dal tipo d'incontro",
                          stato.sceltaFascicolo == TipoProspetto.perIncontro(a, posizione: a.posizioneId.flatMap { id in stato.posizioni.first { $0.id == id } })
-                         && stato.prospetto == .fascicolo)
+                         && apreIlFascicolo)
                 if let d = stato.documentoFascicolo(), let pdf = StampaCarta.pdf(d) {
                     verifica("Fascicolo dall'Agenda: la data dell'incontro nel titolo", d.titolo == StatoShell.titoloFascicolo(a.inizio))
                     stato.archiviaProspetto(pdf, documento: d)
@@ -559,6 +576,9 @@ enum ProvaProspetti {
             verifica("Fascicolo del primo incontro: c'è il check-up", TipoProspetto.perIncontro(primo, posizione: nil).contains(.checkUp))
             stato.sceltaFascicolo = []
             verifica("Fascicolo vuoto: nessun documento", stato.documentoFascicolo() == nil)
+            #if os(macOS)
+            provaFascicoloPerCliente(verifica)
+            #endif
         }
 
         // Sostituzione o confronto: prospetto e report per ogni cliente con una coppia da confrontare
@@ -642,6 +662,64 @@ enum ProvaProspetti {
         print("ERRORE: \(errori) verifiche non riuscite")
         return 1
     }
+
+    /// I testi compaiono tutti, uno dopo l'altro, nel testo (migliorie d'uso 70: l'indice del fascicolo).
+    static func inOrdine(_ testi: [String], in testo: String) -> Bool {
+        var resto = testo[...]
+        for t in testi {
+            guard let r = resto.range(of: t) else { return false }
+            resto = resto[r.upperBound...]
+        }
+        return true
+    }
+
+    #if os(macOS)
+    /// Migliorie d'uso 70: la scelta del fascicolo è di ogni cliente, con il suo ordine e il suo appuntamento.
+    static func provaFascicoloPerCliente(_ verifica: (String, Bool, String) -> Void) {
+        let stato = StatoShell(persistente: false)
+        stato.clienteAttivoId = "marco"
+        stato.sceltaFascicolo = [.resoconto, .costi]
+        stato.clienteAttivoId = "giulia"
+        verifica("Fascicolo per cliente: Giulia parte dalla scelta predefinita",
+                 stato.sceltaFascicolo == TipoProspetto.fascicoloPredefinito, "")
+        stato.clienteAttivoId = "marco"
+        verifica("Fascicolo per cliente: tornando a Marco la sua scelta è rimasta", stato.sceltaFascicolo == [.resoconto, .costi], "")
+        // L'ordine: «Il costo» sale sopra «Resoconto» (fra i report che Marco ha), e il documento lo segue
+        let visibili = stato.ordineFascicolo.filter { stato.pagineFascicolo($0) != nil }
+        var scelta = stato.sceltaFascicoloCompleta
+        for _ in 0..<TipoProspetto.inFascicolo.count {
+            guard let i = scelta.inOrdine.firstIndex(of: .costi), i > 0 else { break }
+            scelta.sposta(.costi, di: -1, visibili: visibili)
+        }
+        stato.sceltaFascicoloCompleta = scelta
+        verifica("Fascicolo per cliente: le frecce cambiano l'ordine", stato.reportFascicolo == [.costi, .resoconto],
+                 stato.reportFascicolo.map(\.rawValue).joined(separator: ", "))
+        if let d = stato.documentoFascicolo(), let costi = stato.documentoProspetto(.costi(report: true)) {
+            let n = stato.reportPresentiFascicolo.count
+            verifica("Fascicolo per cliente: le pagine sono la copertina più i report",
+                     d.pagine.count == StatoShell.pagineAperturaFascicolo(n) + stato.reportPresentiFascicolo.reduce(0) { $0 + (stato.pagineFascicolo($1) ?? 0) }
+                     && (stato.pagineFascicolo(.costi) ?? 0) == costi.pagine.count, "\(d.pagine.count) pagine")
+        } else {
+            verifica("Fascicolo per cliente: documento composto", false, "")
+        }
+        // Spostare il primo in su non fa niente
+        var ferma = stato.sceltaFascicoloCompleta
+        let prima = ferma.ordine
+        ferma.sposta(ferma.ordine.first { visibili.contains($0) } ?? .resoconto, di: -1, visibili: visibili)
+        verifica("Fascicolo per cliente: il primo non sale oltre la cima", ferma.ordine == prima, "")
+        // L'appuntamento resta al suo cliente, anche cambiando cliente e tornando
+        if let a = stato.appuntamenti.first(where: { $0.clienteId == "marco" && $0.stato == .pianificato }) {
+            stato.preparaFascicolo(per: a)
+            stato.clienteAttivoId = "giulia"
+            let diGiulia = stato.fascicoloAppuntamento
+            stato.clienteAttivoId = "marco"
+            verifica("Fascicolo per cliente: l'appuntamento resta a Marco", diGiulia == nil && stato.fascicoloAppuntamento == a.id, "")
+        }
+        verifica("Fascicolo: con otto report l'indice sta sulla copertina, con nove torna la pagina",
+                 StatoShell.indiceInCopertina(8) && !StatoShell.indiceInCopertina(9)
+                 && StatoShell.pagineAperturaFascicolo(3) == 1, "")
+    }
+    #endif
 
     static func spazi(_ s: String) -> String {
         // Le legature tipografiche (ﬁ, ﬃ…) tornano lettere separate: "autosufficienza" resta cercabile

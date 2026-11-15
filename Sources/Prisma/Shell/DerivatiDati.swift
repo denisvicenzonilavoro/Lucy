@@ -51,7 +51,8 @@ final class DerivatiDati {
         let cliente: String
         let orizzonteConfronto: Int?
         let orizzonteSostituzione: Int?
-        let fascicolo: Set<TipoProspetto>
+        /// I report del fascicolo spuntati, nell'ordine scelto (migliorie d'uso 70: l'ordine cambia il documento).
+        let fascicolo: [TipoProspetto]
         let appuntamento: String?
         let ora: Int
     }
@@ -517,7 +518,7 @@ extension StatoShell {
         let k = DerivatiDati.ChiaveDocumento(scelta: scelta, note: DerivatiDati.leggeLeNote(scelta) ? versioneNote : 0,
                                              prospetto: prospetto, cliente: clienteAttivoId,
                                              orizzonteConfronto: orizzonteConfronto, orizzonteSostituzione: orizzonteSostituzione,
-                                             fascicolo: sceltaFascicolo, appuntamento: fascicoloAppuntamento, ora: DerivatiDati.ora())
+                                             fascicolo: reportFascicolo, appuntamento: fascicoloAppuntamento, ora: DerivatiDati.ora())
         if let i = d.documenti.lastIndex(where: { $0.chiave == k }) {
             if i == d.documenti.count - 1 || !DerivatiDati.soloSeUltimo(scelta) {
                 // Il più recente va in fondo; il numero è quello della sua impaginazione

@@ -240,6 +240,9 @@ extension Tipo {
         static let copertinaRuolo = Documento.sf(9)
         static let copertinaEtichetta = Documento.sf(7.5, grassetto: true)
         static let copertinaValore = sf(14)
+        /// L'indice sulla copertina del fascicolo (migliorie d'uso 70): il titolo del report e la sua pagina.
+        static let indiceCopertina = sf(10.5)
+        static let paginaIndiceCopertina = Documento.sf(9)
         static let occhiello = Documento.sf(7, grassetto: true)
         static let titoloSlide = sf(23)
         static let sottotitoloSlide = Documento.sf(10)
@@ -300,6 +303,11 @@ extension Misure {
         /// Righe al massimo nelle tabelle dei documenti a pagina fissa (oltre: «…e altre N», l'elenco intero è in Posizioni).
         static let righeTabellaFissa = 9
         static let schedeReport = 4
+        /// Migliorie d'uso 70: l'indice entra nella copertina del fascicolo fino a 8 report (oltre resta la pagina
+        /// dell'indice, decisione 70-b); il riquadro «Dentro» è largo 280, le righe alte almeno 20.
+        static let vociIndiceCopertina = 8
+        static let larghezzaIndiceCopertina: CGFloat = 280
+        static let rigaIndiceCopertina: CGFloat = 20
         static let puntiReport = 5
     }
 }

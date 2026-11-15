@@ -1774,6 +1774,8 @@ enum Istantanee {
         tutteLeScene += sceneNoteDossier
         // Migliorie d'uso 69: il TFR, prima la risposta (IstantaneeTFRUso.swift)
         tutteLeScene += sceneTFRUso
+        // Migliorie d'uso 70: il fascicolo si compone a vista (IstantaneeFascicoloUso.swift)
+        tutteLeScene += sceneFascicoloUso
         tutteLeScene += sceneAgendaApple
         // Migliorie d'uso 21: l'elenco di Incontri (IstantaneeElencoIncontri.swift)
         tutteLeScene += sceneElencoIncontri

@@ -174,10 +174,14 @@ enum VoceConfronto: Hashable {
     /// Il gruppo delle Impostazioni a cui scorrere dentro la pagina (`"impostazioni-occasioni"` in Promemoria e
     /// occasioni; `"impostazioni-conformita"` porta alla pagina Conformità); si consuma appena raggiunto.
     var ancoraImpostazioni: String?
-    /// I report spuntati per il fascicolo dell'incontro (per la sessione).
-    var sceltaFascicolo: Set<TipoProspetto> = TipoProspetto.fascicoloPredefinito
-    /// L'appuntamento per cui si prepara il fascicolo (dà la data e il tipo d'incontro alla copertina).
-    var fascicoloAppuntamento: String?
+    /// Il fascicolo dell'incontro (per la sessione, mai nell'archivio): report spuntati, ordine e appuntamento. Sul Mac
+    /// (migliorie d'uso 70, decisione 70-a) uno per cliente; su iPhone e iPad uno solo per tutti (chiave vuota).
+    /// Si legge e si scrive con `sceltaFascicolo`, `fascicoloAppuntamento` e `ordineFascicolo` (Fascicolo.swift).
+    var fascicoli: [String: SceltaFascicolo] = [:]
+    #if os(macOS)
+    /// Migliorie d'uso 70: Prospetti apre la scheda «Il fascicolo dell'incontro» appena si vede (si consuma).
+    var fascicoloDaAprire = false
+    #endif
     /// Il documento mostrato a tutto schermo all'incontro (nil se non si presenta).
     var presentazione: Presentazione? {
         didSet { aggiornaMenu(); presentazioneCambiata.send(presentazione != nil) }
@@ -1070,7 +1074,10 @@ enum VoceConfronto: Hashable {
             // Il fascicolo preparato per l'appuntamento di un cliente non segue un altro cliente
             // e lo scenario «E se…?» lasciato a metà non prende la risposta pensata per un altro cliente
             if newValue != dati.clienteAttivoId {
+                #if !os(macOS)
+                // Sul Mac il fascicolo è già per cliente (migliorie d'uso 70): l'appuntamento resta al suo cliente
                 fascicoloAppuntamento = nil
+                #endif
                 scenarioInSospeso = nil
                 // Migliorie d'uso 59: il copione è dell'esperienza vissuta con un cliente
                 if sala.copioneAperto { sala.copioneAperto = false }
@@ -2029,6 +2036,11 @@ enum VoceConfronto: Hashable {
     /// Apre Prospetti e report su una scelta precisa (dal dettaglio di una posizione o da Confronti).
     func apriProspetto(_ scelta: SceltaProspetto) {
         prospetto = scelta
+        #if os(macOS)
+        // Migliorie d'uso 70: il fascicolo non è più una voce dell'elenco; Prospetti si apre con la sua scheda sopra
+        // il documento del fascicolo (non in modalità cliente, dove la scheda non si apre)
+        if case .fascicolo = scelta, !inModoCliente, clienteAttivo != nil { fascicoloDaAprire = true }
+        #endif
         apri(.presentazioni)
     }
 

@@ -191,6 +191,76 @@ extension Tema.Apple {
             static let vuotoLarghezza: CGFloat = 380
         }
 
+        // MARK: Il fascicolo che si compone a vista (migliorie d'uso 70, Mac)
+
+        /// La scheda «Il fascicolo dell'incontro» (Shell/ComponiFascicolo.swift): dettaglio 1080×640 che nasce dalla card,
+        /// due colonne (l'elenco e l'anteprima vera della copertina, larga 470) a 26 l'una dall'altra.
+        enum Fascicolo {
+            static let misuraDettaglio = CGSize(width: 1080, height: 640)
+            static let occhiello = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            /// Il titolo 26 bold con tracking −0,5, 4 sotto l'occhiello e 18 sopra le colonne.
+            static let titolo = Carattere(dimensione: 26, peso: .bold, tracking: -0.5)
+            static let coloreTitolo = Colore.inchiostro
+            static let sottoOcchiello: CGFloat = 4
+            static let sopraColonne: CGFloat = 18
+            static let larghezzaAnteprima: CGFloat = 470
+            static let spazioColonne: CGFloat = 26
+            /// «Cosa c'è dentro»: l'etichetta e 8 sotto.
+            static let etichetta = Carattere.etichetta
+            static let coloreEtichetta = Colore.inchiostro2
+            static let sottoEtichetta: CGFloat = 8
+            /// Una riga: padding 9×4, filetto sotto; nome 14,5 semibold (grigio se tolto), sotto 12 `inchiostro2`.
+            static let paddingRiga = Misura.padding(9, 4)
+            static let spazioRiga: CGFloat = 10
+            static let nome = Carattere(dimensione: 14.5, peso: .semibold)
+            static let coloreNome = Colore.inchiostro
+            static let coloreNomeTolto = Colore.inchiostro3
+            static let sotto = Carattere(dimensione: 12, peso: .regular)
+            static let coloreSotto = Colore.inchiostro2
+            static let coloreIncontro = Laterale.testoEtichettaIncontro
+            static let pagine = Carattere(dimensione: 12, peso: .medium, tabellare: true)
+            static let colorePagine = Colore.inchiostro2
+            static let filetto = Colore.separatore
+            static let spessoreFiletto: CGFloat = 0.5
+            /// La spunta della riga (accesa nell'accento, spenta col bordo).
+            static let spunta: CGFloat = 18
+            static let raggioSpunta: CGFloat = 5
+            static let fondoSpunta = Colore.accento
+            static let bordoSpunta = Colore.inchiostro3
+            static let segnoSpunta = Carattere(dimensione: 10, peso: .bold)
+            static let coloreSegnoSpunta = Color.white
+            static let spessoreBordoSpunta: CGFloat = 1.5
+            static let opacitaSpuntaFissa: Double = 0.45
+            /// Le frecce dell'ordine: 24×24, raggio 8, 2 fra l'una e l'altra.
+            static let freccia: CGFloat = 24
+            static let raggioFreccia: CGFloat = 8
+            static let spazioFrecce: CGFloat = 2
+            static let carattereFreccia = Carattere(dimensione: 11, peso: .semibold)
+            static let fondoFreccia = Colore.chip
+            static let opacitaFrecciaSpenta: Double = 0.35
+            /// La nota sotto l'elenco.
+            static let nota = Carattere.secondario
+            static let coloreNota = Colore.inchiostro2
+            static let sopraNota: CGFloat = 10
+            /// L'anteprima: la copertina vera su fondo `chip`, raggio 16.
+            static let fondoAnteprima = Colore.chip
+            static let raggioAnteprima: CGFloat = 16
+            static let paddingAnteprima: CGFloat = 12
+            static let ombraCarta = Color(r: 0, g: 0, b: 0, a: 0.16)
+            static let raggioOmbraCarta: CGFloat = 8
+            /// «3 report · 9 pagine» 14 semibold e «con la copertina» 12, 10 sotto l'anteprima.
+            static let somma = Carattere(dimensione: 14, peso: .semibold, tabellare: true)
+            static let coloreSomma = Colore.inchiostro
+            static let sopraSomma: CGFloat = 10
+            static let spazioSomma: CGFloat = 8
+            /// Oltre dieci pagine la pillola arancio «Tante da leggere a casa».
+            static let pagineTante = 10
+            /// La fila in fondo: 16 sopra, 10 fra i pulsanti.
+            static let sopraFila: CGFloat = 16
+            static let spazioFila: CGFloat = 10
+        }
+
         // MARK: Sala della presentazione (§4.5.3)
 
         enum Sala {

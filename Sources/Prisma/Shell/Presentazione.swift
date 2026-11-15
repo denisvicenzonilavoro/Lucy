@@ -26,6 +26,8 @@ struct Presentazione {
     /// «Prospetto» o «Report», e il tipo del documento: servono al tavolo con l'iPad (la presa visione in Documenti).
     var genere = "Prospetto"
     var tipoDocumento: Documento.Tipo = .prospetto
+    /// Migliorie d'uso 70: la parola dopo il contatore («1 di 3 · fascicolo»); nil = solo «1 di 3».
+    var etichettaContatore: String?
     #if os(macOS)
     /// La finestra messa a tutto schermo: all'uscita si rimette com'era quella, non la finestra in primo piano.
     var finestra: NSWindow?
@@ -304,6 +306,12 @@ struct VistaPresentazione: View {
             .padding(.horizontal, s.margineLati)
     }
 
+    /// «2 di 5», o «2 di 5 · fascicolo» per il fascicolo dell'incontro (migliorie d'uso 70).
+    private var contatore: String {
+        guard let e = p.etichettaContatore else { return "\(p.pagina + 1) di \(p.pagine.count)" }
+        return TestiFascicolo.contatore(p.pagina + 1, di: p.pagine.count, etichetta: e)
+    }
+
     private var comandi: some View {
         let s = Tema.Apple.Prospetti.Sala.self
         let ultima = p.pagine.count - 1
@@ -311,7 +319,7 @@ struct VistaPresentazione: View {
             FrecciaSalaApple(simbolo: "chevron.left", aiuto: "Pagina precedente") { stato.paginaPrecedente() }
                 .keyboardShortcut(.leftArrow, modifiers: [])
                 .disabled(p.pagina == 0)
-            Text("\(p.pagina + 1) di \(p.pagine.count)")
+            Text(contatore)
                 .carattereApple(s.contatore)
                 .foregroundColor(s.testo)
                 .frame(minWidth: s.larghezzaContatore)

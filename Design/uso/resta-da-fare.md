@@ -2304,3 +2304,32 @@ Resta:
   PDF).
 - **Istantanee**: rigenerare sul Mac e guardare 204, 207, 208 e 1408-1410 (chiare e scure), e aggiornare la pagina delle
   anteprime.
+
+## 70. Il fascicolo si compone a vista
+
+Fatto (solo Mac): la card «Fascicolo dell'incontro» di Prospetti apre la scheda «Il fascicolo dell'incontro», un
+dettaglio del tema 1080×640 che nasce dalla card (`Shell/ComponiFascicolo.swift`, `PresentatoreFascicoloMac`); la apre
+anche `apriProspetto(.fascicolo)` (Agenda, «Preparami l'incontro», Pratiche, Vera) con `stato.fascicoloDaAprire`, sopra
+il documento del fascicolo. A sinistra la copertina fissa e i report che il cliente ha, nell'ordine scelto, con la spunta,
+la riga «a cosa serve», «per l'incontro di oggi» (stessa regola della miglioria 23), le pagine vere e le frecce; a destra
+la prima pagina vera del PDF (la copertina con l'indice) e la somma, con «Tante da leggere a casa» oltre dieci pagine; la
+fila «Salva il PDF · n pagine» (seconda lettura e archivio nei Documenti), «Mostra al cliente» (dalla copertina, decisione
+70-c, con «1 di n · fascicolo») e «Altro ⌄» (salva in un'altra cartella con la password, stampa). La scelta è per
+cliente, in memoria (`StatoShell.fascicoli`, `SceltaFascicolo`, decisione 70-a); su iPhone e iPad resta una sola. Sul Mac
+l'indice va sulla copertina (riquadro «Dentro» di `CopertinaReport`) fino a 8 report e la pagina dell'indice sparisce
+(decisione 70-b). Testi in `Motori/TestiFascicolo.swift`, token in `Tema.Apple.Prospetti.Fascicolo` e
+`Misure.Documento`/`Tipo.Report`. Prove in `--prova-prospetti` (`provaFascicoloPerCliente`, indice sulla copertina, pagine),
+`ProvaAnnoInsieme` aggiornata; istantanee 81-fascicolo-scuro, 1411, 1412 nuove, la 81, la 82 e la 460 cambiano da sole.
+
+Resta:
+- **⌥↑ / ⌥↓ sulla riga a fuoco**: le righe non prendono il fuoco della tastiera; l'ordine si cambia solo con le frecce.
+- **«1413-uso-fascicolo-un-report»**: con i motori di oggi ogni cliente di prova ha più report pronti (check-up,
+  liquidità, patrimonio… si impaginano sempre), quindi il caso «un solo report» non si vede con i dati di prova. Il testo
+  c'è (`TestiFascicolo.unSoloReport`); serve un cliente di prova adatto o una scena con dati costruiti.
+- **Prova di carico** («spuntare una riga non impagina altro che la copertina»): non aggiunta a `--prova-carico`; la
+  scheda impagina tutti i report del cliente alla prima apertura (per contare le pagine, nella cache `fascicolo|…`):
+  se su M1 l'apertura si sente lenta, contare le pagine in un secondo passaggio con un segnaposto «— pagine».
+- **La card dopo la chiusura**: chiusa la scheda aperta dall'Agenda, l'anteprima di Prospetti resta sul documento del
+  fascicolo (con le azioni di sempre); nessuna voce dell'elenco è scelta. Valutare guardando le istantanee.
+- **Istantanee**: rigenerare sul Mac e guardare 81, 81-scuro, 82, 460, 1411 e 1412 (l'indice sulla copertina: righe,
+  misure e se 8 voci entrano davvero) e aggiornare la pagina delle anteprime.

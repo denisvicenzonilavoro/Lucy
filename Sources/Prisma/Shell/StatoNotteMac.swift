@@ -438,12 +438,15 @@ extension StatoShell {
         let primaScelta = sceltaFascicolo
         let primoAppuntamento = fascicoloAppuntamento
         let primoScenario = scenarioInSospeso
+        // Migliorie d'uso 70: il fascicolo è per cliente, quello del cliente della notte torna com'era
+        let primiFascicoli = fascicoli
         defer {
             // Prima il cliente (il suo setter azzera appuntamento e scenario), poi il resto
             clienteAttivoId = primaCliente
             sceltaFascicolo = primaScelta
             fascicoloAppuntamento = primoAppuntamento
             scenarioInSospeso = primoScenario
+            fascicoli = primiFascicoli
         }
         clienteAttivoId = cliente
         if let s = scelta { sceltaFascicolo = s }

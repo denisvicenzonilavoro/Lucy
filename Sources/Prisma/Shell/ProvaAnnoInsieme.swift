@@ -85,7 +85,7 @@ enum ProvaAnnoInsieme {
         stato.sceltaFascicolo = [.annoInsieme, .resoconto]
         if let f = stato.documentoFascicolo(), let d = stato.documentoProspetto(.annoInsieme),
            let r = stato.documentoProspetto(.resoconto(report: true)) {
-            verifica("Un anno insieme: nel fascicolo con il resoconto", f.pagine.count == 2 + d.pagine.count + r.pagine.count,
+            verifica("Un anno insieme: nel fascicolo con il resoconto", f.pagine.count == StatoShell.pagineAperturaFascicolo(2) + d.pagine.count + r.pagine.count,
                      "\(f.pagine.count) pagine")
         } else {
             verifica("Un anno insieme: fascicolo composto", false, "")

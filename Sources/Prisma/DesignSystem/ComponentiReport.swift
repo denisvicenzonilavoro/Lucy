@@ -157,6 +157,9 @@ struct CopertinaReport: View {
     let data: Date
     let canali: [Canale]
     let cartellini: [(String, [String])]
+    /// Migliorie d'uso 70: l'indice del fascicolo (titolo e pagina): quando c'è, al posto dei cartellini il riquadro
+    /// «Dentro» con i report e la pagina da cui comincia ciascuno.
+    var indice: [(String, Int)]? = nil
 
     var body: some View {
         FoglioDocumento(formato: D.report, sfondo: C.copertina) {
@@ -197,14 +200,50 @@ struct CopertinaReport: View {
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-                    VStack(spacing: 12) {
-                        ForEach(Array(cartellini.enumerated()), id: \.offset) { _, c in cartellino(c.0, c.1) }
+                    if let indice {
+                        riquadroIndice(indice)
+                            .frame(width: D.larghezzaIndiceCopertina)
+                    } else {
+                        VStack(spacing: 12) {
+                            ForEach(Array(cartellini.enumerated()), id: \.offset) { _, c in cartellino(c.0, c.1) }
+                        }
+                        .frame(width: 240)
                     }
-                    .frame(width: 240)
                 }
                 .padding(EdgeInsets(top: 52, leading: 56, bottom: 50, trailing: 56))
             }
         }
+    }
+
+    /// Il riquadro «Dentro» del fascicolo: bianco sul blu notte come i cartellini, una riga per report con la pagina.
+    private func riquadroIndice(_ voci: [(String, Int)]) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            OcchielloDoc(testo: TestiFascicolo.dentro, font: T.copertinaEtichetta, colore: C.copertinaEtichetta)
+            if voci.isEmpty {
+                Text(verbatim: TestiFascicolo.nessunReport).font(T.paginaIndiceCopertina).foregroundColor(C.tenue)
+                    .padding(.top, 4)
+            }
+            VStack(spacing: 0) {
+                ForEach(Array(voci.enumerated()), id: \.offset) { i, v in
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        // Due righe al più: nel PDF il titolo resta intero (si cerca nel testo)
+                        Text(verbatim: v.0).font(T.indiceCopertina).foregroundColor(C.titolo)
+                            .lineLimit(2).fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 6)
+                        Text(verbatim: "\(v.1)").font(T.paginaIndiceCopertina).foregroundColor(C.tenue)
+                    }
+                    .padding(.vertical, 3)
+                    .frame(minHeight: D.rigaIndiceCopertina)
+                    if i < voci.count - 1 {
+                        Rectangle().fill(C.filetto).frame(height: 0.6)
+                    }
+                }
+            }
+        }
+        .padding(15)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(RoundedRectangle(cornerRadius: D.cartellinoRaggio).fill(C.copertinaRiquadro)
+            .shadow(color: C.ombraCartellino, radius: D.cartellinoOmbra, x: 0, y: D.cartellinoOmbraY))
     }
 
     /// Cartellino bianco sul blu notte.
