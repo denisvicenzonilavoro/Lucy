@@ -51,7 +51,7 @@ extension SchedaCliente {
         guard let c else { return false }
         if !c.elencoAziende.isEmpty { return true }
         let p = c.professione.lowercased()
-        return p.contains("imprenditor") || p.contains("titolare")
+        return p.contains("imprendit") || p.contains("titolare")  // imprenditore, imprenditrice
     }
 
     /// I gruppi dell'indice per il cliente: «L'azienda» solo quando va mostrata, o quando è la sezione aperta (aperta
