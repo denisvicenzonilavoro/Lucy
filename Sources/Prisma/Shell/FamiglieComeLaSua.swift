@@ -79,14 +79,16 @@ struct RigaVisteAnalisi360: View {
     let diProva: Bool
     let modoCliente: Bool
     let apriImpostazioni: () -> Void
+    #if os(macOS)
+    @Environment(StatoShell.self) var stato
+    #endif
 
     var body: some View {
         let f = Tema.Apple.Famiglie.self
         return HStack(alignment: .center, spacing: f.spazioRigaVista) {
-            SegmentatoPillola(selezione: $vista, voci: [(.aree, VistaAnalisi360.aree.titolo),
-                                                        (.famiglie, VistaAnalisi360.famiglie.titolo)])
+            segmentato
                 .fixedSize()
-            if diProva && vista == .famiglie {
+            if diProva && vista == .famiglie && !simulaAperto {
                 if modoCliente {
                     etichetta
                 } else {
@@ -97,6 +99,38 @@ struct RigaVisteAnalisi360: View {
             }
             Spacer(minLength: 0)
         }
+    }
+
+    /// Migliorie d'uso 64: sul Mac la terza voce «Simula e confronta» apre lo strumento (stessa riga, stessa posizione);
+    /// le due porte (barra laterale e segmentato) portano allo stesso stato.
+    private var simulaAperto: Bool {
+        #if os(macOS)
+        return stato.strumentoAnalisi == .simulaConfronta
+        #else
+        return false
+        #endif
+    }
+
+    @ViewBuilder private var segmentato: some View {
+        #if os(macOS)
+        SegmentatoPillola(selezione: Binding<VoceRigaAnalisi360>(
+                              get: { simulaAperto ? .simula : (vista == .aree ? .aree : .famiglie) },
+                              set: { nuova in
+                                  switch nuova {
+                                  case .simula:
+                                      stato.scegliStrumentoAnalisi(.simulaConfronta)
+                                  case .aree, .famiglie:
+                                      if stato.strumentoAnalisi != nil { stato.scegliStrumentoAnalisi(nil) }
+                                      let v: VistaAnalisi360 = nuova == .aree ? .aree : .famiglie
+                                      if vista != v { vista = v }
+                                  }
+                              }),
+                          voci: [(.aree, VistaAnalisi360.aree.titolo), (.famiglie, VistaAnalisi360.famiglie.titolo),
+                                 (.simula, TestiSimulaConfronta.titolo)])
+        #else
+        SegmentatoPillola(selezione: $vista, voci: [(.aree, VistaAnalisi360.aree.titolo),
+                                                    (.famiglie, VistaAnalisi360.famiglie.titolo)])
+        #endif
     }
 
     private var etichetta: some View {
@@ -114,6 +148,11 @@ struct RigaVisteAnalisi360: View {
         .overlay(Capsule(style: .continuous).strokeBorder(f.bordoEtichettaProva, lineWidth: Tema.Apple.Misura.bordo))
         .accessibilityElement(children: .combine)
     }
+}
+
+/// Le voci del segmentato di Analisi 360 sul Mac (migliorie d'uso 64): le due viste e «Simula e confronta».
+enum VoceRigaAnalisi360: Hashable {
+    case aree, famiglie, simula
 }
 
 // MARK: - Rispetto alle famiglie come la sua

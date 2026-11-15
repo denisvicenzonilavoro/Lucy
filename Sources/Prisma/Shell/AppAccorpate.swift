@@ -41,6 +41,13 @@ extension StatoShell {
             switch strumentoAnalisi {
             case .confronto: return .confronti
             case .simulatore, .scenari, .tfr: return .simulazioni
+            case .simulaConfronta:
+                #if os(macOS)
+                // Migliorie d'uso 64: «Due a confronto» è l'ex Confronti, «Una strada» l'ex Simulazioni
+                return modoSimula == .due ? .confronti : .simulazioni
+                #else
+                return .simulazioni
+                #endif
             case nil: return nil
             }
         #if os(macOS)

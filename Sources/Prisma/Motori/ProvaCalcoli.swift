@@ -1337,6 +1337,8 @@ enum ProvaCalcoli {
         ProvaCalcoliPrioritaAree360.esegui(verificaEsterna)
         // Migliorie d'uso 63: l'esito delle schede per il cliente, l'ordine del catalogo e le frasi «È per / Non è per»
         ProvaCalcoliSchedaProdotto.esegui(verificaEsterna)
+        // Migliorie d'uso 64: «Simula e confronta», le strade con gli stessi soldi e le frasi
+        ProvaCalcoliSimulaConfronta.esegui(verificaEsterna)
         // Migliorie d'uso 34: il momento e la durata di ogni esperienza della Sala, le due consigliate dalle priorità
         ProvaCalcoliSalaMomenti.esegui(verificaEsterna)
         // Migliorie d'uso 11: i gruppi dell'indice del dossier e «L'azienda» solo per chi ce l'ha

@@ -41,7 +41,34 @@ extension Istantanee {
                 }
                 preparaAree360Apple(s)
             }),
+            // Migliorie d'uso 64 «Simula e confronta»: l'ETF di Giulia contro «Lasciare i soldi sul conto» (la frase
+            // «… arriva … più in alto …») e contro un'ipotesi quasi uguale (la frase «quasi allo stesso punto»)
+            ("1403-uso-analisi360-simula-conto", { s in preparaSimulaConfronta(s, b: .conto) }),
+            ("1403-uso-analisi360-simula-conto-scuro", { s in preparaSimulaConfronta(s, b: .conto) }),
+            ("1404-uso-analisi360-simula-pari", { s in preparaSimulaPari(s) }),
+            ("1404-uso-analisi360-simula-pari-scuro", { s in preparaSimulaPari(s) }),
         ]
+    }
+
+    /// «Simula e confronta» di Giulia su «Due a confronto», con l'ETF in A e `b` in B.
+    nonisolated static func preparaSimulaConfronta(_ s: StatoShell, b: StradaSimula?) {
+        s.clienteAttivoId = "giulia"
+        s.areaAnalisi = nil
+        s.scegliStrumentoAnalisi(.confronto)
+        s.apri(.analisi360)
+        s.adottaSimula()
+        s.stradaA = .posizione("pos-giulia-etf-azionario-globale")
+        if let b { s.stradaB = b }
+    }
+
+    /// Due strade quasi pari: l'ETF e «un'ipotesi mia» con lo stesso costo e due centesimi di punto di rendimento in più.
+    nonisolated static func preparaSimulaPari(_ s: StatoShell) {
+        preparaSimulaConfronta(s, b: nil)
+        if let o = s.opzioniSimula().first(where: { $0.strada == .posizione("pos-giulia-etf-azionario-globale") }) {
+            s.stradaLibera = IpotesiLibera(nome: "ETF di un’altra banca", rendimento: o.rendimento + 0.02,
+                                           costoIngresso: o.costoIngresso, costoAnnuo: o.costoAnnuo, canale: .indipendente)
+            s.stradaB = .libera
+        }
     }
 
     /// Analisi 360 aperta sulla griglia delle aree di Giulia (nessuna area né strumento scelti).

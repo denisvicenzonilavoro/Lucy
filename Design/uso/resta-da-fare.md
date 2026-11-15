@@ -2183,10 +2183,57 @@ Resta:
 - **«Quanto costa, per dare un’idea» della protezione** (63-d): non fatto. Va mostrato solo con una stima da
   `MotoreSimulatoriAnalisi.tariffaCasoMorte` sulle coperture in archivio («stima dalle polizze in archivio»); oggi la
   protezione ha solo «Per quanto tempo».
-- **«Confronta con quello che ha»**: apre il confronto di oggi (`apri(.confronti)`). Con la miglioria 64 deve aprire
-  Analisi 360 › «Simula e confronta» › «Due a confronto» con A = la scheda e B = la prima posizione in essere della stessa
-  area (o «Lasciare i soldi sul conto»).
+- ~~**«Confronta con quello che ha»**~~: fatto con la miglioria 64 (`confrontaProdottoInSimula`: «Due a confronto» con
+  la scheda in A e la prima posizione in essere della stessa area in B, o il conto). Se il cliente ha già quel prodotto,
+  la scheda non è fra le strade «dal catalogo» e A resta quella di partenza.
 - **Salita di 8 e dissolvenza** al cambio di scheda: oggi rientra con la cascata di sempre (`riavviaCascata`) e torna in
   cima (`.id`); la salita di 8 in 0,3 s del template non è un token a parte.
 - **iPhone e iPad**: l'app Prodotti resta quella di prima (nessun esito, nessuna frase); da portare con il loro
   aggiornamento.
+
+## 64. Simula e confronta: prima la frase
+
+Fatto (solo Mac): `StrumentoAnalisi.simulaConfronta` con `delMac` / `diIOS` / `inVista`; la barra laterale di Analisi 360
+mostra «Simula e confronta» e il TFR; `scegliStrumentoAnalisi(.simulatore / .scenari / .confronto)` sul Mac porta a
+«Simula e confronta» in «Una strada» o «Due a confronto» (così `simula(_:)`, `confronta(_:)`, `apri(.simulazioni)`,
+`apri(.confronti)`, i Collegati, Vera e le istantanee continuano a funzionare); `accorpataMostrata` dice `.confronti` in
+«Due a confronto». La bozza del simulatore di prima entra come strada A (posizione, ipotesi salvata, scheda del catalogo
+riconosciuta da nome e canale, altrimenti «un'ipotesi mia») con i suoi soldi, tasse e inflazione, poi si consuma; le voci
+di `confrontoA/B` diventano le due strade. Il segmentato delle viste ha la terza voce «Simula e confronta» (stesso stato
+della barra laterale, `VoceRigaAnalisi360`), ed è in testa alla vista. Via la fila «Strumenti» del piede delle aree.
+Vista nuova `Shell/SimulaConfronta.swift`: a sinistra «Una strada | Due a confronto», le righe delle strade (tondino A/B,
+nome, canale, «provenienza · rende x%, costa y% l’anno») con il menu raggruppato (Ce l’ha già, Proposte, Dal catalogo,
+Ipotesi salvate, Ipotesi mia, Non fare niente) e «Un’ipotesi mia…» (rendimento, costi, canale), scambio automatico A/B,
+tre cursori (intervalli di prima, decisione 64-c), la riga delle ipotesi con «Cambia» (tasse e inflazione); a destra la
+frase, «Se va diversamente» (tre barre, scarti del KID se ci sono), «Anno per anno, al netto», «Come viene calcolato?»,
+«Salva questa ipotesi» (una `Simulazione` con titolo breve, senza chiedere il nome), «Confrontala con un’altra strada»,
+le chip delle ipotesi salvate (al più sei, le altre in «Tutte», menu con Rinomina ed Elimina); con due strade la frase, la
+tabella con la spunta, il grafico a due linee, «Fanne un prospetto per <nome>» (le strade salvate come `Simulazione`,
+riusate se uguali, poi il prospetto del confronto di sempre), «Torna a una strada sola», «Restare o cambiare…» con due
+posizioni e «Stime … non sono promesse.». Motore `MotoreSimulaConfronta` (cifre di `MotoreProiezione`), testi
+`TestiSimulaConfronta`, token `Tema.Apple.SimulaConfronta`, prova `ProvaCalcoliSimulaConfronta` in `--prova-calcoli`,
+`ProvaVera` aggiornata (accorpate, bozza, scambio), istantanee nuove 1403-1404; il catalogo (63) usa «Confronta con
+quello che ha».
+
+Resta:
+- **Istantanee**: rigenerare sul Mac e guardare 14, 15, 16, 233, 239 (chiare e scure) e le nuove 1403-1404; controllare
+  la finestra stretta (239: `ViewThatFits` mette tabella e grafico uno sotto l'altro) e la lunghezza della fila dei
+  pulsanti. Aggiornare la pagina delle anteprime.
+- **«Prospetto in PDF» con una strada sola**: c'è solo per una posizione (`.posizione(id)`); per una scheda, un'ipotesi o
+  il conto non esiste un prospetto della simulazione singola. Serve un caso `SceltaProspetto` nuovo (o il confronto con il
+  conto) da decidere con l'utente.
+- **La cifra della frase non si conta**: è dentro la frase come testo colorato (`Text` + `Text`), quindi niente
+  `NumeroCheConta`; le barre di «Se va diversamente» non si riempiono con il movimento (sono già piene) e non è stato
+  estratto il componente comune con `BarreStradeTFR` (servirà alla 69).
+- **La capsula «Stime in uso · N dati da completare ›»** (miglioria 16) non è nella riga della vista: apre un dettaglio
+  del presentatore delle aree (`Analisi360Apple`), che qui non c'è.
+- **1404 «quasi pari»**: la seconda strada è un'ipotesi mia, che non ha un SRI: la frase dice «quasi allo stesso punto»
+  ma senza il confronto del rischio. Con due strade vere quasi pari compare anche il rischio.
+- **Fluidità**: trascinando un cursore si rifà il corpo della colonna di sinistra (i comandi sono `.equatable()`, ma le
+  righe delle strade no); da misurare con `--prova-fluidita` e, se serve, rendere `RigaStradaSimula` Equatable.
+- **Il conto**: rende 0% (decisione 64-b); l'alternativa con un tasso in Impostazioni › Analisi non è fatta.
+- **Altri collegamenti** che dicono ancora «Simulatore» e «Confronto» (Posizioni, indice delle posizioni, Prospetti,
+  `CollegatiStrumenti`): portano già a «Simula e confronta», ma i nomi sono quelli di prima.
+- **Cambio di cliente**: strade, soldi e ipotesi valgono per `clienteSimula`; tornando a un cliente già visto si ritrova
+  quello che si era lasciato (in memoria), invece di ripartire.
+- **iPhone e iPad**: restano simulatore, scenari e confronto di prima.

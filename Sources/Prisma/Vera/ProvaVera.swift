@@ -616,20 +616,34 @@ enum ProvaVera {
         controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .tfr && accorpate.inPrimoPiano(.simulazioni),
                   "Accorpate: Simulazioni (TFR) si apre negli strumenti di Analisi 360")
         accorpate.apri(.confronti)
-        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .confronto, "Accorpate: Confronti si apre in Analisi 360")
+        // Migliorie d'uso 64: sul Mac simulatore, scenari e confronto sono «Simula e confronta»
+        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta
+                  && accorpate.modoSimula == .due && accorpate.inPrimoPiano(.confronti),
+                  "Accorpate: Confronti si apre in Analisi 360, «Simula e confronta» su «Due a confronto»")
         // Gli ingressi degli strumenti di Analisi 360: simula, confronta e i «Collegati» delle altre app
-        if let p = accorpate.posizioniCliente("marco").first(where: { $0.area.proiettabile && $0.stato != .chiusa }) {
+        if let p = accorpate.posizioniCliente("marco").first(where: { $0.area.proiettabile && $0.stato == .inEssere }) {
             accorpate.simula(p)
-            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulatore
-                      && accorpate.bozzaSimulazione?.posizioneId == p.id,
-                      "Strumenti: «Simula» da una posizione apre il Simulatore di Analisi 360 con le sue ipotesi")
+            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta
+                      && accorpate.modoSimula == .una && accorpate.stradaA == .posizione(p.id)
+                      && accorpate.bozzaSimulazione == nil && accorpate.clienteSimula == "marco",
+                      "Strumenti: «Simula» da una posizione apre «Simula e confronta» con la posizione come strada")
             accorpate.confronta(p)
-            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .confronto && accorpate.confrontoA == .posizione(p.id),
-                      "Strumenti: «Confronta» apre il Confronto di Analisi 360 con la posizione in A")
+            controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta
+                      && accorpate.modoSimula == .due && accorpate.confrontoA == .posizione(p.id)
+                      && accorpate.stradaA == .posizione(p.id),
+                      "Strumenti: «Confronta» apre «Due a confronto» con la posizione in A")
+            // Scegliendo in B la strada di A, le due si scambiano
+            let primaB = accorpate.stradeSimula(accorpate.opzioniSimula()).b
+            accorpate.scegliStradaSimula(.posizione(p.id), perA: false)
+            controlla(accorpate.stradaB == .posizione(p.id) && accorpate.stradaA == primaB,
+                      "Simula e confronta: la strada di A scelta in B scambia le due strade")
         }
         accorpate.apriStrumentoAnalisi(.scenari)
-        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .scenari && accorpate.schedaSimulazioni == .scenari,
-                  "Strumenti: i Collegati aprono gli Scenari in Analisi 360")
+        controlla(accorpate.appAttiva == .analisi360 && accorpate.strumentoAnalisi == .simulaConfronta && accorpate.modoSimula == .una
+                  && accorpate.inPrimoPiano(.simulazioni),
+                  "Strumenti: i Collegati degli Scenari aprono «Simula e confronta» su «Una strada»")
+        controlla(StrumentoAnalisi.inVista == [.simulaConfronta, .tfr],
+                  "Strumenti: sul Mac la barra laterale ha «Simula e confronta» e il TFR")
         accorpate.apriStrumentoAnalisi(.tfr)
         controlla(accorpate.strumentoAnalisi == .tfr && accorpate.inPrimoPiano(.simulazioni), "Strumenti: il TFR si apre in Analisi 360")
         accorpate.scegliStrumentoAnalisi(nil)

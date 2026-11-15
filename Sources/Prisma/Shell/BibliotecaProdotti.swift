@@ -522,8 +522,14 @@ extension AppProdotti {
                     .buttonStyle(.applePrimarioGrande)
                     .disabled(stato.solaLettura)
                     .help("Mette il prodotto fra le proposte di \(nome), con le condizioni della scheda: la completi in Posizioni")
-                // Prima della miglioria 64 il confronto di oggi (Analisi 360 › Confronto)
-                Button(TestiCatalogo.confronta) { stato.apri(.confronti) }
+                // Migliorie d'uso 64: «Simula e confronta» › «Due a confronto», la scheda contro quello che ha
+                Button(TestiCatalogo.confronta) {
+                    #if os(macOS)
+                    stato.confrontaProdottoInSimula(p)
+                    #else
+                    stato.apri(.confronti)
+                    #endif
+                }
                     .buttonStyle(.appleGrande)
             } else {
                 Button(TestiCatalogo.mettiSuCliente) {

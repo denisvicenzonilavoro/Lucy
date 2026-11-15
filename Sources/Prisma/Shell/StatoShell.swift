@@ -19,6 +19,10 @@ enum SchedaSimulazioni: Hashable { case simulatore, scenari, tfr }
 /// = le aree di analisi, come prima.
 enum StrumentoAnalisi: String, CaseIterable, Identifiable {
     case simulatore, scenari, confronto, tfr
+    /// Migliorie d'uso 64: sul Mac simulatore, scenari e confronto diventano una vista sola, «Simula e confronta»
+    /// (Shell/SimulaConfronta.swift). I quattro casi di prima restano per iPhone e iPad e per le chiamate di sempre:
+    /// sul Mac `scegliStrumentoAnalisi` li porta qui con la modalità giusta.
+    case simulaConfronta
 
     var id: String { rawValue }
 
@@ -28,6 +32,7 @@ enum StrumentoAnalisi: String, CaseIterable, Identifiable {
         case .scenari: return "Scenari"
         case .confronto: return "Confronto"
         case .tfr: return "TFR"
+        case .simulaConfronta: return TestiSimulaConfronta.titolo
         }
     }
 
@@ -38,7 +43,22 @@ enum StrumentoAnalisi: String, CaseIterable, Identifiable {
         case .scenari: return "square.stack.3d.up"
         case .confronto: return "rectangle.split.2x1"
         case .tfr: return "building.columns"
+        case .simulaConfronta: return "slider.horizontal.3"
         }
+    }
+
+    /// Le voci della barra laterale di Analisi 360 sul Mac (migliorie d'uso 64; il TFR finché non entra in «Simula e
+    /// confronta» con la miglioria 69).
+    static var delMac: [StrumentoAnalisi] { [.simulaConfronta, .tfr] }
+    /// Le voci di iPhone e iPad: le quattro di sempre.
+    static var diIOS: [StrumentoAnalisi] { [.simulatore, .scenari, .confronto, .tfr] }
+    /// Le voci della piattaforma.
+    static var inVista: [StrumentoAnalisi] {
+        #if os(macOS)
+        return delMac
+        #else
+        return diIOS
+        #endif
     }
 }
 
@@ -347,6 +367,22 @@ enum VoceConfronto: Hashable {
     /// (`apriAreaAnalisi360(_:)`, da «Rispetto alle famiglie come la sua»). Solo in memoria; la consuma
     /// PresentatoreAree360 senza toccare cliente, area o strumento.
     var areaDaAprire: AreaAnalisi? = nil
+    #endif
+    #if os(macOS)
+    // Migliorie d'uso 64 «Simula e confronta» (stato della vista, solo in memoria; SimulaConfronta.swift)
+    /// Una strada, due a confronto (il TFR con la miglioria 69).
+    var modoSimula: ModoSimula = .una
+    /// Le strade scelte (nil = quella di partenza, `MotoreSimulaConfronta.predefinitaA/B`).
+    var stradaA: StradaSimula?
+    var stradaB: StradaSimula?
+    /// I soldi comuni, validi per `clienteSimula`: per un altro cliente si riparte dalle ipotesi dell'area investimenti.
+    var soldiSimula = SoldiSimula(capitale: 0, mensile: 0, anni: IpotesiCalcolo.orizzontePredefinito)
+    /// Tasse e inflazione comuni.
+    var ipotesiSimula = IpotesiSimula()
+    /// «Un'ipotesi mia» (decisione 64-d), solo in memoria finché non si salva.
+    var stradaLibera: IpotesiLibera?
+    /// Il cliente per cui valgono strade, soldi e ipotesi (nil = nessuno: si parte da capo).
+    var clienteSimula: String?
     #endif
     /// Ipotesi sul tavolo del simulatore.
     var bozzaSimulazione: Simulazione?

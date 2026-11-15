@@ -17,6 +17,12 @@ struct StrumentiAnalisi360: View {
             case .scenari: ScenariSalvati(inAnalisi: true)
             case .confronto: ConfrontoIpotesi(inAnalisi: true)
             case .tfr: StrumentoTFR()
+            case .simulaConfronta:
+                #if os(macOS)
+                SimulaConfrontaMac()
+                #else
+                SimulatoreIpotesi(inAnalisi: true)
+                #endif
             case nil: EmptyView()
             }
         }
@@ -59,9 +65,32 @@ extension StatoShell {
     /// Sceglie uno strumento di Analisi 360 (nil = le aree). Tiene allineata la scheda di Simulazioni,
     /// che le viste del simulatore leggono ancora.
     func scegliStrumentoAnalisi(_ s: StrumentoAnalisi?) {
+        #if os(macOS)
+        // Migliorie d'uso 64: simulatore, scenari e confronto sono «Simula e confronta», nella modalità giusta; una bozza
+        // del simulatore (da una posizione, una scheda, un obiettivo, un'area) entra come strada
+        switch s {
+        case .simulatore, .scenari:
+            if modoSimula != .una { modoSimula = .una }
+            consumaBozzaSimulazione()
+            if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+            if schedaSimulazioni != .simulatore { schedaSimulazioni = .simulatore }
+            return
+        case .confronto:
+            if modoSimula != .due { modoSimula = .due }
+            importaConfrontoInSimula()
+            if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+            return
+        case .simulaConfronta:
+            consumaBozzaSimulazione()
+            if strumentoAnalisi != .simulaConfronta { strumentoAnalisi = .simulaConfronta }
+            if schedaSimulazioni != .simulatore { schedaSimulazioni = .simulatore }
+            return
+        case .tfr, nil: break
+        }
+        #endif
         if strumentoAnalisi != s { strumentoAnalisi = s }
         switch s {
-        case .simulatore: if schedaSimulazioni != .simulatore { schedaSimulazioni = .simulatore }
+        case .simulatore, .simulaConfronta: if schedaSimulazioni != .simulatore { schedaSimulazioni = .simulatore }
         case .scenari: if schedaSimulazioni != .scenari { schedaSimulazioni = .scenari }
         case .tfr: if schedaSimulazioni != .tfr { schedaSimulazioni = .tfr }
         case .confronto, nil: break
@@ -72,7 +101,7 @@ extension StatoShell {
     /// di `apri`), su iPhone e iPad nell'app Simulazioni o Confronti, sulla scheda giusta.
     func apriStrumentoAnalisi(_ s: StrumentoAnalisi) {
         switch s {
-        case .simulatore: schedaSimulazioni = .simulatore
+        case .simulatore, .simulaConfronta: schedaSimulazioni = .simulatore
         case .scenari: schedaSimulazioni = .scenari
         case .tfr: schedaSimulazioni = .tfr
         case .confronto: break

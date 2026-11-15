@@ -578,12 +578,14 @@ struct Analisi360Apple: View {
                 ? " Ipotesi corrette per questo cliente; le coperture si leggono sempre dalle posizioni."
                 : " Ipotesi ricavate dalle posizioni in essere e dall'anagrafica: rivedile con il cliente."
         return VStack(alignment: .leading, spacing: p.spazioRighe) {
+            #if !os(macOS)
+            // Migliorie d'uso 64: sul Mac la fila degli strumenti, che ripeteva la barra laterale, non c'è più
             HStack(spacing: p.spazioPulsanti) {
                 Text("Strumenti")
                     .carattereApple(p.etichetta)
                     .foregroundColor(p.coloreEtichetta)
                     .padding(.trailing, max(0, p.spazioEtichetta - p.spazioPulsanti))
-                ForEach(StrumentoAnalisi.allCases) { s in
+                ForEach(StrumentoAnalisi.diIOS) { s in
                     Button { stato.scegliStrumentoAnalisi(s) } label: {
                         Label(s.titolo, systemImage: s.simbolo)
                     }
@@ -591,6 +593,7 @@ struct Analisi360Apple: View {
                 }
                 Spacer(minLength: 0)
             }
+            #endif
             HStack(alignment: .center, spacing: p.spazioNota) {
                 Text("Le quattro aree leggono ipotesi dedicate allo stesso cliente. Capitale e versamenti possono sovrapporsi: verifica le allocazioni prima di sommare i piani." + ipotesi)
                     .carattereApple(p.nota)

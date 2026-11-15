@@ -89,7 +89,10 @@ enum Istantanee {
             // Attività è accorpata nell'Agenda: l'attività si apre nel mese, nel giorno della scadenza
             s.mostraAttivitaInAgenda("task-casa")
         }),
-        // Gli strumenti di Analisi 360 (le ex app Simulazioni e Confronti): rail di Analisi 360, testata compatta
+        // Gli strumenti di Analisi 360 (le ex app Simulazioni e Confronti): rail di Analisi 360, testata compatta.
+        // Migliorie d'uso 64: sul Mac sono «Simula e confronta» — 14 «Una strada» dall'ETF di Giulia, 15 «Una strada» con
+        // le chip delle ipotesi salvate, 16 e 239 «Due a confronto» per Marco (una posizione e una scheda del catalogo),
+        // 233 un cliente senza ipotesi salvate
         ("14-analisi360-simulatore", { s in
             if let p = s.posizioni.first(where: { $0.id == "pos-giulia-etf-azionario-globale" }) { s.simula(p) }
         }),
