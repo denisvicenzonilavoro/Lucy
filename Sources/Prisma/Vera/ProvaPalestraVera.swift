@@ -355,8 +355,13 @@ enum ProvaPalestraVera {
     }
 
     private static func studio(_ controlla: (Bool, String) -> Void) {
+        #if os(macOS)
+        let titoloOCF = "Esame OCF"
+        #else
+        let titoloOCF = "OCF"
+        #endif
         controlla(SchedaStudio.allCases.contains(.palestra) && SchedaStudio.palestra.titolo == "Palestra" && SchedaStudio.palestra.prossima == nil
-                  && SchedaStudio.ocf.titolo == "Esame OCF" && SchedaStudio.fatture.titolo == "Parcelle",
+                  && SchedaStudio.ocf.titolo == titoloOCF && SchedaStudio.fatture.titolo == "Parcelle",
                   "Palestra: nuova scheda di Studio (Cruscotto · Parcelle · Spese | Track record | Esame OCF · Palestra)")
         // Migliorie d'uso 52: tre gruppi separati da un filo, giusti anche senza le Spese
         controlla(SchedaStudio.separatoriPrima(SchedaStudio.allCases) == [3, 4]

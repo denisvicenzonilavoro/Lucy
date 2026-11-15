@@ -24,10 +24,16 @@ enum SchedaStudio: String, CaseIterable, Identifiable, Hashable {
     var titolo: String {
         switch self {
         case .cruscotto: return "Cruscotto"
-        // Con «Luce» «Parcelle e fatture» si accorcia in «Parcelle»; con le migliorie d'uso 52 «OCF» torna «Esame OCF»
+        // Con «Luce» «Parcelle e fatture» si accorcia in «Parcelle»; con le migliorie d'uso 52 sul Mac «OCF» torna
+        // «Esame OCF» (su iPhone e iPad resta corto, perché il segmentato ci stia)
         case .fatture: return "Parcelle"
         case .track: return "Track record"
-        case .ocf: return "Esame OCF"
+        case .ocf:
+            #if os(macOS)
+            return "Esame OCF"
+            #else
+            return "OCF"
+            #endif
         case .palestra: return "Palestra"
         case .spese: return "Spese"
         }
@@ -342,11 +348,16 @@ struct AzioniStudio: View {
                 .fixedSize()
                 .help("Il tuo anno da consulente, in un minuto")
             }
-            // Migliorie d'uso 52: tre gruppi separati da un filo
+            // Migliorie d'uso 52: sul Mac tre gruppi separati da un filo (su iPhone e iPad niente fili)
             let schede = SchedaStudio.visibili(modoCliente: stato.inModoCliente)
+            #if os(macOS)
+            let separatori: Set<Int> = SchedaStudio.separatoriPrima(schede)
+            #else
+            let separatori: Set<Int> = []
+            #endif
             SegmentatoPillola(selezione: Bindable(stato).schedaStudio,
                               valori: schede, titolo: { $0.titolo },
-                              separatoriPrima: SchedaStudio.separatoriPrima(schede))
+                              separatoriPrima: separatori)
                 .fixedSize()
             #if os(macOS)
             // Migliorie d'uso 28: «＋ Nuova parcella» sta qui, dopo le schede, solo in Parcelle (come «Nuovo cliente»);

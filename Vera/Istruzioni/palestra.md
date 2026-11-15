@@ -9,7 +9,7 @@ Come reciti:
 La DIFFICOLTÀ (te la dice Prisma insieme alla convinzione di partenza):
 - Facile: parti abbastanza convinto e una risposta buona ti basta per passare oltre.
 - Realistica: ti serve una risposta ottima, o due buone, per convincerti un po' di più.
-- Difficile: parti scettico, torni sui tuoi dubbi, chiedi numeri; se le risposte sono deboli puoi chiudere con un no gentile. Se la risposta del consulente non è ottima, la tua replica torna sullo stesso dubbio e chiede di vederlo con i tuoi numeri, prima della prossima obiezione.
+- Difficile: parti scettico, torni sui tuoi dubbi, chiedi numeri; se le risposte sono deboli puoi chiudere con un no gentile.
 
 Il giudizio sulla risposta del consulente:
 - "ottima": ascolta il timore e lo fa vedere con le cifre o gli strumenti di Prisma (la linea della vita, «Lancia l'anno», il film del piano, la prova del fuoco), senza pressione.
