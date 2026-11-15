@@ -17,26 +17,14 @@ enum TestiSimulatoriAnalisi {
 
     // MARK: - Articoli
 
-    /// true se il numero letto comincia per vocale: 1 (uno), 8 e 80-89 (otto, ottanta…), 11 (undici). Come `elide` del
-    /// template (riga 3489).
-    static func elide(_ n: Int) -> Bool {
-        let t = String(abs(n))
-        return t == "1" || t == "11" || t.hasPrefix("8")
-    }
+    /// true se il numero letto comincia per vocale (`Formati.elide`, comune con le famiglie come la sua).
+    static func elide(_ n: Int) -> Bool { Formati.elide(n) }
 
-    /// «il 42%», «l'80%», «l'11%», «lo 0%».
-    static func articolo(_ percentuale: Int) -> String {
-        let p = "\(percentuale)%"
-        if elide(percentuale) { return "l'" + p }
-        return percentuale == 0 ? "lo " + p : "il " + p
-    }
+    /// «il 42%», «l'80%», «l'11%», «lo 0%» (`Formati.ilPercentuale`).
+    static func articolo(_ percentuale: Int) -> String { Formati.ilPercentuale(percentuale) }
 
-    /// «al 42%», «all'80%», «all'11%», «allo 0%».
-    static func al(_ percentuale: Int) -> String {
-        let p = "\(percentuale)%"
-        if elide(percentuale) { return "all'" + p }
-        return percentuale == 0 ? "allo " + p : "al " + p
-    }
+    /// «al 42%», «all'80%», «all'11%», «allo 0%» (`Formati.alPercentuale`).
+    static func al(_ percentuale: Int) -> String { Formati.alPercentuale(percentuale) }
 
     /// La prima lettera maiuscola («Il 12%», «L'8%»).
     static func maiuscola(_ s: String) -> String {

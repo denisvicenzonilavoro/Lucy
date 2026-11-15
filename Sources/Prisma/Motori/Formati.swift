@@ -148,3 +148,28 @@ enum IBAN {
         return String(c.prefix(2)) + "•• •••• •••• •••• " + String(c.suffix(4))
     }
 }
+
+// MARK: - Articoli davanti a una percentuale intera
+
+extension Formati {
+    /// true se il numero letto comincia per vocale: 1 (uno), 8 e 80-89 (otto, ottanta…), 11 (undici). Come `elide` del
+    /// template (riga 3489). Comune ai simulatori (migliorie d'uso 45) e alle famiglie come la sua (46).
+    static func elide(_ n: Int) -> Bool {
+        let t = String(abs(n))
+        return t == "1" || t == "11" || t.hasPrefix("8")
+    }
+
+    /// «il 42%», «l'80%», «l'11%», «lo 0%».
+    static func ilPercentuale(_ percentuale: Int) -> String {
+        let p = "\(percentuale)%"
+        if elide(percentuale) { return "l'" + p }
+        return percentuale == 0 ? "lo " + p : "il " + p
+    }
+
+    /// «al 42%», «all'80%», «all'11%», «allo 0%».
+    static func alPercentuale(_ percentuale: Int) -> String {
+        let p = "\(percentuale)%"
+        if elide(percentuale) { return "all'" + p }
+        return percentuale == 0 ? "allo " + p : "al " + p
+    }
+}

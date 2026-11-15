@@ -103,6 +103,12 @@ struct PresentatoreAree360<Contenuto: View>: View {
                 return StatoDettaglio(aperto: DettagliAree360.id(a), misura: DettagliAree360.misura(a))
             }
         }
+        #if os(macOS)
+        // Migliorie d'uso 46: Analisi 360 nasce con l'area chiesta da «Apri l'area» (e le istantanee 1145)
+        if let a = stato.areaDaAprire {
+            return StatoDettaglio(aperto: DettagliAree360.id(a), misura: DettagliAree360.misura(a))
+        }
+        #endif
         return SimulatoriAnalisiApple.dettaglioIniziale(stato)
     }
 
@@ -120,6 +126,9 @@ struct PresentatoreAree360<Contenuto: View>: View {
             // Migliorie d'uso 5: un riquadro del quadro del cliente apre Analisi 360 con il dettaglio dell'area già aperto
             .onAppear(perform: apriDettaglioChiesto)
             .onChange(of: stato.dettaglioArea360DaAprire) { _ in apriDettaglioChiesto() }
+            // Migliorie d'uso 46: «Apri l'area» dalle famiglie come la sua
+            .onAppear(perform: consumaAreaGiaAperta)
+            .onChange(of: stato.areaDaAprire) { _ in apriAreaChiesta() }
             #endif
     }
 
@@ -130,6 +139,27 @@ struct PresentatoreAree360<Contenuto: View>: View {
         stato.dettaglioArea360DaAprire = nil
         let d = dettaglio
         DispatchQueue.main.async {
+            d.apri(DettagliAree360.id(a), misura: DettagliAree360.misura(a))
+        }
+    }
+
+    /// Alla comparsa il dettaglio chiesto con `apriAreaAnalisi360(_:)` è già aperto (`dettaglioIniziale`): resta solo
+    /// da consumare la richiesta.
+    private func consumaAreaGiaAperta() {
+        if stato.areaDaAprire != nil { stato.areaDaAprire = nil }
+    }
+
+    /// Migliorie d'uso 46: aspetta la fine del cambio di vista (650 ms del template al ritmo dell'app; subito con
+    /// «Riduci movimento»), poi apre il dettaglio dalla card dell'area, così nasce da lei.
+    private func apriAreaChiesta() {
+        guard let a = stato.areaDaAprire else { return }
+        stato.areaDaAprire = nil
+        let d = dettaglio
+        let s = stato
+        let attesa = Movimenti.calmo ? 0 : Tema.Apple.Moto.tempo(Tema.Apple.Famiglie.attesaApriArea)
+        Movimenti.dopo(attesa) {
+            // Nel frattempo si è tornati alle famiglie: niente dettaglio
+            guard s.vistaAnalisi360 == .aree else { return }
             d.apri(DettagliAree360.id(a), misura: DettagliAree360.misura(a))
         }
     }

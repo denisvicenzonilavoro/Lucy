@@ -340,6 +340,12 @@ enum VoceConfronto: Hashable {
     /// La vista della panoramica di Analisi 360: le quattro aree o «Rispetto alle famiglie come la sua» (giro 6,
     /// FamiglieComeLaSua.swift). Resta finché l'app è aperta; non si salva nell'archivio.
     var vistaAnalisi360: VistaAnalisi360 = .aree
+    #if os(macOS)
+    /// Migliorie d'uso 46: l'area di cui aprire il dettaglio dalla sua card appena le quattro aree sono di nuovo in vista
+    /// (`apriAreaAnalisi360(_:)`, da «Rispetto alle famiglie come la sua»). Solo in memoria; la consuma
+    /// PresentatoreAree360 senza toccare cliente, area o strumento.
+    var areaDaAprire: AreaAnalisi? = nil
+    #endif
     /// Ipotesi sul tavolo del simulatore.
     var bozzaSimulazione: Simulazione?
     var schedaSimulazioni: SchedaSimulazioni = .simulatore

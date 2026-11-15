@@ -13,6 +13,7 @@ import Foundation
 enum ProvaCalcoliFamiglie {
     static func esegui(_ verifica: VerificaCalcoli) {
         tavoleBancaItalia(verifica)
+        puntoDebole(verifica)
 
         // F1. Il file di prova incluso nell'app si legge, è dichiarato di prova e ha una cella per coppia
         guard let t = TabelleFamiglie.tabelleDiProva else {
@@ -424,5 +425,93 @@ enum ProvaCalcoliFamiglie {
             }
         }?.campo == "gruppi[2].classi")
         verifica.vero("B10 Famiglie a zero", errore { r in classe(&r, 0, 4) { $0["famiglie"] = 0 } }?.campo == "gruppi[0].classi[4].famiglie")
+    }
+}
+
+// MARK: - Il punto debole (migliorie d'uso 46)
+
+extension ProvaCalcoliFamiglie {
+    /// P1-P7: la voce in cui il cliente resta più indietro (`MotoreFamiglie.esitoPuntoDebole`), la mappa voce → area, le
+    /// frasi con gli articoli giusti e la frase grande senza «il 8%».
+    static func puntoDebole(_ verifica: VerificaCalcoli) {
+        func q(_ v: VoceFamiglie, _ a: AmbitoFamiglie, _ p: Int) -> ConfrontoVoceFamiglie {
+            ConfrontoVoceFamiglie(voce: v, ambito: a, metodo: .quantili, valoreCliente: 1, percentile: p, frase: "")
+        }
+        func m(_ v: VoceFamiglie, _ a: AmbitoFamiglie, _ metodo: MetodoConfrontoFamiglie, sopra: Bool?,
+               riferimento: Double? = nil) -> ConfrontoVoceFamiglie {
+            ConfrontoVoceFamiglie(voce: v, ambito: a, metodo: metodo, valoreCliente: sopra == nil ? nil : 1, sopra: sopra,
+                                  riferimento: riferimento, frase: "")
+        }
+        func confronto(_ eta: [ConfrontoVoceFamiglie], _ reddito: [ConfrontoVoceFamiglie] = []) -> ConfrontoFamiglie {
+            var gruppi = [GruppoConfrontoFamiglie(ambito: .eta, classe: nil, famiglie: 500, campioneRidotto: false, voci: eta)]
+            if !reddito.isEmpty {
+                gruppi.append(GruppoConfrontoFamiglie(ambito: .reddito, classe: nil, famiglie: 500, campioneRidotto: false, voci: reddito))
+            }
+            return ConfrontoFamiglie(classeEta: nil, classeReddito: nil, gruppi: gruppi, avvisi: [], diProva: false,
+                                     fonte: "prova", edizione: nil, aggiornamento: nil, unaDimensione: true)
+        }
+
+        // P1. Tutte sopra la metà: nessun punto debole, la capsula verde
+        let sopra = confronto([q(.tassoRisparmio, .eta, 60), q(.protezione, .eta, 72)], [q(.tassoRisparmio, .reddito, 55)])
+        verifica.vero("P1 Tutte sopra → nil", MotoreFamiglie.puntoDebole(sopra) == nil)
+        verifica.vero("P1 Tutte sopra → «Sopra la metà»", MotoreFamiglie.esitoPuntoDebole(sopra) == .sopraLaMeta)
+
+        // P2. Quantili: vince il percentile più basso, anche fra i due gruppi della stessa voce
+        let quantili = confronto([q(.tassoRisparmio, .eta, 40), q(.previdenzaComplementare, .eta, 45)],
+                                 [q(.tassoRisparmio, .reddito, 48), q(.previdenzaComplementare, .reddito, 18)])
+        let p2 = MotoreFamiglie.puntoDebole(quantili)
+        verifica.vero("P2 Percentile più basso → previdenza (18)", p2?.voce == .previdenzaComplementare && p2?.percentile == 18)
+        verifica.vero("P2 Previdenza → area Previdenza", p2?.area == .previdenza)
+        verifica.vero("P2 Frase «l'82% delle famiglie»", p2.map { TestiFamiglie.frasePuntoDebole($0, nome: "Giulia") }
+                      == "Sulla previdenza: l'82% delle famiglie come la sua fa meglio.")
+
+        // P3. Mediana sotto (nessun percentile): «sta sotto la mediana»; a parità vale l'ordine delle voci
+        let mediana = confronto([m(.tassoRisparmio, .eta, .rapportoMedie, sopra: true),
+                                 m(.ricchezzaFinanziaria, .eta, .mediana, sopra: false),
+                                 m(.protezione, .eta, .mediana, sopra: false)])
+        let p3 = MotoreFamiglie.puntoDebole(mediana)
+        verifica.vero("P3 Mediana sotto → patrimonio, prima della protezione", p3?.voce == .ricchezzaFinanziaria && p3?.percentile == nil)
+        verifica.vero("P3 Frase senza percentile", p3.map { TestiFamiglie.frasePuntoDebole($0, nome: "Marco") }
+                      == "Sul patrimonio: sta sotto la mediana delle famiglie come la sua.")
+        // Un percentile sotto la metà vince sulla sola mediana
+        let misto = confronto([m(.tassoRisparmio, .eta, .mediana, sopra: false), q(.protezione, .eta, 30)])
+        verifica.vero("P3 Il percentile sotto la metà viene prima della mediana", MotoreFamiglie.puntoDebole(misto)?.voce == .protezione)
+
+        // P4. Patrimonio: due voci (finanziario e ricchezza netta) che diventano una sola area
+        let patrimonio = confronto([q(.ricchezzaFinanziaria, .eta, 62), q(.ricchezzaNetta, .eta, 22)])
+        let p4 = MotoreFamiglie.puntoDebole(patrimonio)
+        let areaP4: AreaAnalisi? = p4?.area
+        let sullaP4: String = TestiFamiglie.sulla(p4?.voce ?? .tassoRisparmio)
+        verifica.vero("P4 Ricchezza netta → area Investimenti", areaP4 == .investimenti)
+        verifica.vero("P4 «Sul patrimonio»", sullaP4 == "Sul patrimonio")
+        verifica.vero("P4 Patrimonio finanziario → area Investimenti", MotoreFamiglie.area(.ricchezzaFinanziaria) == .investimenti)
+        verifica.vero("P4 Pulsante «Apri l'area Investimenti»", TestiFamiglie.apriArea(.investimenti) == "Apri l'area Investimenti"
+                      && TestiFamiglie.apriArea(.risparmio) == "Apri l'area Risparmio e liquidità")
+        verifica.vero("P4 Solo la ricchezza netta ha «Apri l'area ›»",
+                      MotoreFamiglie.voceSottoLaMeta(.ricchezzaNetta, in: patrimonio)
+                      && !MotoreFamiglie.voceSottoLaMeta(.ricchezzaFinanziaria, in: patrimonio))
+
+        // P5. Senza cifre del cliente: la riga non compare
+        let senza = confronto([m(.tassoRisparmio, .eta, .nessuno, sopra: nil), m(.protezione, .eta, .nessuno, sopra: nil)])
+        verifica.vero("P5 Senza cifre del cliente → nessuna riga", MotoreFamiglie.esitoPuntoDebole(senza) == .senzaCifre
+                      && MotoreFamiglie.puntoDebole(senza) == nil)
+
+        // P6. Quota: senza la cosa è indietro solo se ce l'ha più di metà delle famiglie
+        let quotaBassa = confronto([m(.protezione, .eta, .quota, sopra: false, riferimento: 20)])
+        let quotaAlta = confronto([m(.previdenzaComplementare, .eta, .quota, sopra: false, riferimento: 65)])
+        verifica.vero("P6 Quota del 20% senza polizza: non è un punto debole", MotoreFamiglie.esitoPuntoDebole(quotaBassa) == .sopraLaMeta)
+        verifica.vero("P6 Quota del 65% senza: «la maggior parte … ce l'ha, Giulia no»",
+                      MotoreFamiglie.puntoDebole(quotaAlta).map { TestiFamiglie.frasePuntoDebole($0, nome: "Giulia") }
+                      == "Sulla previdenza: la maggior parte delle famiglie come la sua ce l'ha, Giulia no.")
+
+        // P7. Gli articoli: mai «il 8%» né «del 11%»
+        verifica.vero("P7 «l'8%», «l'11%», «il 18%»", Formati.ilPercentuale(8) == "l'8%" && Formati.ilPercentuale(11) == "l'11%"
+                      && Formati.ilPercentuale(18) == "il 18%")
+        let grandeSotto = TestiFamiglie.fraseGrande(nome: "Giulia", percentile: 18, ridotto: false)
+        verifica.vero("P7 Frase grande «L'82% …»", grandeSotto.prima == "L'" && grandeSotto.numero == 82)
+        let grandeSopra = TestiFamiglie.fraseGrande(nome: "Giulia", percentile: 81, ridotto: false)
+        verifica.vero("P7 Frase grande «più dell'81%»", grandeSopra.prima == "Giulia risparmia più dell'")
+        verifica.vero("P7 Frase grande «più del 62%»",
+                      TestiFamiglie.fraseGrande(nome: "Giulia", percentile: 62, ridotto: false).prima == "Giulia risparmia più del ")
     }
 }

@@ -53,6 +53,16 @@ extension StatoShell {
         apri(.analisi360)
     }
 
+    #if os(macOS)
+    /// Migliorie d'uso 46: torna alle quattro aree (con il cambio di vista di sempre) e, finito il cambio, apre il
+    /// dettaglio dell'area dalla sua card (per Previdenza e Protezione il simulatore). Cliente, area e strumento non
+    /// cambiano: il presentatore non chiude niente.
+    func apriAreaAnalisi360(_ area: AreaAnalisi) {
+        if vistaAnalisi360 != .aree { vistaAnalisi360 = .aree }
+        areaDaAprire = area
+    }
+    #endif
+
     /// Impostazioni › Rendimenti di confronto, sul gruppo «Famiglie italiane» (dall'etichetta dei dati di prova e da
     /// «Carica le tabelle in Impostazioni ›»).
     func apriImpostazioniFamiglie() {
@@ -152,24 +162,71 @@ struct FamiglieComeLaSuaApple: View, Equatable {
         let sottotitolo = c.unaDimensione ? TestiFamiglie.sottotitoloGruppi(c)
             : TestiFamiglie.sottotitoloGruppo(eta: c.classeEta, reddito: c.classeReddito, famiglie: c.famiglieNellaCella)
         return VStack(alignment: .leading, spacing: 0) {
-            frase(c, nome: nome)
-                .carattereApple(f.frase)
-                .foregroundColor(f.coloreFrase)
-                .fixedSize(horizontal: false, vertical: true)
-                .frame(maxWidth: f.larghezzaFraseMax, alignment: .leading)
-            if !sottotitolo.isEmpty {
-                Text(sottotitolo)
-                    .carattereApple(f.sottotitolo)
-                    .foregroundColor(f.coloreSottotitolo)
+            VStack(alignment: .leading, spacing: 0) {
+                frase(c, nome: nome)
+                    .carattereApple(f.frase)
+                    .foregroundColor(f.coloreFrase)
                     .fixedSize(horizontal: false, vertical: true)
-                    .padding(.top, f.sopraSottotitolo)
+                    .frame(maxWidth: f.larghezzaFraseMax, alignment: .leading)
+                if !sottotitolo.isEmpty {
+                    Text(sottotitolo)
+                        .carattereApple(f.sottotitolo)
+                        .foregroundColor(f.coloreSottotitolo)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, f.sopraSottotitolo)
+                }
             }
+            .accessibilityElement(children: .combine)
+            #if os(macOS)
+            passo(c, nome: nome)
+            #endif
         }
         .padding(f.paddingPrincipale)
         .frame(maxWidth: .infinity, alignment: .leading)
         .superficieApple(f.superficie, raggio: f.raggio)
-        .accessibilityElement(children: .combine)
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 46 (`#famPasso`): sopra un filo, la capsula «Dove resta indietro» con la voce più indietro e il
+    /// pulsante che apre la sua area, o la capsula verde «Sopra la metà in tutto». Senza cifre del cliente niente riga.
+    /// Resta anche in modalità cliente: le aree sono del cliente mostrato.
+    @ViewBuilder private func passo(_ c: ConfrontoFamiglie, nome: String) -> some View {
+        let f = Tema.Apple.Famiglie.self
+        let esito = MotoreFamiglie.esitoPuntoDebole(c)
+        if esito != .senzaCifre {
+            VStack(alignment: .leading, spacing: 0) {
+                Rectangle()
+                    .fill(f.coloreFiloPasso)
+                    .frame(height: f.filoPasso)
+                HStack(alignment: .center, spacing: f.spazioPasso) {
+                    switch esito {
+                    case .indietro(let p):
+                        CapsulaStatoApple(testo: TestiFamiglie.capsulaIndietro, tono: .attenzione)
+                        Text(TestiFamiglie.frasePuntoDebole(p, nome: nome))
+                            .carattereApple(f.frasePasso)
+                            .foregroundColor(f.coloreFrasePasso)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        Button { stato.apriAreaAnalisi360(p.area) } label: {
+                            Text(TestiFamiglie.apriArea(p.area))
+                        }
+                        .buttonStyle(.applePrimario)
+                        .fixedSize()
+                    case .sopraLaMeta, .senzaCifre:
+                        CapsulaStatoApple(testo: TestiFamiglie.capsulaSopra, tono: .ok)
+                        Text(TestiFamiglie.nessunPuntoDebole)
+                            .carattereApple(f.frasePasso)
+                            .foregroundColor(f.coloreFrasePasso)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                }
+                .padding(.top, f.sottoFiloPasso)
+            }
+            .padding(.top, f.sopraPasso)
+        }
+    }
+    #endif
 
     /// La frase grande: sempre il risparmio. Con i quantili la percentuale delle famiglie che si conta in blu; con le
     /// tavole a una dimensione il risparmio del gruppo della sua età (o del suo quinto) che si conta, e quello del
@@ -226,7 +283,8 @@ struct FamiglieComeLaSuaApple: View, Equatable {
         let gruppi = c.gruppi.filter { $0.voce(v) != nil }
         if !gruppi.isEmpty {
             CardVoceFamiglie(voce: v, gruppi: gruppi, nome: nome, indice: i, iniziali: cliente?.iniziali ?? "",
-                             tinta: (cliente?.tinta ?? .blu).colori, completa: azioneCompleta(c.confronti(v)))
+                             tinta: (cliente?.tinta ?? .blu).colori, completa: azioneCompleta(c.confronti(v)),
+                             apriArea: azioneApriArea(v, c))
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .entrataCascata(t.indicePrimaVoce + min(i, t.ultimaVoce), base: base)
         }
@@ -240,6 +298,18 @@ struct FamiglieComeLaSuaApple: View, Equatable {
         let stato = self.stato
         let id = clienteId
         return { stato.apriCliente(id) }
+    }
+
+    /// Migliorie d'uso 46: «Apri l'area ›» sulle card delle voci sotto la metà (solo sul Mac).
+    private func azioneApriArea(_ v: VoceFamiglie, _ c: ConfrontoFamiglie) -> (() -> Void)? {
+        #if os(macOS)
+        guard MotoreFamiglie.voceSottoLaMeta(v, in: c) else { return nil }
+        let stato = self.stato
+        let area = MotoreFamiglie.area(v)
+        return { stato.apriAreaAnalisi360(area) }
+        #else
+        return nil
+        #endif
     }
 
     // MARK: Senza confronto
@@ -322,6 +392,8 @@ private struct CardVoceFamiglie: View {
     let iniziali: String
     let tinta: Colori.Avatar.Tinta
     let completa: (() -> Void)?
+    /// Migliorie d'uso 46: «Apri l'area ›» quando la voce è sotto la metà (nil altrove e su iPhone e iPad).
+    var apriArea: (() -> Void)? = nil
 
     private var confronti: [ConfrontoVoceFamiglie] { gruppi.compactMap { $0.voce(voce) } }
     /// Versione 1: la sola cella, come nel template (la percentuale in testa).
@@ -364,10 +436,19 @@ private struct CardVoceFamiglie: View {
                 }
                 .padding(.top, f.sopraCautele)
             }
-            if let completa {
-                Button(action: completa) { Text(TestiFamiglie.completaNellaScheda) }
-                    .buttonStyle(.appleSobrio)
-                    .padding(.top, f.sopraCompleta)
+            if completa != nil || apriArea != nil {
+                HStack(alignment: .center, spacing: f.spazioAzioniVoce) {
+                    if let apriArea {
+                        Button(action: apriArea) { Text(TestiFamiglie.apriAreaCard) }
+                            .buttonStyle(StileCollegamento())
+                            .accessibilityLabel(Text(TestiFamiglie.apriArea(MotoreFamiglie.area(voce))))
+                    }
+                    if let completa {
+                        Button(action: completa) { Text(TestiFamiglie.completaNellaScheda) }
+                            .buttonStyle(.appleSobrio)
+                    }
+                }
+                .padding(.top, f.sopraCompleta)
             }
             Spacer(minLength: 0)
         }

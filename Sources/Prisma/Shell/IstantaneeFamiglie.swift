@@ -10,6 +10,8 @@ import Foundation
 /// - 447: Marco, un altro cliente, con le tavole della Banca d'Italia;
 /// - 448: Giulia senza risparmio indicato e senza posizioni: «—» e «Completa nella scheda del cliente ›»;
 /// - 449: Giulia senza data di nascita: resta il confronto con le famiglie del suo quinto di reddito, e la nota lo dice.
+/// - 1144 (migliorie d'uso 46): la riga «Dove resta indietro» con il pulsante dell'area (anche 445-449 la mostrano);
+/// - 1145: dopo «Apri l'area» (`apriAreaAnalisi360(.previdenza)`): le quattro aree con il simulatore aperto.
 ///
 /// Le cifre delle famiglie sono quelle pubblicate dalla Banca d'Italia (edizione 2022), tranne la 446 che mostra di
 /// proposito il file di prova; i clienti sono quelli fittizi del template. Il file di prova della 446 esiste SOLO dentro
@@ -36,6 +38,14 @@ extension Istantanee {
             if let i = s.dati.clienti.firstIndex(where: { $0.id == "giulia" }) { s.dati.clienti[i].dataNascita = nil }
             preparaFamiglie(s, cliente: "giulia")
         }
+        // Migliorie d'uso 46: la riga «Dove resta indietro» in fondo alla card principale (Giulia: il risparmio sotto
+        // la media del gruppo) e «Apri l'area» che torna alle quattro aree e apre il simulatore della previdenza dalla
+        // sua card (stato finale)
+        coppia("1144-uso-famiglie-passo") { s in preparaFamiglie(s, cliente: "giulia") }
+        scene.append((nome: "1145-uso-famiglie-apri-area", prepara: { s in
+            preparaFamiglie(s, cliente: "giulia")
+            s.apriAreaAnalisi360(.previdenza)
+        }))
         return scene
     }
 

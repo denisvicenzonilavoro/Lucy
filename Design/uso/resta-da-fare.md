@@ -1556,3 +1556,30 @@ Resta:
   riduce fino all'80% e poi si tronca).
 - «Sono stime, non garanzie.» non è ancora coordinato con la capsula delle stime della miglioria 16 (un solo testo,
   `TestiSimulatoriAnalisi.avviso`, pronto per essere riusato).
+
+## 46. Il confronto con le famiglie porta a un passo
+
+Fatto (solo Mac, dentro `#if os(macOS)`; iPhone e iPad restano come prima, salvo gli articoli della frase grande):
+- `MotoreFamiglie.esitoPuntoDebole(_:)` / `puntoDebole(_:)` (`PuntoDeboleFamiglie`, `EsitoPuntoDeboleFamiglie`:
+  `.indietro`, `.sopraLaMeta`, `.senzaCifre`), `area(_:)` voce → area, `voceSottoLaMeta(_:in:)` per le card.
+- In fondo alla card principale, sopra un filo: `CapsulaStatoApple` «Dove resta indietro», la frase e il pulsante
+  primario «Apri l'area …»; oppure la capsula verde «Sopra la metà in tutto» e «Non c'è un punto debole…». Senza cifre
+  del cliente la riga non c'è. Resta anche in modalità cliente.
+- «Apri l'area ›» (`StileCollegamento`) sulle card delle voci sotto la metà, accanto a «Completa nella scheda».
+- `StatoShell.areaDaAprire` e `apriAreaAnalisi360(_:)`: torna alle quattro aree e, dopo 650 ms al ritmo dell'app
+  (`Tema.Apple.Famiglie.attesaApriArea`; subito con «Riduci movimento»), apre il dettaglio dalla card (i simulatori per
+  Previdenza e Protezione). Se Analisi 360 nasce con la richiesta il dettaglio è già aperto (istantanea 1145).
+- Articoli: `Formati.elide`, `ilPercentuale`, `alPercentuale` (in comune con la 45); la frase grande dice «L'82% …» e
+  «più dell'81%».
+- Istantanee 1144 (e scura), 1145; prove P1-P7 in `ProvaCalcoliFamiglie`.
+
+Resta / da decidere:
+- Frasi senza percentile (decisione 46-a): con la quota il testo usa il nome («… ce l'ha, Giulia no.») al posto di
+  «lui no» della proposta. Da approvare con le altre.
+- Con la quota la voce è «sotto la metà» solo se più di metà delle famiglie ha la cosa e il cliente no (con le tavole
+  della Banca d'Italia le polizze vita e i fondi pensione sono di una minoranza: chi non li ha sta con i più). La
+  specifica diceva `sopra == false` e basta: scelta mia per non scrivere «la maggior parte ce l'ha» quando non è vero.
+- Le voci con un percentile sotto la metà vengono prima di quelle con la sola mediana, media o quota (senza percentile
+  si confrontano come 50): da confermare.
+- Le card delle voci sono un solo elemento per VoiceOver (`children: .ignore`, come prima): «Apri l'area ›» e «Completa»
+  non si raggiungono da VoiceOver dentro la card; il pulsante della card principale sì.
