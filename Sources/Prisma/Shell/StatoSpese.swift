@@ -102,6 +102,11 @@ extension StatoShell {
     @discardableResult
     func salvaSpesa(_ spesa: SpesaStudio, fileScontrino: URL? = nil, evidenzia: Bool = false) -> Bool {
         guard !solaLettura else { return false }
+        // Migliorie d'uso 37: durante la dimostrazione nessun file accanto all'archivio
+        if fileScontrino != nil, inDimostrazione {
+            mostraAvviso(TestiDimostrazione.nonDurante)
+            return false
+        }
         var s = spesa
         if let url = fileScontrino, persistente {
             do {
@@ -115,7 +120,7 @@ extension StatoShell {
         let vecchio = a.spese.first(where: { $0.id == s.id })?.scontrino
         if let i = a.spese.firstIndex(where: { $0.id == s.id }) { a.spese[i] = s } else { a.spese.append(s) }
         dati.speseStudio = a
-        if let vecchio, vecchio != s.scontrino, persistente {
+        if let vecchio, vecchio != s.scontrino, persistente, !inDimostrazione {
             try? FileManager.default.removeItem(at: Archivio.cartellaScontrini().appendingPathComponent(vecchio))
         }
         // La card mostra un mese solo: se la spesa è di un altro (per esempio uno scontrino di oggi mentre fino al giorno
@@ -130,7 +135,7 @@ extension StatoShell {
     func eliminaSpesa(_ id: String) {
         guard !solaLettura, let s = dati.speseStudio.spese.first(where: { $0.id == id }) else { return }
         dati.speseStudio.spese.removeAll { $0.id == id }
-        if let f = s.scontrino, persistente {
+        if let f = s.scontrino, persistente, !inDimostrazione {
             try? FileManager.default.removeItem(at: Archivio.cartellaScontrini().appendingPathComponent(f))
         }
         if studioSpese.nuovaSpesaId == id { studioSpese.nuovaSpesaId = nil }
@@ -166,6 +171,7 @@ extension StatoShell {
     /// prima dello stesso corso («Cambia file…»), che non serve più.
     func salvaCorso(_ corso: CorsoAggiornamento, fileAttestato: URL? = nil) {
         guard !solaLettura else { return }
+        if fileAttestato != nil, inDimostrazione { return mostraAvviso(TestiDimostrazione.nonDurante) }
         var c = corso
         if let url = fileAttestato, persistente {
             do {
@@ -179,7 +185,7 @@ extension StatoShell {
         let vecchio = a.corsi.first(where: { $0.id == c.id })?.attestato
         if let i = a.corsi.firstIndex(where: { $0.id == c.id }) { a.corsi[i] = c } else { a.corsi.append(c) }
         dati.speseStudio = a
-        if let vecchio, vecchio != c.attestato, persistente {
+        if let vecchio, vecchio != c.attestato, persistente, !inDimostrazione {
             try? FileManager.default.removeItem(at: Archivio.cartellaAttestati().appendingPathComponent(vecchio))
         }
     }
@@ -187,7 +193,7 @@ extension StatoShell {
     func eliminaCorso(_ id: String) {
         guard !solaLettura, let c = dati.speseStudio.corsi.first(where: { $0.id == id }) else { return }
         dati.speseStudio.corsi.removeAll { $0.id == id }
-        if let f = c.attestato, persistente {
+        if let f = c.attestato, persistente, !inDimostrazione {
             try? FileManager.default.removeItem(at: Archivio.cartellaAttestati().appendingPathComponent(f))
         }
     }

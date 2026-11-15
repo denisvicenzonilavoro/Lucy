@@ -157,7 +157,8 @@ struct RisultatoBiblioteca: Equatable {
 
     /// Salva il testo di un documento accanto al PDF (o solo in memoria, fuori dall'app).
     func salvaTesto(_ id: String, _ pagine: [String]) {
-        guard persistente else {
+        // Migliorie d'uso 37: durante la dimostrazione la Biblioteca non si scrive, il testo resta in memoria
+        guard persistente, !biblioteca.ferma else {
             memoria[id] = pagine
             return
         }
@@ -172,7 +173,7 @@ struct RisultatoBiblioteca: Equatable {
     func dimentica(_ id: String) {
         memoria[id] = nil
         togliDallaCache(id)
-        if persistente {
+        if persistente && !biblioteca.ferma {
             let file = Self.cartella.appendingPathComponent("\(id).txt")
             Self.codaLettura.async { try? FileManager.default.removeItem(at: file) }
         }

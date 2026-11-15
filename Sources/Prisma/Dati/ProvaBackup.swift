@@ -764,6 +764,11 @@ enum ProvaBackup {
                 print("ERRORE: \(errore)")
                 return 1
             }
+            // Migliorie d'uso 37: la dimostrazione non tocca i dati veri e non li mostra (ProvaBackupDimostrazione.swift)
+            if let errore = provaDimostrazione() {
+                print("ERRORE: \(errore)")
+                return 1
+            }
             // «Misura la velocità su questo Mac» non tocca l'archivio dell'utente (ProvaBackupMisura.swift)
             if let errore = try provaMisuraVelocita(radice: radice) {
                 print("ERRORE: \(errore)")

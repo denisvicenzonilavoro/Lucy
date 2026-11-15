@@ -664,7 +664,8 @@ struct RigaPosizioneMappa: View {
 
     private var testo: String {
         if cliente.luogo != nil {
-            return cliente.luogo?.nota == TerritorioDiProva.nota ? "a mano · dati di prova" : "a mano"
+            // Migliorie d'uso 37: in dimostrazione basta l'etichetta della barra
+            return cliente.luogo?.nota == TerritorioDiProva.nota && !stato.inDimostrazione ? "a mano · dati di prova" : "a mano"
         }
         guard let t = stato.territorio.tabella else { return "posizione dal comune dell'indirizzo" }
         let r = MotoreTerritorio.luoghi(clienti: [cliente], tabella: t, zone: [])

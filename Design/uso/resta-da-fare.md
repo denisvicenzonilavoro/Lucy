@@ -698,3 +698,57 @@ Resta:
 - **Istantanee**: rigenerare sul Mac 560-566 (la pagina ha il nuovo ordine), 251 (riga che rimanda), le scene di
   Inquadra senza ponte e «Come funziona» della nota (compare «Collega l’iPhone»), guardare 1069-1071 chiare e scure e
   aggiornare la pagina delle anteprime.
+
+## 37. La dimostrazione è un interruttore
+
+Fatto (solo Mac): `StatoShell.inDimostrazione` e `gruppoProva` (cinque o trentacinque), `accendiDimostrazione` e
+`spegniDimostrazione` in StatoShell.swift, il resto in Shell/StatoDimostrazione.swift. Accesa: prima `salvaOra()`, poi in
+memoria solo i dati di prova rifatti ogni volta (decisione 1), con delle impostazioni dell'utente solo aspetto, nomi dei
+canali, motore e ponte di Vera, nome nel profilo, guida e backup; spenta: l'archivio vero si rilegge dal disco con
+`Archivio.carica()` fuori dal thread principale e `salvataggio.prepara`, e tornano solo aspetto, canali e Vera scelti
+intanto (decisione 7). Lo stato acceso e il gruppo stanno nelle preferenze del Mac (`Prisma.dimostrazione`,
+`Prisma.dimostrazioneGruppo`), fuori da archivio, backup e «Prisma ovunque»; riaprendo Prisma la dimostrazione riparte
+(decisione 2). Ferme durante la dimostrazione: `salvaOra`/`scrivi`, backup manuale e automatico («Crea backup»
+disattivato con la nota), ripristino, importazioni, `dopoUnBackup`, `ripristinaDatiDiProva`, `togliDatiDiProva`,
+`sincronizzaOvunque` (istantanea e unione dei giornali), Stanotte, routine programmate, tagliando, ripianificazione dei
+promemoria del Mac, `rimuoviFile` e le due pulizie dei documenti orfani, le cancellazioni di scontrini e attestati (e
+l'aggiunta di file, con l'avviso «Non durante la dimostrazione»), la Biblioteca e i Moduli dell'utente in sola lettura
+(decisione 3, `fermaPerDimostrazione`), i testi di «Trova la pagina», la memoria di Vera (né letta né scritta) e la cache
+dei vettori; le note dettate si rifiutano e restano nella coda dell'iPhone (decisione 4). Etichetta «Dimostrazione» nella
+barra dopo la pillola del cliente (`EtichettaDimostrazione`, mai in modalità cliente né nella vista pulita) e la scheda
+«Stai mostrando Prisma con i clienti di prova.» con «Esci dalla dimostrazione» e «Resta». Impostazioni › Dimostrazione
+(la pagina `.strumenti`, il valore grezzo resta «strumenti») con l'interruttore, «I clienti di prova» («In uso» / «Usa
+questi») e «accesa» nella colonna; «Confronta i modelli», le misure della velocità e «Voce e ascolto» in Vera, «Prova un
+promemoria» in Promemoria e occasioni, «Togli i clienti di prova» in Archivio e backup (solo se ce ne sono e la
+dimostrazione è spenta); spariscono «I 5 clienti di prova · Ripristina», «35 clienti di prova completi · Carica» e il
+«+ 30 clienti di prova» della rubrica. Guida: il passo «Togli i clienti di prova» porta ad Archivio e backup e c'è solo se
+servono; con la dimostrazione accesa la guida non si mostra. Le scritte «dati di prova» che leggevano `haDatiDiProva`
+leggono `scritteProva` (spenta in dimostrazione, tenuta fra i dati ricavati); anche Mercato, Pratiche › Dopo la firma e
+Territorio tacciono in dimostrazione. «Guardo Prisma con i clienti di prova» del primo avvio accende la dimostrazione.
+Prova `ProvaBackupDimostrazione` in `--prova-backup`. Istantanee nuove 1060 (chiara e scura), 1061, 1062 (chiara e
+scura), 1063; 85 mostra la pagina nuova, 86 le misure in Impostazioni › Vera.
+
+Resta:
+- **Primo avvio senza dati di prova** (37.3 D, decisione 5): `Archivio.carica` scrive ancora `DatiPrisma.demo()` in una
+  cartella vuota (Archivio.swift, ramo finale e `caricaVecchio`). Va cambiato in un archivio vuoto controllando le prove
+  che partono da una cartella vuota; per l'utente non cambia nulla.
+- **Altre scritte «di prova»** che guardano la nota o il prefisso del dato e non sono ancora spente in dimostrazione:
+  PraticheComuniApple (`dati di prova`), SalaGiornataPensione, PaginePrismaCliente (`c.diProva`), SmontaggioApple,
+  DettaglioDocumento («documento di prova»), FamiglieComeLaSua, `TestiStudio.datiDiProva`, StudioSpese, StudioEsameOCF,
+  TestiPassaparola, MotoreTraguardi, TestiSinistri (chiudere con `grep -rn "di prova" Sources/Prisma/Shell
+  Sources/Prisma/Motori`). `scritteProva` non guarda la modalità cliente (la specifica lo propone): aggiungerlo cambierebbe
+  le istantanee della Sala in modalità cliente, da decidere guardandole.
+- **Pulsanti disattivati** con l'aiuto «Non durante la dimostrazione» (documenti, scontrini, attestati, Biblioteca,
+  moduli): oggi la guardia è nello stato (avviso), non nei pulsanti. Un documento aggiunto ai Documenti di un cliente di
+  prova copia comunque il file nella cartella Documenti: non entra nell'archivio vero e la pulizia dei file orfani lo
+  sposta nel Cestino al primo avvio dopo la dimostrazione. Da guardare anche le scritture di capsule e sinistri
+  (StatoCapsule, StatoSinistri).
+- **Prove**: `--prova-ovunque` (con la dimostrazione accesa `sincronizzaOvunque` non scrive e non unisce) e `--prova-vera`
+  (la guida e il contesto di Vera senza id di clienti veri) non sono estese: la prova del backup lavora su uno stato non
+  persistente e controlla dati, ricerca, guida, pulizie e scritture ferme; la lettura dal disco allo spegnimento non è
+  provata (servirebbe uno StatoShell persistente su una cartella di prova).
+- **«Riapri ora»** (dimensione del testo) durante la dimostrazione: la misura scelta non si salva e Prisma riparte con
+  quella dell'archivio vero (in dimostrazione).
+- **Istantanee**: rigenerare sul Mac 85, 86 (chiara e scura), le pagine di Vera, Promemoria e Archivio (righe nuove in
+  fondo), la rubrica vuota e il piede della rubrica (senza «+ 30 clienti di prova»), guardare 1060-1063 e aggiornare la
+  pagina delle anteprime; controllare che le scene dello Studio, di Messaggi e della Sala con «dati di prova» non cambino.

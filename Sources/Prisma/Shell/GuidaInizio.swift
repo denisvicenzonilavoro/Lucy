@@ -23,7 +23,7 @@ extension StatoShell {
         let veri = dati.clienti.contains { !Self.clientiDiProva.contains($0.id) }
         let posizioniVere = dati.posizioni.contains { !Self.clientiDiProva.contains($0.clienteId) }
         let b = dati.impostazioni.backup
-        return [
+        let passi = [
             PassoGuida(azione: .cartellaBackup, titolo: "Scegli dove salvare i backup",
                        dettaglio: "Una cartella su iCloud Drive o su un disco esterno: se il Mac si guasta, i dati dei clienti restano al sicuro.",
                        pulsante: "Scegli la cartella", fatto: b.cartella != nil),
@@ -43,11 +43,17 @@ extension StatoShell {
                        dettaglio: "Da qui in poi ci pensa Prisma ogni settimana (si conservano le ultime 8 copie).",
                        pulsante: "Crea il backup", fatto: b.ultimo != nil && b.cartella != nil),
         ]
+        #if os(macOS)
+        // Migliorie d'uso 37: «Togli i clienti di prova» solo per chi li ha ancora nell'archivio (mai in dimostrazione)
+        if !haDatiDiProva || inDimostrazione { return passi.filter { $0.azione != .togliProva } }
+        #endif
+        return passi
     }
 
     /// La guida si vede finché non è finita o finché non la nascondi (e mai in sola lettura).
     var guidaVisibile: Bool {
-        !solaLettura && !dati.impostazioni.guidaNascosta && passiGuida.contains { !$0.fatto }
+        // Migliorie d'uso 37: con la dimostrazione accesa la guida non si mostra
+        !solaLettura && !inDimostrazione && !dati.impostazioni.guidaNascosta && passiGuida.contains { !$0.fatto }
     }
 
     @MainActor
@@ -62,7 +68,13 @@ extension StatoShell {
             apri(.posizioni)
             importaPosizioniDaFile()
         case .togliProva:
+            // Migliorie d'uso 37: sul Mac «Togli i clienti di prova» sta in Archivio e backup
+            #if os(macOS)
+            schedaImpostazioni = .archivio
+            ancoraImpostazioni = "imp-archivio-prova"
+            #else
             schedaImpostazioni = .strumenti
+            #endif
             apri(.impostazioni)
         case .passwordPDF:
             dati.impostazioni.pdf.proteggi = true

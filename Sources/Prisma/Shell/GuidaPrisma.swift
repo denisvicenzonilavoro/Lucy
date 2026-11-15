@@ -238,11 +238,11 @@ enum GuidaTesti {
                 parole: [])
         case .impostazioni:
             return AiutoApp(
-                aCosaServe: "Il tuo profilo, i backup (manuali e ogni settimana), l'aspetto chiaro o scuro, la dimensione del testo e i dati di prova.",
-                inBreve: "Profilo, backup, aspetto, dati di prova",
+                aCosaServe: "Il tuo profilo, i backup (manuali e ogni settimana), l'aspetto chiaro o scuro, la dimensione del testo e la dimostrazione.",
+                inBreve: "Profilo, backup, aspetto, dimostrazione",
                 passi: ["Archivio: scegli la cartella dei backup e fai il primo.",
                         "Esperienza: aspetto, dimensione del testo, guida.",
-                        "Archivio: carica o togli i clienti di prova."],
+                        "Dimostrazione: Prisma con i clienti di prova; in Archivio si tolgono quelli rimasti."],
                 parole: [])
         }
     }

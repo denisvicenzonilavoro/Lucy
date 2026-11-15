@@ -224,7 +224,7 @@ struct PalcoPrismaCliente: View {
             if html {
                 nota("Con il file per il browser (sperimentale: da provare prima su iPhone e Android veri).", avviso: false)
             }
-            if StatoShell.clientiDiProva.contains(c.id) && stato.haDatiDiProva {
+            if StatoShell.clientiDiProva.contains(c.id) && stato.scritteProva {
                 nota("Dati di prova.", avviso: false)
             }
         }

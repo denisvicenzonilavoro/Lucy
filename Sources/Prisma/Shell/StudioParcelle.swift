@@ -264,7 +264,7 @@ struct ParcelleStudioVista: View {
     private func barra(_ elenco: [Parcella], scelta: String?, totali: TotaliParcelle) -> some View {
         let forma = RoundedRectangle(cornerRadius: D.raggioLaterale, style: .continuous)
         let T = Tema.Apple.Parcelle.Totali.self
-        let prova = stato.haDatiDiProva && !elenco.isEmpty
+        let prova = stato.scritteProva && !elenco.isEmpty
         let oggi = Date()
         return VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: T.spazio) {

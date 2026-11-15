@@ -70,7 +70,7 @@ extension StatoShell {
     /// «Aggiornato oggi alle 18:00 · valori di prova».
     func occhielloMercato(oggi: Date = Date()) -> String {
         MotoreMercato.occhiello(ultimo: MotoreMercato.ultimoArrivo(dati.mercato), inCorso: sessioneMercato.inAggiornamento,
-                                datiDiProva: mercatoDiProva, oggi: oggi)
+                                datiDiProva: mercatoDiProva && !inDimostrazione, oggi: oggi)
     }
 
     /// Gli eventi di «Chi è toccato» con le soglie dell'utente (in modalità cliente solo il suo).

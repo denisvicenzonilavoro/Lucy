@@ -27,7 +27,7 @@ extension StatoShell {
         let tabella = MotoreLanciaAnno.eventi(risorsa: MotoreLanciaAnno.caricati?.eventi ?? [], utente: dati.impostazioni.sala.eventiAnno)
         return MotoreLanciaAnno.prepara(cliente: c, posizioni: posizioniCliente(c.id), obiettivi: obiettiviCliente(c.id),
                                         eventiCliente: dati.eventiVita.filter { $0.clienteId == c.id }, tabella: tabella,
-                                        diProva: haDatiDiProva && StatoShell.clientiDiProva.contains(c.id),
+                                        diProva: scritteProva && StatoShell.clientiDiProva.contains(c.id),
                                         anniScelti: dati.impostazioni.sala.anniPartita, oggi: Date(),
                                         seme: seme ?? MotoreMonteCarlo.seme("\(c.id)-lancia-\(numero)"))
     }
@@ -176,7 +176,7 @@ struct LanciaAnnoVista: View {
                     .foregroundColor(L.coloreEta)
                     .padding(.bottom, L.spazioAnnoEta / 2)
             }
-            if StatoShell.clientiDiProva.contains(cliente.id) && stato.haDatiDiProva {
+            if StatoShell.clientiDiProva.contains(cliente.id) && stato.scritteProva {
                 Text("dati di prova")
                     .carattereApple(L.prova)
                     .foregroundColor(L.coloreProva)

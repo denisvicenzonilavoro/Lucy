@@ -13,6 +13,7 @@ import SwiftUI
 struct BarraSuperiore: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.modoIstantanea) var modoIstantanea
+    @Environment(\.prismaCalmo) private var calmo
     /// Dove sono i pulsanti veri della finestra del Mac (nil: non letti, o non ci sono).
     @State var semafori: PosizioneSemafori? = nil
 
@@ -34,6 +35,13 @@ struct BarraSuperiore: View {
                 // Migliorie d'uso 2: il cliente di tutta Prisma, scelto qui
                 pillolaCliente
                     .offset(y: y)
+                // Migliorie d'uso 37: l'etichetta della dimostrazione accesa, subito dopo la pillola del cliente (mai in
+                // modalità cliente né nella vista pulita); al clic la scheda per uscire
+                if mostraEtichettaDimostrazione {
+                    EtichettaDimostrazione { stato.schedaDimostrazione = true }
+                        .offset(y: y)
+                        .transition(.opacity)
+                }
                 #endif
                 Spacer(minLength: 20)
                 // I vetri sono quasi alti quanto la barra: seguono i pulsanti finché resta un punto dal bordo
@@ -44,6 +52,10 @@ struct BarraSuperiore: View {
             .padding(.leading, margineSinistro)
             .padding(.trailing, B.margineDestro)
             .foregroundColor(Tema.Apple.Colore.inchiostroAcqua)
+            #if os(macOS)
+            .animation(Tema.Apple.Moto.animazione(Tema.Apple.Dimostrazione.animazione, calmo: calmo),
+                       value: mostraEtichettaDimostrazione)
+            #endif
 
             orologio
                 .offset(y: y)
@@ -117,6 +129,11 @@ struct BarraSuperiore: View {
     }
 
     #if os(macOS)
+    /// Migliorie d'uso 37: l'etichetta «Dimostrazione» c'è solo con la dimostrazione accesa, fuori dalla modalità cliente.
+    private var mostraEtichettaDimostrazione: Bool {
+        stato.inDimostrazione && !stato.inModoCliente && !stato.inVistaCliente
+    }
+
     /// La pillola del cliente (migliorie d'uso 2, template #bCli): avatar 20 e nome del cliente, oppure il glifo delle
     /// persone e «Tutti i clienti», con la freccia in giù; apre il pannello «Di chi parliamo?» (mai in modalità cliente).
     private var pillolaCliente: some View {

@@ -250,7 +250,7 @@ struct AppClienti: View {
                 ],
                 pulsante: "Importa i clienti…",
                 azione: { stato.importaClientiDaFile() },
-                secondario: ("Carica i clienti di prova", {
+                secondario: (AppClienti.testoClientiDiProva, {
                     stato.schedaImpostazioni = .strumenti
                     stato.apri(.impostazioni)
                 })
@@ -816,5 +816,17 @@ struct PanoramicaCliente: View {
             stato.clienteAttivoId = cliente.id
             stato.apri(app)
         }
+    }
+}
+
+extension AppClienti {
+    /// Il pulsante secondario della rubrica vuota. Sul Mac (migliorie d'uso 37) porta a Impostazioni › Dimostrazione: i
+    /// clienti di prova non entrano più nell'archivio vero.
+    static var testoClientiDiProva: String {
+        #if os(macOS)
+        return "Guarda la dimostrazione"
+        #else
+        return "Carica i clienti di prova"
+        #endif
     }
 }

@@ -448,6 +448,17 @@ struct CorpoShell: View {
             .animation(curvaPannello(stato.dispositivi.schedaCodice, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
                        value: stato.dispositivi.schedaCodice)
             .opacity(nascosti ? 0 : 1)
+            // Migliorie d'uso 37: la scheda della dimostrazione (StatoDimostrazione.swift), dall'etichetta della barra
+            ZStack {
+                if stato.schedaDimostrazione {
+                    SchedaDimostrazione()
+                        .frame(width: misura.width, height: misura.height)
+                        .transition(transizionePannello)
+                }
+            }
+            .animation(curvaPannello(stato.schedaDimostrazione, Tema.Moto.Guida.entrata, Tema.Moto.Guida.uscita),
+                       value: stato.schedaDimostrazione)
+            .opacity(nascosti ? 0 : 1)
             #endif
 
             ZStack {

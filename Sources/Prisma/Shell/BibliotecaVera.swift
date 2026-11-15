@@ -12,6 +12,9 @@ import Observation
     private(set) var inLettura: [String] = []
 
     let persistente: Bool
+    /// Migliorie d'uso 37 (decisione 3): durante la dimostrazione la Biblioteca dell'utente si vede ma non si scrive
+    /// (nessun file copiato o tolto, biblioteca.json fermo); spenta, si rilegge dal disco.
+    @ObservationIgnored private(set) var ferma = false
     @ObservationIgnored private var caricata = false
     /// La lettura in anticipo di biblioteca.json è partita e `carica()` non ne ha ancora preso il risultato (solo
     /// thread principale).
@@ -40,6 +43,15 @@ import Observation
         scelto = nil
         articoloScelto = nil
         carica()
+    }
+
+    /// Migliorie d'uso 37: ferma le scritture durante la dimostrazione; spenta, rilegge la Biblioteca dal disco.
+    func fermaPerDimostrazione(_ f: Bool) {
+        guard f != ferma else { return }
+        Self.coda.sync {}
+        ferma = f
+        // Nelle prove e nelle istantanee (non persistente) la Biblioteca è solo in memoria: niente da rileggere
+        if !f && persistente { ricarica() }
     }
 
     static var cartella: URL { Archivio.cartella.appendingPathComponent("Biblioteca", isDirectory: true) }
@@ -89,7 +101,7 @@ import Observation
     }
 
     private func salva() {
-        guard persistente else { return }
+        guard persistente, !ferma else { return }
         let e = JSONEncoder()
         e.dateEncodingStrategy = .iso8601
         guard let d = try? e.encode(testi) else { return }
@@ -118,6 +130,7 @@ import Observation
 
     /// Importa i PDF scelti: copia nella cartella, legge (PDFKit, Vision per le scansioni) e divide per articolo.
     func importa(_ urls: [URL], avviso: @escaping (String) -> Void) {
+        guard !ferma else { return avviso(TestiDimostrazione.nonDurante) }
         carica()
         for url in urls where url.pathExtension.lowercased() == "pdf" {
             let nome = url.deletingPathExtension().lastPathComponent
@@ -164,7 +177,7 @@ import Observation
 
     func elimina(_ id: String) {
         guard let t = testi.first(where: { $0.id == id }) else { return }
-        if persistente { try? FileManager.default.removeItem(at: Self.cartella.appendingPathComponent(t.file)) }
+        if persistente && !ferma { try? FileManager.default.removeItem(at: Self.cartella.appendingPathComponent(t.file)) }
         testi.removeAll { $0.id == id }
         if scelto == id { scelto = testi.first?.id }
         salva()

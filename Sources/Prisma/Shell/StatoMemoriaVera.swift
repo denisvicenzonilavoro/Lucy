@@ -19,6 +19,9 @@ import Foundation
     /// La chiave si chiede anche dalla ricerca, fuori dal thread principale: una sola chiave, mai due.
     private let bloccoChiave = NSLock()
     @ObservationIgnored private var caricata = false
+    /// Migliorie d'uso 37: la dimostrazione è accesa. La memoria non si legge (ricordi e lezioni possono nominare clienti
+    /// veri) e non si scrive: quello che Vera impara intanto resta in memoria e se ne va con la dimostrazione.
+    @ObservationIgnored private(set) var ferma = false
     private static let coda = DispatchQueue(label: "prisma.memoria-vera", qos: .utility)
 
     /// Aspetta le scritture in coda (prima di sostituire la cartella dei dati con un ripristino).
@@ -68,7 +71,7 @@ import Foundation
     /// Apre la memoria con la password dei backup (la pagina dei ricordi, quando è bloccata).
     @discardableResult
     func sblocca(password: String) -> Bool {
-        guard persistente, let k = try? MemoriaVera.svolgi(MemoriaVera.fileChiave, password: password),
+        guard persistente, !ferma, let k = try? MemoriaVera.svolgi(MemoriaVera.fileChiave, password: password),
               let d = try? Data(contentsOf: MemoriaVera.file), let c = try? MemoriaVera.leggi(d, chiave: k) else { return false }
         PortachiaviMemoria.salva(k.withUnsafeBytes { Data($0) })
         chiave = k
@@ -96,7 +99,7 @@ import Foundation
     }
 
     private func salva() {
-        guard persistente, let k = chiaveMemoria(), let d = try? MemoriaVera.scrivi(contenuto, chiave: k) else { return }
+        guard persistente, !ferma, let k = chiaveMemoria(), let d = try? MemoriaVera.scrivi(contenuto, chiave: k) else { return }
         let fileChiave = MemoriaVera.fileChiave
         let password = PortachiaviBackup.leggi()
         Self.coda.async {
@@ -116,6 +119,7 @@ import Foundation
     /// Dopo un ripristino: dimentica quello che c'è in memoria e rilegge il file ripristinato (con la chiave del Portachiavi;
     /// se è di un altro Mac la memoria resta bloccata finché non la apri con la password dei backup).
     func ricarica() {
+        guard !ferma else { return }
         Self.coda.sync {}
         bloccoChiave.lock(); chiave = nil; bloccoChiave.unlock()
         caricata = false
@@ -126,7 +130,7 @@ import Foundation
 
     /// Riscrive la chiave nel backup con la password dei backup di adesso (o la toglie se la protezione è spenta).
     func riavvolgiChiave(password: String?) {
-        guard persistente, FileManager.default.fileExists(atPath: MemoriaVera.file.path), !bloccata, let k = chiaveMemoria() else { return }
+        guard persistente, !ferma, FileManager.default.fileExists(atPath: MemoriaVera.file.path), !bloccata, let k = chiaveMemoria() else { return }
         let fileChiave = MemoriaVera.fileChiave
         Self.coda.async {
             if let password { try? MemoriaVera.avvolgi(k, password: password, in: fileChiave) } else { try? FileManager.default.removeItem(at: fileChiave) }
@@ -135,7 +139,7 @@ import Foundation
 
     /// Ricomincia da capo: la memoria che non si apre più (senza chiave né password) si cancella.
     func ricomincia() {
-        guard persistente else { contenuto = ContenutoMemoriaVera(); return }
+        guard persistente, !ferma else { contenuto = ContenutoMemoriaVera(); return }
         try? FileManager.default.removeItem(at: MemoriaVera.file)
         try? FileManager.default.removeItem(at: MemoriaVera.fileChiave)
         PortachiaviMemoria.elimina()
@@ -143,6 +147,21 @@ import Foundation
         contenuto = ContenutoMemoriaVera()
         bloccata = false
         pubblicaLezioni()
+    }
+
+    /// Migliorie d'uso 37: accesa la dimostrazione, la memoria resta vuota e niente si scrive; spenta, si rilegge il file.
+    func fermaPerDimostrazione(_ f: Bool) {
+        guard f != ferma else { return }
+        Self.coda.sync {}
+        ferma = f
+        if f {
+            caricata = true
+            contenuto = ContenutoMemoriaVera()
+            bloccata = false
+            pubblicaLezioni()
+        } else {
+            ricarica()
+        }
     }
 
     // MARK: - Ricordi

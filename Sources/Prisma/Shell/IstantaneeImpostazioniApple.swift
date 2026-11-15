@@ -9,6 +9,7 @@ import Foundation
 /// Migliorie d'uso 31: la colonna con «Da sistemare» e le etichette; 1056-1058 la pagina «Da sistemare».
 /// Migliorie d'uso 38: 1064-1066 le tre domande del primo avvio, 1067 Profilo con i nomi dei canali, 1068 i nomi scelti.
 /// Migliorie d'uso 39: 1069 iPhone e iPad in un collegamento solo, 1070 la scheda del codice, 1071 Vera con il rimando.
+/// Migliorie d'uso 37: 1060 la dimostrazione accesa nella barra, 1061 la sua scheda, 1062 la pagina, 1063 lo Studio.
 extension Istantanee {
     nonisolated static var sceneImpostazioniApple: [(nome: String, prepara: (StatoShell) -> Void)] {
         [
@@ -77,6 +78,27 @@ extension Istantanee {
                 s.apriCodiceDispositivo()
             }),
             ("1071-uso-impostazioni-vera-rimando", { s in preparaImpostazioniApple(s, sezione: .vera) }),
+            // Migliorie d'uso 37: la dimostrazione accesa (l'etichetta nella barra dopo la pillola del cliente), la scheda
+            // aperta dall'etichetta, Impostazioni › Dimostrazione con «Trentacinque clienti · In uso» e il Cruscotto dello
+            // Studio senza le scritte «dati di prova»
+            ("1060-uso-dimostrazione-barra", { s in s.accendiDimostrazione(.trentacinque, avviso: false) }),
+            ("1060-uso-dimostrazione-barra-scuro", { s in s.accendiDimostrazione(.trentacinque, avviso: false) }),
+            ("1061-uso-dimostrazione-scheda", { s in
+                s.accendiDimostrazione(.trentacinque, avviso: false)
+                s.schedaDimostrazione = true
+            }),
+            ("1062-uso-impostazioni-dimostrazione", { s in
+                s.accendiDimostrazione(.trentacinque, avviso: false)
+                preparaImpostazioniApple(s, sezione: .strumenti)
+            }),
+            ("1062-uso-impostazioni-dimostrazione-scuro", { s in
+                s.accendiDimostrazione(.trentacinque, avviso: false)
+                preparaImpostazioniApple(s, sezione: .strumenti)
+            }),
+            ("1063-uso-studio-senza-scritte-prova", { s in
+                s.accendiDimostrazione(.trentacinque, avviso: false)
+                s.apriStudio(.cruscotto)
+            }),
         ]
     }
 

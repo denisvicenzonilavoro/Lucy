@@ -120,7 +120,7 @@ struct PannelloTraguardo: View {
     }
 
     private var diProva: Bool {
-        stato.haDatiDiProva && StatoShell.clientiDiProva.contains(cliente.id)
+        stato.scritteProva && StatoShell.clientiDiProva.contains(cliente.id)
     }
 
     // MARK: Il biglietto e la sua frase

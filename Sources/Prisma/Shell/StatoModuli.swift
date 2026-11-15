@@ -39,6 +39,9 @@ import CoreGraphics
     var rilascioAttivo = false
 
     let persistente: Bool
+    /// Migliorie d'uso 37 (decisione 3): durante la dimostrazione i moduli dell'utente si vedono ma non si scrivono
+    /// (un modello aggiunto resta in memoria, nessun file tolto, moduli.json fermo); spenta, si rileggono dal disco.
+    @ObservationIgnored private(set) var ferma = false
     /// Solo istantanee: l'aspetto con Vera pronta (sfera viva) o no.
     @ObservationIgnored var veraProntaIstantanea: Bool?
     @ObservationIgnored private var caricata = false
@@ -54,6 +57,17 @@ import CoreGraphics
 
     /// Aspetta le scritture in coda.
     static func attendiScritture() { coda.sync {} }
+
+    /// Migliorie d'uso 37: ferma le scritture durante la dimostrazione; spenta, rilegge i modelli dal disco.
+    func fermaPerDimostrazione(_ f: Bool) {
+        guard f != ferma else { return }
+        Self.coda.sync {}
+        ferma = f
+        if !f && persistente {
+            pdfInMemoria = [:]
+            ricarica()
+        }
+    }
 
     /// Dopo un ripristino: rilegge i modelli dalla cartella ripristinata.
     func ricarica() {
@@ -79,7 +93,7 @@ import CoreGraphics
     }
 
     private func salva() {
-        guard persistente else { return }
+        guard persistente, !ferma else { return }
         let elenco = modelli
         Self.coda.async { try? ArchivioModuli.scrivi(elenco, in: Archivio.cartella) }
     }
@@ -162,7 +176,7 @@ import CoreGraphics
         carica()
         modelli.removeAll { $0.id == m.id }
         modelli.append(m)
-        if persistente {
+        if persistente && !ferma {
             let url = ArchivioModuli.pdf(m, in: Archivio.cartella)
             Self.coda.async {
                 try? FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -190,7 +204,7 @@ import CoreGraphics
         ordineImmagini.removeAll { $0.hasPrefix(id) }
         riquadri = riquadri.filter { !$0.key.hasPrefix(id) }
         if scelto == id { scelto = nil; azzeraCompilazione() }
-        if persistente {
+        if persistente && !ferma {
             let url = ArchivioModuli.pdf(m, in: Archivio.cartella)
             Self.coda.async { try? FileManager.default.removeItem(at: url) }
         }

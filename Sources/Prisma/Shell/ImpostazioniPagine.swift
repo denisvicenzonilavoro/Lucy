@@ -116,6 +116,10 @@ extension AppImpostazioni {
             gruppoPromemoria
             GruppoOccasioniImpostazioni()
                 .id("impostazioni-occasioni")
+            #if os(macOS)
+            // Migliorie d'uso 37: la prova dei promemoria, prima in Strumenti
+            gruppoProvaPromemoria
+            #endif
         }
     }
 
@@ -515,12 +519,24 @@ extension AppImpostazioni {
             }
             .id("imp-vera-avanzate")
             .cascataImpostazioni(7)
+            // Migliorie d'uso 37: le prove di Vera, prima in Strumenti (confronto dei modelli, le misure della velocità di
+            // Prisma e di Vera, la voce chiusa)
+            GruppoImpostazioni(titolo: "Prove") {
+                rigaConfrontaModelli
+            }
+            .id("imp-vera-confronta")
+            .cascataImpostazioni(7)
+            GruppoVelocita()
+                .id(MisuraVelocita.ancora)
+                .cascataImpostazioni(7)
+            gruppoVoceVera
+                .cascataImpostazioni(7)
             NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Prisma. I dati non lasciano il Mac.")
                 .cascataImpostazioni(8)
         }
     }
 
-    /// Strumenti › Vera: le stesse domande di prova a ogni modello, risposte e tempi affiancati.
+    /// Vera › Prove (migliorie d'uso 37, prima Strumenti): le stesse domande di prova a ogni modello, risposte e tempi affiancati.
     var rigaConfrontaModelli: some View {
         RigaImpostazione(titolo: "Confronta i modelli",
                          sottotitolo: stato.avanzamentoConfronto ?? "Le stesse domande a ogni modello",
@@ -539,7 +555,7 @@ extension AppImpostazioni {
     }
     #endif
 
-    // MARK: Voce di Vera (in Strumenti, chiusa: per ora Vera non parla)
+    // MARK: Voce di Vera (sul Mac in Impostazioni › Vera, chiusa: per ora Vera non parla)
 
     /// La voce di Vera e la conversazione a voce: tutto sul Mac (sintesi e dettatura di macOS). Il codice resta
     /// pronto per quando Vera avrà la voce.

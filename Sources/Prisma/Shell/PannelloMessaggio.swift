@@ -282,7 +282,7 @@ struct PannelloMessaggio: View {
                 }
                 .padding(.top, P.sopraAvviso)
             }
-            if stato.haDatiDiProva, StatoShell.clientiDiProva.contains(cliente.id) {
+            if stato.scritteProva, StatoShell.clientiDiProva.contains(cliente.id) {
                 Text(TestiMessaggi.datiDiProva)
                     .carattereApple(P.prova)
                     .foregroundColor(P.coloreProva)

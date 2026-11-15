@@ -150,6 +150,8 @@ extension StatoShell {
     /// I PDF e le immagini trascinati o scelti: copiati nella cartella della Biblioteca, letti sul Mac pagina per pagina
     /// (PDFKit, Vision per le scansioni) con l'avanzamento nella barra. Genere, canale ed edizione li propone Prisma.
     func importaInBiblioteca(_ urls: [URL]) {
+        // Migliorie d'uso 37: durante la dimostrazione la Biblioteca non cambia (decisione 3)
+        guard !inDimostrazione else { return mostraAvviso(TestiDimostrazione.nonDurante) }
         let t = trovaPagina
         let persistente = self.persistente
         for url in urls where LetturaDocumenti.estensioniAccettate.contains(url.pathExtension.lowercased()) {

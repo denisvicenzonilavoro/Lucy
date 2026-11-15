@@ -163,6 +163,8 @@ final class IndiceVera {
     private let blocco = NSLock()
     private var vettori: [String: [Float]] = [:]
     private var caricato = false
+    /// Migliorie d'uso 37: con la dimostrazione accesa la cache sul disco non si riscrive (sotto `blocco`).
+    private var salvataggiFermi = false
     private let persistente: Bool
     private let chiave: () -> SymmetricKey?
 
@@ -192,10 +194,16 @@ final class IndiceVera {
         guard persistente, let k = chiave() else { return }
         blocco.lock()
         let copia = vettori
+        let fermi = salvataggiFermi
         blocco.unlock()
-        guard let d = try? JSONEncoder().encode(copia), let cifrato = try? CifraturaBackup.cifra(d, chiave: k, uso: Self.uso) else { return }
+        guard !fermi, let d = try? JSONEncoder().encode(copia), let cifrato = try? CifraturaBackup.cifra(d, chiave: k, uso: Self.uso) else { return }
         try? FileManager.default.createDirectory(at: Self.file.deletingLastPathComponent(), withIntermediateDirectories: true)
         try? cifrato.write(to: Self.file, options: .atomic)
+    }
+
+    /// Migliorie d'uso 37: ferma (o fa ripartire) la scrittura della cache durante la dimostrazione.
+    func fermaSalvataggi(_ fermi: Bool) {
+        blocco.lock(); salvataggiFermi = fermi; blocco.unlock()
     }
 
     var quanti: Int {

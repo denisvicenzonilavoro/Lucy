@@ -186,7 +186,7 @@ struct LetteraDalFuturo: View {
     /// Le note sotto il segmentato: età ipotizzata, obiettivo mancante, previdenza da confermare, Vera non pronta.
     private func note(_ s: SchedaLettera, nome: String) -> [(testo: String, avviso: Bool)] {
         var r: [(String, Bool)] = []
-        if StatoShell.clientiDiProva.contains(cliente.id) && stato.haDatiDiProva { r.append(("Dati di prova.", false)) }
+        if StatoShell.clientiDiProva.contains(cliente.id) && stato.scritteProva { r.append(("Dati di prova.", false)) }
         if s.etaIpotizzata { r.append(("\(s.etaTraguardo) anni: età di pensione ipotizzata.", false)) }
         if s.mancanti.contains(.previdenza) {
             r.append(("Senza le ipotesi di previdenza confermate la lettera non parla di pensione.", false))

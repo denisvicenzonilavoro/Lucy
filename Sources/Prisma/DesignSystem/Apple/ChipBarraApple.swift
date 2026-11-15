@@ -140,3 +140,39 @@ struct BarraOggiDopo: View {
         Tema.Apple.Moto.animazione(Tema.Apple.Moto.BarraScenario.animazioneColore, calmo: calmo, istantanea: istantanea)
     }
 }
+
+// MARK: - Etichetta «Dimostrazione» della barra
+
+/// Migliorie d'uso 37 (`#bDemo` del template): la pillola di vetro della barra con «Dimostrazione» in arancione del testo,
+/// grassetto, e il filo arancione al 40%. C'è solo con la dimostrazione accesa (mai in modalità cliente né nella vista
+/// pulita di «Mostra al cliente»); al clic apre la scheda della dimostrazione. Valori in Tema.Apple+Dimostrazione.swift.
+struct EtichettaDimostrazione: View {
+    let azione: () -> Void
+
+    private typealias D = Tema.Apple.Dimostrazione
+
+    init(azione: @escaping () -> Void) {
+        self.azione = azione
+    }
+
+    var body: some View {
+        Button(action: azione) {
+            Text("Dimostrazione")
+                .carattereApple(D.carattere)
+                .foregroundColor(D.testo)
+                .lineLimit(1)
+                .fixedSize()
+                .padding(D.padding)
+                .frame(minHeight: Tema.Misura.marchioBarra)
+                .vetro(.leggero, forma: .capsula, interattivo: true)
+                .overlay {
+                    Capsule(style: .continuous)
+                        .strokeBorder(D.filo, lineWidth: D.spessoreFilo)
+                }
+                .contentShape(Capsule(style: .continuous))
+        }
+        .buttonStyle(StileSemplice())
+        .help("Stai mostrando Prisma con i clienti di prova: clic per uscire")
+        .accessibilityLabel(Text("Dimostrazione accesa"))
+    }
+}

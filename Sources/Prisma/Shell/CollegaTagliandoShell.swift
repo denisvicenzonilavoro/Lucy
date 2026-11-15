@@ -94,7 +94,8 @@ extension StatoShell {
     /// Il controllo, solo se è dovuto (acceso e nessun controllo dall'ultimo turno notturno).
     func tagliandoSeDovuto(adesso: Date = Date()) {
         #if os(macOS)
-        guard persistente, archivioPronto, !lavoriInPausa, !solaLettura else { return }
+        // Migliorie d'uso 37: il tagliando notturno non controlla i clienti di prova
+        guard persistente, archivioPronto, !lavoriInPausa, !solaLettura, !inDimostrazione else { return }
         guard TagliandoVera.dovuto(ultimo: dati.tagliando.ultimoControllo, adesso: adesso, impostazioni: dati.impostazioni.tagliando) else {
             // Non dovuto: dopo un riavvio l'elenco in memoria si rifà (senza toccare il registro dei controlli)
             if esitoTagliando == nil, !inModoCliente { aggiornaEsitoTagliando(adesso: adesso) }

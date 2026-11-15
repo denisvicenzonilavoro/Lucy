@@ -280,7 +280,8 @@ extension StatoShell {
     /// tornando a Prisma). Spenti o non consentiti: toglie quelli consegnati in questa sessione.
     /// Il calcolo è in background: il thread principale passa solo una copia dei dati.
     func aggiornaPromemoria() {
-        guard persistente, PromemoriaMac.disponibili else { return }
+        // Migliorie d'uso 37: con i dati di prova i promemoria non si ripianificano (restano quelli veri di prima)
+        guard persistente, PromemoriaMac.disponibili, !inDimostrazione else { return }
         let scelte = dati.impostazioni.promemoria
         guard scelte.attivi, permessoPromemoria != .negati else {
             if PromemoriaMac.condiviso.haPianificato {

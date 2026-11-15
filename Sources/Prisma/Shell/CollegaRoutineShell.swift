@@ -417,7 +417,8 @@ extension StatoShell {
     /// da sole (non saprebbero per chi). Non in modalità cliente, non durante la presentazione, mai in sola lettura.
     @discardableResult
     func controllaRoutineDovute(adesso: Date = Date()) -> [EsitoRoutine] {
-        guard !solaLettura, modoCliente == nil, presentazione == nil, !routineSoloSulMac else { return [] }
+        // Migliorie d'uso 37: le routine programmate non lavorano sui clienti di prova
+        guard !solaLettura, !inDimostrazione, modoCliente == nil, presentazione == nil, !routineSoloSulMac else { return [] }
         let dovute = RoutineVera.dovute(dati.routine.tutte, adesso: adesso).filter { !$0.serveCliente }
         var esiti: [EsitoRoutine] = []
         for r in dovute {

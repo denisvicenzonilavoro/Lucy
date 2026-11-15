@@ -7,7 +7,8 @@ import UniformTypeIdentifiers
 /// Impostazioni › Archivio e backup, come nel template (§4.6, PIE i03-i06): la card con l'anello del backup che si
 /// riempie mentre il backup lavora e «Crea backup» (l'azione principale), poi il backup automatico settimanale,
 /// «Dove salvare», «Ripristina…» e la password; sotto i backup disponibili, gli avvisi dell'archivio e l'archivio di
-/// Prisma. Tutto funziona come prima. I dati di prova stanno in Strumenti.
+/// Prisma. Tutto funziona come prima. Sul Mac (migliorie d'uso 37) qui anche «Togli i clienti di prova», per chi li ha ancora
+/// nell'archivio; la dimostrazione sta in Impostazioni › Dimostrazione.
 extension AppImpostazioni {
 
     var archivio: some View {
@@ -100,6 +101,28 @@ extension AppImpostazioni {
             .id("imp-archivio-elenco")
             .cascataImpostazioni(7)
 
+            #if os(macOS)
+            // Migliorie d'uso 37: durante la dimostrazione il backup è fermo (la scheda della barra lo promette)
+            if stato.inDimostrazione {
+                NotaImpostazioni(TestiDimostrazione.backupFermo, colore: Tema.Apple.Colore.arancioTesto)
+                    .cascataImpostazioni(7)
+            }
+            // Migliorie d'uso 37: la sola pulizia rimasta, per chi ha ancora i clienti di prova mescolati ai suoi (prima un
+            // backup, come sempre)
+            if stato.haDatiDiProva && !stato.inDimostrazione {
+                GruppoImpostazioni(titolo: "Clienti di prova") {
+                    RigaImpostazione(titolo: "Togli i clienti di prova", sottotitolo: "Restano solo i tuoi clienti",
+                                     icona: IconaVetroImpostazioni(simbolo: "person.crop.circle.badge.minus", colori: Tema.Colore.Impostazioni.dati),
+                                     aiuto: "Per lavorare solo con i tuoi clienti: restano i clienti che hai inserito tu. Prima viene salvato un backup.",
+                                     ultima: true) {
+                        ValoreRiga(testo: "Togli") { confermaTogliProva = true }
+                    }
+                }
+                .id("imp-archivio-prova")
+                .cascataImpostazioni(7)
+            }
+            #endif
+
             if stato.copieNonLeggibili > 0 {
                 VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.spazioControlliAffiancati) {
                     Text("All'avvio l'archivio non era leggibile: la copia è nella cartella di Prisma e i backup automatici sono fermi, per non sostituire i backup buoni. Ripristina un backup qui sopra oppure, se i dati di oggi vanno bene, riprendi i backup.")
@@ -173,8 +196,9 @@ extension AppImpostazioni {
             Button("Crea backup") { stato.creaBackup() }
                 .buttonStyle(StilePulsanteRigaImpostazioni(principale: true, grande: true))
                 .fixedSize()
-                .disabled(stato.backupInCorso)
-                .help("Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Vera")
+                .disabled(stato.backupInCorso || stato.inDimostrazione)
+                .help(stato.inDimostrazione ? TestiDimostrazione.backupFermo
+                                            : "Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Vera")
         }
         .padding(k.padding)
         .frame(maxWidth: .infinity, alignment: .leading)

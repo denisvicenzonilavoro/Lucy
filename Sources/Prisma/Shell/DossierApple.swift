@@ -240,14 +240,10 @@ struct RubricaApple: View {
         .frame(maxWidth: .infinity)
     }
 
-    /// Il comando c'è solo sul Mac, con i clienti di prova del template e senza quelli fittizi.
     private var mostraClientiDiProva: Bool {
-        #if os(macOS)
-        guard !stato.inModoCliente, stato.haDatiDiProva else { return false }
-        return !stato.dati.clienti.contains { $0.id.hasPrefix(ClientiFittizi.prefisso) }
-        #else
-        return false
-        #endif
+        // Migliorie d'uso 37: i 35 clienti di prova non si caricano più nell'archivio vero (ora sono la dimostrazione,
+        // in Impostazioni › Dimostrazione): il comando non c'è più, nemmeno sul Mac
+        false
     }
 }
 

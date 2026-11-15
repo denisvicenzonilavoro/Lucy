@@ -142,7 +142,7 @@ struct ValoreConsulenteVista: View {
                     .carattereApple(V.etichetta)
                     .foregroundColor(V.coloreEtichetta)
                     .lineLimit(1)
-                if StatoShell.clientiDiProva.contains(cliente.id) && stato.haDatiDiProva {
+                if StatoShell.clientiDiProva.contains(cliente.id) && stato.scritteProva {
                     Text("dati di prova").carattereApple(V.prova).foregroundColor(V.coloreProva)
                 }
                 if sala.titoloValore == nil && !v.presto && v.totale != nil {

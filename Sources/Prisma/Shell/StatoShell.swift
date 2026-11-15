@@ -425,6 +425,19 @@ enum VoceConfronto: Hashable {
     var sceltaMostra = false
     /// Migliorie d'uso 38: le tre domande del primo avvio aperte, con la pagina (0…2; nil = chiuse). Solo in memoria.
     var primoAvvio: Int? = nil
+    /// Migliorie d'uso 37 (StatoDimostrazione.swift): la dimostrazione è accesa. In memoria ci sono solo i clienti di
+    /// prova, l'archivio vero resta sul disco intatto; salvataggi, backup, «Prisma ovunque», notte, routine, tagliando,
+    /// promemoria e pulizie dei file sono fermi. Solo sul Mac: su iPhone e iPad resta sempre falsa.
+    private(set) var inDimostrazione = false
+    /// Migliorie d'uso 37: il gruppo dei clienti di prova della dimostrazione (quello in uso, o quello della prossima volta).
+    var gruppoProva: GruppoProva = .trentacinque
+    /// Migliorie d'uso 37: la scheda «Stai mostrando Prisma con i clienti di prova.» aperta dall'etichetta della barra.
+    var schedaDimostrazione = false
+    /// Migliorie d'uso 37: lo spegnimento rilegge l'archivio dal disco (fuori dal thread principale): uno alla volta.
+    @ObservationIgnored var spegnimentoDimostrazione = false
+    /// Migliorie d'uso 37, solo nelle prove e nelle istantanee (non persistente, nessun archivio sul disco): i dati di
+    /// prima della dimostrazione. Nell'app resta sempre nil: i dati veri si rileggono dal disco.
+    @ObservationIgnored private var datiPrimaDellaDimostrazione: DatiPrisma?
     var schermataNeutraMac = false
     var schedaMostra: SchedaMostra? = nil
     var menuUscitaMostra = false
@@ -770,6 +783,10 @@ enum VoceConfronto: Hashable {
         // Prisma ovunque (StatoOvunque.swift): spento finché l'utente non lo accende; acceso, apre lo spazio con la
         // chiave del Portachiavi e fa un primo giro, fuori dal thread principale
         avviaOvunque()
+        #if os(macOS)
+        // Migliorie d'uso 37: la dimostrazione accesa alla chiusura riparte (preferenza del Mac, fuori dall'archivio)
+        DispatchQueue.main.async { [weak self] in self?.riprendiDimostrazione() }
+        #endif
         // I file rimasti da un'importazione interrotta vanno nel Cestino (il disco lavora in background);
         // solo con l'archivio letto senza intoppi (con un archivio recuperato o di prova i file servono ancora)
         if caricati.avviso == nil, !caricati.solaLettura, copieNonLeggibili == 0 {
@@ -1577,7 +1594,8 @@ enum VoceConfronto: Hashable {
 
     private func rimuoviFile(_ d: Documento) {
         // In sola lettura (archivio di una versione più nuova) i file restano: l'archivio vero li usa ancora
-        guard persistente, !solaLettura else { return }
+        // Migliorie d'uso 37: in dimostrazione nemmeno (i documenti tolti sono di prova, i file sono quelli veri)
+        guard persistente, !solaLettura, !inDimostrazione else { return }
         if let u = urlDocumento(d) { try? FileManager.default.removeItem(at: u) }
         if let t = urlTesto(d) { try? FileManager.default.removeItem(at: t) }
     }
@@ -1587,7 +1605,8 @@ enum VoceConfronto: Hashable {
     /// Restituisce quanti file ha tolto.
     @discardableResult
     func pulisciDocumentiOrfani(nelCestino: Bool = false) -> Int {
-        guard persistente, !solaLettura else { return 0 }
+        // Migliorie d'uso 37: con i soli dati di prova in memoria i file dei clienti veri sembrerebbero orfani
+        guard persistente, !solaLettura, !inDimostrazione else { return 0 }
         let orfani = Self.fileOrfani(usati: fileUsati(), radice: Archivio.cartellaDocumenti)
         return Self.togli(orfani.file, cartelle: orfani.cartelle, nelCestino: nelCestino)
     }
@@ -1596,7 +1615,7 @@ enum VoceConfronto: Hashable {
     /// cartella e Cestino si toccano fuori. Se nel frattempo i documenti cambiano (un'importazione) si rinuncia:
     /// i file creati dopo l'elenco non ne fanno parte, e quelli di prima sono di nuovo controllati qui.
     func pulisciDocumentiOrfaniInBackground() {
-        guard persistente, !solaLettura, documentiInLettura.isEmpty else { return }
+        guard persistente, !solaLettura, !inDimostrazione, documentiInLettura.isEmpty else { return }
         let usati = fileUsati()
         let impronta = dati.documenti.map(\.file)
         let radice = Archivio.cartellaDocumenti
@@ -1604,7 +1623,8 @@ enum VoceConfronto: Hashable {
             let orfani = StatoShell.fileOrfani(usati: usati, radice: radice)
             guard !orfani.file.isEmpty || !orfani.cartelle.isEmpty else { return }
             DispatchQueue.main.async {
-                guard !self.solaLettura, self.documentiInLettura.isEmpty, self.dati.documenti.map(\.file) == impronta else { return }
+                guard !self.solaLettura, !self.inDimostrazione, self.documentiInLettura.isEmpty,
+                      self.dati.documenti.map(\.file) == impronta else { return }
                 DispatchQueue.global(qos: .utility).async {
                     let tolti = StatoShell.togli(orfani.file, cartelle: orfani.cartelle, nelCestino: true)
                     guard tolti > 0 else { return }
@@ -3323,7 +3343,8 @@ enum VoceConfronto: Hashable {
     /// Salva adesso e aspetta: quando torna, l'archivio sul disco è aggiornato. Lo usano backup,
     /// ripristino, riapertura e chiusura.
     func salvaOra() {
-        guard persistente, !salvataggioSospeso, archivioPronto else { return }
+        // Migliorie d'uso 37: con la dimostrazione accesa l'archivio vero non si tocca (37.3 A.4)
+        guard persistente, !salvataggioSospeso, archivioPronto, !inDimostrazione else { return }
         scrivi()
         salvataggio.attendi()
     }
@@ -3331,7 +3352,7 @@ enum VoceConfronto: Hashable {
     /// Accoda il salvataggio dei dati di adesso (niente, se questa generazione è già sul disco o in coda).
     private func scrivi() {
         // Mai un archivio a metà sopra quello vero (avvio a due tempi)
-        guard persistente, !salvataggioSospeso, archivioPronto else { return }
+        guard persistente, !salvataggioSospeso, archivioPronto, !inDimostrazione else { return }
         // L'istantanea è un valore: la copia va alla coda senza rischi, e la coda non legge mai `self.dati`
         salvataggio.accoda(dati.istantanea, generazione: versioneDati) { [weak self] errore in
             self?.mostraAvviso("Salvataggio non riuscito: \(errore.localizedDescription)")
@@ -3497,6 +3518,11 @@ enum VoceConfronto: Hashable {
     /// Crea un backup completo della cartella dell'archivio.
     func creaBackup(automatico: Bool = false) {
         guard persistente, !backupInCorso else { return }
+        // Migliorie d'uso 37: i dati di prova non finiscono tra quelli veri
+        guard !inDimostrazione else {
+            if !automatico { mostraAvviso(TestiDimostrazione.backupFermo) }
+            return
+        }
         // Con la protezione attiva il backup si fa solo con la password, mai in chiaro
         let password: String?
         do {
@@ -3547,6 +3573,7 @@ enum VoceConfronto: Hashable {
     /// backup; se nessuna lo apre si chiede la password.
     func ripristina(_ zip: URL, password scritta: String? = nil) {
         guard persistente, !backupInCorso else { return }
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard !ripristinoBloccato else { mostraAvviso("Archivio in sola lettura: apri l'ultima versione di Prisma per ripristinare."); return }
         // Riconosciuto dal contenuto: anche un backup protetto rinominato
         let protetto = CifraturaBackup.cifrato(zip)
@@ -3664,7 +3691,7 @@ enum VoceConfronto: Hashable {
     /// Toglie i 5 clienti di prova con tutti i loro dati (e le schede prodotto di esempio non usate),
     /// lasciando i clienti veri. Prima salva un backup.
     func togliDatiDiProva() {
-        guard persistente, !backupInCorso, !solaLettura else { return }
+        guard persistente, !backupInCorso, !solaLettura, !inDimostrazione else { return }
         let password: String?
         do {
             password = try passwordPerBackup()
@@ -3697,6 +3724,7 @@ enum VoceConfronto: Hashable {
     /// Importa in rubrica i clienti scelti (da vCard o CSV). Prima salva un backup dello stato attuale.
     func importaClienti(_ elenco: [ClienteImportato]) {
         guard !elenco.isEmpty, !solaLettura else { return }
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else {
             aggiungiImportati(elenco)
             return
@@ -3736,6 +3764,7 @@ enum VoceConfronto: Hashable {
     /// in rubrica (chiave: il segnaposto in `clienteId`). Prima salva un backup dello stato attuale.
     func importaPosizioni(_ elenco: [Posizione], nuoviClienti: [String: ClienteImportato] = [:]) {
         guard !elenco.isEmpty, !solaLettura else { return }
+        guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else {
             aggiungiPosizioniImportate(elenco, nuoviClienti: nuoviClienti)
             return
@@ -3803,6 +3832,11 @@ enum VoceConfronto: Hashable {
             return true
         }
         guard !backupInCorso else { return false }
+        // Migliorie d'uso 37: niente backup né operazioni sull'archivio vero durante la dimostrazione
+        guard !inDimostrazione else {
+            mostraAvviso(TestiDimostrazione.nonDurante)
+            return false
+        }
         let password: String?
         do {
             password = try passwordPerBackup()
@@ -3891,7 +3925,7 @@ enum VoceConfronto: Hashable {
     /// Torna ai dati di prova (con backup di sicurezza dello stato attuale): i 5 clienti del template,
     /// oppure con `completi` anche i 30 clienti fittizi.
     func ripristinaDatiDiProva(completi: Bool = false) {
-        guard persistente, !backupInCorso, !solaLettura else { return }
+        guard persistente, !backupInCorso, !solaLettura, !inDimostrazione else { return }
         let password: String?
         do {
             password = try passwordPerBackup()
@@ -3975,7 +4009,7 @@ enum VoceConfronto: Hashable {
         let b = dati.impostazioni.backup
         // Con un archivio non leggibile da sistemare i backup automatici non sostituiscono quelli buoni
         // (il conto si aggiorna all'avvio, dopo un ripristino e quando il consulente le segna come gestite)
-        guard persistente, b.automatico, !solaLettura, copieNonLeggibili == 0, !backupInCorso,
+        guard persistente, b.automatico, !solaLettura, !inDimostrazione, copieNonLeggibili == 0, !backupInCorso,
               let prossimo = b.prossimo, prossimo <= Date() else { return }
         // Backup protetti: il Portachiavi si legge (una volta per sessione) fuori dal thread principale
         if b.cifrato, passwordBackupInMemoria == nil, !portachiaviLetto {
@@ -4060,7 +4094,8 @@ enum SchedaImpostazioni: String, CaseIterable, Hashable, Identifiable {
     /// La stima delle distanze, il giro, la partenza, le zone e l'anello arancio di Territorio («Luce» giro 11,
     /// PaginaImpostazioniTerritorio.swift).
     case territorio
-    /// Dati di prova, confronto dei modelli, prove di promemoria e voce.
+    /// Dati di prova, confronto dei modelli, prove di promemoria e voce. Sul Mac (migliorie d'uso 37) «Dimostrazione»:
+    /// il valore grezzo resta «strumenti».
     case strumenti
 
     var id: String { rawValue }
@@ -4098,7 +4133,13 @@ enum SchedaImpostazioni: String, CaseIterable, Hashable, Identifiable {
         case .sala: return "Sala"
         case .moduli: return "Moduli"
         case .territorio: return "Territorio"
-        case .strumenti: return "Strumenti"
+        case .strumenti:
+            // Migliorie d'uso 37: sul Mac la pagina è la dimostrazione (le prove di Vera e dei promemoria sono nelle loro pagine)
+            #if os(macOS)
+            return "Dimostrazione"
+            #else
+            return "Strumenti"
+            #endif
         }
     }
 
@@ -4250,3 +4291,118 @@ struct AzioneAvviso {
     let titolo: String
     let esegui: () -> Void
 }
+
+// MARK: - Migliorie d'uso 37: la dimostrazione
+
+#if os(macOS)
+extension StatoShell {
+    /// Accende la dimostrazione con il gruppo dato (o, già accesa, cambia gruppo). Prima l'archivio vero va sul disco,
+    /// intero; poi i dati di prova entrano in memoria al suo posto (rifatti ogni volta, decisione 1): nessun backup
+    /// prima, perché l'archivio vero non si tocca. Le impostazioni dell'utente restano solo per l'aspetto, i nomi dei
+    /// canali e il motore e il ponte di Vera (37.3 A.2).
+    func accendiDimostrazione(_ gruppo: GruppoProva, avviso: Bool = true) {
+        guard archivioPronto, !spegnimentoDimostrazione else { return }
+        guard !backupInCorso else {
+            mostraAvviso(TestiDimostrazione.attendiBackup)
+            return
+        }
+        let gia = inDimostrazione
+        if !gia {
+            salvaOra()
+            if !persistente { datiPrimaDellaDimostrazione = dati.istantanea }
+            // Prima di toccare i dati: da qui in poi niente scrive sull'archivio vero
+            inDimostrazione = true
+            fermaScrittureAccanto(true)
+        }
+        gruppoProva = gruppo
+        dati.carica(Self.datiDimostrazione(gruppo, impostazioni: dati.impostazioni))
+        pulisciDopoCambioDimostrazione()
+        ricordaDimostrazione()
+        if avviso { mostraAvviso(gia ? TestiDimostrazione.gruppoInUso(gruppo) : TestiDimostrazione.accesa) }
+    }
+
+    /// Spegne la dimostrazione: l'archivio vero si rilegge dal disco (fuori dal thread principale, come all'avvio), con
+    /// le scelte di aspetto, nomi dei canali e Vera fatte intanto (decisione 7); tutto il resto fatto in dimostrazione si
+    /// perde, «senza niente da ripulire».
+    func spegniDimostrazione(avviso: String? = TestiDimostrazione.spenta) {
+        guard inDimostrazione, !spegnimentoDimostrazione else { return }
+        guard persistente else {
+            // Prove e istantanee: nessun archivio sul disco, i dati di prima sono in memoria
+            var d = datiPrimaDellaDimostrazione ?? DatiPrisma.demo()
+            Self.riportaImpostazioni(&d.impostazioni, da: dati.impostazioni)
+            datiPrimaDellaDimostrazione = nil
+            concludiSpegnimento(d, avviso: avviso)
+            return
+        }
+        spegnimentoDimostrazione = true
+        DispatchQueue.global(qos: .userInitiated).async {
+            let letto = Archivio.carica()
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                self.spegnimentoDimostrazione = false
+                self.salvataggio.prepara(letto.sulDisco)
+                self.solaLettura = letto.solaLettura
+                self.ripristinoBloccato = letto.bloccaRipristino
+                self.salvataggioSospeso = letto.solaLettura
+                var d = letto.dati
+                if !letto.solaLettura { Self.riportaImpostazioni(&d.impostazioni, da: self.dati.impostazioni) }
+                self.concludiSpegnimento(d, avviso: letto.avviso ?? avviso)
+            }
+        }
+    }
+
+    /// La parte comune dello spegnimento: i dati veri al loro posto, poi tutto riparte.
+    private func concludiSpegnimento(_ d: DatiPrisma, avviso: String?) {
+        // Ancora accesa mentre i dati cambiano: il salvataggio automatico di `carica` non parte prima del tempo
+        dati.carica(d)
+        pulisciDopoCambioDimostrazione()
+        inDimostrazione = false
+        schedaDimostrazione = false
+        fermaScrittureAccanto(false)
+        ricordaDimostrazione()
+        // Le impostazioni riportate dalla dimostrazione (aspetto, canali, Vera) vanno sul disco
+        salvaOra()
+        aggiornaPromemoria()
+        if dati.impostazioni.ovunque.acceso { sincronizzaOvunque(automatica: true) }
+        if let avviso { mostraAvviso(avviso) }
+    }
+
+    /// Come dopo un ripristino: filtri, selezioni e testi letti dei documenti ripartono (mai un cliente dell'altro
+    /// archivio sullo schermo).
+    private func pulisciDopoCambioDimostrazione() {
+        testiDocumenti = MemoriaTesti()
+        documentoSelezionato = nil
+        posizioneInDettaglio = nil
+        azzeraNote()
+        trovaPagina.azzera()
+    }
+
+    /// Ferma (o fa ripartire) le scritture accanto all'archivio: memoria di Vera, cache della ricerca, Biblioteca e Moduli.
+    /// Spenta la dimostrazione, memoria, Biblioteca e Moduli si rileggono dal disco.
+    private func fermaScrittureAccanto(_ ferma: Bool) {
+        memoriaVera.fermaPerDimostrazione(ferma)
+        indiceVera.fermaSalvataggi(ferma)
+        biblioteca.fermaPerDimostrazione(ferma)
+        moduli.fermaPerDimostrazione(ferma)
+    }
+
+    /// Riaprendo Prisma con la dimostrazione accesa (decisione 2): l'archivio vero è già letto (schermata di
+    /// benvenuto), subito dopo entrano i dati di prova.
+    func riprendiDimostrazione() {
+        guard persistente, !inDimostrazione else { return }
+        let preferenze = UserDefaults.standard
+        if let g = preferenze.string(forKey: TestiDimostrazione.chiaveGruppo).flatMap(GruppoProva.init(rawValue:)) {
+            gruppoProva = g
+        }
+        guard preferenze.bool(forKey: TestiDimostrazione.chiaveAccesa) else { return }
+        accendiDimostrazione(gruppoProva, avviso: false)
+    }
+
+    /// Le preferenze del Mac (fuori dall'archivio, dai backup e da «Prisma ovunque», 37.4).
+    private func ricordaDimostrazione() {
+        guard persistente else { return }
+        UserDefaults.standard.set(inDimostrazione, forKey: TestiDimostrazione.chiaveAccesa)
+        UserDefaults.standard.set(gruppoProva.rawValue, forKey: TestiDimostrazione.chiaveGruppo)
+    }
+}
+#endif

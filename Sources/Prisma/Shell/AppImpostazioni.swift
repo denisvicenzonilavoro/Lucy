@@ -14,8 +14,6 @@ struct AppImpostazioni: View {
     @Environment(StatoShell.self) var stato
     @State var daRipristinare: VoceBackup?
     @State var fileDaRipristinare: URL?
-    @State var confermaDatiProva = false
-    @State var confermaClientiCompleti = false
     @State var confermaTogliProva = false
     @State var modificaNome = false
     // Password dei backup
@@ -51,18 +49,6 @@ struct AppImpostazioni: View {
             Button("Togli i clienti di prova", role: .destructive) { stato.togliDatiDiProva() }
         } message: {
             Text("I clienti di prova (Giulia, Marco, Laura, Andrea, Sofia e quelli inventati) vengono tolti con posizioni, agenda, documenti e conversazioni. I tuoi clienti restano. Prima Prisma salva un backup dello stato attuale.")
-        }
-        .alert("Caricare i 35 clienti di prova?", isPresented: $confermaClientiCompleti) {
-            Button("Annulla", role: .cancel) {}
-            Button("Carica i clienti di prova", role: .destructive) { stato.ripristinaDatiDiProva(completi: true) }
-        } message: {
-            Text("Clienti, posizioni, agenda e attività vengono sostituiti da 35 clienti inventati. Prima Prisma salva un backup dello stato attuale: i tuoi dati si recuperano da lì.")
-        }
-        .alert("Tornare ai dati di prova?", isPresented: $confermaDatiProva) {
-            Button("Annulla", role: .cancel) {}
-            Button("Ripristina i dati di prova", role: .destructive) { stato.ripristinaDatiDiProva() }
-        } message: {
-            Text("Clienti, agenda e attività tornano ai 5 clienti di prova. Prima Prisma salva un backup dello stato attuale.")
         }
         // Backup protetto da ripristinare: la richiesta si chiude solo dai pulsanti, che leggono il file prima di chiuderla
         .alert("Backup protetto da password", isPresented: Binding(get: { stato.ripristinoDaSbloccare != nil }, set: { _ in })) {
@@ -197,6 +183,13 @@ struct AppImpostazioni: View {
         case TestiSpese.ancoraImpostazioni: return .studio
         case TestiFamiglie.ancoraImpostazioni: return .rendimenti
         case TestiNotte.ancoraImpostazioni: return .vera
+        // Migliorie d'uso 37: la misura della velocità (MisuraVelocita.ancora) sta in Vera, non più in Strumenti
+        case "impostazioni-velocita":
+            #if os(macOS)
+            return .vera
+            #else
+            return .strumenti
+            #endif
         default:
             // Migliorie d'uso 30: le ancore dell'indice della ricerca si chiamano «imp-<pagina>-<voce>»
             guard ancora.hasPrefix("imp-") else { return nil }
@@ -553,60 +546,45 @@ struct AppImpostazioni: View {
 
     // MARK: Strumenti
 
-    /// Strumenti di prova, separati dalle preferenze: dati di prova, confronto dei modelli, le misure della velocità
-    /// (Prisma e Vera), prova dei promemoria e, chiusa, la voce di Vera (per ora Vera non parla).
-    private var strumenti: some View {
-        let c = Tema.Colore.Impostazioni.self
-        return VStack(alignment: .leading, spacing: M.spazioGruppi) {
-            #if os(macOS)
-            GruppoImpostazioni(titolo: "Dati di prova") {
-                if stato.haDatiDiProva {
-                    RigaImpostazione(titolo: "Togli i clienti di prova", sottotitolo: "Restano solo i tuoi clienti",
-                                     icona: IconaVetroImpostazioni(simbolo: "person.crop.circle.badge.minus", colori: c.dati),
-                                     aiuto: "Per lavorare solo con i tuoi clienti: restano i clienti che hai inserito tu. Prima viene salvato un backup.") {
-                        ValoreRiga(testo: "Togli") { confermaTogliProva = true }
-                    }
-                }
-                RigaImpostazione(titolo: "I 5 clienti di prova", sottotitolo: "Per provare i motori di calcolo",
-                                 icona: IconaVetroImpostazioni(simbolo: "person.2.fill", colori: c.dati),
-                                 aiuto: "Utile per provare i motori di calcolo. Prima viene salvato un backup.") {
-                    ValoreRiga(testo: "Ripristina") { confermaDatiProva = true }
-                }
-                RigaImpostazione(titolo: "35 clienti di prova completi", sottotitolo: "Prisma piena, per Vera e le prove",
-                                 icona: IconaVetroImpostazioni(simbolo: "person.3.fill", colori: c.dati),
-                                 aiuto: "I 5 del template più 30 clienti inventati, con polizze Alleanza, investimenti, famiglia, agenda e note: per vedere Prisma piena e fare domande a Vera. Prima viene salvato un backup.",
-                                 ultima: true) {
-                    ValoreRiga(testo: "Carica") { confermaClientiCompleti = true }
-                }
-            }
-            NotaImpostazioni("Prima di ogni cambio Prisma salva un backup.")
-            GruppoImpostazioni(titolo: "Vera") {
-                rigaConfrontaModelli
-            }
-            .id("imp-strumenti-vera")
-            // Giro 0 di «Prisma istantaneo»: la prova della fluidità e i tempi di Vera su questo Mac (MisuraVelocita.swift)
-            GruppoVelocita()
-                .id(MisuraVelocita.ancora)
-            #endif
-            GruppoImpostazioni(titolo: "Promemoria") {
-                RigaImpostazione(titolo: "Prova un promemoria", sottotitolo: "Arriva subito, per vedere com'è",
-                                 icona: IconaVetroImpostazioni(.simbolo("bell.fill", c.promemoria)),
-                                 avvertenza: stato.dati.impostazioni.promemoria.attivi ? nil : "Prima accendi i promemoria",
-                                 ultima: true) {
-                    Button { stato.provaPromemoria() } label: { Label("Prova", systemImage: "bell") }
-                        .buttonStyle(StilePulsanteRigaImpostazioni())
-                        .disabled(stato.permessoPromemoria == .negati || !stato.dati.impostazioni.promemoria.attivi)
-                }
-            }
-            .id("imp-strumenti-promemoria")
-            GruppoImpostazioni(titolo: "Parlare con Vera") {
-                rigaApri("Voce e ascolto", "Per ora Vera non parla", aperta: $mostraVoce, ultima: !mostraVoce)
-                if mostraVoce {
-                    righeVoce
-                }
-            }
-            .id("imp-strumenti-voce")
+    /// Sul Mac (migliorie d'uso 37) la pagina è «Dimostrazione» (StatoDimostrazione.swift): le prove di Vera stanno in
+    /// Impostazioni › Vera, la prova dei promemoria in Promemoria e occasioni, «Togli i clienti di prova» in Archivio e
+    /// backup. Su iPhone e iPad restano la prova dei promemoria e, chiusa, la voce di Vera.
+    @ViewBuilder private var strumenti: some View {
+        #if os(macOS)
+        paginaDimostrazione
+        #else
+        VStack(alignment: .leading, spacing: M.spazioGruppi) {
+            gruppoProvaPromemoria
+            gruppoVoceVera
         }
+        #endif
+    }
+
+    /// «Prova un promemoria»: arriva subito, per vedere com'è.
+    var gruppoProvaPromemoria: some View {
+        let c = Tema.Colore.Impostazioni.self
+        return GruppoImpostazioni(titolo: "Prova") {
+            RigaImpostazione(titolo: "Prova un promemoria", sottotitolo: "Arriva subito, per vedere com'è",
+                             icona: IconaVetroImpostazioni(.simbolo("bell.fill", c.promemoria)),
+                             avvertenza: stato.dati.impostazioni.promemoria.attivi ? nil : "Prima accendi i promemoria",
+                             ultima: true) {
+                Button { stato.provaPromemoria() } label: { Label("Prova", systemImage: "bell") }
+                    .buttonStyle(StilePulsanteRigaImpostazioni())
+                    .disabled(stato.permessoPromemoria == .negati || !stato.dati.impostazioni.promemoria.attivi)
+            }
+        }
+        .id("imp-promemoria-prova")
+    }
+
+    /// «Parlare con Vera» › «Voce e ascolto», chiusa (per ora Vera non parla).
+    var gruppoVoceVera: some View {
+        GruppoImpostazioni(titolo: "Parlare con Vera") {
+            rigaApri("Voce e ascolto", "Per ora Vera non parla", aperta: $mostraVoce, ultima: !mostraVoce)
+            if mostraVoce {
+                righeVoce
+            }
+        }
+        .id("imp-vera-voce")
     }
 }
 

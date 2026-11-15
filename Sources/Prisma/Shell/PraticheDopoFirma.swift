@@ -94,7 +94,7 @@ private struct CorpoPraticheDopo: View {
             let compatta = g.size.width < P.larghezzaCompatta
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 0) {
-                    intestazione(prova: stati.contains { $0.pratica.diProva })
+                    intestazione(prova: !stato.inDimostrazione && stati.contains { $0.pratica.diProva })
                         .padding(.bottom, P.sottoTitoloScheda)
                     tile(r)
                         .padding(.bottom, P.sottoTile)

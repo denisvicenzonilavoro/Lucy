@@ -445,23 +445,27 @@ enum IndiceImpostazioni {
           parole: ["tasti", "tastiera"]),
     ]
 
+    /// Migliorie d'uso 37: sul Mac la pagina è «Dimostrazione»; le prove di Vera, dei promemoria e «Togli i clienti di
+    /// prova» stanno nelle loro pagine (Vera, Promemoria e occasioni, Archivio e backup).
     private static let strumenti: [V] = [
-        V(titolo: "Togli i clienti di prova", spiegazione: "Restano solo i tuoi clienti", pagina: .strumenti,
-          parole: ["dati di prova", "dimostrazione"]),
-        V(titolo: "I 5 clienti di prova", spiegazione: "Per provare i motori di calcolo", pagina: .strumenti,
-          parole: ["dati di prova", "dimostrazione"]),
-        V(titolo: "35 clienti di prova completi", spiegazione: "Prisma piena, per Vera e le prove", pagina: .strumenti,
-          parole: ["dati di prova", "dimostrazione"]),
-        V(titolo: "Confronta i modelli", spiegazione: "Le stesse domande a ogni modello", pagina: .strumenti,
-          ancora: "imp-strumenti-vera", parole: ["Vera"]),
+        V(titolo: TestiDimostrazione.interruttore, spiegazione: TestiDimostrazione.interruttoreSpiegazione, pagina: .strumenti,
+          ancora: "imp-strumenti-dimostrazione", parole: ["dati di prova", "clienti di prova", "demo", "mostrare Prisma"]),
+        V(titolo: GruppoProva.cinque.titolo, spiegazione: GruppoProva.cinque.spiegazione, pagina: .strumenti,
+          ancora: "imp-strumenti-gruppi", parole: ["dati di prova", "dimostrazione", "5 clienti"]),
+        V(titolo: GruppoProva.trentacinque.titolo, spiegazione: GruppoProva.trentacinque.spiegazione, pagina: .strumenti,
+          ancora: "imp-strumenti-gruppi", parole: ["dati di prova", "dimostrazione", "35 clienti"]),
+        V(titolo: "Togli i clienti di prova", spiegazione: "Restano solo i tuoi clienti", pagina: .archivio,
+          ancora: "imp-archivio-prova", parole: ["dati di prova", "dimostrazione"]),
+        V(titolo: "Confronta i modelli", spiegazione: "Le stesse domande a ogni modello", pagina: .vera,
+          ancora: "imp-vera-confronta", parole: ["Vera", "prove"]),
         V(titolo: "Misura la velocità su questo Mac", spiegazione: "La prova della fluidità con 5 e 200 clienti di prova",
-          pagina: .strumenti, ancora: "imp-strumenti-vera", parole: ["velocità", "fluidità"]),
-        V(titolo: "Misura Vera", spiegazione: "Caricamento di Qwen, prima parola, parole al secondo", pagina: .strumenti,
-          ancora: "imp-strumenti-vera", parole: ["velocità"]),
-        V(titolo: "Prova un promemoria", spiegazione: "Arriva subito, per vedere com'è", pagina: .strumenti,
-          ancora: "imp-strumenti-promemoria", parole: ["notifiche"]),
-        V(titolo: "Voce e ascolto", spiegazione: "Voce di Vera, microfono e riconoscimento della voce.", pagina: .strumenti,
-          ancora: "imp-strumenti-voce", parole: ["microfono", "dettatura"]),
+          pagina: .vera, ancora: "impostazioni-velocita", parole: ["velocità", "fluidità"]),
+        V(titolo: "Misura Vera", spiegazione: "Caricamento di Qwen, prima parola, parole al secondo", pagina: .vera,
+          ancora: "impostazioni-velocita", parole: ["velocità"]),
+        V(titolo: "Prova un promemoria", spiegazione: "Arriva subito, per vedere com'è", pagina: .promemoria,
+          ancora: "imp-promemoria-prova", parole: ["notifiche"]),
+        V(titolo: "Voce e ascolto", spiegazione: "Voce di Vera, microfono e riconoscimento della voce.", pagina: .vera,
+          ancora: "imp-vera-voce", parole: ["microfono", "dettatura"]),
     ]
 }
 #endif

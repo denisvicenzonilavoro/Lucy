@@ -164,6 +164,10 @@ extension AppImpostazioni {
     /// «spenti», «da completare»…). Sull'iPad il pallino di sempre.
     private func segnoVoceLaterale(_ p: SchedaImpostazioni, esito: EsitoDaSistemare?) -> SegnoVoceImpostazioni? {
         guard let esito else { return statoVoceLaterale(p).map { SegnoVoceImpostazioni.pallino($0) } }
+        // Migliorie d'uso 37: accanto a «Dimostrazione», accesa, la scritta piccola «accesa»
+        if p == .strumenti && stato.inDimostrazione {
+            return .etichetta(TestiDimostrazione.etichettaColonna, errore: false)
+        }
         if p == .panoramica {
             return esito.conteggio == 0 ? .spunta : .etichetta("\(esito.conteggio)", errore: false)
         }

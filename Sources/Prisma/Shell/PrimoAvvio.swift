@@ -114,7 +114,9 @@ extension StatoShell {
         chiudiPrimoAvvio()
         switch scelta {
         case .prova:
-            mostraAvviso(TestiPrimoAvvio.avvisoProva)
+            // Migliorie d'uso 37: «Guardo Prisma con i clienti di prova» accende la dimostrazione (l'archivio vero resta da
+            // parte, intatto)
+            accendiDimostrazione(gruppoProva)
         case .miei:
             // Clienti e il pannello «Importa…» (vCard, Excel o CSV); incollare da Excel resta nel menu … della Rubrica
             apriApp(.clienti)

@@ -696,6 +696,7 @@ struct PercorsoGiro: Shape {
 
 private struct FumettoLuce: View {
     let luce: LuceCliente
+    @Environment(StatoShell.self) private var stato
 
     private typealias F = Tema.Apple.Territorio.Fumetto
 
@@ -734,7 +735,8 @@ private struct FumettoLuce: View {
     private var provenienza: String {
         switch luce.luogo.precisione {
         case .manuale:
-            let prova = luce.cliente.luogo?.nota == TerritorioDiProva.nota ? " · dati di prova" : ""
+            // Migliorie d'uso 37: in dimostrazione basta l'etichetta della barra
+            let prova = luce.cliente.luogo?.nota == TerritorioDiProva.nota && !stato.inDimostrazione ? " · dati di prova" : ""
             return "posizione a mano" + prova
         case .comune:
             return "posizione del comune di \(luce.luogo.comune?.nome ?? luce.luogo.zona)"

@@ -53,7 +53,7 @@ private struct CorpoStudioScrivania: View, Equatable {
         let riservato = chiave.modo != nil
         // Dalla cache del motore (una volta per versione dei calcoli e per giorno)
         let c = stato.cruscottoStudio()
-        let prova = stato.haDatiDiProva
+        let prova = stato.scritteProva
         let mese = Calendar.current.component(.month, from: c.oggi)
         return HStack(alignment: .center, spacing: s.spazio) {
             anelli(c, riservato: riservato)

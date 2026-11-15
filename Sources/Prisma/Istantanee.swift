@@ -348,7 +348,7 @@ enum Istantanee {
             s.apri(.posizioni)
         }),
         ("85-impostazioni-strumenti", { s in
-            // Strumenti, in fondo alla barra laterale: dati di prova, confronto dei modelli, prove
+            // Strumenti in fondo alla barra laterale; sul Mac (migliorie d'uso 37) la pagina «Dimostrazione», spenta
             s.schedaImpostazioni = .strumenti
             s.apri(.impostazioni)
         }),
@@ -358,8 +358,11 @@ enum Istantanee {
             #if os(macOS)
             s.misureIstantanea = MisuraVelocita.diProvaIstantanea
             s.ancoraImpostazioni = MisuraVelocita.ancora
-            #endif
+            // Migliorie d'uso 37: le misure della velocità stanno in Impostazioni › Vera
+            s.schedaImpostazioni = .vera
+            #else
             s.schedaImpostazioni = .strumenti
+            #endif
             s.apri(.impostazioni)
         }),
         ("86-impostazioni-velocita-scuro", { s in
@@ -367,8 +370,11 @@ enum Istantanee {
             #if os(macOS)
             s.misureIstantanea = MisuraVelocita.diProvaIstantanea
             s.ancoraImpostazioni = MisuraVelocita.ancora
-            #endif
+            // Migliorie d'uso 37: le misure della velocità stanno in Impostazioni › Vera
+            s.schedaImpostazioni = .vera
+            #else
             s.schedaImpostazioni = .strumenti
+            #endif
             s.apri(.impostazioni)
         }),
         ("70-modo-cliente", { s in

@@ -222,6 +222,9 @@ extension StatoShell {
             accogliCarta(c)
             return .accettata()
         case .notaVocale(let n):
+            // Migliorie d'uso 37 (decisione 4): durante la dimostrazione la nota resta nella coda cifrata dell'iPhone e
+            // arriva dopo (entrerebbe nei dati di prova e si perderebbe)
+            if inDimostrazione { return .rifiutata(TestiDimostrazione.notaRifiutata) }
             // «Luce» giro 13: la nota entra sempre (anche con Prisma bloccato), le proposte si confermano sul Mac
             return riceviNotaVocale(n)
         }

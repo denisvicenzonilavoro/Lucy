@@ -444,6 +444,9 @@ extension StatoShell {
     /// il giornale e legge l'istantanea. `automatica`: niente avviso se non è cambiato nulla, niente errori a schermo.
     func sincronizzaOvunque(forza: Bool = false, automatica: Bool = false) {
         guard persistente, !solaLettura else { return }
+        // Migliorie d'uso 37: con la dimostrazione accesa l'istantanea non si scrive con i dati di prova e i giornali non si
+        // uniscono (restano nella cartella e si uniscono allo spegnimento)
+        guard !inDimostrazione else { return }
         let o = dati.impostazioni.ovunque
         guard o.acceso else { return }
         if ovunque.inCorso {
