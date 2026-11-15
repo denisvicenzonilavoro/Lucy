@@ -26,6 +26,9 @@ import SwiftUI
 //   nei Documenti, Salva PDF (il blu, l'azione principale).
 // - «Riduci movimento»: dissolvenze di 0,15 s; istantanee: tutto fermo nello stato finale.
 // - Sull'iPad la stessa app: niente passaggio del puntatore, la carta si sfoglia col dito (`SfogliaAnteprimaApple`).
+// - Sul Mac (migliorie d'uso 23) la colonna ha i documenti per momento (`ElencoProspetti`), con la riga «a cosa serve»,
+//   le etichette delle versioni e «per l'incontro di oggi»; la riga scelta non si allarga (solo le scelte per impaginare)
+//   e la descrizione lunga sta dietro la «i» sopra la pagina (Shell/ElencoProspettiApple.swift). Niente piede.
 // Valori in DesignSystem/Apple/Tema.Apple+Prospetti.swift. L'iPhone non ha Prospetti.
 
 // MARK: - Stili delle scelte del documento (comuni)
@@ -108,7 +111,12 @@ extension AppProspetti {
 
     /// L'ordine di tutte le voci, dall'alto in basso: dice da che parte gira la pagina.
     private var ordineVoci: [TipoProspetto] {
+        #if os(macOS)
+        // Migliorie d'uso 23: l'ordine dei gruppi per momento
+        ElencoProspetti.ordine
+        #else
         tipiPerIncontro + Self.tipiDiDettaglio + [.portafoglio, .fascicolo]
+        #endif
     }
 
     var corpoProspettiApple: some View {
@@ -137,7 +145,9 @@ extension AppProspetti {
     private var barraLateraleApple: some View {
         let l = Tema.Apple.Prospetti.Laterale.self
         let forma = RoundedRectangle(cornerRadius: l.raggio, style: .continuous)
+        #if !os(macOS)
         let perIncontro = tipiPerIncontro
+        #endif
         // La voce scelta, letta una volta per tutte le voci (non una per voce)
         let scelto = scelta.tipo
         return VStack(alignment: .leading, spacing: 0) {
@@ -146,6 +156,14 @@ extension AppProspetti {
             ScrollViewReader { lettore in
                 ScrollView(.vertical, showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 0) {
+                        #if os(macOS)
+                        gruppiPerMomentoApple(scelto: scelto)
+                        // Migliorie d'uso 23 (decisione 23-e): niente piede con i collegamenti e la nota «Impaginati sul Mac…»
+                        cardFascicoloApple
+                            .padding(.top, l.sopraFascicolo)
+                            .id(TipoProspetto.fascicolo.id)
+                            .entrataCascata(ElencoProspetti.ordine.count + ElencoProspetti.gruppi.count)
+                        #else
                         gruppoApple("Per l'incontro", tipi: perIncontro, primo: 0, scelto: scelto)
                         gruppoApple("Prospetti di dettaglio", tipi: Self.tipiDiDettaglio, primo: perIncontro.count + 1, scelto: scelto)
                         if !stato.inModoCliente {
@@ -157,6 +175,7 @@ extension AppProspetti {
                             .entrataCascata(perIncontro.count + Self.tipiDiDettaglio.count + 4)
                         piedeLateraleApple
                             .padding(.top, l.sopraPiede)
+                        #endif
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                 }
@@ -188,6 +207,67 @@ extension AppProspetti {
             }
         }
     }
+
+    #if os(macOS)
+    /// Migliorie d'uso 23: i gruppi per momento («Primo incontro», «Le analisi», «Per una proposta», «Fine anno»,
+    /// «Per te» fuori dalla modalità cliente), con il documento adatto all'incontro di oggi segnato in verde.
+    @ViewBuilder private func gruppiPerMomentoApple(scelto: TipoProspetto) -> some View {
+        let gruppi = ElencoProspetti.gruppi.filter { !(stato.inModoCliente && $0.titolo == ElencoProspetti.gruppoPerTe) }
+        let primi = Self.primiIndici(gruppi.map { $0.tipi.count })
+        let oggi = stato.prospettoPerIncontroOggi(cliente)
+        ForEach(Array(gruppi.enumerated()), id: \.offset) { i, g in
+            gruppoMomentoApple(g.titolo, tipi: g.tipi, primo: primi[i], scelto: scelto, perIncontroOggi: oggi)
+        }
+    }
+
+    /// L'indice di cascata della prima riga di ogni gruppo (l'etichetta del gruppo conta una riga).
+    private static func primiIndici(_ conteggi: [Int]) -> [Int] {
+        var primi: [Int] = []
+        var n = 0
+        for c in conteggi {
+            primi.append(n)
+            n += c + 1
+        }
+        return primi
+    }
+
+    private func gruppoMomentoApple(_ titolo: String, tipi: [TipoProspetto], primo: Int, scelto: TipoProspetto,
+                                    perIncontroOggi: TipoProspetto?) -> some View {
+        let l = Tema.Apple.Prospetti.Laterale.self
+        return VStack(alignment: .leading, spacing: l.fraVoci) {
+            Text(titolo)
+                .carattereApple(l.etichetta)
+                .foregroundColor(l.coloreEtichetta)
+                .lineLimit(1)
+                .padding(.top, primo == 0 ? 0 : l.sopraGruppo)
+                .padding(.bottom, max(0, l.sottoEtichetta - l.fraVoci))
+                .entrataCascata(primo)
+            ForEach(Array(tipi.enumerated()), id: \.element) { i, t in
+                voceMomentoApple(t, scelto: scelto, perIncontroOggi: perIncontroOggi == t)
+                    .entrataCascata(primo + i + 1, sfocatura: false)
+            }
+        }
+    }
+
+    /// Una riga: il nome, la riga «a cosa serve» (al più due righe) e le etichette. La riga scelta non si allarga: sotto
+    /// restano solo le scelte che servono a impaginare (e il commento del report), se ce ne sono (decisione 23-d).
+    private func voceMomentoApple(_ t: TipoProspetto, scelto: TipoProspetto, perIncontroOggi: Bool) -> some View {
+        let scelta = scelto == t
+        return VStack(alignment: .leading, spacing: 0) {
+            VoceProspettoApple(titolo: nomeBreve(t), sottotitolo: t.inBreve, nuovo: voceNuova(t), scelta: scelta,
+                               righeSottotitolo: Tema.Apple.Prospetti.Laterale.righeInBreve,
+                               conEtichette: true, versioni: t.versioni, incontroOggi: perIncontroOggi) {
+                scegliApple(t)
+            }
+            if scelta && sceltaSiAllarga {
+                contenutoScelta
+                    .padding(Tema.Apple.Prospetti.Laterale.paddingScelte)
+                    .transition(.opacity)
+            }
+        }
+        .id(t.id)
+    }
+    #endif
 
     private func voceApple(_ t: TipoProspetto, scelto: TipoProspetto) -> some View {
         let scelta = scelto == t
@@ -343,6 +423,8 @@ extension AppProspetti {
             // Migliorie d'uso 22: «Per il cliente | Per te», o l'etichetta grigia per chi ha una versione sola
             selettoreVersione
                 .fixedSize()
+            // Migliorie d'uso 23: la «i» con la scheda «A cosa serve»
+            PulsanteInfoProspetto(tipo: scelta.tipo)
             #endif
             Spacer(minLength: b.spazioAzioni)
             // Con le etichette se c'è posto, altrimenti le sole icone (con il suggerimento): il blu tiene la scritta
@@ -691,6 +773,11 @@ private struct VoceProspettoApple: View {
     let sottotitolo: String
     let nuovo: Bool
     let scelta: Bool
+    /// Migliorie d'uso 23 (sul Mac): la riga sotto il nome su più righe e le etichette delle versioni.
+    var righeSottotitolo = 1
+    var conEtichette = false
+    var versioni: [VersioneProspetto] = []
+    var incontroOggi = false
     let azione: () -> Void
 
     @Environment(\.prismaCalmo) private var calmo
@@ -705,10 +792,17 @@ private struct VoceProspettoApple: View {
                 Text(titolo)
                     .carattereApple(l.titoloVoce)
                     .foregroundColor(l.coloreTitoloVoce)
+                    .lineLimit(1)
                 testoSotto
                     .carattereApple(l.sottotitoloVoce)
+                    .lineLimit(righeSottotitolo)
+                    .fixedSize(horizontal: false, vertical: righeSottotitolo > 1)
+                #if os(macOS)
+                if conEtichette {
+                    EtichetteVoceProspetto(versioni: versioni, perIncontroOggi: incontroOggi)
+                }
+                #endif
             }
-            .lineLimit(1)
             .padding(l.paddingVoce)
             .frame(maxWidth: .infinity, alignment: .leading)
             .background { fondo }

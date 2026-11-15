@@ -314,3 +314,124 @@ extension SceltaProspetto {
         return versione == .perTe || soloPer == .perTe
     }
 }
+
+/// Migliorie d'uso 23: l'elenco dei documenti si legge a colpo d'occhio. Una riga per tipo che dice a cosa serve,
+/// le versioni che ha (le etichette «per il cliente» e «per te» sotto la riga) e da dove vengono le cifre (nella
+/// scheda «A cosa serve» sopra la pagina). Sono solo testi: valgono ovunque, li mostra il Mac.
+extension TipoProspetto {
+    /// La riga sotto il nome nell'elenco (decisione 23-b: i quattro del template come sono, gli altri nuovi).
+    var inBreve: String {
+        switch self {
+        case .checkUp: return "La fotografia: cosa c'è e cosa manca"
+        case .obiettivo: return "Quanto versare e quando ci arriva"
+        case .protezione: return "Quanto servirebbe alla famiglia"
+        case .annoInsieme: return "Il riepilogo dell'anno, da consegnare"
+        case .resoconto: return "Cosa ha e come sta andando"
+        case .patrimonio: return "Tutte le posizioni nei prossimi 20 anni"
+        case .resistenza: return "Se arrivassero tre anni difficili"
+        case .costi: return "Quanto costano gli investimenti"
+        case .successione: return "Cosa succede se venisse a mancare"
+        case .liquidita: return "I capitali in scadenza e la riserva"
+        case .previdenza: return "Quanto manca alla pensione che vuole"
+        case .valutazione: return "Un investimento da valutare, anno per anno"
+        case .sostituzione: return "Restare o cambiare"
+        case .posizione: return "Una posizione o una proposta in ogni dettaglio"
+        case .confronto: return "Due voci a fronte"
+        case .riesame: return "Per preparare il riesame"
+        case .portafoglio: return "Tutti i clienti insieme"
+        case .fascicolo: return "I report scelti in un solo PDF"
+        }
+    }
+
+    /// Le versioni del documento, nell'ordine delle etichette: per il cliente, poi per te (come `SceltaProspetto.versione`
+    /// e `soloPer`, migliorie d'uso 22).
+    var versioni: [VersioneProspetto] {
+        switch self {
+        case .resoconto, .sostituzione, .previdenza, .protezione, .obiettivo, .liquidita, .checkUp, .resistenza, .costi,
+             .successione, .patrimonio, .valutazione:
+            return [.perIlCliente, .perTe]
+        case .fascicolo, .annoInsieme:
+            return [.perIlCliente]
+        case .posizione, .confronto, .portafoglio, .riesame:
+            return [.perTe]
+        }
+    }
+
+    /// Da dove vengono le cifre: le note che prima stavano sotto la voce scelta, ora nella scheda «A cosa serve».
+    var fonti: String {
+        switch self {
+        case .resoconto:
+            return "Tutte le cifre vengono dalle Posizioni del cliente: aggiornale lì e il resoconto si ricompone. Ogni volta che cambi un controvalore, il valore precedente resta nello storico."
+        case .sostituzione:
+            return "Se la prima voce è in essere, cambiare vuol dire chiuderla oggi (penale, bollo, imposte) e reinvestire il netto. Le due strade ricevono gli stessi versamenti futuri. Tra due fondi pensione è un trasferimento senza imposte."
+        case .previdenza:
+            return "Età di pensione, reddito desiderato, pensione pubblica e anni di integrazione vengono dall'Analisi 360 (area Previdenza); il reddito lordo annuo dal profilo del cliente; i piani dalle Posizioni."
+        case .protezione:
+            return "Fabbisogno, anni di sostegno, entrate sostitutive e riserva vengono dall'Analisi 360 (area Protezione); la famiglia dal dossier del cliente; le coperture dalle Posizioni."
+        case .obiettivo:
+            return TestiProspettiObiettivo.dove
+        case .liquidita:
+            return "Capitali in scadenza e conti dalle Posizioni; fabbisogno mensile e mesi di riserva dall'Analisi 360 (area Protezione); i salvadanai seguono gli Obiettivi del cliente."
+        case .checkUp:
+            return "Anagrafica e famiglia dal dossier, patrimonio dalle Posizioni, ipotesi dall'Analisi 360, bisogni dal profilo dei bisogni. Più dati si raccolgono, meno semafori restano grigi."
+        case .resistenza:
+            return "Posizioni in essere e loro indicatore di rischio (SRI) dalle Posizioni; propensione al rischio dal profilo del cliente. Lo stesso calcolo del pannello in Posizioni."
+        case .costi:
+            return "Costi dalle Posizioni (e dai KID letti in Documenti); alternative dal catalogo Prodotti, con la stessa area e lo stesso indicatore di rischio. Lo stesso calcolo del pannello in Posizioni."
+        case .successione:
+            return "Posizioni e beneficiari dalle Posizioni; famiglia e stato civile dal dossier del cliente. Lo stesso calcolo del pannello in Posizioni."
+        case .patrimonio:
+            return "Posizioni e proposte dalle Posizioni, obiettivi con una data dagli Obiettivi del cliente. Lo stesso calcolo del pannello in Posizioni."
+        case .fascicolo:
+            return "Ogni report porta il suo commento, se l'hai scritto. Salvando il PDF vale la password del cliente, come per ogni documento."
+        case .posizione:
+            return "Contratto e costi dalla posizione; proiezioni con le ipotesi di calcolo di Prisma; fonti e pagine dai documenti letti."
+        case .confronto:
+            return "Le stesse scelte valgono nel Confronto: il prospetto riporta ciò che vedi lì, con il dettaglio anno per anno."
+        case .valutazione:
+            return "Condizioni del contratto dalla scheda prodotto (parti, penali, costi, KID); ipotesi e testi si modificano nella valutazione."
+        case .portafoglio:
+            return "Le cifre della vista Portafoglio di Posizioni. Non si archivia nei Documenti di un cliente: salvalo in PDF dove preferisci."
+        case .riesame:
+            return "Incontri dall'Agenda, posizioni con l'atteso, obiettivi, aree del check-up e proposte aperte del cliente."
+        case .annoInsieme:
+            return "Valori di inizio anno dallo storico delle Posizioni (ogni controvalore aggiornato resta nello storico), incontri dall'Agenda, obiettivi dal dossier, protezione dall'Analisi 360. Nessuna cifra scritta a mano."
+        }
+    }
+}
+
+/// Migliorie d'uso 23: i documenti raggruppati per momento (decisione 23-a), nell'ordine dell'elenco. «Per te» (il
+/// portafoglio) non si mostra in modalità cliente. Il fascicolo ha la sua card sotto i gruppi.
+enum ElencoProspetti {
+    static let gruppi: [(titolo: String, tipi: [TipoProspetto])] = [
+        (TestiElencoProspetti.primoIncontro, [.checkUp, .resoconto, .patrimonio]),
+        (TestiElencoProspetti.analisi, [.resistenza, .costi, .successione, .liquidita, .previdenza, .protezione, .obiettivo]),
+        (TestiElencoProspetti.proposta, [.valutazione, .sostituzione, .posizione, .confronto]),
+        (TestiElencoProspetti.fineAnno, [.annoInsieme, .riesame]),
+        (TestiElencoProspetti.perTe, [.portafoglio]),
+    ]
+
+    /// Il gruppo che resta fuori in modalità cliente.
+    static let gruppoPerTe = TestiElencoProspetti.perTe
+
+    /// L'ordine di tutte le voci, dall'alto in basso (con il fascicolo in fondo): dice da che parte gira la pagina.
+    static let ordine: [TipoProspetto] = gruppi.flatMap { $0.tipi } + [.fascicolo]
+}
+
+/// I testi dell'elenco dei documenti (migliorie d'uso 23).
+enum TestiElencoProspetti {
+    static let primoIncontro = "Primo incontro"
+    static let analisi = "Le analisi"
+    static let proposta = "Per una proposta"
+    static let fineAnno = "Fine anno"
+    static let perTe = "Per te"
+    static let etichettaCliente = "per il cliente"
+    static let etichettaPerTe = "per te"
+    static let incontroOggi = "per l'incontro di oggi"
+    static let aCosaServe = "A cosa serve"
+    static let daDove = "Da dove vengono le cifre"
+
+    static func etichetta(_ v: VersioneProspetto) -> String {
+        v == .perIlCliente ? etichettaCliente : etichettaPerTe
+    }
+}

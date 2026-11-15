@@ -982,3 +982,44 @@ Resta:
   pagina nei prospetti di `FoglioProspetto` sta nei 22 punti sotto il piede.
 - **Istantanee da rigenerare sul Mac**: 460 (chiara e scura), 461, 466 (chiara e scura), 236 e le scene dei prospetti
   (27-44, 66, 69, 101, 102, 112, 211, 212). Aggiornare la pagina delle anteprime.
+
+## 23. L'elenco dei documenti si legge a colpo d'occhio
+
+Fatto (solo sul Mac, `#if os(macOS)`; l'iPad tiene i tre gruppi di prima e le scelte complete):
+- **I gruppi per momento** (decisione 23-a) in `ElencoProspetti.gruppi` (`Dati/Prospetto.swift`): «Primo incontro», «Le
+  analisi», «Per una proposta», «Fine anno» e «Per te» (il portafoglio, nascosto in modalità cliente). `ordineVoci` segue
+  `ElencoProspetti.ordine` (il fascicolo in fondo), così la pagina gira nel verso giusto.
+- **La riga «a cosa serve»** `TipoProspetto.inBreve` (23-b, i quattro del template come sono) al posto di «Prospetto e
+  report», al più su due righe; «nuovo» resta per «Un anno insieme».
+- **Le etichette** «per il cliente» e «per te» sotto la riga (`TipoProspetto.versioni`, come `versione`/`soloPer` della
+  miglioria 22) e, in verde, «per l'incontro di oggi»: `stato.prospettoPerIncontroOggi(_:)` (in `ricavato`, chiave
+  «prospetti-incontro-oggi|<cliente>») segna il primo, nell'ordine dell'elenco, dei report di `TipoProspetto.perIncontro`
+  per un appuntamento di oggi non concluso (23-c; mai i blocchi «Non disponibile»).
+- **La riga non si allarga più**: sotto la voce scelta restano solo le scelte che servono a impaginare (posizione,
+  valutazione con «Modifica ipotesi e testi…» e «Nuova valutazione», obiettivo, le due voci di confronto e sostituzione
+  con gli anni, i report del fascicolo, il commento del report: 23-d) in `scelteCompatte` (`AppProspetti.swift`); le
+  parti comuni con l'iPad sono uscite in `scelteSostituzione`, `scelteConfronto`, `elencoObiettivi`, senza cambiare l'iPad.
+- **La «i» sopra la pagina** (`PulsanteInfoProspetto`, accanto al selettore delle versioni): il popover «A cosa serve» con
+  il nome 24 bold, `TipoProspetto.descrizione` e «Da dove vengono le cifre» (`TipoProspetto.fonti`, i testi che stavano
+  sotto la voce).
+- **Niente piede** con i collegamenti e la nota «Impaginati sul Mac…» (23-e). Token in `Tema.Apple.Prospetti.Laterale`
+  (`etichettaVoce`, `spazioEtichette`, `sopraEtichette`, `fondoEtichettaIncontro`, `testoEtichettaIncontro`,
+  `righeInBreve`) e `Tema.Apple.Prospetti.Info`; testi in `TestiElencoProspetti`.
+- Prova `ProvaElencoProspetti` (`--prova-prospetti`): riga, fonti e versioni per ogni tipo, ogni tipo in un gruppo solo,
+  l'ordine completo, il portafoglio in «Per te», e sul Mac la regola dell'incontro di oggi (primo incontro → check-up,
+  revisione → resoconto, niente per domani, per un concluso o per «Non disponibile»).
+- Istantanea nuova 464-prospetti-elenco-incontro-oggi (Giulia, revisione di oggi alle 9:30: il resoconto scelto porta
+  «per l'incontro di oggi»).
+
+Resta:
+- **465-prospetti-info** non aggiunta: la scheda «A cosa serve» è un popover e le istantanee non lo catturano; serve uno
+  screenshot dall'utente.
+- Gli **elenchi puntati di cosa contiene ogni documento** (prospetto e report) non sono passati nella scheda della «i»:
+  la scheda ha la descrizione lunga e le fonti; se servono, una `TipoProspetto.contenuto(versione:)` dai testi di oggi.
+- Sotto la voce scelta non ci sono più, sul Mac, i collegamenti «Apri l'Analisi 360» (previdenza, protezione) e «Apri il
+  Portafoglio in Posizioni», né l'elenco dei punti del riesame: le app sono nel dock. Per il riesame resta «Fissa
+  l'incontro di riesame» (o «In agenda: …»), che serve al documento.
+- La larghezza della colonna resta `Misura.Laterale.prospetti` (il template dice 300): si cambia solo il valore del token,
+  se l'utente lo vuole.
+- **Istantanee da rigenerare sul Mac**: 460 (chiara e scura), 461, 464, 466 (chiara e scura), 236, 81, 82. Aggiornare la
+  pagina delle anteprime.

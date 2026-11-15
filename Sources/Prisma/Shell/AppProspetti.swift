@@ -283,6 +283,11 @@ struct AppProspetti: View {
     /// sotto la voce scelta della barra laterale sul Mac.
     var contenutoScelta: some View {
         VStack(alignment: .leading, spacing: 0) {
+            #if os(macOS)
+            // Migliorie d'uso 23: sul Mac solo le scelte che servono a impaginare; a cosa serve il documento e da dove
+            // vengono le cifre stanno nella scheda «A cosa serve» sopra la pagina
+            scelteCompatte
+            #else
             switch scelta {
             case .resoconto(let report): sceltaResoconto(report: report)
             case .sostituzione(let a, let b, let report): sceltaSostituzione(a, b, report: report)
@@ -303,6 +308,7 @@ struct AppProspetti: View {
             case .riesame: sceltaRiesame
             case .annoInsieme: sceltaAnnoInsieme
             }
+            #endif
             if scelta.conCommento, let chiave = scelta.chiaveCommento(cliente: cliente) {
                 PannelloCommento(scelta: scelta).id(chiave)
             }
@@ -524,26 +530,32 @@ struct AppProspetti: View {
         .padding(12)
     }
 
-    private func sceltaObiettivo(_ id: String, report: Bool) -> some View {
+    /// L'elenco degli obiettivi del cliente: quale obiettivo impaginare.
+    private func elencoObiettivi(_ id: String, report: Bool) -> some View {
         let elenco = stato.obiettiviCliente(cliente)
         let mie = stato.posizioniCliente(cliente)
-        return VStack(alignment: .leading, spacing: 0) {
-            ForEach(elenco) { o in
-                let a = AvanzamentoObiettivo(o, posizioni: mie)
-                Button {
-                    archiviato = nil
-                    stato.prospetto = .obiettivo(o.id, report: report)
-                } label: {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(o.titolo).font(SSP.forte).foregroundColor(SSP.coloreTesto).lineLimit(1)
-                        Text("\(Formati.euro(o.importo)) · \(Formati.dataBreve.string(from: o.scadenza)) · \(Int((a.quota * 100).rounded()))%")
-                            .font(SSP.piccolo).foregroundColor(SSP.coloreNota)
-                    }
-                    .padding(EdgeInsets(top: 7, leading: 10, bottom: 7, trailing: 10))
-                    .voceSceltaProspetto(attiva: o.id == id)
+        return ForEach(elenco) { o in
+            let a = AvanzamentoObiettivo(o, posizioni: mie)
+            Button {
+                archiviato = nil
+                stato.prospetto = .obiettivo(o.id, report: report)
+            } label: {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(o.titolo).font(SSP.forte).foregroundColor(SSP.coloreTesto).lineLimit(1)
+                    Text("\(Formati.euro(o.importo)) · \(Formati.dataBreve.string(from: o.scadenza)) · \(Int((a.quota * 100).rounded()))%")
+                        .font(SSP.piccolo).foregroundColor(SSP.coloreNota)
                 }
-                .buttonStyle(StileSemplice())
+                .padding(EdgeInsets(top: 7, leading: 10, bottom: 7, trailing: 10))
+                .voceSceltaProspetto(attiva: o.id == id)
             }
+            .buttonStyle(StileSemplice())
+        }
+    }
+
+    private func sceltaObiettivo(_ id: String, report: Bool) -> some View {
+        let elenco = stato.obiettiviCliente(cliente)
+        return VStack(alignment: .leading, spacing: 0) {
+            elencoObiettivi(id, report: report)
             VStack(alignment: .leading, spacing: 10) {
                 if elenco.contains(where: { $0.id == id }) {
                     selettoreVersioneColonna(report) { stato.prospetto = .obiettivo(id, report: $0); archiviato = nil }
@@ -629,30 +641,35 @@ struct AppProspetti: View {
     }
 
     private func sceltaSostituzione(_ a: String, _ b: String, report: Bool) -> some View {
-        let elenco = posizioniOrdinate.filter { $0.area.proiettabile }
-        let attuale = elenco.first { $0.id == a }
-        return VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 10) {
             selettoreVersioneColonna(report) { stato.prospetto = .sostituzione(a, b, report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: A4 orizzontale, restare o cambiare spiegato una pagina alla volta."
                         : "Prospetto per te: A4 verticale, uscita di oggi, netto anno per anno, scenari, costi e caratteristiche.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
-            sceltaPosizioneSostituzione(attuale?.stato == .proposta ? "PRIMA PROPOSTA" : "OGGI · DA SOSTITUIRE", elenco: elenco,
-                                        selezione: Binding(get: { a }, set: { stato.prospetto = .sostituzione($0, b == $0 ? a : b, report: report); archiviato = nil }))
-            sceltaPosizioneSostituzione(attuale?.stato == .proposta ? "SECONDA PROPOSTA" : "ALTERNATIVA", elenco: elenco.filter { $0.stato == .proposta || $0.id == b },
-                                        selezione: Binding(get: { b }, set: { stato.prospetto = .sostituzione(a == $0 ? b : a, $0, report: report); archiviato = nil }))
-            Toggle("Orizzonte della proposta", isOn: Binding(
-                get: { stato.orizzonteSostituzione == nil },
-                set: { stato.orizzonteSostituzione = $0 ? nil : (stato.testiSostituzione(a, b)?.e.anni ?? IpotesiCalcolo.orizzontePredefinito) }))
-                .font(SSP.testo)
-            if let anni = stato.orizzonteSostituzione {
-                Stepper(value: Binding(get: { anni }, set: { stato.orizzonteSostituzione = min(max($0, 1), 50) }), in: 1...50) {
-                    Text("\(anni) \(anni == 1 ? "anno" : "anni")").font(SSP.testo)
-                }
-            }
+            scelteSostituzione(a, b, report: report)
             Text("Se la prima voce è in essere, cambiare vuol dire chiuderla oggi (penale, bollo, imposte) e reinvestire il netto. Le due strade ricevono gli stessi versamenti futuri. Tra due fondi pensione è un trasferimento senza imposte.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
         }
         .padding(12)
+    }
+
+    /// Le due posizioni della sostituzione e l'orizzonte: le scelte che servono a impaginare.
+    @ViewBuilder private func scelteSostituzione(_ a: String, _ b: String, report: Bool) -> some View {
+        let elenco = posizioniOrdinate.filter { $0.area.proiettabile }
+        let attuale = elenco.first { $0.id == a }
+        sceltaPosizioneSostituzione(attuale?.stato == .proposta ? "PRIMA PROPOSTA" : "OGGI · DA SOSTITUIRE", elenco: elenco,
+                                    selezione: Binding(get: { a }, set: { stato.prospetto = .sostituzione($0, b == $0 ? a : b, report: report); archiviato = nil }))
+        sceltaPosizioneSostituzione(attuale?.stato == .proposta ? "SECONDA PROPOSTA" : "ALTERNATIVA", elenco: elenco.filter { $0.stato == .proposta || $0.id == b },
+                                    selezione: Binding(get: { b }, set: { stato.prospetto = .sostituzione(a == $0 ? b : a, $0, report: report); archiviato = nil }))
+        Toggle("Orizzonte della proposta", isOn: Binding(
+            get: { stato.orizzonteSostituzione == nil },
+            set: { stato.orizzonteSostituzione = $0 ? nil : (stato.testiSostituzione(a, b)?.e.anni ?? IpotesiCalcolo.orizzontePredefinito) }))
+            .font(SSP.testo)
+        if let anni = stato.orizzonteSostituzione {
+            Stepper(value: Binding(get: { anni }, set: { stato.orizzonteSostituzione = min(max($0, 1), 50) }), in: 1...50) {
+                Text("\(anni) \(anni == 1 ? "anno" : "anni")").font(SSP.testo)
+            }
+        }
     }
 
     private func sceltaPosizioneSostituzione(_ titolo: String, elenco: [Posizione], selezione: Binding<String>) -> some View {
@@ -761,27 +778,32 @@ struct AppProspetti: View {
     }
 
     private func sceltaConfronto(_ a: VoceConfronto, _ b: VoceConfronto) -> some View {
-        let voci = ElementoConfronto.elenco(stato.dati, cliente: cliente)
-        return VStack(alignment: .leading, spacing: 10) {
-            sceltaVoce("A", voci: voci, selezione: Binding(get: { a }, set: { stato.prospetto = .confronto($0, b) }))
-            sceltaVoce("B", voci: voci, selezione: Binding(get: { b }, set: { stato.prospetto = .confronto(a, $0) }))
-            Toggle("Stesso orizzonte per entrambe", isOn: Binding(
-                get: { stato.orizzonteConfronto != nil },
-                set: { attivo in
-                    let anni = voci.filter { $0.voce == a || $0.voce == b }.map(\.parametri.anni).max() ?? IpotesiCalcolo.orizzontePredefinito
-                    stato.orizzonteConfronto = attivo ? anni : nil
-                }))
-                .font(SSP.testo)
-            if let anni = stato.orizzonteConfronto {
-                Stepper(value: Binding(get: { anni }, set: { stato.orizzonteConfronto = min(max($0, 1), 50) }), in: 1...50) {
-                    Text("\(anni) \(anni == 1 ? "anno" : "anni")").font(SSP.testo)
-                }
-            }
+        VStack(alignment: .leading, spacing: 10) {
+            scelteConfronto(a, b)
             Text("Le stesse scelte valgono nel Confronto: il prospetto riporta ciò che vedi lì, con il dettaglio anno per anno.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .padding(12)
+    }
+
+    /// Le due voci del confronto e l'orizzonte comune: le scelte che servono a impaginare.
+    @ViewBuilder private func scelteConfronto(_ a: VoceConfronto, _ b: VoceConfronto) -> some View {
+        let voci = ElementoConfronto.elenco(stato.dati, cliente: cliente)
+        sceltaVoce("A", voci: voci, selezione: Binding(get: { a }, set: { stato.prospetto = .confronto($0, b) }))
+        sceltaVoce("B", voci: voci, selezione: Binding(get: { b }, set: { stato.prospetto = .confronto(a, $0) }))
+        Toggle("Stesso orizzonte per entrambe", isOn: Binding(
+            get: { stato.orizzonteConfronto != nil },
+            set: { attivo in
+                let anni = voci.filter { $0.voce == a || $0.voce == b }.map(\.parametri.anni).max() ?? IpotesiCalcolo.orizzontePredefinito
+                stato.orizzonteConfronto = attivo ? anni : nil
+            }))
+            .font(SSP.testo)
+        if let anni = stato.orizzonteConfronto {
+            Stepper(value: Binding(get: { anni }, set: { stato.orizzonteConfronto = min(max($0, 1), 50) }), in: 1...50) {
+                Text("\(anni) \(anni == 1 ? "anno" : "anni")").font(SSP.testo)
+            }
+        }
     }
 
     private func sceltaVoce(_ lettera: String, voci: [ElementoConfronto], selezione: Binding<VoceConfronto>) -> some View {
@@ -893,6 +915,131 @@ struct AppProspetti: View {
         return dati
     }
 }
+
+#if os(macOS)
+// MARK: - Le scelte compatte del Mac (migliorie d'uso 23)
+
+extension AppProspetti {
+    /// true se sotto la voce scelta c'è qualcosa da scegliere per impaginare (decisione 23-d): i documenti senza scelte
+    /// non si allargano, salvo il commento del report.
+    var sceltaSiAllarga: Bool {
+        switch scelta {
+        case .sostituzione, .obiettivo, .valutazione, .posizione, .confronto, .fascicolo, .riesame:
+            return true
+        default:
+            return scelta.conCommento && scelta.chiaveCommento(cliente: cliente) != nil
+        }
+    }
+
+    /// Solo le scelte che servono a impaginare: quale posizione, valutazione o obiettivo, le due voci del confronto e
+    /// della sostituzione, gli anni, i report del fascicolo; per il riesame l'incontro da fissare.
+    @ViewBuilder var scelteCompatte: some View {
+        switch scelta {
+        case .sostituzione(let a, let b, let report):
+            VStack(alignment: .leading, spacing: 10) { scelteSostituzione(a, b, report: report) }
+                .padding(12)
+        case .obiettivo(let id, let report):
+            VStack(alignment: .leading, spacing: 0) {
+                elencoObiettivi(id, report: report)
+                if stato.obiettiviCliente(cliente).isEmpty {
+                    Button {
+                        stato.apri(.obiettivi)
+                    } label: {
+                        Label("Apri \(AppPrisma.obiettivi.titoloInPrisma)", systemImage: "target")
+                    }
+                    .buttonStyle(StileAzioneSceltaProspetto(taglia: .compatta))
+                    .fixedSize()
+                    .padding(12)
+                }
+            }
+        case .valutazione(let id, let report):
+            valutazioneCompatta(id, report: report)
+        case .posizione(let id):
+            sceltaPosizione(id)
+        case .confronto(let a, let b):
+            VStack(alignment: .leading, spacing: 10) { scelteConfronto(a, b) }
+                .padding(12)
+        case .fascicolo:
+            fascicoloCompatto
+        case .riesame:
+            riesameCompatto
+        case .resoconto, .previdenza, .protezione, .liquidita, .checkUp, .resistenza, .costi, .successione, .patrimonio,
+             .portafoglio, .annoInsieme:
+            EmptyView()
+        }
+    }
+
+    private func valutazioneCompatta(_ id: String, report: Bool) -> some View {
+        let elenco = stato.valutazioniCliente(cliente)
+        return VStack(alignment: .leading, spacing: 0) {
+            ForEach(elenco) { v in
+                Button {
+                    archiviato = nil
+                    stato.prospetto = .valutazione(v.id, report: report)
+                } label: { rigaValutazione(v, attiva: v.id == id) }
+                .buttonStyle(StileSemplice())
+            }
+            VStack(alignment: .leading, spacing: 10) {
+                if elenco.contains(where: { $0.id == id }) {
+                    Button { stato.valutazioneInModifica = stato.valutazione(id) } label: {
+                        Label("Modifica ipotesi e testi…", systemImage: "pencil")
+                    }
+                    .buttonStyle(StileAzioneSceltaProspetto(taglia: .compatta))
+                    .fixedSize()
+                }
+                pulsanteNuova
+                if stato.prodottiValutabili.isEmpty {
+                    Text("Serve una scheda prodotto con le condizioni del contratto (parti, penali, costi, KID).")
+                        .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
+                }
+            }
+            .padding(12)
+        }
+    }
+
+    private var fascicoloCompatto: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            ForEach(TipoProspetto.inFascicolo) { t in
+                Toggle(isOn: Binding(get: { stato.sceltaFascicolo.contains(t) },
+                                     set: { si in
+                                         if si { stato.sceltaFascicolo.insert(t) } else { stato.sceltaFascicolo.remove(t) }
+                                         archiviato = nil
+                                     })) {
+                    Text(t.nome).font(SSP.testo).foregroundColor(SSP.coloreTesto)
+                }
+                .stileCasella()
+            }
+        }
+        .padding(12)
+    }
+
+    @ViewBuilder private var riesameCompatto: some View {
+        if let r = stato.riesameCliente(cliente) {
+            VStack(alignment: .leading, spacing: 10) {
+                if let a = r.prossimo {
+                    Button { stato.mostraInAgenda(a) } label: {
+                        HStack(spacing: Tema.Misura.Componenti.spazioSimboloPulsante) {
+                            Text("In agenda: \(a.titolo), \(Formati.dataOra.string(from: a.inizio))")
+                                .lineLimit(2)
+                                .fixedSize(horizontal: false, vertical: true)
+                            Image(systemName: "arrow.up.right")
+                        }
+                    }
+                    .buttonStyle(StileCollegamento())
+                } else {
+                    Button { moduloAppuntamento = stato.bozzaRiesame(cliente) } label: {
+                        Label("Fissa l'incontro di riesame", systemImage: "calendar.badge.plus")
+                    }
+                    .buttonStyle(StileAzioneSceltaProspetto(accento: true))
+                    .fixedSize()
+                    .disabled(stato.solaLettura)
+                }
+            }
+            .padding(12)
+        }
+    }
+}
+#endif
 
 /// Le pagine di un documento sul tavolo dell'anteprima (gettone del tema, chiaro o scuro): i fogli restano chiari.
 /// Pila pigra: si disegnano solo i fogli che si vedono, non tutto il fascicolo con le ombre.
