@@ -107,6 +107,9 @@ extension Tema.Apple.Studio {
             /// Il fondo della materia scelta sporge di poco attorno alla riga.
             static let paddingMateria = Tema.Apple.Misura.padding(4, 8)
             static let raggioMateria: CGFloat = 10
+            /// Migliorie d'uso 55: al passaggio del puntatore (Mac) la riga prende un fondo tenue, metà di quello della
+            /// materia scelta, e il cursore a mano.
+            static let fondoSopra = Tema.Apple.Studio.OCF.Colore.materiaScelta.opacity(0.5)
             /// La nota in fondo: `.k` 12,5, 14 sopra.
             static let notaSopra: CGFloat = 14
             /// Il riquadro della data dell'esame, 14 sotto le materie.
@@ -200,6 +203,50 @@ extension Tema.Apple.Studio {
             static let raggioErrore = Tema.Apple.Raggio.voce
             static let paddingErrore = Tema.Apple.Misura.Padding.tile
             static let titoloErrore = Tema.Apple.Carattere.titoloRiga
+        }
+
+        // MARK: Il bilancio del giro (migliorie d'uso 55)
+
+        /// A fine giro, al posto della domanda: etichetta viola, titolo 30 bold, la regola del ripasso, l'elenco delle
+        /// domande del giro (segno, testo e materia, pillola di stato) e il piede con i due pulsanti grandi.
+        enum Bilancio {
+            /// «Il ripasso di oggi» in `.lbl` viola, come la materia sopra la domanda.
+            static let etichetta = Tema.Apple.Carattere.etichetta
+            static let coloreEtichetta = Tema.Apple.Studio.OCF.Colore.materia
+            /// «4 giuste su 6.»: 30 bold, −0,6, 8 sotto l'etichetta.
+            static let titolo = Tema.Apple.Carattere(dimensione: 30, peso: .bold, tracking: -0.6)
+            static let coloreTitolo = Tema.Apple.Colore.inchiostro
+            static let titoloSopra: CGFloat = 8
+            /// La regola del ripasso: 14,5, interlinea 1,45, 6 sopra, 16 sotto (prima dell'elenco).
+            static let testo = Tema.Apple.Carattere(dimensione: 14.5, peso: .regular, interlinea: 1.45)
+            static let coloreTesto = Tema.Apple.Colore.inchiostro2
+            static let testoSopra: CGFloat = 6
+            static let elencoSopra: CGFloat = 16
+            /// Le righe: 11 sopra e sotto, il filo `separatore` fra l'una e l'altra; segno largo 22, 12 dal testo.
+            static let rigaVerticale: CGFloat = 11
+            static let filo = Tema.Apple.Colore.separatore
+            static let spessoreFilo: CGFloat = 1
+            static let larghezzaSegno: CGFloat = 22
+            static let spazio: CGFloat = 12
+            /// Il segno: ✓ verde, ✕ rosso, – grigio, 16 bold.
+            static let segno = Tema.Apple.Carattere(dimensione: 16, peso: .bold)
+            static let coloreGiusta = Tema.Apple.Colore.verde
+            static let coloreSbagliata = Tema.Apple.Colore.rosso
+            static let coloreSaltata = Tema.Apple.Colore.inchiostro3
+            static let segnoGiusta = "✓"
+            static let segnoSbagliata = "✕"
+            static let segnoSaltata = "–"
+            /// La domanda in 14 semibold (al più due righe), la materia sotto in `.k`.
+            static let domanda = Tema.Apple.Carattere(dimensione: 14, peso: .semibold, interlinea: 1.35)
+            static let coloreDomanda = Tema.Apple.Colore.inchiostro
+            static let materia = Tema.Apple.Carattere.secondario
+            static let coloreMateria = Tema.Apple.Colore.inchiostro2
+            static let spazioRighe: CGFloat = 2
+            /// Il piede: 24 sopra, come il piede della domanda; 10 fra i pulsanti.
+            static let piedeSopra: CGFloat = 24
+            static let spazioPulsanti: CGFloat = 10
+            static let puntoDebole = Tema.Apple.Carattere.secondario
+            static let colorePuntoDebole = Tema.Apple.Colore.inchiostro2
         }
 
         // MARK: Movimento

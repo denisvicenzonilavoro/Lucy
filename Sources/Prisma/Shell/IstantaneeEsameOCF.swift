@@ -11,6 +11,11 @@ import Foundation
 /// - 535: il riepilogo di un'importazione con domande nuove, aggiornate e righe scartate;
 /// - 536: il ripasso di oggi finito;
 /// - 537: la domanda più lunga fra quelle di esempio, per controllare a capo e altezze.
+/// Migliorie d'uso 55 (il giro chiude con un bilancio; gli esiti del giro vivono solo nella sessione della scena):
+/// - 1093-uso-ocf-bilancio (chiara e scura): il bilancio di un giro con giuste, sbagliate e una saltata;
+/// - 1093-uso-ocf-tutte-giuste: il bilancio con tutte giuste («Tutte giuste.»);
+/// - 1093-uso-ocf-ultima-domanda: l'ultima domanda del giro con la risposta data («Vedi com’è andata ›»).
+/// Con le migliorie 55 la 530 mostra «Salta» sul piede e la nota nuova delle materie, 531 e 532 «Prossima domanda ›».
 ///
 /// DATI DI PROVA DICHIARATI: le sette domande sono quelle di esempio di Prisma (`Risorse/ocf-esempio.json`, scritte
 /// apposta, non tratte da manuali o quiz). Per vedere anello, barre e fasce servono almeno cinque risposte per materia:
@@ -40,7 +45,29 @@ extension Istantanee {
             ("536-studio-ocf-ripasso-finito", { s in preparaEsameOCF(s, .finito) }),
             ("536-studio-ocf-ripasso-finito-scuro", { s in preparaEsameOCF(s, .finito) }),
             ("537-studio-ocf-domanda-lunga", { s in preparaEsameOCF(s, .prova, domanda: idOCFLunga) }),
+            ("1093-uso-ocf-bilancio", { s in preparaEsameOCF(s, .prova, esiti: esitiOCFMisti) }),
+            ("1093-uso-ocf-bilancio-scuro", { s in preparaEsameOCF(s, .prova, esiti: esitiOCFMisti) }),
+            ("1093-uso-ocf-tutte-giuste", { s in preparaEsameOCF(s, .prova, esiti: esitiOCFTutteGiuste) }),
+            ("1093-uso-ocf-ultima-domanda", { s in
+                preparaEsameOCF(s, .prova, domanda: idOCFConsolidamento, scelta: 0,
+                                esiti: Array(esitiOCFMisti.prefix(3)))
+            }),
         ]
+    }
+
+    /// Un giro di sei domande di esempio: quattro giuste, una sbagliata, una saltata (migliorie d'uso 55).
+    nonisolated static var esitiOCFMisti: [EsitoGiroOCF] {
+        [EsitoGiroOCF(domandaId: idOCFPrima, esito: .giusta),
+         EsitoGiroOCF(domandaId: idOCFKid, esito: .sbagliata),
+         EsitoGiroOCF(domandaId: "esempio-matematica-1", esito: .giusta),
+         EsitoGiroOCF(domandaId: idOCFLunga, esito: .saltata),
+         EsitoGiroOCF(domandaId: "esempio-assicurazioni-1", esito: .giusta),
+         EsitoGiroOCF(domandaId: "esempio-matematica-2", esito: .giusta)]
+    }
+
+    /// Lo stesso giro, tutte giuste.
+    nonisolated static var esitiOCFTutteGiuste: [EsitoGiroOCF] {
+        esitiOCFMisti.map { EsitoGiroOCF(domandaId: $0.domandaId, esito: .giusta) }
     }
 
     /// Le domande di esempio mostrate dalle scene (Risorse/ocf-esempio.json).
@@ -51,7 +78,8 @@ extension Istantanee {
 
     /// Studio › Esame OCF con le domande di esempio e, nel caso «prova», i segnaposto con lo storico di prova.
     nonisolated static func preparaEsameOCF(_ s: StatoShell, _ caso: CasoEsameOCFIstantanee, domanda: String? = nil,
-                                            scelta: Int? = nil, dataEsame: Bool = false, importazione: Bool = false) {
+                                            scelta: Int? = nil, dataEsame: Bool = false, importazione: Bool = false,
+                                            esiti: [EsitoGiroOCF] = []) {
         let cal = Calendar.current
         let oggi = Date()
         let ieri = cal.date(byAdding: .day, value: -1, to: oggi) ?? oggi
@@ -76,7 +104,7 @@ extension Istantanee {
         }
         s.dati.ocf = a
         RichiestaIstantaneaOCF.chiedi(s, domanda: domanda, scelta: scelta, riquadroData: dataEsame,
-                                      importazione: importazione ? riepilogoOCFDiProva(esempi) : nil)
+                                      importazione: importazione ? riepilogoOCFDiProva(esempi) : nil, esiti: esiti)
         s.apriStudio(.ocf)
     }
 

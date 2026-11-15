@@ -90,6 +90,73 @@ enum ProvaCalcoliOCF {
         verifica("O6 Giorni all'esame", Double(MotoreOCF.preparazione(conEsame, oggi: giorno(2026, 11, 3, 22), cal: cal).giorniAllEsame ?? -1), 107)
         verifica("O6 L'esame è oggi", Double(MotoreOCF.preparazione(conEsame, oggi: giorno(2027, 2, 18, 18), cal: cal).giorniAllEsame ?? -1), 0)
 
+        // O7. Migliorie d'uso 55 · il ritmo fino all'esame: domande mai viste più ripassi aperti, divise per i giorni
+        verifica.vero("O7 Ritmo: zero giorni → nessun avviso", MotoreOCF.domandeAlGiorno(archivio: a, giorni: 0, cal: cal) == nil)
+        verifica.vero("O7 Ritmo: esame passato → nessun avviso", MotoreOCF.domandeAlGiorno(archivio: a, giorni: -3, cal: cal) == nil)
+        verifica.vero("O7 Ritmo: nessuna domanda → nessun avviso",
+                      MotoreOCF.domandeAlGiorno(archivio: ArchivioOCF(), giorni: 30, cal: cal) == nil)
+        // 17 domande, tutte da fare (nessuna al gradino dei 30 giorni): 10 giorni → 2 al giorno; 100 giorni → almeno 1
+        verifica("O7 Ritmo: 17 domande in 10 giorni → 2 al giorno",
+                 Double(MotoreOCF.domandeAlGiorno(archivio: a, giorni: 10, cal: cal) ?? -1), 2)
+        verifica("O7 Ritmo: 17 domande in 100 giorni → almeno 1",
+                 Double(MotoreOCF.domandeAlGiorno(archivio: a, giorni: 100, cal: cal) ?? -1), 1)
+        var consolidata = ArchivioOCF()
+        consolidata.materie = [MateriaOCF(id: "m1", nome: "Prima")]
+        consolidata.domande = [domanda("k", "m1")]
+        consolidata.risposte = [r("k", giorno(2026, 11, 2), true), r("k", giorno(2026, 11, 5), true),
+                                r("k", giorno(2026, 11, 12), true), r("k", giorno(2026, 11, 26), true)]
+        verifica.vero("O7 Ritmo: tutte al gradino dei 30 giorni → nessun avviso",
+                      MotoreOCF.domandeAlGiorno(archivio: consolidata, giorni: 30, cal: cal) == nil)
+        verifica.vero("O7 Ritmo: il testo dell'avviso",
+                      TestiEsameOCF.ritmo(giorni: 90, domande: 3) == "Mancano 90 giorni: 3 domande al giorno per arrivare pronto")
+        verifica.vero("O7 Bilancio: i titoli",
+                      TestiEsameOCF.bilancio(giuste: 6, di: 6, risposte: 6) == "Tutte giuste."
+                      && TestiEsameOCF.bilancio(giuste: 1, di: 6, risposte: 4) == "1 giusta su 6."
+                      && TestiEsameOCF.bilancio(giuste: 4, di: 6, risposte: 5) == "4 giuste su 6."
+                      && TestiEsameOCF.bilancio(giuste: 0, di: 3, risposte: 0) == "Nessuna risposta, per ora.")
+        verifica.vero("O7 Bilancio: la regola viene dagli intervalli del motore",
+                      TestiEsameOCF.tornano.contains("tra 3, 7, 14 e 30 giorni"))
+
+        #if os(macOS)
+        // O8. Migliorie d'uso 55 · la sessione ricorda il giro (solo sul Mac): saltare non rimette in coda e non scrive
+        // risposte, `avvia` azzera gli esiti, «Ricomincia» riporta le saltate, «Ripassa il punto debole» filtra la materia
+        var giro = ArchivioOCF()
+        giro.materie = [MateriaOCF(id: "m1", nome: "Prima"), MateriaOCF(id: "m2", nome: "Seconda")]
+        giro.domande = (1...3).map { domanda("s\($0)", "m1") } + (1...2).map { domanda("t\($0)", "m2") }
+        giro.nuovePerGiorno = 5
+        let sessione = SessioneEsameOCF()
+        sessione.avvia(giro, oggi: oggi, cal: cal)
+        let codaPrima = sessione.coda
+        let saltata = sessione.idAttuale ?? ""
+        sessione.avanti()
+        verifica.vero("O8 Saltare non rimette la domanda in coda", sessione.coda == codaPrima && sessione.indice == 1)
+        verifica.vero("O8 La saltata è nel giro", sessione.esiti == [EsitoGiroOCF(domandaId: saltata, esito: .saltata)])
+        verifica.vero("O8 Saltare non scrive risposte", giro.risposte.isEmpty)
+        let risposta = sessione.idAttuale ?? ""
+        sessione.annota(risposta, giusta: true)
+        sessione.scelta = 0
+        giro.rispondi(risposta, scelta: 0, il: oggi)
+        sessione.avanti()
+        verifica.vero("O8 La risposta è nel giro una volta sola",
+                      sessione.esiti.count == 2 && sessione.esiti.last == EsitoGiroOCF(domandaId: risposta, esito: .giusta))
+        verifica.vero("O8 All'ultima domanda il pulsante dice «Vedi com’è andata»", { () -> Bool in
+            let x = SessioneEsameOCF()
+            x.avvia(giro, oggi: oggi, cal: cal)
+            while x.indice < x.coda.count - 1 { x.avanti() }
+            return x.ultimaDelGiro
+        }())
+        sessione.avvia(giro, oggi: oggi, cal: cal)
+        verifica.vero("O8 «Ricomincia» azzera il giro, riporta la saltata e non la risposta",
+                      sessione.esiti.isEmpty && sessione.coda.contains(saltata) && !sessione.coda.contains(risposta))
+        let debole = MotoreOCF.preparazione(a, oggi: oggi, cal: cal).puntoDebole
+        let suDebole = SessioneEsameOCF()
+        suDebole.materia = debole?.id
+        suDebole.avvia(a, oggi: oggi, cal: cal)
+        verifica.vero("O8 «Ripassa il punto debole»: solo la materia più debole",
+                      debole?.id == "m2" && !suDebole.coda.isEmpty
+                      && suDebole.coda.allSatisfy { id in a.domanda(id)?.materia == "m2" })
+        #endif
+
         importazione(verifica, archivio: a)
         casoVero(verifica)
     }

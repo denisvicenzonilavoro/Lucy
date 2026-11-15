@@ -1800,3 +1800,22 @@ clienti» e cambiano da sole. Resta:
 - Guardare nelle istantanee che i quattro chip stiano accanto al titolo lungo «Le raccomandazioni e come sono andate»
   alla larghezza minima della finestra (il titolo è su una riga e ha la precedenza), e che «Riproponi» stia nei 132.
 - Il dettaglio della card non ha «Riproponi» (il template non lo chiede); VoceOver lo trova fra le azioni della card.
+
+## 55. Il quiz OCF chiude con un bilancio
+
+Fatto (solo sul Mac, iPhone e iPad tengono il quiz di prima con `SessioneEsameOCF.conBilancio`): il piede dice «Salta»
+(grande, non blu) finché non si risponde, poi «Prossima domanda ›» o, all'ultima della coda, «Vedi com’è andata ›»;
+la saltata non torna più nella coda di oggi (resta nella quota delle nuove o fra i ripassi scaduti); il giro vive nella
+sessione (`SessioneEsameOCF.esiti`, `EsitoGiroOCF`, azzerato da `avvia`) e chiude con `BilancioOCFVista` («Il ripasso di
+oggi», «4 giuste su 6.», la regola vera dagli intervalli del motore, l'elenco con segno, domanda, materia e pillola
+«Fatta» / «Torna domani» / «Saltata: torna domani», «Ripassa il punto debole», «Ricomincia», «Punto debole: …»); la nota
+delle materie nuova, con il fondo tenue e il cursore a mano al passaggio; dopo «Salva» della data l'avviso «Mancano <g>
+giorni: <k> domande al giorno per arrivare pronto» (`MotoreOCF.domandeAlGiorno`, niente con le domande di esempio).
+Nuova pillola di stato comune `PillolaStatoApple` / `TonoPillola` con i colori in `Tema.Apple.PillolaStato`
+(`PillolaEsitoApple` ora la usa; i nomi in `Tema.Apple.Studio.Track` puntano lì). Prove O7 e O8 in `ProvaCalcoliOCF`.
+Istantanee nuove 1093 (bilancio chiara e scura, tutte giuste, ultima domanda); 530, 531, 532 cambiano da sole. Resta:
+- Guardare nelle istantanee 1093 che il piede del bilancio («Ripassa il punto debole», «Ricomincia», «Punto debole: …»)
+  stia su una riga alla larghezza minima della card della domanda; se no, portare il punto debole sopra i pulsanti.
+- Il bilancio entra da destra con la stessa transizione della domanda; non c'è la cascata delle righe (il template non
+  la chiede).
+- `--prova-fluidita`: nessuna prova nuova (gli esiti sono della sessione della vista, fuori dalla `ChiaveVista`).
