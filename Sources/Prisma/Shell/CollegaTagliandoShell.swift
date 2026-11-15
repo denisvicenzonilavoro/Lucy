@@ -480,6 +480,9 @@ extension StatoShell {
         u.sinistri = spostaTagliando(\DatiVivi.sinistri, id: \.id, cliente: \.clienteId, da: dId, a: pId)
         u.uscite = spostaTagliando(\DatiVivi.uscite, id: \.id, cliente: \.clienteId, da: dId, a: pId)
         u.lettere = spostaTagliando(\DatiVivi.lettere, id: \.id, cliente: \.clienteId, da: dId, a: pId)
+        // Migliorie d'uso 60: le esperienze della Sala fatte seguono il cliente che resta (due uguali nello stesso giorno
+        // restano due righe)
+        u.esperienzeFatte = spostaTagliando(\DatiVivi.esperienzeFatte, id: \.id, cliente: \.clienteId, da: dId, a: pId)
         u.noteInArrivo = spostaTagliando(\DatiVivi.noteInArrivo, id: \.id, cliente: \.clienteId, da: Optional(dId), a: Optional(pId))
         u.potenziali = spostaTagliando(\DatiVivi.potenziali, id: \.id, cliente: \.clienteId, da: Optional(dId), a: Optional(pId))
         // Le pratiche seguono la loro posizione (non hanno un cliente proprio): passano con le posizioni.
@@ -714,6 +717,7 @@ extension StatoShell {
         _ = spostaTagliando(\DatiVivi.sinistri, id: \.id, cliente: \.clienteId, da: p, a: d, soli: Set(u.sinistri))
         _ = spostaTagliando(\DatiVivi.uscite, id: \.id, cliente: \.clienteId, da: p, a: d, soli: Set(u.uscite))
         _ = spostaTagliando(\DatiVivi.lettere, id: \.id, cliente: \.clienteId, da: p, a: d, soli: Set(u.lettere))
+        _ = spostaTagliando(\DatiVivi.esperienzeFatte, id: \.id, cliente: \.clienteId, da: p, a: d, soli: Set(u.esperienzeFatte))
         _ = spostaTagliando(\DatiVivi.noteInArrivo, id: \.id, cliente: \.clienteId, da: Optional(p), a: Optional(d), soli: Set(u.noteInArrivo))
         _ = spostaTagliando(\DatiVivi.potenziali, id: \.id, cliente: \.clienteId, da: Optional(p), a: Optional(d), soli: Set(u.potenziali))
         if u.kmSpostati, dati.kmClienti[d] == nil, let km = dati.kmClienti[p] {
@@ -961,6 +965,8 @@ private struct UnioneTagliando: Codable {
     var sinistri: [String] = []
     var uscite: [String] = []
     var lettere: [String] = []
+    /// Migliorie d'uso 60: le esperienze della Sala fatte passate sulla principale.
+    var esperienzeFatte: [String] = []
     var noteInArrivo: [String] = []
     var potenziali: [String] = []
     /// I clienti presentati dalla doppia, ora presentati dalla principale (passaparola).
@@ -993,7 +999,7 @@ private struct UnioneTagliando: Codable {
         let elenchi = [posizioni, documenti, appuntamenti, attivita, note, messaggi, incontri, obiettivi, simulazioni, valutazioni,
                        commenti, fotografie, schedeAdeguatezza, parcelle, eventiVita, sessioniCopilota, partiteRischio, promesse,
                        confrontiDocumenti, coperture, sussurriChiusi, spiegazioniTreLivelli, esitiRoutine, messaggiVera, speseStudio,
-                       capsule, sinistri, uscite, lettere, noteInArrivo, potenziali]
+                       capsule, sinistri, uscite, lettere, esperienzeFatte, noteInArrivo, potenziali]
         return elenchi.reduce(0) { $0 + $1.count } + (analisiSpostata ? 1 : 0) + (confrontoTFRSpostato ? 1 : 0) + (kmSpostati ? 1 : 0)
     }
 
@@ -1002,7 +1008,8 @@ private struct UnioneTagliando: Codable {
              valutazioni, commenti, fotografie, schedeAdeguatezza, parcelle, eventiVita, sessioniCopilota, partiteRischio, promesse,
              confrontiDocumenti, coperture, sussurriChiusi, spiegazioniTreLivelli, esitiRoutine, analisiSpostata, confrontoTFRSpostato,
              messaggiVera, riempiti, canaliAggiunti, consensiPrima, consensiDopo, conformitaUnita, conformitaPrima, conformitaDopo, rigaNota,
-             anagrafica, speseStudio, kmSpostati, ibanPreso, capsule, sinistri, uscite, lettere, noteInArrivo, potenziali, presentati
+             anagrafica, speseStudio, kmSpostati, ibanPreso, capsule, sinistri, uscite, lettere, noteInArrivo, potenziali, presentati,
+             esperienzeFatte
     }
 
     init(from decoder: Decoder) throws {
@@ -1039,6 +1046,7 @@ private struct UnioneTagliando: Codable {
         sinistri = elenco(.sinistri)
         uscite = elenco(.uscite)
         lettere = elenco(.lettere)
+        esperienzeFatte = elenco(.esperienzeFatte)
         noteInArrivo = elenco(.noteInArrivo)
         potenziali = elenco(.potenziali)
         presentati = elenco(.presentati)
@@ -1121,6 +1129,10 @@ extension StatoShell {
         }
         let sussurroDoppia = SussurroChiuso(clienteId: doppia.id, chiave: "prova-tagliando", chiusoIl: Date(timeIntervalSinceReferenceDate: 800_000_100.75))
         s.dati.sussurriChiusi.append(sussurroDoppia)
+        // Migliorie d'uso 60: un'esperienza della Sala fatta con la doppia segue il cliente che resta
+        let fattaDoppia = EsperienzaFatta(id: "fatta-prova-tagliando", clienteId: doppia.id, esperienza: .giocoRischio,
+                                          quando: Date(timeIntervalSinceReferenceDate: 800_000_200))
+        s.dati.esperienzeFatte.append(fattaDoppia)
         let messaggioDoppia = MessaggioVera(autore: .utente, testo: "Domanda sulla scheda doppia")
         s.dati.conversazioni[doppia.id] = [messaggioDoppia]
         // Marco senza email: dopo l'unione «Completa» con la scheda doppia deve scrivere sulla principale
@@ -1156,6 +1168,8 @@ extension StatoShell {
                   && s.dati.conversazioni[principale]?.contains { $0.id == messaggioDoppia.id } == true
                   && (dop == principale || s.dati.conversazioni[dop] == nil),
                   "Tagliando nell'app: anche sussurro chiuso e conversazione di Vera passano sulla principale")
+        controlla(s.dati.esperienzeFatte.contains { $0.id == fattaDoppia.id && $0.clienteId == principale },
+                  "Tagliando nell'app: le esperienze della Sala fatte passano sulla principale (migliorie d'uso 60)")
         if dop == doppia.id {
             controlla(s.cliente(principale)?.modelloId == "modello-prova-tagliando" && s.cliente(principale)?.professione == "Architetto",
                       "Tagliando nell'app: il resto dell'anagrafica che manca alla principale (modello del radar, professione) arriva dalla doppia")
@@ -1213,6 +1227,8 @@ extension StatoShell {
                   && s.dati.conversazioni[doppia.id]?.contains { $0.id == messaggioDoppia.id } == true
                   && s.dati.conversazioni["marco"]?.contains { $0.id == messaggioDoppia.id } != true,
                   "Tagliando nell'app: «Annulla» rimette le due schede com'erano (anche consensi, sussurro e conversazione)")
+        controlla(s.dati.esperienzeFatte.contains { $0.id == fattaDoppia.id && $0.clienteId == doppia.id },
+                  "Tagliando nell'app: «Annulla» rimette le esperienze della Sala fatte sulla doppia (migliorie d'uso 60)")
         // Eliminare la principale di un'unione libera la scheda doppia (niente `unitaIn` verso una scheda che non c'è)
         do {
             let t = StatoShell(persistente: false)

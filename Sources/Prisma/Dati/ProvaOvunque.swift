@@ -620,9 +620,13 @@ enum ProvaOvunque {
         dati.capsule = [capsula]
         dati.uscite = [uscita]
         dati.sinistri = [sinistro]
+        // Migliorie d'uso 60 (decisione 60-e): le esperienze della Sala fatte restano sul Mac
+        let fatta = EsperienzaFatta(id: "fatta-ovunque", clienteId: "giulia", esperienza: .giocoRischio, quando: ora(1))
+        dati.esperienzeFatte = [fatta]
         let istantanea = SpazioOvunque.datiIstantanea(dati)
         try controlla(istantanea.capsule.isEmpty && istantanea.uscite.isEmpty,
                       "le capsule del tempo o le uscite entrano nell'istantanea di Prisma ovunque")
+        try controlla(istantanea.esperienzeFatte.isEmpty, "le esperienze della Sala fatte entrano nell'istantanea di Prisma ovunque")
         let chiaro = try JSONOvunque.codificatore().encode(istantanea)
         let testo = String(decoding: chiaro, as: UTF8.self)
         for segreto in ["Obiettivo riservato 3H8T", "Biglietto riservato 9P4K", "Descrizione riservata 6W1R", "SIN-PROVA-4417",
@@ -641,6 +645,7 @@ enum ProvaOvunque {
         // L'archivio del Mac non cambia
         try controlla(dati.capsule == [capsula] && dati.uscite == [uscita] && dati.sinistri == [sinistro],
                       "l'istantanea ha toccato capsule, uscite o sinistri dell'archivio del Mac")
+        try controlla(dati.esperienzeFatte == [fatta], "l'istantanea ha toccato le esperienze della Sala fatte dell'archivio del Mac")
         // Sul dispositivo: capsule e uscite restano le sue
         var telefono = DatiPrisma.demo()
         telefono.capsule = []
@@ -650,6 +655,11 @@ enum ProvaOvunque {
         let accolto = SincroniaOvunque.accogli(ist, in: telefono).dati
         try controlla(accolto.capsule.isEmpty && accolto.uscite.isEmpty,
                       "accogliendo l'istantanea il dispositivo riceve capsule o uscite")
+        // Un'istantanea senza il campo non cancella le esperienze fatte locali
+        var conFatte = telefono
+        conFatte.esperienzeFatte = [fatta]
+        try controlla(SincroniaOvunque.accogli(ist, in: conFatte).dati.esperienzeFatte == [fatta],
+                      "accogliendo l'istantanea il dispositivo perde le sue esperienze della Sala fatte")
         try controlla(accolto.sinistri.map(\.id).contains(sinistro.id), "il dispositivo non riceve i sinistri dello spazio")
     }
 

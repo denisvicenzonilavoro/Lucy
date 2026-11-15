@@ -151,6 +151,26 @@ extension Tema.Apple {
             static let spazioPulsante: CGFloat = 5
         }
 
+        /// Migliorie d'uso 60 «Ogni esperienza lascia qualcosa»: «✓ Fatta oggi» è la capsula di stato «ok» del tema
+        /// (`CapsulaStatoApple`, `.st2.ok`: 11,5 bold, padding 3×9, #1F7A41 / #6FD08E su verde 0,15); sulla griglia sta
+        /// in alto a destra della scheda, 44 dall'alto e 14 da destra (`.saOk`), sotto l'etichetta del momento. Nel
+        /// dossier il riquadro «In Sala» con le ultime cinque esperienze fatte (data breve e titolo).
+        enum Fatte {
+            static let dallAlto: CGFloat = 44
+            static let daDestra: CGFloat = 14
+            /// Le righe del riquadro «In Sala» nel dossier.
+            static let quante = 5
+            static let spazioRighe: CGFloat = 6
+            static let spazioRiga: CGFloat = 10
+            static let data = C(dimensione: 13, peso: .regular, tabellare: true)
+            static let coloreData = Tema.Apple.Colore.inchiostro2
+            static let larghezzaData: CGFloat = 56
+            static let riga = C(dimensione: 13, peso: .semibold)
+            static let coloreRiga = Tema.Apple.Colore.inchiostro
+            static let tassello: CGFloat = 20
+            static let raggioTassello: CGFloat = 6
+        }
+
         /// La presentazione sulla sala opaca (velo dei Prospetti, sempre scuro): il palco grande al centro, «Chiudi»
         /// bianco in basso.
         enum Presenta {

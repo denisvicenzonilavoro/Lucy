@@ -215,6 +215,7 @@ struct CapsulaDelTempo: View {
             return
         }
         stato.mostraAvviso(TestiRealta.capsulaArrivata(TestiRealta.primoNome(cliente.nome)))
+        if !istantanea { stato.segnaEsperienza(.capsula, cliente: cliente.id, avviso: false) }
         guard !calmo, !istantanea else { return }
         lampo = nuova
         Movimenti.dopo(M.rigaNuova) {
@@ -373,6 +374,8 @@ struct CapsulaDelTempo: View {
             stato.mostraAvviso(TestiCapsule.toastNonSigillata)
             return
         }
+        // Migliorie d'uso 60: «Sigilla» è una fine chiara, l'esperienza si segna da sola (senza avviso)
+        stato.segnaEsperienza(.capsula, cliente: cliente.id, avviso: false)
         let nuova = stato.dati.capsule.first { !prima.contains($0.id) }?.id
         if calmo {
             testo = ""
@@ -424,6 +427,8 @@ struct CapsulaDelTempo: View {
         let password = istantanea ? (stato.sala.provaUscite.passwordDiProva ?? TestiCapsule.passwordDiProvaIstantanee)
                                   : GeneratorePassword.nuova(cliente: cliente)
         stato.sala.dettaglioValoreAperto = true
+        // Migliorie d'uso 60: «Apri e consegna» è una fine chiara
+        if !istantanea { stato.segnaEsperienza(.capsula, cliente: cliente.id, avviso: false) }
         let nuova = CapsulaAperta(id: id, testo: t, password: password, animata: animata)
         if animata {
             withAnimation(.easeOut(duration: M.velo)) { aperta = nuova }

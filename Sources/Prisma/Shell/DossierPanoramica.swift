@@ -61,6 +61,9 @@ struct PanoramicaDossierApple: View {
             DaRicordareApple(cliente: cliente)
                 .entrataDossier(2)
             if !stato.inModoCliente {
+                // Migliorie d'uso 60: le ultime esperienze della Sala fatte con il cliente (StatoEsperienzeFatte.swift)
+                InSalaDossierApple(cliente: cliente)
+                    .entrataDossier(2)
                 let daFesteggiare = stato.traguardiDaFesteggiareDossier(cliente.id)
                 if !daFesteggiare.isEmpty {
                     DaFesteggiareApple(traguardi: daFesteggiare)

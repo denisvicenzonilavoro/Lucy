@@ -264,6 +264,14 @@ private struct TestaFinestra: View {
                 if app == .mercato {
                     // L'occhiello lo scrive il motore del mercato: «Aggiornato oggi alle 18:00» (AppMercato.swift)
                     OcchielloMercato()
+                } else if app == .sala {
+                    // Migliorie d'uso 60: «2 esperienze fatte oggi con Giulia» (StatoEsperienzeFatte.swift)
+                    OcchielloSala { testo in
+                        Text(testo)
+                            .carattereApple(RigaTestaTema.sottotitolo)
+                            .foregroundColor(RigaTestaTema.coloreSottotitolo)
+                            .lineLimit(1)
+                    }
                 } else {
                     Text(app.occhiello)
                         .carattereApple(RigaTestaTema.sottotitolo)

@@ -3,7 +3,8 @@ import Foundation
 /// Migliorie d'uso 34 «Le esperienze della Sala, al momento giusto»: ogni esperienza ha un momento (e una durata, tranne
 /// il Prisma del cliente), le etichette dicono «Per aprire · 2 min» e «Dopo l’incontro», le consigliate vengono dalle
 /// priorità in ordine (al più due, il risparmio non ha un'esperienza sua, nessun consiglio senza priorità).
-/// Dalla miglioria 59 anche i copioni «Cosa dire» delle esperienze. Chiamata da `ProvaCalcoli.esegui()`.
+/// Dalla miglioria 59 anche i copioni «Cosa dire» delle esperienze, dalla 60 la prossima esperienza. Chiamata da
+/// `ProvaCalcoli.esegui()`.
 enum ProvaCalcoliSalaMomenti {
     static func esegui(_ verifica: VerificaCalcoli) {
         // Ogni esperienza ha un momento; ogni momento ha almeno un'esperienza
@@ -52,5 +53,32 @@ enum ProvaCalcoliSalaMomenti {
                           let c = e.copione
                           return !(c.passi + [c.apertura, c.domanda]).joined().contains("€")
                       })
+
+        // Migliorie d'uso 60: la prossima esperienza (`salaProssima` del template): il primo momento dopo con una libera,
+        // dentro il momento la consigliata, poi lo stesso momento, mai i momenti prima
+        verifica.vero("Sala prossima: dopo il gioco del rischio la prima «per chiudere»",
+                      EsperienzaSala.prossima(dopo: .giocoRischio, fatte: [.giocoRischio], consigliate: []) == .lettera)
+        verifica.vero("Sala prossima: dentro il momento vince la consigliata",
+                      EsperienzaSala.prossima(dopo: .giocoRischio, fatte: [.giocoRischio], consigliate: [.capsula]) == .capsula)
+        verifica.vero("Sala prossima: un momento senza esperienze libere si salta",
+                      EsperienzaSala.prossima(dopo: .prismaLuce, fatte: [.prismaLuce, .giocoRischio, .giornataPensione, .lanciaAnno],
+                                              consigliate: []) == .lettera)
+        verifica.vero("Sala prossima: finiti i momenti dopo, lo stesso momento",
+                      EsperienzaSala.prossima(dopo: .film, fatte: [.film], consigliate: []) == .prismaCliente)
+        verifica.vero("Sala prossima: nel «Dopo l’incontro» il film viene prima del Prisma del cliente",
+                      EsperienzaSala.prossima(dopo: .valoreConsulente, fatte: [.valoreConsulente, .lettera, .capsula],
+                                              consigliate: []) == .film)
+        verifica.vero("Sala prossima: i momenti prima non si propongono mai",
+                      EsperienzaSala.prossima(dopo: .film, fatte: [.film, .prismaCliente], consigliate: [.giocoRischio]) == nil)
+        verifica.vero("Sala prossima: nil quando non resta nulla",
+                      EsperienzaSala.prossima(dopo: .capsula, fatte: [.capsula, .lettera, .valoreConsulente, .film, .prismaCliente],
+                                              consigliate: []) == nil)
+        verifica.vero("Sala prossima: l'ordine dei momenti copre tutte le esperienze una volta",
+                      Set(EsperienzaSala.ordineMomenti) == Set(EsperienzaSala.allCases)
+                          && EsperienzaSala.ordineMomenti.count == EsperienzaSala.allCases.count)
+        verifica.vero("Sala fatte: i testi del template",
+                      TestiEsperienzeFatte.occhiello(1, nome: "Giulia") == "Un’esperienza fatta oggi con Giulia"
+                          && TestiEsperienzeFatte.occhiello(2, nome: "Giulia") == "2 esperienze fatte oggi con Giulia"
+                          && TestiEsperienzeFatte.segnata(.giocoRischio, nome: "Marco").hasSuffix("resta scritta nel dossier di Marco, con la data di oggi"))
     }
 }

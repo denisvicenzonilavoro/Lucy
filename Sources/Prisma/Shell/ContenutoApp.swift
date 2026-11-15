@@ -265,6 +265,14 @@ struct IntestazioneApp<Azioni: View>: View {
                 if app == .mercato {
                     // L'occhiello lo scrive il motore del mercato: «Aggiornato oggi alle 18:00» (AppMercato.swift)
                     OcchielloMercato()
+                } else if app == .sala {
+                    // Migliorie d'uso 60: sul Mac quante esperienze sono state fatte oggi (StatoEsperienzeFatte.swift)
+                    OcchielloSala { testo in
+                        Text(testo.uppercased())
+                            .font(Tipo.appOcchiello)
+                            .foregroundColor(Colori.IntestazioneApp.occhiello)
+                            .lineLimit(1)
+                    }
                 } else {
                     Text(app.occhiello.uppercased())
                         .font(Tipo.appOcchiello)

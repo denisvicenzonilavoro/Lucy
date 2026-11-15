@@ -2,7 +2,7 @@
 import SwiftUI
 
 // Migliorie d'uso 59 «Ogni esperienza ha il suo copione» (Design/uso/gruppo-10.md §59, template righe 4770-4801): nella
-// testata del palco i pulsanti del consulente (`#saMie`: qui «Cosa dire»; la miglioria 60 aggiungerà «Segna come fatta»)
+// testata del palco i pulsanti del consulente (`#saMie`: «Cosa dire» e, dalla miglioria 60, «Segna come fatta»)
 // e il riquadro del copione, ancorato in alto a destra del palco, sotto la testata. Non è un popover: le istantanee lo
 // disegnano e resta dentro la finestra. Sta in `PalcoSala`, mai in `ContenutoPalco`: così non entra nella presentazione
 // né nelle immagini mandate all'iPad. Solo sul Mac. Valori in Tema.Apple.SalaEsperienze.Copione.
@@ -37,6 +37,57 @@ struct AzioniPalco: View {
         .buttonStyle(.apple)
         .help(TestiCopione.aiutoPulsante)
         .accessibilityAddTraits(sala.copioneAperto ? .isSelected : [])
+    }
+}
+
+/// Migliorie d'uso 60 «Ogni esperienza lascia qualcosa» (template righe 4797-4803): dopo «Cosa dire», «Segna come
+/// fatta» se l'esperienza non è ancora fatta oggi con il cliente; se è fatta l'etichetta verde «✓ Fatta oggi» e, se ce
+/// n'è una, il blu «Prossima: <esperienza> ›», che apre subito quella esperienza sul palco. Alle stesse condizioni del
+/// copione (`consulenteVede`).
+struct AzioniFattaPalco: View {
+    @Environment(StatoShell.self) var stato
+    let esperienza: EsperienzaSala
+    let cliente: Cliente
+
+    @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.modoIstantanea) private var istantanea
+
+    var body: some View {
+        let fatta = stato.esperienzaFattaOggi(esperienza, cliente: cliente.id)
+        if fatta {
+            CapsulaStatoApple(testo: TestiEsperienzeFatte.fattaOggi, tono: .ok)
+                .accessibilityLabel(Text(TestiEsperienzeFatte.fattaOggi))
+            if let prossima = stato.prossimaEsperienza(dopo: esperienza, cliente: cliente.id) {
+                Button(TestiEsperienzeFatte.prossima(prossima)) { apri(prossima) }
+                    .buttonStyle(.applePrimario)
+                    .help(TestiEsperienzeFatte.aiutoProssima(prossima))
+            }
+        } else {
+            Button(TestiEsperienzeFatte.segna) {
+                stato.segnaEsperienza(esperienza, cliente: cliente.id, avviso: true)
+            }
+            .buttonStyle(.apple)
+            .disabled(stato.solaLettura)
+            .help(TestiEsperienzeFatte.aiutoSegna)
+        }
+    }
+
+    /// Apre la prossima esperienza con la stessa animazione della griglia (a metà del gioco del rischio chiede prima
+    /// conferma, come «‹ Sala»).
+    private func apri(_ prossima: EsperienzaSala) {
+        guard stato.puoTornareAllaSala() else { return }
+        let sala = stato.sala
+        let cambia: () -> Void = {
+            sala.copioneAperto = false
+            sala.dettaglioValoreAperto = false
+            sala.stesureLettera = [:]
+            sala.esperienza = prossima
+        }
+        if istantanea {
+            cambia()
+        } else {
+            withAnimation(calmo ? Tema.Moto.dissolvenzaCalma : Tema.Apple.Moto.SalaEsperienze.passaggio) { cambia() }
+        }
     }
 }
 

@@ -178,6 +178,8 @@ enum SpazioOvunque {
         x.uscite = []
         // Le lettere dal futuro conservate restano sul Mac (D-L8, decisione 44)
         x.lettere = []
+        // Migliorie d'uso 60: le esperienze della Sala fatte restano sul Mac (decisione 60-e)
+        x.esperienzeFatte = []
         x.sinistri = x.sinistri.map(SpazioOvunque.sinistroPerOvunque)
         // L'IBAN dei clienti e i moduli compilati restano sul Mac (decisioni 40 e 44; i modelli stanno in Moduli/, fuori
         // dall'archivio)
@@ -519,6 +521,7 @@ enum SincroniaOvunque {
         nuovo.capsule = locale.capsule
         nuovo.uscite = locale.uscite
         nuovo.lettere = locale.lettere
+        nuovo.esperienzeFatte = locale.esperienzeFatte
         // Vera, fase 4: ciò che l'istantanea non porta resta quello del dispositivo
         nuovo.routine.esiti = locale.routine.esiti
         // Le routine sono del Mac (non passano dal giornale), ma un lancio fatto qui non torna «dovuto» per

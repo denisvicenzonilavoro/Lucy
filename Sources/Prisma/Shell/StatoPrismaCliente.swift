@@ -238,6 +238,8 @@ extension StatoShell {
             s.aggiunteDopoUltimoFile = []
             dati.clienti[i].prismaCliente = s
         }
+        // Migliorie d'uso 60: «Prepara il file» riuscito è una fine chiara, l'esperienza si segna da sola (senza avviso)
+        segnaEsperienza(.prismaCliente, cliente: c.id, avviso: false)
         avanzamento(1)
         return .pronto(pdf: urlPDF, html: urlHTML, dimensione: dimensione, documentoId: documentoId)
     }

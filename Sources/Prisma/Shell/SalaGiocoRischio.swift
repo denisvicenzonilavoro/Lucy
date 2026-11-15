@@ -445,6 +445,8 @@ struct GiocoRischioVista: View {
         p.vistaDalConsulenteIl = Date()
         stato.dati.partiteRischio.append(p)
         salvata = true
+        // Migliorie d'uso 60 (decisione 60-b): «Salva nel dossier» confermato segna l'esperienza come fatta
+        stato.segnaEsperienza(.giocoRischio, cliente: p.clienteId, avviso: false)
     }
 }
 

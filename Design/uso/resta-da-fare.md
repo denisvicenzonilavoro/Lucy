@@ -1962,3 +1962,35 @@ Resta:
 - La prova della modalità cliente in `--prova-backup` (`provaModoClienteLuce`) non è stata estesa: il caso «fuori dalla
   vista `mandaAlTavolo()` non fa nulla» è in `--prova-tavolo`. `--prova-realta` non ha un caso nuovo per la conferma
   passando dall'etichetta. `EsperienzaSala.mostraSulTavolo` e `tavoloPronto` restano (li conta la prova di Vera).
+
+## 60. Ogni esperienza lascia qualcosa
+
+Fatto (solo Mac): il campo nuovo `DatiPrisma.esperienzeFatte` (`Dati/EsperienzaFatta.swift`: chi, cosa, quando; letto con
+tolleranza, nessuna versione nuova, 27) nel file del cliente (`ArchivioPezzi.pezzo`: `.cliente`), in `DatiVivi` (54 campi,
+`.neutro`), tolto con il cliente, spostato da «Unisci le schede» e rimesso dall'annullamento, mai in «Prisma ovunque»
+(fuori dall'istantanea, le locali restano all'unione). Le funzioni in `Shell/StatoEsperienzeFatte.swift`: le fatte oggi e le
+ultime in `ricavato` con nella chiave quante sono e l'id dell'ultima; il segno una volta al giorno (solo Mac); «Togli»;
+la prossima pura (`EsperienzaSala.prossima(dopo:fatte:consigliate:)`, ordine esplicito `ordineMomenti`, film prima del
+Prisma del cliente). Nel palco, dopo «Cosa dire», «Segna come fatta» oppure «✓ Fatta oggi» (`CapsulaStatoApple` `.ok`, i
+toni `.st2.ok` già del tema) e «Prossima: … ›». Il segno da solo nei punti di fine del codice: capsula sigillata (anche
+dall'iPad del tavolo) e «Apri e consegna», obiettivo salvato dal disegno, «Prepara il file» riuscito, video esportato o
+mandato, partita del rischio salvata nel dossier (decisione 60-b). Sulla griglia «✓ Fatta oggi» a 44/14 e l'occhiello della
+Sala «2 esperienze fatte oggi con Giulia» (riga sola della finestra e intestazione di prima; non nella vista del cliente né
+in modalità cliente). Nel dossier il riquadro «In Sala» nella Panoramica (decisione 60-a), le ultime cinque, clic che apre
+l'esperienza, menu «Togli» (60-d). Prove: `ProvaBackupEsperienzeFatte` in `--prova-backup` (posto su disco, backup e
+ripristino, archivio di prima, esperienza sconosciuta scartata, cliente tolto, segno una volta al giorno, «Togli»),
+`--prova-ovunque` (fuori dall'istantanea, le locali restano), il tagliando (unione e annullamento, in
+`provaCollegamentoTagliando`), la prossima e i testi in `ProvaCalcoliSalaMomenti` (non in `ProvaCalcoliEsperienza`, che
+è dell'esperienza MiFID). Istantanee nuove 686, 687, 688 (chiare e scure).
+
+Resta:
+- **CLAUDE.md**: aggiungere all'elenco di ciò che il backup comprende «da «Migliorie d'uso» le esperienze della Sala fatte
+  con il cliente: data ed esperienza, mai il contenuto» (non toccato da questo giro: lo decide l'utente).
+- **Istantanee**: generarle sul Mac (686-688) e guardare che «✓ Fatta oggi» sulla scheda grande non copra il saluto e che la
+  testata del palco con «Prossima: … ›» non tagli il nome dell'esperienza alla larghezza minima; rigenerare 690 e 691
+  (ora con «Segna come fatta») e aggiornare la pagina delle anteprime.
+- **`--prova-fluidita`**: nessun caso nuovo; la griglia legge le fatte una volta (ricavato) e passa il booleano alle schede.
+- Il riquadro «In Sala» c'è solo nella Panoramica del Mac (con il quadro); nella cronologia degli incontri e in Documenti
+  non c'è una riga (alternative di 60-a non fatte).
+- Il segno da solo per la lettera e la giornata con «✦ Aggiungi al Prisma di …» non c'è (decisione 60-b: aggiungere al file
+  non vuol dire averla fatta).

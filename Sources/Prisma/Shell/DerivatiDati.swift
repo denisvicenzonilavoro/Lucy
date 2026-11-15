@@ -636,6 +636,9 @@ extension DatiPrisma {
         b.uscite = a.uscite
         // Le lettere dal futuro conservate non entrano in nessun calcolo in cache
         b.lettere = a.lettere
+        // Migliorie d'uso 60: le esperienze della Sala fatte non entrano in nessun calcolo in cache (le loro letture hanno
+        // nella chiave quante sono e l'ultima)
+        b.esperienzeFatte = a.esperienzeFatte
         b.impostazioni.studio.spese = a.impostazioni.studio.spese
         // Vera, fase 4: le routine, il tagliando dei dati («Va bene così» non rifà le cache), le spiegazioni in tre livelli
         // e il profilo di stile non entrano in nessun calcolo in cache

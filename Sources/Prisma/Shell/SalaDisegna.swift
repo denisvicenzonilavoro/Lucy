@@ -34,7 +34,11 @@ struct DisegnaIlFuturo: View {
                                                eventi: stato.eventiVitaCliente(id), analisi: stato.dati.analisi[id])
         CorpoDisegno(cliente: attuale, preparazione: prep, prova: stato.sala.provaDisegno,
                      obiettivi: stato.obiettiviCliente(id),
-                     salva: { stato.salvaObiettivo($0) },
+                     salva: {
+                         stato.salvaObiettivo($0)
+                         // Migliorie d'uso 60: l'obiettivo salvato dal disegno è una fine chiara
+                         stato.segnaEsperienza(.disegna, cliente: id, avviso: false)
+                     },
                      completaAnagrafica: { stato.apriCliente(id) },
                      alTavolo: stato.sala.tavoloEsperienza == .disegna,
                      mandaAlTavolo: { assi, ingresso, risultato, frase in

@@ -64,6 +64,8 @@ extension StatoShell {
     func registraUscitaFilm(_ c: Cliente, dati d: DatiFilm, via: String, documentoId: String?) {
         registraUscita(clienteId: c.id, genere: .film, descrizione: TestiFilm.descrizioneUscita(d.durataTotale), via: via,
                        documentoId: documentoId, protetto: false)
+        // Migliorie d'uso 60: il video mandato è una fine chiara (una sola volta al giorno)
+        segnaEsperienza(.film, cliente: c.id, avviso: false)
     }
 }
 

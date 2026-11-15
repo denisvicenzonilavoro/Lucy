@@ -10,6 +10,8 @@ import SwiftUI
 ///   Sala e Vera a confronto, decisione 122); 619: la tavola dei 29 glifi nei tasselli;
 /// - 618: le quattro finestre nuove con la testata e lo stato «in arrivo»;
 /// - 684-685 (migliorie d'uso 59): il copione «Cosa dire» aperto sul palco, con e senza durata;
+/// - 686-688 (migliorie d'uso 60): «✓ Fatta oggi» e «Prossima» sul palco, la griglia con due esperienze fatte oggi, il
+///   riquadro «In Sala» nel dossier;
 /// - 690-694: la Sala (griglia, palco, senza cliente, in modalità cliente, presentazione sulla sala opaca);
 /// - 1115-1117 (migliorie d'uso 34): i momenti e le consigliate sulla griglia, il filtro, un cliente senza priorità.
 /// I clienti sono quelli di prova del template (dati di prova): nessun dato nuovo nell'archivio.
@@ -71,6 +73,32 @@ extension Istantanee {
         coppia("685-sala-copione-senza-durata") { s in
             s.apriEsperienza(.prismaCliente, cliente: "giulia")
             s.sala.copioneAperto = true
+        }
+        // Migliorie d'uso 60: il gioco del rischio segnato per Marco («✓ Fatta oggi» e «Prossima: … ›»), la griglia di
+        // Giulia con due esperienze fatte oggi (e l'occhiello che lo dice) e il riquadro «In Sala» nel dossier. I segni
+        // si scrivono qui, sullo stato di prova: i dati di prova non ne hanno (690 e 691 restano senza)
+        coppia("686-sala-fatta-prossima") { s in
+            s.dati.esperienzeFatte = [EsperienzaFatta(clienteId: "marco", esperienza: .giocoRischio, quando: Date())]
+            s.apriEsperienza(.giocoRischio, cliente: "marco")
+        }
+        coppia("687-sala-griglia-fatte") { s in
+            s.dati.esperienzeFatte = [
+                EsperienzaFatta(clienteId: "giulia", esperienza: .prismaLuce, quando: Date()),
+                EsperienzaFatta(clienteId: "giulia", esperienza: .giornataPensione, quando: Date()),
+            ]
+            s.clienteAttivoId = "giulia"
+            s.apri(.sala)
+        }
+        coppia("688-dossier-in-sala") { s in
+            let giorno: TimeInterval = 86_400
+            s.dati.esperienzeFatte = [
+                EsperienzaFatta(clienteId: "marco", esperienza: .prismaLuce, quando: Date().addingTimeInterval(-9 * giorno)),
+                EsperienzaFatta(clienteId: "marco", esperienza: .lanciaAnno, quando: Date().addingTimeInterval(-9 * giorno)),
+                EsperienzaFatta(clienteId: "marco", esperienza: .giocoRischio, quando: Date()),
+            ]
+            s.clienteAttivoId = "marco"
+            s.schedaCliente = .panoramica
+            s.apri(.clienti)
         }
         // Migliorie d'uso 34: le esperienze dicono il loro momento e quanto durano, due sono consigliate per il cliente
         coppia("1115-uso-sala-momenti") { s in
