@@ -18,6 +18,8 @@ struct VoceGlossario: Identifiable, Equatable {
         #if os(macOS)
         // Migliorie d'uso 10: le parole di Prisma che mancavano (Shell/ParolePrisma.swift)
         case daFare, mostraAlCliente, tuttiIClienti, ilQuadro
+        // Migliorie d'uso 1: la parola che il quadro della vista pulita fa toccare al cliente
+        case divarioPrevidenziale
         #endif
     }
 
@@ -315,6 +317,10 @@ enum Glossario {
               "Le quattro aree del cliente lette insieme: previdenza, protezione, investimenti e risparmio.",
               "Il quadro mostra dove il cliente è coperto e dove no, con le cifre di Prisma, partendo dalle posizioni in essere. È il primo sguardo sul dossier e la base delle proposte.",
               nil, [.analisi360, .clienti]),
+            v(.divarioPrevidenziale, "Divario previdenziale", nil, .previdenzaFisco,
+              "La differenza tra la pensione che ti aspetti e il reddito che vorresti avere quando smetti di lavorare.",
+              "Prisma confronta la pensione pubblica stimata con il reddito che desideri: la differenza, al mese, è il divario. I piani di previdenza complementare servono a colmarlo, in tutto o in parte.",
+              nil, [.analisi360]),
         ]
         #else
         return []

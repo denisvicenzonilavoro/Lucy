@@ -249,7 +249,15 @@ enum VoceConfronto: Hashable {
     /// StatoShell. Non si salva (le impostazioni dello spazio stanno in `dati.impostazioni.ovunque`).
     let ovunque = StatoOvunque()
     /// Modalità cliente: lo schermo girato verso il cliente mostra solo il suo dossier (id del cliente).
-    var modoCliente: String? { didSet { aggiornaMenu() } }
+    var modoCliente: String? {
+        didSet {
+            aggiornaMenu()
+            #if os(macOS)
+            // La vista pulita vive solo sopra la modalità cliente: se questa si spegne (blocco, cliente eliminato), si chiude
+            if modoCliente == nil, vistaCliente != nil { chiudiVistaClienteSenzaRitorno() }
+            #endif
+        }
+    }
     /// Il pulsante dell'intestazione di Posizioni chiede di aprire il modulo (nuova posizione o proposta).
     var richiestaNuovaPosizione: StatoPosizione?
     /// «Dal catalogo» nell'intestazione di Posizioni: il prodotto sul cliente in due passi (in essere o proposta).
@@ -398,6 +406,17 @@ enum VoceConfronto: Hashable {
     /// Migliorie d'uso 5 «Il dossier parte dal quadro» (DossierQuadro.swift): l'area di cui Analisi 360 apre il dettaglio
     /// appena c'è (un clic su un riquadro del quadro del cliente). Solo in memoria; la consuma PresentatoreAree360.
     var dettaglioArea360DaAprire: AreaAnalisi? = nil
+    /// Migliorie d'uso 1 «Mostra al cliente» (MostraAlCliente.swift), tutto in memoria come `modoCliente`: il capitolo della
+    /// vista pulita (nil: non si mostra; sotto c'è sempre la modalità cliente), il pannello di scelta aperto, la schermata
+    /// neutra, la scheda di una parola o delle ipotesi, il menu dell'avatar, l'app davanti prima di girare lo schermo e
+    /// l'avviso «Per tornare al lavoro…» già mostrato in questa sessione.
+    var vistaCliente: CapitoloCliente? = nil { didSet { menu.aggiornaVista(vistaCliente != nil) } }
+    var sceltaMostra = false
+    var schermataNeutraMac = false
+    var schedaMostra: SchedaMostra? = nil
+    var menuUscitaMostra = false
+    @ObservationIgnored var appPrimaDellaVista: AppPrisma?
+    @ObservationIgnored var avvisoVistaVisto = false
     #endif
     /// «Le routine» di Vera (fase 4, CollegaRoutineShell.swift): la pagina delle routine aperta sopra Vera e la routine scelta.
     var paginaRoutineVera = false

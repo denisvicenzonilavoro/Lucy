@@ -116,6 +116,12 @@ final class StatoMenu: ObservableObject {
     @Published private(set) var inModoCliente = false
     @Published private(set) var inPresentazione = false
     @Published private(set) var conversazioneAVoce = false
+    /// Migliorie d'uso 1: la vista pulita di «Mostra al cliente» è aperta (solo Mac).
+    @Published private(set) var inVistaCliente = false
+
+    func aggiornaVista(_ aperta: Bool) {
+        if inVistaCliente != aperta { inVistaCliente = aperta }
+    }
 
     /// Copia i valori solo se cambiano: il menu si ricostruisce il meno possibile.
     func aggiorna(bloccato: Bool, inModoCliente: Bool, inPresentazione: Bool, conversazioneAVoce: Bool) {

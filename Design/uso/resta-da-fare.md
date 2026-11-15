@@ -295,3 +295,49 @@ Resta:
   non è ancora montata. Se si vuole l'origine sulla card, aprirlo dopo la prima comparsa della griglia.
 - **La guida del template** (il giro guidato «Il dossier parte dal quadro» con `indica('#quadroC')`) non è riportata.
 - `DatiAnalisiApple` e la card «Il cliente in 30 secondi» restano per iPhone e iPad; sul Mac non si usano più.
+
+## 1. «Mostra al cliente»: un pulsante solo e una vista pulita con il suo quadro
+
+Fatto (solo sul Mac, `#if os(macOS)`): lo stato in memoria in `StatoShell` (`vistaCliente`, `sceltaMostra`,
+`schermataNeutraMac`, `schedaMostra`, `menuUscitaMostra`, `appPrimaDellaVista`, `avvisoVistaVisto`) e le funzioni in
+Shell/MostraAlCliente.swift (`apriMostraAlCliente`, `mostra(_:)`, `cambiaCapitolo`, `mostraProspetto`, `fineMostra`,
+`alternaMostraAlCliente`, `mostraNeutra`, `escMostra`), sempre sopra la modalità cliente di oggi (se questa si spegne, la
+vista si chiude). Nella barra la pillola «Mostra al cliente» dopo «Da fare»; nella vista pulita restano marchio (che non
+porta alla scrivania), pillola del cliente (non si apre) e l'avatar con l'anello, che apre il menu «Fine: torna al lavoro
+⌥⌘M» / «Schermata neutra». Il pannello di scelta (Shell/PannelloMostraAlCliente.swift) con le quattro righe e la schermata
+neutra, o l'elenco «A chi vuoi mostrare Prisma?». La vista (Shell/VistaCliente.swift): dock, scrivania e finestre nascosti
+(tranne la Sala nel suo capitolo), la barra dei capitoli, «Il quadro» (frasi del motore puro `FrasiCliente`, in cache con
+`ricavato`), «Le posizioni» (patrimonio netto, «Dove sono», righe con il canale), «Gli obiettivi» (anello 200 e
+avanzamento), «Nel tempo» (oggi, a 10 e 20 anni e con le proposte da `analisiDossier(id).patrimonio`, grafico con la
+linea del totale e le proposte tratteggiate), il piede «Come sono calcolate queste cifre» (testo dalle costanti di
+`IpotesiCalcolo`) e le parole toccabili (scheda «Le parole» dal glossario, voce nuova `divarioPrevidenziale`). Testo almeno
+«Grande». La schermata neutra copre tutto tranne l'acqua. Nella vista pulita non si aprono altre app (solo la Sala), né
+mini Vera, ricerca, guida e voce; Esc chiude solo neutra, scheda e menu. Il menu «Vai»: «Mostra al cliente» / «Fine: torna
+al lavoro» ⌥⌘M, le altre voci e la guida spente nella vista. Prospetti: «Mostra al cliente» al posto di «Presenta
+all'incontro» (la presentazione dentro la vista pulita); Sala: il blu «Mostra al cliente» nella testata. Prove:
+`ProvaCalcoliFrasiCliente` (`--prova-calcoli`) e `ProvaMostraAlCliente` (`--prova-vera`). Istantanee nuove 1010-1019
+(chiare e scure), «70-modo-cliente» e «693-sala-modo-cliente» ora nella vista pulita.
+
+Resta:
+- **Il blocco chiude la vista pulita** (come oggi chiude la modalità cliente, e la prova di Vera lo vuole): la specifica
+  dice «allo sblocco si torna dov'eri». Per farlo il blocco dovrebbe tenere la modalità cliente quando la vista è aperta.
+- **Gli avvisi interni con il nome di altri clienti** (note e carta dall'iPhone, carte della notte, «Prisma ovunque»,
+  routine) non sono ancora trattenuti mentre si mostra: vanno messi in coda e mostrati dopo «Fine» (§1.3 punto 12).
+- **«Sull’iPad sul tavolo»** fa come il template (apre Prospetti con l'avviso), non avvia ancora il tavolo; se l'iPad non è
+  collegato dovrebbe portare a Impostazioni › iPhone e iPad (miglioria 39).
+- **«Un prospetto»** mostra il report del check-up del cliente: la scelta del prospetto (e la versione «Per il cliente»
+  della miglioria 22) resta da fare.
+- **Le parole** stanno nel piede di ogni capitolo, non dentro le frasi (il template le sottolinea nel testo); da unire con
+  il componente della miglioria 66. «Gli obiettivi» dice «traguardo a <mese anno>» (la data dell'obiettivo), non una data
+  d'arrivo stimata, che Prisma oggi non calcola.
+- **Nel capitolo «La Sala»** la barra dei capitoli si sovrappone al fondo della finestra della Sala; la chiusura della
+  finestra non è nascosta; la Sala aperta su un'esperienza resta aperta solo entrando da lì (`tieni` non è distinto).
+- **Movimento**: il pannello entra con `entrataScheda` (dal basso, 0,97); l'ombra al passaggio delle righe non c'è (solo
+  la salita di 2). Il menu dell'avatar è una scheda disegnata, non un menu del Mac.
+- `ContrassegnoModoCliente` resta come ripiego quando la modalità cliente è accesa senza la vista (presentazione della
+  Sala); la guida (testi «Modalità cliente» di iPhone e iPad) non è stata toccata. Il «Presenta» del palco della Sala e il
+  «Mostra al cliente» della Biblioteca si allineano con le migliorie 58 e 35.
+- `--prova-fluidita`: non c'è ancora una misura del cambio di capitolo (i ricavati sono in cache).
+- **Istantanee**: generarle sul Mac (1010-1019, 70, 693) e guardare in particolare il quadro con il testo «Grande»
+  (altezza 548 dei riquadri con frasi lunghe), la colonna delle posizioni e il grafico «Nel tempo»; aggiornare la pagina
+  delle anteprime.

@@ -368,8 +368,14 @@ enum Istantanee {
         ("70-modo-cliente", { s in
             // Lo schermo girato verso Marco: solo il suo dossier, niente degli altri clienti
             s.clienteAttivoId = "marco"
+            #if os(macOS)
+            // Migliorie d'uso 1: sul Mac la vista pulita di «Mostra al cliente», sul capitolo «Le posizioni»
+            s.avvisoVistaVisto = true
+            s.mostra(.posizioni)
+            #else
             s.entraModoCliente()
             s.apri(.posizioni)
+            #endif
         }),
         ("69-riesame-prospetto", { s in
             s.clienteAttivoId = "giulia"
@@ -1642,6 +1648,8 @@ enum Istantanee {
         tutteLeScene += sceneBarreCorte
         // Migliorie d'uso 3: il «Da fare» unico (IstantaneeDaFare.swift)
         tutteLeScene += sceneDaFare
+        // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (IstantaneeMostra.swift)
+        tutteLeScene += sceneMostra
         tutteLeScene += sceneVeraApple
         tutteLeScene += sceneScenariVera
         tutteLeScene += sceneFalloTu

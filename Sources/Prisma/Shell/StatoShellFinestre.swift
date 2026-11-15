@@ -100,6 +100,8 @@ extension StatoShell {
             mostraAvviso("In modalità cliente \(app.titolo) non si apre: mostra i dati di altri clienti.")
             return
         }
+        // Migliorie d'uso 1: nella vista pulita di «Mostra al cliente» si apre solo la Sala
+        guard !inVistaCliente || app == .sala else { return }
         #if os(macOS)
         // Le app accorpate (Obiettivi, Documenti, Simulazioni, Confronti, Attività) si aprono nel loro ospite,
         // sulla scheda giusta: tutte le chiamate `apri(.documenti)` e simili passano da qui
@@ -472,6 +474,11 @@ extension StatoShell {
             if pannelloCliente { pannelloCliente = false }
             if pannelloAppAperte { pannelloAppAperte = false }
             if sistema.pannelloNovita { sistema.pannelloNovita = false }
+            #if os(macOS)
+            // Migliorie d'uso 1: il pannello di «Mostra al cliente» e la schermata neutra si chiudono
+            if sceltaMostra { sceltaMostra = false }
+            if schermataNeutraMac { schermataNeutraMac = false }
+            #endif
             // La guida si chiude senza segnare l'introduzione come vista: riparte al prossimo sblocco
             if sistema.guida != nil { sistema.guida = nil }
             if !bloccato { bloccato = true }
@@ -557,6 +564,8 @@ extension StatoShell {
 
     /// Riduce tutte le finestre e mostra la scrivania: una ogni 50 ms, dalla finestra in alto (tema showDesk).
     func mostraScrivania() {
+        // Migliorie d'uso 1: nella vista pulita il marchio e ⌥0 non portano alla scrivania
+        guard !inVistaCliente else { return }
         // «Scrivania» nel dock riporta sempre ai widget, anche dalla Vera della scrivania (VeraScrivania.swift)
         if sistema.paginaVera != 0 || sistema.gestoVera.spostamento != 0 { nascondiVeraScrivania() }
         let davanti = finestreVisibili.reversed().map(\.app)

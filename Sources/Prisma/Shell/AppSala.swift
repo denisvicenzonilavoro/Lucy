@@ -50,6 +50,16 @@ struct AzioniSala: View {
                            scelto: stato.clienteAttivoId, scegli: { stato.scegliClienteSala($0) })
                 .equatable()
         }
+        #if os(macOS)
+        // Migliorie d'uso 1: con un cliente scelto, il blu «Mostra al cliente» porta nella vista pulita sulla Sala (non
+        // c'è dentro la vista pulita, che è già la vista del cliente)
+        if !stato.inModoCliente, stato.clienteAttivo != nil {
+            Button(TestiMostra.titolo) { stato.mostra(.sala) }
+                .buttonStyle(.applePrimario)
+                .fixedSize()
+                .help(TestiMostra.aiutoPillola)
+        }
+        #endif
     }
 }
 

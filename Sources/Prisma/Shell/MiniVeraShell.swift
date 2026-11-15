@@ -15,7 +15,8 @@ extension StatoShell {
     }
 
     /// Si può chiamare Vera? Non durante la presentazione al cliente (sotto c'è solo il documento).
-    var miniVeraConsentita: Bool { presentazione == nil }
+    /// Migliorie d'uso 1: nemmeno nella vista pulita di «Mostra al cliente» (anche ⌥ Spazio).
+    var miniVeraConsentita: Bool { presentazione == nil && !inVistaCliente }
 
     /// Apre la mini finestra in uno stato (dalla sfera nella barra, da ⌥ Spazio, dalle prove).
     func apriMiniVera(_ fase: FaseMiniVera) {

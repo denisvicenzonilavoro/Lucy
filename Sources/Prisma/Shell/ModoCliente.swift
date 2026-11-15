@@ -15,6 +15,24 @@ extension StatoShell {
 
     var inModoCliente: Bool { modoCliente != nil }
 
+    /// Migliorie d'uso 1: la vista pulita di «Mostra al cliente» è aperta (solo sul Mac; su iPhone e iPad mai).
+    var inVistaCliente: Bool {
+        #if os(macOS)
+        return vistaCliente != nil
+        #else
+        return false
+        #endif
+    }
+
+    /// Migliorie d'uso 1: la vista pulita è sul capitolo «La Sala» (la finestra della Sala resta visibile).
+    var salaNellaVistaCliente: Bool {
+        #if os(macOS)
+        return vistaCliente == .sala
+        #else
+        return false
+        #endif
+    }
+
     /// `avviso`: falso quando la accende la presentazione, per non coprire la pagina davanti al cliente.
     func entraModoCliente(avviso: Bool = true) {
         #if os(macOS)

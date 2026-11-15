@@ -620,7 +620,7 @@ extension StatoShell {
             mostraAvviso("In modalità cliente la Ricerca non si apre: mostra i dati di altri clienti.")
             return
         }
-        guard !bloccato, presentazione == nil else { return }
+        guard !bloccato, presentazione == nil, !inVistaCliente else { return }
         // Un pannello alla volta, come in macOS
         if pannelloNotifiche { pannelloNotifiche = false }
         if pannelloSpazi { pannelloSpazi = false }

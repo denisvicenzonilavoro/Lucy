@@ -63,12 +63,23 @@ final class MonitorEscFinestra {
     private func tasto(_ e: NSEvent) -> NSEvent? {
         guard e.keyCode == Self.tastoEsc, !e.isARepeat,
               e.modifierFlags.intersection([.command, .option, .control, .shift]).isEmpty,
-              let s = stato, let app = s.appAttiva,
+              let s = stato,
               let finestra = e.window, !(finestra is NSPanel), finestra.isKeyWindow,
               finestra === NSApp.mainWindow, finestra.attachedSheet == nil, finestra.sheetParent == nil
         else { return e }
         // Un campo di testo in scrittura: Esc è suo (annulla, chiude il completamento, `onExitCommand` dei campi)
         if finestra.firstResponder is NSText { return e }
+        // Migliorie d'uso 1 «Mostra al cliente»: la schermata neutra e il pannello di scelta si chiudono; nella vista pulita
+        // Esc chiude solo ciò che c'è sopra (scheda, menu dell'avatar) e mai la finestra sotto. La presentazione del
+        // prospetto e i dettagli aperti (per esempio il palco della Sala) tengono il loro Esc
+        if !s.bloccato, s.schermataNeutraMac || s.sceltaMostra || s.inVistaCliente {
+            if s.inVistaCliente && !s.schermataNeutraMac {
+                if s.presentazione != nil { return e }
+                if s.schedaMostra == nil && !s.menuUscitaMostra, finestra.performKeyEquivalent(with: e) { return nil }
+            }
+            return s.escMostra() ? nil : e
+        }
+        guard let app = s.appAttiva else { return e }
         // Qualcosa sopra la finestra che usa Esc a modo suo
         guard nienteSopra(s, app: app) else { return e }
         // Prima i pulsanti con Esc della finestra (dettagli, schede, palco…): se uno lo prende, la finestra resta

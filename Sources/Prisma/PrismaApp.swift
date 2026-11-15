@@ -125,8 +125,6 @@ struct ComandiPrisma: Commands {
             // Il pannello di ricerca come Spotlight: ⌘K lo apre e lo chiude
             Button("Cerca ovunque") { stato.alternaRicerca() }
                 .keyboardShortcut("k", modifiers: .command)
-            Button(menu.inModoCliente ? "Esci dalla modalità cliente" : "Modalità cliente") { stato.alternaModoCliente() }
-                .keyboardShortcut("m", modifiers: [.command, .option])
             Button("Spazi di lavoro…") { stato.pannelloSpazi = true }
                 .disabled(menu.inModoCliente)
             Button("Le tue app aperte…") { stato.pannelloAppAperte = true }
@@ -151,8 +149,17 @@ struct ComandiPrisma: Commands {
                 Button(app.titolo) { stato.apriApp(app) }
             }
             }
-            // Durante la presentazione nulla si muove sotto il velo: resta solo la schermata di benvenuto
-            .disabled(menu.bloccato || menu.inPresentazione)
+            // Durante la presentazione nulla si muove sotto il velo: resta solo la schermata di benvenuto. Nella vista
+            // pulita di «Mostra al cliente» non si apre nessun'altra app (migliorie d'uso 1)
+            .disabled(menu.bloccato || menu.inPresentazione || menu.inVistaCliente)
+            Divider()
+            // Migliorie d'uso 1: un solo modo per girare lo schermo, «Mostra al cliente» (con il cliente entra su «Il
+            // quadro», senza apre il pannello); nella vista pulita «Fine: torna al lavoro»
+            Button(menu.inVistaCliente ? TestiMostra.fine : (menu.inModoCliente ? "Esci dalla modalità cliente" : TestiMostra.titolo)) {
+                stato.alternaMostraAlCliente()
+            }
+            .keyboardShortcut("m", modifiers: [.command, .option])
+            .disabled(menu.bloccato || (menu.inPresentazione && !menu.inVistaCliente))
             Divider()
             Button("Schermata di benvenuto") { stato.blocca() }
                 .keyboardShortcut("l", modifiers: [.command, .option])
@@ -168,7 +175,7 @@ struct ComandiPrisma: Commands {
                 Button("Come funziona Prisma (introduzione)") { stato.apriGuida(.introduzione(0)) }
                 Button("Le parole della finanza") { stato.apriGuida(.glossario(nil)) }
             }
-            .disabled(menu.inPresentazione)
+            .disabled(menu.inPresentazione || menu.inVistaCliente)
             Divider()
             // Prova guidata sul Mac (Shell/ProvaGuidata.swift); scelta di nuovo durante la prova, la interrompe
             Button("Prova la fluidità…") { ProvaGuidata.condivisa.avvia(stato: stato) }

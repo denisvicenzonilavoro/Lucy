@@ -1230,6 +1230,8 @@ enum ProvaCalcoli {
         ProvaCalcoliSimulatoriAnalisi.esegui(verificaEsterna)
         // Giro 4 (acqua viva): la griglia delle aree di Analisi 360 (anelli, mesi di spese, composizione)
         ProvaCalcoliAree360.esegui(verificaEsterna)
+        // Migliorie d'uso 1: le frasi del quadro della vista pulita («Mostra al cliente»)
+        ProvaCalcoliFrasiCliente.esegui(verificaEsterna)
         // Orizzonte, giro 1: il cruscotto di Studio (ricavi, obiettivi, imbuto, incassi, valore e tempo)
         ProvaCalcoliStudio.esegui(verificaEsterna)
         // Orizzonte, giro 2: parcelle e fatture (totali, numerazione, voci fiscali con regimi di prova dichiarati, XML) e track record

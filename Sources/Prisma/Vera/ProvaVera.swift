@@ -1122,6 +1122,8 @@ enum ProvaVera {
         #if os(macOS)
         // Migliorie d'uso 3: un solo «Da fare» (StatoDaFare.swift, solo sul Mac): numero, fatto, «Annulla l’ultima», «+ Aggiungi»
         ProvaDaFareShell.esegui(controlla)
+        // Migliorie d'uso 1: «Mostra al cliente» e la vista pulita (MostraAlCliente.swift, solo sul Mac)
+        ProvaMostraAlCliente.esegui(controlla)
         #endif
         // Le domande dei passi con il loro seguito, «Rifai i calcoli», il piano vuoto evitato
         StatoShell.provaPassiSeguito(controlla)

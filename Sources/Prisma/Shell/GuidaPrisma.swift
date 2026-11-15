@@ -356,7 +356,8 @@ extension StatoShell {
     /// prima si entra, poi la guida compare a sblocco finito (due transazioni separate, mai insieme).
     /// Durante la presentazione non si apre.
     func apriGuida(_ pagina: PaginaGuida = .introduzione(0)) {
-        guard presentazione == nil else { return }
+        // Migliorie d'uso 1: nella vista pulita di «Mostra al cliente» la guida non si apre
+        guard presentazione == nil, !inVistaCliente else { return }
         if bloccato {
             sblocca()
             // Nelle istantanee e nelle prove lo sblocco è di colpo: si prosegue subito

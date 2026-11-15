@@ -11,7 +11,7 @@ extension StatoShell {
     /// Il pulsante del microfono (e ⌥⌘E): se Vera ascolta, chiude la frase e la manda; se parla, la ferma e
     /// ascolta; altrimenti inizia ad ascoltare. Dal menu, a conversazione a voce aperta, la chiude.
     func alternaAscolto(daMenu: Bool = false) {
-        guard persistente, !bloccato, presentazione == nil else { return }
+        guard persistente, !bloccato, presentazione == nil, !inVistaCliente else { return }
         if dettaturaAttiva {
             // Con la dettatura di macOS: il pulsante manda subito quello che è scritto
             mandaDettatura()

@@ -52,8 +52,9 @@ extension Istantanee {
         }
         una("693-sala-modo-cliente") { s in
             s.clienteAttivoId = "giulia"
-            s.entraModoCliente(avviso: false)
-            s.apri(.sala)
+            // Migliorie d'uso 1: la Sala dentro la vista pulita di «Mostra al cliente»
+            s.avvisoVistaVisto = true
+            s.mostra(.sala)
         }
         coppia("694-sala-presenta") { s in
             s.apriEsperienza(.prismaLuce, cliente: "giulia")

@@ -25,8 +25,11 @@ struct BarraSuperiore: View {
             HStack(spacing: B.spazio) {
                 marchio
                     .offset(y: y)
-                appCorrente
-                    .offset(y: y)
+                // Migliorie d'uso 1: nella vista pulita di «Mostra al cliente» niente pillola dell'app
+                if !stato.inVistaCliente {
+                    appCorrente
+                        .offset(y: y)
+                }
                 #if os(macOS)
                 // Migliorie d'uso 2: il cliente di tutta Prisma, scelto qui
                 pillolaCliente
@@ -166,6 +169,53 @@ struct BarraSuperiore: View {
     /// staccati l'uno dall'altro, senza una capsula comune che li raggruppi.
     private var strumenti: some View {
         HStack(spacing: B.spazio) {
+            #if os(macOS)
+            if stato.inVistaCliente {
+                // Migliorie d'uso 1: nella vista pulita resta solo l'avatar, con l'anello: l'unica uscita
+                avatarUscita
+            } else {
+                strumentiLavoro
+            }
+            #else
+            strumentiLavoro
+            #endif
+        }
+        .foregroundColor(Tema.Apple.Colore.inchiostroAcqua)
+        .frame(height: B.tasto)
+        // Vetri separati (spazio 0: non si fondono), campionati insieme sul vetro nativo di macOS 26
+        .gruppoVetro()
+        .overlayPreferenceValue(AncoraCampanella.self) { ancora in
+            GeometryReader { geo in
+                let n = stato.notificheNuove
+                if let ancora, n > 0 {
+                    let r = geo[ancora]
+                    // Il numero sta sul bordo del cerchio, in alto a destra, come prima
+                    Color.clear
+                        .frame(width: r.width, height: r.height)
+                        .overlay(alignment: .topTrailing) {
+                            BadgeCampanella(numero: n)
+                                .offset(x: B.spostamentoBadge.width, y: B.spostamentoBadge.height)
+                        }
+                        .offset(x: r.minX, y: r.minY)
+                        .allowsHitTesting(false)
+                }
+            }
+        }
+    }
+
+    #if os(macOS)
+    /// L'avatar «DV» della vista pulita: l'anello bianco e il menu «Fine: torna al lavoro» / «Schermata neutra».
+    private var avatarUscita: some View {
+        let U = Tema.Apple.MostraAlCliente.Uscita.self
+        return PulsanteBarra(aiuto: TestiMostra.aiutoUscita, forma: nil, azione: { stato.menuUscitaMostra.toggle() }) {
+            AvatarUtente(iniziali: stato.inizialiUtente)
+                .overlay(Circle().strokeBorder(U.anello, lineWidth: U.spessore))
+        }
+    }
+    #endif
+
+    /// Gli strumenti di lavoro: Cerca, Vera, «Da fare», «Mostra al cliente», guida, lucchetto e avatar.
+    @ViewBuilder private var strumentiLavoro: some View {
             if stato.inModoCliente {
                 ContrassegnoModoCliente()
             } else {
@@ -210,6 +260,17 @@ struct BarraSuperiore: View {
                 .accessibilityLabel(Text(TestiDaFare.titolo))
                 .puntoAcqua(.campanella)
                 .segnaCampanella()
+
+                // Migliorie d'uso 1: «Mostra al cliente», una pillola con il glifo e il nome, prima del «?»
+                PulsanteBarra(aiuto: TestiMostra.aiutoPillola, forma: .pillola, azione: { stato.apriMostraAlCliente() }) {
+                    HStack(spacing: Tema.Apple.MostraAlCliente.Pillola.spazio) {
+                        Image(systemName: "person.crop.rectangle")
+                            .carattereApple(Tema.Apple.MostraAlCliente.Pillola.glifo)
+                        Text(TestiMostra.titolo)
+                            .carattereApple(Tema.Apple.Carattere.barra)
+                            .lineLimit(1)
+                    }
+                }
                 #else
                 PulsanteBarra(aiuto: "Notifiche", azione: { stato.alternaNotifiche() }) {
                     simbolo("bell")
@@ -234,38 +295,26 @@ struct BarraSuperiore: View {
                 simbolo("lock")
             }
 
+            #if os(macOS)
+            // Sul Mac «Mostra al cliente» sta prima del «?»; qui resta solo l'uscita dalla modalità cliente accesa da
+            // altre strade (la presentazione della Sala)
+            if stato.inModoCliente {
+                PulsanteBarra(aiuto: "Esci dalla modalità cliente (⌥⌘M)", azione: { stato.esciModoCliente() }) {
+                    simbolo("person.fill.checkmark")
+                }
+            }
+            #else
             PulsanteBarra(aiuto: stato.inModoCliente ? "Esci dalla modalità cliente (⌥⌘M)"
                                                      : "Modalità cliente: mostra solo il cliente attivo, per girare lo schermo (⌥⌘M)",
                           azione: { if stato.inModoCliente { stato.esciModoCliente() } else { stato.entraModoCliente() } }) {
                 simbolo(stato.inModoCliente ? "person.fill.checkmark" : "person.crop.rectangle")
             }
+            #endif
 
             // L'avatar è già un cerchio a sé: niente vetro attorno
             PulsanteBarra(aiuto: "Impostazioni", forma: nil, azione: { stato.apri(.impostazioni) }) {
                 AvatarUtente(iniziali: stato.inizialiUtente)
             }
-        }
-        .foregroundColor(Tema.Apple.Colore.inchiostroAcqua)
-        .frame(height: B.tasto)
-        // Vetri separati (spazio 0: non si fondono), campionati insieme sul vetro nativo di macOS 26
-        .gruppoVetro()
-        .overlayPreferenceValue(AncoraCampanella.self) { ancora in
-            GeometryReader { geo in
-                let n = stato.notificheNuove
-                if let ancora, n > 0 {
-                    let r = geo[ancora]
-                    // Il numero sta sul bordo del cerchio, in alto a destra, come prima
-                    Color.clear
-                        .frame(width: r.width, height: r.height)
-                        .overlay(alignment: .topTrailing) {
-                            BadgeCampanella(numero: n)
-                                .offset(x: B.spostamentoBadge.width, y: B.spostamentoBadge.height)
-                        }
-                        .offset(x: r.minX, y: r.minY)
-                        .allowsHitTesting(false)
-                }
-            }
-        }
     }
 
     /// Un simbolo di sistema al centro di un tasto tondo.

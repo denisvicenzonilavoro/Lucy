@@ -392,12 +392,23 @@ extension AppProspetti {
             #endif
             // Il portafoglio parla di tutti i clienti: non si mostra a un cliente
             if scelta.tipo != .portafoglio {
+                #if os(macOS)
+                // Migliorie d'uso 1: «Mostra al cliente» al posto di «Presenta all'incontro»: la presentazione di sempre,
+                // dentro la vista pulita
+                Button { presentaApple(d) } label: {
+                    etichettaAzione(TestiMostra.titolo, simbolo: "person.crop.rectangle", soloIcona: soloIcona)
+                }
+                .buttonStyle(.apple)
+                .fixedSize()
+                .help("Mostra al cliente: il documento a tutto schermo dalla pagina mostrata (← → per sfogliare, esc per uscire), nella vista pulita")
+                #else
                 Button { presentaApple(d) } label: {
                     etichettaAzione("Presenta all'incontro", simbolo: "play.fill", soloIcona: soloIcona)
                 }
                 .buttonStyle(.apple)
                 .fixedSize()
                 .help("Presenta all'incontro: il documento a tutto schermo dalla pagina mostrata (← → per sfogliare, esc per uscire), in modalità cliente")
+                #endif
             }
             Button { if let dati = pdf(d) { StampaCarta.stampa(dati, formato: d.formato) } } label: {
                 etichettaAzione("Stampa…", simbolo: "printer", soloIcona: soloIcona)
@@ -445,7 +456,11 @@ extension AppProspetti {
     private func presentaApple(_ d: DocumentoStampabile) {
         // Presentare il prospetto del riesame salva la fotografia di oggi (memoria del riesame)
         if case .riesame = scelta { stato.fotografaRiesame(stato.clienteAttivoId, origine: .prospetto) }
+        #if os(macOS)
+        stato.mostraProspetto(d, daPagina: indiceAnteprima(d))
+        #else
         stato.presenta(d, daPagina: indiceAnteprima(d))
+        #endif
     }
 
     // MARK: Anteprima
