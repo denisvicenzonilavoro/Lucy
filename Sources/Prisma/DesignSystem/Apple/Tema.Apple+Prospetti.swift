@@ -136,8 +136,13 @@ extension Tema.Apple {
             static let sottotitolo = Carattere.secondario
             static let coloreSottotitolo = Colore.inchiostro2
             static let spazioTitoli: CGFloat = 1
-            /// Spazio minimo del titolo: sotto questa misura le azioni passano alle sole icone.
+            /// Spazio minimo del titolo: sotto questa misura, sul Mac, «Mostra al cliente» passa in «Altro» (migliorie
+            /// d'uso 24); altrove le azioni passano alle sole icone.
             static let larghezzaMinimaTitolo: CGFloat = 180
+            /// Migliorie d'uso 24: la freccia di «Altro ⌄» (come nell'Agenda).
+            static let frecciaAltro = Carattere(dimensione: 11, peso: .semibold)
+            static let opacitaFrecciaAltro = 0.6
+            static let spazioFrecciaAltro: CGFloat = 4
             static let spazioAzioni: CGFloat = 8
             static let padding = EdgeInsets(top: 0, leading: 4, bottom: 0, trailing: 0)
             /// Migliorie d'uso 22: la barra sopra la pagina con «Per il cliente | Per te» è alta 58 (`#pBarra`).

@@ -22,6 +22,10 @@ struct AppProspetti: View {
     /// La pagina mostrata nell'anteprima e il verso dell'ultimo cambio (ProspettiApple.swift).
     @State var paginaAnteprima = PaginaAnteprimaProspetto()
     @State var direzioneAnteprima = 1
+    #if os(macOS)
+    /// Migliorie d'uso 24: il pannello del tavolo con l'iPad, aperto da «Altro › Al tavolo…».
+    @State var tavoloAperto = false
+    #endif
     @Environment(\.prismaCalmo) var calmo
 
     var cliente: String { stato.clienteAttivoId }

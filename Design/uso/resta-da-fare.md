@@ -1023,3 +1023,30 @@ Resta:
   se l'utente lo vuole.
 - **Istantanee da rigenerare sul Mac**: 460 (chiara e scura), 461, 464, 466 (chiara e scura), 236, 81, 82. Aggiornare la
   pagina delle anteprime.
+
+## 24. Tre pulsanti nei Prospetti
+
+Fatto (solo Mac, `#if os(macOS)`; iPhone e iPad tengono la fila di sempre con le sole icone nelle finestre strette):
+- **Tre pulsanti sempre con il nome** nella barra sopra la pagina (`treAzioniApple` in `ProspettiApple.swift`): «Mostra al
+  cliente» (simbolo dello schermo, la presentazione di sempre nella vista pulita con `presentaApple`, sempre la versione
+  per il cliente; spento per il portafoglio e per i documenti solo per te, con l'aiuto), «Salva PDF…» (blu, seconda
+  lettura, foglio della password e avviso con la versione) e «Altro ⌄» (`Menu` con l'etichetta e la freccia come in
+  Agenda): «Stampa…», «Archivia nei Documenti» (non il portafoglio), «Chiedi a Vera di commentarlo» (solo con lo spunto,
+  spento mentre Vera scrive) e «Al tavolo…» (mai il portafoglio né i documenti solo per te), che apre il pannello di
+  sempre del tavolo con l'iPad (`PannelloAlTavolo`, stesso `ContestoTavolo`: versione per il cliente).
+- **Niente sole icone**: `ViewThatFits` fra i tre pulsanti e «Salva PDF + Altro» con «Mostra al cliente» in testa al menu.
+- **24-a**: «Archiviato in Documenti ↗» resta il collegamento sobrio accanto ai pulsanti finché non si cambia documento.
+- **Senza cliente** i tre pulsanti aprono «Di chi parliamo?» (`apriSceltaCliente`); il portafoglio no (è di tutti).
+- Token in `Tema.Apple.Prospetti.Barra` (`frecciaAltro`, `opacitaFrecciaAltro`, `spazioFrecciaAltro`); testi in
+  `TestiAzioniProspetto`. `larghezzaMinimaTitolo` resta: il titolo divide ancora la riga con i pulsanti.
+
+Resta:
+- Il pannello «Mostra al cliente» (miglioria 1) non sa ancora ricevere un documento già scelto con le due strade (tutto
+  schermo o iPad al tavolo): per ora «Mostra al cliente» va a tutto schermo e il tavolo sta in «Altro › Al tavolo…», così
+  nessuna funzione si perde. Con la 58 (gruppo 10), chi toglie `PulsanteAlTavolo` (oggi non più usato dai Prospetti sul
+  Mac) e `PannelloAlTavolo` dai Prospetti deve portare la strada verso l'iPad nel pannello «Mostra al cliente»
+  (`ContestoTavolo(documento:pagina:clienteId:)` come `contestoTavolo(_:)`).
+- Il puntino dello stato del tavolo non compare più nella barra (il menu del sistema non lo disegna): lo stato si legge
+  nel pannello del tavolo.
+- `--prova-tavolo` (a mano) e le istantanee 460 (chiara e scura), 461, 236 da rigenerare sul Mac: il menu «Altro» aperto
+  non si vede nelle istantanee.
