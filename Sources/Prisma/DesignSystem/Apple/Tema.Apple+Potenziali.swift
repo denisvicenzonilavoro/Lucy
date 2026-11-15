@@ -258,6 +258,38 @@ extension Tema.Apple {
         static let paddingChip = Tema.Apple.Misura.padding(4, 10)
         static let paddingPillola = Tema.Apple.Misura.padding(2, 7)
         static let spazioRiga: CGFloat = 2
+        // Migliorie d'uso 49 (solo Mac): la campagna in tre passi (`.cmPa`, `.cmR`, `.chip.on3` del template)
+        /// Il tondino numerato del passo: 20, nel colore del gruppo, con la cifra bianca 11,5 bold.
+        static let passoTondino: CGFloat = 20
+        static let passoCifra = Tema.Apple.Carattere(dimensione: 11.5, peso: .bold, tabellare: true)
+        static let coloreCifraPasso = Tema.Apple.Controlli.Pulsante.testoPrincipale
+        /// «Chi», «Cosa scrivi», «Quando» in neretto 14; accanto il sottotitolo grigio.
+        static let passoTitolo = Tema.Apple.Carattere(dimensione: 14, peso: .bold)
+        static let passoSottotitolo = Tema.Apple.Carattere.secondario
+        static let coloreSottotitoloPasso = Tema.Apple.Colore.inchiostro2
+        /// 9 fra tondino, titolo e sottotitolo; 14 sopra ogni passo; 6 fra il passo e il suo contenuto.
+        static let spazioPasso: CGFloat = 9
+        static let spazioPassi: CGFloat = 14
+        static let sottoPasso: CGFloat = 6
+        /// Le righe del passo «Chi» visibili prima di «Mostra tutti».
+        static let righeVisibili = 8
+        /// La riga di un cliente: 6 × 4, filetto basso, 10 fra casella, avatar e nome.
+        static let paddingRigaPasso = Tema.Apple.Misura.padding(6, 4)
+        static let spazioRigaPasso: CGFloat = 10
+        static let nomeRigaPasso = Tema.Apple.Carattere(dimensione: 13.5, peso: .regular)
+        static let filoRiga = Tema.Apple.Colore.separatore
+        /// Le capsule degli orari: accese (fondo accento, testo bianco) o spente (fondo `chip`), 12,5 con 5 × 11.
+        static let chipPasso = Tema.Apple.Carattere(dimensione: 12.5, peso: .semibold, tabellare: true)
+        static let paddingChipPasso = Tema.Apple.Misura.padding(5, 11)
+        static let spazioChip: CGFloat = 6
+        static let fondoChipScelto = Tema.Apple.Colore.accento
+        static let testoChipScelto = Tema.Apple.Controlli.Pulsante.testoPrincipale
+        static let testoChip = Tema.Apple.Colore.inchiostro
+        /// L'intestazione dell'anteprima («Anteprima per Marco») e la tile: 11 × 14.
+        static let paddingAnteprimaPasso = Tema.Apple.Misura.padding(11, 14)
+        /// Il piede con il pulsante: 16 sotto, 22 ai lati; 7 fra il pulsante e «Niente parte da solo…».
+        static let paddingPiede = Tema.Apple.Misura.padding(14, 22)
+        static let sottoPulsante: CGFloat = 7
 
         /// Il colore di un gruppo nella mappa.
         static func tinta(_ t: TipoGruppoCampagna) -> Color {
@@ -317,5 +349,7 @@ extension Tema.Apple.Moto {
         static let lampo = 0.9
         /// Le righe diventano «✓ bozza pronta» una dopo l'altra (passo).
         static let passoBozze = 0.12
+        /// Migliorie d'uso 49 (solo Mac): le righe diventano «✓ pronto in Messaggi» una dopo l'altra, ogni 320 ms.
+        static let pronta = 0.32
     }
 }

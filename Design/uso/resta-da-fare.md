@@ -1646,3 +1646,30 @@ Resta / da decidere:
 - La bozza del grazie è sempre nel tono cordiale e con il canale dal telefono (Messaggi con un cellulare, altrimenti
   Mail); si cambia in Messaggi prima di aprirla.
 - L'avviso del template non ha un collegamento diretto a Messaggi: la bozza si trova nel dossier e in Messaggi.
+
+## 49. La campagna in tre passi
+
+Fatto (solo Mac, dentro `#if os(macOS)`; l'iPad in sola lettura resta come prima):
+- `PannelloCampagna` in tre passi numerati (`PassoCampagna`: tondino 20 nel colore del gruppo, titolo 14 neretto,
+  sottotitolo grigio): «1 · Chi» «{q} di {N} clienti con questo bisogno» con le righe di sempre e in testa la casella
+  quadrata del tema (nuovo `CasellaSceltaApple`, 18 × 18, raggio 6, bordo 1,6 `inchiostro3`, piena d'accento con la
+  spunta); tutta la riga include o esclude (consenso e recapito controllati come prima); le prime 8 righe e poi «e altri
+  N clienti» con «Mostra tutti». «2 · Cosa scrivi»: «Tono» e «Invia con» (49-a), poi «Anteprima per {nome}» o «Scegli
+  almeno un cliente.». «3 · Quando»: capsule accese (accento, testo bianco) o spente, niente barrato; tutte accese di
+  base (49-b); con l'agenda piena la frase di sempre e il pulsante non chiede orari.
+- Il piede resta fermo sotto i passi (lo scorrimento è solo dei passi): pulsante grande a tutta larghezza
+  `TestiCampagne.pulsante(…)` («Prepara il messaggio» / «Prepara N messaggi»; spento «Scegli almeno un cliente», «Scegli
+  almeno un orario», «Scegli la firma»), sopra la nota di chi resta fuori solo quando serve, sotto «Niente parte da solo:
+  li rileggi e li spedisci tu, da Messaggi.».
+- Dopo: «✓ pronto in Messaggi» in verde con il lampo, una riga dopo l'altra ogni 320 ms
+  (`Tema.Apple.Moto.Campagne.pronta`, `ritardoPrisma`); avviso «N messaggi preparati: sono in Messaggi, da rileggere»;
+  «Apri i messaggi preparati» apre Messaggi sulla prima bozza ancora da aprire (`preparaMessaggio(clienteId:messaggioId:)`,
+  non Mail); sotto, sobri, «Apri la prossima in …», «Apri tutte», «Annulla la campagna». Una campagna riaperta dallo
+  storico non lampeggia più.
+- Con un cliente nella barra e nessun gruppo scelto, Campagne si apre sul suo gruppo.
+- Istantanee 1150 (un orario spento) e 1151 (nessun cliente); prove dei testi del pulsante in `ProvaCalcoliCampagne`.
+
+Resta:
+- Il passaggio «Preparo…» del pulsante: l'avvio è sincrono (le bozze nascono subito), quindi il pulsante passa
+  direttamente a «Apri i messaggi preparati» mentre le righe si accendono una dopo l'altra.
+- Le istantanee non mostrano il lampo (stato finale) né «Mostra tutti» aperto: da guardare sul Mac.
