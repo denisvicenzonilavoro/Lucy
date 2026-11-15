@@ -117,18 +117,36 @@ struct AppClienti: View {
         // Sul Mac come nel template: la rubrica nel pannello, il dossier nella card a 16 di distanza
         // Finestra stretta (mezza finestra di uno spazio): resta solo il dossier, a tutta larghezza. La larghezza
         // ideale fissata dice a ViewThatFits quanto chiede il dossier (senza, i testi lunghi la farebbero enorme)
-        ViewThatFits(in: .horizontal) {
-            HStack(spacing: Tema.Apple.Clienti.spazioRubrica) {
-                rubrica
-                    .frame(width: Tema.Apple.Clienti.larghezzaRubrica)
-                    .frame(maxHeight: .infinity, alignment: .top)
-                    .superficieApple(Tema.Apple.Superficie.pannello)
-                    .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.Superficie.pannello.raggio, style: .continuous))
-                dossier(superficie: Tema.Apple.Superficie.cardPiatta)
-                    .frame(minWidth: Tema.Apple.Clienti.larghezzaMinimaDossier, idealWidth: Tema.Apple.Clienti.larghezzaMinimaDossier,
-                           maxWidth: .infinity)
+        // Migliorie d'uso 11: con un cliente scelto la colonna di sinistra è l'indice del suo dossier (216), non la
+        // rubrica; «‹ Rubrica» torna a «Tutti i clienti». In finestra stretta l'indice diventa «Sezione: … ⌄».
+        if let c = stato.clienteAttivo {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Tema.Apple.Clienti.Indice.spazio) {
+                    IndiceDossierApple(cliente: c)
+                        .frame(width: Tema.Apple.Clienti.Indice.larghezza)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .superficieApple(Tema.Apple.Superficie.pannello)
+                        .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.Superficie.pannello.raggio, style: .continuous))
+                    dossier(superficie: Tema.Apple.Superficie.cardPiatta, schede: .nessuna)
+                        .frame(minWidth: Tema.Apple.Clienti.larghezzaMinimaDossier, idealWidth: Tema.Apple.Clienti.larghezzaMinimaDossier,
+                               maxWidth: .infinity)
+                }
+                dossier(superficie: Tema.Apple.Superficie.cardPiatta, schede: .menu)
             }
-            dossier(superficie: Tema.Apple.Superficie.cardPiatta)
+        } else {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: Tema.Apple.Clienti.spazioRubrica) {
+                    rubrica
+                        .frame(width: Tema.Apple.Clienti.larghezzaRubrica)
+                        .frame(maxHeight: .infinity, alignment: .top)
+                        .superficieApple(Tema.Apple.Superficie.pannello)
+                        .clipShape(RoundedRectangle(cornerRadius: Tema.Apple.Superficie.pannello.raggio, style: .continuous))
+                    dossier(superficie: Tema.Apple.Superficie.cardPiatta)
+                        .frame(minWidth: Tema.Apple.Clienti.larghezzaMinimaDossier, idealWidth: Tema.Apple.Clienti.larghezzaMinimaDossier,
+                               maxWidth: .infinity)
+                }
+                dossier(superficie: Tema.Apple.Superficie.cardPiatta)
+            }
         }
         #endif
     }
@@ -200,9 +218,9 @@ struct AppClienti: View {
 
     // MARK: - Dossier
 
-    @ViewBuilder private func dossier(superficie: Tema.Apple.Superficie?) -> some View {
+    @ViewBuilder private func dossier(superficie: Tema.Apple.Superficie?, schede: SchedeDossier = .segmentato) -> some View {
         if stato.clienteAttivo != nil {
-            DossierApple(superficie: superficie, modifica: { c in modulo = c }) { scheda, c in
+            DossierApple(superficie: superficie, schede: schede, modifica: { c in modulo = c }) { scheda, c in
                 schedaDossier(scheda, c)
             }
         } else if stato.dati.clienti.isEmpty {
@@ -302,14 +320,29 @@ struct AppClienti: View {
                 RigaCampo(etichetta: "Sostituto d'imposta",
                           valore: f.sostitutoImposta.map { $0 ? "Sì" : "No" } ?? "")
             }
-            Button {
-                // La nota «Da ricordare» in attesa entra prima nella scheda: il modulo la salverebbe com'era
-                TestiRinviati.scriviOra()
-                modulo = stato.cliente(c.id) ?? c
-            } label: {
-                Label("Modifica la scheda", systemImage: "pencil")
+            HStack(spacing: Tema.Apple.Clienti.Testata.spazioComandi) {
+                Button {
+                    // La nota «Da ricordare» in attesa entra prima nella scheda: il modulo la salverebbe com'era
+                    TestiRinviati.scriviOra()
+                    modulo = stato.cliente(c.id) ?? c
+                } label: {
+                    Label("Modifica la scheda", systemImage: "pencil")
+                }
+                    .buttonStyle(StileCuoioChiaro())
+                #if os(macOS)
+                // Migliorie d'uso 11: «L'azienda» sta nell'indice solo per chi ce l'ha o fa l'imprenditore; per gli altri
+                // la strada di prima («Altro › Azienda») resta da qui, finché la riga in testa non ha il suo menu (12)
+                if !SchedaCliente.mostraAzienda(per: c), !stato.inModoCliente, !stato.solaLettura {
+                    Button {
+                        stato.schedaCliente = .azienda
+                    } label: {
+                        Label("Aggiungi un'azienda…", systemImage: "building.2")
+                    }
+                        .buttonStyle(StileCuoioChiaro())
+                        .help("Apre «L'azienda»: quota, ruolo, dipendenti e fatturato li scrivi tu")
+                }
+                #endif
             }
-                .buttonStyle(StileCuoioChiaro())
         }
     }
 

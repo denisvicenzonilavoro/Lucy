@@ -65,6 +65,63 @@ extension Tema.Apple {
             static let fraRighePiede: CGFloat = 2
         }
 
+        // MARK: Indice del dossier (migliorie d'uso 11)
+
+        /// Con un cliente scelto la colonna di sinistra è l'indice del suo dossier (`#dosIdx` del template, `.side`
+        /// largo 216, il dossier a 16 di distanza): «‹ Rubrica», la testa del cliente e le sezioni in tre gruppi, con il
+        /// numero piccolo dove c'è qualcosa da guardare. Solo sul Mac.
+        enum Indice {
+            static let larghezza: CGFloat = 216
+            static let spazio: CGFloat = 16
+            /// Padding della colonna 14×12, come la rubrica.
+            static let padding = Misura.Padding.barraLaterale
+            /// Voce `.side .vo`: alta 32, padding orizzontale 10, raggio 12, spazio 10, 13,5 medio.
+            static let altezzaVoce: CGFloat = 32
+            static let paddingVoce: CGFloat = 10
+            static let raggioVoce: CGFloat = 12
+            static let spazioVoce: CGFloat = 10
+            static let voce = Carattere(dimensione: 13.5, peso: .medium)
+            static let coloreVoce = Colore.inchiostro
+            /// La voce scelta: fondo accento al 13%; sotto il puntatore `chip` (in 0,2 s).
+            static let voceScelta = Colore.selezioneVoce
+            static let voceSopra = Colore.chip
+            static let durataFondo = 0.2
+            static var animazioneFondo: Animation { .easeInOut(duration: durataFondo * Tema.Apple.Moto.ritmo) }
+            /// «‹ Rubrica»: 13,5 semibold accento, simbolo 14.
+            static let ritorno = Carattere(dimensione: 13.5, peso: .semibold)
+            static let simboloRitorno = Carattere(dimensione: 14, peso: .semibold)
+            static let coloreRitorno = Colore.accento
+            /// La testa del cliente: avatar 40, nome 14,5 bold, motto 12 `inchiostro2`, padding 10/8/8, spazio 10.
+            static let avatar: CGFloat = 40
+            static let nome = Carattere(dimensione: 14.5, peso: .bold)
+            static let motto = Carattere(dimensione: 12, peso: .regular)
+            static let coloreNome = Colore.inchiostro
+            static let coloreMotto = Colore.inchiostro2
+            static let paddingTesta = EdgeInsets(top: 10, leading: 8, bottom: 8, trailing: 8)
+            static let spazioTesta: CGFloat = 10
+            static let spazioNomeMotto: CGFloat = 1
+            /// L'etichetta del gruppo (`.lbl.ig`): 11 maiuscolo, margine 13 sopra, 8 ai lati, 4 sotto.
+            static let etichettaGruppo = Carattere(dimensione: 11, peso: .semibold, tracking: 0.6, maiuscolo: true)
+            static let coloreEtichettaGruppo = Colore.inchiostro2
+            static let paddingEtichettaGruppo = EdgeInsets(top: 13, leading: 8, bottom: 4, trailing: 8)
+            /// Il numero accanto alla voce (`.vo small`): 11,5 tabellare, padding 1×7, a capsula.
+            static let numero = Carattere(dimensione: 11.5, peso: .semibold, tabellare: true)
+            static let paddingNumero = Misura.padding(1, 7)
+            /// I quattro toni del numero: le cose da fare (rosso pieno, testo bianco), gli obiettivi che non ci arrivano
+            /// (arancio tenue, testo arancio), le voci scadute di In regola (rosso tenue, testo rosso), i documenti (neutro).
+            static let fondoUrgente = Colore.rossoBadge
+            static let testoUrgente = Color.white
+            static let fondoAttenzione = Color(r: 224, g: 138, b: 0, a: 0.16)
+            static let testoAttenzione = Colore.arancioTesto
+            static let fondoErrore = Color(r: 229, g: 72, b: 77, a: 0.14)
+            static let testoErrore = Colore.rosso
+            static let fondoNeutro = Colore.chip
+            static let testoNeutro = Colore.inchiostro2
+            /// Finestra stretta (solo il dossier): l'indice diventa la capsula «Sezione: Panoramica ⌄» al posto del
+            /// segmentato.
+            static let prefissoMenu = "Sezione: "
+        }
+
         // MARK: Testata del dossier
 
         enum Testata {
@@ -154,6 +211,9 @@ extension Tema.Apple {
             static let indiceTessere = 1
             static let indiceSchede = 5
             static let primoIndiceScheda = 6
+            /// Sul Mac con l'indice accanto (migliorie d'uso 11) il segmentato non c'è: il contenuto entra subito dopo le
+            /// tessere, senza aspettare un blocco che non c'è più.
+            static let primoIndiceSenzaSchede = 5
         }
     }
 }

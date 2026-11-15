@@ -36,6 +36,21 @@ extension Istantanee {
         }
         tutte += [(nome: "1032-uso-dossier-bisogni", prepara: bisogni),
                   (nome: "1032-uso-dossier-bisogni-scuro", prepara: bisogni)]
+        // Migliorie d'uso 11 «Il dossier ha un indice»: l'indice di Marco su Panoramica, con i numeri di Panoramica,
+        // Obiettivi, Documenti e In regola (chiara e scura), e Giulia su Documenti, una sezione che prima stava in «Altro».
+        // (1028-1029: 1020-1022 sono già della barra del cliente, migliorie d'uso 2)
+        let indice: (StatoShell) -> Void = { s in
+            s.clienteAttivoId = "marco"
+            s.schedaCliente = .panoramica
+            s.apri(.clienti)
+        }
+        tutte += [(nome: "1028-uso-dossier-indice", prepara: indice),
+                  (nome: "1028-uso-dossier-indice-scuro", prepara: indice),
+                  (nome: "1029-uso-dossier-documenti", prepara: { s in
+                      s.clienteAttivoId = "giulia"
+                      s.schedaCliente = .documenti
+                      s.apri(.clienti)
+                  })]
         return tutte
     }
 

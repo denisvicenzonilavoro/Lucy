@@ -1445,7 +1445,7 @@ enum Istantanee {
             s.schedaCliente = .panoramica
             s.apri(.clienti)
         }),
-        ("431-clienti-dossier-altro", { s in
+        ("431-clienti-dossier-in-regola", { s in
             s.clienteAttivoId = "marco"
             s.schedaCliente = .inRegola
             s.apri(.clienti)

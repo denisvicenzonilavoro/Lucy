@@ -383,3 +383,37 @@ Resta:
   accanto alla ruota.
 - **Indice del dossier (miglioria 11)**: quando la sezione Bisogni passa nel tema Apple, la capsula e la nota vanno
   riprese da `BisogniCliente.prioritaVista` (oggi la scheda usa ancora i caratteri di Rubrica).
+
+## 11. Il dossier ha un indice
+
+Fatto (solo sul Mac, `#if os(macOS)`): con un cliente scelto la colonna di sinistra di Clienti è `IndiceDossierApple`
+(Shell/IndiceDossierApple.swift, larga 216 sul `pannello`, il dossier a 16): «‹ Rubrica» (`scegliCliente(nil)`, non in
+modalità cliente), la testa del cliente (avatar 40, nome e motto), i tre gruppi di `SchedaCliente.indice` (La persona, Il
+piano, Le carte) con le voci alte 32 e la scelta sul fondo accento al 13%. I numeri (`ContiIndiceDossier`, letti in un
+colpo con `stato.contiIndiceDossier` in `ricavato`, chiave con l'ora): Panoramica le cose da fare (rosso pieno, non in
+modalità cliente), Obiettivi quelli non in tempo della 13 (arancio tenue), Documenti da leggere o con differenze (neutro),
+In regola le scadute (rosso tenue). Sul Mac il dossier non ha più segmentato né «Altro» (`DossierApple(schede: .nessuna)`,
+cascata da `primoIndiceSenzaSchede`); in finestra stretta resta solo il dossier con la capsula «Sezione: … ⌄»
+(`MenuSezioneDossier`, menu del Mac con i tre gruppi). «L'azienda» nell'indice per chi ha un'azienda o fa l'imprenditore
+o il titolare (`SchedaCliente.mostraAzienda`), e per gli altri finché è la sezione aperta; `cambiaCliente` usa la stessa
+regola. Token in `Tema.Apple.Clienti.Indice`. Prova `ProvaCalcoliIndiceDossier` in `--prova-calcoli`. Istantanee nuove
+1028-uso-dossier-indice (chiara e scura) e 1029-uso-dossier-documenti (1020-1022 erano già della barra del cliente);
+«431-clienti-dossier-altro» rinominata «431-clienti-dossier-in-regola». iPhone e iPad restano con segmentato e «Altro».
+
+Resta:
+- **«Aggiungi un'azienda…»**: per chi non è imprenditore oggi sta come pulsante nell'Anagrafica (accanto a «Modifica la
+  scheda») e apre la sezione «L'azienda» con il vuoto di sempre; con la miglioria 12 va nel menu «Altro ⌄» della riga in
+  testa, come dice la decisione 11.6.
+- **«Nuovo cliente» solo nella rubrica**: con un cliente scelto le azioni della riga in testa sono ancora quelle di Clienti
+  (`AzioniClienti`: «Nuovo cliente», Rubrica / Potenziali / Passaparola); diventano quelle del dossier con la miglioria 12.
+- **La testata `sezT`** («Anagrafica · i dati della persona» con «Modifica», «Note · … si salvano da sole»…) non è stata
+  portata sulle sezioni senza titolo proprio: da fare guardando le istantanee, sezione per sezione.
+- **La sfumatura in fondo all'indice** (come le altre colonne): il tema non ha ancora un modificatore comune; l'indice
+  scorre senza indicatori e senza sfumatura.
+- **«La tua rubrica» con le quattro cifre e il «Da fare»** (Tutti i clienti, miglioria 2 §2.3 punto 7) non è in questo giro.
+- **Numerazione delle istantanee**: «1032-uso-dossier-bisogni» (miglioria 17) usa lo stesso numero di
+  «1032-da-fare-aggiungi» (miglioria 3); i nomi sono diversi, ma conviene riallineare.
+- **Istantanee**: rigenerare sul Mac 430 e -scuro, 431-clienti-panoramica-apple, 431-clienti-dossier-in-regola, 432, 433,
+  434, 1023, 1032, 1050-1052 e le nuove 1028-1029; controllare che il nome lungo si tagli nella testa dell'indice e che
+  con la finestra stretta compaia «Sezione: … ⌄». `--prova-fluidita`: guardare i corpi di `IndiceDossierApple` nel passo di
+  Clienti (i conti sono in `ricavato`).

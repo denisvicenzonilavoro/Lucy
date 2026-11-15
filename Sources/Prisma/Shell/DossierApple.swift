@@ -36,6 +36,29 @@ extension SchedaCliente {
         (c?.elencoAziende.isEmpty ?? true) ? dellAltro + [.azienda] : dellAltro
     }
 
+    /// Migliorie d'uso 11: i gruppi dell'indice del dossier (sul Mac, al posto del segmentato e di «Altro»).
+    static let indice: [(titolo: String, voci: [SchedaCliente])] = [
+        ("La persona", [.panoramica, .anagrafica, .famiglia, .azienda, .profilo, .bisogni]),
+        ("Il piano", [.obiettivi, .lineaVita, .nelTempo]),
+        ("Le carte", [.documenti, .inRegola, .riesami, .note]),
+    ]
+
+    /// «L'azienda» sta nell'indice per chi ha almeno un'azienda o fa l'imprenditore o il titolare (professione, senza
+    /// maiuscole: decisione 11.6). Per gli altri l'azienda si aggiunge da «Aggiungi un'azienda…» nell'Anagrafica.
+    static func mostraAzienda(per c: Cliente?) -> Bool {
+        guard let c else { return false }
+        if !c.elencoAziende.isEmpty { return true }
+        let p = c.professione.lowercased()
+        return p.contains("imprenditor") || p.contains("titolare")
+    }
+
+    /// I gruppi dell'indice per il cliente: «L'azienda» solo quando va mostrata, o quando è la sezione aperta (aperta
+    /// da «Aggiungi un'azienda…», resta in vista finché si sceglie un'altra sezione).
+    static func indice(per c: Cliente?, scelta: SchedaCliente? = nil) -> [(titolo: String, voci: [SchedaCliente])] {
+        let conAzienda = mostraAzienda(per: c) || scelta == .azienda
+        return indice.map { g in (titolo: g.titolo, voci: conAzienda ? g.voci : g.voci.filter { $0 != .azienda }) }
+    }
+
     /// Il titolo nel menu «Altro»: «Azienda» (§9.3.1, stato 1.4).
     var titoloAltro: String { self == .azienda ? "Azienda" : titolo }
 
@@ -348,12 +371,30 @@ struct CampoRicercaApple: View {
 
 // MARK: - Dossier
 
+/// Come il dossier fa scegliere la sezione (migliorie d'uso 11).
+enum SchedeDossier {
+    /// Il segmentato a pillola con «Altro ▾» (iPad, finché non arriva il suo giro).
+    case segmentato
+    /// Niente: sul Mac l'indice del dossier sta nella colonna di sinistra.
+    case nessuna
+    /// La capsula «Sezione: Panoramica ⌄» (Mac, finestra stretta: l'indice non ci sta).
+    case menu
+
+    /// Da dove parte la cascata del contenuto quando entra con il cliente (dopo testata, tessere e, se c'è, la scelta).
+    var primoIndice: Int {
+        self == .nessuna ? Tema.Apple.Clienti.Moto.primoIndiceSenzaSchede : Tema.Apple.Clienti.Moto.primoIndiceScheda
+    }
+}
+
 /// Il dossier del cliente attivo: testata, tessere, schede e contenuto della scheda, con il cambio di cliente e di
 /// scheda del template. `contenuto` disegna la scheda (lo fornisce AppClienti, che tiene i fogli dei moduli).
 struct DossierApple<Contenuto: View>: View {
     @Environment(StatoShell.self) var stato
     /// La superficie del dossier: sul Mac la card senza ombra; su iPad nil (sta già sul vetro della finestra).
     let superficie: Tema.Apple.Superficie?
+    /// Come si sceglie la sezione: il segmentato con «Altro» (iPad), niente (sul Mac c'è l'indice accanto, migliorie
+    /// d'uso 11) o la capsula «Sezione: … ⌄» (Mac, finestra stretta senza indice).
+    let schede: SchedeDossier
     let modifica: (Cliente) -> Void
     let contenuto: (SchedaCliente, Cliente) -> Contenuto
 
@@ -369,11 +410,14 @@ struct DossierApple<Contenuto: View>: View {
     @State private var avvio = AvvioCascataDossier(primoIndice: Tema.Apple.Clienti.Moto.primoIndiceScheda,
                                                    base: Tema.Apple.Clienti.Moto.baseApertura)
 
-    init(superficie: Tema.Apple.Superficie?, modifica: @escaping (Cliente) -> Void,
+    init(superficie: Tema.Apple.Superficie?, schede: SchedeDossier = .segmentato, modifica: @escaping (Cliente) -> Void,
          @ViewBuilder contenuto: @escaping (SchedaCliente, Cliente) -> Contenuto) {
         self.superficie = superficie
+        self.schede = schede
         self.modifica = modifica
         self.contenuto = contenuto
+        _avvio = State(initialValue: AvvioCascataDossier(primoIndice: schede.primoIndice,
+                                                         base: Tema.Apple.Clienti.Moto.baseApertura))
     }
 
     var body: some View {
@@ -406,10 +450,25 @@ struct DossierApple<Contenuto: View>: View {
                 .entrataCascata(0, base: baseDossier)
             TessereDossierApple(clienteId: c.id, base: baseDossier)
                 .padding(.top, k.Tessere.sopra)
-            SchedeDossierApple(selezione: Bindable(stato).schedaCliente, cliente: c)
-                .entrataCascata(k.Moto.indiceSchede, base: baseDossier)
-                .padding(.top, k.Schede.sopra)
-                .padding(.bottom, k.Schede.sotto)
+            switch schede {
+            case .segmentato:
+                SchedeDossierApple(selezione: Bindable(stato).schedaCliente, cliente: c)
+                    .entrataCascata(k.Moto.indiceSchede, base: baseDossier)
+                    .padding(.top, k.Schede.sopra)
+                    .padding(.bottom, k.Schede.sotto)
+            case .menu:
+                #if os(macOS)
+                MenuSezioneDossier(cliente: c)
+                    .entrataCascata(k.Moto.indiceSchede, base: baseDossier)
+                    .padding(.top, k.Schede.sopra)
+                    .padding(.bottom, k.Schede.sotto)
+                #else
+                EmptyView()
+                #endif
+            case .nessuna:
+                // L'indice sta accanto: il contenuto a 18 sotto le tessere
+                Color.clear.frame(height: k.Schede.sopra)
+            }
             schedaCorrente(c, scheda: scheda)
         }
         .padding(k.Testata.paddingDossier)
@@ -453,8 +512,14 @@ struct DossierApple<Contenuto: View>: View {
     // MARK: Cambi
 
     private func cambiaCliente(_ nuovo: String) {
-        // «L'azienda» non c'è per un cliente senza azienda: si torna a «Panoramica» (riga 561 del template)
-        if stato.schedaCliente == .azienda, stato.cliente(nuovo)?.elencoAziende.isEmpty ?? true {
+        // «L'azienda» non c'è per un cliente senza azienda: si torna a «Panoramica» (riga 561 del template). Sul Mac
+        // la stessa regola dell'indice (migliorie d'uso 11: anche imprenditori e titolari)
+        #if os(macOS)
+        let senzaAzienda = !SchedaCliente.mostraAzienda(per: stato.cliente(nuovo))
+        #else
+        let senzaAzienda = stato.cliente(nuovo)?.elencoAziende.isEmpty ?? true
+        #endif
+        if stato.schedaCliente == .azienda, senzaAzienda {
             stato.schedaCliente = .panoramica
         }
         guard nuovo != clienteMostrato else {
@@ -465,7 +530,7 @@ struct DossierApple<Contenuto: View>: View {
         if istantanea || calmo {
             let mostra: () -> Void = {
                 baseDossier = m.baseCambio
-                avvio = AvvioCascataDossier(primoIndice: m.primoIndiceScheda, base: m.baseCambio)
+                avvio = AvvioCascataDossier(primoIndice: schede.primoIndice, base: m.baseCambio)
                 clienteMostrato = nuovo
                 schedaMostrata = stato.schedaCliente
                 esceCliente = false
@@ -483,7 +548,7 @@ struct DossierApple<Contenuto: View>: View {
             // Un clic su un altro cliente nel frattempo: entra quello, con il suo giro
             guard stato.clienteAttivoId == nuovo else { return }
             baseDossier = m.baseCambio
-            avvio = AvvioCascataDossier(primoIndice: m.primoIndiceScheda, base: m.baseCambio)
+            avvio = AvvioCascataDossier(primoIndice: schede.primoIndice, base: m.baseCambio)
             clienteMostrato = nuovo
             schedaMostrata = stato.schedaCliente
             esceScheda = false
@@ -839,7 +904,7 @@ struct AltroSchedeDossier: View {
 }
 
 #if os(macOS)
-private final class BersaglioMenuAltro: NSObject {
+final class BersaglioMenuAltro: NSObject {
     let scelto: (Int) -> Void
     init(_ scelto: @escaping (Int) -> Void) { self.scelto = scelto }
     @objc func scegli(_ voce: NSMenuItem) { scelto(voce.tag) }

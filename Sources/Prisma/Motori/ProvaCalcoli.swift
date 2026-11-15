@@ -1335,6 +1335,8 @@ enum ProvaCalcoli {
         ProvaCalcoliArrivoObiettivo.esegui(verificaEsterna)
         // Migliorie d'uso 17: le priorità di Analisi 360 in ordine, senza doppioni, e dall'area più scoperta senza ruota
         ProvaCalcoliPrioritaAree360.esegui(verificaEsterna)
+        // Migliorie d'uso 11: i gruppi dell'indice del dossier e «L'azienda» solo per chi ce l'ha
+        ProvaCalcoliIndiceDossier.esegui(verificaEsterna)
         #if os(macOS)
         // Migliorie d'uso 7: i testi piccoli (grigi e arancione delle scritte) hanno contrasto almeno 4,5
         MainActor.assumeIsolated { ProvaCalcoliLeggibilita.esegui(verificaEsterna) }
