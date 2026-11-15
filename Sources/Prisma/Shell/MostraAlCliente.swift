@@ -283,7 +283,8 @@ extension StatoShell {
         if schermataNeutraMac { schermataNeutraMac = false; return true }
         if sceltaMostra { sceltaMostra = false; return true }
         guard inVistaCliente else { return false }
-        if presaVisioneAperta { presaVisioneAperta = false; return true }
+        // Come «Annulla»: con il cliente sull'iPad la richiesta del segno si ritira e l'iPad torna a ciò che si vede
+        if presaVisioneAperta { MainActor.assumeIsolated { annullaPresaVisione() }; return true }
         if schedaMostra != nil { schedaMostra = nil; return true }
         if menuLuogo { menuLuogo = false; return true }
         if menuUscitaMostra { menuUscitaMostra = false; return true }

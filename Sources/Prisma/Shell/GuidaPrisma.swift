@@ -213,12 +213,18 @@ enum GuidaTesti {
                         "Ogni pratica porta al cliente e alla sua posizione."],
                 parole: [.canale])
         case .sala:
+            // Migliorie d'uso 58: sul Mac «Presenta» lo sostituisce «Mostra al cliente» nella testata della Sala
+#if os(macOS)
+            let presenta = "«Mostra al cliente», in alto, la porta nella vista del cliente; l’iPad sul tavolo si sceglie dall’etichetta del luogo."
+#else
+            let presenta = "«Presenta» la mostra a tutto schermo, in modalità cliente."
+#endif
             return AiutoApp(
                 aCosaServe: "Le esperienze da vivere con il cliente davanti allo schermo: il suo Prisma, il prisma di luce, la lettera dal futuro e le altre. Le cifre le calcola Prisma dal suo dossier.",
                 inBreve: "Le esperienze da vivere con il cliente",
                 passi: ["Scegli il cliente nelle pillole in alto.",
                         "Tocca un'esperienza: si apre sul palco; «‹ Sala» o Esc tornano alla griglia.",
-                        "«Presenta» la mostra a tutto schermo, in modalità cliente."],
+                        presenta],
                 parole: [])
         case .biblioteca:
             return AiutoApp(
