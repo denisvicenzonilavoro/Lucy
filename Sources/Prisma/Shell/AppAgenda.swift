@@ -1469,6 +1469,21 @@ struct DettaglioAppuntamento: View {
         }
     }
 
+    #if os(macOS)
+    /// Rifinitura 18-24 (decisione 20-e, miglioria 10): «Preparami l'incontro» come nella traccia: la traccia dell'impegno
+    /// si apre sopra l'Agenda e spunta i punti uno alla volta, poi il fascicolo si apre in Prospetti. Un blocco senza
+    /// cliente non ha niente da preparare: resta Vera, come prima.
+    private var azioneVera: some View {
+        PulsanteAzione(titolo: Parole.preparamiIncontro, simbolo: "sparkles") {
+            guard !evento.clienteId.isEmpty else {
+                stato.apri(.vera)
+                return
+            }
+            stato.tracciaDaPreparare = evento.id
+            stato.richiestaTracciaImpegno = evento.id
+        }
+    }
+    #else
     private var azioneVera: some View {
         PulsanteAzione(titolo: "Prepara con Vera", simbolo: "sparkles") {
             // Un blocco «Non disponibile» non ha cliente: Vera si apre su quello di prima
@@ -1476,6 +1491,7 @@ struct DettaglioAppuntamento: View {
             stato.apri(.vera)
         }
     }
+    #endif
 
     private var azioneModifica: some View {
         PulsanteAzione(titolo: "Modifica", simbolo: "pencil", azione: modifica)
@@ -1508,11 +1524,19 @@ struct DettaglioAppuntamento: View {
 
     /// `aperto`: c'è già un incontro per questo appuntamento (dal body).
     private func azioneIncontro(_ aperto: Bool) -> some View {
-        PulsanteAzione(titolo: aperto ? "Apri l'incontro" : "Prepara l'incontro", principale: true,
-                       simbolo: "list.bullet.rectangle") {
+        #if os(macOS)
+        // Rifinitura 18-24 (miglioria 10): «Prepara l'incontro» sparisce, accanto c'è «Preparami l'incontro»; questo
+        // porta all'incontro in Incontri, sul momento «Prima»
+        let titolo = aperto ? "Apri l'incontro" : "Prima dell'incontro"
+        let aiuto = aperto ? "Apri l'incontro: appunti e decisioni" : "Incontri › Prima: punti da toccare, temi, l'ultima volta"
+        #else
+        let titolo = aperto ? "Apri l'incontro" : "Prepara l'incontro"
+        let aiuto = aperto ? "Apri l'incontro: appunti e decisioni" : "Prepara l'incontro: temi, ascolto, prossimi passi"
+        #endif
+        return PulsanteAzione(titolo: titolo, principale: true, simbolo: "list.bullet.rectangle") {
             stato.apriIncontro(per: evento)
         }
-        .help(aperto ? "Apri l'incontro: appunti e decisioni" : "Prepara l'incontro: temi, ascolto, prossimi passi")
+        .help(aiuto)
     }
 
     private func valore(_ testo: String) -> some View {

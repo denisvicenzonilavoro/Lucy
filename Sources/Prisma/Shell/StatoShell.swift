@@ -353,6 +353,12 @@ enum VoceConfronto: Hashable {
     /// Migliorie d'uso 19: la traccia di un impegno concluso chiede all'Agenda il modulo di modifica o dell'attività
     /// collegata («Altro ⌄»); l'Agenda lo apre e lo azzera (solo in memoria).
     var richiestaModuloImpegno: RichiestaModuloImpegno?
+    /// Rifinitura 18-24 (solo sul Mac): l'impegno di cui aprire la traccia sopra l'Agenda (dal «Com'è andato?» di un
+    /// impegno da chiudere, o da «Preparami l'incontro» del dettaglio di «Giorno»). L'Agenda la apre e la azzera.
+    var richiestaTracciaImpegno: String?
+    /// L'impegno la cui traccia, appena aperta, parte già con «Preparami l'incontro» (i punti che si spuntano e poi il
+    /// fascicolo). La traccia lo legge e lo azzera (solo in memoria).
+    var tracciaDaPreparare: String?
 
     // Strumenti di analisi (stato delle viste, non salvato)
     /// Area aperta in Analisi 360 (nil = panoramica).

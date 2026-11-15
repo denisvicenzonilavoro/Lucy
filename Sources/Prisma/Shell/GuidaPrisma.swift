@@ -90,10 +90,11 @@ enum GuidaTesti {
                           "Le priorità sono numerate: parti dalla 1.",
                           "Tocca un’area per il simulatore; «Simula e confronta» mette due strade una accanto all’altra, e fa il conto del TFR."])
         case .incontri:
+            // Rifinitura 18-24: i tre momenti, con il «Come funziona» del copilota (il riquadro sul Mac non c'è più)
             return guida("L’incontro in tre momenti: prima lo prepari, durante ascolti, dopo confermi.",
-                         ["Scegli l’incontro a sinistra: oggi, prossimi, fatti.",
-                          "Durante, il copilota riconosce obiettivi, polizze, timori ed eventi; oppure prendi appunti a mano.",
-                          "Dopo, decidi tu cosa entra nel dossier."])
+                         ["Prima: scegli l’incontro a sinistra (oggi, prossimi, fatti) e rileggi i punti da toccare.",
+                          "Durante, con il copilota: " + TestiCopilota.comeFunziona + " Oppure prendi appunti a mano.",
+                          "Dopo: conferma il verbale e cosa entra nel dossier, poi «Chiudi e archivia l’incontro»."])
         case .agenda:
             return guida("Impegni e appuntamenti, a giorno, a settimana o a mese.",
                          ["«Settimana» mostra i sette giorni affiancati: tocca il nome di un giorno per vederlo in grande.",

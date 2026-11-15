@@ -278,7 +278,25 @@ struct PresentatoreImpegniApple<Contenuto: View>: View {
                 TracciaImpegnoApple(idDettaglio: id)
             }
             .onDisappear { dettaglio.chiudi(subito: true) }
+            #if os(macOS)
+            // Rifinitura 18-24: la traccia chiesta da fuori (il «Com'è andato?» di un impegno da chiudere, «Preparami
+            // l'incontro» del dettaglio di «Giorno») si apre sopra l'Agenda, anche se l'Agenda si apre adesso
+            .onAppear { apriTracciaRichiesta(stato.richiestaTracciaImpegno) }
+            .onChange(of: stato.richiestaTracciaImpegno) { _, id in apriTracciaRichiesta(id) }
+            #endif
     }
+
+    #if os(macOS)
+    private func apriTracciaRichiesta(_ eventoId: String?) {
+        guard let eventoId else { return }
+        stato.richiestaTracciaImpegno = nil
+        guard stato.appuntamento(eventoId) != nil else { return }
+        let id = TracciaImpegnoApple.id(per: eventoId)
+        guard dettaglio.idAperto != id else { return }
+        dettaglio.chiudi(subito: true)
+        dettaglio.apri(id, misura: Tema.Apple.Agenda.Traccia.misura)
+    }
+    #endif
 }
 
 // MARK: - Barra laterale (vista «Settimana»)

@@ -379,6 +379,15 @@ enum ProvaMostraAlCliente {
         s.blocca(animato: false)
         controlla(!s.inVistaCliente && !s.inModoCliente, "Mostra al cliente: il blocco chiude la vista pulita con la modalità cliente")
         controlla(s.avvisiTrattenuti.isEmpty, "Mostra al cliente: il blocco scarta gli avvisi trattenuti")
+        // Rifinitura 18-24: «Mostra al cliente» della traccia dell'impegno presenta il fascicolo dentro la vista pulita
+        let t = StatoShell(persistente: false)
+        if let e = t.dati.appuntamenti.first(where: { t.cliente($0.clienteId) != nil }) {
+            t.presentaImpegno(e)
+            controlla(t.presentazione == nil || (t.inVistaCliente && t.clienteAttivoId == e.clienteId),
+                      "Mostra al cliente: il fascicolo dell'impegno si presenta nella vista pulita, del suo cliente")
+            controlla(TracciaImpegnoApple.titoloMostra == Parole.mostraAlCliente,
+                      "Mostra al cliente: la traccia dell'impegno dice «Mostra al cliente»")
+        }
     }
 }
 #endif

@@ -946,8 +946,16 @@ extension StatoShell {
             giornoAgenda = Calendar.current.startOfDay(for: a.inizio)
             appuntamentoSelezionato = a.id
             #if os(macOS)
-            // Migliorie d'uso 18: la settimana non ha la colonna del dettaglio, l'appuntamento si mostra in «Giorno»
-            if vistaAgenda == .settimana { vistaAgenda = .giorno }
+            // Rifinitura 18-24: un impegno passato e senza esito («Com'è andato?») apre la sua traccia sopra la
+            // settimana, che chiede com'è andata (miglioria 19); gli altri si mostrano in «Giorno» (miglioria 18: la
+            // settimana non ha la colonna del dettaglio)
+            if vistaAgenda == .settimana {
+                if MomentoImpegno.di(a, adesso: Date()) == .daChiudere {
+                    richiestaTracciaImpegno = a.id
+                } else {
+                    vistaAgenda = .giorno
+                }
+            }
             #endif
             apri(.agenda)
         case .attivita(let id):

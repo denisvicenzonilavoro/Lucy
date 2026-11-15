@@ -768,7 +768,7 @@ struct AppIncontri: View {
     // MARK: Dopo
 
     /// Il verbale del copilota dentro la pagina; senza copilota i prossimi passi dagli appunti; senza niente il vuoto;
-    /// per un incontro concluso l'archivio in sola lettura con «Riapri».
+    /// per un incontro concluso l'archivio in sola lettura con «Riapri» e, sotto, il verbale confermato da rileggere.
     @ViewBuilder private func dopoMac(_ i: Incontro, area: CGSize) -> some View {
         let sessione = stato.copilota.sessione(incontro: i.id, cliente: i.clienteId, in: stato)
         let conVerbale = sessione.map { !($0.schede.isEmpty && $0.trascrizione.isEmpty) || $0.verbale != nil } ?? false
@@ -786,7 +786,7 @@ struct AppIncontri: View {
                         .fixedSize()
                         .disabled(stato.solaLettura)
                 }
-                concluso(i, area: area)
+                concluso(i, area: area, verbale: RegoleVerbaleLettura.daRileggere(sessione))
             }
         } else if conVerbale {
             VStack(alignment: .leading, spacing: d.spazioNota) {
@@ -1053,6 +1053,10 @@ struct AppIncontri: View {
                     .lineLimit(1)
                 Spacer(minLength: mi.spazioGettoni)
                 Button {
+                    // Rifinitura 18-24: l'analisi è del cliente dell'incontro, anche con «Tutti i clienti»
+                    #if os(macOS)
+                    stato.scegliCliente(i.clienteId)
+                    #endif
                     stato.areaAnalisi = tema.0
                     stato.apri(.analisi360)
                 } label: {
@@ -1506,7 +1510,8 @@ struct AppIncontri: View {
     }
 
     /// Concluso: i seguiti in fila, poi quanto è stato scritto, in schede affiancate.
-    private func concluso(_ i: Incontro, area: CGSize) -> some View {
+    /// `verbale`: sul Mac il verbale confermato del copilota, in sola lettura sotto l'archivio (rifinitura 18-24).
+    private func concluso(_ i: Incontro, area: CGSize, verbale: VerbaleCopilota? = nil) -> some View {
         let mi = Tema.Misura.Incontri.self
         let m = Misure.IncontriImpaginazione.self
         let voci = [("COSA LA PREOCCUPA", i.preoccupazioni), ("I SUOI PROGETTI", i.progetti), ("LA SUA ESPERIENZA", i.esperienza),
@@ -1534,6 +1539,11 @@ struct AppIncontri: View {
                         .modifier(CartaIncontro())
                     }
                 }
+                #if os(macOS)
+                if let verbale {
+                    VerbaleConfermatoLettura(verbale: verbale)
+                }
+                #endif
             }
         }
     }

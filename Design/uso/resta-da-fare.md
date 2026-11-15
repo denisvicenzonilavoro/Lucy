@@ -272,7 +272,9 @@ Resta:
   nella colonna di sinistra della settimana con due voci di oggi e la riga comune, al posto di «Da non dimenticare»; la
   fascia della giornata si chiama «Da fare oggi», «Da fare» negli altri giorni, ma tiene le sue capsule: passarla alla
   riga comune resta da fare). **Dossier** «Da fare per <Nome>» (miglioria 5), **Vera** senza «Da non dimenticare»
-  (miglioria 27), il collegamento «<N> da fare per <Nome> ›» di Posizioni.
+  (miglioria 27), il collegamento «<N> da fare per <Nome> ›» di Posizioni. Verificato nella rifinitura 18-24: sul Mac la
+  card «Da non dimenticare» non c'è più né nell'Agenda né in Vera (resta solo per iPhone e iPad); la colonna del giorno del
+  mese tiene le righe delle attività di sempre, «in piccolo» (decisione 50-b).
 - **Notifiche viste**: `notificheViste` e il numero delle «nuove» restano nel codice comune (le usano iPhone, iPad e le
   prove); sul Mac non si vedono più. I promemoria del Mac (notifiche di sistema) leggono ancora `MotoreNotifiche.promemoria`:
   da far leggere al nastro.
@@ -810,7 +812,8 @@ Resta:
   screenshot all'utente.
 - **Colonna a sinistra**: fatto nella rifinitura (`DaFareOggiAgendaApple`: «Da fare oggi» con il numero, «Apri tutto ›» e
   due voci di oggi con `RigaDaFare(filoAgenda: true, conCanali: false)`; vuoto «Niente per oggi[ con <Nome>].»). La fascia
-  della giornata ha il titolo nuovo ma le capsule di prima. Istantanee da rigenerare: 450, 453.
+  della giornata ha il titolo nuovo ma le capsule di prima. Istantanee da rigenerare: 450, 453. Ricontrollato nella
+  rifinitura 18-24: «Da non dimenticare» resta solo nel ramo di iPhone e iPad.
 - **Scala al passaggio** (1,03) non messa: basta l'inclinazione (come chiede 18.3 punto 3).
 - **`--prova-fluidita`**: guardare in CI che la settimana con 30 clienti non faccia crescere i corpi rifatti (ogni colonna
   di oggi ha una `TimelineView` della riga dell'ora e una degli impegni); `ProvaRiesamiAgenda` non tocca la vista e resta.
@@ -852,9 +855,8 @@ Fatto (solo sul Mac, `#if os(macOS)`; iPhone e iPad restano con le tendine e la 
 Resta:
 - **«Tutti i clienti»**: toccare la riga di un altro cliente **non** cambia il cliente della barra, come nel template.
   La specifica (21.3 punto 3) diceva di metterlo, ma allora l'elenco si stringerebbe a quel cliente a ogni tocco. Il
-  quaderno usa il cliente dell'incontro mostrato. Il collegamento «Analisi» delle schede dei temi apre però Analisi 360
-  sul cliente della barra, che con «Tutti» mostra il vuoto: da sistemare con la miglioria 20 o scegliendo il cliente al
-  tocco di «Analisi».
+  quaderno usa il cliente dell'incontro mostrato. ~~Il collegamento «Analisi» delle schede dei temi~~: fatto nella
+  rifinitura 18-24, sul Mac sceglie il cliente dell'incontro (`scegliCliente(i.clienteId)`) prima di aprire Analisi 360.
 - **«Prima» dall'appuntamento**: oggi la bozza usa la «Preparazione» di sempre (priorità, dossier, temi, l'ultima volta).
   I «punti da toccare» e le cifre del template arrivano con la miglioria 20 (Prima, Durante, Dopo), e così anche
   «Riapri» per i fatti in sola lettura e «Fermare l'ascolto?» (20-c). Oggi, mentre si ascolta, le righe sono solo spente.
@@ -912,15 +914,22 @@ dettaglio):
 Resta:
 - **L'uscita del contenuto in 120 ms** (opacità e 6 punti in giù) prima della cascata al cambio di momento: oggi il
   contenuto nuovo entra a cascata senza l'uscita del vecchio (si può fare come `DossierApple` con `CambioScheda`).
-- **Incontro concluso con il solo verbale del copilota**: in «Dopo» si vede l'archivio degli appunti scritti, non i
-  punti del verbale confermato (da aggiungere in sola lettura, come «Il verbale» del template).
+- ~~**Incontro concluso con il solo verbale del copilota**~~: fatto nella rifinitura 18-24. Sotto l'archivio degli appunti
+  c'è «Il verbale» in sola lettura (`VerbaleConfermatoLettura` in VerbaleCopilota.swift: «Confermato il …», i punti, le
+  attività e cosa è entrato nel dossier, senza pulsanti), solo se il verbale è confermato e non vuoto
+  (`RegoleVerbaleLettura.daRileggere`, prova in `ProvaVistaCopilota`). Istantanea da guardare: un incontro concluso con il
+  verbale (584/585 se mostrano un concluso).
 - **«Fissa il prossimo»** apre il modulo dell'appuntamento fra 30 giorni alle 10 (titolo «Seguito · …», revisione), non
   l'Agenda: da guardare se l'utente preferisce aprire l'Agenda con il cliente scelto.
 - **Il numero delle domande** degli appunti a mano usa ancora il tondo del tema di prima (`Tema.Misura.Incontri`); il
   token `Durante.numeroDomanda` (22, `.pzN`) è pronto.
 - La testata con titoli lunghi e finestra stretta: i momenti hanno la precedenza e il titolo si tronca; sotto i 900 punti
   della parte destra potrebbe non starci tutto (guardare l'istantanea a finestra stretta).
-- Il «?» con «Come funziona» del copilota (miglioria 6): sul Mac il riquadro non si vede più.
+- ~~Il «?» con «Come funziona» del copilota~~: fatto nella rifinitura 18-24. La guida di Incontri sul Mac (`aiutoMac`) dice
+  i tre momenti: Prima con i punti da toccare, Durante con il testo di `TestiCopilota.comeFunziona` o gli appunti a mano,
+  Dopo con il verbale e «Chiudi e archivia l’incontro». L'iPad tiene il riquadro e la guida di sempre.
+- «Prepara con Vera» di `azioneFase` (AppIncontri) resta: sul Mac non si vede (la testata con `azioneFase` è solo
+  dell'iPad, sul Mac c'è «Prima»).
 - `CollegamentiCopilota` e la scheda del consenso a riquadro non si usano più sul Mac (restano per l'iPad).
 - **Istantanee da rigenerare sul Mac**: 21, 22, 105, 215, 476, 477, 580-589 (testata con i momenti, barra di «Durante»)
   e le nuove 472-475; aggiornare la pagina delle anteprime. Il foglio del consenso, l'avviso «Fermare l'ascolto?» e la
@@ -959,12 +968,21 @@ prossimo passo si decide nel verbale.») e 19-d (la voce del «Da fare» resta e
   457-agenda-impegno-concluso-senza-proposta (Giulia, «Concluso» spenta e «Non ancora scritto»).
 
 Resta:
-- **Dal «Da fare»** la voce «Com'è andato «…»?» apre «Giorno» con il dettaglio (che ora dice «Scrivi il verbale» e
-  «Altro ⌄»), non la traccia della 19 sopra la settimana: aprire la traccia da `vai(.appuntamento(id))` chiede un modo
-  per far nascere il dettaglio dell'Agenda dallo stato (oggi lo apre solo il tocco su un impegno).
-- **«Prepara con Vera»** sparisce dalla scheda concluso; la richiesta a Vera per l'incontro passa dalla decisione 20-e
-  (nel dettaglio di «Giorno» per un impegno «prima» il pulsante resta finché la miglioria 10 non lo rinomina).
-- **«Presenta al cliente»** nella traccia «prima» resta finché la miglioria 1 non porta «Mostra al cliente».
+- ~~**Dal «Da fare»** la voce «Com'è andato «…»?»~~: fatto nella rifinitura 18-24. `StatoShell.richiestaTracciaImpegno`
+  (solo in memoria) la legge `PresentatoreImpegniApple` (all'apertura dell'Agenda e quando cambia) e apre la traccia
+  sopra l'Agenda. `vai(a: .appuntamento)` con la settimana: un impegno da chiudere (`MomentoImpegno.daChiudere`) resta
+  sulla settimana del suo giorno e apre la traccia; gli altri passano a «Giorno» come prima. Prova in
+  `ProvaSettimanaAgenda`. Sul Mac la voce arriva dai promemoria di sistema (`Notifiche`, «esito-…»); il nastro del «Da
+  fare» non ha ancora la voce «Com'è andato?» (vedi miglioria 3, «impegni senza esito → miglioria 19»).
+- ~~**«Prepara con Vera»**~~: fatto nella rifinitura 18-24. Nel dettaglio di «Giorno» per un impegno «prima» il pulsante
+  dice «Preparami l'incontro» (`Parole.preparamiIncontro`) e fa come la traccia: la traccia si apre sopra l'Agenda già
+  avviata (`tracciaDaPreparare`), spunta i punti e apre il fascicolo. Un blocco senza cliente apre Vera come prima.
+  «Prepara l'incontro» accanto (che porta in Incontri) sul Mac si chiama «Prima dell'incontro». iPad e widget restano.
+- ~~**«Presenta al cliente»**~~: fatto nella rifinitura 18-24. La traccia «prima» dice «Mostra al cliente»
+  (`Parole.mostraAlCliente`) e `presentaImpegno` sul Mac passa da `mostraProspetto`, dentro la vista pulita (prova in
+  `ProvaMostraAlCliente`, che controlla la vista pulita solo se il fascicolo di prova ha pagine). iPhone e iPad restano.
+- Da guardare nelle istantanee e con uno screenshot: la traccia aperta dal promemoria sopra la settimana e quella aperta
+  da «Preparami l'incontro» del dettaglio di «Giorno» (i punti che si spuntano).
 - La traccia aperta non si rifà da sola quando l'impegno finisce mentre la si guarda (si rifà alla prossima apertura).
 - **Istantanee da rigenerare sul Mac**: 452, 456 (chiara e scura), 457, 11-agenda e 11b-agenda-giorno (il dettaglio di un
   impegno passato alle 10:24 ferme, con «Scrivi il verbale» e «Altro ⌄»); il menu «Altro ⌄» e i passi

@@ -14,7 +14,29 @@ enum ProvaVistaCopilota {
         senzaConsenso(controlla)
         momenti(controlla)
         riapri(controlla)
+        #if os(macOS)
+        verbaleDaRileggere(controlla)
+        #endif
     }
+
+    #if os(macOS)
+    /// Rifinitura 18-24: in «Dopo» di un incontro concluso il verbale si rilegge solo se è confermato e ha qualcosa dentro.
+    private static func verbaleDaRileggere(_ controlla: (Bool, String) -> Void) {
+        let r = RegoleVerbaleLettura.self
+        let quando = Date()
+        var s = SessioneCopilota(clienteId: "prova", incontroId: "prova-incontro", data: quando,
+                                 consenso: ConsensoCopilota(data: quando, modo: .aVoce))
+        controlla(r.daRileggere(nil) == nil && r.daRileggere(s) == nil,
+                  "Incontri, Dopo: senza sessione o senza verbale non c'è niente da rileggere")
+        s.verbale = VerbaleCopilota(punti: ["Il mutuo pesa sulla rata."], attivita: ["Mandare il riepilogo"])
+        controlla(r.daRileggere(s) == nil, "Incontri, Dopo: il verbale da confermare non si rilegge")
+        s.verbale?.confermatoIl = quando
+        controlla(r.daRileggere(s)?.punti == ["Il mutuo pesa sulla rata."],
+                  "Incontri, Dopo: il verbale confermato si rilegge, con i suoi punti")
+        s.verbale = VerbaleCopilota(confermatoIl: quando)
+        controlla(r.daRileggere(s) == nil, "Incontri, Dopo: un verbale confermato ma vuoto non si mostra")
+    }
+    #endif
 
     /// Migliorie d'uso 20: le spunte dei tre momenti, «■ Termina» che porta a «Dopo» e la sessione ristretta all'incontro.
     private static func momenti(_ controlla: (Bool, String) -> Void) {

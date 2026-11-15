@@ -10,7 +10,7 @@ import SwiftUI
 //   ○ Temi scelti: Previdenza, Risparmio               │ 184.300 €        │
 //   ○ Dal riesame del 12 ottobre: …                    ├ Dati per l'analisi┤
 //   ○ …                                                │ 92%  ▬▬▬▬▬▬▬▬▬   │
-//   [Preparami l'incontro] [Apri il dossier] [Presenta al cliente]        Tutti i dettagli
+//   [Preparami l'incontro] [Apri il dossier] [Mostra al cliente]          Tutti i dettagli
 //
 // - I punti vengono dalla preparazione che Prisma ha già: i temi dell'incontro preparato (AppIncontri), la
 //   proposta o la posizione di cui si parla, le priorità del cliente (MotoreBisogni), cosa è cambiato dal riesame
@@ -18,8 +18,8 @@ import SwiftUI
 //   Nessuna cifra scritta a mano (§4.9 n. 8): patrimonio e completezza vengono dai motori.
 // - «Preparami l'incontro»: i punti si spuntano uno alla volta (ListaTiPreparo); alla fine il fascicolo
 //   dell'appuntamento (preparaFascicolo(per:)) si apre in Prospetti, già composto.
-// - «Apri il dossier» apre il cliente dell'impegno; «Presenta al cliente» presenta il fascicolo dell'impegno,
-//   di quel cliente (§4.9 n. 10), con la modalità cliente; «Tutti i dettagli» porta al dettaglio di sempre
+// - «Apri il dossier» apre il cliente dell'impegno; «Mostra al cliente» presenta il fascicolo dell'impegno,
+//   di quel cliente (§4.9 n. 10), nella vista pulita sul Mac (su iPhone e iPad «Presenta al cliente»); «Tutti i dettagli» porta al dettaglio di sempre
 //   (modifica, concluso, esito della proposta, attività collegate) nella vista Giorno.
 // - Sul Mac (Migliorie d'uso 19) dopo l'ora o già chiuso la scheda chiede com'è andato: «Incontro concluso», «Com'è
 //   andata?», «Punti toccati», «Il verbale», «Cosa succede adesso», «Scrivi il verbale» e «Altro ⌄»
@@ -72,7 +72,7 @@ extension StatoShell {
         return note.isEmpty ? ["Ascoltare il cliente: cosa è cambiato e cosa vuole fare"] : [note]
     }
 
-    /// «Presenta al cliente»: il fascicolo dell'impegno, con i report adatti al tipo d'incontro, a tutto schermo
+    /// «Mostra al cliente»: il fascicolo dell'impegno, con i report adatti al tipo d'incontro, a tutto schermo
     /// in modalità cliente (le annotazioni vanno all'appuntamento).
     func presentaImpegno(_ e: Appuntamento) {
         clienteAttivoId = e.clienteId
@@ -84,7 +84,12 @@ extension StatoShell {
             mostraAvviso("Il fascicolo dell'incontro non ha ancora report da mostrare")
             return
         }
+        #if os(macOS)
+        // Rifinitura 18-24 (migliorie d'uso 1 e 10): «Mostra al cliente» entra nella vista pulita, poi presenta
+        mostraProspetto(d)
+        #else
         presenta(d)
+        #endif
     }
 
     /// «Tutti i dettagli»: il dettaglio di sempre dell'appuntamento, nella vista Giorno.
@@ -107,6 +112,16 @@ struct TracciaImpegnoApple: View {
 
     private static let prefisso = "impegno-"
 
+    /// Il pulsante che presenta il fascicolo dell'impegno: sul Mac «Mostra al cliente» (migliorie d'uso 10), nella vista
+    /// pulita; su iPhone e iPad come prima.
+    #if os(macOS)
+    static let titoloMostra = Parole.mostraAlCliente
+    static let aiutoMostra = "Il fascicolo dell'incontro a tutto schermo, nella vista pulita per il cliente"
+    #else
+    static let titoloMostra = "Presenta al cliente"
+    static let aiutoMostra = "Il fascicolo dell'incontro a tutto schermo, in modalità cliente"
+    #endif
+
     /// L'id del dettaglio nato dall'impegno `eventoId`.
     static func id(per eventoId: String) -> String { prefisso + eventoId }
 
@@ -116,8 +131,20 @@ struct TracciaImpegnoApple: View {
         let _ = ContaCorpi.segna()
         if let e = stato.appuntamento(eventoId) {
             corpo(e)
+                #if os(macOS)
+                .onAppear { preparazioneRichiesta() }
+                #endif
         }
     }
+
+    #if os(macOS)
+    /// Rifinitura 18-24: aperta da «Preparami l'incontro» del dettaglio di «Giorno», la traccia parte già a spuntare i punti.
+    private func preparazioneRichiesta() {
+        guard stato.tracciaDaPreparare == eventoId else { return }
+        stato.tracciaDaPreparare = nil
+        preparando = true
+    }
+    #endif
 
     private func corpo(_ e: Appuntamento) -> some View {
         let t = Tema.Apple.Agenda.Traccia.self
@@ -308,9 +335,9 @@ struct TracciaImpegnoApple: View {
                 Button {
                     dettaglio?.chiudi(subito: true)
                     stato.presentaImpegno(e)
-                } label: { Text("Presenta al cliente") }
+                } label: { Text(TracciaImpegnoApple.titoloMostra) }
                     .buttonStyle(.appleGrande)
-                    .help("Il fascicolo dell'incontro a tutto schermo, in modalità cliente")
+                    .help(TracciaImpegnoApple.aiutoMostra)
             }
             Spacer(minLength: 0)
             Button {
