@@ -791,3 +791,51 @@ Resta:
   anteprime. Il passaggio sull'intestazione e la cascata chiedono uno screenshot.
 - Le corsie nella settimana usano ancora l'altezza minima della giornata per le sovrapposizioni (`CorsieImpegni`):
   con tre corsie strette l'impegno mostra solo il nome; da guardare con i clienti fittizi.
+
+## 21. Incontri segue il cliente e non si ferma a oggi
+
+Fatto (solo sul Mac, `#if os(macOS)`; iPhone e iPad restano con le tendine e la colonna «Oggi» del copilota):
+- **I dati** (Shell/ElencoIncontri.swift): `VoceIncontri`, `GruppiIncontri` e `RegoleElencoIncontri.calcola`, la regola
+  pura dei tre gruppi. «Oggi» comprende gli appuntamenti di oggi con un cliente, uniti al loro incontro, e gli incontri di
+  oggi senza appuntamento. «Prossimi» va da domani per 14 giorni, al più 20. «Fatti» mette in testa gli appuntamenti
+  degli ultimi 7 giorni ancora da chiudere, poi gli incontri conclusi degli ultimi 12 mesi, al più 30. I blocchi «Non
+  disponibile» e gli impegni senza cliente restano fuori, e non ci sono doppioni (la chiave è `Incontro.appuntamentoId`).
+  `stato.elencoIncontri(cliente:)` sta in `ricavato`, con l'ora nella chiave. La spunta del verbale si legge fuori dalla
+  cache (`incontriConVerbale`).
+- **La colonna** `ElencoIncontriApple` (300, token in `Tema.Apple.Copilota.Elenco`): in testa le note dall'iPhone, poi gli
+  occhielli «Oggi», «Prossimi», «Fatti». Ogni riga ha avatar 36, nome, «09:30 · titolo» (oppure «gio 5 · 15:00», «30
+  ottobre»), « · da chiudere» in arancio e la spunta verde. La riga scelta è accesa e i gruppi entrano a cascata. Mentre il
+  copilota ascolta le righe sono spente. Il vuoto della colonna dice «Nessun incontro con <nome>. Si fissa in Agenda.»; a
+  destra compare «Nessun incontro, per ora.» con «Apri l’Agenda».
+- **La scelta**: una riga apre l'incontro sul momento giusto. Oggi si apre su «Ascolto», o su «Prossimi passi» se c'è il
+  verbale o l'incontro è concluso. Un prossimo si apre su «Preparazione», un fatto su «Prossimi passi». Prima di cambiare
+  riga gli appunti in attesa vengono scritti e il copilota riparte da capo. Una riga che è solo un appuntamento mostra la
+  bozza (`bozzaIncontroElenco`, id fisso «incontro-<appuntamento>»), che non va nell'archivio: l'incontro nasce
+  (`assicuraIncontro`) al primo gesto che scrive. Questi gesti sono un campo scritto, un tema scelto, «Inizia l’ascolto»,
+  «Prepara con Vera», l'ascolto del copilota e «Chiudi e archivia». `apriIncontro(per:)` dall'Agenda sul Mac non crea più
+  l'incontro (`appuntamentoIncontro`). Cambiando cliente nella barra (`scegliCliente`) si riparte dal primo incontro della
+  lista.
+- **Via** le due tendine della barra (resta «Nuovo incontro», spento senza cliente). Sul Mac la colonna «Oggi» del copilota
+  non c'è più: il consenso va in riga in testa e «Domande e appunti · Prossimi passi» in fondo.
+- **Prove**: `ProvaElencoIncontri` in `--prova-vera` controlla i gruppi, i limiti, il filtro per cliente, «Non
+  disponibile», i doppioni, il momento, la bozza che non scrive, la nascita al primo gesto e il cambio di cliente.
+  **Istantanee nuove**: 476-incontri-tutti-i-clienti e 477-incontri-cliente-senza-incontri.
+
+Resta:
+- **«Tutti i clienti»**: toccare la riga di un altro cliente **non** cambia il cliente della barra, come nel template.
+  La specifica (21.3 punto 3) diceva di metterlo, ma allora l'elenco si stringerebbe a quel cliente a ogni tocco. Il
+  quaderno usa il cliente dell'incontro mostrato. Il collegamento «Analisi» delle schede dei temi apre però Analisi 360
+  sul cliente della barra, che con «Tutti» mostra il vuoto: da sistemare con la miglioria 20 o scegliendo il cliente al
+  tocco di «Analisi».
+- **«Prima» dall'appuntamento**: oggi la bozza usa la «Preparazione» di sempre (priorità, dossier, temi, l'ultima volta).
+  I «punti da toccare» e le cifre del template arrivano con la miglioria 20 (Prima, Durante, Dopo), e così anche
+  «Riapri» per i fatti in sola lettura e «Fermare l'ascolto?» (20-c). Oggi, mentre si ascolta, le righe sono solo spente.
+- Un incontro in preparazione con una data passata e senza appuntamento da chiudere non compare in nessun gruppo:
+  guardare con i dati veri se serve un quarto caso.
+- Sul Mac non c'è più «Ascolta un incontro senza appuntamento» (era nella colonna «Oggi»): si passa da «Nuovo incontro» e
+  poi «Inizia l’ascolto».
+- **`--prova-fluidita`**: manca il caso «l'elenco non si rifà a ogni frase del copilota». Mentre ascolta, l'elenco non
+  legge le sessioni del copilota, quindi non dovrebbe rifarsi; `AppIncontri` legge `copilota.ascolta` solo al cambio di
+  fase. Da guardare in CI.
+- **Istantanee da rigenerare sul Mac**: 21, 22, 105, 215 e 580-589 (il copilota senza la colonna «Oggi», con il consenso
+  in testa), più le nuove 476 e 477; aggiornare la pagina delle anteprime.

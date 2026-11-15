@@ -1182,6 +1182,8 @@ enum ProvaVera {
         // Migliorie d'uso 2: un solo posto per scegliere il cliente (ProvaSceltaCliente.swift, solo sul Mac)
         ProvaSceltaCliente.esegui(controlla)
         ProvaSettimanaAgenda.esegui(controlla)
+        // Migliorie d'uso 21: l'elenco di Incontri «Oggi», «Prossimi», «Fatti» (ElencoIncontri.swift, solo sul Mac)
+        ProvaElencoIncontri.esegui(controlla)
         #if os(macOS)
         // Migliorie d'uso 3: un solo «Da fare» (StatoDaFare.swift, solo sul Mac): numero, fatto, «Annulla l’ultima», «+ Aggiungi»
         ProvaDaFareShell.esegui(controlla)

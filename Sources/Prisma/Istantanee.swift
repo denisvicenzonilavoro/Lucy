@@ -1703,6 +1703,8 @@ enum Istantanee {
         tutteLeScene += sceneSimulatoriApple
         tutteLeScene += sceneAnalisi360Apple
         tutteLeScene += sceneAgendaApple
+        // Migliorie d'uso 21: l'elenco di Incontri (IstantaneeElencoIncontri.swift)
+        tutteLeScene += sceneElencoIncontri
         tutteLeScene += sceneProspettiApple
         tutteLeScene += sceneAnnoInsieme
         tutteLeScene += sceneTavolo

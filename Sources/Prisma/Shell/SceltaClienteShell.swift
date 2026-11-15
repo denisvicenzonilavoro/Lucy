@@ -54,6 +54,9 @@ extension StatoShell {
         if filtroClienteAgenda != filtro { filtroClienteAgenda = filtro }
         if filtroClienteAttivita != filtro { filtroClienteAttivita = filtro }
         if vistaClienti != .rubrica { vistaClienti = .rubrica }
+        // Migliorie d'uso 21: Incontri riparte dal primo incontro del cliente nuovo (o di tutti)
+        if incontroAperto != nil { incontroAperto = nil }
+        if appuntamentoIncontro != nil { appuntamentoIncontro = nil }
         guard avviso else { return }
         if let c = cliente(nuovo) {
             mostraAvviso(TestiSceltaCliente.avvisoCliente(c.nome))

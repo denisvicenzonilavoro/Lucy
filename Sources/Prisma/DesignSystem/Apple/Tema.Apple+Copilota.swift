@@ -91,6 +91,52 @@ extension Tema.Apple {
             static let spazioCollegamenti: CGFloat = 6
         }
 
+        // MARK: L'elenco di Incontri (Migliorie d'uso 21, solo sul Mac)
+
+        /// La colonna `#incL` del template: larga 300, scorre; occhielli `.lbl` «Oggi», «Prossimi», «Fatti» (6 a
+        /// sinistra), righe `.rub` con padding 9×10, avatar 36, nome 14 bold, sotto «quando · titolo» 12 `inchiostro2`,
+        /// la spunta verde 16 a destra; la riga scelta accesa come le voci di Prospetti.
+        enum Elenco {
+            static let larghezzaElenco: CGFloat = 300
+            static let superficie = Superficie.pannello
+            static let raggio = Raggio.pannello
+            static let padding = Misura.Padding.barraLaterale
+            static let sopraElenco: CGFloat = 6
+            static let occhielloGruppo = Carattere.etichetta
+            static let coloreOcchiello = Colore.inchiostro2
+            static let rientroOcchiello: CGFloat = 6
+            static let sottoOcchiello: CGFloat = 6
+            /// Fra un gruppo e il successivo.
+            static let spazioGruppi: CGFloat = 14
+            static let paddingRiga = Misura.padding(9, 10)
+            static let raggioRiga = Raggio.voce
+            static let fraRighe: CGFloat = 2
+            static let avatarRiga: CGFloat = 36
+            static let spazioAvatar: CGFloat = 10
+            static let nome = Carattere(dimensione: 14, peso: .bold)
+            static let coloreNome = Colore.inchiostro
+            static let sottoRiga = Carattere(dimensione: 12, peso: .regular)
+            static let coloreSottoRiga = Colore.inchiostro2
+            static let spazioTitoli: CGFloat = 1
+            /// «da chiudere» dopo il titolo: il colore delle cose che aspettano (arancio dei testi).
+            static let coloreDaChiudere = Colore.arancioTesto
+            static let spunta = Carattere(dimensione: 16, peso: .semibold)
+            static let coloreSpunta = Colore.verde
+            static let fondoSopra = Colore.chip
+            static let fondoScelta = Colore.selezioneVoce
+            static let opacitaSpenta: Double = 0.45
+            static let durataFondo = 0.25
+            static var animazioneFondo: Animation { .easeInOut(duration: durataFondo * Tema.Apple.Moto.ritmo) }
+            /// «Nessun incontro con <nome>. Si fissa in Agenda.» (`.k`, padding 18×10, interlinea 1,5).
+            static let vuoto = Carattere(dimensione: 13, peso: .regular, interlinea: 1.5)
+            static let coloreVuoto = Colore.inchiostro2
+            static let paddingVuoto = Misura.padding(18, 10)
+            /// A destra, senza incontri: «Nessun incontro, per ora.» 22 bold (titolo del template) e «Apri l'Agenda».
+            static let titoloVuoto = Carattere(dimensione: 22, peso: .bold)
+            static let coloreTitoloVuoto = Colore.inchiostro
+            static let sottoTitoloVuoto: CGFloat = 14
+        }
+
         // MARK: Il consenso e «Come funziona» (§8.2.1, §8.1.5)
 
         enum Consenso {

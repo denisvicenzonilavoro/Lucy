@@ -77,8 +77,21 @@ struct CopilotaIncontro: View {
                     VStack(alignment: .leading, spacing: D.spazio) {
                         SchedaConsensoCopilota(copilota: copilota, cliente: cliente, compatta: true)
                         principale(cliente: cliente, sessione: sessione, stretta: true, larghezza: geo.size.width)
+                        #if os(macOS)
+                        // Sul Mac la colonna «Oggi» non c'è più (Migliorie d'uso 21): i collegamenti stanno qui
+                        CollegamentiCopilota(copilota: copilota)
+                        #endif
                     }
                 } else {
+                    #if os(macOS)
+                    // Migliorie d'uso 21: sul Mac l'elenco degli incontri sta a sinistra per tutta Incontri, quindi la
+                    // colonna «Oggi» non c'è più; il consenso va in riga in testa e i collegamenti in fondo
+                    VStack(alignment: .leading, spacing: D.spazio) {
+                        SchedaConsensoCopilota(copilota: copilota, cliente: cliente, compatta: true)
+                        principale(cliente: cliente, sessione: sessione, stretta: false, larghezza: geo.size.width)
+                        CollegamentiCopilota(copilota: copilota)
+                    }
+                    #else
                     HStack(alignment: .top, spacing: D.gioco) {
                         ColonnaOggiCopilota(copilota: copilota, clienteId: clienteId, incontro: incontro, cliente: cliente)
                             .frame(width: D.larghezzaColonna)
@@ -86,6 +99,7 @@ struct CopilotaIncontro: View {
                         principale(cliente: cliente, sessione: sessione, stretta: false,
                                    larghezza: geo.size.width - D.larghezzaColonna - D.gioco)
                     }
+                    #endif
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
@@ -589,6 +603,8 @@ struct TestataCopilota: View {
             copilota.annulla()
         case .pronto, .concluso, .interrotto:
             guard let c = cliente else { return }
+            // Migliorie d'uso 21: l'ascolto scrive, quindi l'incontro mostrato da un appuntamento nasce qui
+            if let i = incontro { stato.assicuraIncontro(i) }
             copilota.avvia(stato, clienteId: c.id, incontroId: incontro?.id)
         }
     }

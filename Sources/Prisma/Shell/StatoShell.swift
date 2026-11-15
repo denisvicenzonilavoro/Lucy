@@ -340,6 +340,9 @@ enum VoceConfronto: Hashable {
 
     // Incontri
     var incontroAperto: String?
+    /// Migliorie d'uso 21 (solo sul Mac): l'appuntamento scelto in Incontri che non ha ancora un incontro. Si mostra
+    /// «Prima» costruito dall'appuntamento senza scrivere niente; l'incontro nasce al primo gesto che scrive.
+    var appuntamentoIncontro: String?
     var schedaIncontro: SchedaIncontro = .preparazione
     /// Proposte ricavate dagli appunti (per incontro) e quelle scelte per entrare nel dossier.
     var proposteIncontro: [String: [PropostaIncontro]] = [:]
@@ -2262,6 +2265,15 @@ enum VoceConfronto: Hashable {
     /// Nuovo incontro: dal prossimo appuntamento del cliente, con i temi delle sue priorità.
     func nuovoIncontro(cliente id: String, appuntamento: Appuntamento? = nil) {
         let a = appuntamento ?? prossimiAppuntamenti.first { $0.clienteId == id }
+        let i = bozzaIncontro(cliente: id, appuntamento: a)
+        salvaIncontro(i)
+        incontroAperto = i.id
+        appuntamentoIncontro = nil
+        schedaIncontro = .preparazione
+    }
+
+    /// L'incontro che nascerebbe da un appuntamento (o senza), con i temi delle priorità del cliente: non si salva.
+    func bozzaIncontro(cliente id: String, appuntamento a: Appuntamento?) -> Incontro {
         var i = Incontro(clienteId: id, titolo: a?.titolo ?? "Incontro di consulenza", data: a?.inizio ?? Appuntamento.alMinuto(Date()),
                          appuntamentoId: a?.id)
         if let c = cliente(id) {
@@ -2270,19 +2282,35 @@ enum VoceConfronto: Hashable {
             for t in priorita where !temi.contains(t) { temi.append(t) }
             if !temi.isEmpty { i.temi = temi }
         }
-        salvaIncontro(i)
-        incontroAperto = i.id
-        schedaIncontro = .preparazione
+        return i
     }
 
-    /// Apre l'incontro legato a un appuntamento (lo crea se manca).
+    /// Migliorie d'uso 21: l'incontro mostrato da un appuntamento senza incontro entra nell'archivio solo qui, al primo
+    /// gesto che scrive («Inizia l'ascolto», «Prepara con Vera», l'ascolto del copilota, la chiusura). Se c'è già non fa
+    /// niente.
+    func assicuraIncontro(_ i: Incontro) {
+        guard incontro(i.id) == nil else { return }
+        salvaIncontro(i)
+        incontroAperto = i.id
+        appuntamentoIncontro = nil
+    }
+
+    /// Apre l'incontro legato a un appuntamento. Sul Mac (Migliorie d'uso 21) se manca non lo crea: Incontri mostra
+    /// «Prima» dall'appuntamento e l'incontro nasce al primo gesto che scrive. Su iPhone e iPad lo crea subito.
     func apriIncontro(per a: Appuntamento) {
         clienteAttivoId = a.clienteId
         if let i = dati.incontri.first(where: { $0.appuntamentoId == a.id }) {
             incontroAperto = i.id
+            appuntamentoIncontro = nil
             schedaIncontro = i.stato == .concluso ? .passi : .preparazione
         } else {
+            #if os(macOS)
+            incontroAperto = nil
+            appuntamentoIncontro = a.id
+            schedaIncontro = .preparazione
+            #else
             nuovoIncontro(cliente: a.clienteId, appuntamento: a)
+            #endif
         }
         apri(.incontri)
     }

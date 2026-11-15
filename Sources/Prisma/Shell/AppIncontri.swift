@@ -30,14 +30,7 @@ struct AppIncontri: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
-        let elenco = self.elenco
-        let aperto = scegliCorrente(elenco)
-        // Nel passo «Ascolto» il copilota dell'incontro (giro 5, CopilotaIncontro.swift) prende tutta la finestra;
-        // le tre domande scritte e gli appunti restano a un tocco («Domande e appunti»)
-        SceltaAscoltoIncontri(copilota: stato.copilota, ascolto: stato.schedaIncontro == .ascolto,
-                              clienteId: cliente, incontro: aperto) {
-            quaderno(elenco: elenco, corrente: aperto)
-        }
+        contenuto
         // Tema Apple: card piatte, scala tipografica, pulsanti e tendine del template; le cascate ripartono
         // cambiando cliente
         .altreAppApple()
@@ -47,7 +40,7 @@ struct AppIncontri: View {
             Button("Elimina", role: .destructive) {
                 // Prima gli appunti in attesa: scritti dopo, rimetterebbero l'incontro nell'archivio
                 TestiRinviati.scriviOra()
-                if let i = corrente { stato.eliminaIncontro(i.id) }
+                if let i = correnteDaEliminare { stato.eliminaIncontro(i.id) }
             }
         } message: {
             Text("Appunti e decisioni verranno tolti dal dossier. Attività e appuntamenti già creati restano. Se serve, potrai recuperarlo da un backup.")
@@ -59,6 +52,104 @@ struct AppIncontri: View {
                 .environment(stato)
         }
     }
+
+    /// L'incontro da eliminare (solo uno già nell'archivio: una bozza da un appuntamento non ha niente da togliere).
+    private var correnteDaEliminare: Incontro? {
+        #if os(macOS)
+        return correnteMac(stato.elencoIncontri(cliente: clienteElenco)).flatMap { stato.incontro($0.id) }
+        #else
+        return corrente
+        #endif
+    }
+
+    @ViewBuilder private var contenuto: some View {
+        #if os(macOS)
+        // Migliorie d'uso 21: a sinistra l'elenco «Oggi», «Prossimi», «Fatti» del cliente della barra (o di tutti),
+        // a destra l'incontro scelto; nel passo «Ascolto» il copilota prende la parte destra
+        let gruppi = stato.elencoIncontri(cliente: clienteElenco)
+        let aperto = correnteMac(gruppi)
+        let elenco = aperto.map { stato.incontriClienteRicavati($0.clienteId) } ?? []
+        HStack(alignment: .top, spacing: Tema.Apple.Copilota.Disposizione.gioco) {
+            ElencoIncontriApple(gruppi: gruppi, aperto: aperto,
+                                nomeCliente: stato.tuttiIClienti ? nil : stato.cliente(cliente)?.nome,
+                                spento: stato.copilota.ascolta) { v in scegli(v, gruppi: gruppi) }
+                .frame(width: Tema.Apple.Copilota.Elenco.larghezzaElenco)
+                .frame(maxHeight: .infinity, alignment: .top)
+            SceltaAscoltoIncontri(copilota: stato.copilota, ascolto: stato.schedaIncontro == .ascolto,
+                                  clienteId: aperto?.clienteId ?? cliente, incontro: aperto) {
+                quaderno(elenco: elenco, corrente: aperto)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        }
+        // Cambiando cliente nella barra si riparte dal suo primo incontro, sul momento giusto
+        .onChange(of: cliente) {
+            guard stato.incontroAperto == nil, stato.appuntamentoIncontro == nil,
+                  let v = stato.elencoIncontri(cliente: clienteElenco).tutte.first else { return }
+            stato.schedaIncontro = RegoleElencoIncontri.momento(v, verbale: verbale(v))
+        }
+        #else
+        let elenco = self.elenco
+        let aperto = scegliCorrente(elenco)
+        // Nel passo «Ascolto» il copilota dell'incontro (giro 5, CopilotaIncontro.swift) prende tutta la finestra;
+        // le tre domande scritte e gli appunti restano a un tocco («Domande e appunti»)
+        SceltaAscoltoIncontri(copilota: stato.copilota, ascolto: stato.schedaIncontro == .ascolto,
+                              clienteId: cliente, incontro: aperto) {
+            quaderno(elenco: elenco, corrente: aperto)
+        }
+        #endif
+    }
+
+    #if os(macOS)
+    /// Il cliente dell'elenco: nil con «Tutti i clienti».
+    private var clienteElenco: String? { stato.tuttiIClienti ? nil : cliente }
+
+    /// L'incontro mostrato: quello aperto (se è del cliente della barra), altrimenti l'appuntamento scelto senza
+    /// incontro (la sua bozza), altrimenti la prima riga dell'elenco.
+    private func correnteMac(_ gruppi: GruppiIncontri) -> Incontro? {
+        let tutti = stato.tuttiIClienti
+        if let i = stato.incontro(stato.incontroAperto), tutti || i.clienteId == cliente { return i }
+        if let a = stato.appuntamento(stato.appuntamentoIncontro), tutti || a.clienteId == cliente {
+            return incontroDi(a)
+        }
+        guard let v = gruppi.tutte.first else { return nil }
+        if let i = stato.incontro(v.incontroId) { return i }
+        if let a = stato.appuntamento(v.appuntamentoId) { return incontroDi(a) }
+        return nil
+    }
+
+    /// L'incontro di un appuntamento, o la sua bozza (non salvata).
+    private func incontroDi(_ a: Appuntamento) -> Incontro {
+        if let i = stato.dati.incontri.first(where: { $0.appuntamentoId == a.id }) { return i }
+        return stato.bozzaIncontroElenco(per: a)
+    }
+
+    /// Il verbale del copilota pronto per la riga (letto al tocco, non nel body).
+    private func verbale(_ v: VoceIncontri) -> Bool {
+        guard let id = v.incontroId else { return false }
+        return stato.dati.sessioniCopilota.contains { $0.incontroId == id && $0.verbale != nil }
+    }
+
+    /// Una riga dell'elenco: si apre l'incontro (o la bozza dell'appuntamento, senza scrivere niente) sul momento
+    /// giusto. Mentre il copilota ascolta non si cambia incontro; prima di cambiare gli appunti in attesa vanno
+    /// nell'incontro giusto e il copilota riparte da capo.
+    private func scegli(_ v: VoceIncontri, gruppi: GruppiIncontri) {
+        guard !stato.copilota.ascolta else { return }
+        if let attuale = correnteMac(gruppi),
+           (v.incontroId != nil && v.incontroId == attuale.id) || (v.appuntamentoId != nil && v.appuntamentoId == attuale.appuntamentoId) {
+            return
+        }
+        TestiRinviati.scriviOra()
+        stato.copilota.azzera()
+        if let id = v.incontroId {
+            stato.incontroAperto = id
+            stato.appuntamentoIncontro = nil
+        } else {
+            stato.incontroAperto = nil
+            stato.appuntamentoIncontro = v.appuntamentoId
+        }
+        stato.schedaIncontro = RegoleElencoIncontri.momento(v, verbale: verbale(v))
+    }
+    #endif
 
     /// Il quaderno dell'incontro: barra, testata con il percorso, il passo aperto e il piede.
     private func quaderno(elenco: [Incontro], corrente: Incontro?) -> some View {
@@ -131,6 +222,18 @@ struct AppIncontri: View {
     private func barra(elenco: [Incontro], corrente: Incontro?) -> some View {
         let m = Tema.Misura.Incontri.self
         let scelto = corrente?.id ?? ""
+        #if os(macOS)
+        // Migliorie d'uso 21: le due tendine non ci sono più (l'elenco a sinistra segue il cliente della barra)
+        let _ = (m, scelto)
+        let perChi = corrente?.clienteId ?? cliente
+        return HStack(spacing: Misure.IncontriImpaginazione.spazio) {
+            Spacer()
+            Button { stato.nuovoIncontro(cliente: perChi) } label: { Label("Nuovo incontro", systemImage: "plus") }
+                .buttonStyle(StileBlu())
+                .fixedSize()
+                .disabled(stato.cliente(perChi) == nil)
+        }
+        #else
         return HStack(spacing: Misure.IncontriImpaginazione.spazio) {
             MenuTendina(selezione: Bindable(stato).clienteAttivoId,
                         opzioni: stato.clienti.map { ($0.id, $0.nome) },
@@ -148,8 +251,26 @@ struct AppIncontri: View {
                 .buttonStyle(StileBlu())
                 .fixedSize()
         }
+        #endif
     }
 
+    #if os(macOS)
+    /// Nessun incontro nell'elenco: «Nessun incontro, per ora.» con «Apri l'Agenda» (gli incontri si fissano lì).
+    private var vuoto: some View {
+        let e = Tema.Apple.Copilota.Elenco.self
+        return VStack(spacing: e.sottoTitoloVuoto) {
+            Text(TestiIncontri.nessunIncontro)
+                .carattereApple(e.titoloVuoto)
+                .foregroundColor(e.coloreTitoloVuoto)
+                .multilineTextAlignment(.center)
+            Button { stato.apri(.agenda) } label: { Label(TestiIncontri.apriAgenda, systemImage: "calendar") }
+                .buttonStyle(StileVetro(taglia: .grande, accento: true))
+                .fixedSize()
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .modifier(CartaIncontro())
+    }
+    #else
     private var vuoto: some View {
         VStack(spacing: Misure.IncontriImpaginazione.spazio) {
             Image(systemName: "person.2.wave.2")
@@ -167,6 +288,7 @@ struct AppIncontri: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
+    #endif
 
     // MARK: - Testata
 
@@ -272,6 +394,8 @@ struct AppIncontri: View {
             case .preparazione:
                 HStack(spacing: Tema.Misura.Incontri.spazioGettoni) {
                     Button {
+                        // Migliorie d'uso 21: un gesto che scrive, l'incontro di una bozza nasce qui
+                        stato.assicuraIncontro(i)
                         stato.apri(.vera)
                         stato.chiediVera(SpuntoVera.incontro.domanda, spunto: .incontro)
                     } label: {
@@ -279,7 +403,10 @@ struct AppIncontri: View {
                     }
                     .buttonStyle(StileVetro())
                     .fixedSize()
-                    Button { stato.schedaIncontro = .ascolto } label: {
+                    Button {
+                        stato.assicuraIncontro(i)
+                        stato.schedaIncontro = .ascolto
+                    } label: {
                         Label("Inizia l'ascolto", systemImage: Tema.Icona.Incontri.fase(.ascolto))
                     }
                     .buttonStyle(StileVetro(accento: true))
@@ -543,7 +670,12 @@ struct AppIncontri: View {
     /// L'ultima volta: data, titolo e le decisioni in due righe; il resto a un tocco. `elenco`: gli incontri del cliente
     /// della finestra, già letti dal body (l'incontro aperto è sempre suo).
     @ViewBuilder private func ultimaVolta(_ i: Incontro, elenco: [Incontro]) -> some View {
+        #if os(macOS)
+        // Sul Mac `elenco` è già quello del cliente dell'incontro mostrato (anche con «Tutti i clienti»)
+        let suoi = elenco
+        #else
         let suoi = i.clienteId == cliente ? elenco : stato.incontriCliente(i.clienteId)
+        #endif
         if let p = suoi.first(where: { $0.stato == .concluso && $0.id != i.id }) {
             let mi = Tema.Misura.Incontri.self
             let decisioni = p.decisioni.isEmpty ? "Nessuna decisione registrata." : p.decisioni
@@ -810,7 +942,10 @@ struct AppIncontri: View {
                 .padding(.top, Misure.IncontriImpaginazione.staccoNota)
                 .bordoAlto(Colori.Incontri.filo)
                 .help("Alla chiusura: le proposte spuntate entrano nel profilo dei bisogni, l'attività e il seguito in Agenda; l'appuntamento di oggi risulta concluso. Nessun messaggio viene inviato.")
-            PulsanteAzione(titolo: "Chiudi e archivia l'incontro", principale: true, simbolo: "archivebox") { stato.chiudiIncontro(i.id) }
+            PulsanteAzione(titolo: "Chiudi e archivia l'incontro", principale: true, simbolo: "archivebox") {
+                stato.assicuraIncontro(i)
+                stato.chiudiIncontro(i.id)
+            }
         }
         .padding(Misure.IncontriImpaginazione.margine)
         .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -980,10 +1115,13 @@ struct AppIncontri: View {
                 .font(Tema.Testo.Incontri.nota)
                 .foregroundColor(Tema.Colore.Incontri.secondario)
             Spacer()
-            Button("Elimina l'incontro…") { confermaEliminazione = true }
-                .buttonStyle(StileSemplice())
-                .font(Tema.Testo.Incontri.nota)
-                .foregroundColor(Tema.Apple.Colore.rosso)
+            // Una bozza da un appuntamento non è nell'archivio: niente da eliminare
+            if stato.incontro(i.id) != nil {
+                Button("Elimina l'incontro…") { confermaEliminazione = true }
+                    .buttonStyle(StileSemplice())
+                    .font(Tema.Testo.Incontri.nota)
+                    .foregroundColor(Tema.Apple.Colore.rosso)
+            }
         }
     }
 }
