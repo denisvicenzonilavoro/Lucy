@@ -1316,3 +1316,42 @@ Resta:
 - Guardare sul Mac 1115-stretta: con le schede piccole basse l'etichetta verde toglie spazio a titolo e frase.
 - Analisi 360 calcola ancora le priorità per conto suo (`ingressiCard`): potrebbe usare `prioritaAree360` per avere un
   solo punto.
+
+## 35. Biblioteca: prima i documenti del cliente, e si aprono con un clic
+
+Fatto (solo Mac: la Biblioteca c'è solo lì; `clienteBiblioteca` vale nil su iPhone e iPad):
+- **I documenti del cliente** (Motori/MotoreBibliotecaCliente.swift, puro): `prodottiDelCliente` (posizioni in essere e
+  proposte non rifiutate) e `documentiDelCliente(prodotti:tra:)` (anche gli illeggibili, nell'ordine dell'elenco). Nello
+  stato `documentiBibliotecaCliente(_:)` (Shell/BibliotecaCliente.swift) con `stato.ricavato` e la firma dei documenti
+  (id e prodotto collegato) nella chiave. Nessun campo nuovo: il legame passa dal prodotto.
+- **La colonna in due gruppi**: «Dei prodotti di <Nome>» con il numero e il «+», poi «Gli altri documenti» (14 sopra)
+  dentro il `LazyVStack`, le letture in corso in cima. Senza cliente o senza documenti suoi: «I documenti» come prima.
+- **Le domande d'esempio**: `suggerimentiBiblioteca(documento:)`. I fac-simile hanno la tabella
+  `EsempiBiblioteca.domande` (documento e cliente di prova nominato): con un altro cliente scelto la domanda su Marco
+  non si vede, in modalità cliente resta senza nome. Per i documenti dell'utente «Cosa dice «<rubrica>»?» dalle
+  intestazioni dei suoi passi (al più tre).
+- **Il documento aperto**: due colonne come la risposta. A sinistra la tile (genere, titolo 21 grassetto, «N pagine ·
+  canale …» o «vale per tutti i canali», «Vera l’ha letto sul Mac.» o, per un illeggibile, «Non posso leggerlo: le
+  domande non trovano niente qui.»), «Domande su questo documento» (a capo, angoli 14) o «Chiedi tu» con il testo del
+  template; a destra il vassoio con le frecce. Entra salendo di 8 con la dissolvenza in 0,32 s
+  (`B.entrataDocumento`, ferma con «Riduci movimento» e nelle istantanee).
+- **Il campo**: con un documento aperto «Chiedi qualcosa su «<titolo breve>»…», svuotato all'apertura di un documento
+  nuovo (non cambiando pagina).
+- **La ricerca dentro il documento** (proposta §35.6): la domanda dal campo o dalle domande del documento cerca solo lì
+  (`MotoreBiblioteca.cerca(_:in:quanti:solo:)`, l'idf resta quello di tutto l'indice; `StatoTrovaPagina.cerca(_:solo:poi:)`;
+  `chiediBiblioteca(_:subito:solo:)`); «ho cercato in N pagine» conta le pagine di quel documento. Le pillole sopra la
+  risposta cercano sempre in tutti.
+- **Segue il cliente**: `scegliCliente` chiama `chiudiBibliotecaPerCliente()` (risposta, documento aperto, domanda in
+  corso).
+- Prove: `ProvaCalcoliBiblioteca.delCliente` (`--prova-calcoli`) e `ProvaTrovaPaginaVera.documentoAperto`
+  (`--prova-vera`). Istantanee nuove 1120-uso-biblioteca-cliente-documenti (chiara e scura),
+  1121-uso-biblioteca-documento-aperto, 1122-uso-biblioteca-documento-senza-domande; 870, 873-878 scelgono «Tutti i
+  clienti» in modo esplicito e restano come prima.
+
+Resta:
+- «Cerca in tutti i documenti» per ora è il pulsante sotto la tile del documento aperto (al posto di «Torna alla
+  risposta» quando non c'è una risposta): decidere guardando 1121 se serve anche accanto al campo (§35.6).
+- I fac-simile non sono collegati ai prodotti di prova (proposta §35.6): con i soli dati di prova il gruppo del cliente
+  si vede solo collegando a mano un documento (come fanno 1120-1122). Decide l'utente se `caricaEsempiBiblioteca`
+  debba collegarli ai prodotti con lo stesso nome.
+- Le domande del documento non si sollevano al passaggio del puntatore come le pillole: guardare sul Mac se serve.

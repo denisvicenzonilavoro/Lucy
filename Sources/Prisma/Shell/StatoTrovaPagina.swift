@@ -226,11 +226,12 @@ struct RisultatoBiblioteca: Equatable {
     func preparaIndice() { conIndice { _ in } }
 
     /// Cerca i passi: la ricerca BM25 gira sulla coda dell'indice, il risultato arriva sul thread principale.
-    func cerca(_ domanda: String, poi: @escaping ([PassoTrovato], IndiceBiblioteca) -> Void) {
+    /// `solo` (migliorie d'uso 35): l'id del documento aperto, per cercare solo nei suoi passi.
+    func cerca(_ domanda: String, solo: String? = nil, poi: @escaping ([PassoTrovato], IndiceBiblioteca) -> Void) {
         conIndice { indice in
-            guard self.persistente else { return poi(MotoreBiblioteca.cerca(domanda, in: indice), indice) }
+            guard self.persistente else { return poi(MotoreBiblioteca.cerca(domanda, in: indice, solo: solo), indice) }
             Self.coda.async {
-                let trovati = MotoreBiblioteca.cerca(domanda, in: indice)
+                let trovati = MotoreBiblioteca.cerca(domanda, in: indice, solo: solo)
                 DispatchQueue.main.async { poi(trovati, indice) }
             }
         }

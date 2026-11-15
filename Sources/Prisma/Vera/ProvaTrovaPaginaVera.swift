@@ -54,7 +54,60 @@ enum ProvaTrovaPaginaVera {
 
         qwenFinto(passi: passi, frase: frase, controlla)
         collegamenti(s, controlla)
+        documentoAperto(s, controlla)
         stato(s, frase: frase, controlla)
+    }
+
+    /// Migliorie d'uso 35: la domanda fatta con un documento aperto cerca solo lì; le domande del documento; il campo
+    /// che si svuota; cambiando cliente si chiudono la risposta e il documento aperto.
+    private static func documentoAperto(_ s: StatoShell, _ controlla: (Bool, String) -> Void) {
+        guard let temporanea = s.biblioteca.tutti.first(where: { $0.titolo.hasPrefix("Temporanea") }),
+              let kid = s.biblioteca.tutti.first(where: { $0.titolo.hasPrefix("Fondo azionario") }) else {
+            return controlla(false, "Biblioteca: servono i fac-simile della temporanea e del KID")
+        }
+        #if os(macOS)
+        // Con «Tutti i clienti»: le domande d'esempio sono tutte e tre
+        s.scegliCliente(nil)
+        #endif
+        s.trovaPagina.domanda = "una domanda lasciata a metà"
+        s.apriDocumentoBiblioteca(temporanea.id)
+        #if os(macOS)
+        controlla(s.trovaPagina.domanda.isEmpty && s.trovaPagina.aperta == PaginaAperta(documentoId: temporanea.id, pagina: 1),
+                  "Biblioteca: un clic su un documento lo apre alla prima pagina e svuota il campo")
+        s.trovaPagina.domanda = "riscatto"
+        s.apriDocumentoBiblioteca(temporanea.id, pagina: 2)
+        controlla(s.trovaPagina.domanda == "riscatto", "Biblioteca: cambiare pagina nello stesso documento non svuota il campo")
+        #endif
+        let domanda = "Il riscatto nei primi anni ha penali?"
+        s.chiediBiblioteca(domanda, subito: true, solo: temporanea.id)
+        let r = s.trovaPagina.risultato
+        controlla(s.trovaPagina.aperta == nil && (r?.trovati.allSatisfy { $0.passo.documentoId == temporanea.id } ?? false)
+                    && r?.pagineCercate == temporanea.numeroPagine,
+                  "Biblioteca: con il documento aperto la domanda cerca solo lì (\(r?.pagineCercate ?? 0) pagine cercate)")
+        s.chiediBiblioteca(domanda, subito: true)
+        controlla(s.trovaPagina.risultato?.passo?.pagina == 14 && s.trovaPagina.risultato?.pagineCercate == 193,
+                  "Biblioteca: senza documento aperto la domanda cerca in tutti")
+        controlla(s.suggerimentiBiblioteca(documento: kid.id).isEmpty
+                    && s.suggerimentiBiblioteca(documento: temporanea.id) == ["Se Marco non paga la temporanea?"],
+                  "Biblioteca: le domande di un documento (nessuna per il KID: «Chiedi tu»)")
+        #if os(macOS)
+        s.scegliCliente(nil)
+        s.apriDocumentoBiblioteca(kid.id)
+        s.scegliCliente("giulia")
+        controlla(s.trovaPagina.risultato == nil && s.trovaPagina.aperta == nil,
+                  "Biblioteca: cambiando cliente si chiudono la risposta e il documento aperto")
+        controlla(s.suggerimentiBiblioteca(documento: temporanea.id).isEmpty
+                    && !s.suggerimentiBiblioteca().contains { $0.contains("Marco") },
+                  "Biblioteca: con Giulia scelta la domanda su Marco non si vede")
+        if let fondo = s.biblioteca.tutti.first(where: { $0.titolo.hasPrefix("Fondo pensione aperto") }) {
+            s.collegaProdottoBiblioteca(fondo.id, prodotto: "prodotto-previdenza-pip")
+            controlla(s.documentiBibliotecaCliente("giulia") == [fondo.id] && s.documentiBibliotecaCliente("marco").isEmpty,
+                      "Biblioteca: il documento del piano previdenziale sta fra quelli di Giulia (la sua proposta presentata)")
+            s.collegaProdottoBiblioteca(fondo.id, prodotto: nil)
+            controlla(s.documentiBibliotecaCliente("giulia").isEmpty, "Biblioteca: tolto il collegamento, il gruppo del cliente sparisce")
+        }
+        s.scegliCliente(nil)
+        #endif
     }
 
     /// §8.1.5.2 punto 6: «Cerca nella Biblioteca» da Vera, il gruppo «Biblioteca» di «Cerca ovunque» e «Condizioni nella

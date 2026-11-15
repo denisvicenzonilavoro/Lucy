@@ -14,6 +14,7 @@ enum ProvaCalcoliBiblioteca {
         frase(verifica)
         parametri(verifica)
         edizioni(verifica)
+        delCliente(verifica)
     }
 
     private static func parole(_ verifica: VerificaCalcoli) {
@@ -165,5 +166,71 @@ enum ProvaCalcoliBiblioteca {
         illeggibile.testo = nil
         verifica.vero("Prodotti: un documento illeggibile non si apre da «Condizioni nella Biblioteca»",
                       MotoreBiblioteca.condizioniDelProdotto("prod-prova", tra: tutti + [illeggibile])?.id == "nuova")
+    }
+
+    // MARK: - Migliorie d'uso 35: i documenti del cliente, le domande d'esempio, la ricerca in un documento
+
+    private static func delCliente(_ verifica: VerificaCalcoli) {
+        func posizione(_ stato: StatoPosizione, prodotto: String?, esito: EsitoProposta? = nil) -> Posizione {
+            var p = Posizione(clienteId: "prova", canale: .alleanza, stato: stato, area: .risparmio, nome: "Prova")
+            p.prodottoId = prodotto
+            p.esito = esito
+            return p
+        }
+        let posizioni = [posizione(.inEssere, prodotto: "p-essere"),
+                         posizione(.proposta, prodotto: "p-proposta", esito: .presentata),
+                         posizione(.proposta, prodotto: "p-rifiutata", esito: .rifiutata),
+                         posizione(.chiusa, prodotto: "p-chiusa"),
+                         posizione(.inEssere, prodotto: nil)]
+        let prodotti = MotoreBiblioteca.prodottiDelCliente(posizioni)
+        verifica.vero("Biblioteca: i prodotti del cliente sono quelli in essere e delle proposte non rifiutate (\(prodotti.sorted()))",
+                      prodotti == ["p-essere", "p-proposta"])
+        var illeggibile = documento("scansione", edizione: "ed. 01/2026", prodotto: "p-proposta")
+        illeggibile.testo = nil
+        let documenti = [documento("libero", edizione: "", prodotto: nil),
+                         documento("essere", edizione: "", prodotto: "p-essere"),
+                         documento("rifiutata", edizione: "", prodotto: "p-rifiutata"),
+                         illeggibile,
+                         documento("chiusa", edizione: "", prodotto: "p-chiusa")]
+        verifica.vero("Biblioteca: i documenti del cliente nell'ordine dell'elenco, anche l'illeggibile, non quelli delle proposte rifiutate né delle chiuse",
+                      MotoreBiblioteca.documentiDelCliente(prodotti: prodotti, tra: documenti) == ["essere", "scansione"])
+        verifica.vero("Biblioteca: senza prodotti nessun documento del cliente",
+                      MotoreBiblioteca.documentiDelCliente(prodotti: [], tra: documenti).isEmpty)
+
+        // Le domande d'esempio: la domanda su Marco solo con Marco o con «Tutti i clienti», senza nome in modalità cliente
+        let tutte = MotoreBiblioteca.domandeEsempio(documento: nil, cliente: nil, modoCliente: false)
+        verifica.vero("Biblioteca: con «Tutti i clienti» le tre domande del template", tutte.count == 3 && tutte.last == "Se Marco non paga la temporanea?")
+        let giulia = MotoreBiblioteca.domandeEsempio(documento: nil, cliente: "giulia", modoCliente: false)
+        verifica.vero("Biblioteca: con un altro cliente la domanda che nomina Marco non c'è",
+                      giulia.count == 2 && !giulia.contains { $0.contains("Marco") })
+        verifica.vero("Biblioteca: con Marco la domanda su Marco resta",
+                      MotoreBiblioteca.domandeEsempio(documento: nil, cliente: "marco", modoCliente: false).contains("Se Marco non paga la temporanea?"))
+        verifica.vero("Biblioteca: in modalità cliente la domanda è senza nome",
+                      MotoreBiblioteca.domandeEsempio(documento: nil, cliente: "giulia", modoCliente: true).last == "Se il cliente non paga la temporanea?")
+        verifica.vero("Biblioteca: le domande di un documento (il piano rivalutabile: una; il KID: nessuna)",
+                      MotoreBiblioteca.domandeEsempio(documento: "Piano rivalutabile · Condizioni di assicurazione", cliente: "giulia", modoCliente: false)
+                        == ["Il riscatto nei primi anni ha penali?"]
+                        && MotoreBiblioteca.domandeEsempio(documento: "Fondo azionario globale · KID", cliente: nil, modoCliente: false).isEmpty)
+        verifica.vero("Biblioteca: ogni domanda d'esempio parla di un fac-simile che c'è",
+                      EsempiBiblioteca.domande.allSatisfy { q in EsempiBiblioteca.elenco.contains { $0.titolo == q.documento } })
+        let passi = MotoreBiblioteca.passi(pagine: ["Art. 1 – Oggetto\n\nIl testo del primo articolo, abbastanza lungo.\n\nArt. 2 – Recesso\n\nIl testo del secondo articolo, abbastanza lungo.\n\nArt. 3 – Oggetto\n\nIl testo del terzo articolo, abbastanza lungo."],
+                                           documentoId: "r")
+        verifica.vero("Biblioteca: le rubriche dalle intestazioni, senza doppioni (\(MotoreBiblioteca.rubriche(passi)))",
+                      MotoreBiblioteca.rubriche(passi) == ["Oggetto", "Recesso"])
+        verifica.vero("Biblioteca: «38 pagine · canale …» e «vale per tutti i canali»",
+                      TestiBiblioteca.pagineECanale(pagine: 38, canale: nil) == "38 pagine · vale per tutti i canali"
+                        && TestiBiblioteca.pagineECanale(pagine: 1, canale: .alleanza).hasPrefix("1 pagina · canale "))
+
+        // La ricerca dentro un documento: solo i suoi passi
+        let indice = MotoreBiblioteca.indice(fonti())
+        let dentro = MotoreBiblioteca.cerca("Il riscatto nei primi anni ha penali?", in: indice, solo: "piano-rivalutabile")
+        verifica.vero("Biblioteca: con il documento aperto la domanda cerca solo lì (pagina 14 del piano rivalutabile)",
+                      !dentro.isEmpty && dentro.allSatisfy { $0.passo.documentoId == "piano-rivalutabile" } && dentro.first?.passo.pagina == 14)
+        let altrove = MotoreBiblioteca.cerca("Il riscatto nei primi anni ha penali?", in: indice, solo: "fondo-azionario-globale")
+        verifica.vero("Biblioteca: in un altro documento la stessa domanda trova solo i passi di quel documento",
+                      altrove.allSatisfy { $0.passo.documentoId == "fondo-azionario-globale" })
+        verifica.vero("Biblioteca: senza documento aperto la ricerca resta quella di sempre",
+                      MotoreBiblioteca.cerca("Il riscatto nei primi anni ha penali?", in: indice, solo: nil)
+                        == MotoreBiblioteca.cerca("Il riscatto nei primi anni ha penali?", in: indice))
     }
 }

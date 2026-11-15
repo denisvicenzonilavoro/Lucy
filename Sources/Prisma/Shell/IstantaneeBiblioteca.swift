@@ -16,7 +16,10 @@ import CoreGraphics
 ///   «C'è anche un'edizione più vecchia», chiaro e scuro; la scheda del prodotto collegato con «Condizioni nella
 ///   Biblioteca» (§8.1.5.2 punto 6), chiaro e scuro;
 /// - 879 (§8.1.5.2 punto 6): «Cerca ovunque» (⌘K) con il gruppo «Biblioteca», chiaro e scuro; Vera che propone «Cerca
-///   nella Biblioteca» sotto una risposta su condizioni, chiaro e scuro.
+///   nella Biblioteca» sotto una risposta su condizioni, chiaro e scuro;
+/// - 1120-1122 (migliorie d'uso 35): Giulia scelta con un documento dei suoi prodotti, la colonna in due gruppi (chiaro e
+///   scuro); il piano rivalutabile aperto con le sue domande e il campo «Chiedi qualcosa su …»; il KID aperto, «Chiedi tu».
+/// 870-878 scelgono «Tutti i clienti» in modo esplicito: restano come prima.
 /// DATI DI PROVA DICHIARATI: i documenti sono i sei fac-simile scritti per Prisma (Risorse/Biblioteca); le risposte di
 /// Vera sono JSON di prova passati dalla stessa verifica di Prisma che vale per Qwen.
 extension Istantanee {
@@ -30,12 +33,14 @@ extension Istantanee {
             una(nome + "-scuro", prepara)
         }
         coppia("870-biblioteca") { s in
+            s.scegliCliente(nil)
             s.caricaEsempiBiblioteca()
             s.apri(.biblioteca)
         }
         coppia("871-biblioteca-risposta") { s in preparaRispostaBiblioteca(s) }
         coppia("872-biblioteca-vuota") { s in s.apri(.biblioteca) }
         una("873-biblioteca-lettura") { s in
+            s.scegliCliente(nil)
             s.caricaEsempiBiblioteca()
             s.trovaPagina.mostraLetture([
                 LetturaBiblioteca(id: "l1", nome: "Set informativo · Piano di risparmio (prova)", lette: 12, totale: 38),
@@ -45,6 +50,7 @@ extension Istantanee {
             s.apri(.biblioteca)
         }
         una("874-biblioteca-non-trovata") { s in
+            s.scegliCliente(nil)
             s.caricaEsempiBiblioteca()
             let domanda = "Il riscatto del fondo pensione si può chiedere online?"
             s.trovaPagina.domanda = domanda
@@ -53,6 +59,7 @@ extension Istantanee {
             s.apri(.biblioteca)
         }
         una("875-biblioteca-senza-ruby") { s in
+            s.scegliCliente(nil)
             s.caricaEsempiBiblioteca()
             let domanda = "Se Marco non paga la temporanea?"
             s.trovaPagina.domanda = domanda
@@ -99,7 +106,37 @@ extension Istantanee {
                                 cliente: "marco", parla: false)
             s.apri(.vera)
         }
+        // Migliorie d'uso 35 (Design/uso/gruppo-05.md §35.5): Giulia scelta, il fac-simile del fondo pensione collegato a
+        // mano al suo piano previdenziale (come in 878): la colonna in due gruppi, la domanda su Marco nascosta
+        coppia("1120-uso-biblioteca-cliente-documenti") { s in
+            preparaClienteBiblioteca(s)
+            s.apri(.biblioteca)
+        }
+        una("1121-uso-biblioteca-documento-aperto") { s in
+            preparaClienteBiblioteca(s)
+            if let d = s.biblioteca.tutti.first(where: { $0.titolo.hasPrefix("Piano rivalutabile") }) {
+                s.apriDocumentoBiblioteca(d.id)
+            }
+            s.apri(.biblioteca)
+        }
+        una("1122-uso-biblioteca-documento-senza-domande") { s in
+            preparaClienteBiblioteca(s)
+            if let d = s.biblioteca.tutti.first(where: { $0.titolo.hasPrefix("Fondo azionario") }) {
+                s.apriDocumentoBiblioteca(d.id)
+            }
+            s.apri(.biblioteca)
+        }
         return scene
+    }
+
+    /// DATI DI PROVA DICHIARATI (migliorie d'uso 35): Giulia scelta nella barra e il fac-simile «Fondo pensione aperto»
+    /// collegato al piano previdenziale integrativo di prova (la sua proposta presentata).
+    nonisolated static func preparaClienteBiblioteca(_ s: StatoShell) {
+        s.caricaEsempiBiblioteca()
+        s.scegliCliente("giulia")
+        if let d = s.biblioteca.tutti.first(where: { $0.titolo.hasPrefix("Fondo pensione aperto") }) {
+            s.collegaProdottoBiblioteca(d.id, prodotto: "prodotto-previdenza-pip")
+        }
     }
 
     /// DATI DI PROVA DICHIARATI: una seconda edizione (06/2024, stesso testo del fac-simile) del piano rivalutabile, e
@@ -130,6 +167,8 @@ extension Istantanee {
 
     /// La domanda sul riscatto con la risposta di prova di Vera, verificata come quella di Qwen.
     nonisolated static func preparaRispostaBiblioteca(_ s: StatoShell) {
+        // Con «Tutti i clienti», come prima delle migliorie d'uso 35 (le tre domande del template)
+        s.scegliCliente(nil)
         s.caricaEsempiBiblioteca()
         let domanda = "Il riscatto nei primi anni ha penali?"
         s.trovaPagina.domanda = domanda
