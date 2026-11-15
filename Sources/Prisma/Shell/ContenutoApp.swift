@@ -125,6 +125,8 @@ struct AzioniApp: View {
         case .sala: AzioniSala()
         // «Luce» giro 12: il segmentato «Messaggi · Campagne» (MessaggiCampagne.swift)
         case .messaggi: AzioniMessaggi()
+        // Migliorie d'uso 63: «Documenti | Prodotti» e, sul catalogo, il menu «Altro» (BibliotecaProdotti.swift; solo Mac)
+        case .biblioteca: AzioniBiblioteca()
         default: EmptyView()
         }
     }

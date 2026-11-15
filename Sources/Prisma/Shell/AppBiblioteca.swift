@@ -25,7 +25,12 @@ struct AppBiblioteca: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         #if os(macOS)
-        VistaBiblioteca(biblioteca: stato.biblioteca, trova: stato.trovaPagina)
+        // Migliorie d'uso 63: «Documenti | Prodotti» nella testata; con «Prodotti» il catalogo (BibliotecaProdotti.swift)
+        if stato.sezioneBiblioteca == .prodotti {
+            CatalogoProdottiMac()
+        } else {
+            VistaBiblioteca(biblioteca: stato.biblioteca, trova: stato.trovaPagina)
+        }
         #else
         // Su iPhone e iPad la Biblioteca non c'è in questo giro (decisione 114): più avanti dal ponte di Vera
         let n = NovitaLuce.trovaLaPagina

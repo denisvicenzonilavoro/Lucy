@@ -426,9 +426,15 @@ enum ProvaVera {
         controlla(AppPrisma.delDock.count == 15 && AppPrisma.delDock.allSatisfy(\.nelDock)
                   && AppPrisma.allCases.filter { !$0.nelDock }.allSatisfy { $0.ospite?.nelDock == true || ($0.ospite == nil && $0.fuoriDalDock) },
                   "Dock: 15 app con icona propria, le accorpate ospitate da un'app del dock, le altre con una finestra propria")
+        // Migliorie d'uso 63: sul Mac Prodotti è il catalogo della Biblioteca (accorpata), su iPhone e iPad resta un'app a sé
+        #if os(macOS)
+        let altreAppAttese: [AppPrisma] = [.note, .ricerca]
+        #else
+        let altreAppAttese: [AppPrisma] = [.prodotti, .note, .ricerca]
+        #endif
         controlla(AppPrisma.delDock == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio, .messaggi, .pratiche,
                                         .presentazioni, .sala, .biblioteca, .mercato, .studio, .vera, .impostazioni]
-                  && AppPrisma.altreApp == [.prodotti, .note, .ricerca],
+                  && AppPrisma.altreApp == altreAppAttese,
                   "Dock di «Luce»: Clienti, Posizioni, Analisi 360, Incontri, Agenda, Territorio, Messaggi, Pratiche, Prospetti, Sala, Biblioteca, Mercato, Studio, Vera, Impostazioni; Prodotti, Note e Ricerca fuori dal dock")
         controlla(Array(AppPrisma.delDock.prefix(9)) == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio,
                                                          .messaggi, .pratiche, .presentazioni],

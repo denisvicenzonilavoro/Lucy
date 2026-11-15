@@ -2152,3 +2152,41 @@ Resta:
   propria in fondo al passo 3.
 - **Collegamento esterno con un documento già scelto**: `apri(.documenti)` senza un documento nuovo (per esempio il
   collegamento «Documenti» di Prospetti) riapre nel lettore l'ultimo documento scelto.
+
+## 63. I prodotti parlano chiaro
+
+Fatto (solo Mac): `AppPrisma.prodotti.ospite` è la Biblioteca (`#if os(macOS)`), quindi ogni `apri(.prodotti)` (menu Vai,
+ricerca, Collegati, Guida, istantanee) porta alla sezione «Prodotti» della Biblioteca (`StatoShell.sezioneBiblioteca`,
+`preparaOspite`, `accorpataMostrata`); `altreApp` sul Mac perde Prodotti. Nella testata della Biblioteca il segmentato
+«Documenti | Prodotti» e, sul catalogo, il menu «Altro ⌄» (Nuova scheda, Dai documenti…, Modifica, Aggiorna dai
+documenti…, Simula, Elimina la scheda…; nascosto in modalità cliente) attraverso `StatoShell.richiestaCatalogo`. Il
+catalogo (`Shell/BibliotecaProdotti.swift`) è `AppProdotti(nellaBiblioteca: true)`: colonna «Per <nome>, dal più adatto»
+/ «I prodotti» con la ricerca e «Filtra ⌄» (canale e area), righe con quadratino dell'area, «<Area> · costo x% · rischio n
+su 7», «fonte da verificare», «risponde a una priorità» / «rischia più del profilo»; la scheda con testata (occhiello,
+nome 27, canale, pillola dell'esito, fonte verificata / da verificare / «c'è un KID nuovo» con «Segna verificata oggi»),
+«È per / Non è per» proposte dal codice, «Su 10.000 € in dieci anni» in parole (`PesoCostiProdotto(riga: true)`, la quota
+di sempre), «Quanto rischia» (`TesseraRischio(chiara: true)`), «Per quanto tempo», tre condizioni, il piede («Proponi a
+<nome>» con `proponi(_:apri: false)` e l'avviso «Apri», «Confronta con quello che ha», «Apri il suo documento», «Metti su
+un cliente…» senza cliente) e «Tutti i dettagli ⌄» con tutto quello di prima. Motore puro `MotoreSchedaProdotto` (esito
+con la soglia `sriMassimo`, ordine, frasi), testi in `TestiCatalogo`, token in `Tema.Apple.Catalogo`, prova
+`ProvaCalcoliSchedaProdotto` in `--prova-calcoli`, istantanee 23, 32 (dettagli aperti), 4 (finestra della Biblioteca) e
+nuove 1400-1402.
+
+Decisione applicata (template-uso-specifica.md): **nessun campo nuovo in `Prodotto`**. Quindi niente «In una frase» (il
+riquadro non c'è: nessuna frase automatica), niente campi «Per il cliente» in «Modifica» né «Proponi dai dati della
+scheda», nessun cambio all'archivio né a `ProvaBackupArchivioPezzi`. «È per / Non è per» sono sempre quelle del codice,
+con la nota «Scritte da Prisma dai dati della scheda».
+
+Resta:
+- **Istantanee**: rigenerarle sul Mac e guardarle (23, 32, 4, 192, 878, 1400-1402, chiare e scure); controllare che la
+  griglia delle cifre (costi + due tessere da 170) stia nella finestra a 1100 e che il piede non tagli i pulsanti.
+- **«Quanto costa, per dare un’idea» della protezione** (63-d): non fatto. Va mostrato solo con una stima da
+  `MotoreSimulatoriAnalisi.tariffaCasoMorte` sulle coperture in archivio («stima dalle polizze in archivio»); oggi la
+  protezione ha solo «Per quanto tempo».
+- **«Confronta con quello che ha»**: apre il confronto di oggi (`apri(.confronti)`). Con la miglioria 64 deve aprire
+  Analisi 360 › «Simula e confronta» › «Due a confronto» con A = la scheda e B = la prima posizione in essere della stessa
+  area (o «Lasciare i soldi sul conto»).
+- **Salita di 8 e dissolvenza** al cambio di scheda: oggi rientra con la cascata di sempre (`riavviaCascata`) e torna in
+  cima (`.id`); la salita di 8 in 0,3 s del template non è un token a parte.
+- **iPhone e iPad**: l'app Prodotti resta quella di prima (nessun esito, nessuna frase); da portare con il loro
+  aggiornamento.

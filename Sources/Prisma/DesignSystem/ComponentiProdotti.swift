@@ -11,6 +11,8 @@ extension Tema.Colore {
         /// Peso dei costi: versato, guadagno netto (il colore dell'area lo passa la scheda) e costi.
         static let versato = Tema.Apple.Colore.Composizione.liquidita
         static let costi = Tema.Apple.Colore.arancio
+        /// Migliorie d'uso 63: «costi …» nella riga sotto la barra, con l'arancione delle scritte (--orangeT).
+        static let costiTesto = Tema.Apple.Colore.arancioTesto
         /// Testi delle tessere.
         static let testo = Tema.Apple.Colore.inchiostro
         static let secondario = Tema.Apple.Colore.inchiostro2
@@ -42,6 +44,9 @@ extension Tema.Misura {
         static let spazioLegenda: CGFloat = 16
         static let spazioVoceLegenda: CGFloat = 6
         static let pallinoLegenda: CGFloat = 8
+        /// Migliorie d'uso 63: la barra della scheda che parla chiaro, alta 9, e lo spazio fra cifra e «alla fine…».
+        static let altezzaBarraRiga: CGFloat = 9
+        static let spazioCifraRiga: CGFloat = 8
     }
 }
 
@@ -56,6 +61,8 @@ extension Tema.Raggio {
 /// Tessera del rischio (SRI): la classe in grande, a parole, e la scala da 1 a 7 accesa fino alla classe.
 struct TesseraRischio: View {
     let sri: Int?
+    /// Migliorie d'uso 63: «Quanto rischia» e «<n> su 7: <parola>» (la scheda che parla chiaro, senza la sigla SRI).
+    var chiara = false
 
     /// La classe come la scrive il KID.
     static func descrizione(_ sri: Int?) -> String {
@@ -74,26 +81,40 @@ struct TesseraRischio: View {
     var body: some View {
         let m = Tema.Misura.Prodotti.self
         VStack(alignment: .leading, spacing: m.spazioTessera) {
-            EtichettaConTermine(testo: "Rischio (SRI)", font: Tema.Testo.Prodotti.etichetta,
-                                colore: Tema.Colore.Prodotti.secondario, righe: 2)
-                .fixedSize(horizontal: false, vertical: true)
-            HStack(alignment: .firstTextBaseline, spacing: m.spazioTessera) {
-                Group {
-                    if let sri {
-                        NumeroCheConta(Double(sri), formato: .intero, indice: 3)
-                    } else {
-                        Text("—")
-                    }
-                }
-                .carattereApple(Tema.Testo.Prodotti.valore)
-                .foregroundColor(Tema.Colore.Prodotti.testo)
-                Text(sri == nil ? "non indicato" : "su 7 · \(Self.descrizione(sri))")
-                    .font(Tema.Testo.Prodotti.nota)
+            if chiara {
+                // La scala 1-7 e sotto «<n> su 7: <parola>» (il template, `sriScala`)
+                Text(TestiCatalogo.quantoRischia)
+                    .font(Tema.Testo.Prodotti.etichetta)
                     .foregroundColor(Tema.Colore.Prodotti.secondario)
                     .lineLimit(1)
+                scala
+                Text(TestiCatalogo.rischio(sri))
+                    .font(Tema.Testo.Prodotti.nota)
+                    .foregroundColor(Tema.Colore.Prodotti.testo)
+                    .lineLimit(1)
                     .minimumScaleFactor(0.8)
+            } else {
+                EtichettaConTermine(testo: "Rischio (SRI)", font: Tema.Testo.Prodotti.etichetta,
+                                    colore: Tema.Colore.Prodotti.secondario, righe: 2)
+                    .fixedSize(horizontal: false, vertical: true)
+                HStack(alignment: .firstTextBaseline, spacing: m.spazioTessera) {
+                    Group {
+                        if let sri {
+                            NumeroCheConta(Double(sri), formato: .intero, indice: 3)
+                        } else {
+                            Text("—")
+                        }
+                    }
+                    .carattereApple(Tema.Testo.Prodotti.valore)
+                    .foregroundColor(Tema.Colore.Prodotti.testo)
+                    Text(sri == nil ? "non indicato" : "su 7 · \(Self.descrizione(sri))")
+                        .font(Tema.Testo.Prodotti.nota)
+                        .foregroundColor(Tema.Colore.Prodotti.secondario)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                scala
             }
-            scala
         }
         .padding(Tema.Apple.Misura.Padding.tile)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
@@ -126,6 +147,11 @@ struct PesoCostiProdotto: View {
     let netto: Double
     let costi: Double
     let coloreGuadagno: Color
+    /// Migliorie d'uso 63: la versione della scheda che parla chiaro. Cifra e «alla fine, tolti i costi», la barra alta 9
+    /// e sotto una riga sola «versati … · guadagno … · costi …: x% del guadagno possibile» al posto della legenda.
+    var riga = false
+    /// Accanto alla cifra nella versione `riga` («alla fine, tolti i costi»).
+    var sottotitolo: String? = nil
 
     private struct Segmento: Identifiable {
         let id: String
@@ -151,8 +177,58 @@ struct PesoCostiProdotto: View {
     }
 
     var body: some View {
+        if riga {
+            versioneRiga
+        } else {
+            versioneLegenda
+        }
+    }
+
+    /// La scheda che parla chiaro (migliorie d'uso 63): stesse cifre e stessa quota, in parole.
+    private var versioneRiga: some View {
         let m = Tema.Misura.Prodotti.self
-        ViewThatFits(in: .horizontal) {
+        let c = Tema.Colore.Prodotti.self
+        let pezzi = segmenti.map { PezzoBarraPiena(id: $0.id, peso: $0.valore, colore: $0.colore) }
+        let parti = TestiCatalogo.rigaCosti(versato: versato, guadagno: netto - versato, costi: costi)
+        var testo = Text(parti.prima) + Text(parti.costi).foregroundColor(c.costiTesto)
+        if let q = quotaCosti {
+            testo = testo + Text(": ") + Text(TestiCatalogo.quotaGuadagno(Formati.percentuale((q * 100).rounded()))).underline()
+        }
+        return VStack(alignment: .leading, spacing: m.spazioGrafico) {
+            Text(titolo)
+                .font(Tema.Testo.Prodotti.etichetta)
+                .foregroundColor(c.secondario)
+                .lineLimit(1)
+            HStack(alignment: .firstTextBaseline, spacing: m.spazioCifraRiga) {
+                NumeroCheConta(netto, formato: .personalizzato(Formati.euro), indice: 5)
+                    .carattereApple(Tema.Testo.Prodotti.valore)
+                    .foregroundColor(c.testo)
+                    .lineLimit(1)
+                if let sottotitolo {
+                    Text(sottotitolo)
+                        .font(Tema.Testo.Prodotti.nota)
+                        .foregroundColor(c.secondario)
+                        .lineLimit(1)
+                }
+            }
+            BarraPienaSegmenti(pezzi: pezzi, indice: 0, altezza: m.altezzaBarraRiga, spazio: m.spazioSegmenti,
+                               raggioPezzo: Tema.Raggio.Prodotti.segmentoCosti,
+                               raggioContenitore: Tema.Raggio.Prodotti.segmentoCosti)
+                .accessibilityHidden(true)
+            testo
+                .font(Tema.Testo.Prodotti.nota)
+                .foregroundColor(c.secondario)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(Tema.Apple.Misura.Padding.tile)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .superficieApple(Tema.Apple.Superficie.tile)
+        .help("Stima su un versamento unico, dopo costi e imposte: i costi sono la differenza con lo stesso prodotto senza costi")
+    }
+
+    private var versioneLegenda: some View {
+        let m = Tema.Misura.Prodotti.self
+        return ViewThatFits(in: .horizontal) {
             HStack(alignment: .center, spacing: m.spazioCarta) {
                 cifra.frame(width: m.larghezzaCifra, alignment: .leading)
                 grafico

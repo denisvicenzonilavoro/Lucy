@@ -2,7 +2,8 @@ import Foundation
 
 /// Le app accorpate (`AppPrisma.ospite`): sul Mac non hanno più una finestra propria. `apri(_:)` le porta
 /// nell'app che le ospita, sulla scheda giusta: Obiettivi e Documenti in Clienti, Simulazioni e Confronti
-/// negli strumenti di Analisi 360, Attività nell'Agenda (vista mese). iPhone e iPad restano come prima.
+/// negli strumenti di Analisi 360, Attività nell'Agenda (vista mese), Prodotti nella Biblioteca (migliorie d'uso 63).
+/// iPhone e iPad restano come prima.
 extension StatoShell {
     /// Prepara l'ospite a mostrare l'app accorpata (non apre nulla: lo fa `apri`).
     func preparaOspite(per app: AppPrisma) {
@@ -18,6 +19,10 @@ extension StatoShell {
         case .simulazioni: scegliStrumentoAnalisi(StatoShell.strumento(per: schedaSimulazioni))
         case .confronti: scegliStrumentoAnalisi(.confronto)
         case .attivita: selezionaAttivitaInAgenda(attivitaSelezionata)
+        #if os(macOS)
+        // Migliorie d'uso 63: il catalogo dei prodotti è la sezione «Prodotti» della Biblioteca
+        case .prodotti: if sezioneBiblioteca != .prodotti { sezioneBiblioteca = .prodotti }
+        #endif
         default: break
         }
     }
@@ -38,6 +43,10 @@ extension StatoShell {
             case .simulatore, .scenari, .tfr: return .simulazioni
             case nil: return nil
             }
+        #if os(macOS)
+        case .biblioteca:
+            return sezioneBiblioteca == .prodotti ? .prodotti : nil
+        #endif
         default:
             return nil
         }

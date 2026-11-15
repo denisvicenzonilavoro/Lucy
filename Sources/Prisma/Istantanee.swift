@@ -21,8 +21,9 @@ enum Istantanee {
             s.schedaImpostazioni = .archivio
         }),
         ("4-finestra-non-ingrandita", { s in
+            // Migliorie d'uso 63: sul Mac Prodotti è il catalogo della Biblioteca, la finestra è quella della Biblioteca
             s.apri(.prodotti)
-            s.alternaIngrandimento(.prodotti)
+            s.alternaIngrandimento(.biblioteca)
         }),
         ("5-clienti-panoramica", { $0.apri(.clienti) }),
         ("6-clienti-famiglia", { s in
@@ -128,6 +129,8 @@ enum Istantanee {
             s.apri(.incontri)
         }),
         ("23-prodotti", { s in
+            // Migliorie d'uso 63: il catalogo nella Biblioteca con Giulia scelta («Per Giulia, dal più adatto» e gli esiti)
+            s.scegliCliente("giulia")
             s.prodottoSelezionato = "prodotto-previdenza-pip"
             s.apri(.prodotti)
         }),
@@ -188,6 +191,8 @@ enum Istantanee {
         }),
         ("32-prodotti-condizioni", { s in
             s.prodottoSelezionato = "prodotto-orizzonte-valore"
+            // Migliorie d'uso 63: le condizioni dettagliate stanno in «Tutti i dettagli», aperto
+            s.dettagliProdottoAperti = true
             s.apri(.prodotti)
         }),
         ("30-valutazione-prospetto", { s in

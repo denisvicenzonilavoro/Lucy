@@ -375,6 +375,13 @@ enum VoceConfronto: Hashable {
     var prodottoSelezionato: String?
     var filtroCanaleProdotti: Canale?
     var filtroAreaProdotti: AreaPosizione?
+    /// Migliorie d'uso 63 (sul Mac): la Biblioteca mostra i documenti o il catalogo dei prodotti (stato della vista).
+    var sezioneBiblioteca: SezioneBiblioteca = .documenti
+    /// Migliorie d'uso 63: un'azione del menu «Altro» della testata della Biblioteca per la scheda scelta del catalogo;
+    /// la consuma `CatalogoProdottiMac` (che ha i moduli) appena la legge.
+    var richiestaCatalogo: RichiestaCatalogo?
+    /// Migliorie d'uso 63: «Tutti i dettagli» della scheda del catalogo aperto (chiuso di base; stato della vista).
+    var dettagliProdottoAperti = false
     /// «Apri ›» delle famiglie protette nella storia dell'anno (§5.2.4): l'area con cui aprire Posizioni (Portafoglio di
     /// tutti i clienti); la consuma `AppPosizioni` appena la legge.
     var areaPosizioniDaAprire: AreaPosizione?
@@ -2236,9 +2243,16 @@ enum VoceConfronto: Hashable {
     }
 
     /// Crea una proposta per il cliente attivo con le condizioni della scheda e la apre in Posizioni.
-    func proponi(_ p: Prodotto) {
+    /// Migliorie d'uso 63: con `apri: false` (il catalogo della Biblioteca) si resta dove si è e l'avviso offre «Apri».
+    func proponi(_ p: Prodotto, apri: Bool = true) {
         let proposta = p.proposta(per: clienteAttivoId)
         salvaPosizione(proposta)
+        guard apri else {
+            let nome = clienteAttivo.map { StatoShell.nomeBreve($0) } ?? "il cliente"
+            mostraAvviso(TestiCatalogo.propostaCreata(p.nome, cliente: nome),
+                         azione: AzioneAvviso(titolo: TestiCatalogo.apri) { [weak self] in self?.apriPosizione(proposta) })
+            return
+        }
         apriPosizione(proposta)
         mostraAvviso("Proposta creata per \(clienteAttivo?.nome ?? "il cliente"): completa importi e durata")
     }

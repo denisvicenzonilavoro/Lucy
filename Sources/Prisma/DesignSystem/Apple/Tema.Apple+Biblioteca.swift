@@ -204,3 +204,62 @@ extension Tema.Apple.Moto {
         static var animazione: Animation { curva.animazione(durata).ritardoPrisma(ritardo) }
     }
 }
+
+// MARK: - Migliorie d'uso 63: il catalogo dei prodotti nella Biblioteca
+
+extension Tema.Apple {
+    /// Il catalogo «Prodotti» della Biblioteca (Shell/BibliotecaProdotti.swift): la colonna «Per <nome>, dal più adatto»
+    /// e la scheda che parla chiaro (`.side` 330, `#prM` del template, righe 4988-5022).
+    enum Catalogo {
+        typealias K = Tema.Apple.Carattere
+        typealias C = Tema.Apple.Colore
+
+        // Colonna
+        static let larghezzaElenco: CGFloat = 330
+        static let quadratinoArea: CGFloat = 10
+        static let raggioQuadratino: CGFloat = 3
+        static let nomeRiga = K(dimensione: 13.5, peso: .bold, interlinea: 1.25)
+        static let dettaglioRiga = K(dimensione: 12, peso: .regular)
+        static let segnoRiga = K(dimensione: 12, peso: .semibold)
+        static let paddingRiga = EdgeInsets(top: 9, leading: 10, bottom: 9, trailing: 10)
+        static let spazioRiga: CGFloat = 3
+        static let spazioFiltri: CGFloat = 8
+        static let spazioFreccia: CGFloat = 5
+        static let spazioColonna: CGFloat = 8
+
+        // Scheda
+        static let occhiello = K(dimensione: 12, peso: .semibold, tracking: 0.4)
+        static let titoloScheda = K(dimensione: 27, peso: .bold, tracking: -0.6)
+        static let frase = K(dimensione: 19, peso: .semibold, interlinea: 1.4)
+        static let paddingFrase = Misura.padding(16, 20)
+        static let rigaPerChi = K(dimensione: 14, peso: .regular, interlinea: 1.35)
+        static let spazioRigaPerChi: CGFloat = 6
+        static let cifraTessera = K(dimensione: 22, peso: .bold, tracking: -0.4, tabellare: true)
+        static let notaTessera = K(dimensione: 12.5, peso: .regular)
+        static let spazioBlocchi: CGFloat = 12
+        /// «Quanto rischia» e «Per quanto tempo» accanto al riquadro dei costi (il template: `1,5fr 1fr 1fr`).
+        static let larghezzaTesseraPiccola: CGFloat = 170
+        static let spazioTestataFonte: CGFloat = 16
+        static let spazioPiede: CGFloat = 10
+        static let spazioTestata: CGFloat = 6
+        static let margineScheda = EdgeInsets(top: 16, leading: 20, bottom: 20, trailing: 20)
+        static let altezzaBarraCosti: CGFloat = 9
+        static let notaPiede = K(dimensione: 12, peso: .regular)
+        static let larghezzaNotaPiede: CGFloat = 260
+
+        // Colori
+        static let testo = C.inchiostro
+        static let secondario = C.inchiostro2
+        /// «fonte da verificare»: l'arancione delle scritte (--orangeT, migliorie d'uso 7).
+        static let daVerificare = C.arancioTesto
+        /// Gli esiti e le righe «È per» / «Non è per»: il verde e il rosso degli stati di sempre.
+        static let positivo = C.verde
+        static let negativo = C.rosso
+        static let costi = C.arancioTesto
+        static let fondoRigaAccesa = C.selezioneVoce
+        static let raggioRiga = Tema.Apple.Raggio.voce
+        static let superficieCard = Tema.Apple.Superficie.cardPiatta
+        static let superficieTile = Tema.Apple.Superficie.tile
+        static let paddingTile = Misura.Padding.tile
+    }
+}
