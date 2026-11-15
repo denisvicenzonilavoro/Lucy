@@ -362,3 +362,24 @@ Resta:
 - **Carico**: controllare con `--prova-carico` che le curve dei molti obiettivi non svuotino di continuo la memoria di 24
   curve (il conteggio è ricordato per cliente, quindi le curve si chiedono una volta per cambio).
 - La riga facoltativa «Alla scadenza copre il 78%» nel dettaglio (13.6) non è stata aggiunta: solo se l'utente la vuole.
+
+## 17. Le priorità in ordine: 1, 2, 3
+
+Fatto: `PrioritaAree360` (Motori) con l'ordine senza doppioni dai primi tre bisogni della ruota (gli stessi della scheda
+Bisogni; con un doppione le capsule sono due, il quarto bisogno non si pesca) e, solo sul Mac e senza ruota, l'ordine del
+template dall'area più scoperta (escluse le aree al 100%, gli investimenti dall'80% e quelle che non si misurano). Le card
+di Analisi 360 mostrano la capsula `CapsulaPriorita` «Priorità {n}» (token in `Tema.Apple.Aree360.Area`: 11 bold con
+tracking 0,2, padding 2×9, la prima arancio tenue, le altre neutre) con l'aiuto «Da dove partire con {nome}…» o «Dall'area
+più scoperta: la ruota dei bisogni è vuota». La scheda Bisogni mette su ogni riga la capsula della card («Priorità 1 ·
+Protezione», la stessa per due bisogni della stessa area) e sotto la nota del template solo quando le numerazioni
+coincidono, altrimenti «Sulle schede di Analisi 360 due bisogni della stessa area contano una volta.»; con la ruota vuota
+nessuna nota. Tutto solo sul Mac (`Area.numeraPriorita`): iPhone e iPad tengono «★ Priorità» (stesse aree, senza
+ripiego). Prova in `--prova-calcoli` (`ProvaCalcoliPrioritaAree360`), istantanea nuova `1032-uso-dossier-bisogni` (chiara
+e scura).
+
+Resta:
+- **Istantanee**: rigenerare sul Mac 440 (chiara e scura), 99, 300, 301 e la nuova 1032 e aggiornare la pagina delle
+  anteprime; nella 1032 controllare che le capsule stiano accanto al collegamento senza andare a capo nella colonna
+  accanto alla ruota.
+- **Indice del dossier (miglioria 11)**: quando la sezione Bisogni passa nel tema Apple, la capsula e la nota vanno
+  riprese da `BisogniCliente.prioritaVista` (oggi la scheda usa ancora i caratteri di Rubrica).

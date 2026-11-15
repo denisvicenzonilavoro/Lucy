@@ -369,7 +369,7 @@ struct Analisi360Apple: View {
     private func griglia(_ id: String, misura: CGSize) -> some View {
         let d = Tema.Apple.Aree360.Disposizione.self
         let aree = cache.aree(stato, cliente: id)
-        let ingressi = ingressiCard(cliente: id)
+        let ingressi = ingressiCard(cliente: id, aree: aree)
         let altezza = Self.altezzaArea(misura.height)
         let larghezza = max(0, (misura.width - d.margine.leading - d.margine.trailing - d.spazio) / 2)
         let lato = Self.latoAnello(larghezza: larghezza, altezza: altezza)
@@ -416,7 +416,8 @@ struct Analisi360Apple: View {
                                                           titolo: TestiAree360.nomeArea(area), testo: "")
         let ipotesi = statoIpotesi(area, ingressi)
         return CardArea360Apple(area: area, sintesi: sintesi, statoIpotesi: ipotesi.testo, coloreStato: ipotesi.colore,
-                                priorita: ingressi.prioritarie.contains(area), canali: canali(area, ingressi),
+                                numeroPriorita: ingressi.priorita.numero(area), aiutoPriorita: ingressi.aiutoPriorita,
+                                canali: canali(area, ingressi),
                                 lato: lato, ritardoAnello: ritardoAnelli, indice: indice - t.indicePrimaArea,
                                 apri: { apri(area) })
             // Ingressi semplici: a ogni giro del body della griglia (StatoShell cambiato, cliente scritto alla
@@ -428,25 +429,34 @@ struct Analisi360Apple: View {
     }
 
     /// Ciò che le quattro card leggono dallo stato, letto una volta per la griglia e non una volta per card:
-    /// le aree confermate, la completezza, le tre priorità e le posizioni in essere del cliente.
+    /// le aree confermate, la completezza, le priorità in ordine (con l'aiuto della capsula) e le posizioni in essere.
     private struct IngressiCard360 {
         let confermate: [AreaAnalisi]
         let completezza: CompletezzaCliente?
-        let prioritarie: [AreaAnalisi]
+        let priorita: PrioritaAree360
+        let aiutoPriorita: String
         let inEssere: [Posizione]
     }
 
-    private func ingressiCard(cliente id: String) -> IngressiCard360 {
+    private func ingressiCard(cliente id: String, aree: AreeAnalisi360) -> IngressiCard360 {
         // Solo l'analisi salvata ha aree confermate: la prima stesura dalle posizioni non si rifà a ogni card
         let confermate = stato.dati.analisi[id]?.confermate ?? []
-        // Le tre priorità del cliente, dalla ruota dei bisogni della sua scheda
-        var prioritarie: [AreaAnalisi] = []
+        // Migliorie d'uso 17: le priorità in ordine, senza doppioni, dai primi tre bisogni della ruota (gli stessi che
+        // la scheda Bisogni numera); sul Mac, senza ruota, dall'area più scoperta
+        var priorita = PrioritaAree360.vuota
+        var aiuto = ""
         if let c = stato.cliente(id) {
-            prioritarie = MotoreBisogni.priorita(stato.bisogniRilevati(c.id), profilo: c.bisogni).prefix(3).map(\.areaAnalisi)
+            let bisogni = MotoreBisogni.priorita(stato.bisogniRilevati(c.id), profilo: c.bisogni)
+            priorita = PrioritaAree360.calcola(bisogni: bisogni, aree: aree.aree,
+                                               ripiego: Tema.Apple.Aree360.Area.numeraPriorita)
+            aiuto = priorita.fonte == .copertura
+                ? "Dall'area più scoperta: la ruota dei bisogni è vuota"
+                : "Da dove partire con \(StatoShell.nomeBreve(c)): l'ordine dei bisogni nella sua scheda"
         }
         return IngressiCard360(confermate: confermate,
                                completezza: stato.completezzaCliente(id),
-                               prioritarie: prioritarie,
+                               priorita: priorita,
+                               aiutoPriorita: aiuto,
                                inEssere: stato.posizioniCliente(id).filter { $0.stato == .inEssere })
     }
 
@@ -559,7 +569,9 @@ private struct CardArea360Apple: View, Equatable {
     let sintesi: SintesiArea360
     let statoIpotesi: String
     let coloreStato: Color
-    let priorita: Bool
+    /// Migliorie d'uso 17: il numero della priorità (1, 2, 3) o nil, e l'aiuto della capsula.
+    let numeroPriorita: Int?
+    let aiutoPriorita: String
     let canali: [Canale]
     let lato: CGFloat
     let ritardoAnello: Double
@@ -569,7 +581,7 @@ private struct CardArea360Apple: View, Equatable {
 
     static func == (a: Self, b: Self) -> Bool {
         a.area == b.area && a.sintesi == b.sintesi && a.statoIpotesi == b.statoIpotesi && a.coloreStato == b.coloreStato
-            && a.priorita == b.priorita && a.canali == b.canali && a.lato == b.lato
+            && a.numeroPriorita == b.numeroPriorita && a.aiutoPriorita == b.aiutoPriorita && a.canali == b.canali && a.lato == b.lato
             && a.ritardoAnello == b.ritardoAnello && a.indice == b.indice
     }
 
@@ -637,13 +649,18 @@ private struct CardArea360Apple: View, Equatable {
                     .carattereApple(a.etichetta)
                     .foregroundColor(colore)
                     .lineLimit(1)
-                if priorita {
-                    Text("★ Priorità")
-                        .carattereApple(a.priorita)
-                        .foregroundColor(a.colorePriorita)
-                        .lineLimit(1)
-                        .fixedSize()
-                        .help("Priorità del cliente, dalla ruota dei bisogni nella sua scheda")
+                if let n = numeroPriorita {
+                    if a.numeraPriorita {
+                        CapsulaPriorita(numero: n)
+                            .help(aiutoPriorita)
+                    } else {
+                        Text("★ Priorità")
+                            .carattereApple(a.prioritaStella)
+                            .foregroundColor(a.colorePriorita)
+                            .lineLimit(1)
+                            .fixedSize()
+                            .help("Priorità del cliente, dalla ruota dei bisogni nella sua scheda")
+                    }
                 }
             }
             Text(sintesi.titolo)

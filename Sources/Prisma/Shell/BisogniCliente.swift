@@ -50,7 +50,10 @@ struct BisogniCliente: View {
     // MARK: - Priorità
 
     private func prioritaVista(_ elenco: [AreaBisogno], ruota: [AreaBisogno: Importanza], rilevati: [BisognoRilevato]) -> some View {
-        VStack(alignment: .leading, spacing: 10) {
+        // Migliorie d'uso 17: l'ordine delle capsule sulle card di Analisi 360 (primi tre bisogni, senza doppioni)
+        let numeraCard = Tema.Apple.Aree360.Area.numeraPriorita
+        let ordineCard = PrioritaAree360.dallaRuota(elenco)
+        return VStack(alignment: .leading, spacing: 10) {
             if elenco.isEmpty {
                 Text("La ruota è ancora vuota.").font(Tipo.bisognoTitolo).foregroundColor(Colori.Rubrica.testo)
                 Text("Conferma i bisogni rilevati dai dati o indica con il cliente quanto conta ogni area: bastano due tocchi per area.")
@@ -81,21 +84,42 @@ struct BisogniCliente: View {
                             .font(Tipo.bisognoTesto)
                             .foregroundColor(Colori.Rubrica.secondario)
                             .fixedSize(horizontal: false, vertical: true)
-                        Button {
-                            stato.clienteAttivoId = cliente.id
-                            stato.areaAnalisi = a.areaAnalisi
-                            stato.apri(.analisi360)
-                        } label: {
-                            HStack(spacing: Tema.Misura.Componenti.spazioSimboloPulsante) {
-                                Text("Analizza in Analisi 360 · \(a.areaAnalisi.nome)")
-                                Image(systemName: "chevron.right")
+                        HStack(spacing: Tema.Apple.Aree360.Area.spazioPrioritaBisogni) {
+                            // Sul Mac la capsula della card di Analisi 360: la stessa per due bisogni della stessa area
+                            if numeraCard, let posto = ordineCard.firstIndex(of: a.areaAnalisi) {
+                                CapsulaPriorita(numero: posto + 1, area: a.areaAnalisi.nome)
+                                    .help("Sulle schede di Analisi 360 questa area è «Priorità \(posto + 1)»")
                             }
+                            Button {
+                                stato.clienteAttivoId = cliente.id
+                                stato.areaAnalisi = a.areaAnalisi
+                                stato.apri(.analisi360)
+                            } label: {
+                                HStack(spacing: Tema.Misura.Componenti.spazioSimboloPulsante) {
+                                    Text("Analizza in Analisi 360 · \(a.areaAnalisi.nome)")
+                                    Image(systemName: "chevron.right")
+                                }
+                            }
+                            .buttonStyle(StileCollegamento())
                         }
-                        .buttonStyle(StileCollegamento())
                     }
                 }
             }
+            // La nota del template solo quando è vera: con due bisogni della stessa area le numerazioni divergono
+            if numeraCard && !elenco.isEmpty {
+                Text(Self.notaOrdine(elenco))
+                    .font(Tipo.bisognoNota)
+                    .foregroundColor(Colori.Rubrica.secondario)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
+    }
+
+    /// Migliorie d'uso 17: la nota sotto i tre numeri, vera per questo cliente.
+    static func notaOrdine(_ elenco: [AreaBisogno]) -> String {
+        PrioritaAree360.stessaNumerazione(elenco)
+            ? "L'ordine è lo stesso che vedi sulle schede di Analisi 360 («Priorità 1, 2, 3»)."
+            : "Sulle schede di Analisi 360 due bisogni della stessa area contano una volta."
     }
 
     // MARK: - Rilevati

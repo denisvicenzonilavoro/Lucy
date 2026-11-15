@@ -96,7 +96,26 @@ extension Tema.Apple {
             static let coloreTrattino = Colore.inchiostro3
             /// `.lbl` nel colore dell'area, con la priorità del cliente accanto.
             static let etichetta = Carattere.etichetta
-            static let priorita = Carattere(dimensione: 11.5, peso: .semibold)
+            /// Migliorie d'uso 17 «Le priorità in ordine: 1, 2, 3»: sul Mac al posto di «★ Priorità» la capsula
+            /// «Priorità {n}» (`.prio` del template: 11 bold, tracking 0,2, padding 2×9). «Priorità 1» arancio tenue
+            /// con il testo `arancioTesto` (`.prio.p1`), «2» e «3» neutre (fondo chip, testo `inchiostro2`); senza ruota
+            /// dei bisogni l'ordine viene dall'area più scoperta. iPhone e iPad tengono la stella fino al loro
+            /// aggiornamento.
+            #if os(macOS)
+            static let numeraPriorita = true
+            #else
+            static let numeraPriorita = false
+            #endif
+            static let priorita = Carattere(dimensione: 11, peso: .bold, tracking: 0.2)
+            static let paddingPriorita = Misura.padding(2, 9)
+            static let fondoPrimaPriorita = Color(r: 224, g: 138, b: 0, a: 0.18)
+            static let testoPrimaPriorita = Colore.arancioTesto
+            static let fondoPriorita = Colore.chip
+            static let testoPriorita = Colore.inchiostro2
+            /// Nella scheda Bisogni la capsula «Priorità n · area» sta a 8 dal collegamento ad Analisi 360.
+            static let spazioPrioritaBisogni: CGFloat = 8
+            /// La stella di prima («★ Priorità» 11,5 semibold arancio), per iPhone e iPad.
+            static let prioritaStella = Carattere(dimensione: 11.5, peso: .semibold)
             static let colorePriorita = Colore.arancioTesto
             static let spazioEtichetta: CGFloat = 8
             /// Titolo 26 bold «{grande} {testo}», 4 sotto l'etichetta.

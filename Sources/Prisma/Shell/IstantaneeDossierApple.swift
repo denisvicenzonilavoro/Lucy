@@ -27,6 +27,15 @@ extension Istantanee {
         ]
         tutte += sceneQuadroDossier
         tutte += sceneArrivoObiettivi
+        // Migliorie d'uso 17 «Le priorità in ordine: 1, 2, 3»: la scheda Bisogni di Marco, con la capsula della card di
+        // Analisi 360 su ogni riga e la nota sull'ordine (vera per lui), chiara e scura
+        let bisogni: (StatoShell) -> Void = { s in
+            s.clienteAttivoId = "marco"
+            s.schedaCliente = .bisogni
+            s.apri(.clienti)
+        }
+        tutte += [(nome: "1032-uso-dossier-bisogni", prepara: bisogni),
+                  (nome: "1032-uso-dossier-bisogni-scuro", prepara: bisogni)]
         return tutte
     }
 
