@@ -82,6 +82,8 @@ codesign --verify --deep --strict "$APP" || errore "Firma di Prisma.app non vali
 echo "✓ Prisma.app completa"
 
 # Il file del Prisma del cliente aperto con il lettore vero: serve Node, che sul Mac non c'è sempre
+# Node installato da nodejs.org nella cartella utente (~/.local/node), senza Homebrew né modifiche al terminale
+[ -x "$HOME/.local/node/bin/node" ] && PATH="$HOME/.local/node/bin:$PATH"
 if command -v node > /dev/null; then
   echo "▸ Prisma del cliente: lettore del file (Node)…"
   CARTELLA_FILE="$(mktemp -d)/file-cliente"
