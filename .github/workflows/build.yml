@@ -1,10 +1,10 @@
 name: Build Prisma
 
-# Una sola build per commit: il push sul branch basta anche per la pull request (i suoi controlli compaiono
-# nella PR). Prima c'era anche «pull_request», che rifaceva la stessa build e raddoppiava i Mac in coda.
+# Dal 16 novembre 2026 (scelta dell'utente) Prisma si compila e si prova sul Mac dell'utente
+# (`bash Supporto/costruisci-mac.sh --prove`): GitHub tiene solo la copia del codice. Questa build non parte più a
+# ogni push: si lancia solo a mano (Actions › Build Prisma › Run workflow), per esempio per rifare la release
+# «ultima» con Prisma.zip e Prisma.ipa senza Xcode. Lanciata su main rifà anche anteprime e release.
 on:
-  push:
-    branches: ['**', '!anteprime']
   workflow_dispatch:
 
 # Un nuovo push sullo stesso branch annulla la build ancora in corso del commit precedente (non su main,
@@ -372,7 +372,7 @@ jobs:
 
       # Le anteprime Mac passano al job «pubblica», che le mette sul branch anteprime così come sono oggi
       - name: Carica le anteprime Mac
-        if: github.event_name == 'push' && steps.anteprime.outputs.ok == '1'
+        if: steps.anteprime.outputs.ok == '1'
         uses: actions/upload-artifact@v6
         with:
           name: anteprime-mac
@@ -620,7 +620,7 @@ jobs:
           retention-days: 7
 
       - name: Carica le anteprime iOS
-        if: always() && github.event_name == 'push'
+        if: always()
         uses: actions/upload-artifact@v6
         with:
           name: anteprime-ios
@@ -693,7 +693,7 @@ jobs:
   # blocca comunque il merge, perché il job ios ora è bloccante.
   pubblica:
     needs: [build, ios]
-    if: always() && github.event_name == 'push' && needs.build.result == 'success' && needs.build.outputs.anteprime == '1'
+    if: always() && needs.build.result == 'success' && needs.build.outputs.anteprime == '1'
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -741,7 +741,7 @@ jobs:
   #   https://github.com/<repo>/releases/download/ultima/Prisma.ipa
   rilascio:
     needs: [build, ipa]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main'
     permissions:
       contents: write
     runs-on: ubuntu-latest
