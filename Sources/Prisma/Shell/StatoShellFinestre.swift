@@ -506,6 +506,8 @@ extension StatoShell {
             if sistema.guida != nil { sistema.guida = nil }
             if !bloccato { bloccato = true }
         }
+        // Il ragionamento di Vera resta solo in memoria e non sopravvive al blocco (motori Mistral, tappa 3)
+        ragionamentiVera.svuota()
         // Gli effetti in corso finiscono di colpo (dopo il cambio animato: mai prima, nello stesso giro)
         annullaEffetti()
         // La crescita del Territorio che sta passando gli anni si ferma («Luce» giro 11)

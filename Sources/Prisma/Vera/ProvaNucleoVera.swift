@@ -486,7 +486,9 @@ final class ServerFinto: URLProtocol {
     private static let blocco = NSLock()
     private static var ricevuti: [String: [String: Any]] = [:]
     private static var _caricamenti: [String] = []
-    static let installati = ["qwen3.5:4b", "gemma4:e4b", MotoreLocale.modelloPredefinito]
+    static let installati = ["qwen3.5:4b", "gemma4:e4b", MotoreLocale.modelloPredefinito, senzaRagionamento]
+    /// Un modello che rifiuta «think», come Ministral 3 Instruct (motori Mistral, tappa 3).
+    static let senzaRagionamento = "senza-ragionamento:1b"
 
     static func azzera() {
         blocco.lock(); defer { blocco.unlock() }
@@ -547,6 +549,9 @@ final class ServerFinto: URLProtocol {
         case "/api/chat" where !Self.installati.contains(modello):
             codice = 404
             testo = #"{"error":"model '"# + modello + #"' not found"}"#
+        case "/api/chat" where modello == Self.senzaRagionamento && (c["think"] as? Bool) == true:
+            codice = 400
+            testo = #"{"error":"\""# + modello + #"\" does not support thinking"}"#
         case "/api/chat" where messaggi.isEmpty:
             Self.blocco.lock()
             Self._caricamenti.append((c["keep_alive"] as? String) ?? (c["keep_alive"] as? NSNumber)?.stringValue ?? "")

@@ -9,6 +9,71 @@ enum ProvaMotoriMistral {
         stati(controlla)
         impostazioni(controlla)
         computerIA(controlla)
+        ragionamento(controlla)
+    }
+
+    /// Tappa 3: il ragionamento da aprire e chiudere, solo in memoria; un modello che non ragiona non fa fallire Vera.
+    private static func ragionamento(_ controlla: (Bool, String) -> Void) {
+        let r = RagionamentiVera()
+        r.conserva("   ", per: "vuoto")
+        r.conserva("Prima guardo il KID, poi i costi.", per: "m1")
+        controlla(!r.ha("vuoto") && r.testo("m1") == "Prima guardo il KID, poi i costi." && !r.aperto("m1"),
+                  "Ragionamento: si tiene solo se c'è, chiuso di base")
+        r.apriChiudi("m1")
+        r.apriChiudi("assente")
+        controlla(r.aperto("m1") && !r.aperto("assente"), "Ragionamento: si apre con un tocco (solo se c'è)")
+        r.apriChiudi("m1")
+        controlla(!r.aperto("m1"), "Ragionamento: e si richiude")
+        for i in 0..<(RagionamentiVera.massimo + 5) { r.conserva("passo \(i)", per: "n\(i)") }
+        controlla(!r.ha("m1") && !r.ha("n0") && r.ha("n\(RagionamentiVera.massimo + 4)") && r.testi.count == RagionamentiVera.massimo,
+                  "Ragionamento: in memoria solo gli ultimi \(RagionamentiVera.massimo)")
+        r.conserva(String(repeating: "a", count: RagionamentiVera.lunghezzaMassima + 100), per: "lungo")
+        controlla(r.testo("lungo")?.count == RagionamentiVera.lunghezzaMassima, "Ragionamento: uno troppo lungo si tronca")
+        r.apriChiudi("lungo")
+        r.svuota()
+        controlla(r.testi.isEmpty && r.aperti.isEmpty, "Ragionamento: al blocco non resta nulla")
+        controlla(MotoreLocale.senzaRagionamento("Ollama ha rifiutato la richiesta (modello ministral-3:3b, codice 400): \"ministral-3:3b\" does not support thinking")
+                  && !MotoreLocale.senzaRagionamento("model not found"),
+                  "Ragionamento: riconosce il modello che non sa ragionare")
+
+        #if os(macOS)
+        // Con il server finto: il ragionamento arriva a parte, mai nella risposta; senza ragionamento Vera riprova
+        let configurazione = URLSessionConfiguration.ephemeral
+        configurazione.protocolClasses = [ServerFinto.self]
+        let sessione = URLSession(configuration: configurazione)
+        func chiedi(_ modello: String) -> (testo: String, ragionamento: String, think: Bool?) {
+            ServerFinto.azzera()
+            var vera = ImpostazioniVera()
+            vera.modelloLocale = modello
+            let motore = MotoreLocale(vera, disponibilita: .pronto, sessione: sessione)
+            var opzioni = OpzioniModello()
+            opzioni.pensa = true
+            let raccolta = RaccoltaRagionamento()
+            let esito = Scatola<String>()
+            let fatto = DispatchSemaphore(value: 0)
+            Task.detached {
+                do {
+                    esito.valore = try await motore.scrivi([MessaggioModello(ruolo: .utente, testo: "Ciao")], opzioni: opzioni) { p in
+                        raccolta.testo = p.ragionamento
+                    }.testo
+                } catch { esito.valore = "errore: \(error.localizedDescription)" }
+                fatto.signal()
+            }
+            fatto.wait()
+            return (esito.valore ?? "", raccolta.testo, ServerFinto.ricevuto("/api/chat")?["think"] as? Bool)
+        }
+        let conPensiero = chiedi("qwen3.5:4b")
+        controlla(conPensiero.testo == ServerFinto.risposta && conPensiero.ragionamento == "ragiono un attimo"
+                  && !conPensiero.testo.contains("ragiono"),
+                  "Ragionamento: arriva a parte e non entra nella risposta («\(conPensiero.ragionamento)»)")
+        let senza = chiedi(ServerFinto.senzaRagionamento)
+        controlla(senza.testo == ServerFinto.risposta && senza.ragionamento.isEmpty && senza.think == false,
+                  "Ragionamento: un modello che non ragiona risponde lo stesso, senza ragionamento («\(senza.testo)»)")
+        #endif
+    }
+
+    private final class Scatola<T>: @unchecked Sendable {
+        var valore: T?
     }
 
     /// Tappa 2: il computer dell'IA dello studio, raggiunto con il ponte cifrato.

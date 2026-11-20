@@ -10,6 +10,8 @@ import Foundation
     @ObservationIgnored let testoCambia = CurrentValueSubject<String, Never>("")
     /// Vera ragiona prima di rispondere (finché non arriva la prima parola).
     private(set) var pensa = false
+    /// Il ragionamento mentre arriva (tappa 3 dei motori Mistral): la bolla in arrivo lo può mostrare piegato.
+    private(set) var ragionamento = ""
     /// Modalità lavoro: Vera legge il dossier; conversazione: scrive e basta.
     private(set) var modalita = ModalitaVera.lavoro
     /// Il motore che sta scrivendo («Qwen sul Mac»).
@@ -21,6 +23,7 @@ import Foundation
     func inizia(_ scelta: SceltaVera, motore: String) -> Int {
         generazione &+= 1
         testo = ""
+        if !ragionamento.isEmpty { ragionamento = "" }
         pensa = scelta.pensa
         modalita = scelta.modalita
         self.motore = motore
@@ -30,6 +33,7 @@ import Foundation
     func aggiorna(_ p: ParzialeVera, generazione g: Int) {
         guard g == generazione else { return }
         if testo != p.testo { testo = p.testo }
+        if ragionamento != p.ragionamento { ragionamento = p.ragionamento }
         let ragiona = p.pensa && p.testo.isEmpty
         if pensa != ragiona && (ragiona || !p.testo.isEmpty) { pensa = ragiona }
     }
@@ -37,6 +41,7 @@ import Foundation
     func chiudi() {
         generazione &+= 1
         testo = ""
+        if !ragionamento.isEmpty { ragionamento = "" }
         pensa = false
     }
 }

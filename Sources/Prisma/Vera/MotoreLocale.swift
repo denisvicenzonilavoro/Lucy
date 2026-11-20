@@ -122,8 +122,25 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
         return r
     }
 
+    /// Un modello che non sa ragionare (Ministral 3 Instruct) rifiuta «think»: Vera riprova subito senza ragionamento.
     private func raccogli(_ messaggi: [MessaggioModello], opzioni: OpzioniModello,
                           aggiorna: ((ParzialeVera) -> Void)?) async throws -> RispostaConStrumenti {
+        do {
+            return try await raccogliUnaVolta(messaggi, opzioni: opzioni, aggiorna: aggiorna)
+        } catch let e as ErroreVera where opzioni.pensa && Self.senzaRagionamento(e.messaggio) {
+            var senza = opzioni
+            senza.pensa = false
+            return try await raccogliUnaVolta(messaggi, opzioni: senza, aggiorna: aggiorna)
+        }
+    }
+
+    /// L'errore di Ollama per un modello che non ragiona («"ministral-3:3b" does not support thinking»).
+    static func senzaRagionamento(_ messaggio: String) -> Bool {
+        messaggio.lowercased().contains("does not support thinking")
+    }
+
+    private func raccogliUnaVolta(_ messaggi: [MessaggioModello], opzioni: OpzioniModello,
+                                  aggiorna: ((ParzialeVera) -> Void)?) async throws -> RispostaConStrumenti {
         // «Impara dalle correzioni»: le lezioni del consulente in fondo alle istruzioni di ogni risposta a testo libero
         let messaggi = LezioniVera.applica(messaggi, opzioni: opzioni)
         var chiamate: [ChiamataStrumento] = []
@@ -151,12 +168,12 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
             if let aggiorna, prima || Date().timeIntervalSince(ultimo) >= Self.intervalloAggiornamenti {
                 ultimo = Date()
                 parlato = !testo.isEmpty
-                aggiorna(ParzialeVera(testo: NucleoVera.pulisci(testo), pensa: !pensiero.isEmpty))
+                aggiorna(ParzialeVera(testo: NucleoVera.pulisci(testo), pensa: !pensiero.isEmpty, ragionamento: pensiero))
             }
         }
         testo += filtro.svuota()
         let finale = NucleoVera.pulisci(testo)
-        aggiorna?(ParzialeVera(testo: finale, pensa: !pensiero.isEmpty))
+        aggiorna?(ParzialeVera(testo: finale, pensa: !pensiero.isEmpty, ragionamento: pensiero))
         return RispostaConStrumenti(testo: finale, chiamate: chiamate, statistiche: statistiche)
     }
 
@@ -175,4 +192,6 @@ struct ParzialeVera: Equatable {
     var testo: String
     /// Il modello sta ragionando (o ha ragionato) prima di rispondere.
     var pensa: Bool
+    /// Il ragionamento fin qui (tappa 3 dei motori Mistral): mai nella risposta, solo in memoria, da aprire e chiudere.
+    var ragionamento = ""
 }
