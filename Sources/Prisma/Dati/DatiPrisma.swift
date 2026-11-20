@@ -909,6 +909,8 @@ struct ImpostazioniVera: Codable, Equatable {
     var motoreEsterno = ImpostazioniMotoreEsterno()
     /// I motori Mistral (20 novembre 2026): il modo di scegliere e i modelli dei ruoli Quotidiano e Profondo.
     var motori = ImpostazioniMotori()
+    /// Il computer dell'IA (motori Mistral, tappa 2): questo Mac lo è, oppure lo usa con il suo codice.
+    var computerIA = ImpostazioniComputerIA()
 
     /// Il modello del fornitore scelto.
     var modello: String {
@@ -930,7 +932,7 @@ struct ImpostazioniVera: Codable, Equatable {
         case memoriaAttiva, imparaDalleCorrezioni, finestra, modelloRicerca
         case sussurroNelDossier, passi
         case suMisura, motoreEsterno
-        case motori
+        case motori, computerIA
     }
 
     init(from decoder: Decoder) throws {
@@ -969,6 +971,7 @@ struct ImpostazioniVera: Codable, Equatable {
         motoreEsterno = ((try? c.decodeIfPresent(ImpostazioniMotoreEsterno.self, forKey: .motoreEsterno)) ?? nil) ?? ImpostazioniMotoreEsterno()
         // I motori Mistral: automatico e i modelli di base se mancano o sono illeggibili
         motori = ((try? c.decodeIfPresent(ImpostazioniMotori.self, forKey: .motori)) ?? nil) ?? ImpostazioniMotori()
+        computerIA = ((try? c.decodeIfPresent(ImpostazioniComputerIA.self, forKey: .computerIA)) ?? nil) ?? ImpostazioniComputerIA()
     }
 }
 

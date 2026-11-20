@@ -18,6 +18,8 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
     let fornitore: FornitoreModello
     let disponibilita: DisponibilitaVera
     let restaInMemoria: String
+    /// Il nome da mostrare quando non è il modello del Mac («Mistral Small 4 sul computer dell'IA»).
+    private var etichetta: String?
 
     init(_ vera: ImpostazioniVera, disponibilita: DisponibilitaVera, sessione: URLSession = .shared) {
         // Con la sessione di sempre il fornitore di questo dispositivo (su iPhone e iPad il ponte verso il Mac);
@@ -27,10 +29,18 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
         restaInMemoria = vera.restaInMemoria
     }
 
+    /// Con un fornitore dato: il computer dell'IA, attraverso il ponte cifrato (ComputerIA.swift).
+    init(fornitore: FornitoreModello, disponibilita: DisponibilitaVera, restaInMemoria: String, nome: String? = nil) {
+        self.fornitore = fornitore
+        self.disponibilita = disponibilita
+        self.restaInMemoria = restaInMemoria
+        etichetta = nome
+    }
+
     var modello: String { fornitore.modello }
 
     /// «Qwen sul Mac», «Gemma sul Mac»…: il nome del modello, senza la taglia.
-    var nome: String { Self.nome(modello) }
+    var nome: String { etichetta ?? Self.nome(modello) }
 
     static func nome(_ modello: String) -> String {
         // «Vera su misura» (fase 5): il modello addestrato sui tuoi esempi

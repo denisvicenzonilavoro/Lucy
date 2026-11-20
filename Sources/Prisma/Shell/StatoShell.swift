@@ -2686,7 +2686,7 @@ enum VoceConfronto: Hashable {
         if esameSuMisuraInCorso { return esameSuMisuraInPausa(cliente: id) }
         // I motori Mistral: Vera sceglie il motore in base al compito (sul MacBook da 8 GB resta il modello del Mac)
         let scelta = motoreVera.scegli(compito, vera: dati.impostazioni.vera)
-        if let m = MotoriVera.generativo(scelta, vera: dati.impostazioni.vera, locale: disponibilitaLocale) {
+        if let m = MotoriVera.generativo(scelta, vera: dati.impostazioni.vera, locale: disponibilitaLocale, computerIA: motoreVera.computerIA) {
             poi(m)
             return
         }

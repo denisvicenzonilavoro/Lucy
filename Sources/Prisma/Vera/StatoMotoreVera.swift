@@ -54,14 +54,18 @@ struct MemoriaMotore: Equatable {
 }
 
 /// Quello che l'interfaccia di Vera riceve sul motore: il motore attivo, lo stato dei modelli e la memoria usata.
-/// È un oggetto a parte (`StatoShell.motoreVera`), osservato solo da chi lo mostra. Il ragionamento da aprire e
-/// chiudere (tappa 3) e il resoconto del turno di notte (tappa 4) si aggiungono qui.
+/// È un oggetto a parte (`StatoShell.motoreVera`), osservato solo da chi lo mostra; con il computer dell'IA (tappa 2) anche
+/// la sua memoria. Il ragionamento da aprire e chiudere (tappa 3) e il resoconto del turno di notte (tappa 4) si aggiungono qui.
 @Observable final class StatoMotoreVera {
     /// L'ultima scelta: il motore che lavora (o ha lavorato per ultimo).
     private(set) var attivo: SceltaMotore?
     /// Lo stato dei tre ruoli, nell'ordine Lampo, Quotidiano, Profondo.
     private(set) var modelli: [StatoModelloVera] = []
     private(set) var memoria: MemoriaMotore?
+    /// Il computer dell'IA collegato (nil se non c'è o non risponde): nome, memoria e modelli.
+    private(set) var computerIA: StatoComputerIA?
+    /// La memoria del computer dell'IA («Memoria del computer dell'IA 38%»).
+    var memoriaIA: MemoriaMotore? { computerIA?.memoria }
     /// I modelli scaricati in Ollama all'ultimo controllo (nil se Ollama non ha risposto).
     @ObservationIgnored private(set) var installati: [String]?
     @ObservationIgnored private(set) var aggiornatoIl: Date?
@@ -69,7 +73,7 @@ struct MemoriaMotore: Equatable {
     /// Sceglie il motore per un compito e lo segna come attivo.
     @discardableResult
     func scegli(_ compito: CompitoVera, vera: ImpostazioniVera, notte: Bool = false) -> SceltaMotore {
-        let s = SceltaMotori.scegli(compito, vera: vera, installati: installati, notte: notte)
+        let s = SceltaMotori.scegli(compito, vera: vera, installati: installati, computerIA: computerIA, notte: notte)
         if attivo != s { attivo = s }
         return s
     }
@@ -87,8 +91,10 @@ struct MemoriaMotore: Equatable {
         } else {
             installati = try? await FornitoriVera.crea(vera).modelli()
         }
+        // Il computer dell'IA, se Vera lo usa: l'ultimo indirizzo o una ricerca in rete locale (ponte cifrato)
+        let ia = await ComputerIA.collega(vera)
         let totale = MemoriaComputer.totaleGB
-        let stati = Self.stati(vera: vera, installati: installati, caricati: caricati, memoriaMac: totale)
+        let stati = Self.stati(vera: vera, installati: installati, caricati: caricati, memoriaMac: totale, computerIA: ia)
         let memoria = MemoriaMotore(dove: .mac, totaleGB: totale, prismaGB: MemoriaComputer.prismaGB(),
                                     modelliGB: caricati.values.reduce(0, +))
         await MainActor.run {
@@ -96,14 +102,15 @@ struct MemoriaMotore: Equatable {
             self.aggiornatoIl = Date()
             if self.modelli != stati { self.modelli = stati }
             if self.memoria != memoria { self.memoria = memoria }
+            if self.computerIA != ia { self.computerIA = ia }
         }
         #endif
     }
 
     /// Lo stato dei tre ruoli: solo regole, per l'interfaccia e per le prove.
     static func stati(vera: ImpostazioniVera, installati: [String]?, caricati: [String: Double],
-                      memoriaMac: Double) -> [StatoModelloVera] {
-        RuoloMotore.allCases.map { ruolo in
+                      memoriaMac: Double, computerIA: StatoComputerIA? = nil) -> [StatoModelloVera] {
+        RuoloMotore.allCases.map { (ruolo: RuoloMotore) -> StatoModelloVera in
             let nome: String
             switch ruolo {
             case .lampo: nome = vera.modello
@@ -113,6 +120,27 @@ struct MemoriaMotore: Equatable {
             let catalogo = CatalogoMistral.modello(nome)
             let gb = catalogo?.memoriaGB
             let famiglia = catalogo?.famiglia ?? (ruolo == .lampo ? MotoreLocale.nome(nome) : nome)
+            // Quotidiano e Profondo sul computer dell'IA, se c'è e ci entrano
+            if ruolo != .lampo, let ia = computerIA {
+                let vuole = gb ?? CatalogoMistral.predefinito(ruolo).memoriaGB
+                let stato: StatoModelloVera.Stato
+                let spiegazione: String
+                if vuole > MemoriaComputer.perIlModello(totale: ia.memoriaGB) {
+                    stato = .nonEntra
+                    spiegazione = "Vuole circa \(SceltaMotori.gb(vuole)): \(ia.nome) ne ha \(SceltaMotori.gb(ia.memoriaGB.rounded()))."
+                } else if ia.inMemoria.keys.contains(where: { FornitoreOllama.stessoModello($0, nome) }) {
+                    stato = .inMemoria
+                    spiegazione = "Caricato su \(ia.nome): risponde subito."
+                } else if ia.ha(nome) {
+                    stato = .pronto
+                    spiegazione = ruolo == .profondo ? "Pronto su \(ia.nome): lavora nel turno di notte." : "Pronto su \(ia.nome)."
+                } else {
+                    stato = .daScaricare
+                    spiegazione = "Da scaricare su \(ia.nome) con «ollama pull \(nome)»."
+                }
+                return StatoModelloVera(ruolo: ruolo, modello: nome, famiglia: famiglia, dove: .computerIA, stato: stato,
+                                        memoriaGB: gb, spiegazione: spiegazione)
+            }
             let perIlModello = MemoriaComputer.perIlModello(totale: memoriaMac)
             let inMemoria = caricati.keys.contains { FornitoreOllama.stessoModello($0, nome) }
             let scaricato = installati?.contains { FornitoreOllama.stessoModello($0, nome) } ?? false

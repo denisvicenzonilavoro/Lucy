@@ -425,7 +425,7 @@ extension ProvaNucleoVera {
         let telefono = FornitorePonte(indirizzo: "http://127.0.0.1:\(porta)", codice: codice, tipo: .ollama, modello: "qwen3.5:4b", sessione: rete)
         let sbagliato = FornitorePonte(indirizzo: "http://127.0.0.1:\(porta)", codice: PonteVera.nuovoCodice(), tipo: .ollama, modello: "qwen3.5:4b", sessione: rete)
         let (pronto, rifiutato) = aspetta { (await telefono.verifica(), await sbagliato.verifica()) }
-        controlla(pronto.pronto && PonteVera.ultimo?.modello == "qwen3.5:4b", "Ponte: il telefono vede Qwen pronto sul Mac (\(pronto.motivo ?? "pronto"))")
+        controlla(pronto.pronto && PonteVera.ultimo?.modello == vera.modello, "Ponte: il telefono vede il modello del Mac pronto (\(pronto.motivo ?? "pronto"))")
         controlla(!rifiutato.pronto, "Ponte: con il codice sbagliato il Mac non risponde")
         let risposta: String = aspetta {
             var testo = ""
@@ -438,6 +438,39 @@ extension ProvaNucleoVera {
         }
         controlla(risposta == ServerFinto.risposta, "Ponte: la risposta di Qwen arriva al telefono a pezzi, cifrata («\(risposta)»)")
         controlla((ServerFinto.ricevuto("/api/chat")?["model"] as? String) == vera.modello, "Ponte: il Mac usa sempre il suo modello")
+
+        // Il computer dell'IA (motori Mistral, tappa 2): lo stesso ponte, ma dice memoria e modelli e usa il modello
+        // chiesto se l'ha scaricato; con un modello che non ha, risponde con il suo
+        var ia = vera
+        ia.computerIA.questoMac = true
+        let serverIA = ServerPonteVera()
+        serverIA.aggiorna(ia, sessione: finta, porta: 0, annuncia: false)
+        let scadenzaIA = Date().addingTimeInterval(5)
+        while serverIA.porta == nil && Date() < scadenzaIA { Thread.sleep(forTimeInterval: 0.05) }
+        guard let portaIA = serverIA.porta else { return controlla(false, "Computer dell'IA: il server ascolta") }
+        defer { serverIA.ferma() }
+        var lavoro = ImpostazioniVera()
+        lavoro.computerIA.usa = true
+        lavoro.computerIA.codice = codice
+        let indirizzoIA = "http://127.0.0.1:\(portaIA)"
+        let (trovato, nonIA) = aspetta {
+            (await ComputerIA.prova([indirizzoIA], vera: lavoro, sessione: rete),
+             await ComputerIA.prova(["http://127.0.0.1:\(porta)"], vera: lavoro, sessione: rete))
+        }
+        controlla(trovato != nil && (trovato?.memoriaGB ?? 0) > 0 && trovato?.installati == ServerFinto.installati.map { $0.lowercased() },
+                  "Computer dell'IA: risponde con memoria e modelli scaricati, cifrati con il codice")
+        controlla(nonIA == nil, "Computer dell'IA: un Mac con il ponte acceso ma senza «computer dell'IA» non vale")
+        func chiedi(_ modello: String) -> String? {
+            ServerFinto.azzera()
+            let f = FornitorePonte(indirizzo: indirizzoIA, codice: codice, tipo: .ollama, modello: modello, sessione: rete)
+            _ = aspetta { () async -> Bool in
+                do { for try await _ in f.flusso([MessaggioModello(ruolo: .utente, testo: "Ciao")], opzioni: OpzioniModello()) {} } catch {}
+                return true
+            }
+            return ServerFinto.ricevuto("/api/chat")?["model"] as? String
+        }
+        controlla(chiedi("gemma4:e4b") == "gemma4:e4b", "Computer dell'IA: usa il modello chiesto se l'ha scaricato")
+        controlla(chiedi("mistral-large4") == ia.modello, "Computer dell'IA: un modello che non ha non si scarica, risponde con il suo")
         #endif
     }
 }

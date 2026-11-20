@@ -8,6 +8,81 @@ enum ProvaMotoriMistral {
         scelta(controlla)
         stati(controlla)
         impostazioni(controlla)
+        computerIA(controlla)
+    }
+
+    /// Tappa 2: il computer dell'IA dello studio, raggiunto con il ponte cifrato.
+    private static func computerIA(_ controlla: (Bool, String) -> Void) {
+        let vera = ImpostazioniVera()
+        let studio = StatoComputerIA(nome: "Mac Studio", indirizzo: "http://192.168.1.30:47620", memoriaGB: 512, prismaGB: 1,
+                                     installati: ["mistral-small4", "Mistral-Large3"], inMemoria: ["mistral-small4": 72])
+        let kid = SceltaMotori.scegli(.kid, vera: vera, memoriaMac: 8, installati: [vera.modello], computerIA: studio, notte: false)
+        controlla(kid.ruolo == .quotidiano && kid.dove == .computerIA && kid.modello == "mistral-small4" && kid.ripiego == nil,
+                  "Computer dell'IA: il KID va a Mistral Small 4 sul computer dell'IA")
+        let comando = SceltaMotori.scegli(.comando, vera: vera, memoriaMac: 8, installati: [vera.modello], computerIA: studio, notte: false)
+        controlla(comando.dove == .mac && comando.ruolo == .lampo, "Computer dell'IA: i comandi restano al Lampo sul Mac, subito")
+        let notte = SceltaMotori.scegli(.lavoroLungo, vera: vera, memoriaMac: 8, installati: nil, computerIA: studio, notte: true)
+        controlla(notte.ruolo == .quotidiano && notte.dove == .computerIA && (notte.ripiego ?? "").contains("600 GB"),
+                  "Computer dell'IA: Large 4 non entra in 512 GB, di notte lavora Small 4 e Vera dice perché (\(notte.ripiego ?? "-"))")
+        var conLarge3 = vera
+        conLarge3.motori.modelloProfondo = CatalogoMistral.large3.nome
+        let large3 = SceltaMotori.scegli(.lavoroLungo, vera: conLarge3, memoriaMac: 8, installati: nil, computerIA: studio, notte: true)
+        controlla(large3.ruolo == .profondo && large3.dove == .computerIA && large3.modello == "mistral-large3" && large3.famiglia == "Mistral Large 3",
+                  "Computer dell'IA: con Mistral Large 3 il Profondo lavora di notte sul computer dell'IA")
+        let giorno = SceltaMotori.scegli(.lavoroLungo, vera: conLarge3, memoriaMac: 8, installati: nil, computerIA: studio, notte: false)
+        controlla(giorno.ruolo == .quotidiano && giorno.dove == .computerIA, "Computer dell'IA: di giorno il Profondo non lavora")
+        let piccolo = StatoComputerIA(nome: "Mac mini", indirizzo: "http://192.168.1.31:47620", memoriaGB: 32, installati: ["mistral-small4"])
+        let nonEntra = SceltaMotori.scegli(.documento, vera: vera, memoriaMac: 8, installati: [vera.modello], computerIA: piccolo, notte: false)
+        controlla(nonEntra.dove == .mac && nonEntra.ruolo == .lampo && (nonEntra.ripiego ?? "").contains("32 GB"),
+                  "Computer dell'IA: su un computer da 32 GB Small 4 non entra, lavora il Mac")
+        let senzaModello = StatoComputerIA(nome: "Mac Studio", indirizzo: "http://192.168.1.30:47620", memoriaGB: 512, installati: [])
+        let daScaricare = SceltaMotori.scegli(.documento, vera: vera, memoriaMac: 8, installati: [vera.modello], computerIA: senzaModello, notte: false)
+        controlla(daScaricare.dove == .mac && (daScaricare.ripiego ?? "").contains("non è scaricato sul computer dell'IA"),
+                  "Computer dell'IA: un modello non scaricato là non si usa")
+
+        // Il motore: il ponte cifrato verso il computer dell'IA, con il nome giusto sotto la risposta
+        #if os(macOS)
+        let motore = MotoriVera.generativo(kid, vera: vera, locale: .nonDisponibile("Ollama spento sul Mac"), computerIA: studio) as? MotoreLocale
+        controlla(motore?.nome == "Mistral Small 4 sul computer dell'IA" && motore?.modello == "mistral-small4" && motore?.fornitore is FornitorePonte,
+                  "Computer dell'IA: risponde anche con Ollama spento sul Mac, attraverso il ponte cifrato")
+        controlla((MotoriVera.generativo(kid, vera: vera, locale: .pronto, computerIA: nil) as? MotoreLocale)?.modello == vera.modello,
+                  "Computer dell'IA: senza lo stato del computer dell'IA resta il motore del Mac")
+        #endif
+
+        // Lo stato dei modelli e la memoria del computer dell'IA per l'interfaccia
+        let stati = StatoMotoreVera.stati(vera: conLarge3, installati: [vera.modello], caricati: [:], memoriaMac: 8, computerIA: studio)
+        controlla(stati[0].dove == .mac && stati[0].stato == .pronto && stati[1].dove == .computerIA && stati[1].stato == .inMemoria
+                  && stati[2].dove == .computerIA && stati[2].stato == .pronto && stati[2].spiegazione.contains("turno di notte"),
+                  "Computer dell'IA: Lampo sul Mac, Small 4 in memoria e Large 3 pronto per la notte sul computer dell'IA")
+        controlla(studio.memoria.dove == .computerIA && studio.memoria.percentuale == 14, "Computer dell'IA: la memoria usata (73 GB su 512 = 14%)")
+
+        // Lo stato del ponte: vale solo un Mac che dice di essere il computer dell'IA
+        var st = StatoPonte(pronto: true, motivo: nil, fornitore: .ollama, modello: "ministral-3:3b", mac: "Mac Studio", versione: PonteVera.versioneProtocollo)
+        controlla(StatoComputerIA(st, indirizzo: "http://x:1") == nil, "Computer dell'IA: un Mac con il solo ponte non è il computer dell'IA")
+        st.computerIA = true
+        st.memoriaGB = 512
+        st.installati = ["Mistral-Small4"]
+        let letto = (try? JSONEncoder().encode(st)).flatMap { try? JSONDecoder().decode(StatoPonte.self, from: $0) }
+        controlla(letto.flatMap { StatoComputerIA($0, indirizzo: "http://x:1") }?.ha("mistral-small4") == true,
+                  "Computer dell'IA: memoria e modelli viaggiano nello stato del ponte")
+        let vecchio = try? JSONDecoder().decode(StatoPonte.self, from: Data(#"{"pronto":true,"fornitore":"ollama","modello":"qwen3.5:4b","mac":"Mac"}"#.utf8))
+        controlla(vecchio != nil && vecchio?.computerIA == nil, "Computer dell'IA: lo stato di un Mac di prima si legge ancora")
+
+        // Il server sceglie il modello: quello chiesto solo se scaricato là
+        controlla(ServerPonteVera.modelloDaUsare(chiesto: "mistral-small4", delMac: "ministral-3:3b", ammessi: ["mistral-small4:latest"]) == "mistral-small4"
+                  && ServerPonteVera.modelloDaUsare(chiesto: "mistral-large4", delMac: "ministral-3:3b", ammessi: ["mistral-small4"]) == "ministral-3:3b"
+                  && ServerPonteVera.modelloDaUsare(chiesto: "mistral-small4", delMac: "ministral-3:3b", ammessi: []) == "ministral-3:3b",
+                  "Computer dell'IA: il server usa il modello chiesto solo se l'ha già scaricato")
+
+        // Le impostazioni: spente di base, salvate e rilette; il codice deve essere valido
+        var imp = ImpostazioniVera()
+        controlla(!imp.computerIA.questoMac && !imp.computerIA.usa && !imp.computerIA.attivo, "Computer dell'IA: spento di base")
+        imp.computerIA.usa = true
+        imp.computerIA.codice = "abcd efgh jkmn"
+        let riletti = (try? JSONEncoder().encode(imp)).flatMap { try? JSONDecoder().decode(ImpostazioniVera.self, from: $0) }
+        controlla(riletti == imp && riletti?.computerIA.attivo == true, "Computer dell'IA: impostazioni salvate e rilette, codice valido")
+        imp.computerIA.codice = "ABCD-EFGH-IJK0"
+        controlla(!imp.computerIA.attivo, "Computer dell'IA: con un codice non valido non si cerca")
     }
 
     private static func scelta(_ controlla: (Bool, String) -> Void) {

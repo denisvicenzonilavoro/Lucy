@@ -7,6 +7,7 @@ import Foundation
 //   · Profondo   = Mistral Large 4  → lavori lunghi, solo nel turno di notte, sul computer dedicato all'IA
 // Finché il computer dell'IA non c'è, ogni compito va al motore più grande che entra nella memoria del Mac
 // (sul MacBook Pro M1 da 8 GB: Ministral 3 da 3 miliardi di parametri). La scelta è solo codice: nessuna rete.
+// Con il computer dell'IA collegato (tappa 2) Quotidiano e Profondo vanno lì, se ci entrano e sono scaricati.
 
 /// I tre ruoli dei motori.
 enum RuoloMotore: String, Codable, CaseIterable, Identifiable {
@@ -105,11 +106,15 @@ enum CatalogoMistral {
                                              licenza: "Apache 2.0", immagini: true)
     static let small4 = ModelloMistral(nome: "mistral-small4", famiglia: "Mistral Small 4", ruolo: .quotidiano, memoriaGB: 72,
                                        licenza: "Apache 2.0", immagini: true)
+    /// L'alternativa al Profondo che entra in un Mac Studio da 512 GB (circa 380 GB a 4 bit): la scelta tra Large 3 e
+    /// Large 4 è dell'utente (domanda aperta del piano); si cambia con il nome del modello Profondo nelle impostazioni.
+    static let large3 = ModelloMistral(nome: "mistral-large3", famiglia: "Mistral Large 3", ruolo: .profondo, memoriaGB: 400,
+                                       licenza: "Apache 2.0", immagini: true)
     static let large4 = ModelloMistral(nome: "mistral-large4", famiglia: "Mistral Large 4", ruolo: .profondo, memoriaGB: 600,
                                        licenza: "Mistral (MIT modificata)", immagini: true)
 
     /// Dal più piccolo al più grande.
-    static let tutti = [ministral3B, ministral8B, ministral14B, small4, large4]
+    static let tutti = [ministral3B, ministral8B, ministral14B, small4, large3, large4]
 
     /// Il modello del catalogo con questo nome (nil se è un altro modello, per esempio Qwen o Vera su misura).
     static func modello(_ nome: String) -> ModelloMistral? {
@@ -171,7 +176,7 @@ enum MemoriaComputer {
 enum DoveLavora: String, Codable, Equatable {
     /// Il Mac dove gira Prisma.
     case mac
-    /// Il computer dedicato all'IA, nella rete dello studio (tappa 2: non ancora collegato).
+    /// Il computer dedicato all'IA, nella rete dello studio, raggiunto con il ponte cifrato (ComputerIA.swift).
     case computerIA
 
     var nome: String {
@@ -242,46 +247,70 @@ struct ImpostazioniMotori: Codable, Equatable {
 enum SceltaMotori {
     /// Sceglie il motore per un compito.
     /// - `memoriaMac`: la memoria fisica del Mac in GB.
-    /// - `installati`: i modelli presenti in Ollama (nil se non si sa ancora: allora si resta sul modello del Mac,
-    ///   che è quello verificato da Prisma).
-    /// - `notte`: true durante il turno di notte (il motore Profondo lavora solo allora).
+    /// - `installati`: i modelli presenti in Ollama sul Mac (nil se non si sa ancora: allora sul Mac si resta sul modello
+    ///   del Mac, che è quello verificato da Prisma).
+    /// - `computerIA`: il computer dell'IA collegato (nil se non c'è): i motori grandi vanno lì se ci entrano e sono scaricati.
+    /// - `notte`: true durante il turno di notte (il motore Profondo lavora solo allora, e solo sul computer dell'IA).
     static func scegli(_ compito: CompitoVera, vera: ImpostazioniVera, memoriaMac: Double = MemoriaComputer.totaleGB,
-                       installati: [String]?, notte: Bool) -> SceltaMotore {
+                       installati: [String]?, computerIA: StatoComputerIA? = nil, notte: Bool) -> SceltaMotore {
         let chiesto = vera.motori.modo.ruolo ?? compito.ruolo
         // Il modello del Mac: quello scelto in Impostazioni › Vera (di base Ministral 3 da 3 miliardi), verificato da Prisma
         let delMac = vera.modello
         var ruolo = chiesto
-        var motivo: String?
+        var motivi: [String] = []
+        func scelta(_ r: RuoloMotore, _ modello: String, _ dove: DoveLavora) -> SceltaMotore {
+            SceltaMotore(compito: compito, ruoloChiesto: chiesto, ruolo: r, modello: modello, dove: dove,
+                         ripiego: motivi.isEmpty ? nil : motivi.joined(separator: " "))
+        }
         if ruolo == .profondo, !notte {
             ruolo = .quotidiano
-            motivo = "\(RuoloMotore.profondo.famiglia) lavora solo nel turno di notte."
+            motivi.append("\(RuoloMotore.profondo.famiglia) lavora solo nel turno di notte.")
         }
-        // Il Lampo è il modello del Mac
-        if ruolo == .lampo {
-            return SceltaMotore(compito: compito, ruoloChiesto: chiesto, ruolo: .lampo, modello: delMac, dove: .mac, ripiego: motivo)
+        // Il Lampo è il modello del Mac: risponde subito, senza rete
+        if ruolo == .lampo { return scelta(.lampo, delMac, .mac) }
+        // Il Profondo lavora solo sul computer dell'IA, se ci entra ed è scaricato; se no scende al Quotidiano
+        if ruolo == .profondo {
+            let nome = vera.motori.modelloProfondo
+            let gb = memoria(nome, .profondo)
+            if let ia = computerIA, gb <= MemoriaComputer.perIlModello(totale: ia.memoriaGB), ia.ha(nome) {
+                return scelta(.profondo, nome, .computerIA)
+            }
+            let famiglia = CatalogoMistral.famiglia(nome)
+            if let ia = computerIA {
+                motivi.append(gb > MemoriaComputer.perIlModello(totale: ia.memoriaGB)
+                              ? "\(famiglia) vuole circa \(Self.gb(gb)): il computer dell'IA ne ha \(Self.gb(ia.memoriaGB.rounded()))."
+                              : "\(famiglia) non è scaricato sul computer dell'IA.")
+            } else {
+                motivi.append("\(famiglia) lavora solo sul computer dell'IA, che non è collegato.")
+            }
+            ruolo = .quotidiano
         }
-        // Quotidiano e Profondo sul Mac solo se ci entrano e sono già scaricati; il computer dell'IA arriva con la tappa 2
-        let nome = ruolo == .quotidiano ? vera.motori.modelloQuotidiano : vera.motori.modelloProfondo
-        let catalogo = CatalogoMistral.modello(nome)
-        let gb = catalogo?.memoriaGB ?? CatalogoMistral.predefinito(ruolo).memoriaGB
+        // Il Quotidiano: prima il computer dell'IA, poi il Mac se ci entra ed è già scaricato, se no il modello del Mac
+        let nome = vera.motori.modelloQuotidiano
+        let gb = memoria(nome, .quotidiano)
+        let famiglia = CatalogoMistral.famiglia(nome)
+        if let ia = computerIA {
+            if gb <= MemoriaComputer.perIlModello(totale: ia.memoriaGB), ia.ha(nome) { return scelta(.quotidiano, nome, .computerIA) }
+            motivi.append(gb > MemoriaComputer.perIlModello(totale: ia.memoriaGB)
+                          ? "\(famiglia) vuole circa \(Self.gb(gb)): il computer dell'IA ne ha \(Self.gb(ia.memoriaGB.rounded()))."
+                          : "\(famiglia) non è scaricato sul computer dell'IA.")
+        }
         let entra = gb <= MemoriaComputer.perIlModello(totale: memoriaMac)
         let scaricato = installati?.contains { FornitoreOllama.stessoModello($0, nome) } ?? false
-        if ruolo == .profondo, !entra {
-            // Di notte, se il Profondo non entra, prova il Quotidiano prima di scendere al modello del Mac
-            let q = scegli(.documento, vera: vera, memoriaMac: memoriaMac, installati: installati, notte: notte)
-            let perche = "\(RuoloMotore.profondo.famiglia) vuole circa \(Self.gb(gb)): sul tuo Mac non entra."
-            return SceltaMotore(compito: compito, ruoloChiesto: chiesto, ruolo: q.ruolo, modello: q.modello, dove: q.dove,
-                                ripiego: [perche, q.ripiego].compactMap { $0 }.joined(separator: " "))
+        if entra, scaricato { return scelta(.quotidiano, nome, .mac) }
+        if entra {
+            motivi.append("\(famiglia) non è ancora scaricato sul Mac.")
+        } else if computerIA == nil {
+            motivi.append("\(famiglia) vuole circa \(Self.gb(gb)): finché non c'è il computer dell'IA lavora \(CatalogoMistral.famiglia(delMac)) sul tuo Mac.")
+        } else {
+            motivi.append("Sul tuo Mac non entra: lavora \(CatalogoMistral.famiglia(delMac)).")
         }
-        if entra, scaricato {
-            return SceltaMotore(compito: compito, ruoloChiesto: chiesto, ruolo: ruolo, modello: nome, dove: .mac, ripiego: motivo)
-        }
-        let famiglia = catalogo?.famiglia ?? nome
-        let perche = entra
-            ? "\(famiglia) non è ancora scaricato sul Mac."
-            : "\(famiglia) vuole circa \(Self.gb(gb)): finché non c'è il computer dell'IA lavora \(CatalogoMistral.famiglia(delMac)) sul tuo Mac."
-        return SceltaMotore(compito: compito, ruoloChiesto: chiesto, ruolo: .lampo, modello: delMac, dove: .mac,
-                            ripiego: [motivo, perche].compactMap { $0 }.joined(separator: " "))
+        return scelta(.lampo, delMac, .mac)
+    }
+
+    /// La memoria che vuole un modello (quella del modello di base del ruolo se non è nel catalogo).
+    static func memoria(_ nome: String, _ ruolo: RuoloMotore) -> Double {
+        CatalogoMistral.modello(nome)?.memoriaGB ?? CatalogoMistral.predefinito(ruolo).memoriaGB
     }
 
     /// «72 GB», «3,5 GB».
