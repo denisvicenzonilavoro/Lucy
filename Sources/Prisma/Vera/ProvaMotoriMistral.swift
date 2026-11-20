@@ -133,11 +133,13 @@ enum ProvaMotoriMistral {
         let vecchio = try? JSONDecoder().decode(StatoPonte.self, from: Data(#"{"pronto":true,"fornitore":"ollama","modello":"qwen3.5:4b","mac":"Mac"}"#.utf8))
         controlla(vecchio != nil && vecchio?.computerIA == nil, "Computer dell'IA: lo stato di un Mac di prima si legge ancora")
 
+        #if os(macOS)
         // Il server sceglie il modello: quello chiesto solo se scaricato là
         controlla(ServerPonteVera.modelloDaUsare(chiesto: "mistral-small4", delMac: "ministral-3:3b", ammessi: ["mistral-small4:latest"]) == "mistral-small4"
                   && ServerPonteVera.modelloDaUsare(chiesto: "mistral-large4", delMac: "ministral-3:3b", ammessi: ["mistral-small4"]) == "ministral-3:3b"
                   && ServerPonteVera.modelloDaUsare(chiesto: "mistral-small4", delMac: "ministral-3:3b", ammessi: []) == "ministral-3:3b",
                   "Computer dell'IA: il server usa il modello chiesto solo se l'ha già scaricato")
+        #endif
 
         // Le impostazioni: spente di base, salvate e rilette; il codice deve essere valido
         var imp = ImpostazioniVera()
