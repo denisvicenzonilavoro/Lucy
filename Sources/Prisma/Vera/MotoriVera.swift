@@ -48,6 +48,21 @@ enum MotoriVera {
         return q.disponibilita.pronto ? q : nil
     }
 
+    /// Il motore della scelta automatica (MotoriMistral.swift). Se la scelta è il modello del Mac vale `generativo`;
+    /// un altro modello (Quotidiano o Profondo) la scelta lo dà solo se Ollama l'ha già tra i modelli scaricati.
+    /// Su iPhone e iPad risponde sempre il modello del Mac attraverso il ponte.
+    static func generativo(_ scelta: SceltaMotore, vera: ImpostazioniVera, locale: DisponibilitaVera) -> (MotoreVera & MotoreGenerativo)? {
+        #if os(iOS)
+        return generativo(vera, locale: locale)
+        #else
+        guard !FornitoreOllama.stessoModello(scelta.modello, vera.modello) else { return generativo(vera, locale: locale) }
+        guard locale.pronto else { return nil }
+        var altro = vera
+        altro.modello = scelta.modello
+        return MotoreLocale(altro, disponibilita: .pronto)
+        #endif
+    }
+
     /// Perché Qwen non risponde (nil se è pronto).
     static func motivo(_ vera: ImpostazioniVera, locale: DisponibilitaVera) -> String? {
         locale.motivo

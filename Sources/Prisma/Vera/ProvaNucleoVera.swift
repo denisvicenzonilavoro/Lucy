@@ -271,11 +271,11 @@ enum ProvaNucleoVera {
         let riletti = (try? JSONEncoder().encode(nuove)).flatMap { try? JSONDecoder().decode(ImpostazioniVera.self, from: $0) }
         controlla(riletti == nuove && riletti?.modelloCompatibile == "qwen3.5-4b-mlx" && riletti?.modelloLocale == MotoreLocale.modelloPredefinito,
                   "Vera: fornitore, indirizzo, modello e ragionamento salvati e riletti")
-        controlla(MotoreLocale.nome("qwen3.5:4b") == "Qwen sul Mac" && MotoreLocale.nome("gemma4:e4b") == "Gemma sul Mac", "Vera: il nome del motore dal modello")
+        controlla(MotoreLocale.nome("qwen3.5:4b") == "Qwen sul Mac" && MotoreLocale.nome("ministral-3:3b") == "Ministral sul Mac" && MotoreLocale.nome("gemma4:e4b") == "Gemma sul Mac", "Vera: il nome del motore dal modello")
         controlla(ConfrontoModelli.elenco(" qwen3.5:4b, qwen3:8b;gemma4:e4b, QWEN3:8B ,") == ["qwen3.5:4b", "qwen3:8b", "gemma4:e4b"],
                   "Confronto: i modelli scritti nelle impostazioni")
         let sceltoPronto = MotoriVera.generativo(ImpostazioniVera(), locale: .pronto)?.nome ?? ""
-        controlla(sceltoPronto == "Qwen sul Mac" && MotoriVera.generativo(ImpostazioniVera(), locale: .nonDisponibile("no")) == nil,
+        controlla(sceltoPronto == "Ministral sul Mac" && MotoriVera.generativo(ImpostazioniVera(), locale: .nonDisponibile("no")) == nil,
                   "Vera: il modello sul Mac è l'unico motore, se è pronto")
         // Senza il modello Vera non risponde con i calcoli: dice che non è pronto
         let spento = StatoShell(persistente: false)
@@ -320,7 +320,7 @@ enum ProvaNucleoVera {
              await FornitoreOllama(indirizzo: vera.indirizzoLocale, modello: "qwen3:8b", sessione: sessione).verifica(),
              (try? await ollama.modelli()) ?? [])
         }
-        controlla(pronto.pronto && modelli == ["qwen3.5:4b", "gemma4:e4b"], "Server finto: Ollama pronto con il modello scelto")
+        controlla(pronto.pronto && modelli == ServerFinto.installati, "Server finto: Ollama pronto con il modello scelto")
         controlla(!manca.pronto && (manca.motivo ?? "").contains("ollama pull qwen3:8b"), "Server finto: manca il modello, Vera dice come scaricarlo")
 
         // Una risposta vera in streaming, a pezzi spezzati a metà riga
@@ -453,7 +453,7 @@ final class ServerFinto: URLProtocol {
     private static let blocco = NSLock()
     private static var ricevuti: [String: [String: Any]] = [:]
     private static var _caricamenti: [String] = []
-    static let installati = ["qwen3.5:4b", "gemma4:e4b"]
+    static let installati = ["qwen3.5:4b", "gemma4:e4b", MotoreLocale.modelloPredefinito]
 
     static func azzera() {
         blocco.lock(); defer { blocco.unlock() }

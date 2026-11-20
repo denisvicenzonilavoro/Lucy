@@ -15,3 +15,8 @@ COMMIT=$(/usr/libexec/PlistBuddy -c 'Print :PrismaCommit' "$TMP/Prisma.app/Conte
 rm -rf /Applications/Prisma.app
 ditto "$TMP/Prisma.app" /Applications/Prisma.app
 echo "✓ Installata in /Applications/Prisma.app (commit $COMMIT)"
+# Vera lavora con Ministral 3 (dal 20 novembre 2026): se Ollama c'è e il modello manca, lo scarica (solo il modello, nessun dato)
+if command -v ollama > /dev/null && ! ollama list 2>/dev/null | grep -q "^ministral-3:3b"; then
+  echo "▸ Scarico Ministral 3 per Vera (circa 3 GB)…"
+  ollama pull ministral-3:3b || echo "✗ Ministral 3 non scaricato: riprova con «ollama pull ministral-3:3b»"
+fi
