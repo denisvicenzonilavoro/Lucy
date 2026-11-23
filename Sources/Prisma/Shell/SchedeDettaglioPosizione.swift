@@ -312,6 +312,19 @@ extension DettaglioPosizione {
     private func schedaCosti(_ calcoli: CalcoliDettaglio) -> some View {
         let p = posizione
         return VStack(alignment: .leading, spacing: K.spazioPannelli) {
+            if Tema.Stile.usaCarta && p.area.proiettabile {
+                // Stile Carta (NOVITÀ 6): lo scontrino dei costi, con l'alternativa a confronto
+                let scontrino = stato.ricavato("scontrino.costi.\(p.id)") {
+                    MotoreScontrino.costi(p, prodotti: stato.dati.prodotti, cliente: p.clienteId)
+                }
+                HStack(alignment: .top, spacing: K.spazio) {
+                    ScontrinoCostiPosizione(scontrino: scontrino,
+                                            mostraAlCliente: stato.inModoCliente ? nil : { stato.entraModoCliente() })
+                    NotePennaVista(note: MotorePennaVera.costi(scontrino))
+                        .frame(maxWidth: 260, alignment: .leading)
+                        .padding(.top, 40)
+                }
+            }
             if p.area.proiettabile {
                 HStack(alignment: .top, spacing: K.spazio) {
                     costiERischio(calcoli)

@@ -1221,6 +1221,8 @@ enum ProvaCalcoli {
         ProvaStatoFinaleApple.esegui(verificaEsterna)
         // Lo stile Carta: colori del template, contrasti, stile per dispositivo, caratteri, segni a mano e grana
         ProvaTemaCarta.esegui(verificaEsterna)
+        // Lo scontrino: il conto di oggi del cliente e i costi di posizioni e proposte (NOVITÀ 6)
+        ProvaCalcoliScontrino.esegui(verificaEsterna)
         // Scrivania: la mossa del giorno (pesi, caso calmo, casi a mano, clienti di prova)
         ProvaMossaDelGiorno.esegui(verificaEsterna)
         // Giro 2 (acqua viva): i tre anelli della scrivania (lo stato del lavoro)

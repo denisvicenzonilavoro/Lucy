@@ -50,6 +50,17 @@ struct PanoramicaDossierApple: View {
     @ViewBuilder private func grigliaQuadro(completezza: CompletezzaCliente?, prossimo: Appuntamento?) -> some View {
         let p = Tema.Apple.Clienti.Panoramica.self
         let destra = VStack(alignment: .leading, spacing: p.spazio) {
+            if Tema.Stile.usaCarta {
+                // Stile Carta (NOVITÀ 6): lo scontrino del conto di oggi, lo stesso di Prisma AI
+                let conto = stato.ricavato("scontrino.conto.\(cliente.id)") {
+                    MotoreScontrino.contoCliente(stato.posizioniCliente(cliente.id), data: Date())
+                }
+                if conto.posizioni > 0 {
+                    ScontrinoContoCliente(conto: conto)
+                        .entrataDossier(1)
+                    NotePennaVista(note: MotorePennaVera.conto(conto))
+                }
+            }
             SussurroDossierVista(cliente: cliente)
                 .entrataDossier(1)
             if !stato.inModoCliente {
