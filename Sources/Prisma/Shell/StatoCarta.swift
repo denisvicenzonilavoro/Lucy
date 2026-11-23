@@ -34,3 +34,46 @@ extension StatoShell {
         }
     }
 }
+
+extension StatoShell {
+    /// La Prima Pagina di adesso (NOVITÀ 1): mattino con gli incontri di oggi, sera (dalle 18) con quelli di domani.
+    /// Non in modalità cliente (porta i nomi di tutti i clienti). La chiave cambia ogni ora: alle 6 e alle 18 si «ristampa».
+    func primaPagina(ristampa: Int = 0) -> PrimaPagina {
+        let adesso = Date()
+        let cal = Calendar.current
+        let ora = cal.component(.hour, from: adesso)
+        return ricavato("prima-pagina|\(cal.startOfDay(for: adesso).timeIntervalSinceReferenceDate)|\(ora)|\(ristampa)") {
+            let sera = MotorePrimaPagina.edizione(adesso, calendario: cal) == .sera
+            let giorno = sera ? (cal.date(byAdding: .day, value: 1, to: adesso) ?? adesso) : adesso
+            let nomi = Dictionary(dati.clienti.map { ($0.id, $0.nome) }, uniquingKeysWith: { a, _ in a })
+            let incontri = appuntamentiDelGiorno(giorno)
+                .filter { $0.stato == .pianificato }
+                .map { IncontroPrimaPagina(ora: $0.inizio, chi: nomi[$0.clienteId] ?? $0.titolo, cosa: $0.titolo) }
+            let inEssere = dati.posizioni.filter { $0.stato == .inEssere }
+            let scadenze = inEssere.compactMap { p -> ScadenzaPrimaPagina? in
+                guard let s = p.scadenza, let chi = nomi[p.clienteId] else { return nil }
+                return ScadenzaPrimaPagina(cliente: chi, posizione: p.nome, data: s, valore: p.valore)
+            }
+            let chiamate = attivitaAperte.prefix(3).map {
+                ChiamataPrimaPagina(chi: nomi[$0.clienteId] ?? "", perche: $0.titolo)
+            }
+            var i = IngressiPrimaPagina(data: adesso)
+            i.incontri = incontri
+            i.scadenze = scadenze
+            i.daChiamare = Array(chiamate)
+            i.patrimonio = inEssere.filter { $0.area != .debiti }.reduce(0) { $0 + $1.valore }
+            i.clienti = dati.clienti.count
+            return MotorePrimaPagina.componi(i, calendario: cal)
+        }
+    }
+
+    /// «Ascolta»: Vera legge il titolo e gli incontri con la voce del Mac (nessun testo esce dal computer).
+    func ascoltaPrimaPagina(_ p: PrimaPagina) {
+        var testo = p.titolo + ". "
+        if !p.incontri.isEmpty {
+            testo += p.incontri.map { "Alle \(Formati.ora.string(from: $0.ora)), \($0.chi)." }.joined(separator: " ")
+        }
+        let vera = dati.impostazioni.vera
+        voceVera.di(testo, voce: vera.voce, velocita: vera.velocitaVoce)
+    }
+}

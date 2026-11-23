@@ -1227,6 +1227,8 @@ enum ProvaCalcoli {
         ProvaCalcoliTimbro.esegui(verificaEsterna)
         // Il libro mastro: cedolini, parcelle, quota scelta e quanto si può spendere (NOVITÀ 9)
         ProvaCalcoliLibroMastro.esegui(verificaEsterna)
+        // La Prima Pagina: le due edizioni e il titolo della giornata (NOVITÀ 1)
+        ProvaCalcoliPrimaPagina.esegui(verificaEsterna)
         // Scrivania: la mossa del giorno (pesi, caso calmo, casi a mano, clienti di prova)
         ProvaMossaDelGiorno.esegui(verificaEsterna)
         // Giro 2 (acqua viva): i tre anelli della scrivania (lo stato del lavoro)

@@ -309,6 +309,11 @@ private struct TestataScrivania: View {
                     GuidaCompatta()
                         .padding(.top, s.guidaAlto)
                 }
+                // Stile Carta (NOVITÀ 1): la Prima Pagina della giornata
+                if Tema.Stile.usaCarta && !stato.inModoCliente {
+                    PrimaPaginaWidget()
+                        .padding(.top, s.guidaAlto)
+                }
             }
             .modifier(entrata(0))
             Spacer(minLength: 0)
