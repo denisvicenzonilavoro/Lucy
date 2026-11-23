@@ -41,5 +41,24 @@ enum ProvaCalcoliPrimaPagina {
         verifica.vero("Prima Pagina: la sera senza incontri domani", vuota.titolo == "Domani nessun incontro: il momento giusto per chiamare chi aspetta"
                       && vuota.edizione == .sera && vuota.didascaliaNumero == "seguiti per 1 cliente")
         verifica.vero("Prima Pagina: niente mercati se l'utente non li ha accesi", vuota.mercati.isEmpty && vuota.notaVera == nil)
+
+        // Il resoconto del turno di notte (NOVITÀ 3): durata e carte per tipo, dalle notti di sempre
+        var notte = NotteDiLavoro(giorno: alle(20, 0), inizio: alle(20, 1), cal: cal)
+        notte.fine = alle(20, 4, 12)
+        notte.esito = .fatta
+        for k in 0..<3 {
+            notte.carte.append(CartaNotte(id: "f\(k)", tipo: .fascicolo, clienteId: "c\(k)", riferimento: "r\(k)", titolo: "t",
+                                          descrizione: "d", conferma: "c", preparataIl: alle(20, 2), perIl: alle(20, 9)))
+        }
+        notte.carte.append(CartaNotte(id: "m0", tipo: .messaggio, clienteId: "c0", riferimento: "r", titolo: "t",
+                                      descrizione: "d", conferma: "c", preparataIl: alle(20, 3), perIl: alle(20, 9)))
+        let vecchia = NotteDiLavoro(giorno: alle(19, 0), inizio: nil, cal: cal)
+        let r = MotoreResocontoNotte.ultimo([vecchia, notte])
+        verifica.vero("Notte: il resoconto è dell'ultima notte", r?.inizio == alle(20, 1))
+        verifica.vero("Notte: la durata scritta", r?.durata == "3 h 12 min")
+        verifica.vero("Notte: le carte contate per tipo, nell'ordine del lavoro",
+                      r?.righe == ["3 · \(TipoCartaNotte.fascicolo.nome.lowercased())", "1 · \(TipoCartaNotte.messaggio.nome.lowercased())"])
+        verifica.vero("Notte: tutte da decidere al mattino", r?.daDecidere == 4 && r?.interrotta == false)
+        verifica.vero("Notte: senza notti niente resoconto", MotoreResocontoNotte.ultimo([]) == nil)
     }
 }

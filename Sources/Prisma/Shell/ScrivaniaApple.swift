@@ -313,6 +313,9 @@ private struct TestataScrivania: View {
                 if Tema.Stile.usaCarta && !stato.inModoCliente {
                     PrimaPaginaWidget()
                         .padding(.top, s.guidaAlto)
+                    // Stile Carta (NOVITÀ 3): il resoconto del turno di notte di Vera
+                    TurnoNotteWidget()
+                        .padding(.top, 12)
                 }
             }
             .modifier(entrata(0))
