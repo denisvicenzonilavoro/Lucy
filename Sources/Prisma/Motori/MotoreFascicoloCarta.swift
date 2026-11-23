@@ -5,7 +5,7 @@ import Foundation
 // costi, timbro, scadenze): mai inventate. Il PDF resta quello del fascicolo di sempre (Fascicolo.swift). Puro.
 
 /// Una parte della cartella dell'incontro.
-struct ParteFascicolo: Hashable, Identifiable {
+struct ParteCartella: Hashable, Identifiable {
     enum Tipo: String, CaseIterable {
         case quadro, posizioni, treCose, proposta, moduli
 
@@ -27,7 +27,7 @@ struct ParteFascicolo: Hashable, Identifiable {
 }
 
 struct FascicoloCarta: Hashable {
-    let parti: [ParteFascicolo]
+    let parti: [ParteCartella]
     /// Al più tre frasi, dalla più importante.
     let treCose: [String]
 }
@@ -39,19 +39,19 @@ enum MotoreFascicoloCarta {
                         proposte: [(Posizione, EsitoTimbro)], moduli: Int, data: Date) -> FascicoloCarta {
         let euro = FormatoCifra.euro
         let inEssere = posizioni.filter { $0.stato == .inEssere }
-        var parti = [ParteFascicolo(tipo: .quadro, sotto: "Profilo, obiettivi e famiglia")]
+        var parti = [ParteCartella(tipo: .quadro, sotto: "Profilo, obiettivi e famiglia")]
         if !inEssere.isEmpty {
             let n = inEssere.count
-            parti.append(ParteFascicolo(tipo: .posizioni,
+            parti.append(ParteCartella(tipo: .posizioni,
                                         sotto: "\(n == 1 ? "1 posizione" : "\(n) posizioni") · \(euro.testo(conto.valore))"))
         }
         let cose = treCose(posizioni: inEssere, conto: conto, costi: costi, proposte: proposte, data: data)
-        if !cose.isEmpty { parti.append(ParteFascicolo(tipo: .treCose, sotto: cose[0])) }
+        if !cose.isEmpty { parti.append(ParteCartella(tipo: .treCose, sotto: cose[0])) }
         if let prima = proposte.first {
-            parti.append(ParteFascicolo(tipo: .proposta, sotto: "\(prima.0.nome) · \(prima.1.scritta.lowercased())"))
+            parti.append(ParteCartella(tipo: .proposta, sotto: "\(prima.0.nome) · \(prima.1.scritta.lowercased())"))
         }
         if moduli > 0 {
-            parti.append(ParteFascicolo(tipo: .moduli, sotto: moduli == 1 ? "1 modulo da firmare" : "\(moduli) moduli da firmare"))
+            parti.append(ParteCartella(tipo: .moduli, sotto: moduli == 1 ? "1 modulo da firmare" : "\(moduli) moduli da firmare"))
         }
         return FascicoloCarta(parti: parti, treCose: cose)
     }

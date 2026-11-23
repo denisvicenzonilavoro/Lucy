@@ -101,7 +101,7 @@ struct FascicoloInUnTocco: View {
         }
     }
 
-    private func rigaParte(_ n: Int, _ p: ParteFascicolo) -> some View {
+    private func rigaParte(_ n: Int, _ p: ParteCartella) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(String(format: "%02d", n))
                 .fontCarta(TemaCarta.Scontrino.riga)

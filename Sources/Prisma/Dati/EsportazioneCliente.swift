@@ -30,7 +30,8 @@ enum EsportazioneCliente {
         for campo in ArchivioPezzi.campiCliente {
             _ = campo.distribuisci(d, gruppo, &pezzi)
         }
-        return pezzi[id] ?? DatiPrisma()
+        return pezzi[id] ?? DatiPrisma(clienti: [], appuntamenti: [], attivita: [], posizioni: [], clienteAttivoId: "",
+                                            impostazioni: Impostazioni())
     }
 
     /// Il file JSON dell'esportazione (date ISO 8601, chiavi in ordine).

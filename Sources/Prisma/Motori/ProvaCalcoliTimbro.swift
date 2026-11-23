@@ -67,7 +67,7 @@ enum ProvaCalcoliTimbro {
         let conto = ContoCliente(versato: 40_000, valore: 50_000, costiPagati: 2_000, tasse: 1_000, posizioni: 1)
         let f = MotoreFascicoloCarta.componi(posizioni: [polizza], conto: conto, costi: [], proposte: [(p, pesante)],
                                              moduli: 2, data: oggi)
-        verifica.vero("Fascicolo: le cinque parti della cartella", f.parti.map(\.tipo) == ParteFascicolo.Tipo.allCases)
+        verifica.vero("Fascicolo: le cinque parti della cartella", f.parti.map(\.tipo) == ParteCartella.Tipo.allCases)
         verifica.vero("Fascicolo: al più tre cose da dire", !f.treCose.isEmpty && f.treCose.count <= 3)
         verifica.vero("Fascicolo: prima la scadenza vicina", f.treCose.first?.hasPrefix("Polizza vita scade il 18/12/2026") == true)
         verifica.vero("Fascicolo: la proposta da rivedere con il suo motivo",
