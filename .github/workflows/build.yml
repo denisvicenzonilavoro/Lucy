@@ -21,10 +21,13 @@ jobs:
     # Dal 15 novembre 2026 (scelta dell'utente) Prisma per Mac è solo per Apple Silicon, su tutti i branch e su main:
     # niente più versione Intel né universale. Il runner è Apple Silicon, così le prove e le istantanee girano sulla
     # stessa architettura della release.
-    # Dal 23 novembre 2026 (scelta dell'utente) macos-26: dal 20 novembre la coda di macos-15 annullava il job dopo 15 minuti.
+    # Dal 23 novembre 2026 (scelta dell'utente) un Mac Intel (macos-15-intel): le code dei runner Apple Silicon
+    # (macos-15 e poi macos-26) annullavano il job dopo 15 minuti senza farlo partire. Si compila universale: la parte
+    # arm64 è quella che gira sul Mac dell'utente (controllo con lipo più sotto), la parte x86_64 fa girare prove e
+    # istantanee sul runner Intel.
     env:
-      ARCHITETTURE: '--arch arm64'
-    runs-on: macos-26
+      ARCHITETTURE: '--arch arm64 --arch x86_64'
+    runs-on: macos-15-intel
     # La pubblicazione sul branch anteprime la fa il job «pubblica» (Mac e iOS insieme)
     outputs:
       anteprime: ${{ steps.anteprime.outputs.ok }}
