@@ -459,6 +459,18 @@ private struct RamoPassaparolaCard: View {
                     ForEach(ramo.presentati) { p in riga(p) }
                 }
             }
+            // La mappa dei legami (stile Carta, NOVITÀ 8): accanto al passaparola, la famiglia della persona
+            if Tema.Stile.usaCarta, let famiglia = stato.cliente(ramo.clienteId)?.famiglia, !famiglia.isEmpty {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("IN FAMIGLIA")
+                        .carattereApple(Tema.Apple.Carattere.etichetta)
+                        .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                    Text(famiglia.map { "\($0.nome) (\($0.relazione.nome.lowercased()))" }.joined(separator: " · "))
+                        .carattereApple(P.rigaRamo)
+                        .foregroundColor(Tema.Apple.Colore.inchiostro)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
             pulsanti
         }
         .padding(P.padding)
