@@ -447,6 +447,19 @@ struct AppImpostazioni: View {
                     segmenti([(true, "Animato"), (false, "Fermo")], Bindable(stato.dati).impostazioni.sfondoAnimato)
                 }
                 .cascataImpostazioni(2)
+                if Tema.Stile.usaCarta {
+                    // Stile Carta (NOVITÀ 12): lo sfondo vivo della scrivania e dello sblocco
+                    RigaImpostazione(titolo: "Sfondo vivo", sottotitolo: stato.dati.impostazioni.carta.sfondo.nome,
+                                     aiuto: "Luce del pomeriggio, Inchiostro, Cristallo o Carta marmorizzata: rispondono al tocco e si fermano con «Riduci movimento», con il risparmio energetico e quando la scrivania non si vede") {
+                        Picker("Sfondo vivo", selection: Bindable(stato.dati).impostazioni.carta.sfondo) {
+                            ForEach(SfondoScrivaniaCarta.allCases) { Text($0.nome).tag($0) }
+                        }
+                        .labelsHidden()
+                        .pickerStyle(.menu)
+                        .fixedSize()
+                    }
+                    .cascataImpostazioni(2)
+                }
                 RigaImpostazione(titolo: "Pioggia", sottotitolo: animato ? "Quante gocce cadono." : "Con lo sfondo fermo non piove.") {
                     segmenti(IntensitaPioggia.allCases.map { ($0, $0.nome) }, Bindable(stato.dati).impostazioni.pioggia)
                         .disabled(!animato)

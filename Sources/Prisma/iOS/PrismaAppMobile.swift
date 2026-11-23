@@ -154,7 +154,8 @@ private struct AcquaMobile: View {
         // Con «Riduci movimento» di Prisma l'acqua si ferma (quello del sistema lo legge SfondoAcquaMobile)
         Materiale.SfondoScrivania(animato: stato.dati.impostazioni.sfondoAnimato && !stato.dati.impostazioni.riduciMovimento
                                       && stato.presentazione == nil && !coperta,
-                                  intensita: stato.dati.impostazioni.pioggia.forza)
+                                  intensita: stato.dati.impostazioni.pioggia.forza,
+                                  sfondoCarta: stato.dati.impostazioni.carta.sfondo)
     }
 }
 

@@ -101,7 +101,8 @@ struct CorpoShell: View {
                 // Con «Riduci movimento» (di Prisma qui, del Mac in SfondoAcqua) l'acqua si ferma
                 Materiale.SfondoScrivania(animato: stato.dati.impostazioni.sfondoAnimato && !stato.dati.impostazioni.riduciMovimento
                                               && !stato.scrivaniaCoperta && !modoIstantanea,
-                                          intensita: stato.dati.impostazioni.pioggia.forza)
+                                          intensita: stato.dati.impostazioni.pioggia.forza,
+                                          sfondoCarta: stato.dati.impostazioni.carta.sfondo)
                 // «L'acqua risponde»: notifiche, Vera che parla e sblocco toccano l'acqua (non disegna niente)
                 OsservatoreAcqua(sistema: sistema)
 

@@ -39,18 +39,23 @@ enum Materiale {
     struct SfondoScrivania: View {
         var animato: Bool
         var intensita: Double
+        /// Stile Carta (NOVITÀ 12): lo sfondo vivo scelto in Impostazioni › Aspetto.
+        var sfondoCarta: SfondoScrivaniaCarta
         @Environment(\.colorScheme) private var schema
 
-        init(animato: Bool = false, intensita: Double) {
+        init(animato: Bool = false, intensita: Double, sfondoCarta: SfondoScrivaniaCarta = .fermo) {
             self.animato = animato
             self.intensita = intensita
+            self.sfondoCarta = sfondoCarta
         }
 
         var body: some View {
             // Stile Carta (Mac e iPad): la scrivania di carta, ferma; l'acqua non nasce (niente Metal).
             // Gli sfondi animati dello stile Carta arrivano con la novità 12.
             if Tema.Stile.usaCarta {
-                SfondoCarta()
+                // Fermo con l'interruttore, sotto le finestre ingrandite e la sala, e con il risparmio energetico
+                SfondoVivoCarta(sfondo: sfondoCarta,
+                                animato: animato && !ProcessInfo.processInfo.isLowPowerModeEnabled)
             } else {
                 SfondoAcqua(animato: animato, intensita: intensita, scuro: schema == .dark)
                     .ignoresSafeArea()
