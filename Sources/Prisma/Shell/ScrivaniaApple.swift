@@ -316,6 +316,9 @@ private struct TestataScrivania: View {
                     // Stile Carta (NOVITÀ 3): il resoconto del turno di notte di Vera
                     TurnoNotteWidget()
                         .padding(.top, 12)
+                    // Stile Carta (NOVITÀ 11): le richieste da Prisma AI come lettere (collegamento spento)
+                    LetteraPrismaAIWidget()
+                        .padding(.top, 12)
                 }
             }
             .modifier(entrata(0))
