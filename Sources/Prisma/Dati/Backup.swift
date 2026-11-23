@@ -208,10 +208,29 @@ enum GestoreBackup {
             .sorted { $0.data > $1.data }
     }
 
-    /// Elimina i backup più vecchi oltre le ultime `massimo` copie, contando a parte quelle automatiche.
+    /// Il sigillo (stile Carta, NOVITÀ 10): delle copie automatiche si tengono le ultime 12 settimane e, prima, una copia
+    /// al mese (la più recente di ogni mese) per al più 24 mesi.
+    static let settimaneSigillo = 12
+    static let mesiSigillo = 24
+
+    /// Le copie automatiche da eliminare: oltre le ultime `settimaneSigillo`, si tiene la più recente di ogni mese.
+    /// `automatici` dal più recente (come `elenca`).
+    static func automaticiDaEliminare(_ automatici: [VoceBackup], calendario cal: Calendar = Calendar(identifier: .gregorian)) -> [VoceBackup] {
+        var mesi = Set<Int>()
+        var elimina: [VoceBackup] = []
+        for v in automatici.dropFirst(settimaneSigillo) {
+            let c = cal.dateComponents([.year, .month], from: v.data)
+            let mese = (c.year ?? 0) * 100 + (c.month ?? 0)
+            if mesi.count < mesiSigillo, mesi.insert(mese).inserted { continue }
+            elimina.append(v)
+        }
+        return elimina
+    }
+
+    /// Elimina i backup più vecchi: le copie fatte a mano oltre le ultime `massimo`, quelle automatiche con il sigillo.
     static func ruota(_ cartella: URL, proteggi: URL? = nil) {
         let tutti = elenca(cartella)
-        let troppi = Array(tutti.filter(automatico).dropFirst(massimo)) + Array(tutti.filter { !automatico($0) }.dropFirst(massimo))
+        let troppi = automaticiDaEliminare(tutti.filter(automatico)) + Array(tutti.filter { !automatico($0) }.dropFirst(massimo))
         for vecchio in troppi where vecchio.url.standardizedFileURL != proteggi?.standardizedFileURL {
             try? FileManager.default.removeItem(at: vecchio.url)
         }

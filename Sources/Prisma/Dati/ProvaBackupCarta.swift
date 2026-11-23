@@ -33,6 +33,36 @@ extension ProvaBackup {
             return "carta: i valori fuori misura o illeggibili non tornano nei limiti"
         }
         guard strani.nomeUtente == imp.nomeUtente else { return "carta: un valore illeggibile ha fermato le altre impostazioni" }
+
+        // Il sigillo: 40 copie automatiche settimanali (dalla più recente) → le ultime 12 e una al mese prima
+        let cal = Calendar(identifier: .gregorian)
+        let oggi = cal.date(from: DateComponents(year: 2026, month: 11, day: 22, hour: 3)) ?? Date()
+        let copie = (0..<40).map { k in
+            VoceBackup(url: URL(fileURLWithPath: "/tmp/Prisma backup \(k) automatico.zip"),
+                       data: cal.date(byAdding: .day, value: -7 * k, to: oggi) ?? oggi, dimensione: 1)
+        }
+        let via = Set(GestoreBackup.automaticiDaEliminare(copie, calendario: cal).map(\.url))
+        let restano = copie.filter { !via.contains($0.url) }
+        guard Array(restano.prefix(12)) == Array(copie.prefix(12)) else { return "sigillo: le ultime 12 settimane non restano tutte" }
+        let vecchie = restano.dropFirst(12)
+        let mesiVecchi = vecchie.map { cal.dateComponents([.year, .month], from: $0.data) }
+        guard Set(mesiVecchi.map { "\($0.year ?? 0)-\($0.month ?? 0)" }).count == vecchie.count else {
+            return "sigillo: prima delle 12 settimane deve restare una copia sola per mese"
+        }
+        guard !vecchie.isEmpty, vecchie.count < 28 else { return "sigillo: la rotazione mensile non ha tenuto le copie giuste" }
+        guard GestoreBackup.automaticiDaEliminare(Array(copie.prefix(12)), calendario: cal).isEmpty else {
+            return "sigillo: con 12 copie non si elimina niente"
+        }
+        // La domenica alle 03:00: da mercoledì 18 novembre 2026 alle 10 → domenica 22 alle 3
+        let mercoledi = cal.date(from: DateComponents(year: 2026, month: 11, day: 18, hour: 10)) ?? Date()
+        let domenica = ImpostazioniBackup.domenicaDopo(mercoledi, calendario: cal)
+        let attesa = cal.dateComponents([.year, .month, .day, .hour, .minute, .weekday], from: domenica)
+        guard attesa.year == 2026, attesa.month == 11, attesa.day == 22, attesa.hour == 3, attesa.minute == 0, attesa.weekday == 1 else {
+            return "sigillo: la copia automatica non cade la domenica alle 03:00"
+        }
+        // Appena fatta la copia della domenica, la prossima è la domenica dopo
+        let dopo = ImpostazioniBackup.domenicaDopo(domenica, calendario: cal)
+        guard cal.dateComponents([.day], from: domenica, to: dopo).day == 7 else { return "sigillo: la copia dopo non è fra una settimana" }
         return nil
     }
 }

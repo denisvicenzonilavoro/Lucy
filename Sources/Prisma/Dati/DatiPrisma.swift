@@ -1009,8 +1009,21 @@ struct ImpostazioniBackup: Codable, Equatable {
 
     static let intervalloAutomatico: TimeInterval = 7 * 24 * 60 * 60
 
+    /// Il sigillo (stile Carta, NOVITÀ 10): la copia automatica si fa la domenica alle 03:00 (se Prisma è aperto; se il
+    /// Mac era spento, alla prima occasione dopo). Senza nessuna copia ancora, subito.
     var prossimo: Date? {
         guard automatico else { return nil }
-        return ultimo.map { $0.addingTimeInterval(Self.intervalloAutomatico) } ?? Date()
+        guard let ultimo else { return Date() }
+        return Self.domenicaDopo(ultimo)
+    }
+
+    /// La prima domenica alle 03:00 dopo `data`.
+    static func domenicaDopo(_ data: Date, calendario cal: Calendar = .current) -> Date {
+        var c = DateComponents()
+        c.weekday = 1
+        c.hour = 3
+        c.minute = 0
+        c.second = 0
+        return cal.nextDate(after: data, matching: c, matchingPolicy: .nextTime) ?? data.addingTimeInterval(intervalloAutomatico)
     }
 }

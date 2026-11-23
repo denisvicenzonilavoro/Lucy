@@ -312,7 +312,7 @@ extension AppImpostazioni {
     var testoAutomatico: String {
         let b = stato.dati.impostazioni.backup
         guard b.automatico else { return "Spento: ricordati di crearli a mano." }
-        return "Ogni settimana; tengo le ultime \(GestoreBackup.massimo) copie."
+        return "Il sigillo: ogni domenica alle 03:00; tengo le ultime \(GestoreBackup.settimaneSigillo) settimane, poi una copia al mese."
     }
 
     /// Il prossimo backup automatico, al passaggio del puntatore.
