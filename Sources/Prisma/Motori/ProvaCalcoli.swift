@@ -1223,6 +1223,8 @@ enum ProvaCalcoli {
         ProvaTemaCarta.esegui(verificaEsterna)
         // Lo scontrino: il conto di oggi del cliente e i costi di posizioni e proposte (NOVITÀ 6)
         ProvaCalcoliScontrino.esegui(verificaEsterna)
+        // Il timbro: cinque controlli di coerenza della proposta con il profilo (NOVITÀ 7)
+        ProvaCalcoliTimbro.esegui(verificaEsterna)
         // Scrivania: la mossa del giorno (pesi, caso calmo, casi a mano, clienti di prova)
         ProvaMossaDelGiorno.esegui(verificaEsterna)
         // Giro 2 (acqua viva): i tre anelli della scrivania (lo stato del lavoro)

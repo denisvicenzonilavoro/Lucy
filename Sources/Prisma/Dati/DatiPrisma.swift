@@ -588,6 +588,9 @@ struct Impostazioni: Codable, Equatable {
     /// di base («Alleanza», «Indipendente»). Letto con tolleranza, senza alzare la versione: gli archivi e i backup di
     /// prima si aprono con i nomi di base. Entra nei calcoli in cache (testi delle notifiche, di Vera, di Studio).
     var nomiCanali: NomiCanali?
+    /// Lo stile Carta (23 novembre 2026, ImpostazioniCarta.swift): soglia del timbro, quota da mettere da parte,
+    /// sfondo della scrivania e sigillo automatico. Letto con tolleranza, senza alzare la versione.
+    var carta = ImpostazioniCarta()
 
     init() {}
 
@@ -610,6 +613,7 @@ struct Impostazioni: Codable, Equatable {
         case territorio
         case notte
         case nomiCanali
+        case carta
     }
 
     init(from decoder: Decoder) throws {
@@ -675,6 +679,8 @@ struct Impostazioni: Codable, Equatable {
         territorio = ((try? c.decodeIfPresent(ImpostazioniTerritorio.self, forKey: .territorio)) ?? nil) ?? ImpostazioniTerritorio()
         // Stanotte (versione 27, giro 14): senza o illeggibile, spento
         notte = ((try? c.decodeIfPresent(ImpostazioniNotte.self, forKey: .notte)) ?? nil) ?? ImpostazioniNotte()
+        // Lo stile Carta (23 novembre 2026): senza o illeggibile, i valori di base
+        carta = ((try? c.decodeIfPresent(ImpostazioniCarta.self, forKey: .carta)) ?? nil) ?? ImpostazioniCarta()
         // Nomi dei canali (migliorie d'uso 38): senza o illeggibili, quelli di base; ripuliti come dal campo
         nomiCanali = ((try? c.decodeIfPresent(NomiCanali.self, forKey: .nomiCanali)) ?? nil).flatMap { n in
             let puliti = NomiCanali.scelti(primo: n.primo, secondo: n.secondo)

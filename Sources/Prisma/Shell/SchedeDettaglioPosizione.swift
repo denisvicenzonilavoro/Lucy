@@ -312,6 +312,10 @@ extension DettaglioPosizione {
     private func schedaCosti(_ calcoli: CalcoliDettaglio) -> some View {
         let p = posizione
         return VStack(alignment: .leading, spacing: K.spazioPannelli) {
+            if Tema.Stile.usaCarta, let timbro = stato.timbro(p) {
+                // Stile Carta (NOVITÀ 7): il timbro di Vera sulla proposta, con l'avvertenza sull'adeguatezza
+                RiquadroTimbro(esito: timbro)
+            }
             if Tema.Stile.usaCarta && p.area.proiettabile {
                 // Stile Carta (NOVITÀ 6): lo scontrino dei costi, con l'alternativa a confronto
                 let scontrino = stato.ricavato("scontrino.costi.\(p.id)") {
