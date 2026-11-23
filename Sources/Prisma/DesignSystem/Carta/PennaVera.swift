@@ -6,10 +6,10 @@ import SwiftUI
 
 extension TemaCarta {
     enum Penna {
-        static let testo = Font.system(size: 14, weight: .regular, design: .serif).italic()
+        static let testo = TestoCarta(dimensione: 14, peso: .regular, disegno: .serif, corsivo: true)
         static let pennino: CGFloat = 13
         static let spazio: CGFloat = 6
-        static let pulsante = Font.system(size: 12.5, weight: .medium)
+        static let pulsante = TestoCarta(dimensione: 12.5, peso: .medium)
         #if os(iOS)
         static let altezzaPulsante: CGFloat = 44
         #else
@@ -42,9 +42,9 @@ struct NotaPennaVista: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: TemaCarta.Penna.spazio) {
             Image(systemName: "pencil.tip")
-                .font(.system(size: TemaCarta.Penna.pennino, weight: .regular))
+                .fontCarta(TemaCarta.Penna.pennino, weight: .regular)
             Text(nota.testo)
-                .font(TemaCarta.Penna.testo)
+                .fontCarta(TemaCarta.Penna.testo)
                 .fixedSize(horizontal: false, vertical: true)
         }
         .foregroundColor(TemaCarta.Colore.pennaD)
@@ -71,7 +71,7 @@ struct PulsanteNoteVera: View {
                 stato.noteVeraAccese.toggle()
             } label: {
                 Label("Note di Vera", systemImage: "pencil")
-                    .font(TemaCarta.Penna.pulsante)
+                    .fontCarta(TemaCarta.Penna.pulsante)
                     .padding(.horizontal, 13)
                     .frame(height: TemaCarta.Penna.altezzaPulsante)
                     .foregroundColor(acceso ? TemaCarta.Colore.schedaD : TemaCarta.Colore.inchiostroD)

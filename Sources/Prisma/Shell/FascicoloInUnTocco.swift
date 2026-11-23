@@ -17,7 +17,7 @@ struct PulsanteFascicoloInUnTocco: View {
                 aperto = true
             } label: {
                 Label("Fascicolo in un tocco", systemImage: "folder")
-                    .font(.system(size: 13, weight: .medium))
+                    .fontCarta(13, weight: .medium)
                     .foregroundColor(TemaCarta.Colore.suInchiostroD)
                     .padding(.horizontal, 16)
                     .frame(height: 36)
@@ -46,10 +46,10 @@ struct FascicoloInUnTocco: View {
         VStack(alignment: .leading, spacing: 18) {
             VStack(alignment: .leading, spacing: 4) {
                 Text("IL FASCICOLO IN UN TOCCO")
-                    .font(TemaCarta.Scontrino.titolo).tracking(2)
+                    .fontCarta(TemaCarta.Scontrino.titolo).tracking(2)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                 Text(cliente.nome)
-                    .font(.system(size: 30, weight: .medium, design: .serif))
+                    .fontCarta(30, weight: .medium, design: .serif)
                     .foregroundColor(TemaCarta.Colore.inchiostroD)
                     .segnoCarta(.sottolinea, chiave: "fascicolo.\(cliente.id)")
             }
@@ -63,12 +63,12 @@ struct FascicoloInUnTocco: View {
             if !f.treCose.isEmpty {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("TRE COSE DA DIRE")
-                        .font(TemaCarta.Scontrino.titolo).tracking(2)
+                        .fontCarta(TemaCarta.Scontrino.titolo).tracking(2)
                         .foregroundColor(TemaCarta.Colore.matitaD)
                     ForEach(Array(f.treCose.enumerated()), id: \.offset) { i, cosa in
                         HStack(alignment: .firstTextBaseline, spacing: 8) {
-                            Text("\(i + 1).").font(.system(size: 14, weight: .medium, design: .serif))
-                            Text(cosa).font(.system(size: 14)).fixedSize(horizontal: false, vertical: true)
+                            Text("\(i + 1).").fontCarta(14, weight: .medium, design: .serif)
+                            Text(cosa).fontCarta(14).fixedSize(horizontal: false, vertical: true)
                         }
                         .foregroundColor(TemaCarta.Colore.inchiostroD)
                     }
@@ -85,7 +85,7 @@ struct FascicoloInUnTocco: View {
             }
             if stato.reportFascicolo.isEmpty {
                 Text("Per il PDF scegli i report in Prospetti › Il fascicolo dell'incontro.")
-                    .font(.system(size: 11.5)).foregroundColor(TemaCarta.Colore.matitaD)
+                    .fontCarta(11.5).foregroundColor(TemaCarta.Colore.matitaD)
             }
         }
         .padding(28)
@@ -104,11 +104,11 @@ struct FascicoloInUnTocco: View {
     private func rigaParte(_ n: Int, _ p: ParteFascicolo) -> some View {
         HStack(alignment: .firstTextBaseline, spacing: 12) {
             Text(String(format: "%02d", n))
-                .font(TemaCarta.Scontrino.riga)
+                .fontCarta(TemaCarta.Scontrino.riga)
                 .foregroundColor(TemaCarta.Colore.oroTestoD)
             VStack(alignment: .leading, spacing: 2) {
-                Text(p.tipo.titolo).font(.system(size: 17, weight: .medium, design: .serif))
-                Text(p.sotto).font(.system(size: 12.5)).foregroundColor(TemaCarta.Colore.inchiostro2D)
+                Text(p.tipo.titolo).fontCarta(17, weight: .medium, design: .serif)
+                Text(p.sotto).fontCarta(12.5).foregroundColor(TemaCarta.Colore.inchiostro2D)
                     .fixedSize(horizontal: false, vertical: true)
             }
             .foregroundColor(TemaCarta.Colore.inchiostroD)

@@ -8,10 +8,10 @@ extension TemaCarta {
     enum Timbro {
         static let lato: CGFloat = 132
         static let inclinazione: Double = -12
-        static let scritta = Font.system(size: 12, weight: .semibold, design: .monospaced)
-        static let piccolo = Font.system(size: 11, weight: .regular, design: .monospaced)
-        static let voce = Font.system(size: 13, weight: .regular)
-        static let nota = Font.system(size: 11.5, weight: .regular, design: .serif).italic()
+        static let scritta = TestoCarta(dimensione: 12, peso: .semibold, disegno: .monospaced)
+        static let piccolo = TestoCarta(dimensione: 11, peso: .regular, disegno: .monospaced)
+        static let voce = TestoCarta(dimensione: 13, peso: .regular)
+        static let nota = TestoCarta(dimensione: 11.5, peso: .regular, disegno: .serif, corsivo: true)
         static let durata: Double = 0.45
     }
 }
@@ -31,13 +31,13 @@ struct TimbroTondo: View {
             Circle().strokeBorder(colore, lineWidth: 3)
             Circle().strokeBorder(colore, lineWidth: 1).padding(7)
             VStack(spacing: 4) {
-                Text("VERA · PRISMA").font(k.piccolo).tracking(1.5)
+                Text("VERA · PRISMA").fontCarta(k.piccolo).tracking(1.5)
                 Text(scritta.uppercased())
-                    .font(k.scritta)
+                    .fontCarta(k.scritta)
                     .multilineTextAlignment(.center)
                     .lineLimit(2)
                     .minimumScaleFactor(0.7)
-                Text(Formati.dataBreve.string(from: Date())).font(k.piccolo)
+                Text(Formati.dataBreve.string(from: Date())).fontCarta(k.piccolo)
             }
             .padding(18)
         }
@@ -65,7 +65,7 @@ struct RiquadroTimbro: View {
             TimbroTondo(coerente: esito.coerente, scritta: esito.scritta)
             VStack(alignment: .leading, spacing: 8) {
                 Text("IL TIMBRO DI VERA")
-                    .font(TemaCarta.Scontrino.titolo)
+                    .fontCarta(TemaCarta.Scontrino.titolo)
                     .tracking(2)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                 ForEach(esito.controlli) { c in
@@ -73,7 +73,8 @@ struct RiquadroTimbro: View {
                         Image(systemName: c.passa ? "checkmark" : "exclamationmark.circle")
                             .foregroundColor(c.passa ? TemaCarta.Colore.verdeD : TemaCarta.Colore.rossoD)
                             .accessibilityHidden(true)
-                        Text("\(c.voce.nome): ").font(k.voce.weight(.medium)) + Text(c.testo).font(k.voce)
+                        (Text("\(c.voce.nome): ").fontWeight(.medium) + Text(c.testo))
+                            .fontCarta(k.voce)
                     }
                     .foregroundColor(TemaCarta.Colore.inchiostroD)
                     .fixedSize(horizontal: false, vertical: true)
@@ -81,7 +82,7 @@ struct RiquadroTimbro: View {
                     .accessibilityValue(c.passa ? "superato" : "da rivedere")
                 }
                 Text(MotoreTimbro.avvertenza)
-                    .font(k.nota)
+                    .fontCarta(k.nota)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, 4)

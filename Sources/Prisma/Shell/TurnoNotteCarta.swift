@@ -32,27 +32,27 @@ struct TurnoNotteWidget: View {
         HStack(alignment: .top, spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
                 Label("IL TURNO DI NOTTE DI VERA", systemImage: "moon")
-                    .font(.system(size: 11, design: .monospaced)).tracking(2)
+                    .fontCarta(11, design: .monospaced).tracking(2)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                 Text(r.durata ?? (r.interrotta ? "Interrotto" : "In corso"))
-                    .font(.system(size: 42, weight: .medium, design: .serif)).tracking(-1.2)
+                    .fontCarta(42, weight: .medium, design: .serif).tracking(-1.2)
                 if let i = r.inizio, let f = r.fine {
                     Text("dalle \(Formati.ora.string(from: i)) alle \(Formati.ora.string(from: f))")
-                        .font(.system(size: 14, design: .serif).italic())
+                        .fontCarta(14, design: .serif, corsivo: true)
                         .foregroundColor(TemaCarta.Colore.inchiostro2D)
                 }
             }
             VStack(alignment: .leading, spacing: 4) {
                 ForEach(r.righe, id: \.self) { riga in
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
-                        Text("✓").font(.system(size: 11, design: .monospaced)).foregroundColor(TemaCarta.Colore.verdeD)
+                        Text("✓").fontCarta(11, design: .monospaced).foregroundColor(TemaCarta.Colore.verdeD)
                             .accessibilityHidden(true)
-                        Text(riga).font(.system(size: 12.5)).foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        Text(riga).fontCarta(12.5).foregroundColor(TemaCarta.Colore.inchiostro2D)
                     }
                 }
                 if r.daDecidere > 0 {
                     Text(r.daDecidere == 1 ? "1 carta da approvare" : "\(r.daDecidere) carte da approvare")
-                        .font(TemaCarta.Penna.testo)
+                        .fontCarta(TemaCarta.Penna.testo)
                         .foregroundColor(TemaCarta.Colore.pennaD)
                         .padding(.top, 4)
                 }

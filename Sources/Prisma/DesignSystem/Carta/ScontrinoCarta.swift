@@ -12,12 +12,12 @@ extension TemaCarta {
         /// Altezza e passo dei denti del bordo seghettato.
         static let dente: CGFloat = 6
         static let passoDente: CGFloat = 10
-        static let testata = Font.system(size: 11, weight: .regular, design: .monospaced)
-        static let titolo = Font.system(size: 11, weight: .regular, design: .monospaced)
-        static let totale = Font.system(size: 46, weight: .medium, design: .serif).monospacedDigit()
-        static let riga = Font.system(size: 12.5, weight: .regular, design: .monospaced)
-        static let rigaForte = Font.system(size: 13.5, weight: .medium, design: .monospaced)
-        static let piccolo = Font.system(size: 11, weight: .regular, design: .monospaced)
+        static let testata = TestoCarta(dimensione: 11, peso: .regular, disegno: .monospaced)
+        static let titolo = TestoCarta(dimensione: 11, peso: .regular, disegno: .monospaced)
+        static let totale = TestoCarta(dimensione: 46, peso: .medium, disegno: .serif, cifre: true)
+        static let riga = TestoCarta(dimensione: 12.5, peso: .regular, disegno: .monospaced)
+        static let rigaForte = TestoCarta(dimensione: 13.5, peso: .medium, disegno: .monospaced)
+        static let piccolo = TestoCarta(dimensione: 11, peso: .regular, disegno: .monospaced)
         static let spazioRighe: CGFloat = 9
         static let codice: CGFloat = 30
     }
@@ -59,11 +59,11 @@ struct RigaScontrinoVista: View {
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
             Text(etichetta)
-                .font(forte ? TemaCarta.Scontrino.rigaForte : TemaCarta.Scontrino.riga)
+                .fontCarta(forte ? TemaCarta.Scontrino.rigaForte : TemaCarta.Scontrino.riga)
                 .foregroundColor(forte ? TemaCarta.Colore.inchiostroD : TemaCarta.Colore.inchiostro2D)
             Spacer(minLength: 12)
             Text(importo)
-                .font(forte ? TemaCarta.Scontrino.rigaForte : TemaCarta.Scontrino.riga)
+                .fontCarta(forte ? TemaCarta.Scontrino.rigaForte : TemaCarta.Scontrino.riga)
                 .monospacedDigit()
                 .foregroundColor(colore)
         }
@@ -121,22 +121,22 @@ struct ScontrinoCarta<Righe: View>: View {
                 Spacer()
                 Text(Formati.dataBreve.string(from: data))
             }
-            .font(k.testata)
+            .fontCarta(k.testata)
             .foregroundColor(TemaCarta.Colore.matitaD)
             .padding(.bottom, 18)
 
             VStack(spacing: 6) {
                 Text(titolo.uppercased())
-                    .font(k.titolo)
+                    .fontCarta(k.titolo)
                     .tracking(2)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                 ContachilometriCarta(testo: totale)
-                    .font(k.totale)
+                    .fontCarta(k.totale)
                     .foregroundColor(TemaCarta.Colore.inchiostroD)
                     .segnoCarta(.sottolinea, chiave: "scontrino.\(titolo)")
                 if let sottoTotale {
                     Text(sottoTotale)
-                        .font(k.piccolo)
+                        .fontCarta(k.piccolo)
                         .foregroundColor(coloreSottoTotale)
                         .multilineTextAlignment(.center)
                         .padding(.top, 4)
@@ -153,7 +153,7 @@ struct ScontrinoCarta<Righe: View>: View {
                 .padding(.top, 16)
                 .padding(.horizontal, 30)
             Text("Lo stesso conto di Prisma AI".uppercased())
-                .font(k.testata)
+                .fontCarta(k.testata)
                 .tracking(2)
                 .foregroundColor(TemaCarta.Colore.matitaD)
                 .frame(maxWidth: .infinity)
@@ -188,7 +188,7 @@ struct ScontrinoContoCliente: View {
                                    colore: resa >= 0 ? TemaCarta.Colore.verdeD : TemaCarta.Colore.rossoD)
             }
             Text("I costi pagati sono una stima: costo annuo per gli anni trascorsi.")
-                .font(TemaCarta.Scontrino.piccolo)
+                .fontCarta(TemaCarta.Scontrino.piccolo)
                 .foregroundColor(TemaCarta.Colore.matitaD)
                 .fixedSize(horizontal: false, vertical: true)
         }

@@ -69,15 +69,15 @@ struct LetteraPrismaAIWidget: View {
                     BustaCeralacca()
                     VStack(alignment: .leading, spacing: 2) {
                         Text("DA PRISMA AI · \(Formati.ora.string(from: l.arrivata))")
-                            .font(.system(size: 11, design: .monospaced)).tracking(2)
+                            .fontCarta(11, design: .monospaced).tracking(2)
                             .foregroundColor(TemaCarta.Colore.matitaD)
                         Text("\(l.nome) chiede una consulenza")
-                            .font(.system(size: 21, weight: .medium, design: .serif))
+                            .fontCarta(21, weight: .medium, design: .serif)
                         Text("\(l.eta.map { "\($0) anni · " } ?? "")ha caricato \(l.prodotti) prodotti")
-                            .font(.system(size: 13)).foregroundColor(TemaCarta.Colore.inchiostro2D)
+                            .fontCarta(13).foregroundColor(TemaCarta.Colore.inchiostro2D)
                     }
                     Spacer()
-                    Text("Apri la lettera →").font(.system(size: 13, weight: .medium))
+                    Text("Apri la lettera →").fontCarta(13, weight: .medium)
                 }
                 .foregroundColor(TemaCarta.Colore.inchiostroD)
                 .padding(EdgeInsets(top: 14, leading: 20, bottom: 14, trailing: 20))
@@ -123,10 +123,10 @@ struct LetteraPrismaAIVista: View {
     var body: some View {
         let f = FormatoCifra.euro
         VStack(alignment: .leading, spacing: 16) {
-            Text("Ciao \(stato.nomeUtente),").font(.system(size: 15, design: .serif).italic()).foregroundColor(TemaCarta.Colore.inchiostro2D)
+            Text("Ciao \(stato.nomeUtente),").fontCarta(15, design: .serif, corsivo: true).foregroundColor(TemaCarta.Colore.inchiostro2D)
             Text("\(lettera.nome) chiede una consulenza")
-                .font(.system(size: 28, weight: .medium, design: .serif))
-            Text(lettera.frase).font(.system(size: 15, design: .serif)).fixedSize(horizontal: false, vertical: true)
+                .fontCarta(28, weight: .medium, design: .serif)
+            Text(lettera.frase).fontCarta(15, design: .serif).fixedSize(horizontal: false, vertical: true)
             ScontrinoCarta(data: lettera.arrivata, titolo: "Il conto che ha condiviso", totale: f.testo(lettera.totale),
                            sottoTotale: "di costi all'anno", coloreSottoTotale: TemaCarta.Colore.matitaD) {
                 ForEach(lettera.conto, id: \.etichetta) { r in
@@ -136,7 +136,7 @@ struct LetteraPrismaAIVista: View {
             }
             if stato.inDimostrazione {
                 Text("Lettera di esempio della dimostrazione: dati inventati.")
-                    .font(.system(size: 11.5)).foregroundColor(TemaCarta.Colore.matitaD)
+                    .fontCarta(11.5).foregroundColor(TemaCarta.Colore.matitaD)
             }
             HStack {
                 Button("Richiamala oggi") { stato.richiamaOggi(lettera); chiudi() }

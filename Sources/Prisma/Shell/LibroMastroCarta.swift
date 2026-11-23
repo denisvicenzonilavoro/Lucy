@@ -43,27 +43,27 @@ struct LibroMastroCarta: View {
         HStack(alignment: .top, spacing: 26) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("IL LIBRO MASTRO · \(Formati.meseAnno.string(from: m.mese).uppercased())")
-                    .font(.system(size: 11, design: .monospaced)).tracking(2)
+                    .fontCarta(11, design: .monospaced).tracking(2)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                 if let disponibile = m.disponibile {
-                    Text("Quanto puoi spendere").font(.system(size: 14, design: .serif).italic())
+                    Text("Quanto puoi spendere").fontCarta(14, design: .serif, corsivo: true)
                         .foregroundColor(TemaCarta.Colore.inchiostro2D)
                     ContachilometriCarta(testo: f.testo(disponibile))
-                        .font(.system(size: 42, weight: .medium, design: .serif).monospacedDigit())
+                        .fontCarta(42, weight: .medium, design: .serif, cifre: true)
                         .segnoCarta(.sottolinea, chiave: "libro-mastro")
                 } else {
-                    Text("Scegli quanto mettere da parte").font(.system(size: 22, weight: .medium, design: .serif))
+                    Text("Scegli quanto mettere da parte").fontCarta(22, weight: .medium, design: .serif)
                     Text("La percentuale la decidi tu: Prisma non conosce regole fiscali e non ne inventa.")
-                        .font(.system(size: 12.5)).foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        .fontCarta(12.5).foregroundColor(TemaCarta.Colore.inchiostro2D)
                         .fixedSize(horizontal: false, vertical: true)
                 }
                 HStack(spacing: 8) {
-                    Text("Da mettere da parte").font(.system(size: 12.5))
+                    Text("Da mettere da parte").fontCarta(12.5)
                     TextField("%", value: quota, format: .number.precision(.fractionLength(0...1)))
                         .frame(width: 54)
                         .accessibilityLabel("Percentuale da mettere da parte")
                         .multilineTextAlignment(.trailing)
-                    Text("%").font(.system(size: 12.5))
+                    Text("%").fontCarta(12.5)
                 }
                 .foregroundColor(TemaCarta.Colore.inchiostroD)
                 .padding(.top, 6)
@@ -135,9 +135,9 @@ struct LibroMastroCarta: View {
 
     private var riquadroCedolino: some View {
         VStack(spacing: 6) {
-            Image(systemName: "doc.text.viewfinder").font(.system(size: 22, weight: .light))
-            Text("Scegli o trascina qui il cedolino").font(.system(size: 12.5, weight: .medium))
-            Text("Vera lo legge sul Mac: tu confermi le cifre").font(.system(size: 11)).multilineTextAlignment(.center)
+            Image(systemName: "doc.text.viewfinder").fontCarta(22, weight: .light)
+            Text("Scegli o trascina qui il cedolino").fontCarta(12.5, weight: .medium)
+            Text("Vera lo legge sul Mac: tu confermi le cifre").fontCarta(11).multilineTextAlignment(.center)
         }
         .foregroundColor(sopra ? TemaCarta.Colore.pennaD : TemaCarta.Colore.inchiostro2D)
         .padding(14)
@@ -166,11 +166,11 @@ struct ConfermaCedolino: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Il cedolino").font(.system(size: 24, weight: .medium, design: .serif))
-            Text(cedolino.fonte).font(.system(size: 11.5, design: .monospaced)).foregroundColor(TemaCarta.Colore.matitaD)
+            Text("Il cedolino").fontCarta(24, weight: .medium, design: .serif)
+            Text(cedolino.fonte).fontCarta(11.5, design: .monospaced).foregroundColor(TemaCarta.Colore.matitaD)
             if cedolino.lordo == nil {
                 Text("Non ho trovato il totale delle provvigioni: scrivilo tu.")
-                    .font(TemaCarta.Penna.testo).foregroundColor(TemaCarta.Colore.pennaD)
+                    .fontCarta(TemaCarta.Penna.testo).foregroundColor(TemaCarta.Colore.pennaD)
             }
             Form {
                 DatePicker("Mese", selection: Binding(get: { cedolino.mese ?? Date() }, set: { cedolino.mese = $0 }),
