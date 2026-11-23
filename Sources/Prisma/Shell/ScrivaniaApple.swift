@@ -504,7 +504,7 @@ struct CifraScrivania: View {
     let pronto: Bool
 
     var body: some View {
-        if pronto && Tema.Stile.carta {
+        if pronto && Tema.Stile.usaCarta {
             // Stile Carta: le cifre a contachilometri
             ContachilometriCarta(testo: formato.testo(valore, finale: valore))
         } else if pronto {

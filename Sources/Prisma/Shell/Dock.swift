@@ -87,7 +87,7 @@ private struct FilaDock: View, Equatable {
                 rimbalza(0)
                 mostraScrivania()
             } icona: {
-                if Tema.Stile.carta {
+                if Tema.Stile.usaCarta {
                     IconaScrivaniaCarta(lato: lato)
                 } else {
                     ImmagineNitida(percorso: "Icone/Prisma.png", lato: lato)

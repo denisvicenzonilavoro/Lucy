@@ -159,7 +159,7 @@ struct ModificatoreVetro: ViewModifier {
     }
 
     @ViewBuilder func body(content: Content) -> some View {
-        if Tema.Stile.carta {
+        if Tema.Stile.usaCarta {
             vetroCarta(content)
         } else if usaVetroNativo {
             vetroNativo(content)
@@ -193,6 +193,8 @@ struct ModificatoreVetro: ViewModifier {
     /// Il riempimento della carta per ogni variante (`.w` scheda, `#dock` velina, `#win` foglio, barre laterali carta).
     private var riempimentoCarta: Color {
         if let riempimentoScelto { return riempimentoScelto }
+        // Sopra altri contenuti (notifiche, mini Vera, avvisi): carta coprente, sotto non si legge niente
+        if sopra { return TemaCarta.Colore.schedaD }
         typealias C = TemaCarta.Colore
         switch variante {
         case .spesso, .pannello, .sottile: return C.schedaD

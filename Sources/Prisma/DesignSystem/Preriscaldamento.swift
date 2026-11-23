@@ -18,10 +18,13 @@ extension Misure {
 /// - Icone del dock, delle finestre e di «Le tue app aperte»: ridotte fuori dal thread principale, dopo il primo fotogramma.
 enum Preriscaldamento {
     @MainActor static func avvia() {
-        DispatchQueue.global(qos: .userInitiated).async {
-            // La prima lettura crea il device Metal (MTLCreateSystemDefaultDevice) qui e non nel primo body
-            let programma = ProgrammaAcqua.condiviso
-            DispatchQueue.main.async { programma.richiedi { _ in } }
+        // Con lo stile Carta l'acqua non si disegna: niente device Metal né shader da preparare (memoria e avvio)
+        if !Tema.Stile.usaCarta {
+            DispatchQueue.global(qos: .userInitiated).async {
+                // La prima lettura crea il device Metal (MTLCreateSystemDefaultDevice) qui e non nel primo body
+                let programma = ProgrammaAcqua.condiviso
+                DispatchQueue.main.async { programma.richiedi { _ in } }
+            }
         }
         #if os(macOS)
         let scala = NSScreen.main?.backingScaleFactor ?? 2

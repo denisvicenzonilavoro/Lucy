@@ -21,8 +21,8 @@ extension Tema {
 
         nonisolated(unsafe) static var attivo: Stile = predefinito
 
-        /// true con lo stile Carta.
-        static var carta: Bool { attivo == .carta }
+        /// true con lo stile Carta (un nome diverso dal caso `.carta`).
+        static var usaCarta: Bool { attivo == .carta }
 
         /// Il Mac parte in Carta; iPhone e iPad partono dal tema Apple e l'iPad passa a Carta in `PrismaAppMobile.init`.
         private static var predefinito: Stile {
@@ -50,7 +50,7 @@ extension Color {
         let c = NSColor(cartaChiaro), cs = NSColor(cartaScuro)
         return Color(nsColor: NSColor(name: nil) { aspetto in
             let notte = aspetto.prismaScuro
-            if Tema.Stile.carta { return notte ? cs : c }
+            if Tema.Stile.attivo == .carta { return notte ? cs : c }
             return notte ? s : a
         })
         #elseif os(iOS)
@@ -58,7 +58,7 @@ extension Color {
         let c = UIColor(cartaChiaro), cs = UIColor(cartaScuro)
         return Color(uiColor: UIColor { tratti in
             let notte = tratti.userInterfaceStyle == .dark
-            if Tema.Stile.carta { return notte ? cs : c }
+            if Tema.Stile.usaCarta { return notte ? cs : c }
             return notte ? s : a
         })
         #endif
@@ -204,9 +204,12 @@ enum TemaCarta {
 
     /// Il disegno dei caratteri con lo stile Carta: New York (serif di sistema) per titoli e numeri grandi, SF Mono
     /// per le etichette in maiuscolo, SF Pro per il resto. `dimensione` è quella del tema, prima della scala del testo.
-    static func disegno(dimensione: CGFloat, peso: Font.Weight, maiuscolo: Bool, disegno: Font.Design) -> (Font.Design, Font.Weight) {
-        guard Tema.Stile.carta, disegno == .default else { return (disegno, peso) }
-        if dimensione >= 17 {
+    /// `sogliaSerif`: da che dimensione un testo è un titolo. 17 per i gradini del tema Apple (che sono titoli da 17 in
+    /// su), 20 per i caratteri generici (`Tema.Testo.sf`), così corpi, campi e pulsanti grandi restano in SF.
+    static func disegno(dimensione: CGFloat, peso: Font.Weight, maiuscolo: Bool, disegno: Font.Design,
+                        sogliaSerif: CGFloat = 17) -> (Font.Design, Font.Weight) {
+        guard Tema.Stile.usaCarta, disegno == .default else { return (disegno, peso) }
+        if dimensione >= sogliaSerif {
             // Il serif del template è a peso 500: i grassetti diventano medi, i leggeri restano leggeri
             let p: Font.Weight = (peso == .light || peso == .thin || peso == .ultraLight) ? .regular : .medium
             return (.serif, p)

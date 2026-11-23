@@ -110,7 +110,7 @@ struct BarraSuperiore: View {
     private var marchio: some View {
         PulsanteBarra(aiuto: "Prisma: torna alla scrivania", forma: .pillola, azione: { stato.mostraScrivania() }) {
             HStack(spacing: B.spazioMarchio) {
-                if Tema.Stile.carta {
+                if Tema.Stile.usaCarta {
                     // Il prisma «Cristallo» a inchiostro con la sottolineatura dorata
                     LogoInchiostro(lato: B.logo + 3)
                 } else {

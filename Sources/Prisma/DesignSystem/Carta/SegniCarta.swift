@@ -55,7 +55,7 @@ private struct ModificatoreSegnoCarta: ViewModifier {
     @State private var deciso = false
 
     func body(content: Content) -> some View {
-        if Tema.Stile.carta {
+        if Tema.Stile.usaCarta {
             let p: CGFloat = statoFinale ? 1 : fatto
             switch segno {
             case .sottolinea:
@@ -162,12 +162,12 @@ struct ContachilometriCarta: View {
     @State private var arrivato = false
 
     var body: some View {
-        if statoFinale || !Tema.Stile.carta {
+        if statoFinale || !Tema.Stile.usaCarta {
             Text(testo).monospacedDigit()
         } else {
             HStack(spacing: 0) {
                 ForEach(Array(testo.enumerated()), id: \.offset) { i, c in
-                    if let n = c.wholeNumberValue {
+                    if c.isASCII, let n = c.wholeNumberValue {
                         ColonnaCifra(cifra: n, arrivato: arrivato)
                             .animation(Tema.Apple.Moto.Curva.uscita.animazione(TemaCarta.Moto.contachilometri)
                                 .ritardoPrisma(Double(i) * 0.07), value: arrivato)

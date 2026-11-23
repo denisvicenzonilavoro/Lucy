@@ -49,7 +49,7 @@ enum Materiale {
         var body: some View {
             // Stile Carta (Mac e iPad): la scrivania di carta, ferma; l'acqua non nasce (niente Metal).
             // Gli sfondi animati dello stile Carta arrivano con la novità 12.
-            if Tema.Stile.carta {
+            if Tema.Stile.usaCarta {
                 SfondoCarta()
             } else {
                 SfondoAcqua(animato: animato, intensita: intensita, scuro: schema == .dark)

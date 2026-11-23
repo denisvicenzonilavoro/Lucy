@@ -42,10 +42,12 @@ private struct FiligranaLogo: View {
 /// ripetuta sulla scrivania. Di giorno in moltiplicazione al 22%, di notte in schermo al 6%, come il template.
 struct GranaCarta: View {
     @Environment(\.colorScheme) private var schema
+    /// La tessera si disegna a un pixel per pixel dello schermo: la grana resta fine anche sul Retina.
+    @Environment(\.displayScale) private var scalaSchermo
 
     var body: some View {
         let notte = schema == .dark
-        Image(decorative: Self.tessera, scale: 1)
+        Image(decorative: Self.tessera, scale: max(1, scalaSchermo))
             .resizable(resizingMode: .tile)
             .opacity(notte ? TemaCarta.Grana.opacitaNotte : TemaCarta.Grana.opacitaGiorno)
             .blendMode(notte ? .screen : .multiply)

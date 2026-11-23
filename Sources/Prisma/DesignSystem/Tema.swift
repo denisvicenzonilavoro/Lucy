@@ -260,11 +260,11 @@ enum Tema {
 
     enum Raggio {
         /// Stile Carta: 22 (`.w` del template).
-        static var widget: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.riquadro : 26 }
+        static var widget: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.riquadro : 26 }
         static let widgetVera: CGFloat = 22
         /// Stile Carta: 14 (`#win` del template), 10 se ingrandita.
-        static var finestra: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.finestra : 24 }
-        static var finestraIngrandita: CGFloat { Tema.Stile.carta ? 10 : 18 }
+        static var finestra: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.finestra : 24 }
+        static var finestraIngrandita: CGFloat { Tema.Stile.usaCarta ? 10 : 18 }
         /// Barra laterale e schede dentro le finestre.
         static let pannello: CGFloat = 18
         static let laterale: CGFloat = 18
@@ -396,7 +396,7 @@ enum Tema {
         /// SF alla dimensione del tema sulla scala leggibile, moltiplicata per Impostazioni → Dimensione del testo.
         static func sf(_ dimensione: CGFloat, _ peso: Font.Weight = .regular, arrotondato: Bool = false) -> Font {
             let (disegno, p) = TemaCarta.disegno(dimensione: dimensione, peso: peso, maiuscolo: false,
-                                                 disegno: arrotondato ? .rounded : .default)
+                                                 disegno: arrotondato ? .rounded : .default, sogliaSerif: 20)
             return Font.system(size: leggibile(dimensione) * Tipo.fattore, weight: p, design: disegno)
         }
 
@@ -404,7 +404,7 @@ enum Tema {
         /// assi dei grafici, dock, barra superiore, scrivania e widget.
         static func sfFisso(_ dimensione: CGFloat, _ peso: Font.Weight = .regular, arrotondato: Bool = false) -> Font {
             let (disegno, p) = TemaCarta.disegno(dimensione: dimensione, peso: peso, maiuscolo: false,
-                                                 disegno: arrotondato ? .rounded : .default)
+                                                 disegno: arrotondato ? .rounded : .default, sogliaSerif: 20)
             return Font.system(size: dimensione * Tipo.fattore, weight: p, design: disegno)
         }
 

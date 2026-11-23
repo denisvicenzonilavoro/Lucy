@@ -75,7 +75,7 @@ struct SchermataBenvenuto: View {
     private var colonna: some View {
         VStack(spacing: 0) {
             Group {
-                if Tema.Stile.carta {
+                if Tema.Stile.usaCarta {
                     // Stile Carta: il prisma si disegna a inchiostro, poi la sottolineatura dorata (template, `#lock .logo`)
                     LogoInchiostro(lato: L.logo * 1.25, disegna: true)
                 } else {

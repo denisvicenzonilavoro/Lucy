@@ -247,8 +247,8 @@ extension Tema.Apple {
         static let dettaglioAperto: CGFloat = 28
         /// Riquadri della scrivania, dock.
         /// Stile Carta: 22 e 14 (`.w` e `#win` del template).
-        static var riquadro: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.riquadro : 26 }
-        static var finestra: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.finestra : 24 }
+        static var riquadro: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.riquadro : 26 }
+        static var finestra: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.finestra : 24 }
         /// Card, notifiche, dettaglio chiuso, schede «Da fare», spunta.
         static let card: CGFloat = 22
         /// Barre laterali, bolle di chat, anteprima dei prospetti.
@@ -484,7 +484,7 @@ private struct ModificatoreSuperficieApple: ViewModifier {
 
     /// Niente materiali né vetro di Apple: istantanee, ImageRenderer, vetro semplificato e lo stile Carta (la carta
     /// non sfoca: riempimento coprente).
-    private var senzaMateriali: Bool { istantanea || semplificatoQui || Vetro.semplificato || Tema.Stile.carta }
+    private var senzaMateriali: Bool { istantanea || semplificatoQui || Vetro.semplificato || Tema.Stile.usaCarta }
 
     /// Il riempimento senza sfocatura: per le superfici che sfocherebbero, quello coprente se ce l'hanno.
     private var riempimentoFermo: Color {
@@ -542,7 +542,7 @@ private struct ModificatoreSuperficieApple: ViewModifier {
     /// Ombra esatta (con l'espansione) dalla bitmap pronta, con il buco della forma: mai sotto il vetro.
     @ViewBuilder private var ombra: some View {
         if let o = superficie.ombra {
-            OmbraVetroPronta(raggio: raggio, strati: Tema.Stile.carta ? o.stratiCarta(scuro: schema == .dark)
+            OmbraVetroPronta(raggio: raggio, strati: Tema.Stile.usaCarta ? o.stratiCarta(scuro: schema == .dark)
                                                                         : o.strati(scuro: schema == .dark))
         }
     }
