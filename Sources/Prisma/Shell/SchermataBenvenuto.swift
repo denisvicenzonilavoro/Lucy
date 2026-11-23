@@ -74,10 +74,17 @@ struct SchermataBenvenuto: View {
     /// Logo, ora, data e, in fondo, il pulsante.
     private var colonna: some View {
         VStack(spacing: 0) {
-            LogoPrisma(colore: Tema.Apple.Colore.logo)
-                .frame(height: L.logo)
-                .padding(.top, L.logoDallAlto)
-                .accessibilityHidden(true)
+            Group {
+                if Tema.Stile.carta {
+                    // Stile Carta: il prisma si disegna a inchiostro, poi la sottolineatura dorata (template, `#lock .logo`)
+                    LogoInchiostro(lato: L.logo * 1.25, disegna: true)
+                } else {
+                    LogoPrisma(colore: Tema.Apple.Colore.logo)
+                        .frame(height: L.logo)
+                }
+            }
+            .padding(.top, L.logoDallAlto)
+            .accessibilityHidden(true)
             OrologioBlocco()
                 .padding(.top, L.oraSottoLogo)
             Spacer(minLength: 0)

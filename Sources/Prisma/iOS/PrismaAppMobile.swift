@@ -17,6 +17,9 @@ struct PrismaAppMobile: App {
     private let modo: Modo
 
     init() {
+        // Lo stile Carta sull'iPad, il tema Apple di prima sull'iPhone (scelta dell'utente del 23 novembre 2026):
+        // va scelto prima di disegnare qualsiasi cosa
+        Tema.Stile.attivo = Tema.Stile.perDispositivo(iPad: UIDevice.current.userInterfaceIdiom == .pad)
         let argomenti = CommandLine.arguments
         /// Il valore dopo un'opzione, se c'è e non è un'altra opzione.
         func valore(_ i: Int) -> String? {

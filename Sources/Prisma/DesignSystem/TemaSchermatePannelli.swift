@@ -10,8 +10,8 @@ extension Tema.Colore {
         /// Riempimento coprente dei pannelli che galleggiano sopra la scrivania o le finestre (notifiche,
         /// spazi di lavoro, ricerca, avvisi): il contenuto dietro non si legge attraverso, nemmeno senza sfocatura.
         /// In chiaro 0,98: a 0,95 le scritte scure della scrivania si leggevano ancora sotto il pannello.
-        static let coprente = Color.dinamico(chiaro: Color(r: 247, g: 247, b: 251, a: 0.98),
-                                             scuro: Color(r: 18, g: 29, b: 38, a: 0.96))
+        static let coprente = Color.tema(apple: Color(r: 247, g: 247, b: 251, a: 0.98), Color(r: 18, g: 29, b: 38, a: 0.96),
+                                         carta: TemaCarta.Colore.scheda.0, TemaCarta.Colore.scheda.1)
         /// Presentazione: la sala resta scura (il cielo scuro dello sfondo d'acqua), anche con l'app in chiaro.
         static let salaAlto = Color(hex: "#123648")
         static let salaBasso = Color(hex: "#081A25")
