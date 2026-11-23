@@ -1,9 +1,15 @@
 # Piano «App sicure» (23 novembre 2026)
 
-Dal reel di Antonio Bartolucci (14 novembre 2026): «Hai fatto l'app con Lovable, Cursor o Claude? Prima di lanciarla
-controlla queste cinque cose, ognuna può costarti migliaia di euro». La copertina nomina tre temi: **GDPR**,
-**accessibilità**, **bollette del cloud**. Le altre due voci si sentono solo nel video: qui non sono riportate per non
-inventarle; si aggiungono quando l'utente le scrive.
+Dal reel di Antonio Bartolucci (14 novembre 2026, trascrizione data dall'utente): cinque rischi per chi scrive un'app con
+l'AI, ognuno da migliaia di euro.
+
+| # | Il rischio del video | Prisma (sul Mac, niente server) | Prisma AI (server UE, utenti veri) |
+|---|---|---|---|
+| 1 | Sito statico su un hosting che fattura a gigabyte: un attacco DDoS e arriva un conto da 104.500 $ (Netlify) | Nessun sito, nessun hosting: non si applica | Landing su un hosting a prezzo fisso o con tetto di spesa che **ferma** il servizio (non solo un avviso), dietro una protezione dai DDoS; mai a consumo senza limite |
+| 2 | Sito non navigabile da tastiera, immagini senza testo alternativo: European Accessibility Act dal giugno 2025, multe AgID da 5 a 40.000 € (chi ha almeno 10 dipendenti e 2 milioni di fatturato) | Uso personale del consulente; le schermate mostrate al cliente rese accessibili lo stesso (§2) | App al pubblico: tastiera, VoiceOver, testo alternativo, contrasto, dichiarazione di accessibilità prima del lancio |
+| 3 | Database Supabase con la RLS spenta: chiunque legge tutti gli utenti con la chiave pubblica. È un data breach: 72 ore per dirlo al Garante, multe fino a 10 milioni o al 2% del fatturato | Nessun database in rete; i dati stanno sul Mac (FileVault), i backup possono essere cifrati, «Prisma ovunque» è cifrato | Già nelle regole: ogni tabella nasce chiusa. In più: una prova automatica che con la chiave pubblica nessuna tabella si legga, prima di ogni rilascio; la procedura delle 72 ore scritta prima del lancio |
+| 4 | SMS alla waitlist senza consenso esplicito: il Codice Privacy lo vieta (75.000 € a un ateneo telematico) | Le campagne lasciano fuori chi non ha il consenso commerciale; il messaggio singolo e l'inclusione a mano lo chiedono, e ora la conferma dice il divieto del Codice Privacy; Prisma non spedisce mai da solo | Nessun messaggio promozionale senza un consenso a parte, non preselezionato, registrato con la data; la lista d'attesa solo con quel consenso |
+| 5 | Una funzione che richiama se stessa: gli avvisi di budget mandano una mail e basta, sveglia con 72.000 $ di Google Cloud | Nessun servizio a consumo; i lavori di Vera hanno limiti fissi (al più 5 passi, al più 10 bozze di notte, stop al primo avviso di memoria) | Tetto di spesa che spegne le funzioni, non solo un avviso; nessuna funzione che ne chiama altre senza un limite di profondità; tetto di domande per utente (c'è già) |
 
 Il piano vale per le due app, che hanno regole diverse (CLAUDE.md):
 - **Prisma** (questa, per il consulente): tutto in locale, nessun server, nessun utente esterno. Il consulente è
@@ -49,4 +55,10 @@ Il piano vale per le due app, che hanno regole diverse (CLAUDE.md):
    nella prova.
 3. Testo per l'informativa ai clienti (cancellazione e backup) e registro dei trattamenti del consulente.
 4. Promemoria dei potenziali fermi da 24 mesi (se l'utente lo approva).
-5. Prisma AI: le tre regole (GDPR, EAA, tetti di spesa) nel suo CLAUDE.md, quando l'utente riapre quel lavoro.
+5. Prisma AI: le regole della tabella qui sopra (hosting con tetto che ferma, accessibilità, prova automatica della
+   RLS e procedura delle 72 ore, consenso a parte per i messaggi promozionali, tetti di spesa che spengono) nel suo
+   CLAUDE.md, quando l'utente riapre quel lavoro (è un repository a parte: da qui non si tocca).
+6. Sicurezza di Prisma: controllo ECC fatto (nessun dato esce dal Mac, nessuna chiamata di rete nuova, lettere di Prisma
+   AI spente). Proposta: un avviso in «Da sistemare» quando i backup sono in chiaro (oggi il backup senza password
+   conta «a posto»), perché un disco esterno o una cartella iCloud persi sarebbero una violazione da comunicare entro
+   72 ore. Da decidere dall'utente: cambia una voce che oggi è «a posto».
