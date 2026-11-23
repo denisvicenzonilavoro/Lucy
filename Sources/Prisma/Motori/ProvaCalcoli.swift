@@ -1225,6 +1225,8 @@ enum ProvaCalcoli {
         ProvaCalcoliScontrino.esegui(verificaEsterna)
         // Il timbro: cinque controlli di coerenza della proposta con il profilo (NOVITÀ 7)
         ProvaCalcoliTimbro.esegui(verificaEsterna)
+        // Il libro mastro: cedolini, parcelle, quota scelta e quanto si può spendere (NOVITÀ 9)
+        ProvaCalcoliLibroMastro.esegui(verificaEsterna)
         // Scrivania: la mossa del giorno (pesi, caso calmo, casi a mano, clienti di prova)
         ProvaMossaDelGiorno.esegui(verificaEsterna)
         // Giro 2 (acqua viva): i tre anelli della scrivania (lo stato del lavoro)
