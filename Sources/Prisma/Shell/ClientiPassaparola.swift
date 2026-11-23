@@ -460,7 +460,7 @@ private struct RamoPassaparolaCard: View {
                 }
             }
             // La mappa dei legami (stile Carta, NOVITÀ 8): accanto al passaparola, la famiglia della persona
-            if Tema.Stile.usaCarta, let famiglia = stato.cliente(ramo.clienteId)?.famiglia, !famiglia.isEmpty {
+            if Tema.Stile.usaCarta, !stato.inModoCliente, let famiglia = stato.cliente(ramo.clienteId)?.famiglia, !famiglia.isEmpty {
                 VStack(alignment: .leading, spacing: 3) {
                     Text("IN FAMIGLIA")
                         .carattereApple(Tema.Apple.Carattere.etichetta)

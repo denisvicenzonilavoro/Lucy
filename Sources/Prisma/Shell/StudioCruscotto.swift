@@ -30,9 +30,17 @@ struct CruscottoStudioVista: View {
         // Dalla cache del motore (calcolato una volta per versione dei calcoli e per giorno), mai qui
         let c = stato.cruscottoStudio()
         let prova = stato.scritteProva
-        return GeometryReader { geo in
-            ScrollView(.vertical, showsIndicators: false) {
-                griglia(c, prova: prova, misura: geo.size)
+        return VStack(spacing: Tema.Apple.Studio.Disposizione.spazio) {
+            #if os(macOS)
+            // Stile Carta (NOVITÀ 9): il libro mastro del mese, con il cedolino da trascinare
+            if Tema.Stile.usaCarta && !stato.inModoCliente {
+                LibroMastroCarta()
+            }
+            #endif
+            GeometryReader { geo in
+                ScrollView(.vertical, showsIndicators: false) {
+                    griglia(c, prova: prova, misura: geo.size)
+                }
             }
         }
     }

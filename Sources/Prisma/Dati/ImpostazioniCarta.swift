@@ -29,13 +29,11 @@ struct ImpostazioniCarta: Codable, Equatable {
     var quotaAccantonamento: Double?
     /// Lo sfondo della scrivania (NOVITÀ 12): di base la Luce del pomeriggio.
     var sfondo: SfondoScrivaniaCarta = .luce
-    /// Il sigillo (NOVITÀ 10): la copia di sicurezza cifrata ogni domenica alle 03:00, se Prisma è aperto.
-    var sigilloAutomatico = true
 
     init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case sogliaPesoTimbro, quotaAccantonamento, sfondo, sigilloAutomatico
+        case sogliaPesoTimbro, quotaAccantonamento, sfondo
     }
 
     init(from decoder: Decoder) throws {
@@ -45,7 +43,6 @@ struct ImpostazioniCarta: Codable, Equatable {
         let quota = (try? c.decodeIfPresent(Double.self, forKey: .quotaAccantonamento)) ?? nil
         quotaAccantonamento = quota.map(Self.limitaQuota)
         sfondo = ((try? c.decodeIfPresent(SfondoScrivaniaCarta.self, forKey: .sfondo)) ?? nil) ?? .luce
-        sigilloAutomatico = ((try? c.decodeIfPresent(Bool.self, forKey: .sigilloAutomatico)) ?? nil) ?? true
     }
 
     /// La soglia del timbro fra 5% e 100%.

@@ -1,0 +1,179 @@
+#if os(macOS)
+import SwiftUI
+import PDFKit
+import UniformTypeIdentifiers
+
+// Il libro mastro in Studio (NOVITÀ 9 dello stile Carta, template «STUDIO · il libro mastro»): le entrate del mese
+// (provvigioni dai cedolini e parcelle incassate), la quota da mettere da parte scelta dall'utente, le spese e quanto si
+// può spendere, in cifre a contachilometri. Il cedolino si trascina dentro: Prisma ne legge il testo sul Mac (PDFKit,
+// LettoreCedolino), il consulente conferma le cifre e si registra solo mese, canale, lordo, netto e nome del file; il
+// PDF non si conserva. Solo sul Mac, mai in modalità cliente (Studio è del consulente).
+
+extension StatoShell {
+    /// Il mese di adesso del libro mastro, in cache.
+    func libroMastro() -> MeseLibroMastro {
+        let quota = dati.impostazioni.carta.quotaAccantonamento
+        return ricavato("libro-mastro|\(quota ?? -1)|\(dati.speseStudio.cedolini.count)") {
+            MotoreLibroMastro.mese(Date(), cedolini: dati.speseStudio.cedolini, parcelle: dati.parcelle,
+                                   spese: dati.speseStudio.spese, quota: quota, calendario: Calendar.current)
+        }
+    }
+
+    /// Registra un cedolino confermato dal consulente.
+    func registraCedolino(_ c: CedolinoProvvigioni) {
+        guard !solaLettura else { return }
+        dati.speseStudio.cedolini.append(c)
+        mostraAvviso("Cedolino di \(Formati.meseAnno.string(from: c.mese)) registrato nel libro mastro.")
+    }
+}
+
+struct LibroMastroCarta: View {
+    @Environment(StatoShell.self) private var stato
+    @State private var letto: CedolinoDaConfermare?
+    @State private var sopra = false
+
+    var body: some View {
+        let m = stato.libroMastro()
+        let f = FormatoCifra.euro
+        HStack(alignment: .top, spacing: 26) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("IL LIBRO MASTRO · \(Formati.meseAnno.string(from: m.mese).uppercased())")
+                    .font(.system(size: 10, design: .monospaced)).tracking(2)
+                    .foregroundColor(TemaCarta.Colore.matitaD)
+                if let disponibile = m.disponibile {
+                    Text("Quanto puoi spendere").font(.system(size: 14, design: .serif).italic())
+                        .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                    ContachilometriCarta(testo: f.testo(disponibile))
+                        .font(.system(size: 42, weight: .medium, design: .serif).monospacedDigit())
+                        .segnoCarta(.sottolinea, chiave: "libro-mastro")
+                } else {
+                    Text("Scegli quanto mettere da parte").font(.system(size: 22, weight: .medium, design: .serif))
+                    Text("La percentuale la decidi tu: Prisma non conosce regole fiscali e non ne inventa.")
+                        .font(.system(size: 12.5)).foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                HStack(spacing: 8) {
+                    Text("Da mettere da parte").font(.system(size: 12.5))
+                    TextField("%", value: quota, format: .number.precision(.fractionLength(0...1)))
+                        .frame(width: 54)
+                        .multilineTextAlignment(.trailing)
+                    Text("%").font(.system(size: 12.5))
+                }
+                .foregroundColor(TemaCarta.Colore.inchiostroD)
+                .padding(.top, 6)
+            }
+            .frame(maxWidth: 300, alignment: .leading)
+
+            VStack(alignment: .leading, spacing: 8) {
+                RigaScontrinoVista(etichetta: "Provvigioni (cedolini)", importo: f.testo(m.provvigioni))
+                RigaScontrinoVista(etichetta: "Parcelle incassate", importo: f.testo(m.parcelle))
+                RigaScontrinoVista(etichetta: "Entrate", importo: f.testo(m.entrate), forte: true)
+                LineaTratteggiata()
+                if let a = m.accantonamento {
+                    RigaScontrinoVista(etichetta: "Da mettere da parte", importo: "−" + f.testo(a), colore: TemaCarta.Colore.oroTestoD)
+                }
+                RigaScontrinoVista(etichetta: "Spese dello studio", importo: "−" + f.testo(m.spese), colore: TemaCarta.Colore.rossoD)
+            }
+            .frame(maxWidth: 340)
+
+            zonaCedolino
+        }
+        .padding(20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
+        .sheet(item: $letto) { c in
+            ConfermaCedolino(cedolino: c) { confermato in
+                if let confermato { stato.registraCedolino(confermato) }
+                letto = nil
+            }
+        }
+    }
+
+    /// La quota scelta (nil = non ancora scelta), nei limiti di ImpostazioniCarta.
+    private var quota: Binding<Double?> {
+        Binding(get: { stato.dati.impostazioni.carta.quotaAccantonamento },
+                set: { stato.dati.impostazioni.carta.quotaAccantonamento = $0.map(ImpostazioniCarta.limitaQuota) })
+    }
+
+    /// Il riquadro dove si trascina il PDF del cedolino.
+    private var zonaCedolino: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "doc.text.viewfinder").font(.system(size: 22, weight: .light))
+            Text("Trascina qui il cedolino").font(.system(size: 12.5, weight: .medium))
+            Text("Vera lo legge sul Mac: tu confermi le cifre").font(.system(size: 11)).multilineTextAlignment(.center)
+        }
+        .foregroundColor(sopra ? TemaCarta.Colore.pennaD : TemaCarta.Colore.inchiostro2D)
+        .padding(14)
+        .frame(width: 170, height: 120)
+        .background {
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
+                .strokeBorder(sopra ? TemaCarta.Colore.pennaD : TemaCarta.Colore.filo2D, style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
+        }
+        .onDrop(of: [UTType.fileURL], isTargeted: $sopra) { fornitori in
+            guard let f = fornitori.first else { return false }
+            _ = f.loadObject(ofClass: URL.self) { url, _ in
+                guard let url, url.pathExtension.lowercased() == "pdf" else { return }
+                let testo = PDFDocument(url: url)?.string ?? ""
+                let l = LettoreCedolino.leggi(testo)
+                let nome = url.lastPathComponent
+                DispatchQueue.main.async {
+                    letto = CedolinoDaConfermare(fonte: nome, mese: l.mese, lordo: l.lordo, netto: l.netto)
+                }
+            }
+            return true
+        }
+        .accessibilityLabel("Trascina qui il PDF del cedolino delle provvigioni")
+    }
+}
+
+/// Le cifre lette dal cedolino, da confermare.
+struct CedolinoDaConfermare: Identifiable {
+    let id = UUID()
+    let fonte: String
+    var mese: Date?
+    var lordo: Double?
+    var netto: Double?
+}
+
+/// La conferma delle cifre lette: il consulente le corregge se serve, poi «Registra».
+struct ConfermaCedolino: View {
+    @State var cedolino: CedolinoDaConfermare
+    @State private var canale: Canale = .alleanza
+    let fine: (CedolinoProvvigioni?) -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Il cedolino").font(.system(size: 24, weight: .medium, design: .serif))
+            Text(cedolino.fonte).font(.system(size: 11.5, design: .monospaced)).foregroundColor(TemaCarta.Colore.matitaD)
+            if cedolino.lordo == nil {
+                Text("Non ho trovato il totale delle provvigioni: scrivilo tu.")
+                    .font(TemaCarta.Penna.testo).foregroundColor(TemaCarta.Colore.pennaD)
+            }
+            Form {
+                DatePicker("Mese", selection: Binding(get: { cedolino.mese ?? Date() }, set: { cedolino.mese = $0 }),
+                           displayedComponents: .date)
+                TextField("Provvigioni lorde", value: $cedolino.lordo, format: .number.precision(.fractionLength(2)))
+                TextField("Netto pagato", value: $cedolino.netto, format: .number.precision(.fractionLength(2)))
+                Picker("Canale", selection: $canale) {
+                    ForEach(Canale.allCases, id: \.self) { Text($0.nome).tag($0) }
+                }
+            }
+            HStack {
+                Spacer()
+                Button("Annulla") { fine(nil) }.keyboardShortcut(.cancelAction)
+                Button("Registra") {
+                    let cal = Calendar.current
+                    let m = cedolino.mese.flatMap { cal.date(from: cal.dateComponents([.year, .month], from: $0)) } ?? Date()
+                    fine(CedolinoProvvigioni(mese: m, canale: canale, lordo: cedolino.lordo ?? 0, netto: cedolino.netto,
+                                             fonte: cedolino.fonte))
+                }
+                .keyboardShortcut(.defaultAction)
+                .disabled((cedolino.lordo ?? 0) <= 0)
+            }
+        }
+        .padding(26)
+        .frame(width: 420)
+        .background(TemaCarta.Colore.foglioD)
+    }
+}
+#endif

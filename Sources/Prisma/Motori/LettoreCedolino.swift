@@ -16,8 +16,12 @@ enum LettoreCedolino {
     /// Un importo all'italiana: 1.234,56 oppure 234,56.
     private static let numero = #"(\d{1,3}(?:\.\d{3})*,\d{2})"#
 
-    static func leggi(_ testo: String, calendario: Calendar = Calendar(identifier: .gregorian)) -> CedolinoLetto {
-        CedolinoLetto(mese: mese(testo, calendario: calendario),
+    /// Un cedolino sta in poche pagine: oltre si legge solo l'inizio.
+    static let caratteriMassimi = 200_000
+
+    static func leggi(_ intero: String, calendario: Calendar = Calendar(identifier: .gregorian)) -> CedolinoLetto {
+        let testo = String(intero.prefix(caratteriMassimi))
+        return CedolinoLetto(mese: mese(testo, calendario: calendario),
                       lordo: primo([#"(?i)totale\s+provvigioni[^\d\n]*"# + numero,
                                     #"(?i)provvigioni\s+(?:lorde|maturate|del\s+mese)[^\d\n]*"# + numero,
                                     #"(?i)provvigioni[^\d\n]*"# + numero], in: testo),
