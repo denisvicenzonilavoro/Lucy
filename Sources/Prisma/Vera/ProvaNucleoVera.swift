@@ -345,9 +345,12 @@ enum ProvaNucleoVera {
                   "Server finto: il testo arriva a pezzi mentre Vera lo scrive, senza il ragionamento (\(parziali.elenco.count) aggiornamenti)")
         let ricevuto = ServerFinto.ricevuto("/api/chat")
         let messaggiRicevuti = ricevuto?["messages"] as? [[String: String]] ?? []
-        controlla((ricevuto?["stream"] as? Bool) == true && (ricevuto?["think"] as? Bool) == true && ricevuto?["model"] as? String == "qwen3.5:4b"
+        // Il modello è quello del Mac nelle impostazioni (dalla tappa 1 dei motori Mistral, Ministral 3, non più qwen3.5:4b)
+        controlla((ricevuto?["stream"] as? Bool) == true && (ricevuto?["think"] as? Bool) == true && ricevuto?["model"] as? String == vera.modello
                   && messaggiRicevuti.first?["role"] == "system" && (messaggiRicevuti.last?["content"] ?? "").hasPrefix("CONTESTO:"),
-                  "Server finto: la richiesta arrivata a Ollama (streaming, think, modello, istruzioni e contesto)")
+                  "Server finto: la richiesta arrivata a Ollama (streaming, think, modello, istruzioni e contesto; arrivati: stream "
+                  + "\(String(describing: ricevuto?["stream"])), think \(String(describing: ricevuto?["think"])), modello "
+                  + "\(String(describing: ricevuto?["model"])) atteso \(vera.modello), \(messaggiRicevuti.count) messaggi)")
 
         // Modello che non c'è: l'errore di Ollama diventa un messaggio chiaro
         var sbagliatoScelto = vera
