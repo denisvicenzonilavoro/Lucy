@@ -51,6 +51,8 @@ struct PanoramicaDossierApple: View {
         let p = Tema.Apple.Clienti.Panoramica.self
         let destra = VStack(alignment: .leading, spacing: p.spazio) {
             if Tema.Stile.usaCarta {
+                // Stile Carta (NOVITÀ 5): la cartella dell'incontro composta a vista
+                PulsanteFascicoloInUnTocco(cliente: cliente)
                 // Stile Carta (NOVITÀ 6): lo scontrino del conto di oggi, lo stesso di Prisma AI
                 let conto = stato.ricavato("scontrino.conto.\(cliente.id)") {
                     MotoreScontrino.contoCliente(stato.posizioniCliente(cliente.id), data: Date())

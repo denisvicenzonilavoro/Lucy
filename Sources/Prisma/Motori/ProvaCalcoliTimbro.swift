@@ -58,5 +58,24 @@ enum ProvaCalcoliTimbro {
         annua.premio = 1_000
         annua.frequenza = .mensile
         verifica("Timbro: l'importo di un piano è un anno di premi", MotoreTimbro.importo(annua), 12_000)
+
+        // Il fascicolo in un tocco (NOVITÀ 5): le parti della cartella e le tre cose da dire, con le cifre di Prisma
+        let oggi = AiutiProva.data(2026, 11, 20)
+        var polizza = Posizione(clienteId: "timbro", canale: .alleanza, stato: .inEssere, area: .risparmio, nome: "Polizza vita")
+        polizza.scadenza = AiutiProva.data(2026, 12, 18)
+        polizza.controvalore = 50_000
+        let conto = ContoCliente(versato: 40_000, valore: 50_000, costiPagati: 2_000, tasse: 1_000, posizioni: 1)
+        let f = MotoreFascicoloCarta.componi(posizioni: [polizza], conto: conto, costi: [], proposte: [(p, pesante)],
+                                             moduli: 2, data: oggi)
+        verifica.vero("Fascicolo: le cinque parti della cartella", f.parti.map(\.tipo) == ParteFascicolo.Tipo.allCases)
+        verifica.vero("Fascicolo: al più tre cose da dire", !f.treCose.isEmpty && f.treCose.count <= 3)
+        verifica.vero("Fascicolo: prima la scadenza vicina", f.treCose.first?.hasPrefix("Polizza vita scade il 18/12/2026") == true)
+        verifica.vero("Fascicolo: la proposta da rivedere con il suo motivo",
+                      f.treCose.contains { $0.hasPrefix("Proposta: da rivedere, peso sul patrimonio.") })
+        verifica.vero("Fascicolo: la riga dei moduli", f.parti.last?.sotto == "2 moduli da firmare")
+        let vuoto = MotoreFascicoloCarta.componi(posizioni: [], conto: ContoCliente(versato: 0, valore: 0, costiPagati: 0, tasse: 0, posizioni: 0),
+                                                 costi: [], proposte: [], moduli: 0, data: oggi)
+        verifica.vero("Fascicolo: un cliente nuovo ha solo il quadro, niente cose inventate",
+                      vuoto.parti.map(\.tipo) == [.quadro] && vuoto.treCose.isEmpty)
     }
 }

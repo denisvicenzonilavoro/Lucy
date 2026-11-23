@@ -19,3 +19,18 @@ extension StatoShell {
         }
     }
 }
+
+extension StatoShell {
+    /// Il fascicolo in un tocco di un cliente (NOVITÀ 5): le parti della cartella e le tre cose da dire.
+    func fascicoloCarta(_ c: Cliente) -> FascicoloCarta {
+        ricavato("fascicolo-carta|\(c.id)|\(dati.impostazioni.carta.sogliaPesoTimbro)") {
+            let mie = posizioniCliente(c.id)
+            let conto = MotoreScontrino.contoCliente(mie, data: Date())
+            let costi = mie.filter { $0.stato == .inEssere && $0.area.proiettabile }
+                .map { MotoreScontrino.costi($0, prodotti: dati.prodotti, cliente: c.id) }
+            let proposte = mie.filter { $0.stato == .proposta }.compactMap { p in timbro(p).map { (p, $0) } }
+            return MotoreFascicoloCarta.componi(posizioni: mie, conto: conto, costi: costi, proposte: proposte,
+                                                moduli: 0, data: Date())
+        }
+    }
+}
