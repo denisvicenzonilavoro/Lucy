@@ -75,6 +75,11 @@ struct ScontrinoCosti {
 }
 
 enum MotoreScontrino {
+    /// «1,2%»: le percentuali dei costi con un decimale (il formato dei numeri della scrivania le arrotonda all'intero).
+    static func percento(_ v: Double) -> String {
+        String(format: "%.1f", v).replacingOccurrences(of: ".", with: ",") + "%"
+    }
+
     /// Il conto di oggi del cliente dalle sue posizioni (le altre si scartano: proposte, chiuse, non finanziarie,
     /// senza versato).
     static func contoCliente(_ posizioni: [Posizione], data: Date) -> ContoCliente {

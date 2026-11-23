@@ -6,7 +6,11 @@ import SwiftUI
 extension StatoShell {
     /// Il resoconto dell'ultima notte di lavoro (MotoreResocontoNotte), in cache.
     var resocontoNotte: ResocontoNotte? {
-        ricavato("resoconto-notte|\(dati.notti.count)|\(dati.notti.last?.fine?.timeIntervalSinceReferenceDate ?? 0)") {
+        // Le notti sono dati «neutri»: nella chiave quante carte ci sono e quante restano da decidere
+        let carte = dati.notti.reduce(0) { $0 + $1.carte.count }
+        let daDecidere = dati.notti.reduce(0) { $0 + $1.carte.filter { $0.stato == .daDecidere }.count }
+        let ultima = dati.notti.max(by: { $0.giorno < $1.giorno })
+        return ricavato("resoconto-notte|\(dati.notti.count)|\(carte)|\(daDecidere)|\(ultima?.fine?.timeIntervalSinceReferenceDate ?? 0)|\(ultima?.esito.rawValue ?? "")") {
             MotoreResocontoNotte.ultimo(dati.notti)
         }
     }

@@ -220,7 +220,7 @@ struct ScontrinoCostiPosizione: View {
         VStack(alignment: .leading, spacing: 12) {
             ScontrinoCarta(data: Date(), titolo: s.posizione.stato == .proposta ? "I costi della proposta" : "I costi",
                            totale: s.costiNoti ? f.testo(s.euroAnno) : "—",
-                           sottoTotale: s.costiNoti ? "all'anno · \(FormatoCifra.percentuale.testo(s.annuo)) del valore"
+                           sottoTotale: s.costiNoti ? "all'anno · \(MotoreScontrino.percento(s.annuo)) del valore"
                                                     : "costi non indicati: completali con il KID",
                            coloreSottoTotale: s.costiNoti ? TemaCarta.Colore.matitaD : TemaCarta.Colore.rossoD) {
                 if s.costiNoti {

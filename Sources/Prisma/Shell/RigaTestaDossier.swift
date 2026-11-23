@@ -167,6 +167,15 @@ struct RigaTestaDossier: View {
             voci.append(.azione("Aggiungi un'azienda…",
                                 aiuto: "Apre «L'azienda»: quota, ruolo, dipendenti e fatturato li scrivi tu") { s.schedaCliente = .azienda })
         }
+        // GDPR (art. 15 e 20, piano «App sicure»): i dati del cliente in un file, salvato dove scegli tu; mai davanti al cliente
+        if !stato.inModoCliente {
+            voci.append(.separatore)
+            let s = stato, c = cliente
+            voci.append(.azione("Esporta i dati del cliente…",
+                                aiuto: "Diritto di accesso e portabilità: tutto ciò che Prisma conserva di questa persona, in un file") {
+                s.esportaDatiCliente(c)
+            })
+        }
         return voci
     }
 

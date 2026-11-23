@@ -1,4 +1,8 @@
 import Foundation
+#if os(macOS)
+import AppKit
+import UniformTypeIdentifiers
+#endif
 
 // I dati ricavati dello stile Carta, in cache come gli altri (`ricavato`): il timbro di una proposta (NOVITÀ 7).
 // Le viste leggono da qui, mai i motori dentro un body.
@@ -47,7 +51,7 @@ extension StatoShell {
             let giorno = sera ? (cal.date(byAdding: .day, value: 1, to: adesso) ?? adesso) : adesso
             let nomi = Dictionary(dati.clienti.map { ($0.id, $0.nome) }, uniquingKeysWith: { a, _ in a })
             let incontri = appuntamentiDelGiorno(giorno)
-                .filter { $0.stato == .pianificato }
+                .filter { $0.stato == .pianificato && $0.tipo != .nonDisponibile }
                 .map { IncontroPrimaPagina(ora: $0.inizio, chi: nomi[$0.clienteId] ?? $0.titolo, cosa: $0.titolo) }
             let inEssere = dati.posizioni.filter { $0.stato == .inEssere }
             let scadenze = inEssere.compactMap { p -> ScadenzaPrimaPagina? in
@@ -77,3 +81,23 @@ extension StatoShell {
         voceVera.di(testo, voce: vera.voce, velocita: vera.velocitaVoce)
     }
 }
+
+#if os(macOS)
+extension StatoShell {
+    /// GDPR (art. 15 e 20): salva i dati di un cliente in un file JSON dove sceglie il consulente. Prisma non lo spedisce.
+    func esportaDatiCliente(_ c: Cliente) {
+        let pannello = NSSavePanel()
+        pannello.allowedContentTypes = [.json]
+        pannello.nameFieldStringValue = "Dati di \(c.nome.replacingOccurrences(of: "/", with: "-")).json"
+        pannello.canCreateDirectories = true
+        pannello.message = "Tutto ciò che Prisma conserva di \(c.nome). Il file resta dove lo salvi: Prisma non lo invia a nessuno."
+        guard pannello.runModal() == .OK, let url = pannello.url else { return }
+        do {
+            try EsportazioneCliente.json(di: c.id, da: dati.istantanea).write(to: url, options: .atomic)
+            mostraAvviso("Dati di \(c.nome) esportati.")
+        } catch {
+            mostraAvviso("Non sono riuscito a esportare i dati di \(c.nome).")
+        }
+    }
+}
+#endif

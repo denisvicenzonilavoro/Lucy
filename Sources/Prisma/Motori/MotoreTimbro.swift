@@ -91,7 +91,7 @@ enum MotoreTimbro {
         if let costo = proposta.costoComplessivo {
             let passa = costo <= MotoreCosti.sogliaAlto
             c.append(ControlloTimbro(voce: .costi, passa: passa,
-                                     testo: "Costo annuo \(FormatoCifra.percentuale.testo(costo))" + (passa ? "." : ": sopra la soglia alta.")))
+                                     testo: "Costo annuo \(MotoreScontrino.percento(costo))" + (passa ? "." : ": sopra la soglia alta.")))
         } else {
             c.append(ControlloTimbro(voce: .costi, passa: false, testo: "Costi non indicati: servono il KID o la scheda."))
         }

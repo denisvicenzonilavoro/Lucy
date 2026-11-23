@@ -33,6 +33,34 @@ extension ProvaBackup {
         }
         guard strani.nomeUtente == imp.nomeUtente else { return "carta: un valore illeggibile ha fermato le altre impostazioni" }
 
+        // I cedolini nell'archivio delle spese di Studio: vanno e tornano, uno illeggibile si scarta
+        let cedolino = CedolinoProvvigioni(id: "cedolino-prova", mese: Date(timeIntervalSinceReferenceDate: 815_000_000),
+                                           canale: .alleanza, lordo: 2_460.5, netto: 1_894.5, fonte: "cedolino.pdf",
+                                           registratoIl: Date(timeIntervalSinceReferenceDate: 815_100_000))
+        let spese = ArchivioSpese(cedolini: [cedolino])
+        let speseLette = try Archivio.decodificatore.decode(ArchivioSpese.self, from: try Archivio.codificatore.encode(spese))
+        guard speseLette.cedolini == [cedolino] else { return "carta: i cedolini non tornano uguali dall'archivio" }
+        var speseOggetto = try JSONSerialization.jsonObject(with: try Archivio.codificatore.encode(spese)) as? [String: Any] ?? [:]
+        var elenco = speseOggetto["cedolini"] as? [Any] ?? []
+        elenco.append(["mese": "non è una data"])
+        speseOggetto["cedolini"] = elenco
+        let tolleranti = try Archivio.decodificatore.decode(ArchivioSpese.self, from: try JSONSerialization.data(withJSONObject: speseOggetto))
+        guard tolleranti.cedolini.count == 1 else { return "carta: un cedolino illeggibile non si scarta" }
+        guard ArchivioSpese(cedolini: [cedolino]).vuoto == false else { return "carta: un archivio con un cedolino non è vuoto" }
+
+        // L'esportazione dei dati di un cliente (GDPR art. 15 e 20): solo i suoi dati, nessun altro cliente
+        let demo = DatiPrisma.demo()
+        if let primo = demo.clienti.first, let altro = demo.clienti.last, primo.id != altro.id {
+            let soli = EsportazioneCliente.dati(di: primo.id, da: demo)
+            guard soli.clienti.map(\.id) == [primo.id] else { return "gdpr: l'esportazione porta anche altri clienti" }
+            guard soli.posizioni.count == demo.posizioni.filter({ $0.clienteId == primo.id }).count,
+                  soli.posizioni.allSatisfy({ $0.clienteId == primo.id }) else { return "gdpr: le posizioni esportate non sono tutte e sole del cliente" }
+            let file = try EsportazioneCliente.json(di: primo.id, da: demo)
+            let testo = String(decoding: file, as: UTF8.self)
+            guard testo.contains(primo.nome) else { return "gdpr: il file esportato non contiene il cliente" }
+            guard (try? JSONSerialization.jsonObject(with: file)) != nil else { return "gdpr: il file esportato non è un JSON valido" }
+        }
+
         // Il sigillo: 40 copie automatiche settimanali (dalla più recente) → le ultime 12 e una al mese prima
         let cal = Calendar(identifier: .gregorian)
         let oggi = cal.date(from: DateComponents(year: 2026, month: 11, day: 22, hour: 3)) ?? Date()

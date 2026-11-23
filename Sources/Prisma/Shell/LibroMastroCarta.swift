@@ -13,7 +13,8 @@ extension StatoShell {
     /// Il mese di adesso del libro mastro, in cache.
     func libroMastro() -> MeseLibroMastro {
         let quota = dati.impostazioni.carta.quotaAccantonamento
-        return ricavato("libro-mastro|\(quota ?? -1)|\(dati.speseStudio.cedolini.count)") {
+        // Spese e cedolini sono dati «neutri» (non cambiano la versione dei calcoli): vanno nell'ingresso della cache
+        return ricavato("libro-mastro|\(quota ?? -1)|\(dati.parcelle.count)", ingresso: dati.speseStudio) {
             MotoreLibroMastro.mese(Date(), cedolini: dati.speseStudio.cedolini, parcelle: dati.parcelle,
                                    spese: dati.speseStudio.spese, quota: quota, calendario: Calendar.current)
         }
@@ -22,6 +23,9 @@ extension StatoShell {
     /// Registra un cedolino confermato dal consulente.
     func registraCedolino(_ c: CedolinoProvvigioni) {
         guard !solaLettura else { return }
+        // Lo stesso cedolino trascinato due volte non raddoppia: quello dello stesso mese e canale si sostituisce
+        let cal = Calendar.current
+        dati.speseStudio.cedolini.removeAll { $0.canale == c.canale && cal.isDate($0.mese, equalTo: c.mese, toGranularity: .month) }
         dati.speseStudio.cedolini.append(c)
         mostraAvviso("Cedolino di \(Formati.meseAnno.string(from: c.mese)) registrato nel libro mastro.")
     }

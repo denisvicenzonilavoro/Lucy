@@ -82,7 +82,7 @@ struct FascicoloInUnTocco: View {
                 Spacer()
                 Button("Chiudi", action: chiudi).keyboardShortcut(.cancelAction)
             }
-            if stato.documentoFascicolo() == nil {
+            if stato.reportFascicolo.isEmpty {
                 Text("Per il PDF scegli i report in Prospetti › Il fascicolo dell'incontro.")
                     .font(.system(size: 11.5)).foregroundColor(TemaCarta.Colore.matitaD)
             }
