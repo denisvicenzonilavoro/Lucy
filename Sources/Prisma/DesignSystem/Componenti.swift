@@ -841,7 +841,10 @@ struct IconaApp: View {
 
     var body: some View {
         Group {
-            if app == .agenda {
+            if Tema.Stile.carta {
+                // Stile Carta (Mac e iPad): tessera di carta con il simbolo a inchiostro
+                IconaCarta(app: app, lato: lato)
+            } else if app == .agenda {
                 IconaAgenda(lato: lato)
             } else {
                 ImmagineNitida(percorso: "Icone/\(app.icona).png", lato: lato)

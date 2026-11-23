@@ -259,10 +259,12 @@ enum Tema {
     // MARK: Raggi
 
     enum Raggio {
-        static let widget: CGFloat = 26
+        /// Stile Carta: 22 (`.w` del template).
+        static var widget: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.riquadro : 26 }
         static let widgetVera: CGFloat = 22
-        static let finestra: CGFloat = 24
-        static let finestraIngrandita: CGFloat = 18
+        /// Stile Carta: 14 (`#win` del template), 10 se ingrandita.
+        static var finestra: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.finestra : 24 }
+        static var finestraIngrandita: CGFloat { Tema.Stile.carta ? 10 : 18 }
         /// Barra laterale e schede dentro le finestre.
         static let pannello: CGFloat = 18
         static let laterale: CGFloat = 18

@@ -295,6 +295,8 @@ private struct TestataScrivania: View {
                             .foregroundColor(s.colore)
                             .lineLimit(1)
                             .minimumScaleFactor(s.riduzioneMinima)
+                            // Stile Carta: la sottolineatura dorata sotto il saluto (template, `.greet h1`)
+                            .segnoCarta(.sottolinea, chiave: "scrivania.saluto")
                     }
                     Text("Tutto il tuo lavoro, a portata di mano.")
                         .carattereApple(s.sottotitolo)
@@ -502,7 +504,10 @@ struct CifraScrivania: View {
     let pronto: Bool
 
     var body: some View {
-        if pronto {
+        if pronto && Tema.Stile.carta {
+            // Stile Carta: le cifre a contachilometri
+            ContachilometriCarta(testo: formato.testo(valore, finale: valore))
+        } else if pronto {
             NumeroCheConta(valore, formato: formato, indice: indice)
         } else {
             Text(formato.testo(0, finale: valore))

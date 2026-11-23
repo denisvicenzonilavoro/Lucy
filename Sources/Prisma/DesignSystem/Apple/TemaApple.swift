@@ -246,8 +246,9 @@ extension Tema.Apple {
         static let pillola: CGFloat = 99
         static let dettaglioAperto: CGFloat = 28
         /// Riquadri della scrivania, dock.
-        static let riquadro: CGFloat = 26
-        static let finestra: CGFloat = 24
+        /// Stile Carta: 22 e 14 (`.w` e `#win` del template).
+        static var riquadro: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.riquadro : 26 }
+        static var finestra: CGFloat { Tema.Stile.carta ? TemaCarta.Raggio.finestra : 24 }
         /// Card, notifiche, dettaglio chiuso, schede «Da fare», spunta.
         static let card: CGFloat = 22
         /// Barre laterali, bolle di chat, anteprima dei prospetti.

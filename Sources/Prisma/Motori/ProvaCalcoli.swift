@@ -1219,6 +1219,8 @@ enum ProvaCalcoli {
         ProvaCalcoliMemoria.esegui(verificaEsterna)
         // Tema Apple: nelle istantanee e con «Riduci movimento» i componenti sono subito nello stato finale
         ProvaStatoFinaleApple.esegui(verificaEsterna)
+        // Lo stile Carta: colori del template, contrasti, stile per dispositivo, caratteri, segni a mano e grana
+        ProvaTemaCarta.esegui(verificaEsterna)
         // Scrivania: la mossa del giorno (pesi, caso calmo, casi a mano, clienti di prova)
         ProvaMossaDelGiorno.esegui(verificaEsterna)
         // Giro 2 (acqua viva): i tre anelli della scrivania (lo stato del lavoro)
