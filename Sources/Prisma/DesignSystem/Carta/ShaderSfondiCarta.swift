@@ -270,6 +270,7 @@ struct SfondoVivoCarta: View {
                     }
             }
             .ignoresSafeArea()
+            .accessibilityHidden(true)
         } else {
             SfondoCarta()
         }

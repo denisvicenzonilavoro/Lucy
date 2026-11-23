@@ -96,8 +96,9 @@ enum TemaCarta {
         static let filo2 = (Color(r: 21, g: 24, b: 31, a: 0.16), Color(r: 237, g: 230, b: 216, a: 0.15))
         static let evidenziatore = (Color(r: 244, g: 205, b: 72, a: 0.78), Color(r: 233, g: 185, b: 58, a: 0.30))
         static let oro = (Color(hex: "#DDA918"), Color(hex: "#E9B93A"))
-        /// L'oro delle scritte (`--goldT`), più scuro di giorno per essere leggibile.
-        static let oroTesto = (Color(hex: "#8E6A06"), Color(hex: "#E9B93A"))
+        /// L'oro delle scritte (`--goldT`), più scuro di giorno per essere leggibile (#856300 al posto di #8E6A06 del template:
+        /// contrasto almeno 4,5 anche sul foglio, verifica di accessibilità del 23 novembre 2026).
+        static let oroTesto = (Color(hex: "#856300"), Color(hex: "#E9B93A"))
         static let rosso = (Color(hex: "#AE3D2B"), Color(hex: "#E4826B"))
         static let verde = (Color(hex: "#2C6A4D"), Color(hex: "#7CC6A0"))
         /// Il blu stilografica della penna di Vera (`--pen`).

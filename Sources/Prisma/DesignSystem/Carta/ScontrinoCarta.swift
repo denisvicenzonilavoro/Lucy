@@ -12,7 +12,7 @@ extension TemaCarta {
         /// Altezza e passo dei denti del bordo seghettato.
         static let dente: CGFloat = 6
         static let passoDente: CGFloat = 10
-        static let testata = Font.system(size: 10, weight: .regular, design: .monospaced)
+        static let testata = Font.system(size: 11, weight: .regular, design: .monospaced)
         static let titolo = Font.system(size: 11, weight: .regular, design: .monospaced)
         static let totale = Font.system(size: 46, weight: .medium, design: .serif).monospacedDigit()
         static let riga = Font.system(size: 12.5, weight: .regular, design: .monospaced)
@@ -184,7 +184,7 @@ struct ScontrinoContoCliente: View {
             LineaTratteggiata()
             RigaScontrinoVista(etichetta: "Netto in tasca", importo: Self.conSegno(conto.netto), forte: true)
             if let resa = conto.resaNetta {
-                RigaScontrinoVista(etichetta: "resa netta in totale", importo: FormatoCifra.percentuale.testo(resa),
+                RigaScontrinoVista(etichetta: "resa netta in totale", importo: (resa > 0 ? "+" : "") + MotoreScontrino.percento(resa),
                                    colore: resa >= 0 ? TemaCarta.Colore.verdeD : TemaCarta.Colore.rossoD)
             }
             Text("I costi pagati sono una stima: costo annuo per gli anni trascorsi.")

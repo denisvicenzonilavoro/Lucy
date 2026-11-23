@@ -13,7 +13,7 @@ struct PrimaPaginaWidget: View {
 
     var body: some View {
         let p = stato.primaPagina(ristampa: ristampa)
-        let mono = Font.system(size: 9, weight: .regular, design: .monospaced)
+        let mono = Font.system(size: 11, weight: .regular, design: .monospaced)
         VStack(alignment: .leading, spacing: 0) {
             HStack {
                 Text("N. \(p.numero)")
@@ -28,6 +28,7 @@ struct PrimaPaginaWidget: View {
             .overlay(alignment: .bottom) { Rectangle().fill(TemaCarta.Colore.filo2D).frame(height: 1) }
 
             Text("Il Foglio di Prisma")
+                .accessibilityAddTraits(.isHeader)
                 .font(.system(size: 34, weight: .medium, design: .serif))
                 .tracking(-1)
                 .frame(maxWidth: .infinity)
@@ -60,11 +61,15 @@ struct PrimaPaginaWidget: View {
                 Button { ristampaPagina() } label: { Label("Ristampa", systemImage: "arrow.clockwise") }
                 Spacer()
                 Text("\(p.numeroDelGiorno) \(p.didascaliaNumero)")
-                    .font(.system(size: 10.5, design: .monospaced))
+                    .font(.system(size: 11, design: .monospaced))
                     .foregroundColor(TemaCarta.Colore.matitaD)
                     .lineLimit(1)
             }
             .buttonStyle(.plain)
+            #if os(iOS)
+            .frame(minHeight: 44)
+            #endif
+            .contentShape(Rectangle())
             .font(.system(size: 12, weight: .medium))
             .foregroundColor(TemaCarta.Colore.inchiostro2D)
             .padding(.top, 12)
@@ -82,7 +87,7 @@ struct PrimaPaginaWidget: View {
     private func colonna(_ titolo: String, _ testo: String, penna: Bool) -> some View {
         VStack(alignment: .leading, spacing: 3) {
             Text(titolo.uppercased())
-                .font(.system(size: 9, design: .monospaced)).tracking(1.5)
+                .font(.system(size: 11, design: .monospaced)).tracking(1.5)
                 .foregroundColor(TemaCarta.Colore.matitaD)
             Text(testo)
                 .font(penna ? TemaCarta.Penna.testo : .system(size: 12))

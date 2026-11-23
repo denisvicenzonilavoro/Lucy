@@ -10,7 +10,11 @@ extension TemaCarta {
         static let pennino: CGFloat = 13
         static let spazio: CGFloat = 6
         static let pulsante = Font.system(size: 12.5, weight: .medium)
+        #if os(iOS)
+        static let altezzaPulsante: CGFloat = 44
+        #else
         static let altezzaPulsante: CGFloat = 30
+        #endif
     }
 }
 
@@ -79,6 +83,8 @@ struct PulsanteNoteVera: View {
             .buttonStyle(.plain)
             .help(acceso ? "Spegni le note di Vera a margine" : "Accendi le note di Vera a margine")
             .accessibilityValue(acceso ? "accese" : "spente")
+            .accessibilityAddTraits(.isToggle)
+            .accessibilityHint("Mostra o nasconde le note di Vera a margine")
         }
     }
 }

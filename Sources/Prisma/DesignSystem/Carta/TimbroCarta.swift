@@ -9,7 +9,7 @@ extension TemaCarta {
         static let lato: CGFloat = 132
         static let inclinazione: Double = -12
         static let scritta = Font.system(size: 12, weight: .semibold, design: .monospaced)
-        static let piccolo = Font.system(size: 9, weight: .regular, design: .monospaced)
+        static let piccolo = Font.system(size: 11, weight: .regular, design: .monospaced)
         static let voce = Font.system(size: 13, weight: .regular)
         static let nota = Font.system(size: 11.5, weight: .regular, design: .serif).italic()
         static let durata: Double = 0.45
@@ -72,10 +72,13 @@ struct RiquadroTimbro: View {
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Image(systemName: c.passa ? "checkmark" : "exclamationmark.circle")
                             .foregroundColor(c.passa ? TemaCarta.Colore.verdeD : TemaCarta.Colore.rossoD)
+                            .accessibilityHidden(true)
                         Text("\(c.voce.nome): ").font(k.voce.weight(.medium)) + Text(c.testo).font(k.voce)
                     }
                     .foregroundColor(TemaCarta.Colore.inchiostroD)
                     .fixedSize(horizontal: false, vertical: true)
+                    .accessibilityElement(children: .combine)
+                    .accessibilityValue(c.passa ? "superato" : "da rivedere")
                 }
                 Text(MotoreTimbro.avvertenza)
                     .font(k.nota)

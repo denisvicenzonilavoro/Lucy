@@ -79,6 +79,7 @@ struct FascicoloInUnTocco: View {
                     .keyboardShortcut(.defaultAction)
                 Button("Manda all'iPad") { apri(mandaAlTavolo: true) }
                 Button("Stampa") { stampa() }
+                    .keyboardShortcut("p", modifiers: .command)
                 Spacer()
                 Button("Chiudi", action: chiudi).keyboardShortcut(.cancelAction)
             }

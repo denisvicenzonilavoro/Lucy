@@ -40,7 +40,13 @@ Il piano vale per le due app, che hanno regole diverse (CLAUDE.md):
 ## Tappe
 
 1. Esportazione dei dati del cliente: fatta.
-2. Accessibilità delle schermate Carta: verifica ECC e correzioni.
+2. Accessibilità delle schermate Carta: verifica ECC (a11y-architect) fatta e corretta in gran parte: il cedolino si
+   sceglie anche con un pulsante (tastiera e VoiceOver), etichette e tratti per VoiceOver (interruttore «Note di Vera»,
+   esiti del timbro letti come «superato» o «da rivedere», glifi nascosti, titoli), aree di tocco da 44 pt sull'iPad,
+   ⌘P per stampare il fascicolo, oro delle scritte a #856300 (contrasto almeno 4,5 anche sul foglio), testi mai sotto
+   gli 11 pt. Resta da fare: i testi delle viste Carta seguano «Dimensione del testo» di Prisma e Dynamic Type sull'iPad
+   (un modificatore `fontCarta` che legge `\.prismaScalaTesto`) e le coppie di contrasto sulla velina e sugli sfondi vivi
+   nella prova.
 3. Testo per l'informativa ai clienti (cancellazione e backup) e registro dei trattamenti del consulente.
 4. Promemoria dei potenziali fermi da 24 mesi (se l'utente lo approva).
 5. Prisma AI: le tre regole (GDPR, EAA, tetti di spesa) nel suo CLAUDE.md, quando l'utente riapre quel lavoro.

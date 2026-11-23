@@ -24,6 +24,7 @@ struct TurnoNotteWidget: View {
             Button { stato.apri(.vera) } label: { contenuto(r) }
                 .buttonStyle(.plain)
                 .help("Apri Vera: le carte della notte da approvare")
+                .accessibilityHint("Apre Vera")
         }
     }
 
@@ -31,7 +32,7 @@ struct TurnoNotteWidget: View {
         HStack(alignment: .top, spacing: 20) {
             VStack(alignment: .leading, spacing: 6) {
                 Label("IL TURNO DI NOTTE DI VERA", systemImage: "moon")
-                    .font(.system(size: 10, design: .monospaced)).tracking(2)
+                    .font(.system(size: 11, design: .monospaced)).tracking(2)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                 Text(r.durata ?? (r.interrotta ? "Interrotto" : "In corso"))
                     .font(.system(size: 42, weight: .medium, design: .serif)).tracking(-1.2)
@@ -45,6 +46,7 @@ struct TurnoNotteWidget: View {
                 ForEach(r.righe, id: \.self) { riga in
                     HStack(alignment: .firstTextBaseline, spacing: 8) {
                         Text("✓").font(.system(size: 11, design: .monospaced)).foregroundColor(TemaCarta.Colore.verdeD)
+                            .accessibilityHidden(true)
                         Text(riga).font(.system(size: 12.5)).foregroundColor(TemaCarta.Colore.inchiostro2D)
                     }
                 }

@@ -35,6 +35,7 @@ struct LibroMastroCarta: View {
     @Environment(StatoShell.self) private var stato
     @State private var letto: CedolinoDaConfermare?
     @State private var sopra = false
+    @State private var scegli = false
 
     var body: some View {
         let m = stato.libroMastro()
@@ -42,7 +43,7 @@ struct LibroMastroCarta: View {
         HStack(alignment: .top, spacing: 26) {
             VStack(alignment: .leading, spacing: 6) {
                 Text("IL LIBRO MASTRO · \(Formati.meseAnno.string(from: m.mese).uppercased())")
-                    .font(.system(size: 10, design: .monospaced)).tracking(2)
+                    .font(.system(size: 11, design: .monospaced)).tracking(2)
                     .foregroundColor(TemaCarta.Colore.matitaD)
                 if let disponibile = m.disponibile {
                     Text("Quanto puoi spendere").font(.system(size: 14, design: .serif).italic())
@@ -60,6 +61,7 @@ struct LibroMastroCarta: View {
                     Text("Da mettere da parte").font(.system(size: 12.5))
                     TextField("%", value: quota, format: .number.precision(.fractionLength(0...1)))
                         .frame(width: 54)
+                        .accessibilityLabel("Percentuale da mettere da parte")
                         .multilineTextAlignment(.trailing)
                     Text("%").font(.system(size: 12.5))
                 }
@@ -99,34 +101,51 @@ struct LibroMastroCarta: View {
                 set: { stato.dati.impostazioni.carta.quotaAccantonamento = $0.map(ImpostazioniCarta.limitaQuota) })
     }
 
-    /// Il riquadro dove si trascina il PDF del cedolino.
+    /// Il riquadro del cedolino: si clicca (tastiera e VoiceOver compresi) o ci si trascina sopra il PDF.
     private var zonaCedolino: some View {
+        Button { scegli = true } label: { riquadroCedolino }
+            .buttonStyle(.plain)
+            .contentShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .accessibilityLabel("Scegli il PDF del cedolino, oppure trascinalo qui")
+            .fileImporter(isPresented: $scegli, allowedContentTypes: [.pdf]) { esito in
+                guard case .success(let url) = esito else { return }
+                let accesso = url.startAccessingSecurityScopedResource()
+                defer { if accesso { url.stopAccessingSecurityScopedResource() } }
+                leggi(url)
+            }
+            .onDrop(of: [UTType.fileURL], isTargeted: $sopra) { fornitori in
+                guard let f = fornitori.first else { return false }
+                _ = f.loadObject(ofClass: URL.self) { url, _ in
+                    guard let url, url.pathExtension.lowercased() == "pdf" else { return }
+                    leggi(url)
+                }
+                return true
+            }
+    }
+
+    /// Legge il testo del PDF sul Mac e prepara le cifre da confermare.
+    private func leggi(_ url: URL) {
+        let testo = PDFDocument(url: url)?.string ?? ""
+        let l = LettoreCedolino.leggi(testo)
+        let nome = url.lastPathComponent
+        DispatchQueue.main.async {
+            letto = CedolinoDaConfermare(fonte: nome, mese: l.mese, lordo: l.lordo, netto: l.netto)
+        }
+    }
+
+    private var riquadroCedolino: some View {
         VStack(spacing: 6) {
             Image(systemName: "doc.text.viewfinder").font(.system(size: 22, weight: .light))
-            Text("Trascina qui il cedolino").font(.system(size: 12.5, weight: .medium))
+            Text("Scegli o trascina qui il cedolino").font(.system(size: 12.5, weight: .medium))
             Text("Vera lo legge sul Mac: tu confermi le cifre").font(.system(size: 11)).multilineTextAlignment(.center)
         }
         .foregroundColor(sopra ? TemaCarta.Colore.pennaD : TemaCarta.Colore.inchiostro2D)
         .padding(14)
-        .frame(width: 170, height: 120)
+        .frame(minWidth: 170, minHeight: 120)
         .background {
             RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(sopra ? TemaCarta.Colore.pennaD : TemaCarta.Colore.filo2D, style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
+                .strokeBorder(sopra ? TemaCarta.Colore.pennaD : TemaCarta.Colore.inchiostro2D, style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
         }
-        .onDrop(of: [UTType.fileURL], isTargeted: $sopra) { fornitori in
-            guard let f = fornitori.first else { return false }
-            _ = f.loadObject(ofClass: URL.self) { url, _ in
-                guard let url, url.pathExtension.lowercased() == "pdf" else { return }
-                let testo = PDFDocument(url: url)?.string ?? ""
-                let l = LettoreCedolino.leggi(testo)
-                let nome = url.lastPathComponent
-                DispatchQueue.main.async {
-                    letto = CedolinoDaConfermare(fonte: nome, mese: l.mese, lordo: l.lordo, netto: l.netto)
-                }
-            }
-            return true
-        }
-        .accessibilityLabel("Trascina qui il PDF del cedolino delle provvigioni")
     }
 }
 
@@ -173,6 +192,7 @@ struct ConfermaCedolino: View {
                 }
                 .keyboardShortcut(.defaultAction)
                 .disabled((cedolino.lordo ?? 0) <= 0)
+                .accessibilityHint("Serve l'importo lordo delle provvigioni")
             }
         }
         .padding(26)

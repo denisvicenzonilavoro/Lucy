@@ -54,6 +54,7 @@ enum ProvaTemaCarta {
             ("rosso sulla scheda", C.rosso, C.scheda),
             ("verde sulla scheda", C.verde, C.scheda),
             ("oro delle scritte sulla scheda", C.oroTesto, C.scheda),
+            ("oro delle scritte sul foglio", C.oroTesto, C.foglio),
         ]
         for (nome, testo, fondo) in coppie {
             let g = contrasto(testo.0, fondo.0), n = contrasto(testo.1, fondo.1)
