@@ -98,6 +98,11 @@ enum VoceConfronto: Hashable {
     private(set) var versioneCalcoli = 0
     /// Cresce quando cambiano le note del taccuino (le leggono i documenti, per esempio il fascicolo).
     private(set) var versioneNote = 0
+    /// La penna di Vera (NOVITÀ 4 dello stile Carta): le note in blu a margine delle schermate, accese o spente dal
+    /// pulsante «Note di Vera» della finestra. Solo in memoria; davanti al cliente sono sempre spente (`notePenna`).
+    var noteVeraAccese = true
+    /// true se le note della penna si vedono adesso: stile Carta, accese e mai in modalità cliente.
+    var notePenna: Bool { Tema.Stile.usaCarta && noteVeraAccese && modoCliente == nil }
     /// Le versioni per cliente delle cache dei motori (CacheClienti.swift, giro 0 tappa 4): crescono quando cambia
     /// qualcosa di quel cliente. Non osservate: le viste si aggiornano con `versioneCalcoli`, che cresce comunque.
     @ObservationIgnored private var versioniCliente: [String: Int] = [:]

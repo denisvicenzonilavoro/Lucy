@@ -110,8 +110,13 @@ struct BarraSuperiore: View {
     private var marchio: some View {
         PulsanteBarra(aiuto: "Prisma: torna alla scrivania", forma: .pillola, azione: { stato.mostraScrivania() }) {
             HStack(spacing: B.spazioMarchio) {
-                LogoPrisma(colore: Tema.Apple.Colore.logo)
-                    .frame(height: B.logo)
+                if Tema.Stile.usaCarta {
+                    // Il prisma «Cristallo» a inchiostro con la sottolineatura dorata
+                    LogoInchiostro(lato: B.logo + 3)
+                } else {
+                    LogoPrisma(colore: Tema.Apple.Colore.logo)
+                        .frame(height: B.logo)
+                }
                 Text("Prisma")
                     .carattereApple(Tema.Apple.Carattere.barra)
             }

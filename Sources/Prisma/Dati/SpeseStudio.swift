@@ -301,18 +301,21 @@ struct ArchivioSpese: Codable, Equatable {
     var corsi: [CorsoAggiornamento] = []
     /// Le visite concluse dei clienti eliminati, perché i km dei mesi già chiusi col commercialista non cambino.
     var visiteTolte: [VisitaTolta] = []
+    /// I cedolini delle provvigioni del libro mastro (stile Carta, NOVITÀ 9, CedolinoProvvigioni.swift).
+    var cedolini: [CedolinoProvvigioni] = []
 
     init(spese: [SpesaStudio] = [], scadenze: [ScadenzaStudio] = [], corsi: [CorsoAggiornamento] = [],
-         visiteTolte: [VisitaTolta] = []) {
+         visiteTolte: [VisitaTolta] = [], cedolini: [CedolinoProvvigioni] = []) {
         self.spese = spese
         self.scadenze = scadenze
         self.corsi = corsi
         self.visiteTolte = visiteTolte
+        self.cedolini = cedolini
     }
 
-    var vuoto: Bool { spese.isEmpty && scadenze.isEmpty && corsi.isEmpty && visiteTolte.isEmpty }
+    var vuoto: Bool { spese.isEmpty && scadenze.isEmpty && corsi.isEmpty && visiteTolte.isEmpty && cedolini.isEmpty }
 
-    private enum CodingKeys: String, CodingKey { case spese, scadenze, corsi, visiteTolte }
+    private enum CodingKeys: String, CodingKey { case spese, scadenze, corsi, visiteTolte, cedolini }
 
     /// Lettura tollerante: un elemento illeggibile si scarta, gli altri restano; un elenco illeggibile si apre vuoto.
     init(from decoder: Decoder) throws {
@@ -321,6 +324,7 @@ struct ArchivioSpese: Codable, Equatable {
         scadenze = ((try? c.decodeIfPresent(ElencoTollerante<ScadenzaStudio>.self, forKey: .scadenze)) ?? nil)?.elementi ?? []
         corsi = ((try? c.decodeIfPresent(ElencoTollerante<CorsoAggiornamento>.self, forKey: .corsi)) ?? nil)?.elementi ?? []
         visiteTolte = ((try? c.decodeIfPresent(ElencoTollerante<VisitaTolta>.self, forKey: .visiteTolte)) ?? nil)?.elementi ?? []
+        cedolini = ((try? c.decodeIfPresent(ElencoTollerante<CedolinoProvvigioni>.self, forKey: .cedolini)) ?? nil)?.elementi ?? []
     }
 }
 

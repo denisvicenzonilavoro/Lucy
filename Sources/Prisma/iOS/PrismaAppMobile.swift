@@ -17,6 +17,9 @@ struct PrismaAppMobile: App {
     private let modo: Modo
 
     init() {
+        // Lo stile Carta sull'iPad, il tema Apple di prima sull'iPhone (scelta dell'utente del 23 novembre 2026):
+        // va scelto prima di disegnare qualsiasi cosa
+        Tema.Stile.attivo = Tema.Stile.perDispositivo(iPad: UIDevice.current.userInterfaceIdiom == .pad)
         let argomenti = CommandLine.arguments
         /// Il valore dopo un'opzione, se c'è e non è un'altra opzione.
         func valore(_ i: Int) -> String? {
@@ -151,7 +154,8 @@ private struct AcquaMobile: View {
         // Con «Riduci movimento» di Prisma l'acqua si ferma (quello del sistema lo legge SfondoAcquaMobile)
         Materiale.SfondoScrivania(animato: stato.dati.impostazioni.sfondoAnimato && !stato.dati.impostazioni.riduciMovimento
                                       && stato.presentazione == nil && !coperta,
-                                  intensita: stato.dati.impostazioni.pioggia.forza)
+                                  intensita: stato.dati.impostazioni.pioggia.forza,
+                                  sfondoCarta: stato.dati.impostazioni.carta.sfondo)
     }
 }
 

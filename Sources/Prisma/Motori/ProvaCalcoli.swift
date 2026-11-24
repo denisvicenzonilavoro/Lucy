@@ -1219,6 +1219,16 @@ enum ProvaCalcoli {
         ProvaCalcoliMemoria.esegui(verificaEsterna)
         // Tema Apple: nelle istantanee e con «Riduci movimento» i componenti sono subito nello stato finale
         ProvaStatoFinaleApple.esegui(verificaEsterna)
+        // Lo stile Carta: colori del template, contrasti, stile per dispositivo, caratteri, segni a mano e grana
+        ProvaTemaCarta.esegui(verificaEsterna)
+        // Lo scontrino: il conto di oggi del cliente e i costi di posizioni e proposte (NOVITÀ 6)
+        ProvaCalcoliScontrino.esegui(verificaEsterna)
+        // Il timbro: cinque controlli di coerenza della proposta con il profilo (NOVITÀ 7)
+        ProvaCalcoliTimbro.esegui(verificaEsterna)
+        // Il libro mastro: cedolini, parcelle, quota scelta e quanto si può spendere (NOVITÀ 9)
+        ProvaCalcoliLibroMastro.esegui(verificaEsterna)
+        // La Prima Pagina: le due edizioni e il titolo della giornata (NOVITÀ 1)
+        ProvaCalcoliPrimaPagina.esegui(verificaEsterna)
         // Scrivania: la mossa del giorno (pesi, caso calmo, casi a mano, clienti di prova)
         ProvaMossaDelGiorno.esegui(verificaEsterna)
         // Giro 2 (acqua viva): i tre anelli della scrivania (lo stato del lavoro)

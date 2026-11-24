@@ -155,7 +155,7 @@ enum IndiceImpostazioni {
     private static let archivio: [V] = [
         V(titolo: "Crea backup", spiegazione: "Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Vera.",
           pagina: .archivio, parole: ["copia", "salva"]),
-        V(titolo: "Backup automatico settimanale", spiegazione: "Ogni settimana; tengo le ultime \(GestoreBackup.massimo) copie.",
+        V(titolo: "Backup automatico settimanale", spiegazione: "Il sigillo: ogni domenica alle 03:00; tengo le ultime \(GestoreBackup.settimaneSigillo) settimane, poi una copia al mese.",
           pagina: .archivio, parole: ["copia", "automatico"]),
         V(titolo: "Dove salvare", spiegazione: "Una cartella di iCloud Drive o un disco esterno.", pagina: .archivio,
           parole: ["cartella", "disco", "iCloud"]),

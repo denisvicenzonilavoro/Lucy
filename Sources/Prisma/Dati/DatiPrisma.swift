@@ -588,6 +588,9 @@ struct Impostazioni: Codable, Equatable {
     /// di base («Alleanza», «Indipendente»). Letto con tolleranza, senza alzare la versione: gli archivi e i backup di
     /// prima si aprono con i nomi di base. Entra nei calcoli in cache (testi delle notifiche, di Vera, di Studio).
     var nomiCanali: NomiCanali?
+    /// Lo stile Carta (23 novembre 2026, ImpostazioniCarta.swift): soglia del timbro, quota da mettere da parte,
+    /// sfondo della scrivania e sigillo automatico. Letto con tolleranza, senza alzare la versione.
+    var carta = ImpostazioniCarta()
 
     init() {}
 
@@ -610,6 +613,7 @@ struct Impostazioni: Codable, Equatable {
         case territorio
         case notte
         case nomiCanali
+        case carta
     }
 
     init(from decoder: Decoder) throws {
@@ -675,6 +679,8 @@ struct Impostazioni: Codable, Equatable {
         territorio = ((try? c.decodeIfPresent(ImpostazioniTerritorio.self, forKey: .territorio)) ?? nil) ?? ImpostazioniTerritorio()
         // Stanotte (versione 27, giro 14): senza o illeggibile, spento
         notte = ((try? c.decodeIfPresent(ImpostazioniNotte.self, forKey: .notte)) ?? nil) ?? ImpostazioniNotte()
+        // Lo stile Carta (23 novembre 2026): senza o illeggibile, i valori di base
+        carta = ((try? c.decodeIfPresent(ImpostazioniCarta.self, forKey: .carta)) ?? nil) ?? ImpostazioniCarta()
         // Nomi dei canali (migliorie d'uso 38): senza o illeggibili, quelli di base; ripuliti come dal campo
         nomiCanali = ((try? c.decodeIfPresent(NomiCanali.self, forKey: .nomiCanali)) ?? nil).flatMap { n in
             let puliti = NomiCanali.scelti(primo: n.primo, secondo: n.secondo)
@@ -1003,8 +1009,21 @@ struct ImpostazioniBackup: Codable, Equatable {
 
     static let intervalloAutomatico: TimeInterval = 7 * 24 * 60 * 60
 
+    /// Il sigillo (stile Carta, NOVITÀ 10): la copia automatica si fa la domenica alle 03:00 (se Prisma è aperto; se il
+    /// Mac era spento, alla prima occasione dopo). Senza nessuna copia ancora, subito.
     var prossimo: Date? {
         guard automatico else { return nil }
-        return ultimo.map { $0.addingTimeInterval(Self.intervalloAutomatico) } ?? Date()
+        guard let ultimo else { return Date() }
+        return Self.domenicaDopo(ultimo)
+    }
+
+    /// La prima domenica alle 03:00 dopo `data`.
+    static func domenicaDopo(_ data: Date, calendario cal: Calendar = .current) -> Date {
+        var c = DateComponents()
+        c.weekday = 1
+        c.hour = 3
+        c.minute = 0
+        c.second = 0
+        return cal.nextDate(after: data, matching: c, matchingPolicy: .nextTime) ?? data.addingTimeInterval(intervalloAutomatico)
     }
 }

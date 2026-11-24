@@ -159,10 +159,72 @@ struct ModificatoreVetro: ViewModifier {
     }
 
     @ViewBuilder func body(content: Content) -> some View {
-        if usaVetroNativo {
+        if Tema.Stile.usaCarta {
+            vetroCarta(content)
+        } else if usaVetroNativo {
             vetroNativo(content)
         } else {
             vetroDisegnato(content)
+        }
+    }
+
+    // MARK: Carta (stile Carta, Mac e iPad)
+
+    /// Con lo stile Carta il vetro diventa carta: riempimento coprente, filo sottile d'inchiostro e l'ombra calda del
+    /// template. Niente materiali né sfocature (anche più leggero per la scheda grafica).
+    private func vetroCarta(_ content: Content) -> some View {
+        content
+            .background {
+                ZStack {
+                    forma.fill(riempimentoCarta)
+                    if let tinta { forma.fill(tinta) }
+                }
+            }
+            .overlay {
+                forma.strokeBorder(variante == .chip || variante == .leggero ? TemaCarta.Colore.filo2D : TemaCarta.Colore.filoD,
+                                   lineWidth: 1)
+                    .allowsHitTesting(false)
+            }
+            .background {
+                if ombra && !stratiCarta.isEmpty { ombreCarta }
+            }
+    }
+
+    /// Il riempimento della carta per ogni variante (`.w` scheda, `#dock` velina, `#win` foglio, barre laterali carta).
+    private var riempimentoCarta: Color {
+        if let riempimentoScelto { return riempimentoScelto }
+        // Sopra altri contenuti (notifiche, mini Vera, avvisi): carta coprente, sotto non si legge niente
+        if sopra { return TemaCarta.Colore.schedaD }
+        typealias C = TemaCarta.Colore
+        switch variante {
+        case .spesso, .pannello, .sottile: return C.schedaD
+        case .leggero: return C.velinaD
+        case .finestra: return C.foglioD
+        case .laterale: return C.cartaD
+        case .chip: return C.chipD
+        }
+    }
+
+    /// Le ombre calde del template: riquadri, finestre, dock e pulsanti.
+    private var stratiCarta: [StratoOmbra] {
+        let notte = schema == .dark
+        switch variante {
+        case .spesso, .pannello: return TemaCarta.Ombra.riquadro(scuro: notte)
+        case .leggero: return TemaCarta.Ombra.dock(scuro: notte)
+        case .finestra: return TemaCarta.Ombra.finestra(scuro: notte)
+        case .chip: return interattivo ? TemaCarta.Ombra.tessera(scuro: notte) : []
+        case .laterale, .sottile: return []
+        }
+    }
+
+    @ViewBuilder private var ombreCarta: some View {
+        if let raggio = raggioOmbraPronta {
+            OmbraVetroPronta(raggio: raggio, strati: stratiCarta, misuraEsatta: false)
+                .animation(nil, value: variante)
+        } else {
+            OmbreVetro(forma: forma, strati: stratiCarta,
+                       margine: variante == .chip ? Vetro.margineOmbreChip : Vetro.margineOmbre)
+                .animation(nil, value: variante)
         }
     }
 

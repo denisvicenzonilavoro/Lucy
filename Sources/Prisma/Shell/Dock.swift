@@ -87,7 +87,11 @@ private struct FilaDock: View, Equatable {
                 rimbalza(0)
                 mostraScrivania()
             } icona: {
-                ImmagineNitida(percorso: "Icone/Prisma.png", lato: lato)
+                if Tema.Stile.usaCarta {
+                    IconaScrivaniaCarta(lato: lato)
+                } else {
+                    ImmagineNitida(percorso: "Icone/Prisma.png", lato: lato)
+                }
             }
             .onHover { passa(0, $0) }
             DivisoreDock()

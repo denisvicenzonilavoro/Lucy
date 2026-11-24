@@ -295,6 +295,8 @@ private struct TestataScrivania: View {
                             .foregroundColor(s.colore)
                             .lineLimit(1)
                             .minimumScaleFactor(s.riduzioneMinima)
+                            // Stile Carta: la sottolineatura dorata sotto il saluto (template, `.greet h1`)
+                            .segnoCarta(.sottolinea, chiave: "scrivania.saluto")
                     }
                     Text("Tutto il tuo lavoro, a portata di mano.")
                         .carattereApple(s.sottotitolo)
@@ -305,6 +307,14 @@ private struct TestataScrivania: View {
                 // La guida per cominciare: un piccolo vetro sotto il saluto, finché non è finita
                 if stato.guidaVisibile && !stato.inModoCliente {
                     GuidaCompatta()
+                        .padding(.top, s.guidaAlto)
+                }
+                // Stile Carta (NOVITÀ 1): la Prima Pagina della giornata
+                // Sulla scrivania una striscia di una riga (la testata ha l'altezza della scrivania Apple: il Foglio intero
+                // copriva la mossa del giorno); «Leggi» apre il Foglio con il turno di notte (NOVITÀ 3) e le lettere da
+                // Prisma AI (NOVITÀ 11)
+                if Tema.Stile.usaCarta && !stato.inModoCliente {
+                    StrisciaPrimaPagina()
                         .padding(.top, s.guidaAlto)
                 }
             }
@@ -502,7 +512,10 @@ struct CifraScrivania: View {
     let pronto: Bool
 
     var body: some View {
-        if pronto {
+        if pronto && Tema.Stile.usaCarta {
+            // Stile Carta: le cifre a contachilometri
+            ContachilometriCarta(testo: formato.testo(valore, finale: valore))
+        } else if pronto {
             NumeroCheConta(valore, formato: formato, indice: indice)
         } else {
             Text(formato.testo(0, finale: valore))

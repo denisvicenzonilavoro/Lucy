@@ -734,6 +734,11 @@ enum ProvaBackup {
                 print("ERRORE: \(errore)")
                 return 1
             }
+            // Lo stile Carta: le sue impostazioni nell'archivio, lette con tolleranza (ProvaBackupCarta.swift)
+            if let errore = try provaCarta() {
+                print("ERRORE: \(errore)")
+                return 1
+            }
             // Le cose date al cliente di «Luce» (giro 15): capsule, sinistri, uscite, stato del Prisma del cliente, consenso a
             // WhatsApp e impostazioni nuove (ProvaBackupGiro15.swift); le chiavi delle capsule nei backup protetti
             // (ProvaBackupCapsule.swift, 15c) e i sinistri con le loro impostazioni (ProvaBackupSinistri.swift, 15e)

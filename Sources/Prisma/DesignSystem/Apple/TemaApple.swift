@@ -15,53 +15,58 @@ extension Tema {
 extension Tema.Apple {
     enum Colore {
         private static func d(_ chiaro: Color, _ scuro: Color) -> Color { .dinamico(chiaro: chiaro, scuro: scuro) }
+        /// Un gettone che con lo stile Carta (Mac e iPad) prende i colori del template Carta, giorno e notte.
+        private static func t(_ carta: (Color, Color), _ chiaro: Color, _ scuro: Color) -> Color {
+            .tema(apple: chiaro, scuro, carta: carta.0, carta.1)
+        }
+        private typealias K = TemaCarta.Colore
         private static func nero(_ a: Double) -> Color { Color(r: 0, g: 0, b: 0, a: a) }
         private static func bianco(_ a: Double) -> Color { Color(r: 255, g: 255, b: 255, a: a) }
 
         // MARK: Cambiano con l'aspetto
 
         /// Testo principale (--ink).
-        static let inchiostro = d(nero(0.87), bianco(0.94))
+        static let inchiostro = t(K.ink, nero(0.87), bianco(0.94))
         #if os(macOS)
         /// Testo secondario, `.k`, `.lbl` (--ink2). Migliorie d'uso 7: in chiaro nero al 62% (contrasto 6,2 sul bianco).
-        static let inchiostro2 = d(nero(0.62), bianco(0.62))
+        static let inchiostro2 = t(K.ink2, nero(0.62), bianco(0.62))
         /// Etichette di assi, ore, giorni fuori mese (--ink3). Migliorie d'uso 7: nero al 54% e bianco al 52%
         /// (contrasto almeno 4,5 per i testi piccoli).
-        static let inchiostro3 = d(nero(0.54), bianco(0.52))
+        static let inchiostro3 = t(K.matita, nero(0.54), bianco(0.52))
         #else
         /// Testo secondario, `.k`, `.lbl` (--ink2). iPhone e iPad prendono i toni nuovi con il loro aggiornamento.
-        static let inchiostro2 = d(nero(0.55), bianco(0.62))
+        static let inchiostro2 = t(K.ink2, nero(0.55), bianco(0.62))
         /// Etichette di assi, ore, giorni fuori mese (--ink3).
-        static let inchiostro3 = d(nero(0.34), bianco(0.38))
+        static let inchiostro3 = t(K.matita, nero(0.34), bianco(0.38))
         #endif
         /// Bordi da 1 pt e divisori (--sep).
-        static let separatore = d(nero(0.08), bianco(0.09))
+        static let separatore = t(K.filo, nero(0.08), bianco(0.09))
         /// Fondo della finestra interna (--win).
-        static let finestra = d(Color(r: 246, g: 248, b: 251, a: 0.86), Color(r: 16, g: 26, b: 35, a: 0.86))
+        static let finestra = t(K.foglio, Color(r: 246, g: 248, b: 251, a: 0.86), Color(r: 16, g: 26, b: 35, a: 0.86))
         /// Barre laterali `.side` (--panel).
-        static let pannello = d(bianco(0.72), bianco(0.05))
+        static let pannello = t(K.carta, bianco(0.72), bianco(0.05))
         /// Card, tile, suggerimenti (--card).
-        static let card = d(bianco(0.82), bianco(0.07))
+        static let card = t(K.scheda, bianco(0.82), bianco(0.07))
         /// Dettaglio, pulsanti, pillola del segmentato, campo di Vera (--cardE).
-        static let cardPiena = d(Color(hex: "#FFFFFF"), Color(hex: "#283642"))
+        static let cardPiena = t(K.scheda, Color(hex: "#FFFFFF"), Color(hex: "#283642"))
         /// Binari di barre, interruttori, cursori, mesi vuoti, cerchietti (--track).
-        static let binario = d(nero(0.07), bianco(0.10))
+        static let binario = t(K.filo2, nero(0.07), bianco(0.10))
         /// Fondo dei segmentati, ricerca, hover, bolle di Vera, fondo dell'anteprima (--chip).
-        static let chip = d(nero(0.05), bianco(0.08))
+        static let chip = t(K.chip, nero(0.05), bianco(0.08))
         /// Riempimento del vetro `.glass` (--glass).
-        static let vetro = d(bianco(0.50), Color(r: 16, g: 32, b: 44, a: 0.42))
+        static let vetro = t(K.velina, bianco(0.50), Color(r: 16, g: 32, b: 44, a: 0.42))
         /// Vetro dei pannelli che galleggiano sopra altri contenuti (notifiche, ricerca ⌘K, app aperte) quando
         /// non c'è sfocatura (istantanee, ImageRenderer, vetro semplificato): coprente come i pannelli della shell,
         /// così le scritte della scrivania o della finestra sotto non si leggono attraverso.
-        static let vetroSopra = d(Color(r: 246, g: 248, b: 251, a: 0.98), Color(r: 16, g: 26, b: 35, a: 0.97))
+        static let vetroSopra = t(K.scheda, Color(r: 246, g: 248, b: 251, a: 0.98), Color(r: 16, g: 26, b: 35, a: 0.97))
         /// Bordo del vetro e della finestra (--glassE).
-        static let bordoVetro = d(bianco(0.70), bianco(0.16))
+        static let bordoVetro = t(K.filo2, bianco(0.70), bianco(0.16))
         /// Testo sopra l'acqua: barra, saluto, dock (--wallInk).
-        static let inchiostroAcqua = d(Color(r: 8, g: 26, b: 38, a: 0.88), Color(hex: "#FFFFFF"))
+        static let inchiostroAcqua = t(K.ink, Color(r: 8, g: 26, b: 38, a: 0.88), Color(hex: "#FFFFFF"))
         /// Sottotitolo del saluto (--wallInk2).
-        static let inchiostroAcqua2 = d(Color(r: 8, g: 26, b: 38, a: 0.60), bianco(0.66))
+        static let inchiostroAcqua2 = t(K.ink2, Color(r: 8, g: 26, b: 38, a: 0.60), bianco(0.66))
         /// Velo sotto il dettaglio (--scrim).
-        static let velo = d(Color(r: 220, g: 232, b: 240, a: 0.40), Color(r: 5, g: 12, b: 18, a: 0.50))
+        static let velo = t(K.velo, Color(r: 220, g: 232, b: 240, a: 0.40), Color(r: 5, g: 12, b: 18, a: 0.50))
         /// Testo e pallino dell'etichetta Alleanza, barra del canale (--chA).
         static let canaleAlleanza = d(Color(hex: "#2563EB"), Color(hex: "#6B95FF"))
         /// Testo e pallino dell'etichetta indipendente (--chI).
@@ -71,13 +76,13 @@ extension Tema.Apple {
         /// Velo del blocco (con sfocatura `Tema.Apple.Superficie.sfocaturaBlocco`).
         static let veloBlocco = d(Color(r: 220, g: 234, b: 242, a: 0.18), Color(r: 5, g: 14, b: 20, a: 0.25))
         /// Logo Prisma nella barra e nel blocco.
-        static let logo = d(Color(hex: "#0F2433"), Color(hex: "#FFFFFF"))
+        static let logo = t(K.ink, Color(hex: "#0F2433"), Color(hex: "#FFFFFF"))
         /// Riflesso delle schede inclinabili (`.sheen`): fusione con `fusioneRiflesso(scuro:)`.
-        static let riflessoInclinazione = d(bianco(0.60), bianco(0.16))
+        static let riflessoInclinazione = t(K.trasparente, bianco(0.60), bianco(0.16))
         /// Fusione del riflesso: `softLight` in chiaro, `normal` in scuro.
         static func fusioneRiflesso(scuro: Bool) -> BlendMode { scuro ? .normal : .softLight }
         /// Filo di luce interno in alto del vetro (inset 0 1 0).
-        static let filoVetro = d(bianco(0.55), bianco(0.12))
+        static let filoVetro = t(K.trasparente, bianco(0.55), bianco(0.12))
         /// `.lbl` «La mossa del giorno»: #1D6FC4 in chiaro; in scuro la stessa tinta più chiara (#6EA7E2),
         /// leggibile sul vetro scuro (contrasto circa 5,9:1 contro 2,9:1 del blu fisso).
         static let mossaDelGiorno = d(Color(hex: "#1D6FC4"), Color(hex: "#6EA7E2"))
@@ -87,20 +92,21 @@ extension Tema.Apple {
         /// Pulsante primario, collegamenti, bolle dell'utente, puntini dell'agenda (uguale in scuro).
         static let accento = Color(hex: "#007AFF")
         /// Urgenza, oggi nel calendario, linea dell'ora, area Protezione.
-        static let rosso = Color(hex: "#E5484D")
+        static let rosso = t(K.rosso, Color(hex: "#E5484D"), Color(hex: "#E5484D"))
         /// Urgenza media, completezza sotto l'85%: l'arancione pieno di pallini, anelli e barre («lì non si legge, si
         /// guarda»). Per le scritte c'è `arancioTesto`.
         static let arancio = Color(hex: "#E08A00")
         #if os(macOS)
         /// L'arancione delle scritte (--orangeT, Migliorie d'uso 7): scadenze, «Da incassare», «Da fare oggi», avvisi,
         /// priorità, passo in corso. #B4530B in chiaro (contrasto 5,0 sul bianco), #F5A94A in scuro.
-        static let arancioTesto = Color.dinamico(chiaro: Color(hex: "#B4530B"), scuro: Color(hex: "#F5A94A"))
+        static let arancioTesto = t(K.arancioTesto, Color(hex: "#B4530B"), Color(hex: "#F5A94A"))
+        // Con lo stile Carta: #A84C09 (TemaCarta.Colore.arancioTesto), leggibile sul foglio avorio.
         #else
         /// L'arancione delle scritte: su iPhone e iPad resta l'arancione pieno fino al loro aggiornamento.
         static let arancioTesto = arancio
         #endif
         /// Positivo, spunte, «Ti preparo», delta.
-        static let verde = Color(hex: "#2FA35A")
+        static let verde = t(K.verde, Color(hex: "#2FA35A"), Color(hex: "#2FA35A"))
         /// Interruttore acceso.
         static let verdeInterruttore = Color(hex: "#34C759")
         /// Badge della campanella.
@@ -114,7 +120,7 @@ extension Tema.Apple {
         #if os(macOS)
         /// La linea del totale (--tot, Migliorie d'uso 8): portafoglio e patrimonio nel blu scuro del logo, #0F2433 in
         /// chiaro e #E3ECF2 in scuro, perché il blu pieno resta ad Alleanza e ai comandi. Linee spesse almeno 2,6.
-        static let totale = Color.dinamico(chiaro: Color(hex: "#0F2433"), scuro: Color(hex: "#E3ECF2"))
+        static let totale = t(K.ink, Color(hex: "#0F2433"), Color(hex: "#E3ECF2"))
         #else
         /// La linea del totale: su iPhone e iPad resta il blu degli anelli fino al loro aggiornamento.
         static let totale = anello2
@@ -241,8 +247,9 @@ extension Tema.Apple {
         static let pillola: CGFloat = 99
         static let dettaglioAperto: CGFloat = 28
         /// Riquadri della scrivania, dock.
-        static let riquadro: CGFloat = 26
-        static let finestra: CGFloat = 24
+        /// Stile Carta: 22 e 14 (`.w` e `#win` del template).
+        static var riquadro: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.riquadro : 26 }
+        static var finestra: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.finestra : 24 }
         /// Card, notifiche, dettaglio chiuso, schede «Da fare», spunta.
         static let card: CGFloat = 22
         /// Barre laterali, bolle di chat, anteprima dei prospetti.
@@ -319,6 +326,16 @@ extension Tema.Apple {
                 return [S(colore: Self.nero(0.30), y: 6, sfocatura: 14, espansione: -10)]
             case .schedaPotenzialeSopra:
                 return [S(colore: Self.nero(0.35), y: 12, sfocatura: 24, espansione: -12)]
+            }
+        }
+
+        /// Con lo stile Carta le ombre blu del vetro diventano quelle calde del template (riquadri, finestre, dettaglio);
+        /// le altre restano come sono.
+        func stratiCarta(scuro: Bool) -> [StratoOmbra] {
+            switch self {
+            case .card, .vetro, .inclinata: return TemaCarta.Ombra.riquadro(scuro: scuro)
+            case .finestra, .dettaglio: return TemaCarta.Ombra.finestra(scuro: scuro)
+            default: return strati(scuro: scuro)
             }
         }
 
@@ -466,8 +483,9 @@ private struct ModificatoreSuperficieApple: ViewModifier {
 
     private var forma: RoundedRectangle { RoundedRectangle(cornerRadius: raggio, style: .continuous) }
 
-    /// Niente materiali né vetro di Apple: istantanee, ImageRenderer, vetro semplificato.
-    private var senzaMateriali: Bool { istantanea || semplificatoQui || Vetro.semplificato }
+    /// Niente materiali né vetro di Apple: istantanee, ImageRenderer, vetro semplificato e lo stile Carta (la carta
+    /// non sfoca: riempimento coprente).
+    private var senzaMateriali: Bool { istantanea || semplificatoQui || Vetro.semplificato || Tema.Stile.usaCarta }
 
     /// Il riempimento senza sfocatura: per le superfici che sfocherebbero, quello coprente se ce l'hanno.
     private var riempimentoFermo: Color {
@@ -525,7 +543,8 @@ private struct ModificatoreSuperficieApple: ViewModifier {
     /// Ombra esatta (con l'espansione) dalla bitmap pronta, con il buco della forma: mai sotto il vetro.
     @ViewBuilder private var ombra: some View {
         if let o = superficie.ombra {
-            OmbraVetroPronta(raggio: raggio, strati: o.strati(scuro: schema == .dark))
+            OmbraVetroPronta(raggio: raggio, strati: Tema.Stile.usaCarta ? o.stratiCarta(scuro: schema == .dark)
+                                                                        : o.strati(scuro: schema == .dark))
         }
     }
 }
@@ -669,8 +688,10 @@ extension Tema.Apple {
         /// Interlinea propria di SF a cui si aggiunge lo spazio fra le righe.
         static let interlineaSistema: CGFloat = 1.2
 
+        /// Con lo stile Carta (Mac e iPad) titoli e numeri grandi in New York, etichette in maiuscolo in SF Mono.
         var font: Font {
-            let f = Font.system(size: dimensione, weight: peso, design: disegno)
+            let (d, p) = TemaCarta.disegno(dimensione: dimensione, peso: peso, maiuscolo: maiuscolo, disegno: disegno)
+            let f = Font.system(size: dimensione, weight: p, design: d)
             return tabellare ? f.monospacedDigit() : f
         }
 

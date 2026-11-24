@@ -298,6 +298,8 @@ private struct TestaFinestra: View {
                 .padding(.leading, RigaTestaTema.margineTestoDestro)
             }
             Spacer(minLength: RigaTestaTema.spazio)
+            // Stile Carta: «Note di Vera» accende e spegne la penna (NOVITÀ 4)
+            PulsanteNoteVera()
             // «Come si usa» non sta più in ogni riga: è il «?» della barra, per l'app davanti (migliorie d'uso 6)
             AzioniApp(app: app)
                 .environment(\.pulsantiSoloIcona, soloIcona)

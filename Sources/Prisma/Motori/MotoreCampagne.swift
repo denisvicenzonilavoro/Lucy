@@ -471,7 +471,8 @@ enum TestiCampagne {
     }
 
     static func confermaSenzaConsenso(_ nome: String) -> String {
-        "\(TestiTraguardi.primoNome(nome)) non ha un consenso commerciale valido. Includerlo comunque in questa campagna?"
+        "\(TestiTraguardi.primoNome(nome)) non ha un consenso commerciale valido: senza consenso il Codice Privacy vieta i messaggi "
+            + "commerciali. Includilo solo se è una comunicazione di servizio (una scadenza, una pratica). Includerlo comunque?"
     }
 
     /// Lo storico: «2 ottobre · Famiglia senza protezione · 3 aperti, 4 da aprire».

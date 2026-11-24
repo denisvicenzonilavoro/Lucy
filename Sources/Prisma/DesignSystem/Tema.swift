@@ -63,6 +63,11 @@ enum Tema {
 
     enum Colore {
         private static func d(_ chiaro: Color, _ scuro: Color) -> Color { .dinamico(chiaro: chiaro, scuro: scuro) }
+        /// Un gettone che con lo stile Carta (Mac e iPad) prende i colori del template Carta, giorno e notte.
+        private static func t(_ carta: (Color, Color), _ chiaro: Color, _ scuro: Color) -> Color {
+            .tema(apple: chiaro, scuro, carta: carta.0, carta.1)
+        }
+        private typealias K = TemaCarta.Colore
         private static func bianco(_ a: Double) -> Color { Color(r: 255, g: 255, b: 255, a: a) }
         private static func nero(_ a: Double) -> Color { Color(r: 0, g: 0, b: 0, a: a) }
 
@@ -103,28 +108,28 @@ enum Tema {
         }
 
         // Testo direttamente sullo sfondo (saluto, barra, piede)
-        static let inchiostroSfondo = d(Color(r: 8, g: 26, b: 38, a: 0.88), .white)
-        static let inchiostroSfondoSecondario = d(Color(r: 8, g: 26, b: 38, a: 0.6), bianco(0.68))
+        static let inchiostroSfondo = t(K.ink, Color(r: 8, g: 26, b: 38, a: 0.88), .white)
+        static let inchiostroSfondoSecondario = t(K.ink2, Color(r: 8, g: 26, b: 38, a: 0.6), bianco(0.68))
         /// Alone del testo sullo sfondo (vedi `.aloneSfondo()`).
-        static let aloneSfondo = d(bianco(0.5), nero(0.35))
+        static let aloneSfondo = t(K.trasparente, bianco(0.5), nero(0.35))
         /// Velo che scende sotto la barra superiore (dall'alto al trasparente).
-        static let veloBarra = d(bianco(0.3), nero(0.3))
+        static let veloBarra = t(K.trasparente, bianco(0.3), nero(0.3))
 
         // Inchiostri
-        static let inchiostro = d(nero(0.86), bianco(0.94))
+        static let inchiostro = t(K.ink, nero(0.86), bianco(0.94))
         #if os(macOS)
         // Migliorie d'uso 7: gli stessi toni più leggibili del tema Apple (`inchiostro2`, `inchiostro3`).
-        static let inchiostroSecondario = d(nero(0.62), bianco(0.64))
-        static let inchiostroTerziario = d(nero(0.54), bianco(0.52))
+        static let inchiostroSecondario = t(K.ink2, nero(0.62), bianco(0.64))
+        static let inchiostroTerziario = t(K.matita, nero(0.54), bianco(0.52))
         #else
-        static let inchiostroSecondario = d(nero(0.56), bianco(0.64))
-        static let inchiostroTerziario = d(nero(0.36), bianco(0.42))
+        static let inchiostroSecondario = t(K.ink2, nero(0.56), bianco(0.64))
+        static let inchiostroTerziario = t(K.matita, nero(0.36), bianco(0.42))
         #endif
         /// Testi secondari e terziari dentro i widget della scrivania: un po' più netti, perché il vetro è trasparente.
-        static let inchiostroWidgetSecondario = d(nero(0.68), bianco(0.78))
-        static let inchiostroWidgetTerziario = d(nero(0.5), bianco(0.58))
+        static let inchiostroWidgetSecondario = t(K.ink2, nero(0.68), bianco(0.78))
+        static let inchiostroWidgetTerziario = t(K.matita, nero(0.5), bianco(0.58))
         /// Separatori da 0,5 pt.
-        static let separatore = d(nero(0.09), bianco(0.1))
+        static let separatore = t(K.filo, nero(0.09), bianco(0.1))
 
         // Riempimenti del vetro (trasparente)
         /// Widget della scrivania sopra il materiale di sistema (macOS 13-25): il materiale ultrasottile schiarisce
@@ -181,31 +186,31 @@ enum Tema {
         static let bordoPallino = bianco(0.4)
 
         // Chip, pozzetti, schede
-        static let chip = d(bianco(0.46), bianco(0.1))
-        static let chipSopra = d(bianco(0.74), bianco(0.18))
-        static let bordoChip = d(bianco(0.75), bianco(0.14))
+        static let chip = t(K.chip, bianco(0.46), bianco(0.1))
+        static let chipSopra = t(K.sopra, bianco(0.74), bianco(0.18))
+        static let bordoChip = t(K.filo2, bianco(0.75), bianco(0.14))
         /// Pulsanti di vetro, chip in capsula e tendine (la variante `.chip` del vetro): in chiaro stanno quasi
         /// sempre su schede bianche, dove il chip bianco del tema sparisce, quindi prendono il pozzetto (--well)
         /// e un filo scuro; in scuro restano il chip del tema.
-        static let chipControllo = d(nero(0.05), bianco(0.1))
-        static let chipControlloSopra = d(nero(0.085), bianco(0.18))
-        static let chipControlloColorato = d(nero(0.05), bianco(0.08))
-        static let bordoControllo = d(nero(0.09), bianco(0.14))
+        static let chipControllo = t(K.chip, nero(0.05), bianco(0.1))
+        static let chipControlloSopra = t(K.sopra, nero(0.085), bianco(0.18))
+        static let chipControlloColorato = t(K.chip, nero(0.05), bianco(0.08))
+        static let bordoControllo = t(K.filo2, nero(0.09), bianco(0.14))
         /// Pozzetto: campi, segmented, tasti.
-        static let pozzetto = d(nero(0.055), bianco(0.07))
+        static let pozzetto = t(K.chip, nero(0.055), bianco(0.07))
         /// Pozzetto scuro: interruttore spento, barre di scorrimento, cerchio della spunta, semafori inattivi.
-        static let pozzettoScuro = d(nero(0.13), bianco(0.18))
-        static let scheda = d(bianco(0.74), bianco(0.06))
-        static let bordoScheda = d(nero(0.06), bianco(0.08))
+        static let pozzettoScuro = t(K.filo2, nero(0.13), bianco(0.18))
+        static let scheda = t(K.scheda, bianco(0.74), bianco(0.06))
+        static let bordoScheda = t(K.filo, nero(0.06), bianco(0.08))
         /// Riga di tabella al passaggio.
-        static let rigaSopra = d(nero(0.035), bianco(0.05))
+        static let rigaSopra = t(K.chip, nero(0.035), bianco(0.05))
 
         // Finestre
-        static let finestra = d(Color(r: 247, g: 247, b: 251, a: 0.84), Color(r: 18, g: 29, b: 38, a: 0.88))
+        static let finestra = t(K.foglio, Color(r: 247, g: 247, b: 251, a: 0.84), Color(r: 18, g: 29, b: 38, a: 0.88))
         /// Barra del titolo e composer.
-        static let finestraPiena = d(Color(r: 247, g: 247, b: 251, a: 0.96), Color(r: 18, g: 29, b: 38, a: 0.97))
+        static let finestraPiena = t(K.foglio, Color(r: 247, g: 247, b: 251, a: 0.96), Color(r: 18, g: 29, b: 38, a: 0.97))
         /// Barra laterale staccata dentro la finestra.
-        static let laterale = d(bianco(0.55), bianco(0.07))
+        static let laterale = t(K.carta, bianco(0.55), bianco(0.07))
         static let semaforoChiudi = Color(hex: "#FF5F57")
         static let semaforoRiduci = Color(hex: "#FEBC2E")
         static let semaforoIngrandisci = Color(hex: "#28C840")
@@ -214,19 +219,19 @@ enum Tema {
 
         // Controlli e pannelli
         /// Cursore dei segmented e manopola del benvenuto.
-        static let cursore = d(bianco(0.97), bianco(0.26))
+        static let cursore = t(K.scheda, bianco(0.97), bianco(0.26))
         /// Pomello dell'interruttore.
         static let pomello = Color.white
         /// Tessera della data (mese e giorno).
-        static let tesseraData = d(bianco(0.82), bianco(0.12))
+        static let tesseraData = t(K.scheda, bianco(0.82), bianco(0.12))
         /// Velo dietro ricerca e app aperte.
-        static let velo = d(Color(r: 8, g: 30, b: 45, a: 0.12), Color(r: 0, g: 10, b: 18, a: 0.34))
+        static let velo = t(K.velo, Color(r: 8, g: 30, b: 45, a: 0.12), Color(r: 0, g: 10, b: 18, a: 0.34))
         /// Suggerimento sui grafici.
-        static let suggerimento = d(bianco(0.78), Color(r: 22, g: 38, b: 50, a: 0.76))
+        static let suggerimento = t(K.scheda, bianco(0.78), Color(r: 22, g: 38, b: 50, a: 0.76))
         /// Testo della schermata di benvenuto.
-        static let inchiostroBenvenuto = d(Color(r: 10, g: 34, b: 52, a: 0.88), .white)
+        static let inchiostroBenvenuto = t(K.ink, Color(r: 10, g: 34, b: 52, a: 0.88), .white)
         /// Ombra del testo nei widget: solo in scuro.
-        static let ombraTestoWidget = d(.clear, nero(0.28))
+        static let ombraTestoWidget = t(K.trasparente, .clear, nero(0.28))
 
         // Pillole di stato e scadenze
         static let testoInEssere = d(Color(r: 34, g: 130, b: 58, a: 0.947), Color(r: 126, g: 219, b: 150, a: 0.977))
@@ -254,10 +259,12 @@ enum Tema {
     // MARK: Raggi
 
     enum Raggio {
-        static let widget: CGFloat = 26
+        /// Stile Carta: 22 (`.w` del template).
+        static var widget: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.riquadro : 26 }
         static let widgetVera: CGFloat = 22
-        static let finestra: CGFloat = 24
-        static let finestraIngrandita: CGFloat = 18
+        /// Stile Carta: 14 (`#win` del template), 10 se ingrandita.
+        static var finestra: CGFloat { Tema.Stile.usaCarta ? TemaCarta.Raggio.finestra : 24 }
+        static var finestraIngrandita: CGFloat { Tema.Stile.usaCarta ? 10 : 18 }
         /// Barra laterale e schede dentro le finestre.
         static let pannello: CGFloat = 18
         static let laterale: CGFloat = 18
@@ -388,15 +395,17 @@ enum Tema {
 
         /// SF alla dimensione del tema sulla scala leggibile, moltiplicata per Impostazioni → Dimensione del testo.
         static func sf(_ dimensione: CGFloat, _ peso: Font.Weight = .regular, arrotondato: Bool = false) -> Font {
-            let disegno: Font.Design = arrotondato ? .rounded : .default
-            return Font.system(size: leggibile(dimensione) * Tipo.fattore, weight: peso, design: disegno)
+            let (disegno, p) = TemaCarta.disegno(dimensione: dimensione, peso: peso, maiuscolo: false,
+                                                 disegno: arrotondato ? .rounded : .default, sogliaSerif: 20)
+            return Font.system(size: leggibile(dimensione) * Tipo.fattore, weight: p, design: disegno)
         }
 
         /// Come prima della scala leggibile (solo la Dimensione del testo): numeri dei badge, mese delle tessere,
         /// assi dei grafici, dock, barra superiore, scrivania e widget.
         static func sfFisso(_ dimensione: CGFloat, _ peso: Font.Weight = .regular, arrotondato: Bool = false) -> Font {
-            let disegno: Font.Design = arrotondato ? .rounded : .default
-            return Font.system(size: dimensione * Tipo.fattore, weight: peso, design: disegno)
+            let (disegno, p) = TemaCarta.disegno(dimensione: dimensione, peso: peso, maiuscolo: false,
+                                                 disegno: arrotondato ? .rounded : .default, sogliaSerif: 20)
+            return Font.system(size: dimensione * Tipo.fattore, weight: p, design: disegno)
         }
 
         /// letter-spacing in em → tracking in punti.
