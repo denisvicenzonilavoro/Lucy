@@ -621,6 +621,10 @@ enum VoceConfronto: Hashable {
     var disponibilitaLocale = DisponibilitaVera.nonDisponibile(StatoShell.veraNonVerificata)
     /// La risposta di Vera mentre arriva (osservata solo dalla bolla in arrivo).
     let flussoVera = FlussoVera()
+    /// I motori Mistral per l'interfaccia di Vera: il motore attivo, lo stato dei modelli e la memoria usata.
+    let motoreVera = StatoMotoreVera()
+    /// Il ragionamento delle ultime risposte, da aprire e chiudere (tappa 3): solo in memoria, si svuota al blocco.
+    let ragionamentiVera = RagionamentiVera()
     /// La mini finestra di Vera (⌥ Spazio, sfera nella barra): osservata solo dal suo pannello e dalla sfera.
     let miniVera = StatoMiniVera()
     /// La risposta in corso: si interrompe con una nuova conversazione.
@@ -2679,10 +2683,12 @@ enum VoceConfronto: Hashable {
 
     /// Vera risponde con Qwen. Se l'ultima verifica non l'ha trovato pronto, prima chiede di nuovo a Ollama
     /// (magari è stato appena aperto); se ancora non c'è, Vera lo dice e non risponde.
-    func conQwen(cliente id: String, _ poi: @escaping ((MotoreVera & MotoreGenerativo)) -> Void) {
+    func conQwen(cliente id: String, compito: CompitoVera = .domanda, _ poi: @escaping ((MotoreVera & MotoreGenerativo)) -> Void) {
         // L'esame di Vera su misura usa il modello (un modello alla volta sul Mac da 8 GB): la chat aspetta
         if esameSuMisuraInCorso { return esameSuMisuraInPausa(cliente: id) }
-        if let m = generativo {
+        // I motori Mistral: Vera sceglie il motore in base al compito (sul MacBook da 8 GB resta il modello del Mac)
+        let scelta = motoreVera.scegli(compito, vera: dati.impostazioni.vera)
+        if let m = MotoriVera.generativo(scelta, vera: dati.impostazioni.vera, locale: disponibilitaLocale, computerIA: motoreVera.computerIA) {
             poi(m)
             return
         }
@@ -2715,6 +2721,8 @@ enum VoceConfronto: Hashable {
         Task {
             let d = await MotoreLocale.verificaDispositivo(vera)
             DispatchQueue.main.async { if self.disponibilitaLocale != d { self.disponibilitaLocale = d } }
+            // Lo stato dei motori Mistral per l'interfaccia (modelli scaricati e in memoria, memoria usata)
+            await self.motoreVera.aggiorna(vera: vera)
             #if os(iOS)
             // «Luce» giro 13: il ponte ha trovato il Mac (anche con Qwen non pronto): partono le note in partenza
             if vera.ponte.abbinato, d.motivo != PonteVera.macNonTrovato {
@@ -2735,6 +2743,7 @@ enum VoceConfronto: Hashable {
             Task.detached(priority: .utility) {
                 let d = await AvvioModello.prepara(vera)
                 await MainActor.run { if self.disponibilitaLocale != d { self.disponibilitaLocale = d } }
+                await self.motoreVera.aggiorna(vera: vera)
             }
         }
         #else
@@ -2881,7 +2890,8 @@ enum VoceConfronto: Hashable {
         let richiesta = "DOMANDA DEL CONSULENTE\n\(domanda)\n\nBOZZA PREPARATA DA PRISMA (dati estratti con la pagina: non cambiarli e non aggiungerne)\n"
             + String(bozza.testo.prefix(ContestoVera.limiteCalcoli))
             + "\n\nESTRATTO DEL DOCUMENTO\n\(estratto)\n\nSpiega il documento al consulente in modo ordinato, con le pagine, e segnala cosa verificare."
-        conQwen(cliente: id) { modello in
+        // Un documento è lavoro del motore Quotidiano (sul Mac da 8 GB resta il modello del Mac)
+        conQwen(cliente: id, compito: .documento) { modello in
             self.veraInCorso = true
             Task { @MainActor in
                 do {
@@ -3084,10 +3094,14 @@ enum VoceConfronto: Hashable {
                         }
                     }
                     // I pezzi arrivano fuori dal thread principale: la bolla si aggiorna sul principale
+                    let pensiero = RaccoltaRagionamento()
                     let r = try await motore.scrivi(piano) { p in
+                        pensiero.testo = p.ragionamento
                         DispatchQueue.main.async { self.flussoVera.aggiorna(p, generazione: generazione) }
                     }
                     var m = MessaggioVera(autore: .vera, testo: r.testo, motore: motore.nome, proposte: proposte)
+                    // Tappa 3: il ragionamento resta solo in memoria, da aprire e chiudere sotto la risposta
+                    self.ragionamentiVera.conserva(pensiero.testo, per: m.id)
                     m.modalita = piano.scelta.modalita
                     // «Mai a caso»: in lavoro ogni cifra ha la sua fonte, o resta «non trovata» (FontiVera.swift)
                     if piano.scelta.conScheda {
