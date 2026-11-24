@@ -89,6 +89,12 @@ enum ProvaFluidita {
         setvbuf(stdout, nil, _IOLBF, 0)
         // Come nelle istantanee: vetro disegnato, niente materiali di sistema né Metal
         Vetro.semplificato = true
+        // Sul runner di GitHub (PRISMA_SENZA_METAL=1) le finestre in stile Carta, aprendo Posizioni dopo Clienti, fermavano
+        // il processo con l'asserzione della GPU virtuale («Target device architecture is nil», 24 novembre 2026), come
+        // radar, Territorio e Biblioteca: lì la prova misura il tema Apple; sul Mac dell'utente misura lo stile Carta
+        let stilePrima = Tema.Stile.attivo
+        if MetalPrisma.spento { Tema.Stile.attivo = .apple }
+        defer { Tema.Stile.attivo = stilePrima }
         let sessione = SessioneFluidita()
         sessione.controlla(!PromemoriaMac.disponibili,
                            "Prova senza archivio, Portachiavi né permesso delle notifiche (stato non persistente, promemoria del Mac spenti)")
