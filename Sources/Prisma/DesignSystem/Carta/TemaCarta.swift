@@ -99,6 +99,9 @@ enum TemaCarta {
         /// L'oro delle scritte (`--goldT`), più scuro di giorno per essere leggibile (#856300 al posto di #8E6A06 del template:
         /// contrasto almeno 4,5 anche sul foglio, verifica di accessibilità del 23 novembre 2026).
         static let oroTesto = (Color(hex: "#856300"), Color(hex: "#E9B93A"))
+        /// L'arancione delle scritte sulla carta: un poco più scuro di #B4530B, che sul foglio avorio dava 4,496
+        /// (contrasto almeno 4,5 anche sul foglio e sulla carta2; in scuro resta #F5A94A).
+        static let arancioTesto = (Color(hex: "#A84C09"), Color(hex: "#F5A94A"))
         static let rosso = (Color(hex: "#AE3D2B"), Color(hex: "#E4826B"))
         static let verde = (Color(hex: "#2C6A4D"), Color(hex: "#7CC6A0"))
         /// Il blu stilografica della penna di Vera (`--pen`).

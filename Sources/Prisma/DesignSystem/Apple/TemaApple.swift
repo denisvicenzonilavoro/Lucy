@@ -99,7 +99,8 @@ extension Tema.Apple {
         #if os(macOS)
         /// L'arancione delle scritte (--orangeT, Migliorie d'uso 7): scadenze, «Da incassare», «Da fare oggi», avvisi,
         /// priorità, passo in corso. #B4530B in chiaro (contrasto 5,0 sul bianco), #F5A94A in scuro.
-        static let arancioTesto = Color.dinamico(chiaro: Color(hex: "#B4530B"), scuro: Color(hex: "#F5A94A"))
+        static let arancioTesto = t(K.arancioTesto, Color(hex: "#B4530B"), Color(hex: "#F5A94A"))
+        // Con lo stile Carta: #A84C09 (TemaCarta.Colore.arancioTesto), leggibile sul foglio avorio.
         #else
         /// L'arancione delle scritte: su iPhone e iPad resta l'arancione pieno fino al loro aggiornamento.
         static let arancioTesto = arancio
