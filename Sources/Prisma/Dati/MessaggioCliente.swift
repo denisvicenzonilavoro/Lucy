@@ -225,7 +225,7 @@ enum AutoreMessaggio: String, Codable, CaseIterable {
     var nome: String {
         switch self {
         case .vera: return "Vera"
-        case .modelloFisso: return "Testo di Prisma"
+        case .modelloFisso: return "Testo di Lucy"
         }
     }
 }

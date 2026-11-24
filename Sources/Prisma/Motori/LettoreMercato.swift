@@ -23,7 +23,7 @@ enum ErroreMercato: Error, Equatable {
         case .serieNonTrovata(let codice): return "La serie \(codice) non è stata trovata."
         case .nessunValore: return "Nella risposta non c'è nessun valore."
         case .rete(let testo): return "Connessione non riuscita: \(testo)"
-        case .spento: return "«Dati di mercato» è spento: Prisma non esce su internet."
+        case .spento: return "«Dati di mercato» è spento: Lucy non esce su internet."
         case .richiestaNonValida(let codice): return "Il codice «\(codice)» non è un codice pubblico valido: nessuna richiesta."
         }
     }

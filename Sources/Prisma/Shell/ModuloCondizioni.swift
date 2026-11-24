@@ -16,7 +16,7 @@ struct ModuloCondizioni: View {
     var body: some View {
         CorniceModulo(titolo: "Condizioni del contratto · \(prodotto)") {
             VStack(alignment: .leading, spacing: 18) {
-                Text("Copia i dati dal KID, dal DIP aggiuntivo IBIP e dalle Condizioni di assicurazione: Prisma li usa così come sono scritti.")
+                Text("Copia i dati dal KID, dal DIP aggiuntivo IBIP e dalle Condizioni di assicurazione: Lucy li usa così come sono scritti.")
                     .font(Tipo.kpiNota).foregroundColor(Colori.Analisi.kpiNota).fixedSize(horizontal: false, vertical: true)
                 sezione("Il contratto")
                 CampoModulo(etichetta: "Versione") {

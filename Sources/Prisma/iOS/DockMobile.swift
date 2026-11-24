@@ -51,7 +51,7 @@ struct DockMobile: View {
                 }
             }
             CellaDockMobile(titolo: "Tutte le app", etichetta: "Tutte le app",
-                            descrizione: "Le app di Prisma in una griglia",
+                            descrizione: "Le app di Lucy in una griglia",
                             lato: lato, nomi: nomi, puntino: false, scorciatoia: nil) { _ in
                 mobile.pannello = mobile.pannello == .tutteLeApp ? nil : .tutteLeApp
             } icona: {

@@ -128,7 +128,7 @@ private struct PaginaPensioneStimata: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 9) {
             SezioneProspetto(titolo: "La pensione pubblica stimata con il contributivo",
-                             testo: Text(verbatim: "Stima di Prisma con il metodo contributivo: i contributi accantonati fino all'uscita, rivalutati, per il coefficiente di trasformazione dell'età (\(RegolePensione.validitaCoefficienti)). In euro di oggi, netta di IRPEF e addizionali stimate, su 13 mensilità. Si affianca alla pensione dell'Analisi 360 e va verificata sull'estratto conto INPS."))
+                             testo: Text(verbatim: "Stima di Lucy con il metodo contributivo: i contributi accantonati fino all'uscita, rivalutati, per il coefficiente di trasformazione dell'età (\(RegolePensione.validitaCoefficienti)). In euro di oggi, netta di IRPEF e addizionali stimate, su 13 mensilità. Si affianca alla pensione dell'Analisi 360 e va verificata sull'estratto conto INPS."))
             FilaCifre {
                 CifraProspetto("Pensione netta stimata", CifreDoc.euro(s.nettaMensile), TestiPrevidenza.alMese("su 13 mensilità, a \(s.etaPensione) anni"))
                 CifraProspetto("Pensione lorda", CifreDoc.euro(s.lordaMensile), TestiPrevidenza.alMese("\(CifreDoc.euro(s.lordaAnnua)) l'anno"))

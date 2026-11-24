@@ -159,7 +159,7 @@ struct CristalloFermo: View {
                                                   esploso: esploso ? 1 : 0, crescita: 1)
             let centro = p.punto(0, e.alto, 0)
             let lato = p.scala * F.logo
-            LogoPrisma(colore: F.coloreLogo)
+            LogoLucy(colore: F.coloreLogo)
                 .frame(width: lato, height: lato)
                 .scaleEffect(x: 1, y: p.schiacciamento * F.schiacciamentoLogo)
                 .position(centro)

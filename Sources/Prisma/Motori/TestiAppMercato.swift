@@ -5,7 +5,7 @@ import Foundation
 enum TestiAppMercato {
     // MARK: - Testata e stati
 
-    static let titoloFinestra = "Prisma conosce il mercato."
+    static let titoloFinestra = "Lucy conosce il mercato."
     static let maiAggiornato = "Mai aggiornato"
     static let inCorso = "Aggiornamento in corso…"
     static let valoriDiProva = "valori di prova"
@@ -17,7 +17,7 @@ enum TestiAppMercato {
     /// La fascia della riservatezza: la frase di TestiMercato e, spento, come accenderlo.
     static func fascia(attivo: Bool) -> (testo: String, forte: String) {
         attivo
-            ? ("Dal Mac escono solo le richieste di dati pubblici (BCE, Eurostat): ", "nessun dato dei clienti lascia Prisma.")
+            ? ("Dal Mac escono solo le richieste di dati pubblici (BCE, Eurostat): ", "nessun dato dei clienti lascia Lucy.")
             : ("Nessun dato esce dal Mac. ", "Dati di mercato spenti: accendili in Impostazioni › Mercato. Escono solo codici pubblici, mai dati dei clienti.")
     }
 
@@ -29,7 +29,7 @@ enum TestiAppMercato {
 
     // MARK: - Mai aggiornato
 
-    static let vuotoTitolo = "Prisma non ha ancora i dati del mercato."
+    static let vuotoTitolo = "Lucy non ha ancora i dati del mercato."
     static func vuotoTesto(attivo: Bool) -> String {
         attivo
             ? "Scarica le serie pubbliche di BCE ed Eurostat, oppure importa un file CSV con indici e quote dei fondi."
@@ -74,7 +74,7 @@ enum TestiAppMercato {
 
     static func titoloToccati(vecchi: Bool) -> String { vecchi ? "Chi è toccato dall’ultimo aggiornamento" : "Chi è toccato oggi" }
     static let nessunoToccato = "Oggi i movimenti del mercato non toccano in modo visibile i tuoi clienti."
-    static let toccatiSenzaSoglie = "Scegli le soglie in Impostazioni › Mercato: senza soglie Prisma non segnala nessun movimento."
+    static let toccatiSenzaSoglie = "Scegli le soglie in Impostazioni › Mercato: senza soglie Lucy non segnala nessun movimento."
     static let toccatiSenzaDati = "Chi è toccato compare quando ci sono i dati del giorno."
     static let preparaMessaggio = "Prepara un messaggio"
 
@@ -142,9 +142,9 @@ enum TestiAppMercato {
     static let avvisi = "Avvisi"
     #if os(macOS)
     /// Sul Mac le soglie si aprono da «Soglie…» nel riquadro degli avvisi (migliorie d'uso 29).
-    static let nessunAvviso = "Nessun avviso. Scegli le soglie con «Soglie…»: senza soglie Prisma non ne crea."
+    static let nessunAvviso = "Nessun avviso. Scegli le soglie con «Soglie…»: senza soglie Lucy non ne crea."
     #else
-    static let nessunAvviso = "Nessun avviso. Scegli le soglie con «Soglie degli avvisi»: senza soglie Prisma non ne crea."
+    static let nessunAvviso = "Nessun avviso. Scegli le soglie con «Soglie degli avvisi»: senza soglie Lucy non ne crea."
     #endif
     static let nessunAvvisoConSoglie = "Nessun avviso: oggi nessuna soglia è superata."
     static let daGuardare = "Da guardare"
@@ -184,7 +184,7 @@ enum TestiAppMercato {
     static let importaTitolo = "Importa i dati del mercato"
     static let importaSpiegazione = "Un file CSV con «data;valore» per una serie (un indice, un tasso) oppure «data;isin;valore» per le quote dei fondi. Il formato è descritto in Design/mercato-csv.md."
     static let fonteFile = "Da dove viene il file"
-    static let fonteFileAiuto = "Per esempio «Estratto della piattaforma Alleanza», «Borsa Italiana», «SGR»: Prisma la cita accanto a ogni valore."
+    static let fonteFileAiuto = "Per esempio «Estratto della piattaforma Alleanza», «Borsa Italiana», «SGR»: Lucy la cita accanto a ogni valore."
     static let nomeSerie = "Nome della serie"
     static let tipoSerie = "Che cosa misura"
     static let unitaSerie = "Unità"
@@ -240,19 +240,19 @@ enum TestiAppMercato {
 
     // MARK: - Impostazioni › Mercato
 
-    static let notaPagina = "Mercato porta in Prisma tassi, inflazione e indici pubblici, e le quote dei fondi che importi tu. Ogni valore ha la sua data e la sua fonte; Prisma non scrive nessun valore da sola."
+    static let notaPagina = "Mercato porta in Lucy tassi, inflazione e indici pubblici, e le quote dei fondi che importi tu. Ogni valore ha la sua data e la sua fonte; Lucy non scrive nessun valore da sola."
     static let interruttore = "Dati di mercato"
     static let interruttoreSpiegazione = "Scarica le serie pubbliche di BCE ed Eurostat. Escono solo i codici pubblici delle serie: mai nomi, importi, portafogli o ISIN dei clienti. Niente account né chiavi."
-    static let interruttoreAiuto = "Spento (come all'inizio) Prisma non esce mai su internet: i valori arrivano solo dai file che importi o da ciò che scrivi a mano."
+    static let interruttoreAiuto = "Spento (come all'inizio) Lucy non esce mai su internet: i valori arrivano solo dai file che importi o da ciò che scrivi a mano."
     static let ultimoAggiornamento = "Ultimo aggiornamento"
     static func ultimo(_ d: Date?) -> String { d.map { Formati.dataOra.string(from: $0) } ?? "Mai" }
     static let ultimoErrore = "L'ultimo scaricamento non è riuscito del tutto"
     static let serieGruppo = "Serie da scaricare"
-    static let serieNota = "Le chiavi delle serie stanno nel file serie-mercato.json (nel pacchetto di Prisma o, se lo metti, nella cartella dell'archivio): si possono cambiare senza toccare l'app."
+    static let serieNota = "Le chiavi delle serie stanno nel file serie-mercato.json (nel pacchetto di Lucy o, se lo metti, nella cartella dell'archivio): si possono cambiare senza toccare l'app."
     static let configurazioneMancante = "Il file delle serie non si legge: nessuna serie da scaricare."
     static func datoDiTerzi(_ chi: String) -> String { "Dato di \(chi), ridistribuito dalla fonte" }
     static let soglieGruppo = "Soglie degli avvisi"
-    static let soglieNota = "Tutte vuote all'inizio: senza una soglia Prisma non crea avvisi e «Chi è toccato» resta vuoto. Le soglie le decidi tu."
+    static let soglieNota = "Tutte vuote all'inizio: senza una soglia Lucy non crea avvisi e «Chi è toccato» resta vuoto. Le soglie le decidi tu."
     static let caloDalMassimo = "Calo dal massimo"
     static let caloDalMassimoSpiegazione = "La quota di un ISIN scende dal massimo degli ultimi 12 mesi di almeno…"
     static let distanza = "Distanza dal riferimento"
@@ -274,7 +274,7 @@ enum TestiAppMercato {
 }
 
 extension TestiAppMercato {
-    static let messaggioNonPreparato = "Il messaggio non si è potuto preparare: il cliente non è più in Prisma."
+    static let messaggioNonPreparato = "Il messaggio non si è potuto preparare: il cliente non è più in Lucy."
     static func scaricate(_ n: Int) -> String { n == 1 ? "1 serie aggiornata da BCE ed Eurostat" : "\(n) serie aggiornate da BCE ed Eurostat" }
     /// La fonte non risponde: i valori restano quelli di prima, niente errore a tutta finestra (§12.1.9).
     static func erroreScaricamento(scaricate: Int, errori: Int) -> String {

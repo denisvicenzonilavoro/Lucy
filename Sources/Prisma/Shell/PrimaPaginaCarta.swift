@@ -80,7 +80,7 @@ struct PrimaPaginaWidget: View {
             .padding(.bottom, 6)
             .overlay(alignment: .bottom) { Rectangle().fill(TemaCarta.Colore.filo2D).frame(height: 1) }
 
-            Text("Il Foglio di Prisma")
+            Text("Il Foglio di Lucy")
                 .accessibilityAddTraits(.isHeader)
                 .fontCarta(34, weight: .medium, design: .serif)
                 .tracking(-1)

@@ -154,7 +154,7 @@ enum ProvaAdeguatezza {
         // V7 · Elenco dei documenti
         do {
             let s = StatoShell(persistente: false)
-            controlla(s.dati.impostazioni.consegna.voci.count == 23, "Elenco dei documenti: 23 voci di Prisma")
+            controlla(s.dati.impostazioni.consegna.voci.count == 23, "Elenco dei documenti: 23 voci di Lucy")
             if let i = s.dati.impostazioni.consegna.voci.firstIndex(where: { $0.id == "all-antiriciclaggio" }) {
                 s.dati.impostazioni.consegna.voci[i].attiva = false
             }
@@ -163,7 +163,7 @@ enum ProvaAdeguatezza {
             s.ripristinaDocumentiConsegna()
             let ripristinato = posizione(s, andrea).flatMap { s.esitoAdeguatezza($0) }?.documenti.count
             controlla(s.dati.impostazioni.consegna.voci.count == 23 && ripristinato == 9,
-                      "Elenco di Prisma ripristinato: 23 voci, 9 documenti per Andrea")
+                      "Elenco di Lucy ripristinato: 23 voci, 9 documenti per Andrea")
         }
 
         // V8 · Ordine e regole delle notifiche invariati

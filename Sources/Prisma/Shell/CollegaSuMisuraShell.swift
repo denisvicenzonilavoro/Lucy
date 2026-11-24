@@ -207,7 +207,7 @@ extension StatoShell {
             throw ErroreVera(messaggio: "L'esportazione del pacchetto aspetta il tuo sì: è un'eccezione alla regola «i dati restano sul Mac».")
         }
         guard !inModoCliente, !solaLettura, dati.impostazioni.vera.fornitore == .ollama else {
-            throw ErroreVera(messaggio: "Il pacchetto si prepara da Prisma sul Mac, con Ollama e fuori dalla modalità cliente.")
+            throw ErroreVera(messaggio: "Il pacchetto si prepara da Lucy sul Mac, con Ollama e fuori dalla modalità cliente.")
         }
         let esempi = esempiPerPacchettoSuMisura()
         guard esempi.count >= SuMisuraVera.minimoEsempi else {
@@ -244,7 +244,7 @@ extension StatoShell {
         p.nameFieldStringValue = SuMisuraVera.nomeModello(Date()).replacingOccurrences(of: ":", with: "-") + ".zip"
         p.allowedContentTypes = [.zip]
         p.canCreateDirectories = true
-        p.message = "Il pacchetto contiene solo esempi resi anonimi che hai approvato. Prisma non lo invia: lo porti tu all'addestramento."
+        p.message = "Il pacchetto contiene solo esempi resi anonimi che hai approvato. Lucy non lo invia: lo porti tu all'addestramento."
         guard p.runModal() == .OK, let url = p.url else { return }
         do {
             let m = try esportaPacchettoSuMisura(a: url)
@@ -435,7 +435,7 @@ extension StatoShell {
             apriPaginaSuMisura()
             risposta = statoSuMisuraInBreve + (t.contains("torna alla vera di prima") ? " Per tornare indietro usa il pulsante nella pagina." : "")
             #else
-            risposta = "Vera su misura si fa da Prisma sul Mac."
+            risposta = "Vera su misura si fa da Lucy sul Mac."
             #endif
         }
         aggiungiMessaggio(MessaggioVera(autore: .vera, testo: risposta, titolo: Self.titoloSuMisura, motore: MotoriVera.sintesi.nome), cliente: chiave)

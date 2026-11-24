@@ -49,7 +49,7 @@ enum ProvaNomiCanali {
                       && SceltaInizio.allCases.first == .prova)
         verifica.vero("Primo avvio: tre punti nella prima pagina, gli ultimi «Tre domande, e poi si comincia.»",
                       TestiPrimoAvvio.punti.count == 3
-                      && TestiPrimoAvvio.punti.first == "I calcoli li fa Prisma: tu scegli e spieghi."
+                      && TestiPrimoAvvio.punti.first == "I calcoli li fa Lucy: tu scegli e spieghi."
                       && TestiPrimoAvvio.punti.last == "Tre domande, e poi si comincia.")
         verifica.vero("Primo avvio: «Il primo avvio · 2 di 3»", TestiPrimoAvvio.occhiello(1) == "Il primo avvio · 2 di 3")
         #endif

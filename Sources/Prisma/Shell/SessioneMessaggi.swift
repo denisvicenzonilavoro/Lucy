@@ -237,8 +237,8 @@ enum TestiMessaggi {
         + "rinnovare, lo trovi qui."
     static let veraScrive = "Vera scrive con i dati del dossier"
     static let veraStaScrivendo = "Vera sta scrivendo con i dati del dossier"
-    static let testoPrisma = "Testo di Prisma, con i dati del dossier"
-    static let cifreDaPrisma = "Le cifre vengono da Prisma"
+    static let testoPrisma = "Testo di Lucy, con i dati del dossier"
+    static let cifreDaPrisma = "Le cifre vengono da Lucy"
     static let spedisciTu = "Lo controlli e lo spedisci tu"
     static let salva = "Salva nel dossier"
     static let riscrivi = "↻ Riscrivi"
@@ -301,14 +301,14 @@ enum TestiMessaggi {
 
     /// La frase della scheda «Da dove vengono le cifre».
     static func cifreDelDossier(_ nome: String) -> String {
-        "Vera ha scritto il testo con questi dati del dossier di \(nome): le cifre le dà Prisma."
+        "Vera ha scritto il testo con questi dati del dossier di \(nome): le cifre le dà Lucy."
     }
 
     /// Chi ha scritto il testo, senza il nome del modello (regola 9): «Scritto da Vera» o «Testo di Prisma».
     static func scrittoDa(_ s: TestoScrittoMessaggio) -> String {
         switch s.autore {
         case .vera: return "Scritto da Vera"
-        case .modelloFisso: return "Testo di Prisma"
+        case .modelloFisso: return "Testo di Lucy"
         }
     }
 
@@ -341,7 +341,7 @@ enum TestiMessaggi {
         #else
         case .vera: return "Scritto da Vera" + (s.modello.map { " con \($0)" } ?? "")
         #endif
-        case .modelloFisso: return "Testo di Prisma"
+        case .modelloFisso: return "Testo di Lucy"
         }
     }
 

@@ -209,7 +209,7 @@ extension AppImpostazioni {
                     .lineLimit(1)
                     .minimumScaleFactor(0.85)
             }
-            Text("Prisma \(Self.versioneApp)")
+            Text("Lucy \(Self.versioneApp)")
                 .lineLimit(1)
         }
         .carattereApple(l.piede)

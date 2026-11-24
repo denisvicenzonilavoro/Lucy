@@ -60,7 +60,7 @@ struct ModuloValutazione: View {
                 CampoModulo(etichetta: "Il tuo consiglio") {
                     VStack(alignment: .leading, spacing: 3) {
                         CampoTestoLungo(testo: $bozza.consiglio)
-                        Text("Se lo lasci vuoto, Prisma propone una frase ricavata dai numeri del primo riscatto.")
+                        Text("Se lo lasci vuoto, Lucy propone una frase ricavata dai numeri del primo riscatto.")
                             .font(Tipo.kpiNota).foregroundColor(Colori.Analisi.kpiNota)
                     }
                 }

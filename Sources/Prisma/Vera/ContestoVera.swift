@@ -79,7 +79,7 @@ enum ContestoVera {
 
         // Quadro delle posizioni (calcolato dall'app)
         let r = RiepilogoPosizioni(f.posizioni)
-        righe.append("QUADRO (calcolato da Prisma): patrimonio netto \(Formati.euro(r.patrimonioNetto)) (attività \(Formati.euro(r.attivita)), debiti \(Formati.euro(r.debiti))); premi e versamenti \(Formati.euro(r.premiAnnui)) all'anno; capitale assicurato \(Formati.euro(r.capitaleAssicurato)); quota Alleanza \(Int((r.quota(.alleanza) * 100).rounded()))%, indipendente \(Int((r.quota(.indipendente) * 100).rounded()))%.")
+        righe.append("QUADRO (calcolato da Lucy): patrimonio netto \(Formati.euro(r.patrimonioNetto)) (attività \(Formati.euro(r.attivita)), debiti \(Formati.euro(r.debiti))); premi e versamenti \(Formati.euro(r.premiAnnui)) all'anno; capitale assicurato \(Formati.euro(r.capitaleAssicurato)); quota Alleanza \(Int((r.quota(.alleanza) * 100).rounded()))%, indipendente \(Int((r.quota(.indipendente) * 100).rounded()))%.")
 
         let inEssere = f.posizioni.filter { $0.stato == .inEssere }
         if !inEssere.isEmpty {
@@ -88,24 +88,24 @@ enum ContestoVera {
         }
         let nelTempo = MotorePatrimonio.calcola(f.posizioni, obiettivi: f.obiettivi, oggi: f.oggi)
         if !nelTempo.vuoto {
-            righe.append("PATRIMONIO NEL TEMPO (proiezione di Prisma, prima delle imposte): " + MotorePatrimonio.sintesi(nelTempo).prefix(2).joined(separator: " "))
+            righe.append("PATRIMONIO NEL TEMPO (proiezione di Lucy, prima delle imposte): " + MotorePatrimonio.sintesi(nelTempo).prefix(2).joined(separator: " "))
         }
         let successione = MotoreSuccessione.calcola(cliente: c, posizioni: f.posizioni, oggi: f.oggi)
         if !successione.vuota {
             let eredi = successione.eredi.isEmpty ? "nessun erede registrato" : successione.eredi.map { "\($0.nome) \(MotoreSuccessione.frazione($0.quota))" }.joined(separator: ", ")
-            righe.append("SUCCESSIONE (stima di Prisma, senza testamento): ai beneficiari \(Formati.euro(successione.fuoriAsse)), agli eredi \(Formati.euro(successione.asseNetto)) (\(eredi)); imposte \(Formati.euro(successione.imposte)); da sistemare: \(successione.daSistemare.count + (successione.conviventeEscluso == nil ? 0 : 1)).")
+            righe.append("SUCCESSIONE (stima di Lucy, senza testamento): ai beneficiari \(Formati.euro(successione.fuoriAsse)), agli eredi \(Formati.euro(successione.asseNetto)) (\(eredi)); imposte \(Formati.euro(successione.imposte)); da sistemare: \(successione.daSistemare.count + (successione.conviventeEscluso == nil ? 0 : 1)).")
         }
         let costi = MotoreCosti.calcola(f.posizioni, prodotti: f.prodotti, cliente: c.id)
         if let m = costi.costoMedio {
             let alternativa = costi.conAlternativa.first.flatMap { v in v.alternativa.map { "; alternativa a parità di rischio per \(v.posizione.nome): \($0.prodotto.nome), +\(Formati.euro($0.guadagno)) in \($0.anni) anni" } } ?? ""
-            righe.append("COSTI (calcolati da Prisma): \(Formati.euro(costi.euroAnno)) quest'anno, media \(CifreDoc.percento(m, decimali: 2)) l'anno; tolgono \(Formati.euro(costi.perso10)) in 10 anni e \(Formati.euro(costi.perso20)) in 20\(alternativa).")
+            righe.append("COSTI (calcolati da Lucy): \(Formati.euro(costi.euroAnno)) quest'anno, media \(CifreDoc.percento(m, decimali: 2)) l'anno; tolgono \(Formati.euro(costi.perso10)) in 10 anni e \(Formati.euro(costi.perso20)) in 20\(alternativa).")
         }
         let prova = MotoreResistenza.calcola(f.posizioni, profilo: c.profilo)
         if !prova.vuota {
             // Una riga sola: la scheda ha un limite di spazio
             let scenari = prova.scenari.filter { !$0.voci.isEmpty }.map { "\($0.tipo.titolo.lowercased()) −\(Formati.euro($0.perdita)) (\(CifreDoc.percento($0.quota * 100, decimali: 0)))" }
             let giudizio = prova.giudizio.map { "; \($0.etichetta.lowercased()), che sopporta fino al \(CifreDoc.condizione(prova.sopportabile ?? 0))" } ?? ""
-            righe.append("PROVA DI RESISTENZA (stime prudenti di Prisma, non previsioni): " + scenari.joined(separator: ", ") + giudizio + ".")
+            righe.append("PROVA DI RESISTENZA (stime prudenti di Lucy, non previsioni): " + scenari.joined(separator: ", ") + giudizio + ".")
         }
         let proposte = f.posizioni.filter { $0.stato == .proposta }
         if !proposte.isEmpty {

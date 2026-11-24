@@ -40,7 +40,7 @@ struct ModuloImportaClienti: View {
                 .contornoTabella()
             }
         } piede: {
-            Text("Prima dell'importazione Prisma salva un backup.")
+            Text("Prima dell'importazione Lucy salva un backup.")
                 .font(Tipo.kpiNota)
                 .foregroundColor(Colori.Rubrica.secondario)
             Spacer()

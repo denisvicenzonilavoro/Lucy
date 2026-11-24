@@ -315,7 +315,7 @@ struct CorpoPortafoglio: View, Equatable {
                         AvatarCliente(iniziali: r.cliente.iniziali, tinta: r.cliente.tinta.colori, lato: Misure.Portafoglio.avatar)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(r.cliente.nome).font(Tipo.tabellaCellaForte).foregroundColor(Colori.Analisi.tabellaTesto)
-                            Text(r.motivo ?? (r.ultimoContatto == nil ? "mai incontrato in Prisma"
+                            Text(r.motivo ?? (r.ultimoContatto == nil ? "mai incontrato in Lucy"
                                               : "ultimo contatto \(r.mesi ?? 0) mesi fa" + (r.riesameScaduto ? " · riesame scaduto" : "")))
                                 .font(Tipo.chip).foregroundColor(r.motivo != nil ? Colori.Analisi.attenzioneTesto : Colori.Analisi.kpiNota)
                         }
@@ -390,7 +390,7 @@ struct CorpoPortafoglio: View, Equatable {
                     VStack(alignment: .leading, spacing: 1) {
                         Text(d.cliente.nome).font(Tipo.tabellaCellaForte).foregroundColor(Colori.Analisi.tabellaTesto)
                         Text(d.dovutoDal.map { d.scaduto() ? "scaduto dal \(Formati.dataEstesa.string(from: $0))" : "dovuto dal \(Formati.dataEstesa.string(from: $0))" }
-                             ?? "mai incontrato in Prisma")
+                             ?? "mai incontrato in Lucy")
                             .font(Tipo.chip).foregroundColor(d.scaduto() ? Colori.Analisi.attenzioneTesto : Colori.Analisi.kpiNota)
                     }
                     .lineLimit(1)

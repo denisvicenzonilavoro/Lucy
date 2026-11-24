@@ -19,13 +19,13 @@ enum TestiConfrontoDossier {
     static func titoloPosizione(_ nome: String) -> String { "Confronto con la posizione «\(nome)»" }
     static func titoloProdotto(_ nome: String) -> String { "Confronto con la scheda prodotto «\(nome)»" }
     static func titoloAppendice(_ nome: String) -> String { "L'appendice rispetto alla posizione «\(nome)»" }
-    static let sottotitolo = "Solo i dati confermati del documento. Scegli quelli da portare in Prisma: i valori di prima restano nello storico e si possono ripristinare."
+    static let sottotitolo = "Solo i dati confermati del documento. Scegli quelli da portare in Lucy: i valori di prima restano nello storico e si possono ripristinare."
 
     // MARK: - Tabella
 
     static let colonnaDato = "Dato"
     static let colonnaDocumento = "Nel documento"
-    static let colonnaPrisma = "In Prisma"
+    static let colonnaPrisma = "In Lucy"
     static let colonnaEsito = "Esito"
 
     static let esitoUguale = "Uguale"
@@ -33,7 +33,7 @@ enum TestiConfrontoDossier {
     static let esitoSale = "Sale"
     static let esitoScende = "Scende"
     static let esitoNuovo = "Nuovo dato"
-    static let esitoTenuto = "Lasciato in Prisma"
+    static let esitoTenuto = "Lasciato in Lucy"
     static let esitoDaConfermare = "Da confermare"
     static let esitoIlleggibile = "Non leggibile"
 
@@ -66,7 +66,7 @@ enum TestiConfrontoDossier {
     // MARK: - Pulsanti e azioni
 
     static func aggiornaScelti(_ n: Int) -> String { n == 1 ? "Aggiorna 1 dato scelto" : "Aggiorna \(n) dati scelti" }
-    static let lasciaComeInPrisma = "Lascia come in Prisma"
+    static let lasciaComeInPrisma = "Lascia come in Lucy"
     static let riportaTraLeDifferenze = "Riporta tra le differenze"
     static let scegliTutte = "Scegli tutte le differenze"
     static let apri = "Apri ↗"
@@ -85,22 +85,22 @@ enum TestiConfrontoDossier {
         n == 1 ? "Aggiorna anche 1 proposta aperta di questo prodotto" : "Aggiorna anche \(n) proposte aperte di questo prodotto"
     }
 
-    static let notaAggiorna = "Cambiano solo i dati scelti. Quelli lasciati come in Prisma non contano più tra le differenze di questo documento, finché uno dei due valori non cambia."
+    static let notaAggiorna = "Cambiano solo i dati scelti. Quelli lasciati come in Lucy non contano più tra le differenze di questo documento, finché uno dei due valori non cambia."
 
     // MARK: - Note delle righe
 
-    static let notaBeneficiari = "Prisma registra i beneficiari scritti nel documento; la designazione vale solo se comunicata alla compagnia (artt. 1920 e 1921 c.c.)."
+    static let notaBeneficiari = "Lucy registra i beneficiari scritti nel documento; la designazione vale solo se comunicata alla compagnia (artt. 1920 e 1921 c.c.)."
 
     static func notaLordo(_ f: MotoreConfrontoDossier.FonteLordo) -> String {
         switch f {
         case .stima:
-            return "Stima di Prisma: il rendimento lordo che, con i costi del KID, rifà lo scenario moderato. Lo scenario è al netto dei costi e non è una previsione (Reg. delegato UE 2017/653)."
+            return "Stima di Lucy: il rendimento lordo che, con i costi del KID, rifà lo scenario moderato. Lo scenario è al netto dei costi e non è una previsione (Reg. delegato UE 2017/653)."
         case .kid:
             return "Dal KID: rendimento medio annuo prima dei costi nello scenario moderato. Non è una previsione."
         }
     }
 
-    static let notaMultiramo = "Multiramo a due parti: i costi correnti del KID sono della combinazione; in Prisma il costo annuo vale per la parte in fondi."
+    static let notaMultiramo = "Multiramo a due parti: i costi correnti del KID sono della combinazione; in Lucy il costo annuo vale per la parte in fondi."
     static let notaRateDiverse = "Stessa cifra all'anno, rate diverse."
 
     static func notaFrequenzaDedotta(_ f: Frequenza) -> String {
@@ -111,7 +111,7 @@ enum TestiConfrontoDossier {
 
     static let occhielloCollega = "Dal documento al dossier"
     static let titoloCollega = "Collega il documento"
-    static let introCollega = "Collega il documento alla posizione o alla scheda prodotto che hai già: Prisma confronta i dati e aggiorna solo quelli che scegli."
+    static let introCollega = "Collega il documento alla posizione o alla scheda prodotto che hai già: Lucy confronta i dati e aggiorna solo quelli che scegli."
 
     static func sembra(_ nome: String) -> String { "Sembra «\(nome)»" }
 
@@ -435,11 +435,11 @@ enum TestiConfrontoDossier {
     Codice delle assicurazioni private, art. 30-decies; Regolamento IVASS n. 45/2020. Per OICR ed ETF: MiFID II, \
     Dir. 2014/65/UE art. 16, par. 3, e art. 24, par. 2; Regolamento Intermediari Consob n. 20307/2018.
     Beneficiari: Codice civile, artt. 1920 e 1921: la designazione si fa e si revoca con dichiarazione alla compagnia o \
-    per testamento. Prisma registra soltanto.
+    per testamento. Lucy registra soltanto.
     Limiti: un nuovo KID vale per le nuove sottoscrizioni; per i contratti in essere i costi cambiano solo se lo prevedono \
     le condizioni o il regolamento del fondo, e il costo in più è una stima «se valesse anche per loro». Lo scenario \
     moderato è un rendimento netto (al netto di tutti i costi, prima delle imposte personali) e non una previsione: \
-    Prisma lo confronta con il suo rendimento lordo solo dopo averlo riportato al lordo (stima) o usando il rendimento \
+    Lucy lo confronta con il suo rendimento lordo solo dopo averlo riportato al lordo (stima) o usando il rendimento \
     «prima dei costi» che il KID scrive dal 2023 (Reg. delegato UE 2021/2268).
     """
 }

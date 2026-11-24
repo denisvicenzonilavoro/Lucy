@@ -26,8 +26,8 @@ enum ProvaMotoreDaSistemare {
                       && template.etichetta(per: .vera) == nil && template.etichetta(per: .aspetto) == nil)
         verifica.vero("Da sistemare: «Sistema» dei dati per le fatture porta alla loro riga",
                       template.etichetta(per: .studio)?.ancora == TestiParcelle.ancoraImpostazioni)
-        verifica.vero("Da sistemare: «Tre cose, poi Prisma è a posto.»",
-                      TestiDaSistemare.conteggio(template.conteggio) == "Tre cose, poi Prisma è a posto.")
+        verifica.vero("Da sistemare: «Tre cose, poi Lucy è a posto.»",
+                      TestiDaSistemare.conteggio(template.conteggio) == "Tre cose, poi Lucy è a posto.")
         verifica.vero("Da sistemare: «ne mancano 9», senza un totale inventato",
                       template.daSistemare.last?.spiegazione == "Servono per il file della fattura elettronica: ne mancano 9.")
 
@@ -99,17 +99,17 @@ enum ProvaMotoreDaSistemare {
         spenti.ovunqueConflitti = 3
         spenti.mercatoErrore = true
         let sp = MotoreDaSistemare.calcola(spenti)
-        verifica.vero("Da sistemare: «Prisma ovunque» e Mercato spenti non contano",
+        verifica.vero("Da sistemare: «Lucy ovunque» e Mercato spenti non contano",
                       sp.etichetta(per: .ovunque) == nil && sp.etichetta(per: .mercato) == nil
                       && !idsOk(sp).contains("ovunque-allineati"))
         var accesi = spenti
         accesi.ovunqueAcceso = true
         accesi.mercatoAcceso = true
         let ac = MotoreDaSistemare.calcola(accesi)
-        verifica.vero("Da sistemare: «Prisma ovunque» con un problema è un errore, Mercato non aggiornato",
+        verifica.vero("Da sistemare: «Lucy ovunque» con un problema è un errore, Mercato non aggiornato",
                       ac.etichetta(per: .ovunque)?.tono == .errore && ac.etichetta(per: .mercato)?.etichettaColonna == "non aggiornato")
         accesi.ovunqueProblema = nil
-        verifica.vero("Da sistemare: le modifiche da decidere di «Prisma ovunque»",
+        verifica.vero("Da sistemare: le modifiche da decidere di «Lucy ovunque»",
                       MotoreDaSistemare.calcola(accesi).etichetta(per: .ovunque)?.titolo == "Ci sono 3 modifiche da decidere")
         accesi.ovunqueConflitti = 0
         verifica.vero("Da sistemare: «iPhone e iPad allineati» solo acceso e senza problemi",

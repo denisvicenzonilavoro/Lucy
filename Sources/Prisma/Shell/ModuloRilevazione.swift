@@ -27,7 +27,7 @@ struct ModuloRilevazione: View {
     var body: some View {
         CorniceModulo(titolo: "Valore passato") {
             VStack(alignment: .leading, spacing: 14) {
-                Text("Da un estratto conto o dalla comunicazione annuale di \(posizione.nome). Con il versato a quella data il rendimento è esatto; senza, Prisma stima i versamenti dai premi periodici.")
+                Text("Da un estratto conto o dalla comunicazione annuale di \(posizione.nome). Con il versato a quella data il rendimento è esatto; senza, Lucy stima i versamenti dai premi periodici.")
                     .font(Tipo.campoEtichetta)
                     .foregroundColor(Colori.Rubrica.secondario)
                     .fixedSize(horizontal: false, vertical: true)

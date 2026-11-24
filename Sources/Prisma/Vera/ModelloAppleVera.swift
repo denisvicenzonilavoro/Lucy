@@ -23,7 +23,7 @@ enum ModelloAppleVera {
     /// Solo informativo, per la pagina dei motori.
     static var descrizioneDisponibilita: String {
         if #available(macOS 26.0, iOS 26.0, *) {
-            return disponibile ? "Disponibile su questo Mac" : "macOS 26 presente · non collegato a Prisma"
+            return disponibile ? "Disponibile su questo Mac" : "macOS 26 presente · non collegato a Lucy"
         }
         return "Richiede macOS 26"
     }

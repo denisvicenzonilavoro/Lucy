@@ -13,7 +13,7 @@ enum TestiVera {
     static let puoiChiedermi = "Puoi chiedermi, per esempio"
     static let nonInvento = "Non invento cifre: se un dato manca, te lo dico."
     static let senzaClienti = "Qui non uso i dati dei clienti."
-    static let calcoliDiPrisma = "I calcoli di Prisma"
+    static let calcoliDiPrisma = "I calcoli di Lucy"
     static let tuaAgenda = "La tua agenda"
     static let tueDomande = "Le tue domande"
 
@@ -29,7 +29,7 @@ enum TestiVera {
         case .giornata: return ("La giornata", "Impegni e cose urgenti, in ordine")
         case .clienteInBreve: return ("Il cliente in breve", "Chi è, cosa ha, cosa manca")
         case .spiegazione: return ("Una spiegazione", "Con le sue cifre, in parole semplici")
-        case .scenario: return ("Uno scenario", "Cosa cambia, con i calcoli di Prisma")
+        case .scenario: return ("Uno scenario", "Cosa cambia, con i calcoli di Lucy")
         case .portafoglioInBreve: return ("Il portafoglio in breve", "Chi segui, cosa hanno, come è diviso")
         case .chiSentire: return ("Chi sentire", "I clienti da richiamare, in ordine")
         }
@@ -159,7 +159,7 @@ enum ProvaEsempiVera {
                       "Esempi di Vera (\(nome)): ogni riquadro ha tipo e domanda")
         }
         let lavoro = EsempiVera.fonti(nomeCliente: "Giulia Rossi", conversazione: false)
-        controlla(lavoro == ["Il dossier di Giulia Rossi", "I calcoli di Prisma", "La tua agenda"], "Fonti di Vera in lavoro: dossier, calcoli e agenda")
+        controlla(lavoro == ["Il dossier di Giulia Rossi", "I calcoli di Lucy", "La tua agenda"], "Fonti di Vera in lavoro: dossier, calcoli e agenda")
         controlla(EsempiVera.fonti(nomeCliente: nil, conversazione: false).first == "I dossier dei tuoi clienti",
                   "Fonti di Vera con tutti i clienti: i dossier dei tuoi clienti")
         let chiacchiera = EsempiVera.fonti(nomeCliente: "Giulia Rossi", conversazione: true)

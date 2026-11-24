@@ -13,7 +13,7 @@ struct GruppoImpostazioniNotte: View {
         let n = stato.dati.impostazioni.notte
         VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.fraRighe) {
             GruppoImpostazioni(titolo: TestiNotte.gruppoImpostazioni) {
-                RigaImpostazione(titolo: TestiNotte.rigaAttivo, sottotitolo: "Prepara le cose di domani mentre non usi Prisma.",
+                RigaImpostazione(titolo: TestiNotte.rigaAttivo, sottotitolo: "Prepara le cose di domani mentre non usi Lucy.",
                                  aiuto: TestiNotte.notaImpostazioni) {
                     interruttore(n.attivo) { v in stato.impostaNotte { $0.attivo = v } }
                 }

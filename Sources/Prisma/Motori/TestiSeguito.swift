@@ -43,7 +43,7 @@ enum TestiSeguito {
     static func daRiprendere(_ data: Date) -> String { "Da riprendere il \(Formati.dataEstesa.string(from: data))" }
 
     static func creaAttivita(_ p: Posizione) -> String {
-        "Prisma crea l'attività «\(titoloRipresa(p))» per quel giorno."
+        "Lucy crea l'attività «\(titoloRipresa(p))» per quel giorno."
     }
 
     /// Titolo dell'attività creata con il rinvio.
@@ -191,7 +191,7 @@ enum TestiSeguito {
         return "\(quando) \(Formati.dataEstesa.string(from: s.dal)): com'è andata la riflessione? Dubbi su costi, tempi, alternative."
     }
     static let luogoSeguito = "Telefonata"
-    static let solaLettura = "Archivio in sola lettura: aggiorna Prisma per segnare l'esito delle proposte."
+    static let solaLettura = "Archivio in sola lettura: aggiorna Lucy per segnare l'esito delle proposte."
 
     // MARK: - Prospetto del Portafoglio
 

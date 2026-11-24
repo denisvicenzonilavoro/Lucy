@@ -172,7 +172,7 @@ struct EtichettaDimostrazione: View {
                 .contentShape(Capsule(style: .continuous))
         }
         .buttonStyle(StileSemplice())
-        .help("Stai mostrando Prisma con i clienti di prova: clic per uscire")
+        .help("Stai mostrando Lucy con i clienti di prova: clic per uscire")
         .accessibilityLabel(Text("Dimostrazione accesa"))
     }
 }

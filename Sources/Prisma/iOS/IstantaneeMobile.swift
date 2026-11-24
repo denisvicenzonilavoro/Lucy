@@ -34,7 +34,7 @@ enum IstantaneeMobile {
         var elenco: [Scena] = [
             Scena(nome: "1-apertura-backup") { m in m.apriBackup() },
             Scena(nome: "2-apertura-password") { m in
-                m.simulaScelta(nome: "Prisma 2026-10-29 09.12.04.zip.cifrato", protetto: true,
+                m.simulaScelta(nome: "Lucy 2026-10-29 09.12.04.zip.cifrato", protetto: true,
                                fase: .errore("La password non è corretta: riprova."))
             },
             Scena(nome: "3-clienti") { m in m.apri(.clienti) },

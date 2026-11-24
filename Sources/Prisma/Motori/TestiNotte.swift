@@ -24,7 +24,7 @@ enum TestiNotte {
     static let preparaAdesso = "Prepara adesso"
     static let vaiAllaScrivania = "Vai alla scrivania"
     static let pulsanteScrivania = "Stanotte"
-    static let aiutoPulsante = "Le cose che Prisma ha preparato per oggi"
+    static let aiutoPulsante = "Le cose che Lucy ha preparato per oggi"
     static let ancoraImpostazioni = "impostazioni-notte"
     static let avvisoModoCliente = "In modalità cliente le carte della notte non si aprono: parlano di tutti i clienti."
     static let avvisoPresentazione = "Con la presentazione aperta le carte della notte non si aprono."
@@ -125,7 +125,7 @@ enum TestiNotte {
         "Il tempo della notte è finito: \(n == 1 ? "1 bozza" : "\(n) bozze") da scrivere quando vuoi."
     }
 
-    static let daFinireTesto = "Le cifre e i documenti di Prisma ci sono comunque. «Apri ›» ti porta in Messaggi."
+    static let daFinireTesto = "Le cifre e i documenti di Lucy ci sono comunque. «Apri ›» ti porta in Messaggi."
     static let daFinireConferma = "Le scrivo io più tardi"
     static let senzaFirma = "Manca la tua firma: la bozza è senza saluto."
 
@@ -222,7 +222,7 @@ enum TestiNotte {
     static func titoloCampagna(titolo: String, inclusi: Int) -> String { "\(titolo): \(inclusi) clienti" }
 
     static func descrizioneCampagna(inclusi: Int) -> String {
-        "\(inclusi) messaggi personalizzati con il modello di Prisma, da rivedere uno per uno prima di mandarli."
+        "\(inclusi) messaggi personalizzati con il modello di Lucy, da rivedere uno per uno prima di mandarli."
     }
 
     static let confermaCampagna = "Campagna pronta"
@@ -272,6 +272,6 @@ enum TestiNotte {
     static let rigaApri = "Apri le carte al mattino"
     static let rigaNotifica = "Notifica sul Mac"
     static let aiutoNotifica = "Solo «Stanotte ho preparato N cose», senza nomi"
-    static let notaImpostazioni = "Solo con il Mac acceso, alla corrente e Prisma aperto: un MacBook chiuso dorme. Mai internet; «Approva» non manda nulla."
+    static let notaImpostazioni = "Solo con il Mac acceso, alla corrente e Lucy aperta: un MacBook chiuso dorme. Mai internet; «Approva» non manda nulla."
     static func oraInizio(_ h: Int) -> String { "\(h):00" }
 }

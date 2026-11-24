@@ -10,13 +10,13 @@ enum ProvaCalcoliSalaMomenti {
         // Ogni esperienza ha un momento; ogni momento ha almeno un'esperienza
         let momenti = Set(EsperienzaSala.allCases.map(\.momento))
         verifica.vero("Sala momenti: ogni momento ha almeno un'esperienza", momenti.count == MomentoSala.allCases.count)
-        verifica.vero("Sala momenti: tutte tranne il Prisma del cliente hanno una durata",
+        verifica.vero("Sala momenti: tutte tranne la Lucy del cliente hanno una durata",
                       EsperienzaSala.allCases.allSatisfy { ($0.minuti != nil) == ($0 != .prismaCliente) })
         verifica.vero("Sala momenti: i titoli dei momenti del template",
                       MomentoSala.allCases.map(\.titolo) == ["Per aprire", "Per spiegare", "Per chiudere", "Dopo l’incontro"])
         verifica.vero("Sala momenti: «Per aprire · 2 min» sul prisma di luce",
                       TestiSala.momento(.prismaLuce) == "Per aprire · 2 min")
-        verifica.vero("Sala momenti: «Dopo l’incontro» senza durata sul Prisma del cliente",
+        verifica.vero("Sala momenti: «Dopo l’incontro» senza durata sulla Lucy del cliente",
                       TestiSala.momento(.prismaCliente) == "Dopo l’incontro")
         verifica.vero("Sala momenti: Disegna il tuo futuro dura 5 minuti", TestiSala.momento(.disegna) == "Per aprire · 5 min")
 
@@ -29,7 +29,7 @@ enum ProvaCalcoliSalaMomenti {
         verifica.vero("Sala consigliate: senza priorità nessun consiglio", EsperienzaSala.consigliate(priorita: []).isEmpty)
         verifica.vero("Sala consigliate: solo il risparmio, nessun consiglio",
                       EsperienzaSala.consigliate(priorita: [.risparmio]).isEmpty)
-        verifica.vero("Sala consigliate: mai il Prisma del cliente né un'esperienza senza area",
+        verifica.vero("Sala consigliate: mai la Lucy del cliente né un'esperienza senza area",
                       EsperienzaSala.allCases.filter { $0.areaConsigliata != nil }.count == 3)
         verifica.vero("Sala consigliate: l'etichetta verde", TestiSala.consigliata("Giulia") == "Consigliata per Giulia")
 
@@ -44,7 +44,7 @@ enum ProvaCalcoliSalaMomenti {
                       TestiCopione.titolo(.giornataPensione) == "Cosa dire · per spiegare · 3 minuti")
         verifica.vero("Sala copione: «1 minuto» al singolare sul film",
                       TestiCopione.titolo(.film) == "Cosa dire · dopo l’incontro · 1 minuto")
-        verifica.vero("Sala copione: niente durata sul Prisma del cliente",
+        verifica.vero("Sala copione: niente durata sulla Lucy del cliente",
                       TestiCopione.titolo(.prismaCliente) == "Cosa dire · dopo l’incontro")
         verifica.vero("Sala copione: il film dura venti secondi, non un minuto (decisione 59-a)",
                       EsperienzaSala.film.copione.apertura.contains("venti secondi"))
@@ -65,7 +65,7 @@ enum ProvaCalcoliSalaMomenti {
                                               consigliate: []) == .lettera)
         verifica.vero("Sala prossima: finiti i momenti dopo, lo stesso momento",
                       EsperienzaSala.prossima(dopo: .film, fatte: [.film], consigliate: []) == .prismaCliente)
-        verifica.vero("Sala prossima: nel «Dopo l’incontro» il film viene prima del Prisma del cliente",
+        verifica.vero("Sala prossima: nel «Dopo l’incontro» il film viene prima della Lucy del cliente",
                       EsperienzaSala.prossima(dopo: .valoreConsulente, fatte: [.valoreConsulente, .lettera, .capsula],
                                               consigliate: []) == .film)
         verifica.vero("Sala prossima: i momenti prima non si propongono mai",

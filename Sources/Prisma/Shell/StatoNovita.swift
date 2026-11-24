@@ -24,9 +24,9 @@ enum NovitaOrizzonte: String, CaseIterable, Identifiable {
     var titolo: String {
         switch self {
         case .studio: return "Studio"
-        case .scrivePerTe: return "Prisma scrive per te"
-        case .mercato: return "Prisma conosce il mercato"
-        case .ovunque: return "Prisma ovunque"
+        case .scrivePerTe: return "Lucy scrive per te"
+        case .mercato: return "Lucy conosce il mercato"
+        case .ovunque: return "Lucy ovunque"
         case .copilota: return "Il copilota dell’incontro"
         case .inquadra: return "Inquadra e capisci"
         case .provaDelFuoco: return "La prova del fuoco"
@@ -43,13 +43,13 @@ enum NovitaOrizzonte: String, CaseIterable, Identifiable {
         case .scrivePerTe: return "Vera prepara i messaggi ai clienti, li spedisci tu"
         case .mercato: return "Quote e tassi aggiornati, avvisi, chi è toccato"
         case .ovunque: return "Una copia cifrata su iPhone e iPad, anche senza il Mac"
-        case .copilota: return "Prisma ascolta e capisce mentre parli col cliente"
+        case .copilota: return "Lucy ascolta e capisce mentre parli col cliente"
         case .inquadra: return "La polizza letta dalla fotocamera dell’iPhone"
         case .provaDelFuoco: return "Uno scenario, tutto il portafoglio ricalcolato"
         case .lineaDellaVita: return "Trascini gli eventi, il futuro si ricalcola"
         case .trackRecord: return "Le raccomandazioni e come sono andate"
         case .famiglieComeLaSua: return "Il cliente confrontato con chi gli somiglia"
-        case .allenamentoOCF: return "Domande, ripasso e casi veri di Prisma"
+        case .allenamentoOCF: return "Domande, ripasso e casi veri di Lucy"
         }
     }
 

@@ -61,7 +61,7 @@ struct SezioneComposizione: View {
             if conGestione, let posizione { ElencoFondiMultiramo(posizione: posizione) }
             if conGestione { rigaRibilanciamento }
             Text(conGestione
-                 ? "Campi vuoti: il rendimento mancante si ricava da quello complessivo, i costi dei fondi dal costo annuo. Basta un dato separato perché Prisma calcoli le due parti a sé."
+                 ? "Campi vuoti: il rendimento mancante si ricava da quello complessivo, i costi dei fondi dal costo annuo. Basta un dato separato perché Lucy calcoli le due parti a sé."
                  : "Per una unit linked i dati dei fondi sono quelli del contratto: rendimento lordo prima dei costi, costi della compagnia e degli OICR, rischio dal KID.")
                 .font(Tema.Testo.Multiramo.nota)
                 .foregroundColor(C.nota)

@@ -172,7 +172,7 @@ final class ServerPonteVera: @unchecked Sendable {
             if let f = destinatario() {
                 ricevuta = await f(arrivo)
             } else {
-                ricevuta = .rifiutata("Prisma sul Mac non è pronto a ricevere: aprilo e riprova.")
+                ricevuta = .rifiutata("Lucy sul Mac non è pronta a ricevere: aprila e riprova.")
             }
             guard let dati = try? PonteVera.sigilla(JSONEncoder().encode(ricevuta), k) else { return await rispondi(c, 500, "errore") }
             await scrivi(c, Self.testata(200) + dati)

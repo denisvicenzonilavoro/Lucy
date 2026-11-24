@@ -24,9 +24,9 @@ enum FileFattura {
         case errore(String)
     }
 
-    static let messaggioXML = "Prisma prepara il file e non lo invia: lo carichi tu sul portale «Fatture e Corrispettivi» "
+    static let messaggioXML = "Lucy prepara il file e non lo invia: lo carichi tu sul portale «Fatture e Corrispettivi» "
         + "dell'Agenzia delle Entrate, o lo dai al commercialista."
-    static let messaggioPDF = "Il PDF resta dove lo salvi: Prisma non lo invia a nessuno."
+    static let messaggioPDF = "Il PDF resta dove lo salvi: Lucy non lo invia a nessuno."
 
     /// Salva i dati con il pannello del Mac (o li condivide su iPhone e iPad).
     @MainActor

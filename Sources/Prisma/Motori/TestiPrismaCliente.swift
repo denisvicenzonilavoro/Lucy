@@ -67,10 +67,10 @@ enum TestiPrismaCliente {
 
     /// Il testo che accompagna il file in Messaggi: **mai la password** (la si dice a voce).
     static func messaggio(_ c: Cliente) -> String {
-        "Ciao \(nomeBattesimo(c)), ti mando il tuo Prisma: la password te la dico a voce."
+        "Ciao \(nomeBattesimo(c)), ti mando la tua Lucy: la password te la dico a voce."
     }
 
-    static func oggetto(_ c: Cliente) -> String { "Il tuo Prisma" }
+    static func oggetto(_ c: Cliente) -> String { "La tua Lucy" }
 
     /// «Il-Prisma-di-Giulia»: solo il nome di battesimo, senza caratteri che il Finder o il telefono non amano.
     static func baseNomeFile(_ nome: String) -> String {
@@ -119,7 +119,7 @@ enum TestiPrismaCliente {
         if consulente.hasSuffix(" · il tuo consulente"), let primo = consulente.split(separator: " ").first {
             chi = "a \(primo)"
         }
-        return "Questo Prisma era valido fino al \(Formati.dataEstesa.string(from: fino)). Chiedi \(chi) una copia aggiornata."
+        return "Questo Lucy era valido fino al \(Formati.dataEstesa.string(from: fino)). Chiedi \(chi) una copia aggiornata."
     }
 
     /// La traccia nel dossier (mai la password né il contenuto): «PDF protetto · obiettivi, linea della vita, lettera».

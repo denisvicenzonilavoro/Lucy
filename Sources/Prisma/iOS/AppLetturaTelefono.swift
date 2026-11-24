@@ -258,7 +258,7 @@ struct DocumentiTelefono: View {
         let documenti = stato.dati.documenti
         FondoTelefono {
             if documenti.isEmpty {
-                VuotoTelefono(testo: "Nessun documento: si importano in Prisma sul Mac.")
+                VuotoTelefono(testo: "Nessun documento: si importano in Lucy sul Mac.")
             }
             ForEach(clienti) { cliente in
                 let delCliente = documenti.filter { $0.clienteId == cliente.id }.sorted { $0.importatoIl > $1.importatoIl }

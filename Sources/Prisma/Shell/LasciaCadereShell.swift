@@ -37,7 +37,7 @@ extension StatoShell {
     func lasciaCadere(_ urls: [URL]) {
         // Fase 3: una nota vocale diventa il resoconto dell'incontro (con il consenso del cliente, l'audio non si salva)
         if let audio = urls.first(where: { ResocontoVera.estensioniAudio.contains($0.pathExtension.lowercased()) }) {
-            guard !solaLettura else { return mostraAvviso("Archivio in sola lettura: aggiorna Prisma per scrivere resoconti.") }
+            guard !solaLettura else { return mostraAvviso("Archivio in sola lettura: aggiorna Lucy per scrivere resoconti.") }
             // Una cosa alla volta: la nota vocale ora, i documenti trascinati insieme li chiedo di nuovo
             if urls.contains(where: { LetturaDocumenti.estensioniAccettate.contains($0.pathExtension.lowercased()) }) {
                 mostraAvviso("Prima trascrivo la nota vocale: trascina di nuovo i documenti quando ho finito.")
@@ -47,7 +47,7 @@ extension StatoShell {
         }
         let documenti = urls.filter { LetturaDocumenti.estensioniAccettate.contains($0.pathExtension.lowercased()) }
         guard !documenti.isEmpty else { return }
-        guard !solaLettura else { return mostraAvviso("Archivio in sola lettura: aggiorna Prisma per archiviare documenti.") }
+        guard !solaLettura else { return mostraAvviso("Archivio in sola lettura: aggiorna Lucy per archiviare documenti.") }
         guard !veraInCorso else { return mostraAvviso("Vera sta ancora rispondendo: trascina il documento tra poco.") }
         // Vera si apre prima di tutto: anche la scheda di «Dopo la firma» deve vedersi (apri non cambia la conversazione)
         if !aperta(.vera) { apri(.vera) }
@@ -291,8 +291,8 @@ extension StatoShell {
         case .polizza: return "una polizza"
         case .estrattoConto: return "un estratto conto"
         case .proposta: return "una proposta"
-        case .prospetto: return "un prospetto di Prisma"
-        case .report: return "un report di Prisma"
+        case .prospetto: return "un prospetto di Lucy"
+        case .report: return "un report di Lucy"
         case .modulo: return "un modulo compilato"
         case .altro: return "un documento"
         }

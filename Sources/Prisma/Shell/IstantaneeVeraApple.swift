@@ -14,13 +14,13 @@ extension Istantanee {
                 preparaVeraApple(s)
                 conversazioneDiProva(s, chiave: "giulia",
                                      domanda: "Come è diviso il patrimonio di Giulia?",
-                                     risposta: "Il patrimonio di Giulia poggia soprattutto sulla casa; investimenti, liquidità e risparmio vengono dopo. Qui sotto le cifre di Prisma, area per area: la liquidità è il punto da cui partire per l'anticipo della casa.")
+                                     risposta: "Il patrimonio di Giulia poggia soprattutto sulla casa; investimenti, liquidità e risparmio vengono dopo. Qui sotto le cifre di Lucy, area per area: la liquidità è il punto da cui partire per l'anticipo della casa.")
             }),
             ("481-vera-risposta-calcoli-scuro", { s in
                 preparaVeraApple(s)
                 conversazioneDiProva(s, chiave: "giulia",
                                      domanda: "Come è diviso il patrimonio di Giulia?",
-                                     risposta: "Il patrimonio di Giulia poggia soprattutto sulla casa; investimenti, liquidità e risparmio vengono dopo. Qui sotto le cifre di Prisma, area per area: la liquidità è il punto da cui partire per l'anticipo della casa.")
+                                     risposta: "Il patrimonio di Giulia poggia soprattutto sulla casa; investimenti, liquidità e risparmio vengono dopo. Qui sotto le cifre di Lucy, area per area: la liquidità è il punto da cui partire per l'anticipo della casa.")
             }),
             // La domanda appena partita: la bolla dell'utente, i puntini e la sfera che pulsa (ferma, in istantanea)
             ("482-vera-sta-scrivendo", { s in

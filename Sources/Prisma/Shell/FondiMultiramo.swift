@@ -16,7 +16,7 @@ struct ElencoFondiMultiramo: View {
         let elenco = posizione.fondi ?? []
         VStack(alignment: .leading, spacing: M.spazioFondi) {
             GruppoCampi(titolo: "I fondi, uno per uno",
-                        spiegazione: "Quota sul totale del contratto e rendimento di ogni fondo: Prisma fa la media ponderata.")
+                        spiegazione: "Quota sul totale del contratto e rendimento di ogni fondo: Lucy fa la media ponderata.")
             if !elenco.isEmpty {
                 intestazione
                 ForEach(elenco.indices, id: \.self) { i in riga(i) }

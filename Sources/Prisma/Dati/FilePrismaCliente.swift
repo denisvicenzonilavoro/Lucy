@@ -105,7 +105,7 @@ enum FilePrismaCliente {
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <meta name="referrer" content="no-referrer">
         <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; media-src data:">
-        <title>Il Prisma</title>
+        <title>La Lucy</title>
         <style>:root { \(variabili) }
         \(css)</style>
         </head>
@@ -113,7 +113,7 @@ enum FilePrismaCliente {
         <main id="prisma">
         <section id="porta" class="porta">
         <div class="logo">\(logoSVG())</div>
-        <h1>Il Prisma</h1>
+        <h1>La Lucy</h1>
         <p id="ripiego" class="ripiego">Se non vedi il campo della password, apri il file con Safari o con Chrome.</p>
         </section>
         </main>
@@ -154,22 +154,9 @@ enum FilePrismaCliente {
         TestiPrismaCliente.baseNomeFile(c.nomeBattesimo) + "." + estensione
     }
 
-    /// Il simbolo di Prisma in SVG (i tre spicchi, #0F2433 a 1 / 0,66 / 0,38), dagli stessi tracciati di `LogoPrisma`.
+    /// Il simbolo di Lucy in SVG (la L e il disco d'oro), dalla stessa geometria di `LogoLucy`.
     static func logoSVG() -> String {
-        let r = GeometriaLogo.riquadro
-        let g = Double(GeometriaLogo.raggio)
-        func n(_ v: CGFloat) -> String { String(format: "%.2f", Double(v)) }
-        func spicchio(_ s: GeometriaLogo.Spicchio, opacita: Double) -> String {
-            var d = "M\(n(s.punta.x)) \(n(s.punta.y))"
-            for a in s.archi {
-                d += " L\(n(a.inizio.x)) \(n(a.inizio.y)) A\(String(format: "%.0f", g)) \(String(format: "%.0f", g)) 0 0 1 \(n(a.fine.x)) \(n(a.fine.y))"
-            }
-            d += " Z"
-            return "<path d=\"\(d)\" fill=\"\(Tema.Apple.MiniCliente.logoHex)\" fill-opacity=\"\(opacita)\"/>"
-        }
-        return "<svg viewBox=\"\(n(r.minX)) \(n(r.minY)) \(n(r.width)) \(n(r.height))\" width=\"44\" height=\"39\" aria-hidden=\"true\">"
-            + spicchio(GeometriaLogo.sinistra, opacita: 1) + spicchio(GeometriaLogo.destra, opacita: 0.66)
-            + spicchio(GeometriaLogo.base, opacita: 0.38) + "</svg>"
+        GeometriaLucy.svg(lato: 40).replacingOccurrences(of: "<svg ", with: "<svg aria-hidden=\"true\" ")
     }
 
     // MARK: Risorse

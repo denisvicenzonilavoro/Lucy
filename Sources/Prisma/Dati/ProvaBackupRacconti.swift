@@ -87,7 +87,7 @@ extension ProvaBackup {
         // 4. L'inizio del rapporto entra nell'istantanea di «Prisma ovunque» con il cliente (decisione 44)
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.clienti.first?.clienteDal == originale.clienti.first?.clienteDal else {
-            return "l'inizio del rapporto non entra nell'istantanea di Prisma ovunque"
+            return "l'inizio del rapporto non entra nell'istantanea di Lucy ovunque"
         }
         // 5. I campi stanno nella versione 27 dell'archivio di Luce
         guard DatiPrisma.versioneAttuale == 27 else { return "i campi del giro 8 stanno nella versione 27 dell'archivio di Luce" }
@@ -116,7 +116,7 @@ extension ProvaBackup {
                           testo: "Giulia,\n\nlettera di prova scritta da Vera 4K7M.\n\nGiulia, 67 anni", autore: .vera,
                           modello: "qwen3.5:4b", cifre: ["etaTraguardo": "67", "pensioneMensile": "1.730"]),
             LetteraFuturo(id: "lettera-prova-g2", clienteId: "giulia", scrittaIl: t0.addingTimeInterval(61), versione: .senzaPiano,
-                          testo: "Giulia,\n\nlettera di prova di Prisma 2R9T.\n\nGiulia, 67 anni", autore: .modelloFisso),
+                          testo: "Giulia,\n\nlettera di prova di Lucy 2R9T.\n\nGiulia, 67 anni", autore: .modelloFisso),
             LetteraFuturo(id: "lettera-prova-m1", clienteId: "marco", scrittaIl: t0.addingTimeInterval(122), versione: .conPiano,
                           testo: "Marco,\n\nlettera di prova 8D3H.\n\nMarco, 66 anni", autore: .modelloFisso),
         ]
@@ -175,7 +175,7 @@ extension ProvaBackup {
         let ist = SpazioOvunque.datiIstantanea(archivio)
         let chiaro = String(decoding: try JSONOvunque.codificatore().encode(ist), as: UTF8.self)
         guard ist.lettere.isEmpty, !chiaro.contains("4K7M"), archivio.lettere == lettere else {
-            return "lettere: entrano nell'istantanea di Prisma ovunque (o l'istantanea tocca l'archivio del Mac)"
+            return "lettere: entrano nell'istantanea di Lucy ovunque (o l'istantanea tocca l'archivio del Mac)"
         }
 
         // Conserva: l'ultima per cliente e versione sostituisce la precedente
@@ -201,7 +201,7 @@ extension ProvaBackup {
         s.aggiungiAlPrismaCliente(.lettera, cliente: giulia)
         guard s.dati.lettere.count == 1, let conservata = s.dati.lettere.first, conservata.versione == .conPiano,
               conservata.autore == .vera, conservata.testo.contains("3N5Q"), conservata.cifre["etaTraguardo"] == "\(scheda.etaTraguardo)" else {
-            return "lettere: «Aggiungi al Prisma» non conserva la stesura «Con il piano»"
+            return "lettere: «Aggiungi alla Lucy» non conserva la stesura «Con il piano»"
         }
         s.sala.stesureLettera = [:]
         guard s.letteraPerIlFile(giulia)?.contains("3N5Q") == true else {

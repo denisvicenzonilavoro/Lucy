@@ -14,12 +14,12 @@ enum TestiTerritorio {
 
     /// «Cliente dal 2019»; se l'anno viene solo dalla data della scheda, «In Prisma dal 2019» (proposta §32.3).
     static func clienteDal(_ anno: Int, stimato: Bool) -> String {
-        stimato ? "In Prisma dal \(anno)" : "Cliente dal \(anno)"
+        stimato ? "In Lucy dal \(anno)" : "Cliente dal \(anno)"
     }
 
     /// La riga sotto il nome nel riquadro del cliente: «Bologna · cliente dal 2019».
     static func zonaEAnno(_ zona: String, anno: Int, stimato: Bool) -> String {
-        "\(zona) · " + (stimato ? "in Prisma dal \(anno)" : "cliente dal \(anno)")
+        "\(zona) · " + (stimato ? "in Lucy dal \(anno)" : "cliente dal \(anno)")
     }
 
     static let haQualcosaDaFare = " · ha qualcosa da fare"
@@ -40,7 +40,7 @@ enum TestiTerritorio {
     static let giroSulliPhone = "✓ Il giro è sull'iPhone"
     /// Niente Mappe (privacy del Territorio): il giro arriva con «Prisma ovunque» e sull'iPhone sta in Agenda.
     static let notaGiroIPhone = "Sull'iPhone lo trovi in Agenda. Tocca una tappa per prepararla."
-    static let accendiOvunque = "Per averlo sull'iPhone accendi «Prisma ovunque» in Impostazioni."
+    static let accendiOvunque = "Per averlo sull'iPhone accendi «Lucy ovunque» in Impostazioni."
     static let apriOvunque = "Impostazioni › iPhone e iPad"
     static let giroInDimostrazione = "Durante la dimostrazione il giro non va all'iPhone."
 

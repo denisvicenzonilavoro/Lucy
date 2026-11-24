@@ -56,7 +56,7 @@ enum ErroreZip: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .nonValido(let m): return "Lo zip non è leggibile: \(m)"
-        case .nonSupportato(let m): return "Lo zip usa un formato che Prisma non legge: \(m)"
+        case .nonSupportato(let m): return "Lo zip usa un formato che Lucy non legge: \(m)"
         case .percorsoNonSicuro(let n): return "Lo zip contiene un percorso non sicuro: «\(n)»"
         case .controlloFallito(let n): return "Lo zip è danneggiato: «\(n)» non supera il controllo"
         case .troppoGrande(let m): return "Il file è troppo grande per lo zip: \(m)"

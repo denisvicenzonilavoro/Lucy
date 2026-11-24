@@ -25,7 +25,7 @@ enum ImportaDocumenti {
         pannello.allowedContentTypes = [.pdf, .png, .jpeg, .tiff, .heic]
         pannello.allowsMultipleSelection = true
         pannello.prompt = "Importa"
-        pannello.message = "Scegli KID, polizze, estratti conto, documenti d'identità o questionari: vengono copiati nell'archivio di Prisma."
+        pannello.message = "Scegli KID, polizze, estratti conto, documenti d'identità o questionari: vengono copiati nell'archivio di Lucy."
         if pannello.runModal() == .OK { stato.aggiungiDocumenti(pannello.urls) }
         #elseif os(iOS)
         scelta.wrappedValue = true
@@ -103,7 +103,7 @@ struct GestioneDocumenti: ViewModifier {
                 Button("Annulla", role: .cancel) {}
                 Button("Elimina", role: .destructive) { stato.eliminaDocumento(d.id) }
             } message: { _ in
-                Text("Il file viene tolto dall'archivio di Prisma. Schede, posizioni e lo storico dei dati portati in Prisma restano. Se serve, lo recuperi da un backup.")
+                Text("Il file viene tolto dall'archivio di Lucy. Schede, posizioni e lo storico dei dati portati in Lucy restano. Se serve, lo recuperi da un backup.")
             }
     }
 }

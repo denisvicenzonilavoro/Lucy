@@ -33,14 +33,14 @@ enum LetteraVera {
     // MARK: - La richiesta
 
     static func scheda(_ s: SchedaLettera, _ v: VersioneLettera) -> String {
-        var righe = ["SCHEDA DELLA LETTERA (fatti e cifre esatte di Prisma: usa solo questi)"]
+        var righe = ["SCHEDA DELLA LETTERA (fatti e cifre esatte di Lucy: usa solo questi)"]
         righe.append("Versione: \(v == .conPiano ? "con il piano" : "senza il piano")")
         righe += MotoreLettera.fatti(s, v).map { "- " + $0 }
         righe.append("")
         righe.append("LETTERA DI PRISMA (riscrivila in modo naturale, con gli stessi fatti e le stesse cifre)")
         righe.append(MotoreLettera.fissa(s, v))
         righe.append("")
-        righe.append("Scrivi solo la lettera, dal saluto all'ultima frase. Non scrivere la firma: la aggiunge Prisma.")
+        righe.append("Scrivi solo la lettera, dal saluto all'ultima frase. Non scrivere la firma: la aggiunge Lucy.")
         return righe.joined(separator: "\n")
     }
 
@@ -88,7 +88,7 @@ enum LetteraVera {
             return "la lettera di Vera ha dei segnaposto da completare"
         }
         guard CommentoVera.numeriConservati(bozza: MotoreLettera.ammessi(s, v), testo: t) else {
-            return "una cifra non era nelle stime di Prisma"
+            return "una cifra non era nelle stime di Lucy"
         }
         if t.range(of: MessaggiVera.promesse, options: [.regularExpression, .caseInsensitive]) != nil
             || t.range(of: #"garantit|sicuramente|di sicuro|certamente avr"#, options: [.regularExpression, .caseInsensitive]) != nil {
@@ -151,7 +151,7 @@ enum LetteraVera {
     static func avvisoNonPronta(_ motivo: String?) -> String {
         let m = (motivo ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: ".").union(.whitespaces))
-        return "Vera non è pronta" + (m.isEmpty ? "" : " (\(m))") + ": la lettera è quella di Prisma."
+        return "Vera non è pronta" + (m.isEmpty ? "" : " (\(m))") + ": la lettera è quella di Lucy."
     }
 
     /// Scrive la lettera con Qwen in streaming (`aggiorna` riceve il testo fin qui, senza firma, da qualunque thread).
@@ -181,14 +181,14 @@ enum LetteraVera {
             let r = try await motore.scrivi(piano(s, v, vera: vera), aggiorna: suPezzo)
             let pulito = pulisci(r.testo, scheda: s)
             if let motivo = controlla(pulito, scheda: s, versione: v, vietati: nomi) {
-                return fissa(s, v, avviso: maiuscola(motivo) + ": la lettera è quella di Prisma.")
+                return fissa(s, v, avviso: maiuscola(motivo) + ": la lettera è quella di Lucy.")
             }
             return TestoLettera(testo: MotoreLettera.conFirma(pulito, s), autore: .vera, modello: motore.modello, avviso: nil)
         } catch is CancellationError {
-            return fissa(s, v, avviso: "Scrittura interrotta: la lettera è quella di Prisma.")
+            return fissa(s, v, avviso: "Scrittura interrotta: la lettera è quella di Lucy.")
         } catch {
             let m = (error as? ErroreVera)?.messaggio ?? error.localizedDescription
-            return fissa(s, v, avviso: "Vera non ha potuto scrivere la lettera (\(m)): la lettera è quella di Prisma.")
+            return fissa(s, v, avviso: "Vera non ha potuto scrivere la lettera (\(m)): la lettera è quella di Lucy.")
         }
     }
 

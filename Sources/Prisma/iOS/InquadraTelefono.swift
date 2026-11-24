@@ -228,14 +228,14 @@ struct InquadraTelefono: View {
                 Spacer(minLength: 0)
             }
         } else if ControlloreScannerInquadra.scansioneDisponibile {
-            Text("Su questo iPhone la lettura dal vivo non c’è: scansiona il documento, poi Prisma lo legge sul telefono.")
+            Text("Su questo iPhone la lettura dal vivo non c’è: scansiona il documento, poi Lucy lo legge sul telefono.")
                 .carattereApple(M.frase)
                 .foregroundColor(M.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)
             Button("Scansiona il documento") { scansioneDocumenti = true }
                 .buttonStyle(.applePrimarioGrande)
         } else {
-            Text("La fotocamera non è disponibile: consenti a Prisma di usarla in Impostazioni › Prisma › Fotocamera.")
+            Text("La fotocamera non è disponibile: consenti a Lucy di usarla in Impostazioni › Lucy › Fotocamera.")
                 .carattereApple(M.frase)
                 .foregroundColor(M.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)

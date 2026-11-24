@@ -19,7 +19,7 @@ struct PaginaImpostazioniModelli: View {
         let clienti = clientiConInvestimenti
         return VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Pagina.spazioGruppi) {
             NotaImpostazioni("Il radar di Posizioni misura quanto ogni cliente si è allontanato dal suo portafoglio "
-                             + "modello. Modelli, pesi e tolleranza li scrivi tu: Prisma non li inventa.")
+                             + "modello. Modelli, pesi e tolleranza li scrivi tu: Lucy non li inventa.")
             VStack(alignment: .leading, spacing: Riga.fraRighe) {
                 GruppoImpostazioni(titolo: "Tolleranza") {
                     RigaImpostazione(titolo: "Tolleranza generale",

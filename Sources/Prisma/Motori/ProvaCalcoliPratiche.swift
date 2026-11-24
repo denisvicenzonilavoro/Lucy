@@ -140,7 +140,7 @@ enum ProvaCalcoliPratiche {
             dati.pratiche[0].passi[PassoPratica.polizzaEmessa.rawValue] = SegnoPasso(fatto: false, il: d(2026, 11, 16))
         })
         verifica.vero("Pratiche: il segno a mano toglie un passo riconosciuto", !fatto(tolto, .polizzaEmessa))
-        verifica.vero("Pratiche: il passo tolto dice cosa riconoscerebbe Prisma",
+        verifica.vero("Pratiche: il passo tolto dice cosa riconoscerebbe Lucy",
                       origine(tolto, .polizzaEmessa) == .toltoAMano(riconoscibile: TestiPratiche.daNumeroContratto))
         let segnato = stato(archivio { $0.pratiche[0].passi[PassoPratica.moduli.rawValue] = SegnoPasso(fatto: true, il: d(2026, 11, 11)) })
         verifica.vero("Pratiche: il segno a mano fa un passo", fatto(segnato, .moduli) && origine(segnato, .moduli) == .aMano)

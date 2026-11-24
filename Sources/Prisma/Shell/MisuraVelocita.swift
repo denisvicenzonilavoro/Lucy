@@ -69,7 +69,7 @@ final class MisuraVelocita: ObservableObject {
             return
         }
         guard let eseguibile = Bundle.main.executableURL else {
-            problema = "Non trovo il programma di Prisma per far partire la prova."
+            problema = "Non trovo il programma di Lucy per far partire la prova."
             return
         }
         let uscita = FileManager.default.temporaryDirectory.appendingPathComponent("prisma-velocita-\(UUID().uuidString).md")
@@ -300,7 +300,7 @@ private struct TabellaVelocita: View {
                     RigaTabellaVelocita(voce: r.azione, valore: r.tempo, secondo: r.primaVolta)
                 }
             }
-            Text("Tempo = mediana del lavoro di Prisma sul thread principale (azione e impaginazione); prima volta = il primo giro. «Copia» copia la tabella completa, con il disegno.")
+            Text("Tempo = mediana del lavoro di Lucy sul thread principale (azione e impaginazione); prima volta = il primo giro. «Copia» copia la tabella completa, con il disegno.")
                 .carattereApple(V.nota)
                 .foregroundColor(V.coloreNota)
                 .fixedSize(horizontal: false, vertical: true)

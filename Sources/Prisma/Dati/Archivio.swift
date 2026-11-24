@@ -154,7 +154,7 @@ enum Archivio {
     static let versioneSegnaposto = 1_000_000
 
     static func datiSegnaposto() -> Data {
-        let testo = "L'archivio di questo backup è nella cartella Archivio/: si apre con Prisma aggiornato (dal giro 0 di «Prisma istantaneo» in poi)."
+        let testo = "L'archivio di questo backup è nella cartella Archivio/: si apre con Lucy aggiornata (dal giro 0 di «Lucy istantaneo» in poi)."
         let oggetto: [String: Any] = ["versione": versioneSegnaposto, "clienti": [Any](), "segnapostoArchivio": testo]
         return (try? JSONSerialization.data(withJSONObject: oggetto, options: [.prettyPrinted, .sortedKeys])) ?? Data()
     }
@@ -172,7 +172,7 @@ enum Archivio {
         if segnaposto(u) { try? FileManager.default.removeItem(at: u) }
     }
 
-    static let avvisoPiuRecente = "Questo archivio è stato salvato da una versione più recente di Prisma: lo apro in sola lettura e non salvo nulla, per non perdere dati. Apri l'ultima versione di Prisma."
+    static let avvisoPiuRecente = "Questo archivio è stato salvato da una versione più recente di Lucy: lo apro in sola lettura e non salvo nulla, per non perdere dati. Apri l'ultima versione di Lucy."
 
     /// Copie di archivi (o di pezzi dell'archivio) non leggibili non ancora gestite: finché ci sono, i backup
     /// automatici si fermano (non devono sostituire, con la rotazione, i backup buoni con dati incompleti).
@@ -269,12 +269,12 @@ enum Archivio {
         // 3. Niente archivio (nessun pezzo, nessun archivio.json): la copia dell'ultimo avvio (a pezzi, poi quella di prima).
         // Una copia che c'è ma che non si apre (più recente, non leggibile adesso) non lascia mai il posto ai dati di prova:
         // sola lettura, nulla scritto sopra
-        let mancava = "L'archivio mancava: ho ripreso la copia fatta all'ultimo avvio di Prisma. Controlla gli ultimi inserimenti."
+        let mancava = "L'archivio mancava: ho ripreso la copia fatta all'ultimo avvio di Lucy. Controlla gli ultimi inserimenti."
         let copiaPezzi = cartella.appendingPathComponent(nomeCopiaAvvio, isDirectory: true)
         if fm.fileExists(atPath: copiaPezzi.appendingPathComponent(ArchivioPezzi.nomeIndice).path) {
             try? fm.removeItem(at: pezzi)
             guard (try? fm.copyItem(at: copiaPezzi, to: pezzi)) != nil, var e = caricaPezzi(cartella, indiceLetto: nil) else {
-                return EsitoCarica(dati: ArchivioPezzi.vuoto, avviso: "L'archivio di Prisma manca e non riesco a riprendere la copia fatta all'ultimo avvio: non salvo nulla. Chiudi Prisma e riaprilo; se succede ancora, ripristina un backup da Impostazioni.", solaLettura: true)
+                return EsitoCarica(dati: ArchivioPezzi.vuoto, avviso: "L'archivio di Lucy manca e non riesco a riprendere la copia fatta all'ultimo avvio: non salvo nulla. Chiudi Lucy e riaprila; se succede ancora, ripristina un backup da Impostazioni.", solaLettura: true)
             }
             if !e.solaLettura { e.avviso = e.avviso.map { mancava + " " + $0 } ?? mancava }
             return e
@@ -286,7 +286,7 @@ enum Archivio {
                    v > DatiPrisma.versioneAttuale {
                     return EsitoCarica(dati: ArchivioPezzi.vuoto, avviso: avvisoPiuRecente, solaLettura: true, bloccaRipristino: true)
                 }
-                return EsitoCarica(dati: ArchivioPezzi.vuoto, avviso: "L'archivio di Prisma manca e la copia fatta all'ultimo avvio non si apre: non salvo nulla. Ripristina un backup da Impostazioni (o chiedi aiuto prima di continuare).", solaLettura: true)
+                return EsitoCarica(dati: ArchivioPezzi.vuoto, avviso: "L'archivio di Lucy manca e la copia fatta all'ultimo avvio non si apre: non salvo nulla. Ripristina un backup da Impostazioni (o chiedi aiuto prima di continuare).", solaLettura: true)
             }
             if diVersionePiuRecente(d) { return EsitoCarica(dati: d, avviso: avvisoPiuRecente, solaLettura: true, bloccaRipristino: true) }
             try? salva(d, in: cartella)
@@ -295,7 +295,7 @@ enum Archivio {
         let documenti = (try? fm.contentsOfDirectory(atPath: cartella.appendingPathComponent("Documenti").path)) ?? []
         if !documenti.isEmpty || !copieNonLeggibili(in: cartella).isEmpty {
             // La cartella è già stata usata: niente dati di prova scritti sopra
-            return EsitoCarica(dati: DatiPrisma.demo(), avviso: "L'archivio di Prisma manca ma la cartella contiene documenti: non salvo nulla. Ripristina un backup da Impostazioni (o chiedi aiuto prima di continuare).", solaLettura: true)
+            return EsitoCarica(dati: DatiPrisma.demo(), avviso: "L'archivio di Lucy manca ma la cartella contiene documenti: non salvo nulla. Ripristina un backup da Impostazioni (o chiedi aiuto prima di continuare).", solaLettura: true)
         }
         let d = archivioIniziale
         try? salva(d, in: cartella)
@@ -320,7 +320,7 @@ enum Archivio {
 
     /// L'avviso di un archivio che non si apre e che quindi non si tocca (sola lettura).
     static func avvisoNonApribile(_ error: Error) -> String {
-        "Non riesco ad aprire l'archivio di Prisma (\(error.localizedDescription)): non salvo nulla e non tocco i file. Chiudi Prisma e riaprilo; se succede ancora, riavvia il dispositivo."
+        "Non riesco ad aprire l'archivio di Lucy (\(error.localizedDescription)): non salvo nulla e non tocco i file. Chiudi Lucy e riaprila; se succede ancora, riavvia il dispositivo."
     }
 
     /// L'esito di una cartella a pezzi che non si deve toccare: più recente di questo Prisma, o non leggibile adesso.
@@ -426,9 +426,9 @@ enum Archivio {
             // Scritto da una versione di Prisma di prima dopo la conversione: non vale e non si perde
             let destinazione = destinazioneLibera("\(prefissoVersionePrecedente) \(quando)", in: cartella)
             if (try? fm.moveItem(at: vecchio, to: destinazione)) == nil {
-                return EsitoCarica(dati: d, avviso: "Una versione precedente di Prisma ha scritto archivio.json accanto all'archivio attuale e non riesco a metterlo da parte: apro l'archivio in sola lettura e non salvo nulla. Chiudi Prisma e riaprilo.", solaLettura: true)
+                return EsitoCarica(dati: d, avviso: "Una versione precedente di Lucy ha scritto archivio.json accanto all'archivio attuale e non riesco a metterlo da parte: apro l'archivio in sola lettura e non salvo nulla. Chiudi Lucy e riaprila.", solaLettura: true)
             }
-            avvisoVersionePrecedente = "Una versione precedente di Prisma ha scritto un archivio dopo il passaggio al nuovo formato: non l'ho usato e l'ho messo da parte nella cartella di Prisma («\(destinazione.lastPathComponent)»). I dati aperti sono quelli dell'archivio attuale: se in quella versione hai inserito qualcosa, va riportato a mano."
+            avvisoVersionePrecedente = "Una versione precedente di Lucy ha scritto un archivio dopo il passaggio al nuovo formato: non l'ho usato e l'ho messo da parte nella cartella di Lucy («\(destinazione.lastPathComponent)»). I dati aperti sono quelli dell'archivio attuale: se in quella versione hai inserito qualcosa, va riportato a mano."
         }
         // I file non citati e più vecchi dell'indice (clienti tolti) e i temporanei di un salvataggio interrotto
         for u in r.scartati { try? fm.removeItem(at: u) }
@@ -467,7 +467,7 @@ enum Archivio {
                 do {
                     try fm.moveItem(at: p.file, to: destinazione)
                 } catch {
-                    return EsitoCarica(dati: d, avviso: "Alcune parti dell'archivio non si sono aperte (\(p.descrizione)) e non riesco a metterne da parte una copia: apro l'archivio in sola lettura e non salvo nulla, per non perderle. Chiudi Prisma e riaprilo.", solaLettura: true)
+                    return EsitoCarica(dati: d, avviso: "Alcune parti dell'archivio non si sono aperte (\(p.descrizione)) e non riesco a metterne da parte una copia: apro l'archivio in sola lettura e non salvo nulla, per non perderle. Chiudi Lucy e riaprila.", solaLettura: true)
                 }
             }
             voci.append("\(p.descrizione) (\(p.mancante ? "manca" : "non si legge"))")
@@ -479,17 +479,17 @@ enum Archivio {
                 do {
                     try fm.moveItem(at: indice, to: destinazione)
                 } catch {
-                    return EsitoCarica(dati: d, avviso: "L'indice dell'archivio non si legge e non riesco a metterne da parte una copia: apro l'archivio in sola lettura e non salvo nulla. Chiudi Prisma e riaprilo.", solaLettura: true)
+                    return EsitoCarica(dati: d, avviso: "L'indice dell'archivio non si legge e non riesco a metterne da parte una copia: apro l'archivio in sola lettura e non salvo nulla. Chiudi Lucy e riaprila.", solaLettura: true)
                 }
             } else {
                 try? Data(#"{"mancava": "indice.json"}"#.utf8).write(to: destinazione)
             }
             voci.insert(riserva.attuale
                         ? "l'indice dell'archivio (ricostruito dalla sua copia di riserva e dai file dei clienti)"
-                        : "l'indice dell'archivio (ricostruito dai file dei clienti e dalla copia dell'ultimo avvio: impostazioni, ordine e contatori di Prisma ovunque sono tornati a quel momento; controlla le impostazioni e, se usi Prisma ovunque, non lasciarlo unire finché non hai verificato i dati)", at: 0)
+                        : "l'indice dell'archivio (ricostruito dai file dei clienti e dalla copia dell'ultimo avvio: impostazioni, ordine e contatori di Lucy ovunque sono tornati a quel momento; controlla le impostazioni e, se usi Lucy ovunque, non lasciarlo unire finché non hai verificato i dati)", at: 0)
         }
         var avviso = "Alcune parti dell'archivio non si sono aperte: " + voci.joined(separator: "; ")
-            + ". Tutto il resto è aperto. Ne ho messo da parte una copia nella cartella di Prisma; i backup automatici sono fermi finché non ripristini un backup da Impostazioni o confermi che i dati vanno bene."
+            + ". Tutto il resto è aperto. Ne ho messo da parte una copia nella cartella di Lucy; i backup automatici sono fermi finché non ripristini un backup da Impostazioni o confermi che i dati vanno bene."
         if let a = avvisoVersionePrecedente { avviso += " " + a }
         return EsitoCarica(dati: d, avviso: avviso, daRiscrivere: true)
     }
@@ -499,7 +499,7 @@ enum Archivio {
         let fm = FileManager.default
         let file = cartella.appendingPathComponent(nomeFileVecchio)
         guard let grezzo = try? Data(contentsOf: file) else {
-            return EsitoCarica(dati: DatiPrisma.demo(), avviso: "Non riesco ad aprire l'archivio di Prisma: non salvo nulla. Riavvia il Mac e riprova.", solaLettura: true)
+            return EsitoCarica(dati: DatiPrisma.demo(), avviso: "Non riesco ad aprire l'archivio di Lucy: non salvo nulla. Riavvia il Mac e riprova.", solaLettura: true)
         }
         // Una lettura sola: la versione la legge già la decodifica completa
         do {
@@ -526,7 +526,7 @@ enum Archivio {
             #else
             let caricato = "caricato i dati di prova"
             #endif
-            return EsitoCarica(dati: d, avviso: "L'archivio non era leggibile: ne ho conservato una copia nella cartella di Prisma e \(caricato). I backup automatici sono fermi finché non ripristini un backup da Impostazioni.")
+            return EsitoCarica(dati: d, avviso: "L'archivio non era leggibile: ne ho conservato una copia nella cartella di Lucy e \(caricato). I backup automatici sono fermi finché non ripristini un backup da Impostazioni.")
         }
     }
 

@@ -147,7 +147,7 @@ enum TestiCollegamenti {
     static let tavoloSotto = "L’iPad davanti al cliente, guidato dal Mac."
 
     static let schedaOcchiello = "Collega un dispositivo"
-    static let schedaTitolo = "Apri Prisma sull’iPhone o sull’iPad e scrivi questo codice"
+    static let schedaTitolo = "Apri Lucy sull’iPhone o sull’iPad e scrivi questo codice"
     static let schedaFrase = "Si fa una volta sola: vale per Vera, per inquadrare i documenti, per le note a voce e per il tavolo."
     static let schedaDati = "Per i dati serve anche la passphrase della copia cifrata, che scegli accendendo «I dati»."
     static let nuovoCodice = "Nuovo codice"

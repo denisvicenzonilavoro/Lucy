@@ -19,19 +19,19 @@ struct ImpostazioniProposte: View {
                 .font(Tema.Testo.Impostazioni.nota)
                 .foregroundColor(Tema.Colore.inchiostroSecondario)
                 .fixedSize(horizontal: false, vertical: true)
-                .help("Per ogni proposta Prisma prepara l'elenco dei documenti del suo canale, secondo il tipo di prodotto. Le spunte si mettono nella scheda di adeguatezza della proposta. L'elenco è un promemoria: verifica sempre la documentazione richiesta dalla compagnia o dall'intermediario.")
+                .help("Per ogni proposta Lucy prepara l'elenco dei documenti del suo canale, secondo il tipo di prodotto. Le spunte si mettono nella scheda di adeguatezza della proposta. L'elenco è un promemoria: verifica sempre la documentazione richiesta dalla compagnia o dall'intermediario.")
             ForEach(Canale.allCases) { c in
                 gruppo(c)
             }
-            GruppoImpostazioni(titolo: "Elenco di Prisma") {
-                RigaImpostazione(titolo: "Ripristina l'elenco di Prisma",
+            GruppoImpostazioni(titolo: "Elenco di Lucy") {
+                RigaImpostazione(titolo: "Ripristina l'elenco di Lucy",
                                  sottotitolo: "Torna ai documenti predefiniti dei due canali: le spunte già messe nelle schede restano.",
                                  ultima: true) {
                     ValoreRiga(testo: "Ripristina") { confermaRipristino = true }
                 }
             }
         }
-        .alert("Ripristinare l'elenco di Prisma?", isPresented: $confermaRipristino) {
+        .alert("Ripristinare l'elenco di Lucy?", isPresented: $confermaRipristino) {
             Button("Annulla", role: .cancel) {}
             Button("Ripristina", role: .destructive) { stato.ripristinaDocumentiConsegna() }
         } message: {

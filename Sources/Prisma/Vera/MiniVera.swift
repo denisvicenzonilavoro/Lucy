@@ -150,7 +150,7 @@ struct CifreMiniVera: Equatable {
                 : nominate
             c.righe = elenco.map { riga($0, sotto: $0.tipologia.isEmpty ? $0.area.nome : $0.tipologia) }
         }
-        c.fonte = "Cifre dai calcoli di \(app ?? "Prisma") · calcolate oggi alle \(calcolate)"
+        c.fonte = "Cifre dai calcoli di \(app ?? "Lucy") · calcolate oggi alle \(calcolate)"
         c.azioni = [AzioneMiniVera(titolo: "Apri in Posizioni", simbolo: "arrow.up.forward", tipo: .posizioni, primaria: true),
                     AzioneMiniVera(titolo: "Fissa incontro", simbolo: "calendar", tipo: .agenda),
                     AzioneMiniVera(titolo: "Prospetto", simbolo: "doc", tipo: .prospetto(prospetto(argomento)))]
@@ -428,14 +428,14 @@ struct DomandaMiniVera: Equatable {
     /// I passi di «pensa» per questa domanda, dai dati veri del cliente.
     static func passi(domanda: String, fonte f: FonteVera?, modalita: ModalitaVera) -> [String] {
         guard modalita == .lavoro else { return ["Ci penso…"] }
-        guard let f else { return ["Apro il portafoglio…", "Leggo i clienti e le scadenze…", "Preparo le cifre di Prisma…"] }
+        guard let f else { return ["Apro il portafoglio…", "Leggo i clienti e le scadenze…", "Preparo le cifre di Lucy…"] }
         let nome = f.cliente.nome.split(separator: " ").first.map(String.init) ?? f.cliente.nome
         let inEssere = f.posizioni.filter { $0.stato == .inEssere }
         let canali = Set(inEssere.map(\.canale))
         let quali = canali.count > 1 ? ", Alleanza e indipendenti" : (canali.first.map { $0 == .alleanza ? ", Alleanza" : ", indipendenti" } ?? "")
         let posizioni = inEssere.count == 1 ? "1 posizione" : "\(inEssere.count) posizioni"
         let t = NucleoVera.semplice(domanda)
-        let incrocio = t.contains("scad") ? "Incrocio scadenze e obiettivi…" : "Preparo le cifre di Prisma…"
+        let incrocio = t.contains("scad") ? "Incrocio scadenze e obiettivi…" : "Preparo le cifre di Lucy…"
         return ["Apro il dossier di \(nome)…", "Leggo \(posizioni)\(quali)…", incrocio]
     }
 }

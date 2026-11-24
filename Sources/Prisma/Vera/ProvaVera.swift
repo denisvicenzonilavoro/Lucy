@@ -233,7 +233,7 @@ enum ProvaVera {
             let r = MotoriVera.sintesi.componi(RichiestaVera(domanda: "", spunto: .successione, fonte: f, storia: []))
             controlla(r.titolo == "Il passaggio generazionale di Marco Bianchi" && MotoreSuccessione.sintesi(su).allSatisfy { r.testo.contains($0) },
                       "Passaggio generazionale di Marco: Vera riporta le cifre del motore")
-            controlla(ContestoVera.scheda(f).contains("SUCCESSIONE (stima di Prisma"), "La scheda per il modello riporta la successione")
+            controlla(ContestoVera.scheda(f).contains("SUCCESSIONE (stima di Lucy"), "La scheda per il modello riporta la successione")
             controlla(ContestoVera.scheda(f).contains("PATRIMONIO NEL TEMPO"), "La scheda per il modello riporta il patrimonio nel tempo")
         }
         // Peso dei costi: le stesse cifre del pannello in Posizioni
@@ -242,7 +242,7 @@ enum ProvaVera {
             let r = MotoriVera.sintesi.componi(RichiestaVera(domanda: "", spunto: .costi, fonte: f, storia: []))
             controlla(!a.voci.isEmpty && r.titolo == "I costi di Marco Bianchi" && MotoreCosti.sintesi(a).allSatisfy { r.testo.contains($0) },
                       "Costi di Marco: Vera riporta le cifre del motore")
-            controlla(ContestoVera.scheda(f).contains("COSTI (calcolati da Prisma)"), "La scheda per il modello riporta i costi")
+            controlla(ContestoVera.scheda(f).contains("COSTI (calcolati da Lucy)"), "La scheda per il modello riporta i costi")
         }
         // Prova di resistenza: le stesse cifre del pannello in Posizioni
         if let f = stato.fonteVera("marco") {
@@ -518,7 +518,7 @@ enum ProvaVera {
                   "Novità di Luce: 29 voci (15 davanti al cliente, 14 per il lavoro), titoli unici, ognuna porta a un'app del dock (o alla scrivania)")
         controlla(EsperienzaSala.allCases.count == 11 && EsperienzaSala.allCases.allSatisfy { $0.novita.esperienza == $0 && $0.novita.app == .sala }
                   && EsperienzaSala.allCases.filter(\.mostraSulTavolo).count == 8 && EsperienzaSala.allCases.filter(\.aggiungeAlPrisma).count == 5,
-                  "Sala: 11 esperienze, ognuna con la sua voce delle novità; «Mostra sul tavolo» in 8, «Aggiungi al Prisma» in 5")
+                  "Sala: 11 esperienze, ognuna con la sua voce delle novità; «Mostra sul tavolo» in 8, «Aggiungi alla Lucy» in 5")
         controlla(Set(GlifoLuce.allCases).count == 29 && Set(NovitaLuce.allCases.map(\.glifo)).count == 29,
                   "Glifi di Luce: 29, uno per novità")
         #if os(macOS)
@@ -1428,7 +1428,7 @@ enum ProvaVera {
         while esitoVoce == nil && Date() < scadenza { RunLoop.main.run(until: Date().addingTimeInterval(0.1)) }
         print("INFO Prova del riconoscimento sul server: \(esitoVoce ?? "nessun esito in 50 secondi")")
         let diagnostica = DiagnosticaVoce.testo
-        controlla(diagnostica.hasPrefix("Prisma · diagnostica dell'ascolto"), "Voce: la diagnostica dell'ascolto si può copiare")
+        controlla(diagnostica.hasPrefix("Lucy · diagnostica dell'ascolto"), "Voce: la diagnostica dell'ascolto si può copiare")
 
         if errori == 0 {
             print("OK: Vera verificata")

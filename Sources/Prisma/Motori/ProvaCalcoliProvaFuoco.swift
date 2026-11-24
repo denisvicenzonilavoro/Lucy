@@ -72,7 +72,7 @@ enum ProvaCalcoliProvaFuoco {
         // P6. Inflazione sull'obiettivo: 50.000 € di oggi fra 10 anni, 5% per 3 anni poi il 2% → 50.000 × 1,05³ × 1,02⁷.
         do {
             verifica("P6 Traguardo con l'inflazione dello scenario", MotoreObiettivo.importoAScadenza(50_000, anni: 10, inflazioneIniziale: (tasso: 5, anni: 3)), 66_487.36, tolleranza: 0.01)
-            verifica("P6 Senza scenario: l'inflazione di Prisma", MotoreObiettivo.importoAScadenza(50_000, anni: 10), 50_000 * pow(1.02, 10), tolleranza: 0.0001)
+            verifica("P6 Senza scenario: l'inflazione di Lucy", MotoreObiettivo.importoAScadenza(50_000, anni: 10), 50_000 * pow(1.02, 10), tolleranza: 0.0001)
         }
 
         // Il portafoglio di prova: Anna (azioni collegate all'obiettivo), Bruno (conto collegato), Carla (senza obiettivi

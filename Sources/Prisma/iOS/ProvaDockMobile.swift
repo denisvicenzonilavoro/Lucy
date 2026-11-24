@@ -51,7 +51,7 @@ enum ProvaDockMobile {
         let tutte = Set(AppPrisma.allCases)
         let nelDock = DisposizioneDockMobile.app(.telefono, consentita: { _ in true })
         verifica("il dock dell'iPhone non ripete le app", Set(nelDock).count == nelDock.count)
-        verifica("il dock dell'iPhone ha solo app di Prisma", Set(nelDock).isSubset(of: tutte))
+        verifica("il dock dell'iPhone ha solo app di Lucy", Set(nelDock).isSubset(of: tutte))
         let dockiPad = DisposizioneDockMobile.app(.iPad, consentita: { _ in true })
         verifica("il dock dell'iPad ha le app del dock del Mac fino a Prospetti, più Sala e Vera, nello stesso ordine",
                  dockiPad == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio, .messaggi, .pratiche,

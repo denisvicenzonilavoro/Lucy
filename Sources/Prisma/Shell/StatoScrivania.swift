@@ -59,7 +59,7 @@ extension StatoShell {
         } else if let m = mossa {
             frase = "Oggi niente incontri in agenda. Partirei da \(Self.nomeBreve(m.cliente)): vuoi un riepilogo?"
         } else {
-            frase = inModoCliente ? "Chiedimi del dossier: ti mostro le cifre di Prisma."
+            frase = inModoCliente ? "Chiedimi del dossier: ti mostro le cifre di Lucy."
                                   : "Oggi niente incontri in agenda. Vuoi il quadro del portafoglio?"
         }
 

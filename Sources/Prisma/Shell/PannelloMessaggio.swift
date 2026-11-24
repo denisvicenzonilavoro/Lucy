@@ -546,7 +546,7 @@ struct PannelloMessaggio: View {
                 Button { siSpedito() } label: { Text(TestiMessaggi.siSpedito) }
                     .buttonStyle(.applePrimarioGrande)
                     .disabled(stato.solaLettura)
-                    .help("Lo segni tu: Prisma non sa se Mail o Messaggi l'hanno spedito")
+                    .help("Lo segni tu: Lucy non sa se Mail o Messaggi l'hanno spedito")
                 Button { sessione.domandeChiuse.insert(occasione.id) } label: { Text(TestiMessaggi.nonAncora) }
                     .buttonStyle(.appleGrande)
                 Spacer(minLength: B.spazio)

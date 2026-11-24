@@ -59,7 +59,7 @@ final class TavoloiPad: ObservableObject {
     func entra(codice c: String) {
         guard Self.disponibile, fase == .spento else { return }
         guard PonteVera.normalizza(c) != nil else {
-            esito = "Scrivi il codice del Mac: lo trovi in Prisma sul Mac, Impostazioni › Vera."
+            esito = "Scrivi il codice del Mac: lo trovi in Lucy sul Mac, Impostazioni › Vera."
             return
         }
         codice = c
@@ -161,7 +161,7 @@ final class TavoloiPad: ObservableObject {
             if fase == .alTavolo { esci("Il Mac ha chiuso il tavolo.") }
         case .rifiutato:
             if fase == .cerca {
-                esci("Il Mac non riconosce questo codice: controllalo in Prisma sul Mac, Impostazioni › Vera.")
+                esci("Il Mac non riconosce questo codice: controllalo in Lucy sul Mac, Impostazioni › Vera.")
             } else {
                 rifiuti += 1
                 if rifiuti >= Self.rifiutiMassimi {
@@ -172,7 +172,7 @@ final class TavoloiPad: ObservableObject {
             }
         case .irraggiungibile:
             if fase == .cerca {
-                esci("Non trovo il Mac: in Prisma sul Mac apri «Al tavolo» (in Prospetti o nella presentazione), sulla stessa rete Wi‑Fi.")
+                esci("Non trovo il Mac: in Lucy sul Mac apri «Al tavolo» (in Prospetti o nella presentazione), sulla stessa rete Wi‑Fi.")
             } else {
                 programmaRiprova()
             }

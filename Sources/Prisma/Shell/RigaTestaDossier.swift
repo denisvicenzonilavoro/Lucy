@@ -172,7 +172,7 @@ struct RigaTestaDossier: View {
             voci.append(.separatore)
             let s = stato, c = cliente
             voci.append(.azione("Esporta i dati del cliente…",
-                                aiuto: "Diritto di accesso e portabilità: tutto ciò che Prisma conserva di questa persona, in un file") {
+                                aiuto: "Diritto di accesso e portabilità: tutto ciò che Lucy conserva di questa persona, in un file") {
                 s.esportaDatiCliente(c)
             })
         }

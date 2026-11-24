@@ -80,7 +80,7 @@ enum GuidaTesti {
                           "A sinistra hai l’indice del suo dossier: tutte le sezioni in vista, in tre gruppi.",
                           "Il dossier si apre sul suo quadro: le quattro aree in una riga ciascuna."])
         case .posizioni:
-            return guida("Tutto quello che i clienti hanno già e quello che proponi, diviso per canale. È il cuore di Prisma.",
+            return guida("Tutto quello che i clienti hanno già e quello che proponi, diviso per canale. È il cuore di Lucy.",
                          ["Con «Tutti i clienti» vedi il portafoglio intero, il radar, la prova del fuoco e lo smontaggio.",
                           "Scegli un cliente in alto: l’elenco delle sue posizioni è nella prima schermata, le analisi nell’indice a sinistra.",
                           "Tocca una posizione per la sua scheda; con «Aggiungi» ne inserisci una nuova."])
@@ -104,7 +104,7 @@ enum GuidaTesti {
             return guida("Vera prepara i messaggi ai clienti, li spedisci tu.",
                          ["Scegli il messaggio a sinistra: con un cliente scelto vedi solo i suoi.",
                           "Rileggi, cambia il tono, scegli se inviarlo con Mail o con Messaggi.",
-                          "Dopo averlo aperto, di’ a Prisma se l’hai spedito: resta tra i «Mandati oggi»."])
+                          "Dopo averlo aperto, di’ a Lucy se l’hai spedito: resta tra i «Mandati oggi»."])
         case .presentazioni:
             return guida("I documenti per l’incontro: il dettaglio per te, l’essenziale per il cliente.",
                          ["Scegli il cliente in alto e il documento a sinistra.",
@@ -121,9 +121,9 @@ enum GuidaTesti {
                           "Con un cliente scelto vedi cosa tocca lui.",
                           "Ogni avviso ha la sua azione; «Silenzia» lo mette da parte."])
         case .vera:
-            return guida("L’assistente di Prisma: legge i dati e li racconta. Tutto resta su questo Mac.",
+            return guida("L’assistente di Lucy: legge i dati e li racconta. Tutto resta su questo Mac.",
                          ["Scrivi, o scegli una delle domande d’esempio.",
-                          "I numeri li calcola Prisma, Vera li spiega.",
+                          "I numeri li calcola Lucy, Vera li spiega.",
                           "Con un cliente scelto in alto parla di lui."])
         case .impostazioni:
             return guida("Il tuo modo di lavorare: aspetto, dispositivi, backup e le regole del lavoro.",
@@ -144,12 +144,12 @@ enum GuidaTesti {
                 aCosaServe: "Qui c'è la scheda di ogni cliente: chi è, la sua famiglia, il lavoro, entrate e spese, che cosa gli preme. È il punto di partenza di ogni analisi.",
                 inBreve: "Le schede delle persone che segui",
                 passi: ["Scegli il cliente nella rubrica a sinistra, oppure «Nuovo cliente» (o «Importa…» da Contatti ed Excel).",
-                        "Completa la scheda: Prisma segna i dati che mancano e dice a che cosa servono.",
+                        "Completa la scheda: Lucy segna i dati che mancano e dice a che cosa servono.",
                         "Da qui vai alle sue Posizioni o prepara il prossimo incontro; in «Potenziali» e «Passaparola» segui chi non è ancora cliente e chi ti ha presentato chi."],
                 parole: [.dossier, .riesame, .profiloRischio, .antiriciclaggio])
         case .posizioni:
             return AiutoApp(
-                aCosaServe: "Tutto quello che il cliente ha già (in essere) e quello che gli proponi (in proposta), diviso per canale: Alleanza o consulenza indipendente. È il cuore di Prisma.",
+                aCosaServe: "Tutto quello che il cliente ha già (in essere) e quello che gli proponi (in proposta), diviso per canale: Alleanza o consulenza indipendente. È il cuore di Lucy.",
                 inBreve: "Che cosa ha il cliente e che cosa gli proponi",
                 passi: ["Scegli il cliente e guarda il riepilogo: quanto ha, dove, con quale canale.",
                         passoAggiungiPosizioni,
@@ -167,7 +167,7 @@ enum GuidaTesti {
             return AiutoApp(
                 aCosaServe: "Il quaderno di ogni incontro: che cosa preparare, che cosa ti dice il cliente, che cosa decidete.",
                 inBreve: "Prepara gli appuntamenti e annota le decisioni",
-                passi: ["«Prepara il primo incontro»: Prisma propone i temi dal dossier.",
+                passi: ["«Prepara il primo incontro»: Lucy propone i temi dal dossier.",
                         "Durante l'incontro scrivi appunti e decisioni.",
                         "«Ai prossimi passi»: nascono attività e appuntamenti da confermare."],
                 parole: [.riesame, .coerenza])
@@ -229,11 +229,11 @@ enum GuidaTesti {
                 parole: [])
         case .documenti:
             return AiutoApp(
-                aCosaServe: "Nella scheda Documenti del cliente: i personali e quelli dei suoi prodotti. Prisma li legge sul Mac, trova le cifre e ti dice che cosa non torna.",
+                aCosaServe: "Nella scheda Documenti del cliente: i personali e quelli dei suoi prodotti. Lucy li legge sul Mac, trova le cifre e ti dice che cosa non torna.",
                 inBreve: "In Clienti: personali e dei prodotti",
                 passi: ["In Clienti, scheda Documenti: trascina i file o «Importa…».",
                         "Controlla le cifre trovate e conferma.",
-                        "Collega il documento a una posizione: Prisma mostra le differenze."],
+                        "Collega il documento a una posizione: Lucy mostra le differenze."],
                 parole: [.kid, .sri, .riy])
         case .presentazioni:
             return AiutoApp(
@@ -245,7 +245,7 @@ enum GuidaTesti {
                 parole: [.prospettoReport, .riy, .sri])
         case .studio:
             return AiutoApp(
-                aCosaServe: "Il cruscotto del tuo lavoro: quanto hai guadagnato quest'anno, a che punto sono gli obiettivi, le proposte ferme e gli incassi dei prossimi mesi. Le cifre le calcola Prisma dalle posizioni Alleanza e dalle tue aliquote.",
+                aCosaServe: "Il cruscotto del tuo lavoro: quanto hai guadagnato quest'anno, a che punto sono gli obiettivi, le proposte ferme e gli incassi dei prossimi mesi. Le cifre le calcola Lucy dalle posizioni Alleanza e dalle tue aliquote.",
                 inBreve: "Ricavi, obiettivi, proposte e incassi",
                 passi: ["In Impostazioni › Studio inserisci le tue aliquote e gli obiettivi dell'anno.",
                         "Apri Studio: il cruscotto somma ricavi e obiettivi dalle posizioni in essere.",
@@ -253,15 +253,15 @@ enum GuidaTesti {
                 parole: [.canale, .inEssere])
         case .messaggi:
             return AiutoApp(
-                aCosaServe: "Prisma trova le occasioni per scrivere ai clienti (il riepilogo di un incontro, una scadenza, un compleanno, un consenso da rinnovare, un riesame) e Vera prepara il messaggio con le cifre esatte di Prisma, sul Mac. Lo controlli, lo correggi e lo spedisci tu: niente parte da solo.",
+                aCosaServe: "Lucy trova le occasioni per scrivere ai clienti (il riepilogo di un incontro, una scadenza, un compleanno, un consenso da rinnovare, un riesame) e Vera prepara il messaggio con le cifre esatte di Lucy, sul Mac. Lo controlli, lo correggi e lo spedisci tu: niente parte da solo.",
                 inBreve: "Vera prepara i messaggi, tu li spedisci",
                 passi: ["A sinistra scegli un'occasione: «Da mandare oggi» o «Questa settimana», con il perché adesso.",
                         "Scegli il tono (Cordiale, Formale, Breve) e il canale (Mail o Messaggi): Vera scrive, tu correggi il testo se serve.",
-                        "«Apri in Mail» o «Apri in Messaggi» lo apre già compilato; in «Campagne» Prisma prepara una bozza per ogni cliente con lo stesso bisogno, e le apri tu una alla volta."],
+                        "«Apri in Mail» o «Apri in Messaggi» lo apre già compilato; in «Campagne» Lucy prepara una bozza per ogni cliente con lo stesso bisogno, e le apri tu una alla volta."],
                 parole: [.canale])
         case .mercato:
             return AiutoApp(
-                aCosaServe: "Tassi, inflazione e indici pubblici di BCE ed Eurostat (solo con «Dati di mercato» acceso in Impostazioni) e le quote dei fondi che importi da un file CSV o scrivi a mano, ognuno con la sua data e la sua fonte. Prisma ti dice quali clienti tocca ogni movimento e crea gli avvisi con le soglie che scegli tu. Dal Mac escono solo i codici pubblici delle serie, mai dati dei clienti.",
+                aCosaServe: "Tassi, inflazione e indici pubblici di BCE ed Eurostat (solo con «Dati di mercato» acceso in Impostazioni) e le quote dei fondi che importi da un file CSV o scrivi a mano, ognuno con la sua data e la sua fonte. Lucy ti dice quali clienti tocca ogni movimento e crea gli avvisi con le soglie che scegli tu. Dal Mac escono solo i codici pubblici delle serie, mai dati dei clienti.",
                 inBreve: "Quote e tassi aggiornati, e chi è toccato",
                 passi: ["In alto le tessere di tassi e indici, con la data e la fonte: un clic apre la serie di 12 mesi.",
                         "Scegli le soglie degli avvisi: «Chi è toccato oggi» mostra i clienti coinvolti e prepara il messaggio.",
@@ -269,7 +269,7 @@ enum GuidaTesti {
                 parole: [.canale])
         case .vera:
             return AiutoApp(
-                aCosaServe: "Vera risponde alle tue domande sui clienti, le posizioni e i documenti. Le cifre le calcola Prisma, Vera le spiega. Funziona sul Mac, senza internet.",
+                aCosaServe: "Vera risponde alle tue domande sui clienti, le posizioni e i documenti. Le cifre le calcola Lucy, Vera le spiega. Funziona sul Mac, senza internet.",
                 inBreve: "L'assistente: domande in chat o a voce",
                 passi: ["Scegli il cliente di cui parlare.",
                         "Scrivi la domanda (o premi il microfono).",
@@ -300,7 +300,7 @@ enum GuidaTesti {
             let presenta = "«Presenta» la mostra a tutto schermo, in modalità cliente."
 #endif
             return AiutoApp(
-                aCosaServe: "Le esperienze da vivere con il cliente davanti allo schermo: il suo Prisma, il prisma di luce, la lettera dal futuro e le altre. Le cifre le calcola Prisma dal suo dossier.",
+                aCosaServe: "Le esperienze da vivere con il cliente davanti allo schermo: la sua Lucy, il prisma di luce, la lettera dal futuro e le altre. Le cifre le calcola Lucy dal suo dossier.",
                 inBreve: "Le esperienze da vivere con il cliente",
                 passi: ["Scegli il cliente nelle pillole in alto.",
                         "Tocca un'esperienza: si apre sul palco; «‹ Sala» o Esc tornano alla griglia.",
@@ -308,15 +308,15 @@ enum GuidaTesti {
                 parole: [])
         case .biblioteca:
             return AiutoApp(
-                aCosaServe: "Le condizioni dei prodotti, le circolari e la normativa che carichi tu: Prisma trova la pagina giusta e la frase che risponde, sul Mac.",
+                aCosaServe: "Le condizioni dei prodotti, le circolari e la normativa che carichi tu: Lucy trova la pagina giusta e la frase che risponde, sul Mac.",
                 inBreve: "Condizioni, circolari e normativa",
                 passi: ["Trascina i PDF nella Biblioteca.",
                         "Scrivi la domanda.",
-                        "Prisma apre la pagina con la frase evidenziata e l'edizione del documento."],
+                        "Lucy apre la pagina con la frase evidenziata e l'edizione del documento."],
                 parole: [])
         case .ricerca:
             return AiutoApp(
-                aCosaServe: "Una ricerca unica in tutto Prisma: clienti, posizioni, documenti, appuntamenti e attività.",
+                aCosaServe: "Una ricerca unica in tutto Lucy: clienti, posizioni, documenti, appuntamenti e attività.",
                 inBreve: "Trova clienti, posizioni, documenti (⌘K)",
                 passi: [passoApriRicerca,
                         "Scrivi una parte del nome o del prodotto.",
@@ -328,7 +328,7 @@ enum GuidaTesti {
                 inBreve: "Profilo, backup, aspetto, dimostrazione",
                 passi: ["Archivio: scegli la cartella dei backup e fai il primo.",
                         "Esperienza: aspetto, dimensione del testo, guida.",
-                        "Dimostrazione: Prisma con i clienti di prova; in Archivio si tolgono quelli rimasti."],
+                        "Dimostrazione: Lucy con i clienti di prova; in Archivio si tolgono quelli rimasti."],
                 parole: [])
         }
     }
@@ -338,7 +338,7 @@ enum GuidaTesti {
         aCosaServe: "La tua giornata in una schermata: la mossa del giorno, le cose da fare, i prossimi incontri, il portafoglio.",
         inBreve: "La tua giornata in una schermata",
         passi: ["Parti dalla mossa del giorno.",
-                "Spunta le cose da fare: spariscono da tutta Prisma.",
+                "Spunta le cose da fare: spariscono da tutta Lucy.",
                 "Apri un’app dal dock, scegli un cliente in alto, o cerca con la lente (⌘K)."],
         parole: [])
 
@@ -349,7 +349,7 @@ enum GuidaTesti {
     static let rigaInFondo = "La guida parla sempre dell’app che hai davanti: per questo il pulsante «Come si usa» non è più ripetuto in ogni barra."
 
     /// Il collegamento al glossario in fondo alla scheda «Come si usa» in grande.
-    static let paroleDiPrisma = "Le parole di Prisma"
+    static let paroleDiPrisma = "Le parole di Lucy"
 
     /// Il secondo passo di Posizioni: sul Mac i pulsanti stanno nel menu «Aggiungi» (migliorie d'uso 6).
     private static var passoAggiungiPosizioni: String {
@@ -394,9 +394,9 @@ struct PaginaIntroduzione {
     /// Le 5 pagine dell'introduzione (fuori dalla vista: la prova dei calcoli le conta).
     static let pagine: [PaginaIntroduzione] = [
         PaginaIntroduzione(
-            titolo: "Benvenuto in Prisma",
-            testo: "Prisma è lo studio di lavoro di un consulente finanziario. Raccoglie le persone che segui, quello che hanno (polizze, investimenti, piani per la pensione) e ti aiuta a capire che cosa manca e che cosa conviene.",
-            punti: ["I calcoli li fa Prisma: tu scegli e spieghi.",
+            titolo: "Benvenuto in Lucy",
+            testo: "Lucy è lo studio di lavoro di un consulente finanziario. Raccoglie le persone che segui, quello che hanno (polizze, investimenti, piani per la pensione) e ti aiuta a capire che cosa manca e che cosa conviene.",
+            punti: ["I calcoli li fa Lucy: tu scegli e spieghi.",
                     "Tutto resta su questo Mac: niente internet, niente cloud.",
                     "Ci sono due canali, sempre distinti: Alleanza (blu) e consulenza indipendente (cuoio)."],
             app: [], conCanali: true),
@@ -404,12 +404,12 @@ struct PaginaIntroduzione {
             titolo: "Si parte dalle persone",
             testo: "In **Clienti** c'è la scheda di ogni persona: famiglia, lavoro, entrate, spese, che cosa le preme. Più la scheda è completa, più le analisi sono precise.",
             punti: ["«Nuovo cliente», oppure «Importa…» dall'app Contatti o da Excel.",
-                    "Prisma ti dice quali dati mancano e a che cosa servono.",
+                    "Lucy ti dice quali dati mancano e a che cosa servono.",
                     "Nella sua scheda trovi anche obiettivi e documenti; in Agenda e Incontri appuntamenti e attività."],
             app: [.clienti, .agenda, .incontri]),
         PaginaIntroduzione(
             titolo: "Che cosa ha, che cosa gli proponi",
-            testo: "In **Posizioni**, il cuore di Prisma, c'è tutto quello che il cliente ha già (*in essere*) e quello che gli stai proponendo (*in proposta*). Ogni posizione dice da quale canale viene.",
+            testo: "In **Posizioni**, il cuore di Lucy, c'è tutto quello che il cliente ha già (*in essere*) e quello che gli stai proponendo (*in proposta*). Ogni posizione dice da quale canale viene.",
             punti: ["«Posizione» per ciò che ha già, «Proposta» per ciò che consigli.",
                     "Puoi leggerle dai documenti (KID, polizze, estratti conto) nella scheda del cliente.",
                     "Ogni parola tecnica ha la sua «i»: un clic e te la spiega."],
@@ -419,13 +419,13 @@ struct PaginaIntroduzione {
             testo: "**Analisi 360** guarda insieme pensione, protezione della famiglia, investimenti e risparmio, e mostra dove il cliente è scoperto. Il simulatore e il confronto, dentro Analisi 360, rispondono a «e se…?» con le cifre.",
             punti: ["Le ipotesi partono dai dati veri del cliente: puoi correggerle insieme a lui.",
                     "Negli obiettivi del cliente dai un nome e una data ai suoi progetti (casa, studi dei figli).",
-                    "I numeri sono sempre calcolati da Prisma, con il metodo scritto sotto."],
+                    "I numeri sono sempre calcolati da Lucy, con il metodo scritto sotto."],
             app: [.analisi360, .clienti]),
         PaginaIntroduzione(
             titolo: "Spiegarlo in modo chiaro",
-            testo: "Da **Prospetti e report** esce il documento in PDF: il *prospetto* dettagliato per te, il *report* essenziale da lasciare al cliente. **Vera** risponde alle tue domande e spiega i documenti, con le cifre di Prisma.",
+            testo: "Da **Prospetti e report** esce il documento in PDF: il *prospetto* dettagliato per te, il *report* essenziale da lasciare al cliente. **Vera** risponde alle tue domande e spiega i documenti, con le cifre di Lucy.",
             punti: [puntoComeSiUsa,
-                    "Menu Aiuto › Guida di Prisma (⌘?) per rivedere tutto, quando vuoi."],
+                    "Menu Aiuto › Guida di Lucy (⌘?) per rivedere tutto, quando vuoi."],
             app: [.presentazioni, .vera], conPercorso: true),
     ]
 }

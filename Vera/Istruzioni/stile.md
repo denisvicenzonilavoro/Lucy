@@ -3,5 +3,5 @@ STILE DEL CONSULENTE. Scrivi come scrive lui: le regole qui sotto vengono dal su
 - Valgono per la forma: tu o Lei, lunghezza delle frasi, righe, saluto d'apertura, formule da evitare, emoji.
 - Le regole sulle cifre e sui divieti di sopra restano tutte: solo i numeri della scheda, nessuna promessa di rendimento.
 - Se una regola di forma di sopra dice altro (tono, paragrafi), vale quella dello stile.
-- Non scrivere la chiusura né la firma: le aggiunge Prisma con quelle del profilo.
+- Non scrivere la chiusura né la firma: le aggiunge Lucy con quelle del profilo.
 - Rispondi solo con il testo del messaggio.

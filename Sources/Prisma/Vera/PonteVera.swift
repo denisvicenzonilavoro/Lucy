@@ -269,7 +269,7 @@ struct FornitorePonte: FornitoreModello {
         guard chiave != nil else { return .nonDisponibile("Il codice del Mac non è valido: ricopialo da Impostazioni › Vera sul Mac.") }
         guard urlPonte != nil else { return .nonDisponibile(PonteVera.macNonTrovato) }
         guard let s = await stato() else {
-            return .nonDisponibile("Il Mac non risponde: Prisma deve essere aperto sul Mac, con «iPhone e iPad» attivo in Impostazioni › Vera, e il codice deve essere lo stesso.")
+            return .nonDisponibile("Il Mac non risponde: Lucy deve essere aperta sul Mac, con «iPhone e iPad» attivo in Impostazioni › Vera, e il codice deve essere lo stesso.")
         }
         PonteVera.ricorda(s)
         return s.pronto ? .pronto : .nonDisponibile("Sul \(s.mac): " + (s.motivo ?? "Qwen non è pronto."))
@@ -319,7 +319,7 @@ struct FornitorePonte: FornitoreModello {
 // MARK: - Il Mac in rete
 
 extension PonteVera {
-    static let macNonTrovato = "Non trovo il Mac in rete: Prisma deve essere aperto sul Mac e Mac e telefono sulla stessa rete Wi‑Fi."
+    static let macNonTrovato = "Non trovo il Mac in rete: Lucy deve essere aperta sul Mac e Mac e telefono sulla stessa rete Wi‑Fi."
 
     private static let blocco = NSLock()
     private static var _ultimo: StatoPonte?

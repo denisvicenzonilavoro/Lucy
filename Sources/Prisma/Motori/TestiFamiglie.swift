@@ -183,16 +183,16 @@ enum TestiFamiglie {
     static let famiglieNonDichiarate = "Le tabelle non dicono quante famiglie ci sono nel gruppo: prendilo come indicazione."
     static let voceSenzaDati = "Le tabelle non hanno dati per questa voce."
     static let risparmioSoloVersamenti = "Risparmio libero non indicato: conto solo i versamenti delle posizioni."
-    static let soloRegistrate = "Conto solo ciò che è registrato nelle posizioni di Prisma."
+    static let soloRegistrate = "Conto solo ciò che è registrato nelle posizioni di Lucy."
     static let soloMediana = "La fonte dà solo la mediana: si sa solo se sta sopra o sotto la metà."
     static let soloMedia = "La fonte dà solo la media: il confronto è solo con la famiglia media."
     /// Il rapporto tra medie (tavole a una dimensione): per il risparmio, 100 meno la propensione al consumo.
     static func rapportoTraMedie(_ v: VoceFamiglie) -> String {
         guard v == .tassoRisparmio else { return "È un rapporto tra medie del gruppo, non la media delle singole famiglie." }
-        return "È un rapporto tra medie: il risparmio medio del gruppo diviso il suo reddito medio (100 meno la propensione al consumo), non la media dei tassi delle singole famiglie. Nelle tavole il risparmio è reddito meno consumi (comprende anche le rate di mutuo rimborsate); quello del cliente in Prisma è il risparmio libero più i versamenti nelle posizioni: le due misure non coincidono."
+        return "È un rapporto tra medie: il risparmio medio del gruppo diviso il suo reddito medio (100 meno la propensione al consumo), non la media dei tassi delle singole famiglie. Nelle tavole il risparmio è reddito meno consumi (comprende anche le rate di mutuo rimborsate); quello del cliente in Lucy è il risparmio libero più i versamenti nelle posizioni: le due misure non coincidono."
     }
     static let distribuzioneComplessiva = "Distribuzione di tutte le famiglie italiane, non della sua età né del suo reddito: le tavole non la danno per gruppo."
-    static let nettaSoloRegistrate = "Conto immobili, posizioni e debiti registrati in Prisma."
+    static let nettaSoloRegistrate = "Conto immobili, posizioni e debiti registrati in Lucy."
     static let mancaEta = "Manca la data di nascita: confronto solo con le famiglie del suo quinto di reddito."
     static let mancaReddito = "Manca il reddito della famiglia: confronto solo con le famiglie della sua età."
     static let etaFuoriClassi = "Le tabelle non hanno una classe per questa età."
@@ -224,7 +224,7 @@ enum TestiFamiglie {
     }
     static func versioneSconosciuta(_ v: Int) -> String {
         let lette = TabelleFamiglie.versioniLette.map(String.init).joined(separator: " e ")
-        return "versione \(v) non riconosciuta: Prisma legge le versioni \(lette)."
+        return "versione \(v) non riconosciuta: Lucy legge le versioni \(lette)."
     }
     static let fonteVuota = "manca la fonte delle tabelle."
     static let edizioneFuori = "l'anno dell'indagine non è valido."
@@ -246,7 +246,7 @@ enum TestiFamiglie {
     static let etaIntera = "le età sono anni interi."
     static let sovrapposte = "si sovrappone alla classe precedente."
     static let buco = "lascia un buco dopo la classe precedente."
-    static let valoreSconosciuto = "valore non riconosciuto (per esempio una dimensione o una statistica che Prisma non conosce)."
+    static let valoreSconosciuto = "valore non riconosciuto (per esempio una dimensione o una statistica che Lucy non conosce)."
     static let gruppiVuoti = "serve almeno un gruppo."
     static func dimensioneDoppia(_ d: String) -> String { "c'è già un gruppo per la dimensione «\(d)»." }
     static let tutteUnaClasse = "il gruppo di tutte le famiglie ha una sola classe, senza «da» né «a»."
@@ -268,7 +268,7 @@ enum TestiFamiglie {
         guard let e = t.edizione else { return "Banca d'Italia" }
         return "Banca d'Italia, edizione \(e)"
     }
-    static let spiegaPredefinite = "Tavole pubblicate dell'Indagine sui bilanci delle famiglie italiane, incluse in Prisma: età del capofamiglia e quinti di reddito familiare netto. Puoi caricare un file aggiornato."
+    static let spiegaPredefinite = "Tavole pubblicate dell'Indagine sui bilanci delle famiglie italiane, incluse in Lucy: età del capofamiglia e quinti di reddito familiare netto. Puoi caricare un file aggiornato."
     static let spiegaDiProva = "Il confronto «Rispetto alle famiglie come la sua» usa valori segnaposto, non statistiche: carica le tabelle della fonte."
     static func titoloCaricate(_ fonte: String, edizione: Int?) -> String {
         edizione.map { "\(fonte), \($0)" } ?? fonte

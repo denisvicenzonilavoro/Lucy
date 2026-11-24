@@ -92,7 +92,7 @@ enum GiudizioPalestra: String, Codable, CaseIterable {
     /// La riga sotto la bolla del consulente (`.pFb` del template).
     var testo: String {
         switch self {
-        case .ottima: return "✓ Ottima: hai usato Prisma per farglielo vedere"
+        case .ottima: return "✓ Ottima: hai usato Lucy per farglielo vedere"
         case .buona: return "○ Buona: chiara e corretta"
         case .debole: return "△ Debole: generica o di pressione"
         }
@@ -169,7 +169,7 @@ struct SchedaRecita: Equatable {
             r.append("CIFRE DI PRISMA (le sole che puoi usare, così come sono):")
             r.append(contentsOf: cifre.map { "- " + $0 })
         }
-        if scarna { r.append("Di questo cliente Prisma sa poco: resta generico e non inventare dettagli.") }
+        if scarna { r.append("Di questo cliente Lucy sa poco: resta generico e non inventare dettagli.") }
         return String(r.joined(separator: "\n").prefix(PalestraVera.limiteScheda))
     }
 }
@@ -314,7 +314,7 @@ enum PalestraVera {
         if let o = c.profilo.orizzonteAnni { s.dettagli.append("Orizzonte dichiarato: \(o) anni.") }
         if !c.tema.isEmpty { s.dettagli.append("Il suo progetto: \(c.tema)") }
         if !s.cifre.isEmpty || !proposte.isEmpty {
-            s.cifre.append("Imposta sui rendimenti finanziari \(CifreDoc.percento(RegoleFiscali.ordinaria, decimali: 0)), sui titoli di Stato \(CifreDoc.percento(RegoleFiscali.titoliStato, decimali: 1)) (regole fiscali di Prisma)")
+            s.cifre.append("Imposta sui rendimenti finanziari \(CifreDoc.percento(RegoleFiscali.ordinaria, decimali: 0)), sui titoli di Stato \(CifreDoc.percento(RegoleFiscali.titoliStato, decimali: 1)) (regole fiscali di Lucy)")
         }
         return s
     }
@@ -356,7 +356,7 @@ enum PalestraVera {
     /// L'ultimo messaggio: scheda, difficoltà, conversazione fin qui e compito del turno. `turni` sono quelli già
     /// giocati; l'ultimo, se ha la risposta del consulente ma non la replica, è quello da giudicare.
     static func messaggi(scheda: SchedaRecita, difficolta: DifficoltaPalestra, turni: [TurnoPalestra]) -> [MessaggioModello] {
-        var parti = ["SCHEDA DEL CLIENTE CHE RECITI (preparata da Prisma)\n" + scheda.testo]
+        var parti = ["SCHEDA DEL CLIENTE CHE RECITI (preparata da Lucy)\n" + scheda.testo]
         parti.append("DIFFICOLTÀ: \(difficolta.regola) Convinzione di partenza: \(difficolta.convinzioneIniziale).")
         if !turni.isEmpty {
             var storia: [String] = []
@@ -407,7 +407,7 @@ enum PalestraVera {
         if !ultimo && obiezione.isEmpty { return .scartata("Manca l'obiezione del cliente.") }
         for t in [replica, ultimo ? "" : obiezione] where !t.isEmpty {
             if !CommentoVera.numeriConservati(bozza: ammesse, testo: t) {
-                return .scartata("Vera ha scritto una cifra che non viene da Prisma.")
+                return .scartata("Vera ha scritto una cifra che non viene da Lucy.")
             }
         }
         var suggerite: [String] = []
@@ -518,7 +518,7 @@ enum PalestraVera {
             return (.buona, "Chiara, ma senza i suoi numeri né il suo obiettivo.")
         }
         if cifre && !CommentoVera.numeriConservati(bozza: ammesse, testo: risposta) {
-            return (.buona, "Usa una cifra che Prisma non ha calcolato: in una trattativa vera va verificata.")
+            return (.buona, "Usa una cifra che Lucy non ha calcolato: in una trattativa vera va verificata.")
         }
         return (.ottima, nil)
     }

@@ -164,7 +164,7 @@ enum MemoriaVera {
         }
         let cifreDiFila = t.replacingOccurrences(of: " ", with: "").replacingOccurrences(of: "-", with: "")
         if DateItaliane.cerca(#"\d{8,}"#, cifreDiFila) != nil {
-            return "Non ricordo numeri di documenti, conti, carte o telefoni: stanno nelle schede di Prisma."
+            return "Non ricordo numeri di documenti, conti, carte o telefoni: stanno nelle schede di Lucy."
         }
         if DateItaliane.cerca(#"\b(carta d'identit|passaporto|patente|numero di (conto|carta|polizza|contratto))"#, t) != nil, DateItaliane.cerca(#"\d{5,}"#, t) != nil {
             return "Non ricordo numeri di documenti."

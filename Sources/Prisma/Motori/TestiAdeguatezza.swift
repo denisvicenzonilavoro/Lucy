@@ -138,7 +138,7 @@ enum TestiAdeguatezza {
     static let obiettivoSparito = "L'obiettivo scelto non c'è più: scegline un altro."
 
     static func bisognoSuggerito(_ descrizione: String) -> String {
-        "Prisma suggerisce «\(descrizione)»: confermalo nella scheda."
+        "Lucy suggerisce «\(descrizione)»: confermalo nella scheda."
     }
 
     static func bisognoScartato(_ titolo: String?) -> String {
@@ -148,7 +148,7 @@ enum TestiAdeguatezza {
 
     static func bisognoDaConfermare(_ titolo: String?) -> String {
         guard let titolo else { return "Il bisogno scelto non è più tra quelli rilevati: scegline un altro." }
-        return "Il bisogno «\(titolo)» è stato rilevato da Prisma ma non è ancora confermato con il cliente."
+        return "Il bisogno «\(titolo)» è stato rilevato da Lucy ma non è ancora confermato con il cliente."
     }
 
     static func bisognoNonTipico(_ area: AreaPosizione, _ bisogno: AreaBisogno) -> String {
@@ -346,7 +346,7 @@ enum TestiAdeguatezza {
     static func fonte(_ t: ControlloAdeguatezza.Tipo, ambito: AmbitoNormativo?) -> String {
         switch t {
         case .rischio:
-            return TestiEsperienza.fonte(ambito ?? .mifid) + " Soglie di Prisma: prudente fino a 2, moderata 3, dinamica 5."
+            return TestiEsperienza.fonte(ambito ?? .mifid) + " Soglie di Lucy: prudente fino a 2, moderata 3, dinamica 5."
         case .orizzonte:
             if ambito == .previdenza {
                 return TestiEsperienza.fonte(.previdenza) + " D.Lgs. 252/2005, art. 11, c. 2 (cinque anni di partecipazione)."
@@ -357,12 +357,12 @@ enum TestiAdeguatezza {
         case .bisogno:
             return "Richieste ed esigenze: IDD (Dir. UE 2016/97) art. 20; Codice delle assicurazioni private art. 119-ter. Obiettivi d'investimento: Reg. delegato UE 2017/565, art. 54, par. 2."
         case .liquidita:
-            let base = "Situazione finanziaria: Reg. delegato UE 2017/565, art. 54, par. 4; Reg. delegato UE 2017/2359, art. 9. Soglie di Prisma: metà della riserva, versamenti oltre il 20% e il 35% del reddito netto."
+            let base = "Situazione finanziaria: Reg. delegato UE 2017/565, art. 54, par. 4; Reg. delegato UE 2017/2359, art. 9. Soglie di Lucy: metà della riserva, versamenti oltre il 20% e il 35% del reddito netto."
             return ambito == .previdenza ? base + " D.Lgs. 252/2005, artt. 8, 11 e 14; TUIR art. 10, c. 1, lett. e-bis." : base
         case .concentrazione:
-            return "Portafoglio nel suo insieme: Orientamenti ESMA sull'adeguatezza (2022). Soglie di Prisma: 50% e 75% per emittente, 80% nel canale Alleanza."
+            return "Portafoglio nel suo insieme: Orientamenti ESMA sull'adeguatezza (2022). Soglie di Lucy: 50% e 75% per emittente, 80% nel canale Alleanza."
         case .sostituzione:
-            return "Cambio di investimento: Reg. delegato UE 2017/565, art. 54, par. 11 (benefici superiori ai costi). Polizze: Regolamento IVASS n. 40/2018. Cambio di canale: conflitti d'interessi, MiFID II art. 23 e IDD art. 28. Soglie di Prisma: 1% e 3% del valore."
+            return "Cambio di investimento: Reg. delegato UE 2017/565, art. 54, par. 11 (benefici superiori ai costi). Polizze: Regolamento IVASS n. 40/2018. Cambio di canale: conflitti d'interessi, MiFID II art. 23 e IDD art. 28. Soglie di Lucy: 1% e 3% del valore."
         }
     }
 
@@ -370,7 +370,7 @@ enum TestiAdeguatezza {
 
     static let avvertenzaBreve = "Scheda di lavoro del consulente: non è un parere legale né la valutazione di adeguatezza ufficiale."
 
-    static let avvertenza = "Scheda di lavoro del consulente, preparata da Prisma con i dati raccolti nel dossier. Riassume i controlli di coerenza della proposta con il profilo, i bisogni e la situazione del cliente. Non è un parere legale e non sostituisce il questionario e la valutazione di adeguatezza dell'intermediario o della compagnia, né la documentazione precontrattuale e contrattuale del prodotto. Le soglie sono di Prisma; i riferimenti normativi vanno verificati sul testo vigente."
+    static let avvertenza = "Scheda di lavoro del consulente, preparata da Lucy con i dati raccolti nel dossier. Riassume i controlli di coerenza della proposta con il profilo, i bisogni e la situazione del cliente. Non è un parere legale e non sostituisce il questionario e la valutazione di adeguatezza dell'intermediario o della compagnia, né la documentazione precontrattuale e contrattuale del prodotto. Le soglie sono di Lucy; i riferimenti normativi vanno verificati sul testo vigente."
 
     static let dichiarazioni = [
         "Il cliente dichiara di aver ricevuto, prima della firma, i documenti spuntati in questa scheda.",
@@ -379,10 +379,10 @@ enum TestiAdeguatezza {
 
     static var metodo: [String] {
         [
-            "Rischio: l'SRI del KID (per le multiramo a due parti quello della combinazione) entro il massimo del profilo: prudente 2, moderata 3, dinamica 5, aggressiva 7. Senza SRI Prisma lo stima e il controllo resta da motivare.",
+            "Rischio: l'SRI del KID (per le multiramo a due parti quello della combinazione) entro il massimo del profilo: prudente 2, moderata 3, dinamica 5, aggressiva 7. Senza SRI Lucy lo stima e il controllo resta da motivare.",
             "Orizzonte: il periodo di detenzione raccomandato entro l'orizzonte del cliente; senza periodo conta la durata del contratto (da motivare). Previdenza: almeno \(MotoreAdeguatezza.anniMinimiPrevidenza) anni di partecipazione alla pensione, contando le forme già aperte.",
             "Esperienza: la griglia per tipo di prodotto (non conosce = da rivedere, da spiegare = da motivare) e la perdita nella crisi peggiore del passato contro la capacità di sostenere perdite.",
-            "Bisogno: il bisogno confermato, l'area della mappa o l'obiettivo a cui risponde, compatibile con l'area della proposta; un suggerimento di Prisma resta da confermare, un bisogno scartato con il cliente è da rivedere.",
+            "Bisogno: il bisogno confermato, l'area della mappa o l'obiettivo a cui risponde, compatibile con l'area della proposta; un suggerimento di Lucy resta da confermare, un bisogno scartato con il cliente è da rivedere.",
             "Liquidità: dopo il versamento dalla liquidità devono restare la riserva di emergenza (fabbisogno mensile per i mesi di riserva) e gli obiettivi dei prossimi \(MotoreAdeguatezza.mesiObiettiviVicini) mesi; sotto metà della riserva è da rivedere, anche con il riscatto bloccato. Versamenti oltre il \(CifreDoc.percento(MotoreAdeguatezza.premioAttenzione, decimali: 0)) del reddito netto da motivare, oltre il \(CifreDoc.percento(MotoreAdeguatezza.premioEccessivo, decimali: 0)) da rivedere.",
             "Concentrazione: il peso dell'emittente sul patrimonio finanziario dopo la firma, oltre il \(CifreDoc.percento(MotoreCoerenza.sogliaEmittente, decimali: 0)) da motivare, oltre il \(CifreDoc.percento(MotoreAdeguatezza.sogliaEmittenteAlta, decimali: 0)) con almeno \(Int(MotoreAdeguatezza.aumentoRilevante)) punti in più da rivedere (da \(CifreDoc.euro(MotoreCoerenza.minimoConcentrazione)) in su); oltre l'\(CifreDoc.percento(MotoreCoerenza.sogliaCanale, decimali: 0)) nel canale Alleanza da motivare.",
             "Sostituzione: costi dell'uscita (penale, bollo maturato, ingresso) oltre l'1% del valore da motivare, oltre il 3% da rivedere; da rivedere anche se il cambio non recupera i costi nel periodo o se si riscatta la previdenza; garanzie perse, recupero oltre metà del periodo e cambio di canale da motivare.",

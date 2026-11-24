@@ -354,7 +354,7 @@ enum ProvaCopilota {
             let pid = s.sessioneCopilota(sid)?.trascrizione.last?.id ?? ""
             s.riconosciConQwenCopilota(pezzo: pid, sessione: sid)
             controlla(schede.count == 2 && s.sessioneCopilota(sid)?.schede.count == 2 && !s.veraInCorso,
-                      "Copilota: Vera non è pronta, Prisma riconosce con le sue regole")
+                      "Copilota: Vera non è pronta, Lucy riconosce con le sue regole")
         } else {
             controlla(false, "Copilota: sessione senza Qwen")
         }
@@ -491,9 +491,9 @@ enum ProvaCopilota {
         controlla(!archivio.contains("MARCHI") && !archivio.contains("MRCLNE90D43A944S"),
                   "Ponte, carta: il testo della carta non entra nell'archivio")
         s.blocca(animato: false)
-        controlla(s.carteInArrivo.isEmpty, "Ponte, carta: al blocco di Prisma le carte in arrivo si scartano")
+        controlla(s.carteInArrivo.isEmpty, "Ponte, carta: al blocco di Lucy le carte in arrivo si scartano")
         controlla(!s.riceviDalPonte(.cartaIdentita(carta)).accettato && s.carteInArrivo.isEmpty,
-                  "Ponte, carta: con Prisma bloccato la carta è rifiutata (si rimanda dall'iPhone)")
+                  "Ponte, carta: con Lucy bloccata la carta è rifiutata (si rimanda dall'iPhone)")
     }
 
     #if os(macOS)
@@ -543,7 +543,7 @@ enum ProvaCopilota {
         // Il Mac senza destinatario (Prisma non pronto): ricevuta rifiutata
         server.consegnaArrivi(nil)
         let senza = aspetta { await ipad.manda(arrivo) }
-        controlla(!senza.accettato && raccolta.elenco.count == 4, "Ponte: se Prisma sul Mac non è pronto la ricevuta lo dice")
+        controlla(!senza.accettato && raccolta.elenco.count == 4, "Ponte: se Lucy sul Mac non è pronta la ricevuta lo dice")
         // Migliorie d'uso 39: con «Inquadra un documento» e «Nota a voce» spenti il Mac rifiuta quei messaggi e continua a
         // ricevere le schede; con «Vera» spento rifiuta le schede e accetta le note
         server.consegnaArrivi { (a: ArrivoPonte) async -> RicevutaPonte in

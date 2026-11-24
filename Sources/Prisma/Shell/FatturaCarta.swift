@@ -95,7 +95,7 @@ private struct PaginaFattura: View {
 
     private var testata: some View {
         HStack(alignment: .center, spacing: M.spazioLogo) {
-            LogoPrisma(colore: K.logo)
+            LogoLucy(colore: K.logo)
                 .frame(height: M.logo)
             Text(verbatim: t.intestazione)
                 .carattereApple(F.testata)

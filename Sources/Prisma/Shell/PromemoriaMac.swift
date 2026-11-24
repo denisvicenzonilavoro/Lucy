@@ -171,7 +171,7 @@ final class PromemoriaMac: NSObject, UNUserNotificationCenterDelegate, @unchecke
         guard Self.disponibili else { return }
         let contenuto = UNMutableNotificationContent()
         contenuto.title = "Promemoria di prova"
-        contenuto.body = "Così arrivano i promemoria di Prisma: appuntamenti, attività, scadenze e compleanni"
+        contenuto.body = "Così arrivano i promemoria di Lucy: appuntamenti, attività, scadenze e compleanni"
         contenuto.sound = .default
         contenuto.threadIdentifier = MotoreNotifiche.prefissoPromemoria + "prova"
         contenuto.userInfo = [PromemoriaMac.chiaveDestinazione: DestinazioneRicerca.app(.impostazioni).testo]
@@ -332,10 +332,10 @@ extension StatoShell {
             self.dati.impostazioni.promemoria.attivi = consentiti
             if consentiti {
                 self.aggiornaPromemoria()
-                self.mostraAvviso("Promemoria del Mac attivi: arrivano anche a Prisma chiusa")
+                self.mostraAvviso("Promemoria del Mac attivi: arrivano anche a Lucy chiusa")
             } else {
                 let motivo = errore.map { " (\($0))" } ?? ""
-                self.mostraAvviso("macOS non consente i promemoria a Prisma\(motivo): attivali in Impostazioni di Sistema › Notifiche › Prisma")
+                self.mostraAvviso("macOS non consente i promemoria a Lucy\(motivo): attivali in Impostazioni di Sistema › Notifiche › Lucy")
             }
         }
     }

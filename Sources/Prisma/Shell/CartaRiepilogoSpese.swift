@@ -75,7 +75,7 @@ struct TestiRiepilogoSpese {
                            numero: Formati.euroDecimali(p.voci?.totaleDocumento ?? imponibile))))
         }
         righe = r
-        piede = "Preparato con Prisma dai dati che hai scritto. Solo fatti: deducibilità, IVA detraibile e regime fiscale li "
+        piede = "Preparato con Lucy dai dati che hai scritto. Solo fatti: deducibilità, IVA detraibile e regime fiscale li "
             + "valuta il tuo commercialista." + (nomi == nil ? " Senza i nomi dei clienti." : "")
     }
 }
@@ -138,7 +138,7 @@ private struct PaginaRiepilogoSpese: View {
         FoglioDocumento(formato: C.formato, sfondo: C.fondo) {
             VStack(alignment: .leading, spacing: C.spazioSezioni) {
                 HStack(alignment: .center) {
-                    LogoPrisma(colore: C.logo)
+                    LogoLucy(colore: C.logo)
                         .frame(height: C.altezzaLogo)
                     Spacer(minLength: 0)
                     if totale > 1 {

@@ -12,7 +12,7 @@ import Foundation
 // ragionamento» e «Ragiona a passi» acceso o spento sono in `Impostazioni.vera.passi`.
 extension StatoShell {
     static let titoloPassi = "Ragiona a passi"
-    static let avvisoPassiSenzaQwen = TestiStatoVera.titoloNonPronta + ": il piano e la spiegazione sono quelli delle regole di Prisma, con le stesse cifre."
+    static let avvisoPassiSenzaQwen = TestiStatoVera.titoloNonPronta + ": il piano e la spiegazione sono quelli delle regole di Lucy, con le stesse cifre."
 
     /// Qwen si usa solo se è pronto (e non nelle prove e nelle istantanee con le risposte preparate).
     var qwenPerPassi: MotoreLocale? { generativo != nil && !rispostePreparate ? qwen : nil }
@@ -266,7 +266,7 @@ extension StatoShell {
     /// In modalità cliente solo il cliente davanti a te.
     func apriObiettiviPassi(_ piano: PianoPassi) {
         let id = piano.richiesta.clienteId
-        guard cliente(id) != nil else { return mostraAvviso("Il cliente non è più in Prisma.") }
+        guard cliente(id) != nil else { return mostraAvviso("Il cliente non è più in Lucy.") }
         guard visibileAlCliente(id) else { return }
         if clienteAttivoId != id { clienteAttivoId = id }
         schedaCliente = .obiettivi
@@ -278,7 +278,7 @@ extension StatoShell {
     /// con Qwen se è pronto, altrimenti con le regole. Non ripete la domanda in chat e non tocca il campo di scrittura.
     func rifaiPassi(_ piano: PianoPassi, chiave: String) {
         guard !veraInCorso else { return }
-        guard let d = datiPassi(cliente: piano.richiesta.clienteId) else { return mostraAvviso("Il cliente non è più in Prisma.") }
+        guard let d = datiPassi(cliente: piano.richiesta.clienteId) else { return mostraAvviso("Il cliente non è più in Lucy.") }
         var r = piano.richiesta
         // Gli obiettivi tolti nel frattempo escono dalla richiesta
         r.obiettiviIds = r.obiettiviIds.filter { d.obiettivo($0) != nil }

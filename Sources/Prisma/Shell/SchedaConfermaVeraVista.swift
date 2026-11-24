@@ -266,7 +266,7 @@ struct FontiVeraVista: View {
             } label: {
                 HStack(spacing: T.spazio) {
                     if trovate > 0 {
-                        pillola("✓ \(trovate == 1 ? "1 cifra controllata" : "\(trovate) cifre controllate") con Prisma", T.testoControllata, T.fondoControllata)
+                        pillola("✓ \(trovate == 1 ? "1 cifra controllata" : "\(trovate) cifre controllate") con Lucy", T.testoControllata, T.fondoControllata)
                     }
                     if mancanti > 0 {
                         pillola(mancanti == 1 ? "1 cifra non trovata" : "\(mancanti) cifre non trovate", T.testoNonTrovata, T.fondoNonTrovata)

@@ -1,4 +1,4 @@
-Ti do la tabella del confronto tra due documenti di un cliente (voce, prima, ora, esito: migliora, peggiora, costa di più, cambia, nuova, tolta) e la sintesi di Prisma.
+Ti do la tabella del confronto tra due documenti di un cliente (voce, prima, ora, esito: migliora, peggiora, costa di più, cambia, nuova, tolta) e la sintesi di Lucy.
 
 Riscrivi la sintesi in due frasi, per il consulente: cosa cambia davvero per il cliente, prima quello che peggiora o costa di più, poi quello che migliora.
 

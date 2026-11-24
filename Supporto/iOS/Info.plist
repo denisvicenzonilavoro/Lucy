@@ -6,7 +6,7 @@
   - MinimumOSVersion deve coincidere con .iOS(.v17) di Package.swift.
   - CFBundleSupportedPlatforms: qui il simulatore; assembla.sh lo cambia in iPhoneOS per Prisma.ipa,
     da installare su iPhone e iPad con AltStore o Sideloadly (che firmano con l'ID Apple).
-  - Le icone AppIcon*.png le genera assembla.sh da Design/Icone/AppIcon.png.
+  - Le icone AppIcon*.png le genera assembla.sh da Design/Icone/AppIcon-iOS.png (Lucy, quadrata e senza trasparenza).
   - Il tipo local.prisma.backup è il backup cifrato (.zip.cifrato) creato da Prisma sul Mac.
   - La fotocamera (NSCameraUsageDescription) serve a Inquadra e capisci e a leggere la carta d'identità di un cliente
     nuovo («Luce» giro 13): al Mac va il testo letto, mai l'immagine.
@@ -23,9 +23,9 @@
     <key>CFBundleDevelopmentRegion</key>
     <string>it</string>
     <key>CFBundleName</key>
-    <string>Prisma</string>
+    <string>Lucy</string>
     <key>CFBundleDisplayName</key>
-    <string>Prisma</string>
+    <string>Lucy</string>
     <key>CFBundleExecutable</key>
     <string>Prisma</string>
     <key>CFBundleIdentifier</key>
@@ -99,7 +99,7 @@
             <key>UTTypeIdentifier</key>
             <string>local.prisma.backup</string>
             <key>UTTypeDescription</key>
-            <string>Backup cifrato di Prisma</string>
+            <string>Backup cifrato di Lucy</string>
             <key>UTTypeConformsTo</key>
             <array>
                 <string>public.data</string>
@@ -117,7 +117,7 @@
     <array>
         <dict>
             <key>CFBundleTypeName</key>
-            <string>Backup cifrato di Prisma</string>
+            <string>Backup cifrato di Lucy</string>
             <key>CFBundleTypeRole</key>
             <string>Viewer</string>
             <key>LSHandlerRank</key>
@@ -129,11 +129,11 @@
         </dict>
     </array>
     <key>NSMicrophoneUsageDescription</key>
-    <string>Prisma usa il microfono per le domande a Vera, per le note che detti dopo una visita e, con il consenso del cliente, per il copilota dell’incontro. L’audio resta sul dispositivo e non si registra.</string>
+    <string>Lucy usa il microfono per le domande a Vera, per le note che detti dopo una visita e, con il consenso del cliente, per il copilota dell’incontro. L’audio resta sul dispositivo e non si registra.</string>
     <key>NSCameraUsageDescription</key>
-    <string>Prisma usa la fotocamera per inquadrare polizze e documenti, per leggere la carta d’identità di un cliente nuovo e per mostrare il patrimonio sul tavolo in realtà aumentata: al tuo Mac va solo il testo letto, in rete locale e cifrato. Le immagini restano sul dispositivo e non si salvano, tranne lo scatto del cristallo che fai tu.</string>
+    <string>Lucy usa la fotocamera per inquadrare polizze e documenti, per leggere la carta d’identità di un cliente nuovo e per mostrare il patrimonio sul tavolo in realtà aumentata: al tuo Mac va solo il testo letto, in rete locale e cifrato. Le immagini restano sul dispositivo e non si salvano, tranne lo scatto del cristallo che fai tu.</string>
     <key>NSSpeechRecognitionUsageDescription</key>
-    <string>Prisma trascrive la voce solo sul dispositivo: le domande a Vera, le note che detti dopo una visita e, con il consenso del cliente, il copilota dell’incontro. Al Mac arriva solo il testo, mai l’audio.</string>
+    <string>Lucy trascrive la voce solo sul dispositivo: le domande a Vera, le note che detti dopo una visita e, con il consenso del cliente, il copilota dell’incontro. Al Mac arriva solo il testo, mai l’audio.</string>
     <key>LSSupportsOpeningDocumentsInPlace</key>
     <false/>
     <key>UIFileSharingEnabled</key>

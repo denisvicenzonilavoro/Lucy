@@ -37,7 +37,7 @@ extension AppImpostazioni {
                     }
                     .cascataImpostazioni(3)
                     RigaImpostazione(titolo: "Ripristina", sottotitolo: "Torna a una copia precedente, anche salvata altrove.",
-                                     aiuto: "Un backup di Prisma salvato altrove (.zip o, se protetto, .zip.cifrato). Sostituisce l'archivio di questo Mac; prima Prisma salva una copia di sicurezza") {
+                                     aiuto: "Un backup di Lucy salvato altrove (.zip o, se protetto, .zip.cifrato). Sostituisce l'archivio di questo Mac; prima Lucy salva una copia di sicurezza") {
                         ValoreRiga(testo: "Ripristina…") { scegliFile() }
                     }
                     .cascataImpostazioni(4)
@@ -125,7 +125,7 @@ extension AppImpostazioni {
 
             if stato.copieNonLeggibili > 0 {
                 VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.spazioControlliAffiancati) {
-                    Text("All'avvio l'archivio non era leggibile: la copia è nella cartella di Prisma e i backup automatici sono fermi, per non sostituire i backup buoni. Ripristina un backup qui sopra oppure, se i dati di oggi vanno bene, riprendi i backup.")
+                    Text("All'avvio l'archivio non era leggibile: la copia è nella cartella di Lucy e i backup automatici sono fermi, per non sostituire i backup buoni. Ripristina un backup qui sopra oppure, se i dati di oggi vanno bene, riprendi i backup.")
                         .carattereApple(n.carattere)
                         .foregroundColor(n.coloreErrore)
                         .fixedSize(horizontal: false, vertical: true)
@@ -138,7 +138,7 @@ extension AppImpostazioni {
             }
 
             if stato.solaLettura {
-                Text("Archivio in sola lettura: è stato salvato da una versione più recente di Prisma. Le modifiche non vengono salvate: apri l'ultima versione dell'app.")
+                Text("Archivio in sola lettura: è stato salvato da una versione più recente di Lucy. Le modifiche non vengono salvate: apri l'ultima versione dell'app.")
                     .carattereApple(n.carattere)
                     .foregroundColor(n.coloreErrore)
                     .fixedSize(horizontal: false, vertical: true)
@@ -146,7 +146,7 @@ extension AppImpostazioni {
                     .cascataImpostazioni(8)
             }
 
-            GruppoImpostazioni(titolo: "Archivio di Prisma") {
+            GruppoImpostazioni(titolo: "Archivio di Lucy") {
                 RigaImpostazione(titolo: "Sul Mac", sottotitolo: Archivio.percorsoBreve(Archivio.cartella),
                                  stato: Pillola(testo: "Versione \(DatiPrisma.versioneAttuale)", tono: .neutro), ultima: true) {
                     ValoreRiga(testo: "Mostra nel Finder") {
@@ -338,7 +338,7 @@ extension AppImpostazioni {
         pannello.canCreateDirectories = true
         pannello.allowsMultipleSelection = false
         pannello.prompt = "Usa questa cartella"
-        pannello.message = "Scegli dove salvare i backup di Prisma (per esempio iCloud Drive o un disco esterno)."
+        pannello.message = "Scegli dove salvare i backup di Lucy (per esempio iCloud Drive o un disco esterno)."
         if pannello.runModal() == .OK, let url = pannello.url {
             stato.scegliCartellaBackup(url)
         }
@@ -359,7 +359,7 @@ extension AppImpostazioni {
         if let protetto = UTType(filenameExtension: GestoreBackup.estensioneCifrata) { tipi.append(protetto) }
         pannello.allowedContentTypes = tipi
         pannello.prompt = "Ripristina"
-        pannello.message = "Scegli un backup di Prisma."
+        pannello.message = "Scegli un backup di Lucy."
         if pannello.runModal() == .OK, let url = pannello.url {
             fileDaRipristinare = url
         }

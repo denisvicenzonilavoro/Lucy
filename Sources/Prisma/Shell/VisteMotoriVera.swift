@@ -84,7 +84,7 @@ struct DueVelocitaVista: View {
         let profonde = stato.dueVelocita.richieste(.qwen) + stato.dueVelocita.richieste(.esterno)
         VStack(alignment: .leading, spacing: S.spazio) {
             HStack(alignment: .top, spacing: D.spazioCorsie) {
-                CorsiaVeraVista(titolo: apple ? "Veloce · modello Apple" : "Veloce · regole di Prisma",
+                CorsiaVeraVista(titolo: apple ? "Veloce · modello Apple" : "Veloce · regole di Lucy",
                                 sottotitolo: apple ? "Sul Mac · comandi, riconoscere un documento, risposte brevi"
                                                    : "Sul Mac · comandi, agenda, routine, tagliando: senza modello",
                                 colore: D.veloce, richieste: veloci, media: media(veloci)) {
@@ -251,7 +251,7 @@ struct CervelloGrandeVista: View {
         var esterno = MessaggioVera(autore: .vera, testo: "Studia come decide chi deve tener conto delle mosse degli altri. Il caso più noto è il dilemma del prigioniero.",
                                     motore: CervelloGrandeVera.nome)
         esterno.modalita = .conversazione
-        var mac = MessaggioVera(autore: .vera, testo: "Ecco la scheda di Laura: obiettivi, posizioni e scadenze, con le cifre calcolate da Prisma.",
+        var mac = MessaggioVera(autore: .vera, testo: "Ecco la scheda di Laura: obiettivi, posizioni e scadenze, con le cifre calcolate da Lucy.",
                                 motore: MotoreLocale.nome(MotoreLocale.modelloPredefinito))
         mac.modalita = .lavoro
         return VStack(alignment: .leading, spacing: K.spazioBolle) {

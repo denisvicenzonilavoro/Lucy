@@ -33,7 +33,7 @@ enum GruppoProva: String, CaseIterable, Identifiable {
     var spiegazione: String {
         switch self {
         case .cinque: return "Pochi, per spiegare con calma."
-        case .trentacinque: return "Prisma piena: Vera, il territorio, lo Studio."
+        case .trentacinque: return "Lucy piena: Vera, il territorio, lo Studio."
         }
     }
 }
@@ -41,9 +41,9 @@ enum GruppoProva: String, CaseIterable, Identifiable {
 /// I testi della dimostrazione (template righe 4209-4227).
 enum TestiDimostrazione {
     static let titoloPagina = "Dimostrazione"
-    static let introduzione = "Per far vedere Prisma a un cliente curioso, a un collega o a chi la vuole comprare, senza mostrare il tuo lavoro."
+    static let introduzione = "Per far vedere Lucy a un cliente curioso, a un collega o a chi la vuole comprare, senza mostrare il tuo lavoro."
     static let interruttore = "Dimostrazione"
-    static let interruttoreSpiegazione = "Prisma mostra solo i clienti di prova: i tuoi restano da parte, intatti."
+    static let interruttoreSpiegazione = "Lucy mostra solo i clienti di prova: i tuoi restano da parte, intatti."
     static let gruppoClienti = "I clienti di prova"
     static let inUso = "In uso"
     static let usaQuesti = "Usa questi"
@@ -55,7 +55,7 @@ enum TestiDimostrazione {
 
     // La scheda dell'etichetta
     static let schedaOcchiello = "Dimostrazione"
-    static let schedaTitolo = "Stai mostrando Prisma con i clienti di prova."
+    static let schedaTitolo = "Stai mostrando Lucy con i clienti di prova."
     static let righe: [(titolo: String, testo: String)] = [
         ("I tuoi clienti sono al sicuro", "Messi da parte, intatti: qui non compaiono e non si possono cercare."),
         ("Niente si mescola", "Il backup e la copia per iPhone e iPad restano fermi: i dati di prova non finiscono tra quelli veri."),
@@ -68,7 +68,7 @@ enum TestiDimostrazione {
     static let backupFermo = "Durante la dimostrazione il backup è fermo"
     static let nonDurante = "Non durante la dimostrazione"
     static let attendiBackup = "C'è un backup in corso: la dimostrazione si accende appena finisce."
-    static let notaRifiutata = "Prisma sul Mac sta mostrando la dimostrazione: la nota resta sull’iPhone e arriva dopo."
+    static let notaRifiutata = "Lucy sul Mac sta mostrando la dimostrazione: la nota resta sull’iPhone e arriva dopo."
 
     // Le preferenze del Mac (fuori dall'archivio e dai backup)
     static let chiaveAccesa = "Prisma.dimostrazione"

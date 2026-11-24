@@ -52,7 +52,7 @@ enum TestiDocumenti {
     }
     static func nonTrovato(_ c: CampoDocumento) -> String { "Non trovato: \(c.nome)" }
     static let nessunDato = "Nessun dato letto in questo documento."
-    static let inLettura = "Prisma sta leggendo il documento sul Mac…"
+    static let inLettura = "Lucy sta leggendo il documento sul Mac…"
     static let illeggibile = "Il documento non si legge: rileggilo o scrivi i dati a mano."
     static let rileggi = "Rileggi"
     static let aiutoVaBene = "Il valore è giusto (Invio): entra così"
@@ -79,7 +79,7 @@ enum TestiDocumenti {
     static let toccaIlGiusto = "Tocca il valore giusto: l’altro viene corretto."
     static let confrontoCompleto = "Apri il confronto completo"
     static let chiudiConfronto = "Chiudi il confronto completo"
-    static let aiutoConfronto = "La tabella «Nel documento / In Prisma» con lo storico, il ripristino e i clienti toccati dal KID"
+    static let aiutoConfronto = "La tabella «Nel documento / In Lucy» con lo storico, il ripristino e i clienti toccati dal KID"
 
     // MARK: Il piede
 
@@ -105,7 +105,7 @@ enum TestiDocumenti {
     // MARK: Il testo
 
     static let mostraIlTesto = "Mostra il testo"
-    static let notaImpaginato = "Impaginato da Prisma con i dati del dossier: da consultare, stampare o consegnare. Con «Apri in Anteprima» lo apri sul Mac."
+    static let notaImpaginato = "Impaginato da Lucy con i dati del dossier: da consultare, stampare o consegnare. Con «Apri in Anteprima» lo apri sul Mac."
     static let altreAzioni = "Tipo, collegamento, crea e altre azioni"
     static let tornaAiPassi = "‹ Torna ai passi"
 }

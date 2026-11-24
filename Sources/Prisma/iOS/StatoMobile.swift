@@ -594,7 +594,7 @@ final class StatoMobile: ObservableObject {
         guard persistente else { return }
         let app = UIApplication.shared
         if compitoSalvataggio == .invalid {
-            compitoSalvataggio = app.beginBackgroundTask(withName: "Salvataggio di Prisma") { [weak self] in
+            compitoSalvataggio = app.beginBackgroundTask(withName: "Salvataggio di Lucy") { [weak self] in
                 self?.fineCompito()
             }
         }

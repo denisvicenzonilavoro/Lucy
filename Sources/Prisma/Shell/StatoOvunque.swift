@@ -471,7 +471,7 @@ extension StatoShell {
         ovunque.inCorso = true
         #if os(iOS)
         // Il giornale va scritto anche se l'app sta andando in background
-        let compito = UIApplication.shared.beginBackgroundTask(withName: "Prisma ovunque", expirationHandler: nil)
+        let compito = UIApplication.shared.beginBackgroundTask(withName: "Lucy ovunque", expirationHandler: nil)
         #endif
         ovunque.coda.async { [weak self] in
             let risultato: Result<EsitoGiroOvunque, Error>
@@ -690,7 +690,7 @@ extension StatoShell {
                     o.accendi(ruolo: ruolo, id: idFinale, nome: StatoOvunque.nomeApparecchio, chiave: pronta)
                     self.dati.impostazioni.ovunque = o
                     if !PortachiaviOvunque.salva(pronta.byte) {
-                        self.mostraAvviso("La chiave non è entrata nel Portachiavi: al prossimo avvio Prisma ti chiederà la passphrase.")
+                        self.mostraAvviso("La chiave non è entrata nel Portachiavi: al prossimo avvio Lucy ti chiederà la passphrase.")
                     }
                     self.ovunque.chiave = pronta
                     self.ovunque.cartella = c
@@ -727,7 +727,7 @@ extension StatoShell {
                     guard let self else { return }
                     self.ovunque.inCorso = false
                     if !PortachiaviOvunque.salva(k.byte) {
-                        self.mostraAvviso("La chiave non è entrata nel Portachiavi: al prossimo avvio Prisma ti chiederà la passphrase.")
+                        self.mostraAvviso("La chiave non è entrata nel Portachiavi: al prossimo avvio Lucy ti chiederà la passphrase.")
                     }
                     self.ovunque.chiave = k
                     self.ovunque.problema = nil
@@ -770,7 +770,7 @@ extension StatoShell {
                     self.dati.carica(self.versioneDati == versione ? esito.dati : StatoShell.riportaOvunque(esito, su: self.dati.istantanea))
                     self.dati.impostazioni.ovunque.generazioneChiave = k.descrittore.generazioneChiave
                     if !PortachiaviOvunque.salva(k.byte) {
-                        self.mostraAvviso("La chiave nuova non è entrata nel Portachiavi: al prossimo avvio Prisma ti chiederà la passphrase.")
+                        self.mostraAvviso("La chiave nuova non è entrata nel Portachiavi: al prossimo avvio Lucy ti chiederà la passphrase.")
                     }
                     self.ovunque.chiave = k
                     self.ovunque.giri += 1

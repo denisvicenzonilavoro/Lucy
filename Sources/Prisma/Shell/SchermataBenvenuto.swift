@@ -66,7 +66,7 @@ struct SchermataBenvenuto: View {
         }
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityHint("Tocca per entrare in Prisma")
+        .accessibilityHint("Tocca per entrare in Lucy")
         .accessibilityAction { entra() }
         .onAppear(perform: arriva)
     }
@@ -75,13 +75,8 @@ struct SchermataBenvenuto: View {
     private var colonna: some View {
         VStack(spacing: 0) {
             Group {
-                if Tema.Stile.usaCarta {
-                    // Stile Carta: il prisma si disegna a inchiostro, poi la sottolineatura dorata (template, `#lock .logo`)
-                    LogoInchiostro(lato: L.logo * 1.25, disegna: true)
-                } else {
-                    LogoPrisma(colore: Tema.Apple.Colore.logo)
-                        .frame(height: L.logo)
-                }
+                // Lucy by Logic con l'animazione d'avvio del marchio, una volta sola all'apertura
+                AvvioLucy(altezza: L.logo * 1.2)
             }
             .padding(.top, L.logoDallAlto)
             .accessibilityHidden(true)
@@ -182,7 +177,7 @@ private struct CursoreEntraBlocco: View {
         let x = arrivato ? corsa : min(max(trascinamento, 0), corsa)
         let quota = corsa > 0 ? x / corsa : 0
         ZStack(alignment: .leading) {
-            Text("Scorri per entrare in Prisma")
+            Text("Scorri per entrare in Lucy")
                 .carattereApple(L.pulsante)
                 .lineLimit(1)
                 .padding(.leading, M.scrittaSinistra)

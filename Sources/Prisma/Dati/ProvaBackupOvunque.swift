@@ -44,18 +44,18 @@ extension ProvaBackup {
     static func verificaOvunque(originale: DatiPrisma, estratto: DatiPrisma) throws -> String? {
         guard originale.impostazioni.ovunque.acceso, !originale.conflittiOvunque.isEmpty, !originale.giornaleOvunque.isEmpty,
               !originale.inquadratureDaConfermare.isEmpty else {
-            return "l'archivio di prova non ha i dati di Prisma ovunque"
+            return "l'archivio di prova non ha i dati di Lucy ovunque"
         }
         guard estratto.impostazioni.ovunque == originale.impostazioni.ovunque, estratto.conflittiOvunque == originale.conflittiOvunque,
               estratto.giornaleOvunque == originale.giornaleOvunque, estratto.arriviOvunque == originale.arriviOvunque,
               estratto.inquadratureDaConfermare == originale.inquadratureDaConfermare else {
-            return "le impostazioni o i dati di Prisma ovunque non tornano uguali dal backup"
+            return "le impostazioni o i dati di Lucy ovunque non tornano uguali dal backup"
         }
         let codificato = try Archivio.codificatore.encode(originale)
         guard var radice = try JSONSerialization.jsonObject(with: codificato) as? [String: Any],
               var impostazioni = radice["impostazioni"] as? [String: Any],
               impostazioni.removeValue(forKey: "ovunque") != nil else {
-            return "archivio di prova senza Prisma ovunque non preparato"
+            return "archivio di prova senza Lucy ovunque non preparato"
         }
         radice["impostazioni"] = impostazioni
         for k in ["giornaleOvunque", "conflittiOvunque", "arriviOvunque", "inquadratureDaConfermare"] { radice.removeValue(forKey: k) }
@@ -65,7 +65,7 @@ extension ProvaBackup {
         guard !letto.impostazioni.ovunque.acceso, letto.impostazioni.ovunque == ImpostazioniOvunque(), letto.giornaleOvunque.isEmpty,
               letto.conflittiOvunque.isEmpty, letto.arriviOvunque.isEmpty, letto.inquadratureDaConfermare.isEmpty,
               letto.clienti == atteso.clienti, letto.note == atteso.note else {
-            return "archivio senza Prisma ovunque non letto con lo spazio spento e il resto uguale"
+            return "archivio senza Lucy ovunque non letto con lo spazio spento e il resto uguale"
         }
         return nil
     }

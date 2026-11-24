@@ -414,7 +414,7 @@ enum ProvaCalcoliAdeguatezza {
 
         let e43 = esito(ingresso(ramoI()))
         verifica.vero("AD43 Sostituzione: senza sostituita non c'è il controllo", e43.controllo(.sostituzione) == nil)
-        verifica.vero("AD43 Sostituzione: Prisma suggerisce la polizza", e43.sostituitaSuggerita == "polizza")
+        verifica.vero("AD43 Sostituzione: Lucy suggerisce la polizza", e43.sostituitaSuggerita == "polizza")
 
         let decorrenza = tra(anni: -5)
         let fondoPensione = AiutiProva.posizione("Fondo pensione", .previdenza, 20_000) {
@@ -519,7 +519,7 @@ enum ProvaCalcoliAdeguatezza {
         let cattiva = #"{"id":"x","canale":"alleanza","titolo":"X","perTipo":"ramoX"}"#
         let unaSola = leggi(ImpostazioniConsegna.self, "{\"voci\":[\(buona),\(cattiva)]}")
         verifica("AD57 Elenco con una voce illeggibile: resta quella buona", Double(unaSola?.voci.count ?? -1), 1)
-        verifica("AD57 Elenco senza chiave: le 23 voci di Prisma", Double(leggi(ImpostazioniConsegna.self, "{}")?.voci.count ?? -1), 23)
+        verifica("AD57 Elenco senza chiave: le 23 voci di Lucy", Double(leggi(ImpostazioniConsegna.self, "{}")?.voci.count ?? -1), 23)
         verifica("AD57 Elenco vuoto: resta vuoto", Double(leggi(ImpostazioniConsegna.self, #"{"voci":[]}"#)?.voci.count ?? -1), 0)
 
         // Archivio con una scheda buona e una senza `posizioneId`
@@ -534,7 +534,7 @@ enum ProvaCalcoliAdeguatezza {
         verifica("AD58 Archivio: una scheda letta su due", Double(archivio?.schedeAdeguatezza.count ?? -1), 1)
         let vecchio = leggi(DatiPrisma.self, #"{"clienti":[],"impostazioni":{}}"#)
         verifica.vero("AD58 Archivio senza schede: elenco vuoto", vecchio?.schedeAdeguatezza.isEmpty == true)
-        verifica.vero("AD58 Archivio senza elenco dei documenti: quello di Prisma", vecchio?.impostazioni.consegna == ImpostazioniConsegna())
+        verifica.vero("AD58 Archivio senza elenco dei documenti: quello di Lucy", vecchio?.impostazioni.consegna == ImpostazioniConsegna())
     }
 
     // MARK: - AD59 · Schede da completare

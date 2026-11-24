@@ -250,7 +250,7 @@ private struct SchedaNuovoClienteMac: View {
     private var testa: some View {
         HStack(spacing: I.spazioTesta) {
             SferaVera(misura: I.sfera, viva: true, pensa: nuovoCliente.fase == .lettura)
-            Text("Nuovo cliente · Prisma sul Mac")
+            Text("Nuovo cliente · Lucy sul Mac")
                 .carattereApple(I.etichetta)
                 .foregroundColor(I.coloreEtichetta)
             Spacer(minLength: 0)
@@ -401,7 +401,7 @@ private struct SchedaNuovoClienteMac: View {
     /// «Elena Marchi è già in Prisma» con «Apri il suo dossier» e «Aggiorna il documento».
     private func giaInPrisma(_ c: Cliente) -> some View {
         VStack(alignment: .leading, spacing: I.spazioPulsanti) {
-            Text("\(c.nome) è già in Prisma")
+            Text("\(c.nome) è già in Lucy")
                 .carattereApple(S.titoloTile)
                 .foregroundColor(S.coloreTitoloTile)
             HStack(spacing: I.spazioPulsanti) {
@@ -452,7 +452,7 @@ private struct SchedaNuovoClienteMac: View {
             voceModulo(TipoModulo.privacy.nome, pronta: privacy)
             voceModulo(TipoModulo.adeguataVerifica.nome, pronta: verifica)
             if !pronti {
-                Text("Carica i modelli dei moduli in Pratiche › Moduli: Prisma li compila con questi dati")
+                Text("Carica i modelli dei moduli in Pratiche › Moduli: Lucy li compila con questi dati")
                     .carattereApple(S.fraseTile)
                     .foregroundColor(S.coloreFraseTile)
                     .fixedSize(horizontal: false, vertical: true)
@@ -549,7 +549,7 @@ private struct SchedaNuovoClienteMac: View {
         .buttonStyle(.applePrimarioGrande)
         .keyboardShortcut(.defaultAction)
         .disabled(stato.solaLettura || nuovoCliente.inModifica != nil)
-        .help(stato.solaLettura ? "Archivio in sola lettura: aggiorna Prisma per creare il cliente." : "Crea il cliente con i dati letti")
+        .help(stato.solaLettura ? "Archivio in sola lettura: aggiorna Lucy per creare il cliente." : "Crea il cliente con i dati letti")
         .padding(.top, S.pulsanteSopra)
     }
 }

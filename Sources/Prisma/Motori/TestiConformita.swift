@@ -127,7 +127,7 @@ enum TestiConformita {
     private static func dettaglioQuestionario(_ v: VoceConformita, cliente: Cliente) -> String {
         if v.stato == .nonRichiesta { return nonSeguito(v.canale) }
         guard let compilato = v.data, let scadenza = v.scadenza else {
-            return "Non registrato in Prisma: indica la data dell'ultimo questionario firmato."
+            return "Non registrato in Lucy: indica la data dell'ultimo questionario firmato."
         }
         let validita = v.mesi.map { "valido \(durata($0)), " } ?? ""
         let fine = v.stato == .scaduta ? "scaduto il \(data(scadenza))" : "fino al \(data(scadenza))"
@@ -146,7 +146,7 @@ enum TestiConformita {
         default: break
         }
         guard let eseguita = v.data, let scadenza = v.scadenza else {
-            return "Non registrata in Prisma: data e profilo di rischio dell'ultima verifica."
+            return "Non registrata in Lucy: data e profilo di rischio dell'ultima verifica."
         }
         let mesi = v.mesi ?? 0
         let entro = v.stato == .scaduta ? "scaduta il \(data(scadenza))" : "entro il \(data(scadenza))"
@@ -247,11 +247,11 @@ enum TestiConformita {
     static func fonte(_ t: Tipo) -> String {
         switch t {
         case .questionarioAlleanza:
-            return "Prodotti d'investimento assicurativi (IBIP): Codice delle assicurazioni private (D.Lgs. 209/2005) art. 121-septies, introdotto dal D.Lgs. 68/2018 di recepimento della IDD (Dir. UE 2016/97, art. 30); richieste ed esigenze per ogni contratto: art. 119-ter; Reg. delegato UE 2017/2359 artt. 9–17; Regolamento IVASS n. 40/2018. La norma chiede informazioni aggiornate ma non fissa una durata: la validità è quella della compagnia, impostabile in Prisma."
+            return "Prodotti d'investimento assicurativi (IBIP): Codice delle assicurazioni private (D.Lgs. 209/2005) art. 121-septies, introdotto dal D.Lgs. 68/2018 di recepimento della IDD (Dir. UE 2016/97, art. 30); richieste ed esigenze per ogni contratto: art. 119-ter; Reg. delegato UE 2017/2359 artt. 9–17; Regolamento IVASS n. 40/2018. La norma chiede informazioni aggiornate ma non fissa una durata: la validità è quella della compagnia, impostabile in Lucy."
         case .questionarioIndipendente:
             return "Consulenza finanziaria: TUF (D.Lgs. 58/1998) artt. 18-bis e 21; MiFID II (Dir. 2014/65/UE) art. 25, par. 2; Reg. delegato UE 2017/565 artt. 54–55; Regolamento Intermediari Consob n. 20307/2018; Orientamenti ESMA sull'adeguatezza (2022). La periodicità dell'aggiornamento la stabilisce il consulente."
         case .verificaAlleanza, .verificaIndipendente:
-            return "Antiriciclaggio: D.Lgs. 231/2007 artt. 17–19 (approccio basato sul rischio; controllo costante, art. 18, c. 1, lett. d), art. 23 (verifica semplificata), artt. 24–25 (verifica rafforzata); per il ramo vita Regolamento IVASS n. 44/2019. La legge chiede un aggiornamento commisurato al rischio senza fissare i mesi: 12, 24 e 36 mesi per rischio alto, medio e basso sono la periodicità predefinita di Prisma, da allineare alla policy della compagnia o alla propria."
+            return "Antiriciclaggio: D.Lgs. 231/2007 artt. 17–19 (approccio basato sul rischio; controllo costante, art. 18, c. 1, lett. d), art. 23 (verifica semplificata), artt. 24–25 (verifica rafforzata); per il ramo vita Regolamento IVASS n. 44/2019. La legge chiede un aggiornamento commisurato al rischio senza fissare i mesi: 12, 24 e 36 mesi per rischio alto, medio e basso sono la periodicità predefinita di Lucy, da allineare alla policy della compagnia o alla propria."
         case .documento:
             return "Identificazione del cliente con un documento d'identità in corso di validità: D.Lgs. 231/2007 artt. 18, c. 1, lett. a) e 19, c. 1, lett. a). Carta d'identità: 10 anni per i maggiorenni (5 dai 3 ai 18 anni, 3 sotto i 3 anni), fino al compleanno successivo (D.L. 5/2012, art. 7, c. 2). Passaporto: 10 anni per i maggiorenni."
         case .privacy:
@@ -274,7 +274,7 @@ enum TestiConformita {
     }
 
     /// Il piede comune di ogni testo che cita le norme.
-    static let avvertenza = "Le date sono quelle registrate in Prisma: fanno fede i moduli firmati e i sistemi della compagnia o dell'intermediario. Prisma non sostituisce le procedure di adeguatezza e antiriciclaggio. La previdenza complementare (D.Lgs. 252/2005, Questionario di autovalutazione COVIP) e il fisco (TUIR) non hanno scadenze in questa sezione."
+    static let avvertenza = "Le date sono quelle registrate in Lucy: fanno fede i moduli firmati e i sistemi della compagnia o dell'intermediario. Lucy non sostituisce le procedure di adeguatezza e antiriciclaggio. La previdenza complementare (D.Lgs. 252/2005, Questionario di autovalutazione COVIP) e il fisco (TUIR) non hanno scadenze in questa sezione."
 
     /// Come si calcola, in tre righe.
     static let metodo: [String] = [

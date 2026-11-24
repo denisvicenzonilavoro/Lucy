@@ -27,7 +27,7 @@ struct QuadroVera: Equatable {
     var titolo: String
     var totale: Double
     var forma: Forma
-    var fonte = "Cifre dai calcoli di Prisma"
+    var fonte = "Cifre dai calcoli di Lucy"
 
     /// Massimo di scadenze sulla linea del portafoglio: oltre, le etichette si sovrappongono.
     static let massimoScadenze = 6

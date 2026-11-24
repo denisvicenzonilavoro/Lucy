@@ -48,7 +48,7 @@ enum TestiAggiornaValori {
 
     // MARK: - Scheda «Da un elenco»
 
-    static let vuota = "Porta in Prisma i valori di tutte le posizioni in una volta: un foglio Excel o un CSV della compagnia, con una riga per posizione, il numero di polizza (o il cliente e il prodotto) e il valore. Prisma abbina ogni riga alla sua posizione, ti mostra la variazione e mette il valore di prima nello storico."
+    static let vuota = "Porta in Lucy i valori di tutte le posizioni in una volta: un foglio Excel o un CSV della compagnia, con una riga per posizione, il numero di polizza (o il cliente e il prodotto) e il valore. Lucy abbina ogni riga alla sua posizione, ti mostra la variazione e mette il valore di prima nello storico."
     static let scegliFile = "Scegli il file…"
     static let incolla = "Incolla da Excel"
 
@@ -56,7 +56,7 @@ enum TestiAggiornaValori {
         "Da «\(file)»: \(righe) \(righe == 1 ? "riga" : "righe"). Colonne riconosciute: \(colonne.map(\.nome).joined(separator: ", "))."
     }
 
-    static let proposta = "Quasi tutte le righe sono di posizioni già in Prisma: ti propongo di aggiornarne i valori. Per aggiungerle come posizioni nuove usa «Importa come posizioni nuove»."
+    static let proposta = "Quasi tutte le righe sono di posizioni già in Lucy: ti propongo di aggiornarne i valori. Per aggiungerle come posizioni nuove usa «Importa come posizioni nuove»."
     static let etichettaData = "Valori senza data al"
     static let filtroTutte = "Tutte"
     static func filtroDaControllare(_ n: Int) -> String { "Da controllare (\(n))" }
@@ -218,9 +218,9 @@ enum TestiAggiornaValori {
     static let chiudi = "Chiudi"
     static let continua = "Continua"
     static let apri = "Apri ↗"
-    static let notaBackup = "Prima di registrare Prisma salva un backup."
+    static let notaBackup = "Prima di registrare Lucy salva un backup."
     static let titoloNota = "Come si aggiornano"
-    static let notaMetodo = "Un valore più recente di quello attuale lo sostituisce e quello di prima resta nello storico; uno più vecchio va tra i valori passati; lo stesso giorno corregge il valore. Se manca il versato, al versato di prima si aggiungono i premi del periodo. La variazione al netto dei versamenti toglie i premi pagati nel frattempo: è quella che dice come è andata la posizione. Gli estratti periodici li prevedono le regole di ogni canale: per le polizze vita il Regolamento IVASS n. 41/2018, per gli strumenti finanziari il Reg. delegato (UE) 2017/565 (art. 63, rendiconto almeno trimestrale), per la previdenza complementare la comunicazione periodica annuale COVIP. I 12 mesi sono la soglia del riesame di Prisma."
+    static let notaMetodo = "Un valore più recente di quello attuale lo sostituisce e quello di prima resta nello storico; uno più vecchio va tra i valori passati; lo stesso giorno corregge il valore. Se manca il versato, al versato di prima si aggiungono i premi del periodo. La variazione al netto dei versamenti toglie i premi pagati nel frattempo: è quella che dice come è andata la posizione. Gli estratti periodici li prevedono le regole di ogni canale: per le polizze vita il Regolamento IVASS n. 41/2018, per gli strumenti finanziari il Reg. delegato (UE) 2017/565 (art. 63, rendiconto almeno trimestrale), per la previdenza complementare la comunicazione periodica annuale COVIP. I 12 mesi sono la soglia del riesame di Lucy."
     static let titoloRiepilogo = "Valori registrati"
 
     static func testoRiepilogo(_ r: AggiornaValori.Riepilogo) -> String {
@@ -256,7 +256,7 @@ enum TestiAggiornaValori {
     static let pulsante = "Aggiorna valori"
     static let aiutoPulsante = "Aggiorna in blocco i valori delle posizioni in essere: da un elenco della compagnia (Excel o CSV) oppure a mano, in fila, quelli fermi da più di 12 mesi."
     static func bannerImportazione(_ n: Int) -> String {
-        n == 1 ? "1 riga è di una posizione già in Prisma." : "\(n) righe sono di posizioni già in Prisma."
+        n == 1 ? "1 riga è di una posizione già in Lucy." : "\(n) righe sono di posizioni già in Lucy."
     }
     static let aggiornaLoroValori = "Aggiorna i loro valori"
     static let fileSenzaValori = "Nel file non ho trovato valori: servono il numero di polizza (o cliente e prodotto) e una colonna del valore (Controvalore, Valore di riscatto, Riserva…), con i nomi delle colonne nella prima riga."
@@ -377,8 +377,8 @@ enum TestiAggiornaValori {
         return registra(valori)
     }
     static let avvisoDecidi = "Prima decidi le righe in arancione"
-    static let notaCopia = "Prima di registrare Prisma salva una copia: si può annullare."
-    static let notaCopiaFatta = "Prima di registrare Prisma ha salvato una copia."
+    static let notaCopia = "Prima di registrare Lucy salva una copia: si può annullare."
+    static let notaCopiaFatta = "Prima di registrare Lucy ha salvato una copia."
 
     /// Il titolo del riepilogo: «8 valori registrati.».
     static func registrati(_ n: Int) -> String {

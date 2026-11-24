@@ -12,7 +12,7 @@ struct PropostaIncontro: Identifiable, Hashable {
     /// La frase degli appunti da cui nasce.
     let fonte: String
     /// Chi l'ha proposta: "Regole di Prisma" o "Qwen".
-    var origine = "Regole di Prisma"
+    var origine = "Regole di Lucy"
 
     var id: String {
         switch tipo {

@@ -48,10 +48,10 @@ struct AperturaBackup: View {
 
     private var intestazione: some View {
         VStack(spacing: M.spazioTesto * 3) {
-            LogoPrisma()
+            LogoLucy()
                 .frame(height: M.logoApertura)
                 .padding(.bottom, M.spazioTesto * 2)
-            Text("Apri il backup di Prisma dal Mac")
+            Text("Apri il backup di Lucy dal Mac")
                 .font(Tipo.Mobile.titoloGrande)
                 .foregroundColor(Tema.Colore.inchiostroSfondo)
                 .multilineTextAlignment(.center)
@@ -98,7 +98,7 @@ struct AperturaBackup: View {
 
     private var passi: some View {
         VStack(alignment: .leading, spacing: M.spazioRiga) {
-            passo(1, "Sul Mac, in Prisma: Impostazioni › Archivio › «Crea backup» (con la password).")
+            passo(1, "Sul Mac, in Lucy: Impostazioni › Archivio › «Crea backup» (con la password).")
             passo(2, "Manda il file .zip.cifrato a questo dispositivo con AirDrop, oppure mettilo in iCloud Drive o in File.")
             passo(3, "Aprilo qui sotto e scrivi la password del backup.")
         }

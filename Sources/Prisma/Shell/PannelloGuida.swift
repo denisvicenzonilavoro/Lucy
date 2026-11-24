@@ -42,10 +42,10 @@ struct PannelloGuida: View {
     private var testata: some View {
         let m = Tema.Misura.Guida.self
         return HStack(spacing: m.spazioTestata) {
-            LogoPrisma(colore: Tema.Colore.logo)
+            LogoLucy(colore: Tema.Colore.logo)
                 .frame(height: m.logoPannello)
                 .accessibilityHidden(true)
-            Text("Guida di Prisma")
+            Text("Guida di Lucy")
                 .font(Tema.Testo.Guida.titoloPannello)
                 .foregroundColor(Tema.Colore.inchiostro)
                 .lineLimit(1)
@@ -232,7 +232,7 @@ private struct PaginaIntroduzioneVista: View {
     @ViewBuilder private var icone: some View {
         let m = Tema.Misura.Guida.self
         if pagina.app.isEmpty {
-            LogoPrisma(colore: Tema.Colore.logo)
+            LogoLucy(colore: Tema.Colore.logo)
                 .frame(height: m.logoIntro)
                 .padding(.top, m.spazio)
                 .accessibilityHidden(true)
@@ -323,7 +323,7 @@ struct GuidaApp: View {
         let scelta = app == nil
         return Button { stato.guida = .scrivania } label: {
             HStack(spacing: m.spazioRigaElenco) {
-                LogoPrisma(colore: Tema.Colore.logo)
+                LogoLucy(colore: Tema.Colore.logo)
                     .frame(width: m.iconaElencoApp, height: m.iconaElencoApp)
                 VStack(alignment: .leading, spacing: m.spazioTermine) {
                     Text(GuidaTesti.titoloScrivania)
@@ -398,7 +398,7 @@ struct SchedaAiutoApp: View {
                 if let app {
                     IconaApp(app: app, lato: latoIcona)
                 } else {
-                    LogoPrisma(colore: Tema.Colore.logo)
+                    LogoLucy(colore: Tema.Colore.logo)
                         .frame(width: latoIcona, height: latoIcona)
                 }
                 Text(app?.titolo ?? GuidaTesti.titoloScrivania)
@@ -441,7 +441,7 @@ struct SchedaAiutoApp: View {
                     chiudi?()
                     stato.apriGuida(app.map { PaginaGuida.app($0) } ?? .scrivania)
                 } label: {
-                    Label("Tutta la guida di Prisma", systemImage: "book")
+                    Label("Tutta la guida di Lucy", systemImage: "book")
                 }
                 .buttonStyle(StileCollegamento())
             }

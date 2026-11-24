@@ -368,7 +368,7 @@ struct RoutineVeraPagina: View {
                         .disabled(stato.solaLettura)
                 }
                 Spacer()
-                Text(r.pronta ? "Una routine pronta di Prisma" : "Creata il \(Formati.dataEstesa.string(from: r.creataIl))")
+                Text(r.pronta ? "Una routine pronta di Lucy" : "Creata il \(Formati.dataEstesa.string(from: r.creataIl))")
                     .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
             }
         }
@@ -420,7 +420,7 @@ struct RoutineVeraPagina: View {
                 }
                 .padding(.vertical, Tema.Apple.routineSpazioPasso)
             }
-            Text("Vera esegue i passi con gli strumenti di Prisma: le cifre le calcola Prisma, e niente cambia senza «Conferma».")
+            Text("Vera esegue i passi con gli strumenti di Lucy: le cifre le calcola Lucy, e niente cambia senza «Conferma».")
                 .carattereApple(F.nota).foregroundColor(F.coloreDettaglio).padding(.top, 8)
         }
     }

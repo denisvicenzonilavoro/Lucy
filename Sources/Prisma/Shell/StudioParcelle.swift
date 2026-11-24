@@ -97,7 +97,7 @@ enum TestiParcelle {
         + "con «Nuova parcella»."
     static let vuotoAnteprima = "Qui vedrai la fattura su carta"
     static let notaXML = "Il file XML della fattura elettronica lo carichi tu sul portale dell’Agenzia delle Entrate, "
-        + "o lo dai al commercialista. Prisma non lo invia."
+        + "o lo dai al commercialista. Lucy non lo invia."
     static let daIncassare = "Da incassare"
     static let provvisorio = "importi provvisori: manca il regime"
     static let xmlPronto = "✓ File XML pronto"

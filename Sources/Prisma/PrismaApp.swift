@@ -96,7 +96,7 @@ struct PrismaApp: App {
     }
 
     var body: some Scene {
-        Window("Prisma", id: "prisma") {
+        Window("Lucy", id: "prisma") {
             // Aspetto scelto in Impostazioni: lo applicano StatoShell.init (prima del primo disegno) e ShellView (ai cambi)
             ShellView()
                 .environment(stato)
@@ -179,9 +179,9 @@ struct ComandiPrisma: Commands {
         // Con la schermata di benvenuto davanti le voci restano attive: apriGuida sblocca e poi apre.
         CommandGroup(replacing: .help) {
             Group {
-                Button("Guida di Prisma") { stato.apriGuida(stato.paginaGuidaDavanti) }
+                Button("Guida di Lucy") { stato.apriGuida(stato.paginaGuidaDavanti) }
                     .keyboardShortcut("?", modifiers: .command)
-                Button("Come funziona Prisma (introduzione)") { stato.apriGuida(.introduzione(0)) }
+                Button("Come funziona Lucy (introduzione)") { stato.apriGuida(.introduzione(0)) }
                 Button("Le parole della finanza") { stato.apriGuida(.glossario(nil)) }
             }
             .disabled(menu.inPresentazione || menu.inVistaCliente)

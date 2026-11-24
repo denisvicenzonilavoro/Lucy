@@ -155,6 +155,6 @@ struct ModuloSalvaPDF: View {
         if regola != .aMano, !proposta.isEmpty, password == proposta {
             return "È \(regola == .dataNascita ? "la data di nascita" : "il codice fiscale") di \(pdf.cliente?.nome ?? "del cliente"): comunicala al cliente a voce o per telefono, non nella stessa email del PDF."
         }
-        return "Comunicala al cliente a voce o per telefono, non nella stessa email del PDF. Prisma non la conserva."
+        return "Comunicala al cliente a voce o per telefono, non nella stessa email del PDF. Lucy non la conserva."
     }
 }

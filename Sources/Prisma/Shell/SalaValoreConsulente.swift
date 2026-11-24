@@ -366,7 +366,7 @@ struct ValoreConsulenteVista: View {
 
     private func nota(_ v: ValoreConsulente, sala: ImpostazioniSala) -> some View {
         let a = ImpostazioniSala.avvertenza(sala.avvertenzaValore)
-        return Text("Stime dai motori di Prisma e dal track record, solo per ciò che è nato dalle raccomandazioni accettate. " + a.testo)
+        return Text("Stime dai motori di Lucy e dal track record, solo per ciò che è nato dalle raccomandazioni accettate. " + a.testo)
             .carattereApple(V.nota)
             .foregroundColor(V.coloreNota)
             .fixedSize(horizontal: false, vertical: true)

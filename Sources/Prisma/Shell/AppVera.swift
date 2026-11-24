@@ -203,7 +203,7 @@ private struct ColonnaAppVera: View {
                     .foregroundColor(col.coloreTesto)
                     .lineLimit(1)
             }
-            Text(pronto ? "I numeri li calcola Prisma, io li racconto." : TestiStatoVera.spiegazione)
+            Text(pronto ? "I numeri li calcola Lucy, io li racconto." : TestiStatoVera.spiegazione)
                 .carattereApple(col.notaMotore)
                 .foregroundColor(col.coloreNota)
                 .fixedSize(horizontal: false, vertical: true)
@@ -245,7 +245,7 @@ private struct ColonnaAppVera: View {
                     .foregroundColor(col.coloreTesto)
                     .lineLimit(1)
             }
-            Text(pronto ? "I numeri li calcola Prisma, io li racconto." : (q.disponibilita.motivo ?? q.descrizione))
+            Text(pronto ? "I numeri li calcola Lucy, io li racconto." : (q.disponibilita.motivo ?? q.descrizione))
                 .carattereApple(col.notaMotore)
                 .foregroundColor(col.coloreNota)
                 .fixedSize(horizontal: false, vertical: true)
@@ -909,8 +909,8 @@ struct AzioniVera: View {
             SegmentatoPillola(selezione: modalita, voci: [(ModalitaVera.lavoro, "Lavoro"), (ModalitaVera.conversazione, "Conversazione")])
                 .disabled(fermo)
                 .opacity(fermo ? Tema.Apple.Vera.Campo.opacitaSpento : 1)
-                .help(stato.veraPortafoglio ? "Sul portafoglio Vera lavora sempre con le cifre di Prisma"
-                                           : "Lavoro: i numeri solo da Prisma · Conversazione: domande di ogni tipo")
+                .help(stato.veraPortafoglio ? "Sul portafoglio Vera lavora sempre con le cifre di Lucy"
+                                           : "Lavoro: i numeri solo da Lucy · Conversazione: domande di ogni tipo")
             // «Le routine» (fase 4): apre la pagina delle routine
             PulsanteRoutineVera()
             Button { stato.nuovaConversazione() } label: {
@@ -978,7 +978,7 @@ struct NuvolaInArrivo: View {
         let b = Tema.Apple.Vera.Bolla.self
         let calcoli = !flusso.testo.isEmpty && (portafoglio || flusso.modalita == .lavoro)
         VStack(alignment: .leading, spacing: 0) {
-            Text(calcoli ? "Vera · Calcoli di Prisma" : "Vera")
+            Text(calcoli ? "Vera · Calcoli di Lucy" : "Vera")
                 .carattereApple(b.intestazione)
                 .foregroundColor(b.coloreIntestazione)
                 .lineLimit(1)
@@ -1116,7 +1116,7 @@ struct NuvolaVera: View {
         let b = Tema.Apple.Vera.Bolla.self
         let resto = !nuova || testoScritto || fermo
         return VStack(alignment: .leading, spacing: 0) {
-            Text(QuadroVera.ammessa(messaggio) ? "Vera · Calcoli di Prisma" : "Vera")
+            Text(QuadroVera.ammessa(messaggio) ? "Vera · Calcoli di Lucy" : "Vera")
                 .carattereApple(b.intestazione)
                 .foregroundColor(b.coloreIntestazione)
                 .lineLimit(1)
@@ -1315,7 +1315,7 @@ struct NuvolaVera: View {
                 }
             }
             // «Impara dalle correzioni»: 👍 e 👎 sotto le risposte scritte da Qwen
-            if messaggio.motore != StatoShell.motoreAzioni, messaggio.motore != MotoriVera.sintesi.nome, messaggio.titolo != "Vera non ha potuto rispondere" {
+            if messaggio.motore != StatoShell.motoreAzioni, messaggio.motore != MotoriVera.sintesi.nome, messaggio.motore != MotoriVera.nomeSintesiDiPrima, messaggio.titolo != "Vera non ha potuto rispondere" {
                 PolliciVera(messaggio: messaggio)
                     .padding(.top, b.spazioAzioni)
             }

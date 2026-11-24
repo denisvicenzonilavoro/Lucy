@@ -306,7 +306,7 @@ struct SchedaCopilota: Identifiable, Codable, Hashable {
 
         var nome: String {
             switch self {
-            case .regole: return "Regole di Prisma"
+            case .regole: return "Regole di Lucy"
             case .qwen: return "Qwen"
             }
         }

@@ -113,7 +113,7 @@ struct ParametriScenarioVera: Codable, Equatable {
 
 enum ScenariVera {
     /// Etichetta delle risposte in cui le cifre sono di Prisma (testo di Prisma, senza Qwen).
-    static let motorePrisma = "Calcoli di Prisma"
+    static let motorePrisma = "Calcoli di Lucy"
 
     // MARK: - Riconoscimento
 
@@ -458,7 +458,7 @@ enum ScenariVera {
     static func messaggiRacconto(_ s: SchedaScenarioVera, domanda: String, ambiente: AmbienteVera) -> [MessaggioModello] {
         var parti = [NucleoVera.rigaContesto(ambiente)]
         parti.append("SCENARIO CALCOLATO DA PRISMA (numeri esatti: usali così come sono, non rifare i conti e non aggiungerne)\n" + s.bozza)
-        parti.append("Racconta lo scenario al consulente: cosa cambia rispetto a oggi e perché conta, con le sole cifre di Prisma, e chiudi con il passo da fare. La tabella con il prima e il dopo la mostra Prisma sotto la tua risposta: non ripeterla riga per riga.")
+        parti.append("Racconta lo scenario al consulente: cosa cambia rispetto a oggi e perché conta, con le sole cifre di Lucy, e chiudi con il passo da fare. La tabella con il prima e il dopo la mostra Lucy sotto la tua risposta: non ripeterla riga per riga.")
         if ambiente.breve { parti.append("COME RISPONDERE\n" + IstruzioniVera.mini) }
         parti.append("DOMANDA DEL CONSULENTE\n" + domanda)
         return [MessaggioModello(ruolo: .sistema, testo: IstruzioniVera.chat),

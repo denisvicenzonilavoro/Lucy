@@ -415,7 +415,7 @@ private struct CardObiettiviStudio: View {
             TitoloCardStudio(TestiStudio.domandaObiettivi, prova: prova)
             if obiettivi.nessunoImpostato {
                 // Niente anelli finti: il consulente dà i suoi traguardi in Impostazioni › Studio
-                NotaStudio("Nessun obiettivo per il \(String(obiettivi.anno)): Prisma non li inventa. Scrivi i tuoi "
+                NotaStudio("Nessun obiettivo per il \(String(obiettivi.anno)): Lucy non li inventa. Scrivi i tuoi "
                            + "traguardi di produzione Alleanza, nuovi clienti e ricavi della consulenza.")
                     .padding(.top, c.vuotoSopra)
                 Button(TestiStudio.imposta + " ›", action: imposta)
@@ -509,7 +509,7 @@ private struct CardObiettiviStudio: View {
 
     private static func avviso(_ v: CruscottoStudio.Obiettivo) -> String? {
         switch v.avviso {
-        case .dallaDataDiInserimento?: return "dalla data di inserimento in Prisma"
+        case .dallaDataDiInserimento?: return "dalla data di inserimento in Lucy"
         case .nessunaParcella?: return TestiStudio.parcelleInArrivo
         case nil: return nil
         }

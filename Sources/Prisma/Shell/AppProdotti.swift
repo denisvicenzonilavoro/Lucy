@@ -163,7 +163,7 @@ struct AppProdotti: View {
                     RigaDato("KID", c.scenariKID.isEmpty ? "scenari non inseriti" : "\(c.scenariKID.count) scenari" + (c.dataDocumenti.map { " · \(Formati.dataBreve.string(from: $0))" } ?? ""))
                     RigaDato("Storico", c.componenti.map { "\($0.tipo.nome): \($0.storico.count) dati" }.joined(separator: " · "))
                 } else {
-                    Text("Parti, penali, bollo, scenari del KID e storico: Prisma calcola quanto si incassa anno per anno.")
+                    Text("Parti, penali, bollo, scenari del KID e storico: Lucy calcola quanto si incassa anno per anno.")
                         .font(Tema.Apple.AltreApp.corpo.fontLeggibile).foregroundColor(Tema.Apple.AltreApp.testo)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.vertical, 6)
@@ -207,7 +207,7 @@ struct AppProdotti: View {
         var esempio = p.proposta(per: "")
         esempio.versamentoIniziale = 10_000
         if let incidenza = MotoreCosti.incidenzaKID(esempio, prodotto: p), let calcolato = incidenza.calcolato {
-            parti.append("calcolato da Prisma \(Formati.percentuale(calcolato)) a \(incidenza.periodoRaccomandato) anni (stima su 10.000 € in un'unica soluzione)")
+            parti.append("calcolato da Lucy \(Formati.percentuale(calcolato)) a \(incidenza.periodoRaccomandato) anni (stima su 10.000 € in un'unica soluzione)")
         }
         if let anni = p.periodoConsigliato {
             parti.append("periodo raccomandato \(anni) anni")
@@ -224,7 +224,7 @@ struct AppProdotti: View {
         var esempio = p.proposta(per: "")
         esempio.versamentoIniziale = 10_000
         if let incidenza = MotoreCosti.incidenzaKID(esempio, prodotto: p), let calcolato = incidenza.calcolato {
-            parti.append("Prisma \(Formati.percentuale(calcolato)) a \(incidenza.periodoRaccomandato) anni")
+            parti.append("Lucy \(Formati.percentuale(calcolato)) a \(incidenza.periodoRaccomandato) anni")
         }
         return parti.joined(separator: " · ")
     }
@@ -625,7 +625,7 @@ struct ModuloProdotto: View {
                     percento($bozza.costoAnnuo, multiramo ? "% all'anno: commissioni, senza il trattenuto" : "% all'anno")
                 }
                 CampoModulo(etichetta: "Costi nel KID (RIY)") {
-                    percento($bozza.incidenzaCostiKID, "% l'anno al periodo raccomandato · Prisma lo confronta con il suo calcolo")
+                    percento($bozza.incidenzaCostiKID, "% l'anno al periodo raccomandato · Lucy lo confronta con il suo calcolo")
                 }
                 CampoModulo(etichetta: "Periodo raccomandato") {
                     CampoInteroFacoltativo(valore: $bozza.periodoRaccomandato, unita: notaPeriodo)

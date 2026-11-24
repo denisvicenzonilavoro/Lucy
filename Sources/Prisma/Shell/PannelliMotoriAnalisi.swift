@@ -284,7 +284,7 @@ struct PannelloPensioneStimata: View {
                     Text(motivo ?? "Stima non disponibile per questo cliente.")
                         .font(Tema.Testo.corpo)
                         .foregroundColor(Tema.Colore.MotoriAnalisi.valore)
-                    SpiegazioneAnalisi(testo: "Compila «Lavoro e contributi» nella scheda del cliente (tipo di lavoratore, reddito da lavoro, anni di contributi o montante dell'estratto conto INPS): Prisma stimerà la pensione con il metodo contributivo, da affiancare a quella inserita qui.")
+                    SpiegazioneAnalisi(testo: "Compila «Lavoro e contributi» nella scheda del cliente (tipo di lavoratore, reddito da lavoro, anni di contributi o montante dell'estratto conto INPS): Lucy stimerà la pensione con il metodo contributivo, da affiancare a quella inserita qui.")
                 }
             }
         }

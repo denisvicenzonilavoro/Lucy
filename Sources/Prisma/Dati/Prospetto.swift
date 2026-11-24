@@ -385,7 +385,7 @@ extension TipoProspetto {
         case .fascicolo:
             return "Ogni report porta il suo commento, se l'hai scritto. Salvando il PDF vale la password del cliente, come per ogni documento."
         case .posizione:
-            return "Contratto e costi dalla posizione; proiezioni con le ipotesi di calcolo di Prisma; fonti e pagine dai documenti letti."
+            return "Contratto e costi dalla posizione; proiezioni con le ipotesi di calcolo di Lucy; fonti e pagine dai documenti letti."
         case .confronto:
             return "Le stesse scelte valgono nel Confronto: il prospetto riporta ciò che vedi lì, con il dettaglio anno per anno."
         case .valutazione:

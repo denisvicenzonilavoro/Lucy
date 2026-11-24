@@ -162,7 +162,7 @@ struct VeraTelefono: View {
                 .carattereApple(ch.benvenuto)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
             Text(stato.veraPortafoglio
-                 ? "Chiedimi del portafoglio: chi ricontattare, cosa scade, la settimana. Le cifre sono quelle di Prisma."
+                 ? "Chiedimi del portafoglio: chi ricontattare, cosa scade, la settimana. Le cifre sono quelle di Lucy."
                  : "Chiedimi di \(stato.clienteAttivo?.nome ?? "un cliente"): un riassunto, il check-up, cosa scade, come preparare l'incontro.")
                 .carattereApple(ch.benvenutoTesto)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)

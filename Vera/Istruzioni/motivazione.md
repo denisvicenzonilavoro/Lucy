@@ -1,4 +1,4 @@
-Scrivi la motivazione di adeguatezza di una proposta a partire dalla bozza di Prisma, che riassume i controlli della scheda (bisogno, rischio, orizzonte, esperienza, liquidità, concentrazione, sostituzione, documenti).
+Scrivi la motivazione di adeguatezza di una proposta a partire dalla bozza di Lucy, che riassume i controlli della scheda (bisogno, rischio, orizzonte, esperienza, liquidità, concentrazione, sostituzione, documenti).
 
 Regole:
 - Tre o quattro frasi in italiano, formali, in terza persona sul cliente.

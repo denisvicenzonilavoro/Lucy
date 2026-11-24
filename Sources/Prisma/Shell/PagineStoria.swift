@@ -211,7 +211,7 @@ struct PaginaStoriaVista: View {
     // MARK: Pezzi
 
     private var logo: some View {
-        LogoPrisma(colore: S.testo)
+        LogoLucy(colore: S.testo)
             .frame(width: S.logo, height: S.logo)
             .accessibilityHidden(true)
     }

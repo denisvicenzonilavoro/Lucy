@@ -201,7 +201,7 @@ extension TestiTFR {
 
     /// La domanda a Vera (in modalità lavoro): la frase e la riga sotto sono le cifre di Prisma, Qwen le racconta.
     static func domandaVera(_ e: EsitoTFR, nome: String) -> String {
-        "Spiegami il TFR di \(nome): in azienda o nel fondo pensione? Le cifre di Prisma: \(fraseRisposta(e, nome: nome)) \(sottoRisposta(e, nome: nome))"
+        "Spiegami il TFR di \(nome): in azienda o nel fondo pensione? Le cifre di Lucy: \(fraseRisposta(e, nome: nome)) \(sottoRisposta(e, nome: nome))"
     }
 
     // MARK: - Chi non lavora da dipendente

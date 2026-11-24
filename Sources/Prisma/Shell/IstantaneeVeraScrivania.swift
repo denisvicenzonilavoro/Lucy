@@ -14,7 +14,7 @@ extension Istantanee {
                 preparaVeraScrivania(s)
                 conversazioneDiProva(s, chiave: "giulia",
                                      domanda: "Come è diviso il patrimonio di Giulia?",
-                                     risposta: "Il patrimonio di Giulia poggia soprattutto sulla casa; investimenti, liquidità e risparmio vengono dopo. Qui sotto le cifre di Prisma, area per area: la liquidità è il punto da cui partire per l'anticipo della casa.")
+                                     risposta: "Il patrimonio di Giulia poggia soprattutto sulla casa; investimenti, liquidità e risparmio vengono dopo. Qui sotto le cifre di Lucy, area per area: la liquidità è il punto da cui partire per l'anticipo della casa.")
             }),
         ]
         let soloChiare: [(String, (StatoShell) -> Void)] = [
@@ -23,7 +23,7 @@ extension Istantanee {
                 s.veraPortafoglio = true
                 conversazioneDiProva(s, chiave: VeraPortafoglio.chiave,
                                      domanda: "Come si divide il portafoglio tra Alleanza e indipendente?",
-                                     risposta: "Il portafoglio si regge su due canali: le polizze Alleanza e la consulenza indipendente. Le barre qui sotto mostrano quanto pesa ciascuno, con le cifre calcolate da Prisma.")
+                                     risposta: "Il portafoglio si regge su due canali: le polizze Alleanza e la consulenza indipendente. Le barre qui sotto mostrano quanto pesa ciascuno, con le cifre calcolate da Lucy.")
             }),
             ("299-scrivania-vera-scadenze", { s in
                 preparaVeraScrivania(s)

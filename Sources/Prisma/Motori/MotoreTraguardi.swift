@@ -160,7 +160,7 @@ enum MotoreTraguardi {
                 let quanti = TestiTraguardi.anni(anni)
                 let perche = primo != nil
                     ? "Il primo incontro fu il " + Formati.dataEstesa.string(from: inizioRapporto)
-                    : "In Prisma dal " + Formati.dataEstesa.string(from: inizioRapporto) + " (dalla data d’inserimento)"
+                    : "In Lucy dal " + Formati.dataEstesa.string(from: inizioRapporto) + " (dalla data d’inserimento)"
                 aggiungi(.anniversario, riferimento: "\(anni)anni", data: giorno, titolo: TestiTraguardi.maiuscola(quanti) + " insieme",
                          fraseBreve: "\(nome): \(quanti) insieme.", perche: perche,
                          saluto: TestiTraguardi.maiuscola(quanti) + " insieme, \(nome).", cifra: nil, didascalia: nil,
@@ -307,9 +307,9 @@ enum TestiTraguardi {
         + "grazie per la fiducia di questi anni."
     static let fraseMutuo = "Il mutuo è finito: un traguardo che merita di essere festeggiato. Grazie per avermi voluto "
         + "accanto in questo percorso."
-    static let notaColonna = "Prisma si accorge da solo dei traguardi: obiettivi raggiunti, anniversari, un mutuo estinto, "
+    static let notaColonna = "Lucy si accorge da sola dei traguardi: obiettivi raggiunti, anniversari, un mutuo estinto, "
         + "un figlio all’università con il piano pronto."
-    static let scrittaDaPrisma = "Frase scritta da Prisma: Vera la riscriverà con un prossimo aggiornamento."
+    static let scrittaDaPrisma = "Frase scritta da Lucy: Vera la riscriverà con un prossimo aggiornamento."
     static let senzaIdea = "Nessuna idea dalle note"
     static let titoloMomento = "Il momento, già pronto"
     static let biglietto = "Il biglietto"

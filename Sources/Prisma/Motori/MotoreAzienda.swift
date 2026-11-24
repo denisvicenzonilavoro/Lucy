@@ -227,7 +227,7 @@ enum TestiAzienda {
     static let piedeProva = "Dati aziendali di prova."
     static let nonPertinente = "Segnata come non pertinente per questa azienda."
     static let tfmNonAccantonato = "Nessun trattamento di fine mandato accantonato: un'occasione da valutare con il commercialista."
-    static let notaTFM = "Prisma non fa calcoli fiscali sul trattamento di fine mandato: deducibilità e tassazione sono da valutare con il commercialista."
+    static let notaTFM = "Lucy non fa calcoli fiscali sul trattamento di fine mandato: deducibilità e tassazione sono da valutare con il commercialista."
     static let nessunaAzienda = "Nessun cliente ha un'azienda registrata: aggiungila dal dossier"
 
     static func euro(_ v: Double) -> String { FormatoCifra.euro.testo(v) }

@@ -86,7 +86,7 @@ private struct IntestazioneAnno: View {
 
     var body: some View {
         HStack(alignment: .center, spacing: M.spazioLogo) {
-            LogoPrisma(colore: K.logo)
+            LogoLucy(colore: K.logo)
                 .frame(height: M.logo)
             if canali == [.alleanza] {
                 simboloAlleanza

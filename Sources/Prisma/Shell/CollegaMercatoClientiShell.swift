@@ -156,7 +156,7 @@ extension StatoShell {
            esito.toccati.contains(where: { $0.motivi.contains { m in m.regola == .liquiditaFerma || m.regola == .contoDeposito } }) {
             righe.append("Per chi non ha l'analisi 360 salvata i mesi di spese usano il fabbisogno predefinito.")
         }
-        righe.append("Le cifre sono di Prisma. Se vuoi preparo le bozze dei messaggi: le apri e le mandi tu.")
+        righe.append("Le cifre sono di Lucy. Se vuoi preparo le bozze dei messaggi: le apri e le mandi tu.")
         return righe.joined(separator: "\n")
     }
 
@@ -250,12 +250,12 @@ extension StatoShell {
         let n = bozze.count
         var testo = n == 1 ? "Ho preparato la bozza" : "Ho preparato \(SchedaConfermaVera.numero(n)) bozze"
         if diVera == n {
-            testo += conProfilo ? " nel tuo stile, con le cifre di Prisma." : ", scritte da Vera con le cifre di Prisma."
+            testo += conProfilo ? " nel tuo stile, con le cifre di Lucy." : ", scritte da Vera con le cifre di Lucy."
         } else if diVera == 0 {
-            testo += conProfilo ? " con il testo di Prisma, nella forma del tuo stile: le cifre sono esatte, il tono lo puoi ritoccare tu."
-                                : " con il testo di Prisma: le cifre sono esatte, il tono lo puoi ritoccare tu."
+            testo += conProfilo ? " con il testo di Lucy, nella forma del tuo stile: le cifre sono esatte, il tono lo puoi ritoccare tu."
+                                : " con il testo di Lucy: le cifre sono esatte, il tono lo puoi ritoccare tu."
         } else {
-            testo += ": \(diVera) " + (conProfilo ? "le ha scritte Vera nel tuo stile" : "le ha scritte Vera") + ", le altre restano con il testo di Prisma."
+            testo += ": \(diVera) " + (conProfilo ? "le ha scritte Vera nel tuo stile" : "le ha scritte Vera") + ", le altre restano con il testo di Lucy."
         }
         testo += " Le metto in Messaggi e segno le attività solo con «Conferma»: le apri e le spedisci tu."
         var m = MessaggioVera(autore: .vera, testo: testo, titolo: esito.etichettaBozze, motore: diVera > 0 ? motore : Self.motoreAzioni)
@@ -343,7 +343,7 @@ struct SceltaMercatoClientiVera: Identifiable, Equatable {
     }
 
     static func esempi(oggi: Date, cal: Calendar = .current) -> [SceltaMercatoClientiVera] {
-        let fonte = "Esempio di Prisma"
+        let fonte = "Esempio di Lucy"
         return [
             SceltaMercatoClientiVera(id: idTassi, etichetta: "Tassi BCE giù",
                                      evento: EventoMercatoVera(tipo: .tassiBCE, misura: -0.25, verso: -1, origine: .aParole, fonte: fonte, data: oggi, cal: cal),

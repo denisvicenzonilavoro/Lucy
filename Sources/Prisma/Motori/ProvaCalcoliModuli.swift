@@ -336,7 +336,7 @@ enum ProvaCalcoliModuli {
             return
         }
         let spuntate = (fatto.page(at: 0)?.annotations ?? []).filter { $0.isCasella && $0.buttonWidgetState == .onState }
-        verifica.vero("Moduli: nel PDF scritto nessuna casella è spuntata da Prisma (\(spuntate.count))", spuntate.isEmpty)
+        verifica.vero("Moduli: nel PDF scritto nessuna casella è spuntata da Lucy (\(spuntate.count))", spuntate.isEmpty)
     }
 
     /// L'anteprima appartiene a un cliente e a un modello; la mappa va confermata prima di compilare; un modulo per

@@ -56,7 +56,7 @@ enum ProvaSceltaCliente {
         let ist = IstantaneaOvunque(generazione: 1, mac: "mac-prova", nomeMac: "Mac", scrittaIl: Date(), vistoFinoA: [:], lamport: 0,
                                     modificheAmmesse: true, dati: SpazioOvunque.datiIstantanea(mac))
         let unito = SincroniaOvunque.accogli(ist, in: locale).dati
-        controlla(unito.clienteAttivoId.isEmpty, "Scelta del cliente: l'unione di Prisma ovunque tiene «Tutti i clienti»")
+        controlla(unito.clienteAttivoId.isEmpty, "Scelta del cliente: l'unione di Lucy ovunque tiene «Tutti i clienti»")
         #endif
     }
 }

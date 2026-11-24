@@ -334,13 +334,13 @@ struct PaginaPresaVisione: View {
                     .font(T.pCorpoForte)
                     .foregroundColor(C.testo)
                 Spacer(minLength: 0)
-                Text(verbatim: "Creato con Prisma sul Mac del consulente. Il PDF resta nei Documenti del cliente.")
+                Text(verbatim: "Creato con Lucy sul Mac del consulente. Il PDF resta nei Documenti del cliente.")
                     .font(T.pPiede)
                     .foregroundColor(C.tenue)
             }
             .padding(EdgeInsets(top: P.alto, leading: P.margine, bottom: P.margine, trailing: P.margine))
             .overlay(alignment: .topTrailing) {
-                LogoPrismaConNome(colore: Colori.Documento.logo, altezza: Misure.Documento.logoProspetto)
+                LogoLucyConNome(colore: Colori.Documento.logo, altezza: Misure.Documento.logoProspetto)
                     .padding(.top, Misure.Documento.logoProspettoAlto)
                     .padding(.trailing, P.margine)
             }

@@ -197,7 +197,7 @@ extension StatoShell {
         avanzamento(0.5)
         await Task.yield()
 
-        let documentoId = archiviaPDF(pdf, titolo: "Il Prisma di \(contenuto.nomeBattesimo)", tipo: .report, cliente: c.id)
+        let documentoId = archiviaPDF(pdf, titolo: "La Lucy di \(contenuto.nomeBattesimo)", tipo: .report, cliente: c.id)
         guard let protetto = StampaCarta.protetto(pdf, password: password) else {
             return .nonRiuscito("Non riesco a proteggere il PDF con la password")
         }

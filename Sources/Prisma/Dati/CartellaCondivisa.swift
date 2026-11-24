@@ -231,7 +231,7 @@ extension ImpostazioniOvunque {
         let scelta = url.standardizedFileURL.resolvingSymlinksInPath().path
         let archivio = Archivio.cartella.standardizedFileURL.resolvingSymlinksInPath().path
         if scelta == archivio || scelta.hasPrefix(archivio + "/") {
-            return "La cartella di Prisma ovunque non può stare dentro l'archivio di Prisma."
+            return "La cartella di Lucy ovunque non può stare dentro l'archivio di Lucy."
         }
         if let b = cartellaBackup?.standardizedFileURL.resolvingSymlinksInPath().path, scelta == b {
             return "Scegli una cartella diversa da quella dei backup."
@@ -263,7 +263,7 @@ enum SceltaCartellaOvunque {
         pannello.canCreateDirectories = true
         pannello.allowsMultipleSelection = false
         pannello.prompt = "Usa questa cartella"
-        pannello.message = "Scegli in iCloud Drive la cartella di Prisma ovunque: ci finisce solo un file cifrato con la tua passphrase."
+        pannello.message = "Scegli in iCloud Drive la cartella di Lucy ovunque: ci finisce solo un file cifrato con la tua passphrase."
         if iCloudDriveAcceso { pannello.directoryURL = iCloudDrive }
         return pannello.runModal() == .OK ? pannello.url : nil
     }

@@ -108,7 +108,7 @@ struct IncidenzaCostiKID {
     }
 
     /// Nota di metodo per prospetti e schede.
-    static let metodo = "Incidenza annua dei costi come nel KID (RIY): rendimento medio annuo senza costi meno quello con i costi del prodotto (ingresso, gestione, trattenuto della gestione separata, penale e costo d'uscita), sui versamenti alle loro date, prima delle imposte e senza il bollo. Uscite dopo 1 anno, a metà del periodo raccomandato (da 10 anni in su) e alla fine. Il RIY del KID resta quello dichiarato: Prisma lo confronta con il suo calcolo. Nelle multiramo i costi valgono per parte: trattenuto sulla gestione separata, commissioni e costi dei fondi sulla parte in fondi."
+    static let metodo = "Incidenza annua dei costi come nel KID (RIY): rendimento medio annuo senza costi meno quello con i costi del prodotto (ingresso, gestione, trattenuto della gestione separata, penale e costo d'uscita), sui versamenti alle loro date, prima delle imposte e senza il bollo. Uscite dopo 1 anno, a metà del periodo raccomandato (da 10 anni in su) e alla fine. Il RIY del KID resta quello dichiarato: Lucy lo confronta con il suo calcolo. Nelle multiramo i costi valgono per parte: trattenuto sulla gestione separata, commissioni e costi dei fondi sulla parte in fondi."
 }
 
 enum MotoreCosti {

@@ -42,13 +42,13 @@ struct AppImpostazioni: View {
                 if let url = daRipristinare?.url ?? fileDaRipristinare { stato.ripristina(url) }
             }
         } message: {
-            Text("I dati attuali verranno sostituiti da quelli del backup \"\(daRipristinare?.nome ?? fileDaRipristinare?.lastPathComponent ?? "")\". Prima del ripristino Prisma salva una copia di sicurezza dello stato attuale.")
+            Text("I dati attuali verranno sostituiti da quelli del backup \"\(daRipristinare?.nome ?? fileDaRipristinare?.lastPathComponent ?? "")\". Prima del ripristino Lucy salva una copia di sicurezza dello stato attuale.")
         }
         .alert("Togliere i clienti di prova?", isPresented: $confermaTogliProva) {
             Button("Annulla", role: .cancel) {}
             Button("Togli i clienti di prova", role: .destructive) { stato.togliDatiDiProva() }
         } message: {
-            Text("I clienti di prova (Giulia, Marco, Laura, Andrea, Sofia e quelli inventati) vengono tolti con posizioni, agenda, documenti e conversazioni. I tuoi clienti restano. Prima Prisma salva un backup dello stato attuale.")
+            Text("I clienti di prova (Giulia, Marco, Laura, Andrea, Sofia e quelli inventati) vengono tolti con posizioni, agenda, documenti e conversazioni. I tuoi clienti restano. Prima Lucy salva un backup dello stato attuale.")
         }
         // Backup protetto da ripristinare: la richiesta si chiude solo dai pulsanti, che leggono il file prima di chiuderla
         .alert("Backup protetto da password", isPresented: Binding(get: { stato.ripristinoDaSbloccare != nil }, set: { _ in })) {
@@ -256,7 +256,7 @@ struct AppImpostazioni: View {
                 }
             }
             HStack(alignment: .center, spacing: M.spazioNumeri) {
-                LogoPrismaConNome(colore: Tema.Colore.logo, altezza: M.logo)
+                LogoLucyConNome(colore: Tema.Colore.logo, altezza: M.logo)
                 Spacer(minLength: 0)
                 Text("Il tuo spazio. Tutto a portata di mano.")
                     .font(Tema.Testo.Impostazioni.nota)
@@ -346,7 +346,7 @@ struct AppImpostazioni: View {
     /// Il problema più importante, se c'è: backup non riusciti, archivio in sola lettura, Qwen da preparare.
     private var avvisoPanoramica: (titolo: String, testo: String, pagina: SchedaImpostazioni)? {
         if stato.solaLettura {
-            return ("Archivio in sola lettura", "Salvato da una versione più recente di Prisma", .archivio)
+            return ("Archivio in sola lettura", "Salvato da una versione più recente di Lucy", .archivio)
         }
         if stato.copieNonLeggibili > 0 {
             return ("Backup automatici fermi", "All'avvio l'archivio non era leggibile", .archivio)
@@ -491,7 +491,7 @@ struct AppImpostazioni: View {
                     .cascataImpostazioni(6)
             }
             GruppoImpostazioni(titolo: "Finestra") {
-                RigaImpostazione(titolo: "Schermo intero", sottotitolo: "Tutto lo schermo a Prisma.", ultima: true) {
+                RigaImpostazione(titolo: "Schermo intero", sottotitolo: "Tutto lo schermo a Lucy.", ultima: true) {
                     ValoreRiga(testo: stato.schermoIntero ? "Attivo" : "Attiva") { stato.alternaSchermoIntero() }
                 }
                 .cascataImpostazioni(7)
@@ -503,7 +503,7 @@ struct AppImpostazioni: View {
                                          set: { stato.dati.impostazioni.guidaNascosta = !$0 }))
                 }
                 .cascataImpostazioni(8)
-                RigaImpostazione(titolo: "Come funziona Prisma", sottotitolo: "L'introduzione e le parole della finanza.",
+                RigaImpostazione(titolo: "Come funziona Lucy", sottotitolo: "L'introduzione e le parole della finanza.",
                                  ultima: true) {
                     ValoreRiga(testo: "Apri") { stato.apriGuida(.introduzione(0)) }
                 }
@@ -520,7 +520,7 @@ struct AppImpostazioni: View {
         let daRiaprire = stato.dati.impostazioni.dimensioneTesto.fattore != Tipo.fattore
         return RigaImpostazione(titolo: "Dimensione del testo", sottotitolo: "Normale, grande, molto grande.",
                                 aiuto: "Prospetti, report e PDF restano come sulla carta",
-                                avvertenza: daRiaprire ? "Le schermate nuove cambiano subito, le altre riaprendo Prisma." : nil,
+                                avvertenza: daRiaprire ? "Le schermate nuove cambiano subito, le altre riaprendo Lucy." : nil,
                                 ultima: true) {
             HStack(spacing: Tema.Apple.Impostazioni.Riga.spazioControlliAffiancati) {
                 if daRiaprire {
@@ -636,13 +636,13 @@ extension StatoShell {
                 if errore == nil {
                     NSApp.terminate(nil)
                 } else {
-                    self.mostraAvviso("Non sono riuscito a riaprire Prisma: chiudilo e riaprilo tu.")
+                    self.mostraAvviso("Non sono riuscito a riaprire Lucy: chiudila e riaprila tu.")
                 }
             }
         }
         #elseif os(iOS)
         // Su iPhone e iPad un'app non si riapre da sé: la nuova misura del testo vale alla prossima apertura
-        mostraAvviso("Dati salvati: chiudi Prisma dal selettore delle app e riaprila per applicare la modifica.")
+        mostraAvviso("Dati salvati: chiudi Lucy dal selettore delle app e riaprila per applicare la modifica.")
         #endif
     }
 }

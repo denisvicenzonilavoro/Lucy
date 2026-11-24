@@ -176,7 +176,7 @@ struct FonteTreLivelli {
 
 enum TreLivelliVera {
     /// In fondo a ogni pagina stampabile (template: «Stime di Prisma con le ipotesi della scheda…»).
-    static let avvertenza = "Stime di Prisma con le ipotesi della scheda. Non sono una promessa di risultato."
+    static let avvertenza = "Stime di Lucy con le ipotesi della scheda. Non sono una promessa di risultato."
 
     // MARK: Fonti
 
@@ -351,7 +351,7 @@ enum TreLivelliVera {
             p.cifre.euro("recupero100", "Ogni 100 € versati recuperi", RegoleFiscali.risparmioDeduzione(reddito: reddito, deduzione: 100), essenziale: true)
             p.cifre.euro("limite", "Limite annuo di deducibilità", RegoleFiscali.limiteDeducibilita)
         } else {
-            p.note.append("Manca il reddito lordo annuo nel profilo: senza, Prisma non calcola il risparmio IRPEF dei versamenti.")
+            p.note.append("Manca il reddito lordo annuo nel profilo: senza, Lucy non calcola il risparmio IRPEF dei versamenti.")
         }
         p.cifre.percento("rendimenti", "Imposta sui rendimenti del fondo", RegoleFiscali.previdenzaRendimenti)
         p.cifre.percento("ordinaria", "Imposta sui rendimenti di un investimento normale", RegoleFiscali.ordinaria)
@@ -721,7 +721,7 @@ enum TreLivelliVera {
         let trovati = numeriConUnita(t)
         let cifreTrovate = trovati.map { CifraControllo(valore: abs($0.valore), unita: $0.unita) }
         for (n, c) in zip(trovati, cifreTrovate) where !consentiti.contains(where: { corrisponde(c, $0) }) {
-            p.append("\(livello.rawValue): cifra non di Prisma «\(n.testo)»")
+            p.append("\(livello.rawValue): cifra non di Lucy «\(n.testo)»")
         }
         for c in s.essenziali where !valori(c).contains(where: { v in cifreTrovate.contains { corrisponde($0, v) } }) {
             p.append("\(livello.rawValue): manca «\(c.etichetta)» (\(c.testo))")
@@ -757,7 +757,7 @@ enum TreLivelliVera {
     }()
 
     static var istruzioni: String {
-        IstruzioniVera.testo("tre-livelli") ?? "Riscrivi in tre versioni una spiegazione preparata da Prisma: tecnico (punti brevi per il consulente, con i termini tecnici), cliente (un testo semplice con il tu e il nome del cliente, senza termini tecnici) e pagina (titolo e da due a quattro sezioni con titolo e righe brevi). Usa solo le cifre dell'elenco di Prisma, scritte come sono; quelle segnate «in tutte e tre» devono stare in tutte e tre le versioni. Non fare conti, non scrivere cifre in parole, non numerare, nessuna promessa di risultato. Rispondi solo con il JSON: tecnico (elenco), cliente (testo), pagina (titolo, sezioni con titolo e righe)."
+        IstruzioniVera.testo("tre-livelli") ?? "Riscrivi in tre versioni una spiegazione preparata da Lucy: tecnico (punti brevi per il consulente, con i termini tecnici), cliente (un testo semplice con il tu e il nome del cliente, senza termini tecnici) e pagina (titolo e da due a quattro sezioni con titolo e righe brevi). Usa solo le cifre dell'elenco di Lucy, scritte come sono; quelle segnate «in tutte e tre» devono stare in tutte e tre le versioni. Non fare conti, non scrivere cifre in parole, non numerare, nessuna promessa di risultato. Rispondi solo con il JSON: tecnico (elenco), cliente (testo), pagina (titolo, sezioni con titolo e righe)."
     }
 
     static func messaggi(_ s: SpiegazioneTreLivelli) -> [MessaggioModello] {
@@ -852,7 +852,7 @@ enum TreLivelliVera {
             blocchi.append(.sezione(numero: String(format: "%02d", n + 1), titolo: sezione.titolo))
             blocchi.append(.testo(sezione.righe.map { "• \($0)" }.joined(separator: "\n")))
         }
-        blocchi.append(.nota(avvertenza + " I numeri sono calcolati da Prisma (\(s.argomento.motore)), le parole sono di Vera."))
+        blocchi.append(.nota(avvertenza + " I numeri sono calcolati da Lucy (\(s.argomento.motore)), le parole sono di Vera."))
         return ContenutoProspetto(occhiello: "Per \(s.nomeCliente)", titolo: s.pagina.titolo, sottotitolo: s.argomento.nome,
                                   cliente: s.nomeCliente, data: s.creataIl, canale: s.canale, blocchi: blocchi)
     }

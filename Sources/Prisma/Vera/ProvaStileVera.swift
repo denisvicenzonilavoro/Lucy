@@ -106,7 +106,7 @@ enum ProvaStileVera {
         let iGiulia = StileVera.istruzioni(p, cliente: giulia, oggi: oggi, clienteNuovo: false)
         controlla(iGiulia.contains("STILE DEL CONSULENTE") && iGiulia.contains("Dai del tu a Giulia") && iGiulia.contains("«con la presente»")
                   && iGiulia.contains("Apri con «Ciao Giulia,»") && !iGiulia.contains("Niente emoji") && !iGiulia.contains("Denis"),
-                  "Stile: le istruzioni per Giulia (tu, formule, saluto; la firma la mette Prisma)")
+                  "Stile: le istruzioni per Giulia (tu, formule, saluto; la firma la mette Lucy)")
         controlla(StileVera.istruzioni(p, cliente: elisa, oggi: oggi, clienteNuovo: true).contains("Niente emoji"), "Stile: niente emoji con un cliente nuovo")
         let iAnna = StileVera.istruzioni(p, cliente: anna, oggi: oggi, clienteNuovo: false)
         controlla(iAnna.contains("Dai del Lei a Anna") && iAnna.contains("Apri con «Gentile Anna,»"), "Stile: le istruzioni per Anna dicono il Lei")

@@ -36,7 +36,7 @@ enum SigilloCapsule {
 
     /// La chiave delle capsule di prova (DATI DI PROVA DICHIARATI): scritta nel codice pubblico, non è un segreto e non
     /// apre capsule vere. Vale solo per le capsule con `diProva == true` dei clienti di prova.
-    static let chiaveDiProva = SymmetricKey(data: SHA256.hash(data: Data("Prisma · capsule di prova · non segreta".utf8)))
+    static let chiaveDiProva = SymmetricKey(data: SHA256.hash(data: Data("Lucy · capsule di prova · non segreta".utf8)))
 
     static var chiaveIdDiProva: String { chiaveId(chiaveDiProva) }
 }

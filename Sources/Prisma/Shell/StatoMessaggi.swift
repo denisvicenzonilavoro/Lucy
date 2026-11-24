@@ -97,7 +97,7 @@ extension StatoShell {
     func apriMessaggio(_ o: OccasioneMessaggio, tono: TonoMessaggio, canale: CanaleMessaggio, scritto: TestoScrittoMessaggio,
                        id: String? = nil) -> EsitoApertura {
         guard let c = dati.clienti.first(where: { $0.id == o.clienteId }) else {
-            return .nonRiuscito("Il cliente non è più in Prisma")
+            return .nonRiuscito("Il cliente non è più in Lucy")
         }
         // Con i file dell'occasione (il PDF della fattura da Studio): CollegamentiMessaggi.swift
         let esito = AperturaMessaggi.apri(testo: scritto.testo, oggetto: canale == .mail ? scritto.oggetto : nil, canale: canale,

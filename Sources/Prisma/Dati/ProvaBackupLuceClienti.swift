@@ -130,17 +130,17 @@ extension ProvaBackup {
               var messaggi = originaliRadice["messaggi"] as? [[String: Any]], let unMessaggio = messaggi.first else {
             return "potenziali, campagne o messaggi di prova non codificati"
         }
-        potenziali[0]["fase"] = "fase di un Prisma più nuovo"
+        potenziali[0]["fase"] = "fase di una Lucy più nuova"
         potenziali[0]["probabilita"] = 140
         potenziali[0]["patrimonioStimato"] = -5
         potenziali[1].removeValue(forKey: "nome")
-        campagna["gruppoTipo"] = "tipo di un Prisma più nuovo"
+        campagna["gruppoTipo"] = "tipo di una Lucy più nuova"
         campagna["tono"] = "tono sconosciuto"
         campagne[0] = campagna
         campagne.append(["titolo": "Senza id"])
         var strano = unMessaggio
         strano["id"] = "messaggio-tipo-sconosciuto"
-        strano["origine"] = ["tipo": "tipo di un Prisma più nuovo", "riferimento": "x"]
+        strano["origine"] = ["tipo": "tipo di una Lucy più nuova", "riferimento": "x"]
         messaggi.append(strano)
         // Migliorie d'uso 48: un Prisma di prima legge «ringraziamentoPresentazione» come un tipo sconosciuto; si simula
         // con un altro valore che questo Prisma non conosce: il messaggio si scarta, gli altri (anche il grazie) restano

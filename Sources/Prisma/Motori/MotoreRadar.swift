@@ -339,9 +339,9 @@ enum TestiRadar {
         if v.costo.penali > 0 { costi.append("penali d'uscita \(Formati.euro(v.costo.penali))") }
         if v.costo.imposte > 0 { costi.append("tasse sulle plusvalenze \(Formati.euro(v.costo.imposte))") }
         if !costi.isEmpty {
-            frase += " Costo stimato dai motori di Prisma: " + costi.joined(separator: " e ") + "."
+            frase += " Costo stimato dai motori di Lucy: " + costi.joined(separator: " e ") + "."
         } else if v.costo.senzaVersato.isEmpty {
-            frase += " Nessuna penale né tassa sulle plusvalenze secondo i dati in Prisma."
+            frase += " Nessuna penale né tassa sulle plusvalenze secondo i dati in Lucy."
         }
         if !v.costo.senzaVersato.isEmpty {
             let nomi = v.costo.senzaVersato.prefix(2).joined(separator: ", ")

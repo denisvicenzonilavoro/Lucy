@@ -138,7 +138,7 @@ enum TestiOvunque {
             return mac ? "Controlla di aver acceso iCloud Drive in Impostazioni di Sistema. I dati restano sul Mac."
                        : "Controlla di aver acceso iCloud Drive in Impostazioni. I dati di qui restano."
         case .cartella:
-            return "Prisma non ritrova la cartella di Prisma ovunque, o non ha più il permesso di aprirla."
+            return "Lucy non ritrova la cartella di Lucy ovunque, o non ha più il permesso di aprirla."
         case .attesaICloud:
             return "iCloud Drive impiega da pochi secondi a qualche minuto. Riprovo da solo al prossimo controllo."
         case .errore(let m):

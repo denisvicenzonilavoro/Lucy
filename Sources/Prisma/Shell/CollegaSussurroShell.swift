@@ -215,7 +215,7 @@ extension StatoShell {
             // Una scheda della stessa voce ancora da confermare: si riusa, niente doppioni
             if let id = schedaSussurroAperta(v) ?? schedaSussurroInAttesaOvunque(v) { return id }
             guard !solaLettura else {
-                mostraAvviso("Prisma è in sola lettura: non posso segnare niente.")
+                mostraAvviso("Lucy è in sola lettura: non posso segnare niente.")
                 return nil
             }
             return schedaSussurro([a], voce: v, cliente: c)

@@ -540,7 +540,7 @@ enum ErroreArchivioPezzi: LocalizedError {
         switch self {
         case .indiceNonLeggibile(let m): return "L'indice dell'archivio non è leggibile: \(m)"
         case .indiceMancante: return "L'indice dell'archivio non c'è."
-        case .formatoPiuRecente, .versionePiuRecente: return "L'archivio è stato scritto da una versione più recente di Prisma."
+        case .formatoPiuRecente, .versionePiuRecente: return "L'archivio è stato scritto da una versione più recente di Lucy."
         case .nonLeggibileOra(let m): return "In questo momento non riesco a leggere \(m)."
         }
     }
@@ -573,7 +573,7 @@ extension ArchivioPezzi {
         case "spazi": return "gli spazi di lavoro"
         case "pratiche": return "le pratiche"
         case "mercato": return "i dati di Mercato"
-        case "ovunque": return "Prisma ovunque e le note arrivate dall’iPhone"
+        case "ovunque": return "Lucy ovunque e le note arrivate dall’iPhone"
         case "studio": return "lo studio (portafogli modello, famiglie, esame OCF)"
         case "routine": return "le routine di Vera"
         case "vera": return "i dati di Vera (il tagliando dei dati)"

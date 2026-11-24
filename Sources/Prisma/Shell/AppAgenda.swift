@@ -169,7 +169,7 @@ struct AppAgenda: View {
             let data = stessoAnno ? Formati.giornoMese.string(from: dal) : Formati.dataEstesa.string(from: dal)
             testo = d.scaduto(oggi) ? "Scaduto dal \(data)" : "Dovuto dal \(data)"
         } else {
-            testo = "Mai incontrato in Prisma"
+            testo = "Mai incontrato in Lucy"
         }
         // Dalla memoria della vista: dopo una modifica si rifà solo il riesame del cliente toccato, non tutta la striscia
         let conti = stato.contiStrisciaRiesami(d.id, memoria: memoriaRiesami)

@@ -103,7 +103,7 @@ enum TestiRiferimenti {
     /// "di Prisma", "inserito da te", "stimato".
     static func origine(_ o: OrigineValore) -> String {
         switch o {
-        case .prisma: return "di Prisma"
+        case .prisma: return "di Lucy"
         case .consulente: return "inserito da te"
         case .stimato: return "stimato"
         }
@@ -153,7 +153,7 @@ enum TestiRiferimenti {
         let soggetto = elenco(ordinati.map { "il \($0)" })
         let maiuscolo = soggetto.prefix(1).uppercased() + soggetto.dropFirst()
         let verbo = ordinati.count == 1 ? "non è ancora pubblicato" : "non sono ancora pubblicati"
-        return "\(maiuscolo) \(verbo): Prisma usa il valore del \(ultimo). A inizio anno aggiorna i valori."
+        return "\(maiuscolo) \(verbo): Lucy usa il valore del \(ultimo). A inizio anno aggiorna i valori."
     }
 
     /// "Mancano i valori del 2018 e del 2019 per «Inflazione (FOI)»: senza, il confronto non si può fare."
@@ -199,20 +199,20 @@ enum TestiRiferimenti {
 
     // MARK: Impostazioni › Riferimenti
 
-    static let introduzione = "I metri con cui Prisma confronta il rendimento delle posizioni: l'inflazione, la rivalutazione del TFR e il rendimento medio delle gestioni separate, più gli indici che aggiungi tu. Sono valori annui in percentuale. Prisma ne porta alcuni con la fonte; gli altri li inserisci tu una volta l'anno, quando escono i dati dell'anno prima (l'ISTAT pubblica l'inflazione di dicembre a metà gennaio). Restano su questo Mac e nel backup."
+    static let introduzione = "I metri con cui Lucy confronta il rendimento delle posizioni: l'inflazione, la rivalutazione del TFR e il rendimento medio delle gestioni separate, più gli indici che aggiungi tu. Sono valori annui in percentuale. Lucy ne porta alcuni con la fonte; gli altri li inserisci tu una volta l'anno, quando escono i dati dell'anno prima (l'ISTAT pubblica l'inflazione di dicembre a metà gennaio). Restano su questo Mac e nel backup."
     /// L'introduzione in una riga (Impostazioni › Rendimenti di confronto); quella lunga al passaggio.
-    static let introduzioneBreve = "Valori annui in percentuale: alcuni li porta Prisma con la fonte, gli altri li aggiungi tu."
+    static let introduzioneBreve = "Valori annui in percentuale: alcuni li porta Lucy con la fonte, gli altri li aggiungi tu."
     static let gruppoMetro = "Il metro per tipo di posizione"
     static let gruppoValori = "I valori anno per anno"
     static let gruppoIndici = "Indici"
     static let gruppoFonti = "Fonti"
-    static let quelloDiPrisma = "Quello di Prisma"
-    static func diPrisma(_ s: SerieRiferimento) -> String { "Di Prisma: \(s.nome)" }
+    static let quelloDiPrisma = "Quello di Lucy"
+    static func diPrisma(_ s: SerieRiferimento) -> String { "Di Lucy: \(s.nome)" }
     static let testaAnno = "Anno"
     /// La testata della colonna del TFR nella griglia (calcolata, sola lettura).
     static let testaTFR = "TFR netto"
     static let segnaposto = "—"
-    static func tornaAPrisma(_ v: Double) -> String { "Torna al valore di Prisma (\(CifreDoc.percento(v)))" }
+    static func tornaAPrisma(_ v: Double) -> String { "Torna al valore di Lucy (\(CifreDoc.percento(v)))" }
 
     /// "Ultimo anno: inflazione 2025 · gestioni separate — · Azionario globale 2025".
     static func ultimiAnni(_ voci: [(nome: String, anno: Int?)]) -> String {
@@ -236,7 +236,7 @@ enum TestiRiferimenti {
     static let eliminaIndice = "Elimina l'indice"
     static let fatto = "Fatto"
     static func confermaElimina(_ nome: String) -> String { "Eliminare «\(nome)»?" }
-    static let spiegaElimina = "I suoi valori e le scelte che lo usano tornano a quelli di Prisma."
+    static let spiegaElimina = "I suoi valori e le scelte che lo usano tornano a quelli di Lucy."
     static let annulla = "Annulla"
     static let elimina = "Elimina"
     static let valoriRivisti = "Valori rivisti"

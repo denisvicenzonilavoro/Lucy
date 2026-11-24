@@ -327,7 +327,7 @@ extension StatoShell {
     /// Esegue un'azione della scheda. In modalità cliente resta nel dossier del cliente davanti a te.
     func eseguiAzioneVera(_ a: AzioneConferma) -> EsitoAzioneVera {
         let no = { (m: String) in EsitoAzioneVera(fatta: false, messaggio: m) }
-        guard !solaLettura else { return no("Prisma è in sola lettura: non ho cambiato niente.") }
+        guard !solaLettura else { return no("Lucy è in sola lettura: non ho cambiato niente.") }
         let arg = a.argomenti
         if inModoCliente {
             if let c = arg["cliente"], c != clienteAttivoId { return no("In modalità cliente resto sul dossier di \(clienteAttivo?.nome ?? "questo cliente").") }
@@ -436,7 +436,7 @@ extension StatoShell {
 
         case RegistroStrumenti.posizioniScadenza:
             guard let id = arg["posizione"], let i = dati.posizioni.firstIndex(where: { $0.id == id }),
-                  let nuova = RegistroStrumenti.daIso(arg["scadenza"]) else { return no("La posizione non è più in Prisma.") }
+                  let nuova = RegistroStrumenti.daIso(arg["scadenza"]) else { return no("La posizione non è più in Lucy.") }
             let prima = dati.posizioni[i].scadenza.map(RegistroStrumenti.isoData) ?? ""
             dati.posizioni[i].scadenza = nuova
             return EsitoAzioneVera(fatta: true, messaggio: "«\(dati.posizioni[i].nome)» scade il \(Formati.dataEstesa.string(from: nuova)).", oggetto: id, prima: prima)
@@ -481,7 +481,7 @@ extension StatoShell {
             return trelivelliEseguiPagina(a)
 
         default:
-            return no("Questa azione non è ancora disponibile in Prisma.")
+            return no("Questa azione non è ancora disponibile in Lucy.")
         }
     }
 
@@ -629,7 +629,7 @@ extension StatoShell {
         d.oggi = oggi
         let corretti = ClientelaVera.correggi(filtri, domanda: domanda, oggi: oggi)
         let r = ClientelaVera.cerca(corretti, domanda: domanda, dati: d)
-        var m = MessaggioVera(autore: .vera, testo: ([r.frase] + r.note).joined(separator: " "), motore: "Calcoli di Prisma · filtri di \(motore)")
+        var m = MessaggioVera(autore: .vera, testo: ([r.frase] + r.note).joined(separator: " "), motore: "Calcoli di Lucy · filtri di \(motore)")
         m.clientela = r
         m.conferma = ClientelaVera.schedaAttivita(r, oggi: oggi)
         aggiungiMessaggio(m, cliente: chiave)

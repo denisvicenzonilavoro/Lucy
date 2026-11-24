@@ -448,7 +448,7 @@ enum TestiPratiche {
         case .aMano: return "Fatto\(il(p.data)) · segnato a mano"
         case .riconosciuto(let da): return "Fatto\(il(p.data)) · riconosciuto \(da)"
         case .toltoAMano(let r):
-            return "Tolto a mano\(il(p.data))" + (r.map { " · Prisma lo riconoscerebbe \($0)" } ?? "")
+            return "Tolto a mano\(il(p.data))" + (r.map { " · Lucy lo riconoscerebbe \($0)" } ?? "")
         }
     }
 

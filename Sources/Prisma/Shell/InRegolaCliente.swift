@@ -18,7 +18,7 @@ struct InRegolaCliente: View {
                     .init(etichetta: "Scadute", valore: "\(e.scadute.count)",
                           nota: e.scadute.first.map { TestiConformita.nomeBreveMaiuscolo($0) } ?? "Nessuna"),
                     .init(etichetta: "In scadenza", valore: "\(e.inScadenza.count)", nota: "entro 60 giorni"),
-                    .init(etichetta: "Da raccogliere", valore: "\(e.mancanti.count)", nota: "non registrate in Prisma"),
+                    .init(etichetta: "Da raccogliere", valore: "\(e.mancanti.count)", nota: "non registrate in Lucy"),
                 ])
                 ForEach(canaliMostrati(e)) { canale in
                     bloccoCanale(e, canale)

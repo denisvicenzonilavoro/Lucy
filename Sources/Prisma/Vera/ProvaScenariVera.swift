@@ -137,15 +137,15 @@ enum ProvaScenariVera {
                   "Scenari, Marco a 63 anni: pensione pubblica più bassa con la stima contributiva (\(Int(pubblica.0)) → \(Int(pubblica.1))) e meno capitale nei piani")
         let oggi = MotorePrevidenza.calcola(marco.posizioni.filter { $0.stato != .proposta }, cliente: marco.cliente, analisi: marco.analisi.previdenza, data: marco.oggi)
         controlla(abs(rendita.0 - oggi.renditaInEssere) < 0.01 && abs(divario.0 - oggi.divarioResiduo) < 0.01,
-                  "Scenari: la colonna «oggi» è quella del piano previdenziale di Prisma, con le ipotesi del cliente")
+                  "Scenari: la colonna «oggi» è quella del piano previdenziale di Lucy, con le ipotesi del cliente")
         controlla(x.colonnaOggi == "Oggi (\(oggi.etaPensione) anni)" && x.colonnaScenario == "Scenario (63 anni)",
                   "Scenari: le colonne dicono le due età (\(x.colonnaOggi) · \(x.colonnaScenario))")
         controlla(x.simulazione?.versamentoMensile == 0 && x.simulazione?.anni == 63 - oggi.eta && x.simulazione?.clienteId == "marco",
                   "Scenari: l'ipotesi per il simulatore ha i versamenti fermi e gli anni fino ai 63")
         controlla(x.racconto.contains("anticipata") || x.racconto.contains("requisiti"),
-                  "Scenari: a 63 anni Prisma avvisa dei requisiti della pensione anticipata")
+                  "Scenari: a 63 anni Lucy avvisa dei requisiti della pensione anticipata")
         controlla(CommentoVera.numeriConservati(bozza: x.bozza, testo: x.racconto) && x.racconto.contains("63"),
-                  "Scenari: il racconto di Prisma usa solo le cifre della scheda («\(x.racconto.prefix(90))…»)")
+                  "Scenari: il racconto di Lucy usa solo le cifre della scheda («\(x.racconto.prefix(90))…»)")
         let ilMarcoDiOggi = MotoreScenari.calcola(ParametriScenarioVera.conArea(.previdenza, cliente: "marco"), fonte: marco, chiave: "marco")
         controlla(ilMarcoDiOggi?.righe.allSatisfy { abs($0.valoreOggi - $0.valoreScenario) < 0.01 } ?? false,
                   "Scenari: senza cambiamenti le due colonne coincidono")
@@ -238,10 +238,10 @@ enum ProvaScenariVera {
         let secondo = aspetta { try? await motore.scrivi(racconto, opzioni: OpzioniModello()).testo } ?? ""
         let corpoRacconto = ((ServerFintoScenari.ultimo["messages"] as? [[String: Any]])?.last?["content"] as? String) ?? ""
         controlla(corpoRacconto.contains("SCENARIO CALCOLATO DA PRISMA") && scheda.righe.allSatisfy { corpoRacconto.contains($0.scenario) },
-                  "Scenari, Qwen finto: il racconto riceve la scheda di Prisma con le cifre esatte")
+                  "Scenari, Qwen finto: il racconto riceve la scheda di Lucy con le cifre esatte")
         controlla(primo == fedele && CommentoVera.numeriConservati(bozza: scheda.bozza + "\n" + frase, testo: primo)
                   && !CommentoVera.numeriConservati(bozza: scheda.bozza + "\n" + frase, testo: secondo),
-                  "Scenari, Qwen finto: un racconto con una cifra inventata non passa (resta quello di Prisma)")
+                  "Scenari, Qwen finto: un racconto con una cifra inventata non passa (resta quello di Lucy)")
     }
 
     // MARK: - Nella conversazione

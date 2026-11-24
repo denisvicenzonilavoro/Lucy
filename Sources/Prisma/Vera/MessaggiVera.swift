@@ -25,7 +25,7 @@ struct TestoScrittoMessaggio: Equatable {
 enum MessaggiVera {
     /// Le istruzioni fisse di Vera/Istruzioni/messaggi.md (con un ripiego minimo in sviluppo).
     static var istruzioni: String {
-        IstruzioniVera.testo("messaggi") ?? "Scrivi in italiano, a nome del consulente, un messaggio breve a un suo cliente partendo dalla bozza di Prisma. Usa solo i fatti e i numeri della scheda, non promettere rendimenti, non scrivere oggetto, chiusura né firma."
+        IstruzioniVera.testo("messaggi") ?? "Scrivi in italiano, a nome del consulente, un messaggio breve a un suo cliente partendo dalla bozza di Lucy. Usa solo i fatti e i numeri della scheda, non promettere rendimenti, non scrivere oggetto, chiusura né firma."
     }
 
     // MARK: - La richiesta a Qwen
@@ -35,7 +35,7 @@ enum MessaggiVera {
     static func scheda(_ o: OccasioneMessaggio, cliente: Cliente, tono: TonoMessaggio, canale: CanaleMessaggio,
                        bozza: TestoMessaggio) -> String {
         let nome = cliente.nome.trimmingCharacters(in: .whitespacesAndNewlines)
-        var righe = ["SCHEDA DEL MESSAGGIO (fatti e numeri esatti di Prisma: usa solo questi)"]
+        var righe = ["SCHEDA DEL MESSAGGIO (fatti e numeri esatti di Lucy: usa solo questi)"]
         switch tono {
         case .cordiale: righe.append("Cliente: \(ModelliMessaggi.primoNome(nome)) (dai del tu)")
         case .formale: righe.append("Cliente: \(nome) (dai del lei)")
@@ -58,7 +58,7 @@ enum MessaggiVera {
         righe.append("BOZZA DI PRISMA (riscrivila in modo naturale, con gli stessi fatti e gli stessi numeri)")
         righe.append(bozza.corpo)
         righe.append("")
-        righe.append("Scrivi solo il testo del messaggio, dal saluto all'invito finale. Non scrivere l'oggetto, la chiusura («Un saluto», «Cordiali saluti») né la firma: le aggiunge Prisma.")
+        righe.append("Scrivi solo il testo del messaggio, dal saluto all'invito finale. Non scrivere l'oggetto, la chiusura («Un saluto», «Cordiali saluti») né la firma: le aggiunge Lucy.")
         return righe.joined(separator: "\n")
     }
 
@@ -174,7 +174,7 @@ enum MessaggiVera {
         // I motivi di DisponibilitaVera finiscono con il punto: qui il punto lo mette la frase
         let m = (motivo ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: ".").union(.whitespaces))
-        return "Vera non è pronta" + (m.isEmpty ? "" : ": \(m)") + ". Resta il testo di Prisma, con le cifre esatte: lo puoi correggere tu."
+        return "Vera non è pronta" + (m.isEmpty ? "" : ": \(m)") + ". Resta il testo di Lucy, con le cifre esatte: lo puoi correggere tu."
     }
 
     /// Scrive il messaggio con Qwen in streaming (`aggiorna` riceve il testo fin qui, già pulito, da qualunque thread:
@@ -201,15 +201,15 @@ enum MessaggiVera {
             let r = try await motore.scrivi(p, aggiorna: suPezzo)
             let pulito = pulisci(r.testo, firma: firma)
             if let motivo = controlla(pulito, occasione: o, cliente: cliente, tono: tono, bozza: bozza) {
-                return fisso(bozza, avviso: maiuscola(motivo) + ": resta il testo di Prisma, con le cifre esatte.")
+                return fisso(bozza, avviso: maiuscola(motivo) + ": resta il testo di Lucy, con le cifre esatte.")
             }
             return TestoScrittoMessaggio(oggetto: bozza.oggetto, testo: pulito + bozza.chiusura, autore: .vera,
                                          modello: motore.modello, avviso: nil)
         } catch is CancellationError {
-            return fisso(bozza, avviso: "Riscrittura interrotta: resta il testo di Prisma.")
+            return fisso(bozza, avviso: "Riscrittura interrotta: resta il testo di Lucy.")
         } catch {
             let m = (error as? ErroreVera)?.messaggio ?? error.localizedDescription
-            return fisso(bozza, avviso: "Vera non ha potuto scrivere il messaggio (\(m)). Resta il testo di Prisma.")
+            return fisso(bozza, avviso: "Vera non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
         }
     }
 

@@ -55,7 +55,7 @@ extension StatoShell {
     @discardableResult
     func avviaSessioneCopilota(clienteId: String, incontroId: String? = nil, data: Date = Date()) -> String? {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per usare il copilota.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per usare il copilota.")
             return nil
         }
         let c = cliente(clienteId)
@@ -182,7 +182,7 @@ extension StatoShell {
     /// Un messaggio nuovo del ponte (dal server del Mac, sul thread principale): le schede dell'iPad entrano nella
     /// sessione del cliente come proposte (solo con il consenso), i testi inquadrati aspettano in arrivo.
     func riceviDalPonte(_ arrivo: ArrivoPonte) -> RicevutaPonte {
-        guard !solaLettura else { return .rifiutata("L’archivio del Mac è in sola lettura: aggiorna Prisma sul Mac.") }
+        guard !solaLettura else { return .rifiutata("L’archivio del Mac è in sola lettura: aggiorna Lucy sul Mac.") }
         switch arrivo {
         case .schedeCopilota(let p):
             guard let c = cliente(p.clienteId) else { return .rifiutata("Il cliente non è nell’archivio del Mac.") }
@@ -218,7 +218,7 @@ extension StatoShell {
             return .accettata()
         case .cartaIdentita(let c):
             // «Luce» giro 13: solo in memoria, mai nell'archivio; con Prisma bloccato si rimanda dall'iPhone (decisione 25)
-            guard !bloccato else { return .rifiutata("Prisma sul Mac è bloccato: sbloccalo e rimanda la carta dall’iPhone.") }
+            guard !bloccato else { return .rifiutata("Lucy sul Mac è bloccata: sbloccalo e rimanda la carta dall’iPhone.") }
             accogliCarta(c)
             return .accettata()
         case .notaVocale(let n):

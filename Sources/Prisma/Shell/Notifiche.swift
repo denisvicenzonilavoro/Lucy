@@ -633,7 +633,7 @@ extension MotoreNotifiche {
             cal.date(bySettingHour: oraPromemoria, minute: 0, second: 0, of: giorno)
         }
         func epoca(_ d: Date) -> Int { Int(d.timeIntervalSince1970) }
-        let dettagli = "apri Prisma per i dettagli"
+        let dettagli = "apri Lucy per i dettagli"
         var elenco: [PromemoriaPianificato] = []
 
         // Appuntamenti ancora da fare: qualche minuto prima dell'inizio
@@ -676,7 +676,7 @@ extension MotoreNotifiche {
                     }
                 } else {
                     titolo = "Un'attività da fare oggi"
-                    parti = ["Apri Prisma per i dettagli"]
+                    parti = ["Apri Lucy per i dettagli"]
                 }
                 if t.priorita == .alta { parti.append("priorità alta") }
                 elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)attivita-\(t.id)-\(epoca(quando))",
@@ -720,7 +720,7 @@ extension MotoreNotifiche {
                 let anni = anno - cal.component(.year, from: nascita)
                 guard anni > 0 else { continue }
                 let titolo = scelte.nomiClienti && !c.nome.isEmpty ? "Oggi \(c.nome) compie \(anni) anni" : "Oggi un cliente compie gli anni"
-                let corpo = scelte.nomiClienti ? "Un pensiero fa piacere" : "Apri Prisma per vedere chi"
+                let corpo = scelte.nomiClienti ? "Un pensiero fa piacere" : "Apri Lucy per vedere chi"
                 elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)compleanno-\(c.id)-\(anno)",
                                                     titolo: titolo, corpo: corpo, gruppo: "clienti",
                                                     data: quando, destinazione: .cliente(c.id)))
@@ -763,7 +763,7 @@ extension MotoreNotifiche {
                 let quante = MotoreNotte.daDecidere(n, cal: cal)
                 guard quante > 0, let quando = cal.date(byAdding: .minute, value: dati.impostazioni.orari.mattina.inizio,
                                                         to: cal.startOfDay(for: n.giorno)), quando > adesso else { continue }
-                elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)notte-\(n.giornoChiave)", titolo: "Prisma",
+                elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)notte-\(n.giornoChiave)", titolo: "Lucy",
                                                     corpo: TestiNotte.notifica(quante), gruppo: "notte", data: quando,
                                                     destinazione: nil))
             }

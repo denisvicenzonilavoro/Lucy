@@ -624,7 +624,7 @@ struct SigilloCapsula: View {
     var body: some View {
         ZStack {
             Circle().fill(colore)
-            LogoPrisma(colore: K.coloreLogoSigillo)
+            LogoLucy(colore: K.coloreLogoSigillo)
                 .frame(width: K.logoSigillo, height: K.logoSigillo)
         }
         .frame(width: K.raggioSigillo * 2, height: K.raggioSigillo * 2)

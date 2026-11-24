@@ -348,7 +348,7 @@ enum DiagnosticaVoce {
     /// Le righe, con l'intestazione (senza impostazioni: per le prove).
     static var testo: String {
         let r = coda.sync { righe }
-        return (["Prisma · diagnostica dell'ascolto · macOS \(ProcessInfo.processInfo.operatingSystemVersionString)"] + r).joined(separator: "\n")
+        return (["Lucy · diagnostica dell'ascolto · macOS \(ProcessInfo.processInfo.operatingSystemVersionString)"] + r).joined(separator: "\n")
     }
 
     /// Ambiente, permessi e impostazioni: la prima cosa da leggere in una diagnostica.
@@ -363,7 +363,7 @@ enum DiagnosticaVoce {
         let classico = SFSpeechRecognizer(locale: Locale(identifier: "it-IT"))
         let statoClassico = classico.map { "disponibile \($0.isAvailable), sul dispositivo \($0.supportsOnDeviceRecognition)" } ?? "assente"
         return """
-        Prisma \(versione) · macOS \(ProcessInfo.processInfo.operatingSystemVersionString) · \(chip)
+        Lucy \(versione) · macOS \(ProcessInfo.processInfo.operatingSystemVersionString) · \(chip)
         Permessi: riconoscimento vocale \(SFSpeechRecognizer.authorizationStatus().rawValue) (3 = concesso), microfono \(AVCaptureDevice.authorizationStatus(for: .audio).rawValue) (3 = concesso)
         Impostazioni: riconoscimento \(vera.riconoscimento.rawValue), risposte a voce \(vera.risposteAVoce.rawValue), conversazione continua \(vera.conversazioneContinua), voce \(vera.voce ?? "automatica")
         Dettatura classica (it-IT): \(statoClassico)

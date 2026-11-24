@@ -46,7 +46,7 @@ extension ProvaBackup {
     static func verificaAccogliFaseQuattro(originale: DatiPrisma) -> String? {
         guard originale.clienti.count > 1, !originale.routine.esiti.isEmpty, originale.tagliando != StatoTagliando(),
               !originale.spiegazioniTreLivelli.isEmpty else {
-            return "l'archivio di prova non ha i dati della fase 4 per la prova di Prisma ovunque"
+            return "l'archivio di prova non ha i dati della fase 4 per la prova di Lucy ovunque"
         }
         let a = originale.clienti[0].id, b = originale.clienti[1].id
         let t = Date(timeIntervalSinceReferenceDate: 800_000_000)
@@ -185,7 +185,7 @@ extension ProvaBackup {
         // Prisma ovunque: le routine sì, i lanci no (la frase del consulente e le bozze restano sul Mac)
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.routine.routine == originale.routine.routine, ist.routine.esiti.isEmpty else {
-            return "i lanci delle routine (frasi e bozze) non devono entrare nell'istantanea di Prisma ovunque"
+            return "i lanci delle routine (frasi e bozze) non devono entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }
@@ -201,7 +201,7 @@ extension ProvaBackup {
                                vicino: "app-vicino-backup", vicinanza: .dopo, etichetta: "subito dopo Laura")
         let q = OrarioProposto(id: "orario-backup-2", inizio: t.addingTimeInterval(2 * 86_400), fine: t.addingTimeInterval(2 * 86_400 + 3_600),
                                vicino: nil, vicinanza: nil, etichetta: "")
-        var m = MessaggioVera(autore: .vera, testo: "Ti propongo due orari.", titolo: "Due orari", motore: "Calcoli di Prisma")
+        var m = MessaggioVera(autore: .vera, testo: "Ti propongo due orari.", titolo: "Due orari", motore: "Calcoli di Lucy")
         m.id = "msg-agenda-orari-backup"
         m.data = t
         m.agendaOrari = RicercaOrari(richiesta: r, proposte: [p, q], nota: "Nota di prova.")
@@ -247,7 +247,7 @@ extension ProvaBackup {
         }
         // Le conversazioni (con gli orari e gli spostamenti) non entrano nell'istantanea di Prisma ovunque
         guard SpazioOvunque.datiIstantanea(originale).conversazioni.isEmpty else {
-            return "gli orari dell'agenda che si organizza (nelle conversazioni) non devono entrare nell'istantanea di Prisma ovunque"
+            return "gli orari dell'agenda che si organizza (nelle conversazioni) non devono entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }
@@ -321,7 +321,7 @@ extension ProvaBackup {
         }
         // Prisma ovunque: gli id delle voci contengono dati delle schede, il tagliando resta sul Mac
         guard SpazioOvunque.datiIstantanea(originale).tagliando == StatoTagliando() else {
-            return "il tagliando non deve entrare nell'istantanea di Prisma ovunque"
+            return "il tagliando non deve entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }
@@ -411,7 +411,7 @@ extension ProvaBackup {
 
     static func aggiungiMercatoClientiVeraDiProva(_ d: inout DatiPrisma) {
         guard let c = d.clienti.first else { return }
-        var m = MessaggioVera(autore: .vera, testo: "Tocca 3 dei tuoi clienti.", titolo: "Le borse perdono l'8% in una settimana", motore: "Calcoli di Prisma")
+        var m = MessaggioVera(autore: .vera, testo: "Tocca 3 dei tuoi clienti.", titolo: "Le borse perdono l'8% in una settimana", motore: "Calcoli di Lucy")
         m.id = "msg-mercato-backup"
         m.mercatoClienti = esitoMercatoClientiDiProva(cliente: c)
         m.mercatoBozze = "msg-mercato-bozze-backup"
@@ -458,7 +458,7 @@ extension ProvaBackup {
         }
         // Prisma ovunque: le conversazioni (e quindi l'elenco con i nomi e le cifre dei clienti) non vanno nell'istantanea
         guard SpazioOvunque.datiIstantanea(originale).conversazioni.isEmpty else {
-            return "l'elenco del mercato per i clienti non deve entrare nell'istantanea di Prisma ovunque"
+            return "l'elenco del mercato per i clienti non deve entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }
@@ -530,7 +530,7 @@ extension ProvaBackup {
         }
         // Prisma ovunque: il profilo (solo regole) va nell'istantanea; le impostazioni di Vera no, come prima
         guard SpazioOvunque.datiIstantanea(originale).impostazioni.stileVera == p else {
-            return "il profilo di stile non entra nell'istantanea di Prisma ovunque"
+            return "il profilo di stile non entra nell'istantanea di Lucy ovunque"
         }
         // Un cambio di stile non rifà i calcoli
         var cambiato = originale.impostazioni
@@ -615,7 +615,7 @@ extension ProvaBackup {
         }
         // Restano sul Mac: niente nell'istantanea di Prisma ovunque
         guard SpazioOvunque.datiIstantanea(originale).spiegazioniTreLivelli.isEmpty else {
-            return "le spiegazioni in tre livelli non devono entrare nell'istantanea di Prisma ovunque"
+            return "le spiegazioni in tre livelli non devono entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }
@@ -631,9 +631,9 @@ extension ProvaBackup {
                                protezione: true, obiettiviIds: ["obiettivo-backup-passi"], protetta: "la famiglia")
         var piano = PianoPassi(richiesta: r, passi: [
             PassoPiano(id: 1, strumento: .leggiProtezione, titolo: "Leggo la protezione della famiglia", obiettivoId: nil, stato: .fatto,
-                       esito: "Da Prisma: servono 620.000 €, oggi ce ne sono 150.000 €"),
+                       esito: "Da Lucy: servono 620.000 €, oggi ce ne sono 150.000 €"),
             PassoPiano(id: 2, strumento: .simulaDivisioni, titolo: "Simulo tre divisioni dei 400 €", obiettivoId: nil, stato: .fatto,
-                       esito: "Con il simulatore di Prisma"),
+                       esito: "Con il simulatore di Lucy"),
             PassoPiano(id: 3, strumento: .scegliESpiega, titolo: "Scelgo e spiego", obiettivoId: nil, stato: .fatto,
                        esito: "Equilibrio: la divisione che regge su tutti gli obiettivi"),
         ], conQwen: true, creatoIl: t)
@@ -662,7 +662,7 @@ extension ProvaBackup {
             PassoPiano(id: 2, strumento: .scegliESpiega, titolo: "Scelgo e spiego", obiettivoId: nil, stato: .fatto, esito: "Equilibrio"),
         ], conQwen: false, creatoIl: t)
         pianoCapitale.id = "passi-backup-capitale"
-        var mc = MessaggioVera(autore: .vera, testo: "Ti consiglio «Equilibrio».", titolo: StatoShell.titoloPassi, motore: "Calcoli di Prisma")
+        var mc = MessaggioVera(autore: .vera, testo: "Ti consiglio «Equilibrio».", titolo: StatoShell.titoloPassi, motore: "Calcoli di Lucy")
         mc.id = idMessaggioPassiDiProva + "-capitale"
         mc.pianoPassi = pianoCapitale
         d.conversazioni[c.id, default: []].append(mc)
@@ -745,7 +745,7 @@ extension ProvaBackup {
         // Prisma ovunque: i piani (nelle conversazioni) e le impostazioni di Vera restano sul Mac
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.conversazioni.isEmpty, ist.impostazioni.vera.passi == ImpostazioniPassiVera() else {
-            return "il ragionamento a passi (piani nelle conversazioni, impostazioni di Vera) non deve entrare nell'istantanea di Prisma ovunque"
+            return "il ragionamento a passi (piani nelle conversazioni, impostazioni di Vera) non deve entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }
@@ -763,7 +763,7 @@ extension ProvaBackup {
     static func aggiungiMessaggiFaseQuattroDiProva(_ d: inout DatiPrisma) {
         guard let c = d.clienti.first, let esito = d.routine.esiti.first else { return }
         let t = Date(timeIntervalSinceReferenceDate: 800_000_000)
-        var r = MessaggioVera(autore: .vera, testo: "Ho lanciato «Quando firmo».", titolo: "Quando firmo", motore: "Calcoli di Prisma")
+        var r = MessaggioVera(autore: .vera, testo: "Ho lanciato «Quando firmo».", titolo: "Quando firmo", motore: "Calcoli di Lucy")
         r.id = idMessaggioRoutineTagliandoDiProva
         r.data = t
         r.esitoRoutine = esito
@@ -821,7 +821,7 @@ extension ProvaBackup {
         }
         // Le conversazioni (con queste schede) restano sul Mac
         guard SpazioOvunque.datiIstantanea(originale).conversazioni.isEmpty else {
-            return "le schede di routine, tagliando, stile e tre livelli (nelle conversazioni) non devono entrare nell'istantanea di Prisma ovunque"
+            return "le schede di routine, tagliando, stile e tre livelli (nelle conversazioni) non devono entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }

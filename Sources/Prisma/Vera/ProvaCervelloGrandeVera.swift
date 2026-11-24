@@ -67,7 +67,7 @@ enum ProvaCervelloGrandeVera {
                   && !tutto.contains("20.800") && !tutto.contains("Marco"),
                   "Cervello grande: niente riga di contesto, niente scheda, niente cifre o nomi dei clienti")
         let conContesto = NucleoVera.rigaContesto(AmbienteVera(cliente: "Giulia Rossi")) + "\n\nCos'è l'inflazione?"
-        controlla(esito(conContesto).messaggi == nil, "Cervello grande: un messaggio con la riga di contesto di Prisma è bloccato")
+        controlla(esito(conContesto).messaggi == nil, "Cervello grande: un messaggio con la riga di contesto di Lucy è bloccata")
     }
 
     private static func etichetta(_ controlla: (Bool, String) -> Void) {
@@ -82,8 +82,8 @@ enum ProvaCervelloGrandeVera {
         controlla(EtichettaMotore.per(lavoro) == EtichettaMotore(testo: "Sul Mac · Qwen · dati del cliente", tono: .sulMac),
                   "Etichetta: Qwen in lavoro «Sul Mac · Qwen · dati del cliente»")
         controlla(EtichettaMotore.per(libera)?.testo == "Sul Mac · Qwen", "Etichetta: Qwen in conversazione «Sul Mac · Qwen»")
-        controlla(EtichettaMotore.per(regole)?.testo == "Sul Mac · regole e calcoli di Prisma" && EtichettaMotore.per(calcoli)?.tono == .prisma,
-                  "Etichetta: regole e calcoli di Prisma")
+        controlla(EtichettaMotore.per(regole)?.testo == "Sul Mac · regole e calcoli di Lucy" && EtichettaMotore.per(calcoli)?.tono == .prisma,
+                  "Etichetta: regole e calcoli di Lucy")
         controlla(EtichettaMotore.per(esterno) == EtichettaMotore(testo: "Motore esterno · nessun dato dei clienti", tono: .esterno),
                   "Etichetta: «Motore esterno · nessun dato dei clienti»")
         controlla(EtichettaMotore.per(suMisura)?.testo == "Sul Mac · Vera su misura", "Etichetta: «Sul Mac · Vera su misura»")

@@ -15,7 +15,7 @@ Leggi la frase di un consulente finanziario italiano e capisci se è uno scenari
 Regole:
 - Scrivi solo i campi numerici che la frase dice (o che ricavi dall'età di pensione del CONTESTO). Se un dato non c'è, non scriverlo: non inventare.
 - Importi come numeri, senza simboli né punti delle migliaia: «50 mila euro» → 50000, «1.500 €» → 1500.
-- Non fare conti sui soldi e non stimare risultati: i calcoli li fa Prisma.
+- Non fare conti sui soldi e non stimare risultati: i calcoli li fa Lucy.
 
 Esempi:
 Frase: E se Marco va in pensione a 63 anni e smette di versare?

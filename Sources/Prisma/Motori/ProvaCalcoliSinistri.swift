@@ -172,7 +172,7 @@ enum ProvaCalcoliSinistri {
 
         // «Prisma ovunque»: titolo, fase, fatti e documenti senza file; via descrizione, numero, stime, importo
         let ridotto = SpazioOvunque.sinistroPerOvunque(completo)
-        verifica.vero("Sinistri: per «Prisma ovunque» senza descrizione, numero, stime, importo e file dei documenti",
+        verifica.vero("Sinistri: per «Lucy ovunque» senza descrizione, numero, stime, importo e file dei documenti",
                       ridotto.descrizione.isEmpty && ridotto.numeroSinistro == nil && ridotto.stimaMinima == nil && ridotto.stimaMassima == nil
                       && ridotto.pagato == nil && ridotto.documenti.allSatisfy { $0.documentoId == nil }
                       && ridotto.titolo == completo.titolo && ridotto.fase == completo.fase && ridotto.eventi == completo.eventi)

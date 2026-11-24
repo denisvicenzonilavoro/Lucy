@@ -13,7 +13,7 @@ enum ErroreImporta: LocalizedError, Equatable {
         switch self {
         case .nonGGUF: return "Il file non è un modello GGUF: scegli lo zip scaricato dall'addestramento o il file .gguf."
         case .troppoGrande: return "Il file è più grande di 6 GB: non è il modello addestrato per Vera."
-        case .nonLocale: return "Prisma parla solo con Ollama sul Mac (127.0.0.1): l'indirizzo non è locale."
+        case .nonLocale: return "Lucy parla solo con Ollama sul Mac (127.0.0.1): l'indirizzo non è locale."
         case .nonTrovato: return "Nello zip non c'è nessun file .gguf."
         case .ollama(let m): return "Ollama non ha accettato il modello: \(m)"
         }

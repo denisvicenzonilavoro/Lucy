@@ -12,7 +12,7 @@ enum GenereUscita: String, Codable, CaseIterable {
 
     var nome: String {
         switch self {
-        case .prismaCliente: return "Il Prisma del cliente"
+        case .prismaCliente: return "La Lucy del cliente"
         case .film: return "Il film del piano"
         case .biglietto: return "Il biglietto del traguardo"
         case .capsula: return "La capsula del tempo"

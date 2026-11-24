@@ -116,7 +116,7 @@ enum ProvaCalcoliNotte {
         verifica.vero("Notte: backup in corso → non lavora", con { $0.backupInCorso = true } == .backupInCorso)
         verifica.vero("Notte: sola lettura → non lavora", con { $0.solaLettura = true } == .solaLettura)
         verifica.vero("Notte: modalità cliente o presentazione → non lavora", con { $0.modoClienteOPresentazione = true } == .modoCliente)
-        verifica.vero("Notte: Prisma in uso → non lavora", con { $0.prismaInUso = true } == .prismaInUso)
+        verifica.vero("Notte: Lucy in uso → non lavora", con { $0.prismaInUso = true } == .prismaInUso)
         var fatta = NotteDiLavoro(giorno: giorno, inizio: ora(2, 3), cal: cal)
         fatta.esito = .fatta
         verifica.vero("Notte: notte già fatta → non lavora", con { $0.notti = [fatta] } == .giaFatta)

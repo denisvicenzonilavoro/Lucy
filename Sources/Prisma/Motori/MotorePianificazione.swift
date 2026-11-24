@@ -272,7 +272,7 @@ enum MotorePianificazione {
                 righe.append("Ultimo contatto il \(data(u)).")
             }
         } else {
-            righe.append("Nessun incontro registrato in Prisma: è il primo riesame.")
+            righe.append("Nessun incontro registrato in Lucy: è il primo riesame.")
         }
         return righe.joined(separator: "\n")
     }

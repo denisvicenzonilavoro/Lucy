@@ -164,7 +164,7 @@ struct EtichettaMotore: Equatable {
     static func per(_ m: MessaggioVera) -> EtichettaMotore? {
         guard m.autore == .vera, let motore = m.motore, !motore.isEmpty else { return nil }
         switch CorsiaVera.da(motore: motore) {
-        case .regole: return EtichettaMotore(testo: "Sul Mac · regole e calcoli di Prisma", tono: .prisma)
+        case .regole: return EtichettaMotore(testo: "Sul Mac · regole e calcoli di Lucy", tono: .prisma)
         case .esterno: return EtichettaMotore(testo: "Motore esterno · nessun dato dei clienti", tono: .esterno)
         case .apple: return EtichettaMotore(testo: "Sul Mac · modello Apple", tono: .sulMac)
         case .qwen:

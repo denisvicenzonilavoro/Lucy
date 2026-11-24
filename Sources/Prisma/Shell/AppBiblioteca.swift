@@ -95,7 +95,7 @@ struct VistaBiblioteca: View {
             }
             Button("Annulla", role: .cancel) { daTogliere = nil }
         } message: {
-            Text("Il PDF e il suo testo escono da Prisma. I backup già fatti non cambiano.")
+            Text("Il PDF e il suo testo escono da Lucy. I backup già fatti non cambiano.")
         }
         .sheet(isPresented: Binding(get: { daModificare != nil }, set: { if !$0 { daModificare = nil } })) {
             if let id = daModificare, let d = stato.documentoBiblioteca(id) {
@@ -170,7 +170,7 @@ struct VistaBiblioteca: View {
     private var vuota: some View {
         VStack(spacing: 16) {
             TasselloGlifo(glifo: .libro, lato: Tema.Apple.Tassello.latoSalaGrande)
-            Text("Trascina qui le condizioni, i KID e le circolari che usi: Prisma li legge sul Mac.")
+            Text("Trascina qui le condizioni, i KID e le circolari che usi: Lucy li legge sul Mac.")
                 .carattereApple(B.invito)
                 .foregroundColor(B.coloreInvito)
                 .multilineTextAlignment(.center)

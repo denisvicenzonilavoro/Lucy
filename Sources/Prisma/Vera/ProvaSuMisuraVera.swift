@@ -215,7 +215,7 @@ enum ProvaSuMisuraVera {
         let testo = String(data: d, encoding: .utf8) ?? ""
         let nomi = [SuMisuraVera.nomeFileAddestramento, SuMisuraVera.nomeFileManifesto, SuMisuraVera.nomeFileRapporto, SuMisuraVera.quantizzazione]
         controlla(json?["cells"] != nil && nomi.allSatisfy { testo.contains($0) },
-                  "Su misura: il notebook è JSON valido e usa gli stessi nomi di Prisma (\(nomi.joined(separator: ", ")))")
+                  "Su misura: il notebook è JSON valido e usa gli stessi nomi di Lucy (\(nomi.joined(separator: ", ")))")
         let script = Bundle.main.resourceURL?.appendingPathComponent("Vera/Addestramento/\(SuMisuraVera.nomeScript)")
         controlla(script.map { FileManager.default.fileExists(atPath: $0.path) } ?? false, "Su misura: lo script di addestramento è nel pacchetto")
     }

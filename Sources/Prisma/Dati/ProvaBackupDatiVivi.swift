@@ -148,11 +148,11 @@ extension ProvaBackup {
     static func modificheNeutre(_ cliente: String) -> [(String, (DatiVivi) -> Void)] {
         [
             ("le sessioni del copilota", { $0.sessioniCopilota += ProvaBackup.sessioniCopilotaDiProva(clienteId: cliente) }),
-            ("il giornale di Prisma ovunque", { $0.giornaleOvunque = [] }),
-            ("i conflitti di Prisma ovunque", { $0.conflittiOvunque = [] }),
-            ("gli arrivi di Prisma ovunque", { $0.arriviOvunque = [] }),
+            ("il giornale di Lucy ovunque", { $0.giornaleOvunque = [] }),
+            ("i conflitti di Lucy ovunque", { $0.conflittiOvunque = [] }),
+            ("gli arrivi di Lucy ovunque", { $0.arriviOvunque = [] }),
             ("le inquadrature dall'iPhone", { $0.inquadratureDaConfermare = [] }),
-            ("le impostazioni di Prisma ovunque", { $0.impostazioni.ovunque.lamport += 1 }),
+            ("le impostazioni di Lucy ovunque", { $0.impostazioni.ovunque.lamport += 1 }),
             ("la storia già vista", { $0.impostazioni.storie.ultimoAnnoVisto = ($0.impostazioni.storie.ultimoAnnoVisto ?? 2000) + 1 }),
             ("le ricerche salvate", { $0.impostazioni.ricercheSalvate.insert(RicercaSalvata(nome: "Prova", testo: "prova"), at: 0) }),
         ]

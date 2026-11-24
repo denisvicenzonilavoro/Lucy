@@ -18,7 +18,7 @@ import Foundation
 
 /// I testi della colonna e della ricerca delle Impostazioni.
 enum TestiImpostazioni {
-    static let gruppoPrisma = "Prisma"
+    static let gruppoPrisma = "Lucy"
     static let gruppoLavoro = "Il lavoro"
     static let gruppoAiuto = "Aiuto"
     static let cerca = "Cerca nelle impostazioni"
@@ -102,7 +102,7 @@ enum IndiceImpostazioni {
 
     /// Migliorie d'uso 31: la prima voce della colonna.
     private static let daSistemare: [V] = [
-        V(titolo: "Da sistemare", spiegazione: "Cosa manca perché Prisma sia a posto, con «Sistema» per ogni cosa.",
+        V(titolo: "Da sistemare", spiegazione: "Cosa manca perché Lucy sia a posto, con «Sistema» per ogni cosa.",
           pagina: .panoramica, parole: ["panoramica", "stato", "problemi", "a posto"]),
     ]
 
@@ -118,11 +118,11 @@ enum IndiceImpostazioni {
           parole: ["animazioni", "accessibilità"]),
         V(titolo: "Dimensione del testo", spiegazione: "Normale, grande, molto grande.", pagina: .aspetto,
           parole: ["carattere", "font", "grandezza", "leggibilità"]),
-        V(titolo: "Schermo intero", spiegazione: "Tutto lo schermo a Prisma.", pagina: .aspetto,
+        V(titolo: "Schermo intero", spiegazione: "Tutto lo schermo a Lucy.", pagina: .aspetto,
           ancora: "imp-aspetto-finestra", parole: ["finestra"]),
         V(titolo: "Guida per cominciare", spiegazione: "Sulla scrivania, finché non è finita.", pagina: .aspetto,
           ancora: "imp-aspetto-aiuto", parole: ["aiuto"]),
-        V(titolo: "Come funziona Prisma", spiegazione: "L'introduzione e le parole della finanza.", pagina: .aspetto,
+        V(titolo: "Come funziona Lucy", spiegazione: "L'introduzione e le parole della finanza.", pagina: .aspetto,
           ancora: "imp-aspetto-aiuto", parole: ["aiuto", "glossario", "guida"]),
     ]
 
@@ -133,7 +133,7 @@ enum IndiceImpostazioni {
         V(titolo: "Collega un dispositivo", spiegazione: "Una volta, con un codice.", pagina: .ovunque,
           parole: ["codice", "abbinamento", "ponte"]),
         V(titolo: "I dati", spiegazione: "Copia cifrata in iCloud Drive.", pagina: .ovunque,
-          parole: ["Prisma ovunque", "sincronizzazione", "iCloud", "copia cifrata"]),
+          parole: ["Lucy ovunque", "sincronizzazione", "iCloud", "copia cifrata"]),
         V(titolo: "Vera su iPhone e iPad", spiegazione: "Usano Vera del Mac, dalla rete di casa.", pagina: .ovunque,
           parole: ["ponte", "Qwen"]),
         V(titolo: "Inquadra un documento", spiegazione: "Con la fotocamera dell’iPhone.", pagina: .ovunque,
@@ -148,7 +148,7 @@ enum IndiceImpostazioni {
         V(titolo: "Modifiche in attesa", spiegazione: "Dall’iPhone di stamattina.",
           pagina: .ovunque, parole: ["da decidere", "conflitti", "unire"]),
         V(titolo: "Cartella", spiegazione: "La cartella di iCloud Drive dello spazio cifrato.", pagina: .ovunque),
-        V(titolo: "Passphrase", spiegazione: "Solo tua: Prisma non la conserva. Su questo Mac la chiave sta nel Portachiavi.",
+        V(titolo: "Passphrase", spiegazione: "Solo tua: Lucy non la conserva. Su questo Mac la chiave sta nel Portachiavi.",
           pagina: .ovunque, parole: ["password", "chiave"]),
     ]
 
@@ -167,7 +167,7 @@ enum IndiceImpostazioni {
           pagina: .archivio, ancora: "imp-archivio-biblioteca", parole: ["documenti", "PDF"]),
         V(titolo: "Backup disponibili", spiegazione: "Le copie salvate, da ripristinare.", pagina: .archivio,
           ancora: "imp-archivio-elenco", parole: ["copia"]),
-        V(titolo: "Sul Mac", spiegazione: "L'archivio di Prisma, da mostrare nel Finder.", pagina: .archivio,
+        V(titolo: "Sul Mac", spiegazione: "L'archivio di Lucy, da mostrare nel Finder.", pagina: .archivio,
           ancora: "imp-archivio-mac", parole: ["Finder", "dati"]),
     ]
 
@@ -178,7 +178,7 @@ enum IndiceImpostazioni {
           pagina: .vera, parole: ["ponte", "codice"]),
         V(titolo: "Scorciatoia", spiegazione: "Apri la mini Vera; tienila premuta per parlare.", pagina: .vera,
           parole: ["tasto", "mini Vera"]),
-        V(titolo: TestiNotte.rigaAttivo, spiegazione: "Prepara le cose di domani mentre non usi Prisma.", pagina: .vera,
+        V(titolo: TestiNotte.rigaAttivo, spiegazione: "Prepara le cose di domani mentre non usi Lucy.", pagina: .vera,
           ancora: TestiNotte.ancoraImpostazioni, parole: ["stanotte", "notte"]),
         V(titolo: TestiNotte.rigaBozze, spiegazione: TestiNotte.notaBozze, pagina: .vera, ancora: TestiNotte.ancoraImpostazioni),
         V(titolo: TestiNotte.rigaApri, spiegazione: "Una volta, dopo lo sblocco; mai con un cliente davanti.", pagina: .vera,
@@ -209,7 +209,7 @@ enum IndiceImpostazioni {
           ancora: "imp-vera-stile", parole: ["scrive come te", "tono"]),
         V(titolo: "Vera su misura", spiegazione: "Esempi approvati e resi anonimi; l'esame resta sul Mac.", pagina: .vera,
           ancora: "imp-vera-motori"),
-        V(titolo: "Due velocità", spiegazione: "Prima le regole di Prisma, poi Qwen sul Mac. Il modello Apple è spento.",
+        V(titolo: "Due velocità", spiegazione: "Prima le regole di Lucy, poi Qwen sul Mac. Il modello Apple è spento.",
           pagina: .vera, ancora: "imp-vera-motori"),
         V(titolo: "Motore esterno",
           spiegazione: "Solo per le conversazioni generali: i dati dei clienti non escono mai dal Mac.", pagina: .vera,
@@ -218,7 +218,7 @@ enum IndiceImpostazioni {
           ancora: "imp-vera-motori"),
         V(titolo: "Controllo notturno", spiegazione: "Doppioni, campi vuoti, consensi e documenti.", pagina: .vera,
           ancora: "imp-vera-tagliando", parole: ["tagliando"]),
-        V(titolo: "Ora del controllo", spiegazione: "Con il Mac acceso e Prisma aperto.", pagina: .vera,
+        V(titolo: "Ora del controllo", spiegazione: "Con il Mac acceso e Lucy aperta.", pagina: .vera,
           ancora: "imp-vera-tagliando", parole: ["tagliando"]),
         V(titolo: "Ultimo controllo", spiegazione: "Quando e che cosa ha trovato il tagliando dei dati.", pagina: .vera,
           ancora: "imp-vera-tagliando", parole: ["tagliando"]),
@@ -242,7 +242,7 @@ enum IndiceImpostazioni {
         V(titolo: VoceObiettivoStudio.produzioneAlleanza.nome,
           spiegazione: "Versamenti iniziali e premi annui delle posizioni Alleanza con decorrenza nell’anno",
           pagina: .studio, parole: ["obiettivi"]),
-        V(titolo: VoceObiettivoStudio.nuoviClienti.nome, spiegazione: "Clienti inseriti in Prisma nell’anno",
+        V(titolo: VoceObiettivoStudio.nuoviClienti.nome, spiegazione: "Clienti inseriti in Lucy nell’anno",
           pagina: .studio, parole: ["obiettivi"]),
         V(titolo: VoceObiettivoStudio.ricaviConsulenza.nome, spiegazione: "Parcelle della consulenza indipendente dell’anno",
           pagina: .studio, parole: ["obiettivi"]),
@@ -259,13 +259,13 @@ enum IndiceImpostazioni {
           pagina: .studio, ancora: TestiSpese.ancoraImpostazioni, parole: ["chilometri", "spese", "rimborso"]),
         V(titolo: "I km di andata e ritorno per cliente", spiegazione: "I km si scrivono per i clienti che visiti",
           pagina: .studio, ancora: TestiSpese.ancoraImpostazioni, parole: ["chilometri", "spese"]),
-        V(titolo: "Ore richieste", spiegazione: "Le scrivi tu: Prisma non contiene i requisiti di IVASS o OCF",
+        V(titolo: "Ore richieste", spiegazione: "Le scrivi tu: Lucy non contiene i requisiti di IVASS o OCF",
           pagina: .studio, ancora: TestiSpese.ancoraImpostazioni, parole: ["aggiornamento professionale", "corsi"]),
         V(titolo: "Ente", spiegazione: "Facoltativo: compare accanto all’anello delle ore", pagina: .studio,
           ancora: TestiSpese.ancoraImpostazioni, parole: ["corsi"]),
         V(titolo: "Nomi dei clienti nel pacchetto", spiegazione: "Spento: dei giri solo data, km e numero di visite",
           pagina: .studio, ancora: TestiSpese.ancoraImpostazioni, parole: ["commercialista", "privacy"]),
-        V(titolo: "Prisma prepara il file, non lo invia",
+        V(titolo: "Lucy prepara il file, non lo invia",
           spiegazione: "Il PDF e il file XML della fattura elettronica (tracciato FatturaPA).", pagina: .studio,
           ancora: TestiParcelle.ancoraImpostazioni, parole: ["fatture", "fattura elettronica", "parcelle"]),
         V(titolo: "Chi emette la fattura", spiegazione: "Nome, cognome o denominazione, partita IVA, codice fiscale, PEC.",
@@ -310,7 +310,7 @@ enum IndiceImpostazioni {
     ]
 
     private static let promemoria: [V] = [
-        V(titolo: "Promemoria nel Centro notifiche", spiegazione: "Anche a Prisma chiusa", pagina: .promemoria,
+        V(titolo: "Promemoria nel Centro notifiche", spiegazione: "Anche a Lucy chiusa", pagina: .promemoria,
           parole: ["notifiche", "avvisi"]),
         V(titolo: "Appuntamenti", spiegazione: "Prima dell'inizio, con il luogo", pagina: .promemoria, parole: ["notifiche"]),
         V(titolo: "Attività", spiegazione: "Il giorno di scadenza", pagina: .promemoria, parole: ["notifiche"]),
@@ -348,7 +348,7 @@ enum IndiceImpostazioni {
           pagina: .proposte, parole: ["proposte", "Alleanza", "indipendente"]),
         V(titolo: "Aggiungi un documento", spiegazione: "Un documento in più da consegnare con le proposte.",
           pagina: .proposte),
-        V(titolo: "Ripristina l'elenco di Prisma",
+        V(titolo: "Ripristina l'elenco di Lucy",
           spiegazione: "Torna ai documenti predefiniti dei due canali: le spunte già messe nelle schede restano.",
           pagina: .proposte),
         V(titolo: "Proponi la password", spiegazione: "Protezione già attiva al salvataggio", pagina: .proposte,
@@ -370,7 +370,7 @@ enum IndiceImpostazioni {
         V(titolo: "Indirizzi dei sinistri", spiegazione: "Il sollecito apre una bozza in Mail all'indirizzo della compagnia",
           pagina: .pratiche, parole: ["compagnia", "sollecito", "sinistri"]),
         V(titolo: "Documenti per tipo di sinistro",
-          spiegazione: "Gli elenchi li dai tu, per tipo e compagnia: Prisma non li inventa", pagina: .pratiche,
+          spiegazione: "Gli elenchi li dai tu, per tipo e compagnia: Lucy non li inventa", pagina: .pratiche,
           parole: ["sinistri"]),
         V(titolo: "Fermo dopo",
           spiegazione: "Oltre questi giorni senza un fatto nuovo il sinistro compare fra le cose da sistemare",
@@ -406,7 +406,7 @@ enum IndiceImpostazioni {
         V(titolo: "Gli imprevisti", spiegazione: "Un evento esce a caso solo con la probabilità annua e la fonte.",
           pagina: .sala, parole: ["Lancia l'anno", "probabilità"]),
         V(titolo: "Prepara anche il file per il browser", spiegazione: "Sperimentale: da provare prima su iPhone e Android veri",
-          pagina: .sala, parole: ["Prisma del cliente"]),
+          pagina: .sala, parole: ["Lucy del cliente"]),
         V(titolo: TestiRealta.scattoConStanzaTitolo, spiegazione: "Di base lo scatto è solo il cristallo su fondo neutro",
           pagina: .sala, parole: ["realtà aumentata", "foto"]),
     ]
@@ -449,7 +449,7 @@ enum IndiceImpostazioni {
     /// prova» stanno nelle loro pagine (Vera, Promemoria e occasioni, Archivio e backup).
     private static let strumenti: [V] = [
         V(titolo: TestiDimostrazione.interruttore, spiegazione: TestiDimostrazione.interruttoreSpiegazione, pagina: .strumenti,
-          ancora: "imp-strumenti-dimostrazione", parole: ["dati di prova", "clienti di prova", "demo", "mostrare Prisma"]),
+          ancora: "imp-strumenti-dimostrazione", parole: ["dati di prova", "clienti di prova", "demo", "mostrare Lucy"]),
         V(titolo: GruppoProva.cinque.titolo, spiegazione: GruppoProva.cinque.spiegazione, pagina: .strumenti,
           ancora: "imp-strumenti-gruppi", parole: ["dati di prova", "dimostrazione", "5 clienti"]),
         V(titolo: GruppoProva.trentacinque.titolo, spiegazione: GruppoProva.trentacinque.spiegazione, pagina: .strumenti,

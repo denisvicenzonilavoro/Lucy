@@ -443,7 +443,7 @@ struct LetturaAdeguatezzaVista: View {
                             inserita = true
                         }
                         .buttonStyle(.applePrimario).disabled(firmata || inserita)
-                        Text(b.conQwen ? TestiStatoVera.inVista(mac: "Scritta da Vera con le sole cifre di Prisma", altrove: "Scritta da Qwen con le sole cifre di Prisma") : "Scritta da Prisma con i controlli della scheda")
+                        Text(b.conQwen ? TestiStatoVera.inVista(mac: "Scritta da Vera con le sole cifre di Lucy", altrove: "Scritta da Qwen con le sole cifre di Lucy") : "Scritta da Lucy con i controlli della scheda")
                             .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                     }
                 }

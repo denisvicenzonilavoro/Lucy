@@ -147,7 +147,7 @@ enum NucleoVera {
     /// La riga di contesto: data, app aperte, cliente attivo.
     static func rigaContesto(_ a: AmbienteVera) -> String {
         var parti = ["Oggi è \(Formati.dataLunga.string(from: a.oggi)) \(Formati.formato("yyyy").string(from: a.oggi)), ore \(Formati.ora.string(from: a.oggi))"]
-        if !a.appAperte.isEmpty { parti.append("app aperte in Prisma: \(a.appAperte.joined(separator: ", "))") }
+        if !a.appAperte.isEmpty { parti.append("app aperte in Lucy: \(a.appAperte.joined(separator: ", "))") }
         if let c = a.cliente { parti.append("cliente attivo: \(c)") }
         return "CONTESTO: " + parti.joined(separator: "; ") + "."
     }
@@ -156,7 +156,7 @@ enum NucleoVera {
     static func ultimoMessaggio(_ r: RichiestaVera, scelta: SceltaVera, ambiente: AmbienteVera) -> String {
         var parti = [rigaContesto(ambiente)]
         if scelta.conScheda {
-            parti.append("SCHEDA DEL CLIENTE (calcolata da Prisma)\n" + ContestoVera.scheda(r.fonte))
+            parti.append("SCHEDA DEL CLIENTE (calcolata da Lucy)\n" + ContestoVera.scheda(r.fonte))
             if r.spunto != nil {
                 // Per gli spunti Prisma prepara già la bozza con i numeri esatti: il modello la rende discorsiva.
                 parti.append("BOZZA PREPARATA DA PRISMA (numeri esatti: non cambiarli e non aggiungerne)\n"
@@ -176,7 +176,7 @@ enum NucleoVera {
             parti.append("RICORDI (dalla memoria di Vera, confermati dal consulente)\n" + ambiente.ricordi.map { "- \($0)" }.joined(separator: "\n"))
         }
         if scelta.conScheda, !ambiente.brani.isEmpty {
-            parti.append("DAI DOCUMENTI E DALLE NOTE DEL CLIENTE (passaggi trovati da Prisma: cita la fonte, per esempio documento e pagina)\n"
+            parti.append("DAI DOCUMENTI E DALLE NOTE DEL CLIENTE (passaggi trovati da Lucy: cita la fonte, per esempio documento e pagina)\n"
                          + ambiente.brani.map { "[\($0.fonte)] \($0.testo)" }.joined(separator: "\n"))
         }
         if ambiente.breve { parti.append("COME RISPONDERE\n" + IstruzioniVera.mini) }

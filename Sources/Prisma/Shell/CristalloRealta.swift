@@ -302,7 +302,7 @@ final class CristalloRealta {
     /// Il logo di Prisma per la faccia alta.
     static func immagineLogo() -> CGImage? {
         let lato = CGFloat(T.Ombra.lato)
-        let r = ImageRenderer(content: LogoPrisma(colore: T.Fermo.coloreLogo).frame(width: lato, height: lato))
+        let r = ImageRenderer(content: LogoLucy(colore: T.Fermo.coloreLogo).frame(width: lato, height: lato))
         r.proposedSize = ProposedViewSize(width: lato, height: lato)
         r.scale = 1
         return r.immaginePrisma

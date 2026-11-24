@@ -116,7 +116,7 @@ struct SchedaMercatoClientiVeraVista: View {
                             .disabled(stato.veraInCorso || stato.solaLettura || !stato.appConsentita(.messaggi))
                             .help("Vera scrive le bozze nel tuo stile; le apri e le spedisci tu, dopo «Conferma».")
                     }
-                    Text("Le cifre sono di Prisma: Vera scrive solo le parole.")
+                    Text("Le cifre sono di Lucy: Vera scrive solo le parole.")
                         .carattereApple(K.nota)
                         .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         .lineLimit(2)
@@ -174,7 +174,7 @@ struct ScenaMercatoClientiVera: View {
                     .carattereApple(K.titoloScena)
                     .foregroundColor(Tema.Apple.Colore.inchiostro)
                     .accessibilityAddTraits(.isHeader)
-                Text("Quando succede qualcosa sui mercati, Prisma ti dice quali clienti tocca, perché e cosa conviene fare con ciascuno.")
+                Text("Quando succede qualcosa sui mercati, Lucy ti dice quali clienti tocca, perché e cosa conviene fare con ciascuno.")
                     .carattereApple(K.nota)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -266,8 +266,8 @@ private struct ElencoMercatoClientiVera: View {
                                 .carattereApple(K.nota)
                                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         }
-                        Text(esempio ? "Le cifre sono calcolate da Prisma sulle posizioni vere dei clienti; l'evento è un esempio."
-                             : "Le cifre sono calcolate da Prisma sulle posizioni vere dei clienti.")
+                        Text(esempio ? "Le cifre sono calcolate da Lucy sulle posizioni vere dei clienti; l'evento è un esempio."
+                             : "Le cifre sono calcolate da Lucy sulle posizioni vere dei clienti.")
                             .carattereApple(K.nota)
                             .foregroundColor(Tema.Apple.Colore.inchiostro2)
                             .fixedSize(horizontal: false, vertical: true)

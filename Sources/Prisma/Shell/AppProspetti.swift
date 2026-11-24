@@ -401,7 +401,7 @@ struct AppProspetti: View {
                 Text("Prospetto per te: A4 verticale, da preparare prima dell'incontro di revisione e da tenere sul tavolo mentre parli con il cliente.")
                     .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
                 Text(r.ultimoContatto.map { "Ultimo incontro il \(Formati.dataEstesa.string(from: $0))" + (r.dovuto ? ": il riesame è dovuto." : ".") }
-                     ?? "Nessun incontro registrato in Prisma.")
+                     ?? "Nessun incontro registrato in Lucy.")
                     .font(SSP.testo).foregroundColor(SSP.coloreTesto).fixedSize(horizontal: false, vertical: true)
                 RiepilogoMemoria(clienteId: cliente)
                 VStack(alignment: .leading, spacing: 7) {
@@ -457,7 +457,7 @@ struct AppProspetti: View {
 
     private var sceltaFascicolo: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Spunta i report da consegnare: Prisma li unisce nell'ordine qui sotto, dopo una copertina e un indice.")
+            Text("Spunta i report da consegnare: Lucy li unisce nell'ordine qui sotto, dopo una copertina e un indice.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             ForEach(TipoProspetto.inFascicolo) { t in
                 Toggle(isOn: Binding(get: { stato.sceltaFascicolo.contains(t) },

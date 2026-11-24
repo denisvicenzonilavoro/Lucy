@@ -97,13 +97,13 @@ struct PannelloOggi: View {
         VStack(alignment: .leading, spacing: P.spazio) {
             if t.tabellaNonLeggibile {
                 EtichettaPannello(testo: "OGGI")
-                Text("La tabella dei comuni non si legge: reinstalla Prisma.")
+                Text("La tabella dei comuni non si legge: reinstalla Lucy.")
                     .carattereApple(P.testo)
                     .foregroundColor(P.coloreTesto)
             } else if oggi.luci.isEmpty {
                 EtichettaPannello(testo: "OGGI")
                     .entrataCascata(0)
-                Text("Nessun cliente ha ancora un indirizzo che Prisma sa mettere sulla mappa.")
+                Text("Nessun cliente ha ancora un indirizzo che Lucy sa mettere sulla mappa.")
                     .carattereApple(P.testo)
                     .foregroundColor(P.coloreTesto)
                     .fixedSize(horizontal: false, vertical: true)
@@ -289,7 +289,7 @@ struct LegendaTerritorio: View {
                     Text("entrambi").carattereApple(Lg.testo).foregroundColor(Lg.colore)
                 }
             }
-            Text("La luce cresce con il patrimonio. Le posizioni vengono dalle coordinate dei comuni incluse in Prisma (ISTAT): gli indirizzi non escono dal Mac.")
+            Text("La luce cresce con il patrimonio. Le posizioni vengono dalle coordinate dei comuni incluse in Lucy (ISTAT): gli indirizzi non escono dal Mac.")
                 .carattereApple(Lg.testo)
                 .foregroundColor(Lg.colore)
                 .fixedSize(horizontal: false, vertical: true)
@@ -390,8 +390,8 @@ struct PannelloCrescita: View {
                     .foregroundColor(P.coloreTesto2)
                     .fixedSize(horizontal: false, vertical: true)
                 if crescita.stimati > 0 {
-                    Text(crescita.stimati == 1 ? String("1 cliente ha l'anno d'inserimento in Prisma, non quello d'inizio.")
-                                               : String("\(crescita.stimati) clienti hanno l'anno d'inserimento in Prisma, non quello d'inizio."))
+                    Text(crescita.stimati == 1 ? String("1 cliente ha l'anno d'inserimento in Lucy, non quello d'inizio.")
+                                               : String("\(crescita.stimati) clienti hanno l'anno d'inserimento in Lucy, non quello d'inizio."))
                         .carattereApple(P.piccolo)
                         .foregroundColor(P.coloreTesto3)
                         .fixedSize(horizontal: false, vertical: true)
@@ -822,7 +822,7 @@ struct ElencoSenzaLuogo: View {
                     .buttonStyle(.apple)
                     .keyboardShortcut(.cancelAction)
             }
-            Text("Prisma riconosce il comune nell'indirizzo (con la sigla per i comuni con lo stesso nome) oppure usa la posizione che metti a mano. Il CAP non serve.")
+            Text("Lucy riconosce il comune nell'indirizzo (con la sigla per i comuni con lo stesso nome) oppure usa la posizione che metti a mano. Il CAP non serve.")
                 .carattereApple(P.piccolo)
                 .foregroundColor(P.coloreTesto2)
                 .fixedSize(horizontal: false, vertical: true)

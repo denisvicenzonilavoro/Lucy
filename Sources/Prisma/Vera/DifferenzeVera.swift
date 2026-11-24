@@ -98,7 +98,7 @@ enum DifferenzeVera {
     /// La sintesi di Prisma: cosa cambia per il cliente, con le cifre della tabella.
     static func sintesi(_ righe: [RigaDifferenza], cliente: String) -> String {
         let cambiate = righe.filter { $0.esito != .uguale }
-        guard !cambiate.isEmpty else { return "Per \(cliente) non cambia niente nelle voci che Prisma ha letto." }
+        guard !cambiate.isEmpty else { return "Per \(cliente) non cambia niente nelle voci che Lucy ha letto." }
         let peggio = cambiate.filter { $0.esito == .peggiora || $0.esito == .costaDiPiu || $0.esito == .tolta }
         let meglio = cambiate.filter { $0.esito == .migliora || $0.esito == .nuova }
         var frasi: [String] = []
@@ -115,7 +115,7 @@ enum DifferenzeVera {
     }
 
     static var istruzioni: String {
-        IstruzioniVera.testo("differenze") ?? "Ti do la tabella del confronto tra due documenti di un cliente (voce, prima, ora, esito) e la sintesi di Prisma. Riscrivi la sintesi in due frasi, per il consulente: cosa cambia davvero per il cliente. Usa solo le cifre della tabella, senza cambiarle e senza fare conti nuovi."
+        IstruzioniVera.testo("differenze") ?? "Ti do la tabella del confronto tra due documenti di un cliente (voce, prima, ora, esito) e la sintesi di Lucy. Riscrivi la sintesi in due frasi, per il consulente: cosa cambia davvero per il cliente. Usa solo le cifre della tabella, senza cambiarle e senza fare conti nuovi."
     }
 
     static func messaggi(_ righe: [RigaDifferenza], sintesi: String, cliente: String) -> [MessaggioModello] {

@@ -244,7 +244,7 @@ private struct PaginaQuadroObiettivi: View {
                                            CellaDoc(a.versamentoNecessario.map { CifreDoc.euro($0) } ?? "—", font: T.pTabella)],
                                    altezza: 21, sfondo: o.id == t.o.id ? C.evidenza : .clear)
                        }, fontTesta: T.pTabellaTesta, fontTestaSotto: T.pTabellaNota, altezzaTesta: 18, margine: 4)
-            Text(verbatim: "Nel quadro la quota raggiunta e il versamento usano l'importo di oggi, senza inflazione, come nella scheda Obiettivi di Prisma.")
+            Text(verbatim: "Nel quadro la quota raggiunta e il versamento usano l'importo di oggi, senza inflazione, come nella scheda Obiettivi di Lucy.")
                 .font(T.pTabellaNota).foregroundColor(C.tenue)
             SezioneProspetto(titolo: "Ipotesi e metodo")
             VStack(alignment: .leading, spacing: 3) {

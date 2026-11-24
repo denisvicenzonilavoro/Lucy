@@ -38,7 +38,7 @@ struct FoglioProspetto<Contenuto: View>: View {
             }
             .padding(EdgeInsets(top: 34, leading: D.margineProspetto, bottom: 22, trailing: D.margineProspetto))
             .overlay(alignment: .topTrailing) {
-                LogoPrismaConNome(colore: Colori.Documento.logo, altezza: D.logoProspetto)
+                LogoLucyConNome(colore: Colori.Documento.logo, altezza: D.logoProspetto)
                     .padding(.top, D.logoProspettoAlto)
                     .padding(.trailing, D.margineProspetto)
             }

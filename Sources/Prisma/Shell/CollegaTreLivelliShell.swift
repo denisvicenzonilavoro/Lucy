@@ -132,14 +132,14 @@ extension StatoShell {
             return m
         }
         let uscite = trelivelliSalva(s)
-        var testo = "La stessa spiegazione in tre versioni: per te, per \(nome) e in una pagina da consegnare. I numeri sono di Prisma, uguali in tutte e tre."
+        var testo = "La stessa spiegazione in tre versioni: per te, per \(nome) e in una pagina da consegnare. I numeri sono di Lucy, uguali in tutte e tre."
         if !TreLivelliVera.stessiNumeri(s) {
             testo += " Attenzione: le cifre dei tre livelli non tornano, rileggi prima di usarle."
         }
         if uscite > 0 {
             testo += " Per \(nome) tengo le ultime \(Self.trelivelliMassimoPerCliente) spiegazioni: "
-                + (uscite == 1 ? "la più vecchia è uscita da Prisma e in chat la sua risposta resta senza scheda."
-                               : "le \(uscite) più vecchie sono uscite da Prisma e in chat le loro risposte restano senza scheda.")
+                + (uscite == 1 ? "la più vecchia è uscita da Lucy e in chat la sua risposta resta senza scheda."
+                               : "le \(uscite) più vecchie sono uscite da Lucy e in chat le loro risposte restano senza scheda.")
         }
         var m = MessaggioVera(autore: .vera, testo: testo, titolo: r.titolo, motore: motore)
         m.treLivelli = s.id
@@ -183,9 +183,9 @@ extension StatoShell {
     /// Dopo «Conferma» (da `eseguiAzioneVera`): il PDF della pagina nei Documenti del cliente.
     func trelivelliEseguiPagina(_ a: AzioneConferma) -> EsitoAzioneVera {
         let no = { (m: String) in EsitoAzioneVera(fatta: false, messaggio: m) }
-        guard !solaLettura else { return no("Prisma è in sola lettura: non ho salvato niente.") }
+        guard !solaLettura else { return no("Lucy è in sola lettura: non ho salvato niente.") }
         guard let id = a.argomenti["spiegazione"], let s = trelivelliSpiegazione(id), let c = cliente(s.clienteId) else {
-            return no("La spiegazione non è più in Prisma: chiedila di nuovo a Vera.")
+            return no("La spiegazione non è più in Lucy: chiedila di nuovo a Vera.")
         }
         if inModoCliente, c.id != clienteAttivoId { return no("In modalità cliente resto sul dossier di \(clienteAttivo?.nome ?? "questo cliente").") }
         let documento = DocumentoStampabile(TreLivelliVera.contenuto(s))

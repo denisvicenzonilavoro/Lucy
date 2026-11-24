@@ -187,7 +187,7 @@ extension Istantanee {
         let domande = ["Laura vuole smettere di lavorare a 60 anni: da dove partiamo?", "Niente rischi sulla casa, me l'ha detto due volte.",
                        "Proviamo con 500 € al mese.", "E con 700 € al mese?", "Quanto le manca rispetto alla pensione pubblica?",
                        "Il fondo pensione le conviene?"]
-        let risposta = "Con le ipotesi della scheda di Laura, Prisma ha rifatto i conti: a 60 anni con 700 € al mese il divario si chiude quasi del tutto, con 500 € al mese l'obiettivo si sposta verso i 62 anni. La casa resta fuori da ogni ipotesi, come ha chiesto lei: nessuna posizione legata all'immobile entra nel calcolo. "
+        let risposta = "Con le ipotesi della scheda di Laura, Lucy ha rifatto i conti: a 60 anni con 700 € al mese il divario si chiude quasi del tutto, con 500 € al mese l'obiettivo si sposta verso i 62 anni. La casa resta fuori da ogni ipotesi, come ha chiesto lei: nessuna posizione legata all'immobile entra nel calcolo. "
         for i in 0..<30 {
             s.aggiungiMessaggio(MessaggioVera(autore: .utente, testo: domande[i % domande.count]), cliente: "laura", parla: false)
             s.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: String(repeating: risposta, count: 5), motore: s.qwen.nome), cliente: "laura", parla: false)

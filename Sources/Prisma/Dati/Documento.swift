@@ -17,7 +17,7 @@ struct Documento: Identifiable, Codable, Hashable {
             case .polizza: return "Polizza o contratto"
             case .estrattoConto: return "Estratto conto"
             case .proposta: return "Proposta"
-            case .prospetto: return "Prospetto di Prisma"
+            case .prospetto: return "Prospetto di Lucy"
             case .report: return "Report per il cliente"
             case .modulo: return "Modulo compilato"
             case .altro: return "Altro"
@@ -185,7 +185,7 @@ enum CategoriaDocumento: String, Codable, CaseIterable, Identifiable {
         case .identita: return "Documenti d'identità"
         case .questionario: return "Questionari"
         case .altro: return "Altri documenti"
-        case .prisma: return "Prospetti e report di Prisma"
+        case .prisma: return "Prospetti e report di Lucy"
         }
     }
 
@@ -198,7 +198,7 @@ enum CategoriaDocumento: String, Codable, CaseIterable, Identifiable {
         case .identita: return "Identità"
         case .questionario: return "Questionario"
         case .altro: return "Altro"
-        case .prisma: return "Di Prisma"
+        case .prisma: return "Di Lucy"
         }
     }
 
@@ -348,7 +348,7 @@ struct CampoEstratto: Identifiable, Codable, Hashable {
     var pagina: Int
     /// La riga del documento da cui viene il valore.
     var estratto = ""
-    var origine = "Regole di Prisma"
+    var origine = "Regole di Lucy"
     var confermato = false
 
     var id: String { chiave.rawValue }

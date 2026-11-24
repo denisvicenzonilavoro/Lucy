@@ -383,7 +383,7 @@ enum MotoreBiblioteca {
 
     static var parametri: [Parametro] {
         [Parametro(parole: ["deduc", "dedurre", "deduzione"], valore: RegoleFiscali.limiteDeducibilita,
-                   testo: "Prisma usa \(Formati.euro(RegoleFiscali.limiteDeducibilita)) l'anno per la deducibilità dei contributi (dal 2026)",
+                   testo: "Lucy usa \(Formati.euro(RegoleFiscali.limiteDeducibilita)) l'anno per la deducibilità dei contributi (dal 2026)",
                    minimo: 1_000, massimo: 20_000, percentuale: false)]
     }
 

@@ -90,7 +90,7 @@ extension ProvaBackup {
         // 4. Le partite restano sul Mac: non entrano nell'istantanea di «Prisma ovunque»; la giornata sì (è nell'analisi)
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.partiteRischio.isEmpty, ist.analisi[id]?.giornata != nil else {
-            return "le partite del gioco del rischio non devono entrare nell'istantanea di Prisma ovunque"
+            return "le partite del gioco del rischio non devono entrare nell'istantanea di Lucy ovunque"
         }
         // 5. I campi stanno nella versione 27 dell'archivio di Luce
         guard DatiPrisma.versioneAttuale == 27 else {

@@ -125,7 +125,7 @@ extension StatoShell {
     func leggiFileNuovoCliente(_ url: URL) {
         let estensione = url.pathExtension.lowercased()
         guard LetturaDocumenti.estensioniAccettate.contains(estensione) else {
-            mostraAvviso("\(url.lastPathComponent) non si legge: Prisma legge PDF e immagini (PNG, JPEG, TIFF, HEIC).")
+            mostraAvviso("\(url.lastPathComponent) non si legge: Lucy legge PDF e immagini (PNG, JPEG, TIFF, HEIC).")
             return
         }
         let nome = url.lastPathComponent
@@ -164,7 +164,7 @@ extension StatoShell {
         pannello.allowsMultipleSelection = false
         pannello.canChooseDirectories = false
         pannello.prompt = "Leggi"
-        pannello.message = "Scegli la foto o il PDF della carta d’identità: Prisma la legge sul Mac e non la salva."
+        pannello.message = "Scegli la foto o il PDF della carta d’identità: Lucy la legge sul Mac e non la salva."
         guard pannello.runModal() == .OK, let url = pannello.url else { return }
         leggiFileNuovoCliente(url)
     }
@@ -246,7 +246,7 @@ extension StatoShell {
     @discardableResult
     func creaClienteDaCarta() -> Cliente? {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per creare il cliente.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per creare il cliente.")
             return nil
         }
         let potenziale = clienteGiaPresenteDaCarta == nil ? potenzialeDaCarta : nil

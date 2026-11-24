@@ -125,7 +125,7 @@ private struct BarraModuli: View {
                 daTogliere = nil
             }
         } message: {
-            Text("Il PDF vuoto e la sua mappa escono da Prisma. I moduli già compilati restano nei Documenti dei clienti.")
+            Text("Il PDF vuoto e la sua mappa escono da Lucy. I moduli già compilati restano nei Documenti dei clienti.")
         }
     }
 
@@ -135,7 +135,7 @@ private struct BarraModuli: View {
                 .carattereApple(M.notaAlleanza)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Carichi una volta i moduli che usi: Prisma riconosce i campi e li compila con i dati del dossier.")
+            Text("Carichi una volta i moduli che usi: Lucy riconosce i campi e li compila con i dati del dossier.")
                 .carattereApple(M.fraseBarra)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -158,7 +158,7 @@ private struct ZonaRilascio: View {
     var body: some View {
         let forma = RoundedRectangle(cornerRadius: M.raggioPiano, style: .continuous)
         VuotoPratiche(glifo: .modulo, frase: "Trascina qui il PDF di un modulo",
-                      nota: "Proposta, privacy, mandato, questionario, adeguata verifica: i moduli veri che usi per il canale indipendente. Prisma riconosce i campi, tu controlli la mappa una volta.",
+                      nota: "Proposta, privacy, mandato, questionario, adeguata verifica: i moduli veri che usi per il canale indipendente. Lucy riconosce i campi, tu controlli la mappa una volta.",
                       pulsante: "Aggiungi un modulo") { importa = true }
             .padding(M.marginePiano)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -590,7 +590,7 @@ private struct ColonnaCompila: View {
     @ViewBuilder private func pulsante(_ c: Cliente?) -> some View {
         Group {
             if !modello.compilabile {
-                Text("I moduli Alleanza non si compilano in Prisma finché la compagnia non lo approva.")
+                Text("I moduli Alleanza non si compilano in Lucy finché la compagnia non lo approva.")
                     .carattereApple(M.notaAlleanza)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -788,7 +788,7 @@ private struct TileFinali: View {
             Text(n == 1 ? "1 risposta la dà \(nome)" : "\(n) risposte le dà \(nome)")
                 .carattereApple(M.titoloTile)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
-            Text("Prisma non compila dichiarazioni e questionario: le chiedi a \(nome) all'incontro.")
+            Text("Lucy non compila dichiarazioni e questionario: le chiedi a \(nome) all'incontro.")
                 .carattereApple(Tema.Apple.Carattere.secondario)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)

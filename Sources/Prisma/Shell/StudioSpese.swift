@@ -33,7 +33,7 @@ import AppKit
 /// I testi di Studio › Spese.
 enum TestiSpese {
     static let ancoraImpostazioni = "impostazioni-spese"
-    static let messaggioPacchetto = "Prisma prepara lo zip e non lo invia a nessuno: lo consegni tu al commercialista."
+    static let messaggioPacchetto = "Lucy prepara lo zip e non lo invia a nessuno: lo consegni tu al commercialista."
     static let fonteKm = "dalle visite dell’agenda"
     static let datiDiProva = "dati di prova"
     static let inquadra = "Inquadra lo scontrino"

@@ -53,7 +53,7 @@ enum ProvaNotaVocale {
         let q = arrivate.first?.quando.timeIntervalSinceReferenceDate ?? 0.5
         controlla(q.rounded(.down) == q, "Nota: le date della nota arrivata sono al secondo (come le scrive l'archivio)")
         controlla(arrivate.first?.clienteId == "giulia" && arrivate.first?.conQwen == false && s.notaVocale.mostrata == n.id,
-                  "Nota: Prisma capisce che si parla di Giulia (solo regole, Qwen assente) e mostra la scheda «Arriva sul Mac»")
+                  "Nota: Lucy capisce che si parla di Giulia (solo regole, Qwen assente) e mostra la scheda «Arriva sul Mac»")
         // Con Prisma bloccato: accettata, da guardare, ma la scheda non si mostra
         let b = StatoShell(persistente: false)
         b.blocca(animato: false)
@@ -61,7 +61,7 @@ enum ProvaNotaVocale {
         bloccata.id = NotaVocaleDiProva.prefisso + "bloccato"
         let r = b.riceviDalPonte(.notaVocale(bloccata))
         controlla(r.accettato && b.dati.noteInArrivo.first { $0.id == bloccata.id }?.stato == .daGuardare && b.notaVocale.mostrata == nil,
-                  "Nota: con Prisma bloccato la nota è accettata e aspetta, senza mostrare la scheda")
+                  "Nota: con Lucy bloccata la nota è accettata e aspetta, senza mostrare la scheda")
         // In modalità cliente: accettata, mai mostrata (porta il testo dettato e il nome di un altro cliente)
         let m = StatoShell(persistente: false)
         m.clienteAttivoId = "marco"
@@ -84,9 +84,9 @@ enum ProvaNotaVocale {
         let dubbio = MotoreNotaVocale.cliente(in: "Ho sentito Marco per la polizza.", clienti: conDue, appuntamenti: [], quando: oggi)
         if case .dubbio(let c) = dubbio {
             controlla(c.count == 2 && c.count <= MotoreNotaVocale.maxCandidati && c.contains("marco") && c.contains(altro.id),
-                      "Nota: con due «Marco» Prisma chiede di chi si parla (mai una scelta silenziosa)")
+                      "Nota: con due «Marco» Lucy chiede di chi si parla (mai una scelta silenziosa)")
         } else {
-            controlla(false, "Nota: con due «Marco» Prisma chiede di chi si parla (mai una scelta silenziosa)")
+            controlla(false, "Nota: con due «Marco» Lucy chiede di chi si parla (mai una scelta silenziosa)")
         }
         controlla(MotoreNotaVocale.cliente(in: "Ho sentito Marco Verdi per la polizza.", clienti: conDue, appuntamenti: [], quando: oggi) == .sicuro(altro.id),
                   "Nota: nome e cognome tolgono il dubbio")
@@ -253,7 +253,7 @@ enum ProvaNotaVocale {
     private static func ovunqueENovita(_ controlla: (Bool, String) -> Void) {
         var d = DatiPrisma.demo()
         d.noteInArrivo = [NotaVocaleDiProva.inArrivo(d, oggi: oggi)]
-        controlla(SpazioOvunque.datiIstantanea(d).noteInArrivo.isEmpty, "Nota: le note dall'iPhone non entrano in Prisma ovunque")
+        controlla(SpazioOvunque.datiIstantanea(d).noteInArrivo.isEmpty, "Nota: le note dall'iPhone non entrano in Lucy ovunque")
         let s = StatoShell(persistente: false)
         s.apriVoceNovita(NovitaLuce.notaVocale)
         controlla(NovitaLuce.nuovoCliente.disponibile && NovitaLuce.notaVocale.disponibile && s.appAttiva == .incontri,

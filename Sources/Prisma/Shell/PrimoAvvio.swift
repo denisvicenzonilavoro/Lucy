@@ -22,7 +22,7 @@ enum SceltaInizio: String, CaseIterable, Identifiable {
 
     var titolo: String {
         switch self {
-        case .prova: return "Guardo Prisma con i clienti di prova"
+        case .prova: return "Guardo Lucy con i clienti di prova"
         case .miei: return "Porto i miei clienti"
         case .zero: return "Parto da zero"
         }
@@ -42,15 +42,15 @@ enum TestiPrimoAvvio {
     static let pagine = 3
     static func occhiello(_ pagina: Int) -> String { "Il primo avvio · \(pagina + 1) di \(pagine)" }
 
-    static let benvenuto = "Benvenuto in Prisma"
-    static let benvenutoTesto = "Prisma è lo studio di lavoro di un consulente finanziario. Raccoglie le persone che segui e quello che hanno, e ti aiuta a capire che cosa manca e che cosa conviene."
+    static let benvenuto = "Benvenuto in Lucy"
+    static let benvenutoTesto = "Lucy è lo studio di lavoro di un consulente finanziario. Raccoglie le persone che segui e quello che hanno, e ti aiuta a capire che cosa manca e che cosa conviene."
     /// I primi due punti sono quelli della prima pagina dell'introduzione, poi «Tre domande, e poi si comincia.».
     static var punti: [String] {
         Array((PaginaIntroduzione.pagine.first?.punti ?? []).prefix(2)) + ["Tre domande, e poi si comincia."]
     }
 
     static let canali = "I tuoi canali"
-    static let canaliTesto = "Con quali etichette lavori? Prisma le tiene sempre distinte, una blu e una cuoio. Scrivi i nomi come li dici tu."
+    static let canaliTesto = "Con quali etichette lavori? Lucy le tiene sempre distinte, una blu e una cuoio. Scrivi i nomi come li dici tu."
     static let primoCanale = "Il primo canale"
     static let secondoCanale = "Il secondo canale"
     static let canaliNota = "Li cambi quando vuoi, in Impostazioni › Profilo."
@@ -217,7 +217,7 @@ struct PrimoAvvio: View {
 
     private var benvenuto: some View {
         HStack(alignment: .top, spacing: P.spazioLogo) {
-            LogoPrisma(colore: P.coloreLogo)
+            LogoLucy(colore: P.coloreLogo)
                 .frame(width: P.logo, height: P.logo)
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 0) {

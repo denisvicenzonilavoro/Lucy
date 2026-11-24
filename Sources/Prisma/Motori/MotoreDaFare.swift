@@ -204,7 +204,7 @@ enum MotoreDaFare {
             if let u = r.ultimoContatto {
                 spiegazione = "L'ultimo incontro è del \(Formati.dataEstesa.string(from: u)): è il momento di rivedere insieme posizioni, obiettivi e coperture."
             } else {
-                spiegazione = "Ha posizioni in essere ma nessun incontro registrato in Prisma: il primo riesame fissa il punto di partenza."
+                spiegazione = "Ha posizioni in essere ma nessun incontro registrato in Lucy: il primo riesame fissa il punto di partenza."
             }
             voci.append(VoceDaFare(
                 id: "riesame-" + r.cliente.id, tipo: .riesame, cliente: r.cliente, data: data, gruppo: g, quando: quando,

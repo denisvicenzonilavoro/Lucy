@@ -5,7 +5,7 @@ import Foundation
 /// Le fonti sono riferimenti da verificare sul testo vigente: in app compaiono con la nota `avvertenza`.
 enum TestiOccasioni {
     /// La nota da mettere sotto le tabelle dei documenti.
-    static let avvertenza = "Date ricavate dai dati registrati in Prisma (decorrenze, condizioni, famiglia): fanno fede le condizioni di contratto e i documenti del fondo."
+    static let avvertenza = "Date ricavate dai dati registrati in Lucy (decorrenze, condizioni, famiglia): fanno fede le condizioni di contratto e i documenti del fondo."
 
     // MARK: - Fonti
 
@@ -26,9 +26,9 @@ enum TestiOccasioni {
         case .maggiorenne:
             return "Codice civile, art. 2 (maggiore età) e art. 320 (amministrazione dei beni dei figli minori)."
         case .fineCarico:
-            return "Ipotesi della protezione di Prisma: età di fine carico del familiare (di regola 25 anni), da rivedere con il cliente."
+            return "Ipotesi della protezione di Lucy: età di fine carico del familiare (di regola 25 anni), da rivedere con il cliente."
         case .capitaleSottoDebito:
-            return "Stima di Prisma: capitale decrescente in linea retta (il piano vero è nelle condizioni di polizza) e debito con l'ammortamento alla francese."
+            return "Stima di Lucy: capitale decrescente in linea retta (il piano vero è nelle condizioni di polizza) e debito con l'ammortamento alla francese."
         case .limiteEtaTCM, .limiteEtaLTC:
             return "Limite d'età più comune nelle condizioni di polizza (si imposta in Impostazioni › Occasioni): verificare quello del prodotto."
         case .scadenzaFiscale:

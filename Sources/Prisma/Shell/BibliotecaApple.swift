@@ -146,7 +146,7 @@ struct BibliotecaApple: View {
         p.allowedContentTypes = [.pdf]
         p.allowsMultipleSelection = true
         p.prompt = "Aggiungi"
-        p.message = "Scegli i PDF delle norme: restano sul Mac, nella Biblioteca di Prisma."
+        p.message = "Scegli i PDF delle norme: restano sul Mac, nella Biblioteca di Lucy."
         if p.runModal() == .OK { biblioteca.importa(p.urls) { stato.mostraAvviso($0) } }
         #endif
     }

@@ -11,8 +11,8 @@ enum ProvaIndiceImpostazioni {
 
         verifica.vero("Impostazioni: ogni pagina una volta sola nella colonna",
                       colonna.count == SchedaImpostazioni.allCases.count && Set(colonna) == Set(SchedaImpostazioni.allCases))
-        verifica.vero("Impostazioni: i gruppi della colonna si chiamano «Prisma», «Il lavoro» e «Aiuto»",
-                      IndiceImpostazioni.gruppi.compactMap { $0.titolo } == ["Prisma", "Il lavoro", "Aiuto"])
+        verifica.vero("Impostazioni: i gruppi della colonna si chiamano «Lucy», «Il lavoro» e «Aiuto»",
+                      IndiceImpostazioni.gruppi.compactMap { $0.titolo } == ["Lucy", "Il lavoro", "Aiuto"])
         verifica.vero("Impostazioni: ogni voce dell'indice ha una pagina della colonna",
                       voci.allSatisfy { colonna.contains($0.pagina) })
         let chiavi = voci.map { "\($0.pagina.rawValue)|\($0.titolo)|\($0.spiegazione)" }

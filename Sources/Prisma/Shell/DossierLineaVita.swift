@@ -352,7 +352,7 @@ struct LineaVitaDossier: View {
         return ScrollView(.vertical, showsIndicators: false) {
             VStack(alignment: .leading, spacing: k.spazioNote) {
                 if senzaEventi {
-                    riga("Nessun evento nella linea della vita. Aggiungi la casa, i figli, un'eredità: Prisma ricalcola il futuro.",
+                    riga("Nessun evento nella linea della vita. Aggiungi la casa, i figli, un'eredità: Lucy ricalcola il futuro.",
                          colore: k.coloreNota)
                 }
                 if prep.eventiSenzaCifra > 0 {

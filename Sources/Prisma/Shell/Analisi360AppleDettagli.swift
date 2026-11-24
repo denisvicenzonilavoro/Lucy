@@ -183,7 +183,7 @@ struct DettaglioLiquiditaApple: View {
             if let mesi = l.mesi {
                 mesiDaParte(mesi, l)
             } else {
-                Text("Indica il fabbisogno mensile nelle ipotesi di protezione: da lì Prisma conta i mesi di spese da parte.")
+                Text("Indica il fabbisogno mensile nelle ipotesi di protezione: da lì Lucy conta i mesi di spese da parte.")
                     .carattereApple(d.vuoto)
                     .foregroundColor(d.coloreVuoto)
                     .fixedSize(horizontal: false, vertical: true)
@@ -434,7 +434,7 @@ private struct PiedeDettaglioArea360: View {
             }
             .buttonStyle(.applePrimarioGrande)
             .disabled(stato.solaLettura)
-            .help("Le proposte che le analisi di Prisma suggeriscono per l'area diventano una bozza in Posizioni")
+            .help("Le proposte che le analisi di Lucy suggeriscono per l'area diventano una bozza in Posizioni")
             Button(action: chiediVera) {
                 Text("Chiedi a Vera di spiegarlo")
             }

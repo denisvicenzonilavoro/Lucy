@@ -160,7 +160,7 @@ extension StatoShell {
         guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else { return }
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per importare documenti.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per importare documenti.")
             return
         }
         guard let s = sinistro(id) else { return }

@@ -607,7 +607,7 @@ private struct PalcoSala: View {
                     // Giro 15: accende la voce nel file del cliente (Shell/StatoPrismaCliente.swift); il disegno entra
                     // nel file solo come obiettivo salvato (decisione 7)
                     let aggiunta = stato.voceAggiunta(esperienza, cliente: cliente)
-                    let intero = aggiunta ? "✓ Nel Prisma di \(nome)" : "✦ Aggiungi al Prisma di \(nome)"
+                    let intero = aggiunta ? "✓ Nella Lucy di \(nome)" : "✦ Aggiungi alla Lucy di \(nome)"
                     Button { stato.aggiungiAlPrismaCliente(esperienza, cliente: cliente) } label: {
                         // Rifinitura 59/60: nelle finestre strette solo il segno (il testo intero resta nell'aiuto e
                         // nell'etichetta di accessibilità)
@@ -633,7 +633,7 @@ private struct PalcoSala: View {
     /// L'aiuto di «✦ Aggiungi al Prisma»: con il solo segno comincia con il testo intero del pulsante.
     private func aiutoAggiungi(intero: String, breve: Bool) -> String {
         if esperienza == .disegna { return "Il disegno entra nel file quando lo salvi come obiettivo" }
-        let spiegazione = "Nel file personale del cliente (Il Prisma del cliente). Prisma non manda nulla da solo"
+        let spiegazione = "Nel file personale del cliente (La Lucy del cliente). Lucy non manda nulla da sola"
         return breve ? intero + ". " + spiegazione : spiegazione
     }
 }
