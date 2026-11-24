@@ -5,6 +5,59 @@ import SwiftUI
 // «Ascolta» (la voce del Mac) e «Ristampa» (ricompone e rifà l'entrata). Le frasi le scrive MotorePrimaPagina. Mai in
 // modalità cliente: porta i nomi di tutti i clienti.
 
+/// La striscia della Prima Pagina nella testata della scrivania: «Il Foglio · N.», il titolo della giornata con
+/// l'evidenziatore e «Leggi», che apre il Foglio intero con il turno di notte e le lettere da Prisma AI.
+struct StrisciaPrimaPagina: View {
+    @Environment(StatoShell.self) private var stato
+    @State private var aperta = false
+
+    var body: some View {
+        let p = stato.primaPagina(ristampa: 0)
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text("IL FOGLIO · N. \(p.numero)")
+                .fontCarta(11, design: .monospaced).tracking(1.5)
+                .foregroundColor(TemaCarta.Colore.matitaD)
+                .fixedSize()
+            Text(p.titolo)
+                .fontCarta(17, weight: .medium, design: .serif)
+                .foregroundColor(TemaCarta.Colore.inchiostroD)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .segnoCarta(.evidenzia, chiave: "prima-pagina.\(p.numero).\(p.edizione.rawValue)")
+            Button { aperta = true } label: {
+                Label("Leggi", systemImage: "newspaper")
+            }
+            .buttonStyle(.plain)
+            .fontCarta(12, weight: .medium)
+            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+            .fixedSize()
+            #if os(iOS)
+            .frame(minHeight: 44)
+            #endif
+            .accessibilityHint("Apre la Prima Pagina di oggi")
+            .popover(isPresented: $aperta, arrowEdge: .bottom) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        PrimaPaginaWidget()
+                        TurnoNotteWidget()
+                        LetteraPrismaAIWidget()
+                    }
+                    .padding(16)
+                }
+                .frame(width: 540)
+                .frame(maxHeight: 640)
+                .environment(stato)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .frame(maxWidth: 640, alignment: .leading)
+        .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("La Prima Pagina di oggi")
+    }
+}
+
 struct PrimaPaginaWidget: View {
     @Environment(StatoShell.self) private var stato
     @Environment(\.prismaStatoFinale) private var statoFinale

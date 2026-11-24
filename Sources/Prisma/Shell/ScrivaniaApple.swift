@@ -310,15 +310,12 @@ private struct TestataScrivania: View {
                         .padding(.top, s.guidaAlto)
                 }
                 // Stile Carta (NOVITÀ 1): la Prima Pagina della giornata
+                // Sulla scrivania una striscia di una riga (la testata ha l'altezza della scrivania Apple: il Foglio intero
+                // copriva la mossa del giorno); «Leggi» apre il Foglio con il turno di notte (NOVITÀ 3) e le lettere da
+                // Prisma AI (NOVITÀ 11)
                 if Tema.Stile.usaCarta && !stato.inModoCliente {
-                    PrimaPaginaWidget()
+                    StrisciaPrimaPagina()
                         .padding(.top, s.guidaAlto)
-                    // Stile Carta (NOVITÀ 3): il resoconto del turno di notte di Vera
-                    TurnoNotteWidget()
-                        .padding(.top, 12)
-                    // Stile Carta (NOVITÀ 11): le richieste da Prisma AI come lettere (collegamento spento)
-                    LetteraPrismaAIWidget()
-                        .padding(.top, 12)
                 }
             }
             .modifier(entrata(0))
