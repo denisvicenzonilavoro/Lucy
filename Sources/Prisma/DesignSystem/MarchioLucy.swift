@@ -63,12 +63,13 @@ enum GeometriaLucy {
         return Path(ellipseIn: CGRect(x: c.x - raggio * s, y: c.y - raggio * s, width: 2 * raggio * s, height: 2 * raggio * s))
     }
 
-    /// Il simbolo come SVG (per i file dati al cliente e le pagine fuori da SwiftUI), in un quadrato di lato `lato`.
+    /// Il simbolo come SVG da mettere dentro una pagina HTML (per i file dati al cliente), in un quadrato di lato `lato`.
+    /// Senza `xmlns`: nei file dati al cliente non ci sono indirizzi web (controllo statico nel workflow).
     static func svg(lato: Double, tratto: String = "#16130F", oro: String = "#BF923D") -> String {
         func n(_ v: Double) -> String { String(format: "%.2f", v) }
         let s = lato, k = Double(spessore)
         let cx = Double(centro.x) * s, cy = Double(centro.y) * s, r = Double(raggio) * s
-        return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 \(n(s)) \(n(s))\" width=\"\(n(s))\" height=\"\(n(s))\">"
+        return "<svg viewBox=\"0 0 \(n(s)) \(n(s))\" width=\"\(n(s))\" height=\"\(n(s))\">"
             + "<path d=\"M0 0H\(n(k * s))V\(n((1 - k) * s))H\(n(s))V\(n(s))H0Z\" fill=\"\(tratto)\"/>"
             + "<circle cx=\"\(n(cx))\" cy=\"\(n(cy))\" r=\"\(n(r))\" fill=\"\(oro)\"/></svg>"
     }
