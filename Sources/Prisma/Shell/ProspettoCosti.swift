@@ -199,7 +199,7 @@ private struct PaginaCostiTempo: View {
                     .font(T.pCorpo).foregroundColor(C.tenue).fixedSize(horizontal: false, vertical: true)
             } else {
                 TabellaCanali(colonne: [
-                    ColonnaDoc(titolo: "Oggi", sottotitolo: "costo annuo", peso: 2, destra: false), ColonnaDoc(titolo: "Alternativa", sottotitolo: "canale · costo", peso: 2.2, destra: false),
+                    ColonnaDoc(titolo: "Oggi", sottotitolo: "costo annuo", peso: 2, destra: false), ColonnaDoc(titolo: "Alternativa", sottotitolo: "costo annuo", peso: 2.2, destra: false),
                     ColonnaDoc(titolo: "Uscita oggi", sottotitolo: "penali, imposte, ingresso", peso: 1.1), ColonnaDoc(titolo: "In più", sottotitolo: "netto, uscita compresa", peso: 1.1),
                 ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
                     // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe

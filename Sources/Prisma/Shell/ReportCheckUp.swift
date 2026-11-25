@@ -19,6 +19,7 @@ enum ReportCheckUp {
     private static func copertina(_ t: TestiCheckUp) -> CopertinaReport {
         let e = t.e
         let cartellini: [(String, [String])] = [("Patrimonio netto", [CifreDoc.euro(e.riepilogo.patrimonioNetto)]),
+                                                ("Liquidità", [CifreDoc.euro(e.riepilogo.perArea[.liquidita] ?? 0), "debiti \(CifreDoc.euro(e.riepilogo.debiti))"]),
                                                 ("Il semaforo", ["\(e.verdi.count) in ordine", "\(e.gialli.count) da migliorare",
                                                                   "\(e.rossi.count) da affrontare"]),
                                                 ("Da dove partire", [e.daAffrontare.first?.titolo ?? "Tutto in ordine"])]

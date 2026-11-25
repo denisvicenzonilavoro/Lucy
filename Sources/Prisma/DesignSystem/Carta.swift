@@ -5,36 +5,38 @@ import UIKit
 #endif
 import SwiftUI
 
-// Carta stampata dei prospetti di dettaglio: carta avorio, testata con il logo di Prisma e
-// filetto blu ardesia, testi in SF. Su carta i colori sono più asciutti che a schermo: niente trame,
-// poco inchiostro. Colori sempre fissi e opachi (mai i colori dinamici del tema): la carta resta chiara.
+// Carta stampata dei prospetti di dettaglio, nello stile Lucy: carta bianca, testata con il marchio Lucy e il filo
+// d'inchiostro, titoli in New York con la sottolineatura d'oro, etichette in SF Mono, testi in SF. Su carta i colori
+// sono asciutti: niente trame, poco inchiostro. Colori sempre fissi e opachi: la carta resta chiara.
 
 extension Colori {
     enum Carta {
-        static let foglio = Color(hex: "#fffefa")
-        /// Il logo di Prisma nella testata: sempre scuro su carta.
+        static let foglio = Color(hex: "#FFFFFF")
+        /// Il marchio Lucy nella testata: sempre a inchiostro su carta.
         static let logo = Tema.Colore.logoStampa
-        static let intestazione = Color(hex: "#395269")
-        static let filettoForte = Color(hex: "#314e63")
-        static let filetto = Color(hex: "#ddd8ca")
-        static let filettoRiga = Color(hex: "#e8e4d8")
-        static let titolo = Color(hex: "#293c4c")
-        static let testo = Color(hex: "#3f413b")
-        static let testoTenue = Color(hex: "#81847d")
-        static let piede = Color(hex: "#909088")
-        static let numeroSezione = Color(hex: "#9f7645")
-        static let zebra = Color(hex: "#f7f5ee")
-        static let evidenza = Color(hex: "#e7eef3")
-        static let riquadro = Color(hex: "#fbfaf5")
-        static let riquadroBordo = Color(hex: "#d9d5c9")
-        static let avvisoFondo = Color(hex: "#fbf3df")
-        static let avvisoBordo = Color(hex: "#e2c98f")
-        static let avvisoTesto = Color(hex: "#6b5426")
-        static let griglia = Color(hex: "#e4e0d4")
-        static let versato = Color(hex: "#9a9a90")
-        static let atteso = Color(hex: "#2f6690")
-        static let prudente = Color(hex: "#b07b4f")
-        static let favorevole = Color(hex: "#5b8a3c")
+        // Stile Lucy (Design/template-carta.html, `.a4`): inchiostro, matita, oro; colori fissi e opachi
+        static let intestazione = Color(hex: "#4E5462")
+        static let filettoForte = Color(hex: "#15181F")
+        static let filetto = Color(hex: "#E4E0D6")
+        static let filettoRiga = Color(hex: "#EEEAE1")
+        static let titolo = Color(hex: "#15181F")
+        static let testo = Color(hex: "#2E323B")
+        static let testoTenue = Color(hex: "#6F685B")
+        static let piede = Color(hex: "#8C8578")
+        /// Il numero della sezione e l'occhiello: l'oro scuro, leggibile sulla carta bianca.
+        static let numeroSezione = Color(hex: "#9A760C")
+        static let zebra = Color(hex: "#FAF8F2")
+        static let evidenza = Color(hex: "#FBF4DA")
+        static let riquadro = Color(hex: "#FAF7EF")
+        static let riquadroBordo = Color(hex: "#E4DFD2")
+        static let avvisoFondo = Color(hex: "#FBF3DF")
+        static let avvisoBordo = Color(hex: "#E2C98F")
+        static let avvisoTesto = Color(hex: "#6B5426")
+        static let griglia = Color(hex: "#ECE8DF")
+        static let versato = Color(hex: "#9C978C")
+        static let atteso = Color(hex: "#2B4C7E")
+        static let prudente = Color(hex: "#B07B4F")
+        static let favorevole = Color(hex: "#2C6A4D")
         /// Fondo dell'anteprima a schermo (.docs-reading-room).
         static let tavoloAlto = Color(hex: "#d8dcda")
         static let tavoloBasso = Color(hex: "#e7e6df")
@@ -54,23 +56,32 @@ extension Tipo {
             Font.system(size: dimensione, weight: grassetto ? .bold : .regular)
         }
 
+        /// New York per i titoli e le cifre grandi, SF Mono per occhielli ed etichette (stile Lucy).
+        static func serif(_ dimensione: CGFloat, _ peso: Font.Weight = .medium) -> Font {
+            Font.system(size: dimensione, weight: peso, design: .serif)
+        }
+
+        static func mono(_ dimensione: CGFloat, _ peso: Font.Weight = .medium) -> Font {
+            Font.system(size: dimensione, weight: peso, design: .monospaced)
+        }
+
         static func nsFont(_ dimensione: CGFloat, grassetto: Bool = false) -> FontPiattaforma {
             FontPiattaforma.systemFont(ofSize: dimensione, weight: grassetto ? .bold : .regular)
         }
 
-        static let testataPiccola = font(5.8)
-        static let data = font(8)
-        static let occhiello = font(7, grassetto: true)
-        static let titolo = font(23)
+        static let testataPiccola = mono(5.6)
+        static let data = mono(7.4)
+        static let occhiello = mono(7)
+        static let titolo = serif(24)
         static let sottotitolo = font(9.5)
         static let firma = font(8.5)
         static let corrente = font(9)
-        static let numeroSezione = font(11)
-        static let sezione = font(14)
-        static let indicatoreEtichetta = font(6.5, grassetto: true)
-        static let indicatoreValore = font(16)
+        static let numeroSezione = mono(10)
+        static let sezione = serif(14.5)
+        static let indicatoreEtichetta = mono(6.1)
+        static let indicatoreValore = serif(17)
         static let indicatoreNota = font(7)
-        static let voceEtichetta = font(6.5, grassetto: true)
+        static let voceEtichetta = mono(6.1)
         static let voceValore = font(9)
         static let tabellaTesta = font(6.5, grassetto: true)
         static let tabella = font(8)
@@ -78,7 +89,7 @@ extension Tipo {
         static let testo = font(9)
         static let nota = font(7)
         static let assi = font(6.5)
-        static let piede = font(6.5)
+        static let piede = mono(6, .regular)
         /// Migliorie d'uso 22: il timbro «SOLO PER TE» e la frase in fondo all'ultima pagina.
         static let timbro = font(9.5, grassetto: true)
         static let notaPerTe = font(6.5, grassetto: true)

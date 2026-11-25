@@ -17,6 +17,10 @@ enum ReportCosti {
     private static func copertina(_ t: TestiCosti) -> CopertinaReport {
         var cartellini: [(String, [String])] = [("Quest'anno", [CifreDoc.euro(t.a.euroAnno)]), ("In 20 anni", [CifreDoc.euro(t.a.perso20)])]
         if t.a.risparmioPossibile > 0 { cartellini.append(("Puoi risparmiare", [CifreDoc.euro(t.a.risparmioPossibile)])) }
+        // Lo scontrino della copertina: anche le posizioni con i costi, la più cara per prima (stesso ordine del motore)
+        if let prima = t.a.voci.first {
+            cartellini.append(("Le posizioni", [t.a.voci.count == 1 ? "1 posizione" : "\(t.a.voci.count) posizioni", "la più cara: \(prima.posizione.nome)"]))
+        }
         return CopertinaReport(occhiello: "Costi", titolo: "Il costo dei tuoi investimenti",
                                sottotitolo: "Quanto paghi, quanto pesa nel tempo e cosa ricevi in cambio",
                                nomi: t.cliente, ruolo: t.ruoloConsulente, data: t.data,

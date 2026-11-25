@@ -25,7 +25,7 @@ enum ReportAnnoInsieme {
 
 // MARK: - Il foglio
 
-/// Carta bianca A4 orizzontale: l'intestazione con il canale, il contenuto, il piede con le avvertenze e il numero.
+/// Carta bianca A4 orizzontale: l'intestazione con il marchio Lucy, il contenuto, il piede con le avvertenze e il numero.
 private struct FoglioAnno<Contenuto: View>: View {
     @Environment(\.numerazioneFascicolo) private var fascicolo
     let t: TestiAnnoInsieme
@@ -58,6 +58,8 @@ private struct FoglioAnno<Contenuto: View>: View {
                     .background(K.fondo)
             }
             .padding(EdgeInsets(top: M.margineAlto, leading: M.margineLati, bottom: M.piedeDalFondo, trailing: M.margineLati))
+            // Un solo canale, Lucy: niente etichette dei canali sulla carta
+            .environment(\.canaleUnicoLucy, true)
         }
         // La carta ha misure fisse: la «Dimensione del testo» dell'app non la ingrandisce (anteprima, sala e PDF uguali)
         .prismaScalaTesto(1)
@@ -79,33 +81,19 @@ private struct FoglioAnno<Contenuto: View>: View {
     }
 }
 
-/// L'intestazione: il logo di Prisma e il canale. Solo indipendente: «DENIS VICENZONI · CONSULENZA FINANZIARIA» in
-/// cuoio; solo Alleanza: il simbolo Alleanza e la scritta in blu; con i due canali, le due etichette da stampa.
+/// L'intestazione: il marchio Lucy e il consulente. Un solo canale, Lucy: niente etichette né simboli dei canali.
 private struct IntestazioneAnno: View {
+    /// I canali delle posizioni: restano per chi li passa, ma sulla carta c'è un solo canale.
     let canali: [Canale]
 
     var body: some View {
         HStack(alignment: .center, spacing: M.spazioLogo) {
-            LogoLucy(colore: K.logo)
-                .frame(height: M.logo)
-            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: il nome del consulente, senza canale né simbolo Alleanza
-            Text(verbatim: TestiValutazione.consulente)
+            LogoLucyConNome(colore: K.logo, altezza: M.logo)
+            Text(verbatim: "· \(TestiValutazione.consulente) · \(TestiValutazione.ruoloLucy.lowercased())")
                 .carattereApple(F.intestazione)
                 .foregroundColor(K.etichetta)
                 .lineLimit(1)
             Spacer(minLength: 0)
-        }
-    }
-
-    @ViewBuilder private var simboloAlleanza: some View {
-        if let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
-            Image(piattaforma: simbolo)
-                .renderingMode(.template)
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .frame(height: M.simboloAlleanza)
-                .foregroundColor(K.alleanza)
         }
     }
 }

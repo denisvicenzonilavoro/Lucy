@@ -22,11 +22,8 @@ struct TestiCosti {
 
     var canali: [Canale] { Canale.allCases.filter { c in a.voci.contains { $0.posizione.canale == c } } }
 
-    var ruoloConsulente: String {
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
-    }
+    /// Un solo canale, Lucy: la stessa firma per ogni cliente.
+    var ruoloConsulente: String { TestiValutazione.ruoloLucy }
 
     var titoloOggi: String {
         guard let m = a.costoMedio else { return "Mancano i costi dei tuoi investimenti" }

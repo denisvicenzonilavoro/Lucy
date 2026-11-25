@@ -20,11 +20,8 @@ struct TestiLiquidita {
         Canale.allCases.filter { c in (e.scadenze.map(\.posizione) + e.liquidita + e.proposte).contains { $0.canale == c } }
     }
 
-    var ruoloConsulente: String {
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
-    }
+    /// Un solo canale, Lucy: la stessa firma per ogni cliente.
+    var ruoloConsulente: String { TestiValutazione.ruoloLucy }
 
     var titoloArrivo: String {
         if e.scadenze.isEmpty { return "Nessun capitale in scadenza: hai \(CifreDoc.euro(e.liquiditaAttuale)) di liquidità" }

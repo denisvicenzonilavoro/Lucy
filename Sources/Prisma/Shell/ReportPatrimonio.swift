@@ -14,6 +14,8 @@ enum ReportPatrimonio {
     private static func copertina(_ t: TestiPatrimonio) -> CopertinaReport {
         var cartellini: [(String, [String])] = [("Oggi", [CifreDoc.euro(t.p.nettoOggi)]), ("Tra \(t.p.anni) anni", [CifreDoc.euro(t.p.valore(t.p.anni))])]
         if t.p.conProposte != nil { cartellini.append(("Con le proposte", [CifreDoc.euro(t.p.valore(t.p.anni, conProposte: true))])) }
+        // Lo scontrino della copertina: anche quali proposte (al più due)
+        if !t.p.proposte.isEmpty { cartellini.append(("Le proposte", t.p.proposte.prefix(2).map(\.nome))) }
         return CopertinaReport(occhiello: "Il tuo patrimonio", titolo: "I prossimi \(t.p.anni) anni",
                                sottotitolo: "Dove ti porta la strada di oggi, e dove potresti arrivare",
                                nomi: t.cliente, ruolo: t.ruoloConsulente, data: t.data,

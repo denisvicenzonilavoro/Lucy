@@ -3,7 +3,7 @@ import PDFKit
 
 /// Prova del report «Un anno insieme», dentro `Prisma --prova-prospetti`: il motore su un caso costruito a mano
 /// (valore al 1° gennaio dallo storico, versamenti dell'anno, andamento, calo, traguardo), poi il PDF dei 5 clienti
-/// di prova: si crea, è A4 orizzontale, ha le avvertenze in ogni pagina, il canale riconoscibile, le cifre del
+/// di prova: si crea, è A4 orizzontale, ha le avvertenze in ogni pagina, il consulente in testa (un solo canale, Lucy), le cifre del
 /// motore e nessuna parola di promessa («garantito», «sicuro», «certo»). Entra nel fascicolo della revisione.
 /// La chiama `ProvaProspetti.esegui` prima del riepilogo, con la sua funzione di verifica.
 @MainActor
@@ -39,8 +39,9 @@ enum ProvaAnnoInsieme {
             verifica("\(nome): avvertenze a piè di ogni pagina", senzaAvvertenze.isEmpty,
                      senzaAvvertenze.isEmpty ? "" : "mancano a pagina \(senzaAvvertenze.joined(separator: ", "))")
             let prima = (pagine.first ?? "").lowercased()
-            let canaliMancanti = a.canali.filter { !prima.contains($0.nome.lowercased()) }.map(\.nomeBreve)
-            verifica("\(nome): il canale in testa alla prima pagina", canaliMancanti.isEmpty,
+            // Un solo canale, Lucy: in testa il consulente, nessuna etichetta dei canali
+            verifica("\(nome): il consulente in testa alla prima pagina, senza canali",
+                     prima.contains(TestiValutazione.consulente.lowercased()) && ProvaProspetti.senzaCanali(pagine.joined(separator: "\n")),
                      a.canali.map(\.nomeBreve).joined(separator: " e "))
 
             // «Cosa ci aspetta» si chiama col periodo vero (da oggi a 12 mesi), non «Nel» anno successivo:

@@ -783,6 +783,8 @@ struct EtichettaCanale: View {
 struct EtichettaCanaleStampa: View {
     let canale: Canale
     var compatta = false
+    /// Nei prospetti e nei report di Prospetti c'è un solo canale, Lucy: l'etichetta non si disegna.
+    @Environment(\.canaleUnicoLucy) private var canaleUnico
 
     // Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy: il canale non si mostra
     // più. Il campo `canale` resta nei dati solo per compatibilità; la firma resta perché i richiami compilino.

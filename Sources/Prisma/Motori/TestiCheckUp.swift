@@ -18,11 +18,8 @@ struct TestiCheckUp {
 
     var canali: [Canale] { e.cliente?.canali.isEmpty == false ? (e.cliente?.canali ?? []) : [.alleanza] }
 
-    var ruoloConsulente: String {
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
-    }
+    /// Un solo canale, Lucy: la stessa firma per ogni cliente.
+    var ruoloConsulente: String { TestiValutazione.ruoloLucy }
 
     /// "35 anni · Infermiere · celibe"
     var chiSei: String {

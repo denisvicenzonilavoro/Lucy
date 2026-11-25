@@ -24,8 +24,8 @@ enum ProspettoAdeguatezza {
     static func pagine(_ t: PaginaDatiAdeguatezza) -> [AnyView] {
         let avvertenza = TestiAdeguatezza.avvertenzaBreve
         return [
-            AnyView(FoglioProspetto(piede: t.piede, avvertenza: avvertenza, numero: 1, totale: 2) { PaginaControlliAdeguatezza(t: t) }),
-            AnyView(FoglioProspetto(piede: t.piede, avvertenza: avvertenza, numero: 2, totale: 2) { PaginaDocumentiAdeguatezza(t: t) }),
+            AnyView(FoglioProspetto(piede: t.piede, avvertenza: avvertenza, numero: 1, totale: 2, canaleUnico: false) { PaginaControlliAdeguatezza(t: t) }),
+            AnyView(FoglioProspetto(piede: t.piede, avvertenza: avvertenza, numero: 2, totale: 2, canaleUnico: false) { PaginaDocumentiAdeguatezza(t: t) }),
         ]
     }
 

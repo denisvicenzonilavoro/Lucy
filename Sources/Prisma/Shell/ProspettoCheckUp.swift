@@ -76,7 +76,13 @@ private struct PaginaChiE: View {
                            return RigaDoc(celle: [CellaDoc(a.nome, font: T.pTabellaForte), CellaDoc((a.passivo ? "− " : "") + CifreDoc.euro(v), font: T.pTabella),
                                                   CellaDoc(quota, font: T.pTabella)], altezza: 14)
                        }, fontTesta: T.pTabellaTesta, altezzaTesta: 12, margine: 4)
-            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente riga «Per canale»
+            // Un solo canale, Lucy: le attività seguite tutte insieme, sulla stessa riga del titolo
+            if e.riepilogo.attivita > 0.5 {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text(verbatim: "Attività seguite").font(T.pSottosezione).foregroundColor(C.titolo)
+                    Text(verbatim: CifreDoc.euro(e.riepilogo.attivita)).font(T.pCorpoForte).foregroundColor(C.titolo)
+                }
+            }
             RiquadroBarra(titolo: "In sintesi") {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(Array(t.sintesi.enumerated()), id: \.offset) { _, p in
@@ -98,7 +104,6 @@ private struct PaginaChiE: View {
             riga("Profilo", [c.profilo.propensione.map { "propensione \($0.nome.lowercased())" }, c.profilo.orizzonteAnni.map { "orizzonte \($0) anni" },
                              c.profilo.esperienza.map { "esperienza \($0.nome.lowercased())" }].compactMap { $0 }.joined(separator: " · ")),
             riga("Obiettivi dichiarati", c.profilo.obiettivi),
-            riga("Canali", c.canali.map(\.nome).joined(separator: ", ")),
         ]
     }
 }

@@ -22,11 +22,8 @@ struct TestiObiettivo {
 
     var canali: [Canale] { Canale.allCases.filter { c in e.contributi.contains { $0.posizione.canale == c } } }
 
-    var ruoloConsulente: String {
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
-    }
+    /// Un solo canale, Lucy: la stessa firma per ogni cliente.
+    var ruoloConsulente: String { TestiValutazione.ruoloLucy }
 
     var quando: String {
         let mesi = e.mesi
