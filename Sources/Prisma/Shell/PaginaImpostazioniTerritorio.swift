@@ -18,7 +18,8 @@ struct PaginaImpostazioniTerritorio: View {
         let tabella = stato.territorio.tabella
         return VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Pagina.spazioGruppi) {
             NotaImpostazioni("Territorio mette i clienti sulla mappa con il comune dell'indirizzo o con la posizione che metti a "
-                             + "mano. Lucy non usa servizi di mappe o di percorso: distanze e tempi sono stime in linea d'aria.")
+                             + "mano. Distanze e tempi sono stime in linea d'aria; solo il giro, se accendi «Usa Apple Mappe per "
+                             + "il giro», usa la mappa e i percorsi di Apple.")
             VStack(alignment: .leading, spacing: Riga.fraRighe) {
                 GruppoImpostazioni(titolo: "Stima delle distanze") {
                     RigaImpostazione(titolo: "Fattore strada", sottotitolo: "La linea d'aria per questo numero: i km stimati") {
@@ -42,21 +43,33 @@ struct PaginaImpostazioniTerritorio: View {
                         }
                     }
                 }
-                NotaImpostazioni("Lucy non usa servizi di percorso: sono stime in linea d'aria. I km di Studio › Spese restano "
-                                 + "quelli che scrivi tu.")
+                NotaImpostazioni("Sono stime in linea d'aria (anche per il giro, se Apple Mappe è spento o non risponde). I km "
+                                 + "di Studio › Spese restano quelli che scrivi tu.")
             }
             .cascataImpostazioni(1)
-            GruppoImpostazioni(titolo: "Il giro") {
-                RigaImpostazione(titolo: "Deviazione massima", sottotitolo: "Per proporre un cliente «lungo la strada»") {
-                    sceltaIntero(t.deviazioneMassima, [5, 10, 15, 20, 30], testo: { "\($0) min" }) { v in
-                        stato.impostaTerritorio { $0.deviazioneMassima = v }
+            VStack(alignment: .leading, spacing: Riga.fraRighe) {
+                GruppoImpostazioni(titolo: "Il giro") {
+                    RigaImpostazione(titolo: "Deviazione massima", sottotitolo: "Per proporre un cliente «lungo la strada»") {
+                        sceltaIntero(t.deviazioneMassima, [5, 10, 15, 20, 30], testo: { "\($0) min" }) { v in
+                            stato.impostaTerritorio { $0.deviazioneMassima = v }
+                        }
+                    }
+                    RigaImpostazione(titolo: "Visita breve", sottotitolo: "La durata dell'appuntamento proposto dal Territorio") {
+                        sceltaIntero(t.durataVisitaBreve, [15, 20, 30, 45, 60], testo: { "\($0) min" }) { v in
+                            stato.impostaTerritorio { $0.durataVisitaBreve = v }
+                        }
+                    }
+                    // Apple Mappe per il giro (decisione dell'utente del 25 novembre 2026): spento di base
+                    RigaImpostazione(titolo: TestiTerritorio.usaMappeApple, sottotitolo: TestiTerritorio.spiegazioneMappeApple,
+                                     ultima: true) {
+                        Toggle(isOn: Binding(get: { t.usaMappeApple }, set: { acceso in
+                            stato.impostaTerritorio { $0.usaMappeApple = acceso }
+                        })) { EmptyView() }
+                        .toggleStyle(.appleSenzaEtichetta)
+                        .disabled(stato.solaLettura)
                     }
                 }
-                RigaImpostazione(titolo: "Visita breve", sottotitolo: "La durata dell'appuntamento proposto dal Territorio", ultima: true) {
-                    sceltaIntero(t.durataVisitaBreve, [15, 20, 30, 45, 60], testo: { "\($0) min" }) { v in
-                        stato.impostaTerritorio { $0.durataVisitaBreve = v }
-                    }
-                }
+                NotaImpostazioni(TestiTerritorio.notaMappeApple)
             }
             .cascataImpostazioni(2)
             GruppoImpostazioni(titolo: "Da dove parti") {

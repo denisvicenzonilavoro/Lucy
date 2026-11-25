@@ -129,6 +129,21 @@ jobs:
             echo "::error::Il Territorio non deve usare la rete, servizi di mappe o la posizione del dispositivo"
             exit 1
           fi
+          # Eccezione Apple Mappe (decisione dell'utente del 25 novembre 2026, spenta di base): MapKit e il calcolo dei
+          # percorsi solo in Shell/GiroMappeApple.swift, in nessun altro file di Sources
+          FUORI=$(grep -rlE 'import MapKit|MKDirections|MKMapItem|MKPlacemark|MKLocalSearch|MapPolyline' Sources \
+              | grep -vx 'Sources/Prisma/Shell/GiroMappeApple.swift' || true)
+          if [ -n "$FUORI" ]; then
+            echo "$FUORI"
+            echo "::error::MapKit e i percorsi di Apple Mappe sono ammessi solo in Sources/Prisma/Shell/GiroMappeApple.swift"
+            exit 1
+          fi
+          # Ad Apple solo le coordinate delle tappe: niente geocodifica, ricerca di luoghi, rete propria, nomi o indirizzi
+          if grep -nE 'URLSession|URLRequest|NWConnection|CLGeocoder|MKLocalSearch|import CoreLocation|addressDictionary|postalAddress|\.name *=|MKAddress' \
+              Sources/Prisma/Shell/GiroMappeApple.swift; then
+            echo "::error::Ad Apple Mappe vanno solo le coordinate delle tappe, mai nomi, indirizzi o ricerche"
+            exit 1
+          fi
 
       - name: Privacy della notte
         run: |

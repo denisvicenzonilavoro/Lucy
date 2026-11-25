@@ -60,4 +60,15 @@ enum TestiTerritorio {
         if altri == 1 { resto += " e un'altra" } else if altri > 1 { resto += " e altre \(altri)" }
         return (forte, resto)
     }
+
+    // MARK: Apple Mappe per il giro (decisione dell'utente del 25 novembre 2026)
+
+    static let usaMappeApple = "Usa Apple Mappe per il giro"
+    static let spiegazioneMappeApple = "Per mappa e percorsi vanno ad Apple solo le coordinate delle tappe, mai nomi o dati dei clienti."
+    static let notaMappeApple = "Spento di base. Senza rete, o se Apple non risponde, il giro torna alla mappa disegnata con le "
+        + "stime in linea d'aria."
+    static let partenzaMappeApple = "Partenza"
+    static let rientroMappeApple = "Rientro"
+    static let percorsoInCalcolo = "Apple Mappe sta calcolando il percorso…"
+    static func durataApple(_ durata: String) -> String { "\(durata) in auto · percorso di Apple Mappe" }
 }

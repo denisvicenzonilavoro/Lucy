@@ -203,6 +203,12 @@ extension Tema.Apple {
             static let sopraPulsante: CGFloat = 10
             static let sottoPulsante: CGFloat = 7
             static let notaIPhone = C(dimensione: 12, peso: .regular)
+            // Apple Mappe per il giro (25 novembre 2026, spento di base): la linea del percorso vero, il segnaposto della
+            // partenza e quanti punti tenere per ogni tratto (memoria del Mac da 8 GB)
+            static let spessorePercorsoApple: CGFloat = 5
+            static let simboloCasaApple = "house.fill"
+            static let tintaCasaApple = Color(hex: "#636366")
+            static let puntiMassimiTratto = 300
         }
 
         // MARK: La crescita

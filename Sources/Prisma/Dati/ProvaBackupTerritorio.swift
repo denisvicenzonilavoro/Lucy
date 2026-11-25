@@ -22,6 +22,8 @@ extension ProvaBackup {
         t.zone = [ZonaTerritorio(id: "zona-prova", nome: "Zona di prova", comuni: ["BO-bologna", "MO-modena"])]
         t.attenzioniAlte = [2]
         t.comunePartenza = "BO-bologna"
+        // Apple Mappe per il giro (25 novembre 2026): acceso nei dati di prova per vederlo tornare dal backup
+        t.usaMappeApple = true
         d.impostazioni.territorio = t
     }
 
@@ -67,6 +69,7 @@ extension ProvaBackup {
         territorio["velocitaCitta"] = 0
         territorio["zone"] = [["nome": "senza id", "comuni": []], "rovinata", zone[0]] as [Any]
         territorio["attenzioniAlte"] = [2, 99]
+        territorio["usaMappeApple"] = "sì"
         impostazioni["territorio"] = territorio
         radice["clienti"] = clienti
         radice["appuntamenti"] = appuntamenti
@@ -78,8 +81,8 @@ extension ProvaBackup {
               t.fattoreStrada == ImpostazioniTerritorio.fattorePredefinito,
               t.velocitaCitta == ImpostazioniTerritorio.velocitaCittaPredefinita,
               t.velocitaFuori == 80, t.zone.map(\.id) == ["zona-prova"], t.attenzioniAlte == [2],
-              t.comunePartenza == "BO-bologna" else {
-            return "Territorio: valori rovinati non letti con tolleranza (luogo fuori scala, fattore, velocità, zone, attenzioni, daConfermare)"
+              t.comunePartenza == "BO-bologna", !t.usaMappeApple else {
+            return "Territorio: valori rovinati non letti con tolleranza (luogo fuori scala, fattore, velocità, zone, attenzioni, Apple Mappe, daConfermare)"
         }
         // 4. La posizione a mano e le impostazioni del Territorio entrano nell'istantanea di «Prisma ovunque» (decisione 44)
         let ist = SpazioOvunque.datiIstantanea(originale)
