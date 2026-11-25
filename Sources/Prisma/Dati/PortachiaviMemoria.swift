@@ -6,7 +6,8 @@ import Security
 /// Nel backup va solo cifrata con la password dei backup (Vera/chiave-memoria.cifrato, MemoriaVera.avvolgi).
 /// Le prove non lo usano mai (la chiave si passa direttamente).
 enum PortachiaviMemoria {
-    static let servizio = "Prisma memoria di Vera"
+    /// Con « demo» in coda in Lucy Demo (`EdizioneLucy`): la demo non legge mai le chiavi vere.
+    static var servizio: String { "Prisma memoria di Vera" + EdizioneLucy.suffissoPortachiavi }
     static let conto = "chiave della memoria"
     static let etichetta = "Prisma – chiave della memoria di Vera"
 

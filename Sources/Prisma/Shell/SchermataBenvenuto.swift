@@ -76,7 +76,7 @@ struct SchermataBenvenuto: View {
         VStack(spacing: 0) {
             Group {
                 // Lucy by Logic con l'animazione d'avvio del marchio, una volta sola all'apertura
-                AvvioLucy(altezza: L.logo * 1.2)
+                AvvioLucy(altezza: L.logo * 1.6)
             }
             .padding(.top, L.logoDallAlto)
             .accessibilityHidden(true)
@@ -182,8 +182,12 @@ private struct CursoreEntraBlocco: View {
                 .lineLimit(1)
                 .padding(.leading, M.scrittaSinistra)
                 .opacity(1 - Double(quota) * M.svanisceScritta)
-                .overlay { LuceDelPulsante() }
                 .allowsHitTesting(false)
+            // La luce attraversa tutta la casella, da un bordo all'altro, sotto la manopola (prima solo la scritta:
+            // un fascio stretto al centro)
+            LuceDelPulsante()
+                .frame(width: M.binario.width, height: M.binario.height)
+                .opacity(1 - Double(quota))
             Image(systemName: "chevron.right")
                 .font(.system(size: M.freccia, weight: .semibold))
                 .foregroundColor(Colori.Benvenuto.freccia)

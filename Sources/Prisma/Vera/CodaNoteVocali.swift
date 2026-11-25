@@ -95,7 +95,8 @@ struct CodaNoteVocali {
 /// La chiave della coda nel Portachiavi dell'iPhone: creata al primo uso, `kSecAttrAccessibleAfterFirstUnlockThisDeviceOnly`,
 /// non sincronizzabile (non va nel backup né su altri dispositivi). Modello: `PortachiaviOvunque`.
 enum PortachiaviNoteVocali {
-    static let servizio = "Prisma note vocali"
+    /// Con « demo» in coda in Lucy Demo (`EdizioneLucy`): la demo non legge mai le chiavi vere.
+    static var servizio: String { "Prisma note vocali" + EdizioneLucy.suffissoPortachiavi }
     static let conto = "chiave della coda"
 
     private static var ricerca: [String: Any] {

@@ -315,7 +315,9 @@ struct LogoLogic: View {
 
 // MARK: - L'animazione d'avvio
 
-/// L'avvio di Lucy (LEGGIMI.md › Animazione di avvio), una volta sola all'apertura dell'app:
+/// L'avvio di Lucy (LEGGIMI.md › Animazione di avvio), come in Lucy AI, ogni volta che compare la schermata di benvenuto
+/// (all'apertura e a ogni blocco; 25 novembre 2026, richiesta dell'utente: prima una volta sola per avvio, e spesso
+/// finiva mentre l'app si apriva ancora):
 /// 0,25–0,9 s la L sale di 8 punti; 0,8–1,6 s il disco cresce da zero con un piccolo rimbalzo (curva 0.3, 1.45, 0.5, 1);
 /// 1,5–2,1 s «Lucy» entra scorrendo di 10 punti da sinistra; 2,1–2,6 s compare «by LOGIC», con il cursore che lampeggia.
 /// Con «Riduci movimento» e nelle istantanee il logo completo compare subito. I tempi sono quelli del marchio (non il ritmo
@@ -325,9 +327,6 @@ struct AvvioLucy: View {
     /// Altezza del simbolo.
     var altezza: CGFloat = 56
     var ai = false
-
-    /// Si vede una volta sola per apertura dell'app.
-    @MainActor static var giaVisto = false
 
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.prismaStatoFinale) private var statoFinale
@@ -370,17 +369,22 @@ struct AvvioLucy: View {
     }
 
     private func avvia() {
-        guard !(calmo || statoFinale || AvvioLucy.giaVisto) else {
+        guard !(calmo || statoFinale) else {
             elle = true
             disco = true
             nome = true
             firma = true
             return
         }
-        AvvioLucy.giaVisto = true
-        withAnimation(.easeOut(duration: 0.65).delay(0.25)) { elle = true }
-        withAnimation(.timingCurve(0.3, 1.45, 0.5, 1, duration: 0.8).delay(0.8)) { disco = true }
-        withAnimation(.easeOut(duration: 0.6).delay(1.5)) { nome = true }
-        withAnimation(.easeOut(duration: 0.5).delay(2.1)) { firma = true }
+        // Si riparte da capo (la vista può tornare dopo un blocco) e si aspetta un attimo che la finestra si veda
+        elle = false
+        disco = false
+        nome = false
+        firma = false
+        let attesa = 0.35
+        withAnimation(.easeOut(duration: 0.65).delay(attesa + 0.25)) { elle = true }
+        withAnimation(.timingCurve(0.3, 1.45, 0.5, 1, duration: 0.8).delay(attesa + 0.8)) { disco = true }
+        withAnimation(.easeOut(duration: 0.6).delay(attesa + 1.5)) { nome = true }
+        withAnimation(.easeOut(duration: 0.5).delay(attesa + 2.1)) { firma = true }
     }
 }

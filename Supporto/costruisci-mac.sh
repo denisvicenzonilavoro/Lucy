@@ -8,14 +8,16 @@
 #   bash Supporto/costruisci-mac.sh            → compila e crea Prisma.app
 #   bash Supporto/costruisci-mac.sh --prove    → in più esegue le prove principali
 #   bash Supporto/costruisci-mac.sh --installa → in più la installa come /Applications/Lucy.app (via la vecchia Prisma.app)
+#   bash Supporto/costruisci-mac.sh --demo     → in più crea «Lucy Demo.app» (con --installa anche in Applicazioni)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-PROVE=0; INSTALLA=0
+PROVE=0; INSTALLA=0; DEMO=0
 for a in "$@"; do
   case "$a" in
     --prove) PROVE=1 ;;
     --installa) INSTALLA=1 ;;
+    --demo) DEMO=1 ;;
     *) echo "Opzione sconosciuta: $a"; exit 2 ;;
   esac
 done
@@ -79,4 +81,25 @@ if [ "$INSTALLA" = 1 ]; then
   ditto "$APP" /Applications/Lucy.app
   rm -rf /Applications/Prisma.app
   echo "✓ Installata in /Applications/Lucy.app (commit $COMMIT)"
+fi
+
+# Lucy Demo (25 novembre 2026): lo stesso eseguibile con un Info.plist diverso (EdizioneLucy): identificativo
+# local.prisma.demo, nome «Lucy Demo», chiave LucyDemo. Dati, backup e Portachiavi suoi: nasce già piena di clienti di
+# prova e non tocca mai l'archivio vero. Con --installa va in /Applications/Lucy Demo.app.
+if [ "$DEMO" = 1 ]; then
+  DEMO_APP="Lucy Demo.app"
+  rm -rf "$DEMO_APP"
+  ditto "$APP" "$DEMO_APP"
+  PL="$DEMO_APP/Contents/Info.plist"
+  /usr/libexec/PlistBuddy -c "Set :CFBundleIdentifier local.prisma.demo" "$PL"
+  /usr/libexec/PlistBuddy -c "Set :CFBundleName Lucy Demo" "$PL"
+  /usr/libexec/PlistBuddy -c "Set :CFBundleDisplayName Lucy Demo" "$PL"
+  /usr/libexec/PlistBuddy -c "Add :LucyDemo bool true" "$PL"
+  codesign --force --deep --sign - "$DEMO_APP"
+  echo "✓ Creata $(pwd)/$DEMO_APP"
+  if [ "$INSTALLA" = 1 ]; then
+    rm -rf "/Applications/$DEMO_APP"
+    ditto "$DEMO_APP" "/Applications/$DEMO_APP"
+    echo "✓ Installata in /Applications/$DEMO_APP (commit $COMMIT)"
+  fi
 fi

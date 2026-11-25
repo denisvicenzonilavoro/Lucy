@@ -113,7 +113,8 @@ struct BarraSuperiore: View {
                 // Il simbolo di Lucy: la L e il disco d'oro (Design/Logo/LucyByLogic)
                 LogoLucy()
                     .frame(width: B.logo, height: B.logo)
-                Text("Lucy")
+                // «Lucy» o «Lucy Demo»: le due edizioni si riconoscono a colpo d'occhio
+                Text(EdizioneLucy.nome)
                     .carattereApple(Tema.Apple.Carattere.barra)
             }
         }

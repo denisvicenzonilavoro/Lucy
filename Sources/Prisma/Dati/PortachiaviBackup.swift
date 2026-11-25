@@ -7,7 +7,8 @@ import Security
 /// Dopo un aggiornamento di Prisma il Mac può chiedere una volta il permesso di leggerla.
 /// Le prove non lo usano mai (la password si passa direttamente a `GestoreBackup`).
 enum PortachiaviBackup {
-    static let servizio = "Prisma backup"
+    /// Con « demo» in coda in Lucy Demo (`EdizioneLucy`): la demo non legge mai le chiavi vere.
+    static var servizio: String { "Prisma backup" + EdizioneLucy.suffissoPortachiavi }
     static let conto = "password dei backup"
     static let etichetta = "Prisma – password dei backup"
 

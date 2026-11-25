@@ -175,7 +175,7 @@ final class IndiceVera {
 
     static var file: URL {
         let cache = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first ?? FileManager.default.temporaryDirectory
-        return cache.appendingPathComponent("Prisma", isDirectory: true).appendingPathComponent("vettori-vera.cifrato")
+        return cache.appendingPathComponent("Prisma" + EdizioneLucy.suffissoCartella, isDirectory: true).appendingPathComponent("vettori-vera.cifrato")
     }
 
     static let uso = "PrismaVE v1 · vettori"

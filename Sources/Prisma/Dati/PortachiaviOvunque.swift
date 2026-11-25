@@ -10,7 +10,8 @@ import Security
 /// Se la chiave non apre più lo spazio (passphrase cambiata sul Mac) la verifica del descrittore lo dice.
 /// Le prove non lo usano mai (la chiave si passa direttamente).
 enum PortachiaviOvunque {
-    static let servizio = "Prisma ovunque"
+    /// Con « demo» in coda in Lucy Demo (`EdizioneLucy`): la demo non legge mai le chiavi vere.
+    static var servizio: String { "Prisma ovunque" + EdizioneLucy.suffissoPortachiavi }
     static let conto = "chiave dello spazio"
     static let etichetta = "Prisma – chiave di Prisma ovunque"
 
