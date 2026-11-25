@@ -5,7 +5,8 @@ import SwiftUI
 // 25 novembre 2026: «più simile al template che ti avevo dato»):
 // - a sinistra la data, «Buongiorno.» con la sottolineatura dorata, la frase del giorno, quanto patrimonio segui in
 //   tutto, il Foglio di Lucy (che si apre a tutta pagina) e sotto la striscia dei mercati;
-// - a destra «Oggi»: gli incontri e le cose da fare insieme (Agenda e attività unite), con la mossa del giorno in testa;
+// - a destra, come la griglia del template: «Oggi» (incontri e cose da fare insieme) e accanto il patrimonio, la mossa
+//   del giorno e il turno di notte;
 //   poi il turno di notte, le lettere da Lucy AI e la barra «Chiedi a Lucy».
 // Niente canali (un solo canale, Lucy) e niente riquadro dello Studio sulla scrivania. Mai in modalità cliente: lì resta
 // la scrivania di prima (porta nomi e cifre di tutti i clienti).
@@ -14,17 +15,30 @@ struct ScrivaniaCarta: View {
     @Environment(StatoShell.self) private var stato
     @State private var foglioAperto = false
 
+    /// Le misure di #deskc del template: colonna sinistra di 520 punti, 40 tra le colonne, 60 ai lati.
+    private enum M {
+        static let sinistra: CGFloat = 520
+        static let traColonne: CGFloat = 40
+        static let lati: CGFloat = 60
+        static let alto: CGFloat = 78
+    }
+
     var body: some View {
         GeometryReader { geo in
-            HStack(alignment: .top, spacing: 28) {
-                ColonnaSinistraCarta(apriFoglio: { foglioAperto = true })
-                    .frame(width: max(420, geo.size.width * 0.46), alignment: .topLeading)
-                ColonnaDestraCarta()
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
+            // Su schermi stretti la colonna sinistra si restringe, mai sotto 420
+            let sinistra = min(M.sinistra, max(420, geo.size.width * 0.38))
+            ScrollView(.vertical, showsIndicators: false) {
+                HStack(alignment: .top, spacing: M.traColonne) {
+                    ColonnaSinistraCarta(apriFoglio: { foglioAperto = true })
+                        .frame(width: sinistra, alignment: .topLeading)
+                    ColonnaDestraCarta()
+                        .frame(maxWidth: .infinity, alignment: .topLeading)
+                }
+                .padding(.horizontal, M.lati)
+                .padding(.top, M.alto)
+                .padding(.bottom, 130)
+                .frame(minHeight: geo.size.height, alignment: .top)
             }
-            .padding(.horizontal, 44)
-            .padding(.top, 52)
-            .padding(.bottom, 120)
         }
         .overlay {
             if foglioAperto {
@@ -45,8 +59,6 @@ private struct ColonnaSinistraCarta: View {
     var body: some View {
         let oggi = Date()
         let incontri = stato.appuntamentiDiOggi
-        let riepilogo = stato.riepilogoTuttePosizioni
-        let clienti = stato.clienti.count
         VStack(alignment: .leading, spacing: 0) {
             Text(Self.dataMaiuscola(oggi))
                 .fontCarta(11, design: .monospaced)
@@ -54,8 +66,8 @@ private struct ColonnaSinistraCarta: View {
                 .foregroundColor(TemaCarta.Colore.matitaD)
             TimelineView(.everyMinute) { contesto in
                 Text(Self.saluto(contesto.date))
-                    .fontCarta(64, weight: .semibold, design: .serif)
-                    .tracking(-1.5)
+                    .fontCarta(74, weight: .medium, design: .serif)
+                    .tracking(-2.4)
                     .foregroundColor(TemaCarta.Colore.inchiostroD)
                     .lineLimit(1)
                     .minimumScaleFactor(0.6)
@@ -63,16 +75,10 @@ private struct ColonnaSinistraCarta: View {
             }
             .padding(.top, 6)
             Text(Self.frase(incontri, stato: stato))
-                .fontCarta(19, design: .serif, corsivo: true)
+                .fontCarta(20, design: .serif, corsivo: true)
                 .foregroundColor(TemaCarta.Colore.inchiostro2D)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 14)
-            if clienti > 0 {
-                Text("In tutto segui \(Formati.euro(riepilogo.attivita)) di patrimonio, per \(clienti) \(clienti == 1 ? "cliente" : "clienti").")
-                    .fontCarta(14, weight: .medium)
-                    .foregroundColor(TemaCarta.Colore.inchiostroD)
-                    .padding(.top, 10)
-            }
             if !stato.inModoCliente {
                 PrimaPaginaWidget()
                     .overlay(alignment: .topTrailing) {
@@ -87,10 +93,10 @@ private struct ColonnaSinistraCarta: View {
                         .help("Apri il Foglio di Lucy a tutta pagina")
                         .padding(6)
                     }
-                    .padding(.top, 22)
+                    .padding(.top, 26)
             }
             MercatiCarta()
-                .padding(.top, 14)
+                .padding(.top, 18)
         }
     }
 
@@ -128,38 +134,72 @@ private struct MercatiCarta: View {
     @Environment(StatoShell.self) private var stato
 
     var body: some View {
-        let serie = Array(stato.dati.mercato.serie.filter { $0.punti.count >= 1 }.prefix(5))
+        let serie = Self.scelte(stato.dati.mercato.serie)
         Group {
             if serie.isEmpty {
-                HStack(spacing: 10) {
-                    Text("MERCATI")
-                        .fontCarta(11, design: .monospaced).tracking(1.8)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("I MERCATI")
+                        .fontCarta(10, design: .monospaced).tracking(2)
                         .foregroundColor(TemaCarta.Colore.matitaD)
-                    Text("Nessun dato di mercato: accendili in Impostazioni › Mercato o importa un file.")
-                        .fontCarta(12)
-                        .foregroundColor(TemaCarta.Colore.inchiostro2D)
-                    Spacer(minLength: 0)
-                    Button("Apri Mercato") { stato.apri(.mercato) }
-                        .buttonStyle(.plain)
-                        .fontCarta(12, weight: .medium)
-                        .foregroundColor(TemaCarta.Colore.pennaD)
+                    HStack(alignment: .firstTextBaseline, spacing: 10) {
+                        Text("Nessun dato di mercato: accendili in Impostazioni › Mercato o importa un file.")
+                            .fontCarta(12.5)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                            .fixedSize(horizontal: false, vertical: true)
+                        Spacer(minLength: 0)
+                        Button("Apri Mercato") { stato.apri(.mercato) }
+                            .buttonStyle(.plain)
+                            .fontCarta(12, weight: .medium)
+                            .foregroundColor(TemaCarta.Colore.pennaD)
+                    }
                 }
+                .padding(.horizontal, 10)
             } else {
                 HStack(alignment: .top, spacing: 0) {
                     ForEach(Array(serie.enumerated()), id: \.element.id) { i, s in
-                        if i > 0 { Rectangle().fill(TemaCarta.Colore.filoD).frame(width: 1).padding(.vertical, 2) }
                         cella(s)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(.horizontal, 10)
+                            .padding(.horizontal, 12)
+                            .overlay(alignment: .leading) {
+                                if i > 0 { Rectangle().fill(TemaCarta.Colore.filoD).frame(width: 1) }
+                            }
                     }
                 }
+                .fixedSize(horizontal: false, vertical: true)
                 .contentShape(Rectangle())
                 .onTapGesture { stato.apri(.mercato) }
+                .help("I mercati: apri Mercato")
             }
         }
         .padding(.vertical, 14)
-        .padding(.horizontal, 16)
+        .padding(.horizontal, 8)
         .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
+    }
+
+    /// Al più cinque serie con dati, una per nome breve (le due inflazioni IPCA sono la stessa cosa).
+    static func scelte(_ tutte: [SerieMercato]) -> [SerieMercato] {
+        var viste = Set<String>()
+        var esito: [SerieMercato] = []
+        for s in tutte.filter({ !$0.punti.isEmpty }).sorted(by: { $0.aggiornataIl > $1.aggiornataIl }) {
+            let n = nomeBreve(s.nome)
+            guard !viste.contains(n) else { continue }
+            viste.insert(n)
+            esito.append(s)
+        }
+        // L'ordine del file delle serie, non quello dell'aggiornamento
+        let ordine = Dictionary(uniqueKeysWithValues: tutte.enumerated().map { ($0.element.id, $0.offset) })
+        return Array(esito.sorted { (ordine[$0.id] ?? 0) < (ordine[$1.id] ?? 0) }.prefix(5))
+    }
+
+    /// Il nome corto, come nel template («BTP 10 anni», «Euribor 3 mesi»).
+    static func nomeBreve(_ nome: String) -> String {
+        let n = nome.lowercased()
+        if n.contains("italiani") && n.contains("rendimento") { return "BTP 10 anni" }
+        if n.contains("tedeschi") && n.contains("rendimento") { return "Bund 10 anni" }
+        if n.contains("inflazione") { return "Inflazione" }
+        if n.contains("spread") { return "Spread BTP-Bund" }
+        if n.contains("bce") && n.contains("depositi") { return "Tasso BCE" }
+        return nome
     }
 
     private func cella(_ s: SerieMercato) -> some View {
@@ -169,18 +209,18 @@ private struct MercatiCarta: View {
             s.unita.variazioneInPercentuale ? (p == 0 ? 0 : (ultimo - p) / p * 100) : ultimo - p
         }
         return VStack(alignment: .leading, spacing: 3) {
-            Text(s.nome.uppercased())
-                .fontCarta(10, design: .monospaced).tracking(1.2)
+            Text(Self.nomeBreve(s.nome).uppercased())
+                .fontCarta(9, design: .monospaced).tracking(1.2)
                 .foregroundColor(TemaCarta.Colore.matitaD)
                 .lineLimit(1)
             Text(Self.valore(ultimo, unita: s.unita))
-                .fontCarta(20, weight: .medium, design: .serif)
+                .fontCarta(19, weight: .medium, design: .serif, cifre: true)
                 .foregroundColor(TemaCarta.Colore.inchiostroD)
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
             if let v = variazione {
                 Text((v >= 0 ? "+" : "") + Formati.percentuale((v * 100).rounded() / 100) .replacingOccurrences(of: "%", with: s.unita.variazioneInPercentuale ? "%" : ""))
-                    .fontCarta(11, design: .monospaced)
+                    .fontCarta(10.5, design: .monospaced)
                     .foregroundColor(v >= 0 ? TemaCarta.Colore.verdeD : TemaCarta.Colore.rossoD)
             }
         }
@@ -206,13 +246,111 @@ private struct ColonnaDestraCarta: View {
     @Environment(StatoShell.self) private var stato
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            OggiCarta()
-            if !stato.inModoCliente {
-                TurnoNotteWidget()
-                LetteraPrismaAIWidget()
+        // .wgrid del template: tre colonne, 18 tra una scheda e l'altra; «Oggi» occupa la prima colonna in altezza
+        VStack(alignment: .leading, spacing: 18) {
+            HStack(alignment: .top, spacing: 18) {
+                OggiCarta()
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
+                    .layoutPriority(1)
+                VStack(alignment: .leading, spacing: 18) {
+                    PatrimonioCarta()
+                    if !stato.inModoCliente {
+                        MossaCarta()
+                        TurnoNotteWidget()
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .layoutPriority(2)
             }
             ChiediLucyCarta()
+            if !stato.inModoCliente {
+                LetteraPrismaAIWidget()
+            }
+        }
+    }
+}
+
+/// Etichetta delle schede del template (.wl): mono, maiuscola, matita, con l'icona.
+private struct EtichettaScheda: View {
+    let icona: String
+    let testo: String
+
+    var body: some View {
+        HStack(spacing: 7) {
+            Image(systemName: icona)
+                .fontCarta(11)
+            Text(testo.uppercased())
+                .fontCarta(10, design: .monospaced).tracking(2)
+                .lineLimit(1)
+        }
+        .foregroundColor(TemaCarta.Colore.matitaD)
+    }
+}
+
+/// «In tutto segui…»: il patrimonio dei clienti, grande come i numeri del template.
+private struct PatrimonioCarta: View {
+    @Environment(StatoShell.self) private var stato
+
+    var body: some View {
+        let clienti = stato.clienti.count
+        let totale = clienti == 0 ? 0 : stato.riepilogoTuttePosizioni.attivita
+        Button { stato.apri(.posizioni) } label: {
+            VStack(alignment: .leading, spacing: 0) {
+                EtichettaScheda(icona: "chart.pie", testo: "Il patrimonio che segui")
+                Text(Formati.euro(totale))
+                    .fontCarta(42, weight: .medium, design: .serif, cifre: true)
+                    .tracking(-1.2)
+                    .foregroundColor(TemaCarta.Colore.inchiostroD)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.6)
+                    .padding(.top, 12)
+                Text(clienti == 0 ? "Ancora nessun cliente: il primo si aggiunge da Clienti."
+                     : "In tutto, per \(clienti) \(clienti == 1 ? "cliente" : "clienti").")
+                    .fontCarta(14, design: .serif, corsivo: true)
+                    .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                    .padding(.top, 4)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
+    }
+}
+
+/// La mossa del giorno, una sola, senza canale.
+private struct MossaCarta: View {
+    @Environment(StatoShell.self) private var stato
+
+    var body: some View {
+        if let m = stato.ricavato("scrivania.carta.mossa", { stato.mossaDelGiorno() }).mossa {
+            Button {
+                stato.clienteAttivoId = m.cliente.id
+                stato.posizioneInDettaglio = nil
+                stato.portafoglio = false
+                stato.apri(.posizioni)
+            } label: {
+                VStack(alignment: .leading, spacing: 0) {
+                    EtichettaScheda(icona: "sparkle", testo: "La mossa del giorno")
+                    Text("Chiama \(m.cliente.nome)")
+                        .fontCarta(20, weight: .medium, design: .serif)
+                        .foregroundColor(TemaCarta.Colore.inchiostroD)
+                        .padding(.top, 12)
+                    Text(m.motivo)
+                        .fontCarta(12.5)
+                        .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 6)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 18)
+                .padding(.vertical, 16)
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+            .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
         }
     }
 }
@@ -225,14 +363,10 @@ private struct OggiCarta: View {
         let incontri = stato.appuntamentiDiOggi
         let oggi = Calendar.current.startOfDay(for: Date())
         let domani = Calendar.current.date(byAdding: .day, value: 1, to: oggi) ?? oggi
-        let daFare = stato.attivitaAperte.filter { $0.scadenza < domani }.prefix(6)
-        let mossa = stato.inModoCliente ? nil : stato.ricavato("scrivania.carta.mossa") { stato.mossaDelGiorno() }.mossa
+        let daFare = stato.attivitaAperte.filter { $0.scadenza < domani }.prefix(8)
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 11))
-                Text(Self.titolo(incontri: incontri.count, daFare: daFare.count))
-                    .fontCarta(11, design: .monospaced).tracking(1.8)
+                EtichettaScheda(icona: "calendar", testo: Self.titolo(incontri: incontri.count, daFare: daFare.count))
                 Spacer(minLength: 0)
                 Button("Apri l'agenda") { stato.apri(.agenda) }
                     .buttonStyle(.plain)
@@ -242,39 +376,10 @@ private struct OggiCarta: View {
             .foregroundColor(TemaCarta.Colore.matitaD)
             .padding(.bottom, 10)
 
-            if let m = mossa {
-                Button {
-                    stato.clienteAttivoId = m.cliente.id
-                    stato.posizioneInDettaglio = nil
-                    stato.portafoglio = false
-                    stato.apri(.posizioni)
-                } label: {
-                    HStack(alignment: .firstTextBaseline, spacing: 12) {
-                        Text("MOSSA")
-                            .fontCarta(10, design: .monospaced).tracking(1.4)
-                            .foregroundColor(TemaCarta.Colore.oroTestoD)
-                            .frame(width: 48, alignment: .leading)
-                        VStack(alignment: .leading, spacing: 2) {
-                            Text("Chiama \(m.cliente.nome)")
-                                .fontCarta(14, weight: .semibold)
-                                .foregroundColor(TemaCarta.Colore.inchiostroD)
-                            Text(m.motivo)
-                                .fontCarta(12)
-                                .foregroundColor(TemaCarta.Colore.inchiostro2D)
-                                .lineLimit(2)
-                        }
-                        Spacer(minLength: 0)
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .padding(.vertical, 8)
-                riga()
-            }
-
-            if incontri.isEmpty && daFare.isEmpty && mossa == nil {
-                Text("Niente in agenda per oggi.")
-                    .fontCarta(13)
+            if incontri.isEmpty && daFare.isEmpty {
+                Text("Niente in agenda per oggi: un buon giorno per chiamare chi aspetta.")
+                    .fontCarta(13, design: .serif, corsivo: true)
+                    .fixedSize(horizontal: false, vertical: true)
                     .foregroundColor(TemaCarta.Colore.inchiostro2D)
                     .padding(.vertical, 8)
             }
@@ -286,16 +391,16 @@ private struct OggiCarta: View {
                 } label: {
                     HStack(alignment: .firstTextBaseline, spacing: 12) {
                         Text(Formati.ora.string(from: a.inizio))
-                            .fontCarta(12, design: .monospaced)
+                            .fontCarta(11.5, design: .monospaced)
                             .foregroundColor(TemaCarta.Colore.oroTestoD)
-                            .frame(width: 48, alignment: .leading)
+                            .frame(width: 40, alignment: .leading)
                         VStack(alignment: .leading, spacing: 2) {
                             Text(stato.cliente(a.clienteId)?.nome ?? a.titolo)
-                                .fontCarta(14, weight: .medium)
+                                .fontCarta(13, weight: .medium)
                                 .foregroundColor(TemaCarta.Colore.inchiostroD)
                                 .lineLimit(1)
                             Text(a.luogo.isEmpty ? a.titolo : "\(a.titolo) · \(a.luogo)")
-                                .fontCarta(12)
+                                .fontCarta(11.5)
                                 .foregroundColor(TemaCarta.Colore.inchiostro2D)
                                 .lineLimit(1)
                         }
@@ -316,16 +421,17 @@ private struct OggiCarta: View {
                             .foregroundColor(TemaCarta.Colore.inchiostro2D)
                     }
                     .buttonStyle(.plain)
-                    .frame(width: 48, alignment: .leading)
+                    .frame(width: 40, alignment: .leading)
                     .accessibilityLabel(t.completata ? "Fatta" : "Da fare")
                     VStack(alignment: .leading, spacing: 2) {
                         Text(t.titolo)
-                            .fontCarta(14)
+                            .fontCarta(13)
+                            .strikethrough(t.completata)
                             .foregroundColor(TemaCarta.Colore.inchiostroD)
                             .lineLimit(1)
                         if let nome = stato.cliente(t.clienteId)?.nome {
                             Text(nome)
-                                .fontCarta(12)
+                                .fontCarta(11.5)
                                 .foregroundColor(TemaCarta.Colore.inchiostro2D)
                                 .lineLimit(1)
                         }
@@ -336,7 +442,8 @@ private struct OggiCarta: View {
                 riga()
             }
         }
-        .padding(20)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 16)
         .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
     }
 

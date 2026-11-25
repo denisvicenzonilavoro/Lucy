@@ -65,7 +65,9 @@ extension StatoShell {
             i.incontri = incontri
             i.scadenze = scadenze
             i.daChiamare = Array(chiamate)
-            i.patrimonio = inEssere.filter { $0.area != .debiti }.reduce(0) { $0 + $1.valore }
+            // Solo le posizioni dei clienti che ci sono (non quelle rimaste senza cliente)
+            let presenti = Set(dati.clienti.map(\.id))
+            i.patrimonio = inEssere.filter { $0.area != .debiti && presenti.contains($0.clienteId) }.reduce(0) { $0 + $1.valore }
             i.clienti = dati.clienti.count
             return MotorePrimaPagina.componi(i, calendario: cal)
         }
