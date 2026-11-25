@@ -43,7 +43,7 @@ enum TestiPrismaCliente {
     static func senzaObiettivi(_ nome: String) -> String { "\(nome) non ha ancora obiettivi con un importo nel dossier" }
     static let senzaLettera = "La lettera non è pronta: serve un piano (una proposta o un versamento previsto) e la data di nascita"
     static let senzaFilm = "Il film non è ancora esportato: esportalo nella Sala"
-    static let senzaLuce = "Il prisma di luce ha bisogno di almeno una posizione in essere"
+    static let senzaLuce = "Il sole del piano ha bisogno di almeno una posizione in essere"
     static let senzaGiornata = "La giornata della pensione ha bisogno della data di nascita e delle ipotesi di previdenza"
     static let senzaSinistro = "Nessun sinistro con gli aggiornamenti per il cliente accesi"
     static let senzaPosizioni = "Nessuna posizione in essere"
@@ -56,7 +56,7 @@ enum TestiPrismaCliente {
         case .lineaVita: return "Completa l’anagrafica ›"
         case .lettera: return "Apri la lettera ›"
         case .film: return "Apri il film ›"
-        case .luce: return "Apri il prisma di luce ›"
+        case .luce: return "Apri il sole del piano ›"
         case .giornata: return "Apri la giornata ›"
         case .sinistro: return "Apri i sinistri ›"
         case .posizioni: return nil
@@ -130,7 +130,7 @@ enum TestiPrismaCliente {
             case .lineaVita: return "linea della vita"
             case .lettera: return "lettera"
             case .film: return "film"
-            case .luce: return "prisma di luce"
+            case .luce: return "sole del piano"
             case .giornata: return "giornata della pensione"
             case .sinistro: return "sinistro"
             case .posizioni: return "posizioni"

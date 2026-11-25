@@ -5,23 +5,25 @@ import AppKit
 import UIKit
 #endif
 
-// Sala › Il prisma di luce (Design/template-luce-specifica.md §2.2, «Luce» giro 4).
+// Sala › Il sole del piano (Design/template-luce-specifica.md §2.2, «Luce» giro 4; dal 25 novembre 2026, decisione
+// dell'utente, il disco d'oro di Lucy al posto del prisma di luce, che rimandava al vecchio Prisma).
 //
-//   IL PATRIMONIO FINANZIARIO DI GIULIA ROSSI          (Per investimento | Per obiettivo | Per canale)
+//   IL PATRIMONIO FINANZIARIO DI GIULIA ROSSI                    (Per investimento | Per obiettivo)
 //   204.050 € oggi
-//                         ╱╲            ● Azionario
-//   ━━━━━━━━━━━━━━━━━━━━ ╱  ╲ ═══════   38% · 77.539 €
-//                       ╱────╲ ═══════  ● Obbligazionario …
+//                        \ | /            ● Azionario
+//                      —( ☀ ) ═══════     38% · 77.539 €
+//                        / | \ ═══════    ● Obbligazionario …
 //   ┌ PASSA SUI RAGGI ┐ ~~~~~~ riflesso ~~~~~~             OGGI ────●──── FRA VENT'ANNI
 //
-// Il palco è sempre notte. La scena la disegna lo shader (`TelaLuceMetal`, `ShaderLuce`); nelle istantanee, con
-// «Riduci movimento» senza Metal o se lo shader non si compila, `PrismaDiLuceFermo`. Sopra, in SwiftUI: l'occhiello, il
-// totale che si conta, il segmentato scuro, le etichette in fondo ai raggi, il pannello del dettaglio e il cursore degli
-// anni. Le cifre vengono da `MotoreLuce` (composizione di Analisi 360, obiettivi, canali, linea della vita).
+// Il palco è sempre notte. La scena è `PrismaDiLuceFermo` in SwiftUI: il sole del piano (`SoleDelPiano`, un raggio per
+// obiettivo, il disco che si riempie con gli obiettivi coperti, l'alone che si accende con il cursore degli anni) e dal
+// suo bordo il ventaglio delle parti del patrimonio. Niente Metal: il sole si accende con le animazioni di SwiftUI, e con
+// «Riduci movimento» e nelle istantanee è già fermo nello stato finale. Sopra, in SwiftUI: l'occhiello, il totale che si
+// conta, il segmentato scuro, le etichette in fondo ai raggi, il pannello del dettaglio e il cursore degli anni. Le cifre
+// vengono da `MotoreLuce` (composizione di Analisi 360, obiettivi, linea della vita) e da `MotoreSole`.
 // - Puntatore sul ventaglio: la fascia si accende, le altre si spengono, il pannello dice la cifra. Clic: la scelta
 //   resta (per parlarne con il cliente) finché non si clicca altrove (proposta del §2.2.4).
-// - Trascinamento: ruota il cristallo (anche con «Riduci movimento»: è un gesto).
-// - Per canale: le etichette portano anche l'etichetta del canale a parole.
+// - Un solo canale (25 novembre 2026): niente vista «Per canale» e niente etichette dei canali sul palco.
 
 /// Lo stato di prova per le istantanee (`StatoSala.provaLuce`).
 struct ProvaLuce: Equatable {
@@ -132,7 +134,6 @@ private struct CorpoLuce: View {
     @Environment(\.prismaCalmo) private var calmo
     @Environment(\.modoIstantanea) private var istantanea
     @Environment(\.prismaStatoFinale) private var statoFinale
-    @ObservedObject private var visibilita = VisibilitaPrisma.condivisa
 
     @State private var vista: VistaLuce = .investimento
     @State private var anno: Int?
@@ -191,7 +192,7 @@ private struct CorpoLuce: View {
         .onAppear(perform: prepara)
         .onChange(of: vista) { _ in cambiaVista() }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel(Text("Il prisma di luce di \(cliente.nome)"))
+        .accessibilityLabel(Text("Il sole del piano di \(cliente.nome)"))
     }
 
     /// Lo stato iniziale: quello di prova delle istantanee, poi le etichette (subito se fermo, dopo il ventaglio se no).
@@ -218,32 +219,16 @@ private struct CorpoLuce: View {
 
     // MARK: La scena
 
-    @ViewBuilder private func scena(_ misura: CGSize) -> some View {
-        let geo = GeometriaLuce(misura: misura)
-        let fermoImmagine = PrismaDiLuceFermo(
+    /// Il sole del piano e il ventaglio, in SwiftUI (sul palco si accende; con «Riduci movimento» e nelle istantanee è
+    /// già fermo).
+    private func scena(_ misura: CGSize) -> some View {
+        PrismaDiLuceFermo(
             fasce: zip(colori, fasce.indices).map { c, i in
                 FasciaLuceFermo(colore: c, peso: scelta == nil ? 1 : (i == scelta ? Double(M.evidenzaScelto) : Double(M.evidenzaAltri)))
             },
-            bordi: bordi, rotazione: 0, frazione: esito.frazione(anno: annoMostrato), spento: esito.vuota)
-        #if os(macOS)
-        if istantanea || !RendererLuce.disponibile || tela.rinunciato {
-            fermoImmagine
-        } else {
-            TelaLuceMetal(tela: tela, scena: scenaMetal(geo), animato: !(calmo || statoFinale || !visibilita.visibile))
-        }
-        #else
-        fermoImmagine
-        #endif
-    }
-
-    private func scenaMetal(_ geo: GeometriaLuce) -> ScenaLuce {
-        var b = bordi.map { Float($0) }
-        while b.count < 7 { b.append(1) }
-        var c = colori.map(ColoriLuce.srgb)
-        while c.count < 6 { c.append(.zero) }
-        return ScenaLuce(misura: geo.misura, bordi: Array(b.prefix(7)), colori: Array(c.prefix(6)), n: fasce.count,
-                         scelta: scelta, lunghezza: Float(geo.lunghezza(rot: 0, frazione: esito.frazione(anno: annoMostrato))),
-                         spento: esito.vuota, fermo: calmo || statoFinale)
+            bordi: bordi, rotazione: 0, frazione: esito.frazione(anno: annoMostrato), spento: esito.vuota,
+            sole: esito.sole, animato: !fermo)
+            .frame(width: misura.width, height: misura.height)
     }
 
     // MARK: In alto
@@ -302,7 +287,7 @@ private struct CorpoLuce: View {
                 Text("Passa sui raggi")
                     .carattereApple(d.invito)
                     .foregroundColor(d.coloreInvito)
-                Text("Ogni raggio è una parte del patrimonio: lo spessore è il suo peso. Trascina il cristallo per ruotarlo.")
+                Text(spiegazioneSole)
                     .carattereApple(d.spiegazione)
                     .foregroundColor(d.coloreSpiegazione)
                     .fixedSize(horizontal: false, vertical: true)
@@ -325,6 +310,16 @@ private struct CorpoLuce: View {
         }
         .allowsHitTesting(false)
         .accessibilityElement(children: .combine)
+    }
+
+    /// La spiegazione del sole: la copertura degli obiettivi è la cifra di `MotoreSole`, mai inventata.
+    private var spiegazioneSole: String {
+        let ventaglio = "Il ventaglio sono le parti del patrimonio: lo spessore è il loro peso."
+        guard !esito.sole.senzaObiettivi else {
+            return "Il sole si accende con gli obiettivi del dossier: per ora non ce ne sono. " + ventaglio
+        }
+        let p = Int((MotoreSole.limita(esito.sole.luce) * 100).rounded())
+        return "Il sole è pieno di luce quanto gli obiettivi sono coperti: oggi al \(p)%. Un raggio per obiettivo, lungo quanto è coperto. " + ventaglio
     }
 
     /// Le note del pannello: composizione stimata, ripartizione di oggi negli anni, obiettivi oltre il patrimonio.
@@ -378,7 +373,7 @@ private struct CorpoLuce: View {
         let geo = GeometriaLuce(misura: misura)
         let nome = StatoShell.nomeBreve(cliente)
         return VStack(spacing: v.spazio) {
-            Text("\(nome) non ha ancora posizioni in essere: il prisma si accende con il suo patrimonio.")
+            Text("\(nome) non ha ancora posizioni in essere: il ventaglio si accende con il suo patrimonio.")
                 .carattereApple(v.testo)
                 .foregroundColor(L.testo)
                 .multilineTextAlignment(.center)
@@ -414,7 +409,6 @@ private struct StratoEtichetteLuce: View {
     @Binding var sotto: Int?
     @Binding var fissata: Int?
 
-    @State private var trascinando = false
     @Environment(\.prismaCalmo) private var calmo
 
     private typealias E = Tema.Apple.Luce.Etichetta
@@ -475,11 +469,10 @@ private struct StratoEtichetteLuce: View {
             .onContinuousHover { fase in
                 switch fase {
                 case .active(let p):
-                    guard !trascinando else { return }
                     let f = geo.fascia(p, rot: rot, bordi: bordi, lunghezza: lunghezza)
                     if f != sotto { sotto = f }
                     #if os(macOS)
-                    NSCursor.openHand.set()
+                    NSCursor.pointingHand.set()
                     #endif
                 case .ended:
                     if sotto != nil { sotto = nil }
@@ -490,28 +483,10 @@ private struct StratoEtichetteLuce: View {
             }
             .gesture(
                 DragGesture(minimumDistance: 0)
-                    .onChanged { v in
-                        if !trascinando && hypot(v.translation.width, v.translation.height) > 3 {
-                            trascinando = true
-                            tela.iniziaTrascinamento()
-                            #if os(macOS)
-                            NSCursor.closedHand.set()
-                            #endif
-                        }
-                        if trascinando { tela.trascina(v.translation.width) }
-                    }
                     .onEnded { v in
-                        if trascinando {
-                            trascinando = false
-                            tela.fineTrascinamento()
-                            #if os(macOS)
-                            NSCursor.openHand.set()
-                            #endif
-                        } else {
-                            // Un clic: tiene ferma la fascia sotto il puntatore, o la toglie
-                            let f = geo.fascia(v.location, rot: rot, bordi: bordi, lunghezza: lunghezza)
-                            fissata = (f == nil || f == fissata) ? nil : f
-                        }
+                        // Un clic: tiene ferma la fascia sotto il puntatore, o la toglie (il sole non si ruota)
+                        let f = geo.fascia(v.location, rot: rot, bordi: bordi, lunghezza: lunghezza)
+                        fissata = (f == nil || f == fissata) ? nil : f
                     }
             )
     }

@@ -62,7 +62,8 @@ fi
 # Privacy della realtà aumentata («Luce» giro 16, decisioni 26 e 27)
 if grep -nE 'UIImageWriteToSavedPhotosAlbum|PHPhotoLibrary|import Photos|ARWorldMap|getCurrentWorldMap|URLSession|URLRequest' \
     Sources/Prisma/Motori/MotoreRealtaAumentata.swift Sources/Prisma/Shell/*Realta*.swift \
-    Sources/Prisma/iOS/RealtaAumentataMobile.swift Sources/Prisma/DesignSystem/CristalloFermo.swift; then
+    Sources/Prisma/iOS/RealtaAumentataMobile.swift Sources/Prisma/DesignSystem/CristalloFermo.swift \
+    Sources/Prisma/DesignSystem/SoleDelPiano.swift Sources/Prisma/Motori/MotoreSole.swift; then
   errore "La realtà aumentata non deve salvare nel Rullino, salvare mappe del mondo o usare la rete"
 fi
 if grep -rnE 'UIImageWriteToSavedPhotosAlbum|PHPhotoLibrary|import Photos|PHAssetChangeRequest' Sources/Prisma; then

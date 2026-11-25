@@ -300,7 +300,7 @@ enum GuidaTesti {
             let presenta = "«Presenta» la mostra a tutto schermo, in modalità cliente."
 #endif
             return AiutoApp(
-                aCosaServe: "Le esperienze da vivere con il cliente davanti allo schermo: la sua Lucy, il prisma di luce, la lettera dal futuro e le altre. Le cifre le calcola Lucy dal suo dossier.",
+                aCosaServe: "Le esperienze da vivere con il cliente davanti allo schermo: la sua Lucy, il sole del piano, la lettera dal futuro e le altre. Le cifre le calcola Lucy dal suo dossier.",
                 inBreve: "Le esperienze da vivere con il cliente",
                 passi: ["Scegli il cliente nelle pillole in alto.",
                         "Tocca un'esperienza: si apre sul palco; «‹ Sala» o Esc tornano alla griglia.",

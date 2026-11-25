@@ -8,9 +8,10 @@ import simd
 
 /// La prova di fattibilità della realtà aumentata (`Prisma --prova-realta`, Mac e simulatore iOS; «Luce» giro 16,
 /// decisione 28): il cristallo si costruisce con RealityKit, framework di sistema, senza dipendenze esterne e senza
-/// fotocamera né finestra. Si controllano: le maglie di `MotoreRealtaAumentata` diventano `MeshResource` con i limiti
-/// attesi; un `ModelEntity` di vetro trasparente per strato; l'esploso alza gli strati e l'altezza cresce con il
-/// patrimonio; il logo sta sopra l'ultimo strato presente; la collisione c'è; una vista virtuale con l'ancora, la camera
+/// fotocamera né finestra. Si controllano (dal 25 novembre 2026 il sole del piano: dischi d'oro al posto del cristallo):
+/// le maglie dei dischi di `MotoreRealtaAumentata` diventano `MeshResource` con i limiti attesi; un `ModelEntity`
+/// trasparente per strato; l'esploso alza gli strati e lo spessore cresce con il patrimonio; il sole sta sopra l'ultimo
+/// strato presente, con un raggio per obiettivo; la collisione c'è; una vista virtuale con l'ancora, la camera
 /// e la luce, e un'iscrizione a `SceneEvents.Update` che si crea e si cancella. Senza Metal la parte RealityKit si salta
 /// (come `ProgrammaLuce.provaCompilazione`) e resta il fermo-immagine. Con `--senza-vista` si salta la vista (runner
 /// del workflow con Metal paravirtuale, vedi build.yml).
@@ -23,10 +24,10 @@ enum ProvaRealta {
             if !ok { errori += 1 }
         }
         let esito = esitoDiProva()
-        controlla(!esito.vuota, "Il cliente di prova ha il cristallo")
+        controlla(!esito.vuota, "Il cliente di prova ha il sole del piano")
         // Il fermo-immagine c'è sempre (ripiego e scatto su fondo neutro, decisione 27)
         let immagine = CristalloFermo.scatto(esito, anno: esito.annoFine, esploso: true, lato: 320)
-        controlla(immagine != nil && (immagine?.width ?? 0) > 0, "Il cristallo fermo diventa un'immagine (scatto su fondo neutro)")
+        controlla(immagine != nil && (immagine?.width ?? 0) > 0, "Il sole del piano fermo diventa un'immagine (scatto su fondo neutro)")
         if let immagine { controlla(ProtocolloTavolo.png(immagine) != nil, "Lo scatto si codifica in PNG") }
         #if canImport(RealityKit)
         // `MetalPrisma.device()`: nil anche con PRISMA_SENZA_METAL=1 (runner del workflow, GPU virtuale)
@@ -58,59 +59,66 @@ enum ProvaRealta {
            stimata: false, motivoSenzaAnni: nil, massimo: 131_870)
     }
 
-    /// DATI DI PROVA per la vetrina 400: tre strati con quote fisse, nessun cliente.
+    /// DATI DI PROVA per la vetrina 400: tre strati con quote fisse e tre obiettivi coperti in parte, nessun cliente.
     static let esitoVetrina = EsitoRealta(totaleOggi: 87_430, strati: [
         StratoRealta(classe: .azionario, nome: "Azionario", quota: 0.43, valoreOggi: 37_595),
         StratoRealta(classe: .gestioneSeparata, nome: "Gestione separata", quota: 0.37, valoreOggi: 32_349),
         StratoRealta(classe: .liquidita, nome: "Liquidità", quota: 0.2, valoreOggi: 17_486),
-    ], anni: [], stimata: false, motivoSenzaAnni: nil, massimo: 87_430)
+    ], anni: [], stimata: false, motivoSenzaAnni: nil, massimo: 87_430,
+       sole: MotoreSole.daCoperture([1, 0.62, 0.35], luce: 0.66))
 
     #if canImport(RealityKit)
     private static func realityKit(_ esito: EsitoRealta, senzaVista: Bool, _ controlla: (Bool, String) -> Void) {
         // 1. Le maglie diventano MeshResource con i limiti attesi
-        let m = MotoreRealtaAumentata.maglia(basso: 0.2, alto: 0.9)
+        let m = MotoreRealtaAumentata.magliaDisco(basso: 0.02, alto: 0.09)
         do {
             let r = try CristalloRealta.risorsa(m, nome: "prova")
             let b = r.bounds
-            controlla(abs(b.min.y - 0.2) < 1e-4 && abs(b.max.y - 0.9) < 1e-4, "La maglia diventa una MeshResource alta come gli estremi")
-            controlla(abs(b.min.z + (MotoreRealtaAumentata.raggio - MotoreRealtaAumentata.arrotondamento)) < 1e-3,
-                      "Il vertice del cristallo va verso −z")
+            controlla(abs(b.min.y - 0.02) < 1e-4 && abs(b.max.y - 0.09) < 1e-4, "Il disco diventa una MeshResource alta come gli estremi")
+            controlla(abs(b.max.x - MotoreRealtaAumentata.raggioDisco) < 1e-3 && abs(b.min.z + MotoreRealtaAumentata.raggioDisco) < 1e-3,
+                      "Il disco è rotondo, largo quanto il suo raggio")
         } catch {
             controlla(false, "MeshDescriptor: \(error.localizedDescription)")
         }
         // 2. Un ModelEntity di vetro per strato
         guard let cristallo = try? CristalloRealta(esito: esito, scala: 1) else {
-            return controlla(false, "Il cristallo in RealityKit si costruisce")
+            return controlla(false, "Il sole del piano in RealityKit si costruisce")
         }
         controlla(cristallo.strati.count == esito.strati.count, "Un ModelEntity per strato (\(esito.strati.count))")
         let materiali = cristallo.strati.compactMap { $0.model?.materials.first as? PhysicallyBasedMaterial }
         controlla(materiali.count == esito.strati.count, "Ogni strato ha un materiale fisico")
-        controlla(materiali.allSatisfy { $0.faceCulling == .none }, "Il vetro si vede da tutte e due le facce")
+        controlla(materiali.allSatisfy { $0.faceCulling == .none }, "I dischi si vedono da tutte e due le facce")
         controlla(materiali.allSatisfy { if case .transparent = $0.blending { return true } else { return false } },
-                  "Il vetro è trasparente")
-        // 3. L'esploso alza gli strati, l'altezza cresce con il patrimonio
+                  "I dischi sono appena trasparenti")
+        let sole = cristallo.radice.children.first { $0.name == "sole" }
+        controlla(sole != nil, "C'è il disco del sole")
+        let raggi = sole?.children.filter { $0.name.hasPrefix("raggio-") }.count ?? 0
+        controlla(raggi == esito.sole.raggi.count, "Un raggio per obiettivo (\(esito.sole.raggi.count))")
+        // 3. L'esploso alza gli strati, lo spessore cresce con il patrimonio
         let primo = cristallo.strati.last?.model?.mesh.bounds.min.y ?? 0
         try? cristallo.aggiorna(anno: esito.annoOggi, esploso: 1, crescita: 1, scelto: nil)
         let dopo = cristallo.strati.last?.model?.mesh.bounds.min.y ?? 0
         let atteso = MotoreRealtaAumentata.salitaEsploso * Float(max(0, esito.strati.count - 1))
         controlla(dopo - primo >= atteso - 0.05, "L'esploso alza l'ultimo strato di 0,2 × indice")
         let altoOggi = MotoreRealtaAumentata.estremi(strato: esito.strati.count - 1, bordi: esito.bordi,
-                                                     altezza: esito.altezza(anno: esito.annoOggi), esploso: 0, crescita: 1).alto
+                                                     altezza: MotoreRealtaAumentata.spessoreDisco(esito, anno: esito.annoOggi),
+                                                     esploso: 0, crescita: 1).alto
         let altoFine = MotoreRealtaAumentata.estremi(strato: esito.strati.count - 1, bordi: esito.bordi,
-                                                     altezza: esito.altezza(anno: esito.annoFine), esploso: 0, crescita: 1).alto
-        controlla(esito.totale(anno: esito.annoFine) < esito.totaleOggi || altoFine >= altoOggi, "L'altezza cresce con il patrimonio")
-        // 4. Il logo sopra l'ultimo strato presente, anche senza la Liquidità
+                                                     altezza: MotoreRealtaAumentata.spessoreDisco(esito, anno: esito.annoFine),
+                                                     esploso: 0, crescita: 1).alto
+        controlla(esito.totale(anno: esito.annoFine) < esito.totaleOggi || altoFine >= altoOggi, "Lo spessore cresce con il patrimonio")
+        // 4. Il sole sopra l'ultimo strato presente, anche senza la Liquidità
         let senzaLiquidita = EsitoRealta(totaleOggi: esito.totaleOggi,
                                          strati: riquota(esito.strati.filter { $0.classe != .liquidita }),
                                          anni: esito.anni, stimata: esito.stimata, motivoSenzaAnni: esito.motivoSenzaAnni,
-                                         massimo: esito.massimo)
+                                         massimo: esito.massimo, sole: esito.sole)
         if !senzaLiquidita.strati.isEmpty, let c2 = try? CristalloRealta(esito: senzaLiquidita, scala: 1) {
             let cima = c2.strati.last?.model?.mesh.bounds.max.y ?? 0
-            let logo = c2.radice.children.first { $0 !== c2.strati.last && $0.position.y > 0 }?.position.y ?? -1
-            controlla(logo >= cima, "Il logo sta sopra l'ultimo strato presente (senza Liquidità)")
+            let quota = c2.radice.children.first { $0.name == "sole" }?.position.y ?? -1
+            controlla(quota >= cima, "Il sole sta sopra l'ultimo strato presente (senza Liquidità)")
         }
         // 5. La collisione per i gesti
-        controlla(cristallo.radice.components[CollisionComponent.self] != nil, "Il cristallo ha la collisione (gesti)")
+        controlla(cristallo.radice.components[CollisionComponent.self] != nil, "Il sole del piano ha la collisione (gesti)")
         // 6. La vista virtuale
         guard !senzaVista else { return controlla(true, "(vista saltata sul runner)") }
         #if os(iOS) && !targetEnvironment(simulator)
@@ -120,7 +128,7 @@ enum ProvaRealta {
         #endif
         let scena = ScenaVirtualeRealta()
         scena.prepara(vista, cristallo: cristallo)
-        controlla(vista.scene.anchors.count == 1, "La vista virtuale ha un'ancora con cristallo, camera e luce")
+        controlla(vista.scene.anchors.count == 1, "La vista virtuale ha un'ancora con il sole, la camera e la luce")
         var aggiornamenti = 0
         let iscrizione = vista.scene.subscribe(to: SceneEvents.Update.self) { _ in aggiornamenti += 1 }
         withExtendedLifetime(iscrizione) {

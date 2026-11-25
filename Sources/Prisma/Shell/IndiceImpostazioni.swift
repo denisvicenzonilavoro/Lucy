@@ -405,7 +405,7 @@ enum IndiceImpostazioni {
           pagina: .sala, parole: ["Lancia l'anno", "probabilità"]),
         V(titolo: "Prepara anche il file per il browser", spiegazione: "Sperimentale: da provare prima su iPhone e Android veri",
           pagina: .sala, parole: ["Lucy del cliente"]),
-        V(titolo: TestiRealta.scattoConStanzaTitolo, spiegazione: "Di base lo scatto è solo il cristallo su fondo neutro",
+        V(titolo: TestiRealta.scattoConStanzaTitolo, spiegazione: "Di base lo scatto è solo il sole del piano su fondo neutro",
           pagina: .sala, parole: ["realtà aumentata", "foto"]),
     ]
 

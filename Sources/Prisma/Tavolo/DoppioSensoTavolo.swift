@@ -14,7 +14,9 @@ extension MotoreRealtaAumentata {
                      },
                      anni: e.anni.map { AnnoRealtaTavolo(anno: $0.anno, eta: $0.eta, totale: ProtocolloTavolo.cifra($0.totale)) },
                      totaleOggi: ProtocolloTavolo.cifra(e.totaleOggi), stimata: e.stimata, motivoSenzaAnni: e.motivoSenzaAnni,
-                     scattoConStanza: scattoConStanza, ultimoScatto: ultimoScatto)
+                     scattoConStanza: scattoConStanza, ultimoScatto: ultimoScatto,
+                     sole: SoleTavolo(coperture: MotoreSole.coperture(e.sole).map(ProtocolloTavolo.cifra),
+                                      luce: ProtocolloTavolo.cifra(e.sole.luce)))
     }
 
     /// Il cristallo dall'iPad: le classi sconosciute (un Mac più nuovo) si scartano, le quote restano quelle mandate.
@@ -25,8 +27,9 @@ extension MotoreRealtaAumentata {
         }
         let anni = r.anni.map { AnnoRealta(anno: $0.anno, eta: $0.eta, totale: max(0, $0.totale)) }
         let massimo = max(r.totaleOggi, anni.map(\.totale).max() ?? 0)
+        let sole = r.sole.map { MotoreSole.daCoperture($0.coperture, luce: $0.luce) } ?? .spento
         return EsitoRealta(totaleOggi: r.totaleOggi, strati: strati, anni: anni, stimata: r.stimata,
-                           motivoSenzaAnni: r.motivoSenzaAnni, massimo: massimo)
+                           motivoSenzaAnni: r.motivoSenzaAnni, massimo: massimo, sole: sole)
     }
 }
 

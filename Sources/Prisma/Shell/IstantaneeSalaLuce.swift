@@ -3,7 +3,7 @@ import Foundation
 import CoreGraphics
 
 /// Le istantanee della Sala, giro 4 di «Luce» (Design/template-luce-specifica.md §2.2.7 e §3.3.7), tutte nello stato
-/// finale (`\.modoIstantanea`): il prisma di luce con `PrismaDiLuceFermo` (niente Metal), «Disegna il tuo futuro» con
+/// finale (`\.modoIstantanea`): il sole del piano con `PrismaDiLuceFermo` (niente Metal), «Disegna il tuo futuro» con
 /// il tratto di prova già trasformato.
 /// - 624: Giulia, per investimento, oggi (chiaro e scuro: il palco è notte in tutti e due);
 /// - 625: per obiettivo; 626: per canale, con le etichette del canale (Giulia ha tutti e due i canali);
@@ -30,7 +30,7 @@ extension Istantanee {
             s.sala.provaDisegno = tratto
             s.apriEsperienza(.disegna, cliente: cliente)
         }
-        // §2.2.7: il prisma di luce
+        // §2.2.7: il sole del piano (prima il prisma di luce)
         coppia("624-sala-luce") { s in luce(s) }
         una("625-sala-luce-obiettivi") { s in luce(s, ProvaLuce(vista: .obiettivo)) }
         una("626-sala-luce-canale") { s in luce(s, ProvaLuce(vista: .canale)) }

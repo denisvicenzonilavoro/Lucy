@@ -466,9 +466,9 @@ enum ProvaFluidita {
             // Il prisma di luce sul cliente attivo (nella prova è il fermo-immagine, come nelle istantanee: niente Metal)
             let cliente = stato.clienteAttivo?.id ?? stato.dati.clienti.first?.id
             s.misura(banco, [
-                PassoFluidita(nome: "Luce · apri il prisma di luce", azione: { stato.apriEsperienza(.prismaLuce, cliente: cliente) },
+                PassoFluidita(nome: "Luce · apri il sole del piano", azione: { stato.apriEsperienza(.prismaLuce, cliente: cliente) },
                               verifica: { stato.appAttiva == .sala && stato.sala.esperienza == .prismaLuce }),
-                PassoFluidita(nome: "Luce · chiudi il prisma di luce", azione: {
+                PassoFluidita(nome: "Luce · chiudi il sole del piano", azione: {
                     stato.tornaAllaSala()
                     stato.chiudi(.sala)
                 }, verifica: { !stato.aperta(.sala) && stato.sala.esperienza == nil }),

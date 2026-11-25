@@ -166,7 +166,7 @@ struct BarraRealta: View {
             }
             .buttonStyle(.plain)
             .disabled(!scattoAcceso)
-            .help(aiutoScatto ?? "Lo scatto: il cristallo su fondo neutro, nel dossier del cliente")
+            .help(aiutoScatto ?? "Lo scatto: il sole del piano su fondo neutro, nel dossier del cliente")
             .accessibilityLabel(Text("Scatto"))
             .accessibilityHint(Text(aiutoScatto ?? ""))
             .simultaneousGesture(DragGesture(minimumDistance: 0)

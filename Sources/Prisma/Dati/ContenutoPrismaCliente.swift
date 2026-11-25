@@ -18,7 +18,7 @@ enum VoceFilePrisma: String, Codable, CaseIterable, Identifiable {
         case .lineaVita: return "La linea della vita da esplorare"
         case .lettera: return "La lettera dal futuro"
         case .film: return "Il film del piano"
-        case .luce: return "Il prisma di luce"
+        case .luce: return "Il sole del piano"
         case .giornata: return "Una giornata della pensione"
         case .sinistro: return "Il tuo sinistro"
         case .posizioni: return "Le posizioni nel dettaglio"

@@ -55,7 +55,7 @@ enum GlifoLuce: String, CaseIterable, Identifiable {
     fileprivate var pezzi: [PezzoGlifo] {
         switch self {
         case .prisma: return [.rettangolo(7, 2.5, 10, 19, 2.5), .tratto("M10.5 18.5h3")]
-        case .luce: return [.tratto("M11 4.5l6.5 12.5H4.5z"), .tratto("M1 13.5h4.5M17.5 10.5l5-2.5M17.5 13l5.5 0M17.5 15.5l5 2.5")]
+        case .luce: return [.cerchio(12, 12, 4.5, pieno: true), .tratto("M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1")]
         case .lettera: return [.rettangolo(3, 5.5, 18, 13, 2), .tratto("M3.5 7l8.5 6 8.5-6")]
         case .film: return [.rettangolo(2.5, 5, 19, 14, 3), .pieno("M10 9.2v5.6l4.8-2.8z")]
         case .disegna: return [.tratto("M3 17c3-1 4-6 7-6s2 5 5 5 3-6 6-8"), .tratto("M17.5 3.5l3 3")]

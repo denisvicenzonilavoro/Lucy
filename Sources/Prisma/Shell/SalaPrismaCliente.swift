@@ -590,7 +590,7 @@ struct MiniPrisma: View {
                     if let l = contenuto.lineaVita { CardPensioneMini(linea: l, eta: $eta).transition(transizione) }
                     if contenuto.lettera != nil { cardLettera.transition(transizione) }
                     if contenuto.conFilm { cardFilm.transition(transizione) }
-                    if voci.contains(.luce) { cardImmagine("Il prisma di luce", png: contenuto.luce).transition(transizione) }
+                    if voci.contains(.luce) { cardImmagine("Il sole del piano", png: contenuto.luce).transition(transizione) }
                     if voci.contains(.giornata) { cardImmagine("Una giornata della pensione", png: contenuto.giornata).transition(transizione) }
                     if let s = contenuto.sinistri { ForEach(Array(s.enumerated()), id: \.offset) { _, x in cardSinistro(x) } }
                     if let p = contenuto.posizioni, !p.isEmpty { cardPosizioni(p).transition(transizione) }
