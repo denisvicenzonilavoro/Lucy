@@ -358,10 +358,6 @@ private struct OggiCarta: View {
             HStack(spacing: 8) {
                 EtichettaScheda(icona: "calendar", testo: Self.titolo(incontri: incontri.count, daFare: daFare.count))
                 Spacer(minLength: 0)
-                Button("Apri l'agenda") { stato.apri(.agenda) }
-                    .buttonStyle(.plain)
-                    .fontCarta(12, weight: .medium)
-                    .foregroundColor(TemaCarta.Colore.pennaD)
             }
             .foregroundColor(TemaCarta.Colore.matitaD)
             .padding(.bottom, 10)
@@ -430,6 +426,14 @@ private struct OggiCarta: View {
                 }
                 .padding(.vertical, 7)
                 riga()
+            }
+            Spacer(minLength: 8)
+            HStack {
+                Spacer(minLength: 0)
+                Button("Apri l'agenda →") { stato.apri(.agenda) }
+                    .buttonStyle(.plain)
+                    .fontCarta(12, weight: .medium)
+                    .foregroundColor(TemaCarta.Colore.pennaD)
             }
         }
         .padding(.horizontal, 18)
