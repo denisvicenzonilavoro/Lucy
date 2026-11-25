@@ -7,6 +7,16 @@ on:
   push:
     branches: ['**', '!anteprime']
   workflow_dispatch:
+    inputs:
+      runner:
+        description: "Mac della build: apple (veloce, chip Apple) o intel (ripiego, più lento)"
+        type: choice
+        options: [apple, intel]
+        default: apple
+      completa:
+        description: "Anche le anteprime del Mac e le prove e istantanee di iPhone e iPad"
+        type: boolean
+        default: true
 
 # Un nuovo push sullo stesso branch annulla la build ancora in corso del commit precedente (non su main,
 # dove ogni commit unito deve arrivare in fondo e aggiornare la release).
@@ -25,9 +35,12 @@ jobs:
     # (macos-15 e poi macos-26) annullavano il job dopo 15 minuti senza farlo partire. Si compila universale: la parte
     # arm64 è quella che gira sul Mac dell'utente (controllo con lipo più sotto), la parte x86_64 fa girare prove e
     # istantanee sul runner Intel.
+    # Dal 25 novembre 2026 (scelta dell'utente, per fare prima) di nuovo un Mac Apple Silicon (macos-26): si compila solo
+    # arm64, una volta sola (circa la metà del tempo). Se il job resta in coda più di 12 minuti, il job «sorveglia»
+    # rilancia la build su Intel (runner=intel, universale come dal 23 novembre) e annulla questa.
     env:
-      ARCHITETTURE: '--arch arm64 --arch x86_64'
-    runs-on: macos-15-intel
+      ARCHITETTURE: ${{ inputs.runner == 'intel' && '--arch arm64 --arch x86_64' || '--arch arm64' }}
+    runs-on: ${{ inputs.runner == 'intel' && 'macos-15-intel' || 'macos-26' }}
     # La pubblicazione sul branch anteprime la fa il job «pubblica» (Mac e iOS insieme)
     outputs:
       anteprime: ${{ steps.anteprime.outputs.ok }}
@@ -335,6 +348,9 @@ jobs:
       # Facoltative: se nessun metodo di disegno funziona sul runner, la build resta verde.
       - name: Anteprime (istantanee delle schermate)
         id: anteprime
+        # Dal 25 novembre 2026 (scelta dell'utente, per fare prima) solo su main o lanciando il workflow a mano con
+        # «completa»: sui branch bastano compilazione e prove
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.completa)
         # Le istantanee usano già il fermo-immagine: senza Metal la GPU virtuale del runner non può fermare il processo
         env:
           PRISMA_SENZA_METAL: "1"
@@ -402,12 +418,43 @@ jobs:
           cat fluidita.md 2>/dev/null || echo "(nessuna tabella)"
           echo "=== FLUIDITA FINE ==="
 
+  # Il ripiego del Mac Apple Silicon (25 novembre 2026): se il job «build» resta in coda più di 12 minuti (le code dei
+  # runner Apple Silicon gratuiti a volte non partono), la build si rilancia su Intel con lo stesso ramo e questa si
+  # annulla. Prima il rilancio, poi l'annullamento (che ferma anche questo job). Sui branch il rilancio non rifà le
+  # anteprime né iPhone e iPad.
+  sorveglia:
+    if: inputs.runner != 'intel'
+    permissions:
+      actions: write
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Il Mac Apple Silicon parte?
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          for minuto in $(seq 1 12); do
+            stato="$(gh api "repos/$GH_REPO/actions/runs/${{ github.run_id }}/jobs" --jq '.jobs[] | select(.name == "build") | .status')"
+            echo "Minuto $minuto: build $stato"
+            if [ -n "$stato" ] && [ "$stato" != "queued" ] && [ "$stato" != "waiting" ]; then
+              echo "Il Mac Apple Silicon è partito"
+              exit 0
+            fi
+            sleep 60
+          done
+          echo "::warning::Il Mac Apple Silicon non è partito in 12 minuti: rilancio la build su Intel"
+          if [ "${{ github.ref }}" = "refs/heads/main" ]; then completa=true; else completa=false; fi
+          gh workflow run build.yml --ref "${{ github.ref_name }}" -f runner=intel -f completa=$completa
+          gh run cancel "${{ github.run_id }}"
+
   # Prisma per iPhone e iPad: compilazione per il simulatore, prove e istantanee.
   # Niente .xcodeproj: xcodebuild apre Package.swift, il .app si assembla con Supporto/iOS/assembla.sh.
   # Bloccante dal giro 2: tutto il target compila su iOS, e da qui vale «iOS rosso = niente merge».
   ios:
     # Solo su main (o lanciato a mano): sugli altri branch la compilazione per iPhone e iPad la controlla già il job ipa
-    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+    if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_dispatch' && inputs.completa)
     permissions:
       contents: read
     # Non usare macos-latest: le code dei runner Apple Silicon gratuiti vanno in timeout.
