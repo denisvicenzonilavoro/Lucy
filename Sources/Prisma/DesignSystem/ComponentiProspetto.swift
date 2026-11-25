@@ -3,8 +3,9 @@ import SwiftUI
 private typealias T = Tipo.Documento
 private typealias D = Misure.Documento
 
-// I pezzi comuni dei prospetti per il consulente (A4 verticale, tavolozza moderna): foglio con il logo
-// e il piede, titoli di sezione, riquadri con la barra, cifre in evidenza, firme.
+// I pezzi comuni dei prospetti per il consulente (A4 verticale), nello stile Lucy su carta (Design/template-carta.html,
+// `.a4`): foglio bianco con il marchio e il piede in SF Mono, titoli in New York con la sottolineatura d'oro, riquadri
+// con la barra d'oro, cifre grandi in New York, firme. Un solo canale, Lucy (`\.canaleUnicoLucy`).
 
 /// Margini, logo piccolo in alto a destra (nel margine, fuori dall'impaginazione) e piè di pagina del prospetto.
 struct FoglioProspetto<Contenuto: View>: View {
@@ -13,6 +14,9 @@ struct FoglioProspetto<Contenuto: View>: View {
     let avvertenza: String
     let numero: Int
     let totale: Int
+    /// Un solo canale, Lucy (`\.canaleUnicoLucy`): così nei prospetti e nei report di Prospetti. La scheda di
+    /// adeguatezza (da Posizioni) dipende dal canale del prodotto e lo tiene.
+    var canaleUnico = true
     @ViewBuilder let contenuto: () -> Contenuto
 
     /// Larghezza utile della pagina.
@@ -33,7 +37,7 @@ struct FoglioProspetto<Contenuto: View>: View {
                         Spacer()
                         Text(verbatim: "pag. \(numero) di \(totale)")
                     }
-                    .font(T.pPiede).foregroundColor(C.tenue)
+                    .font(T.pPiede).tracking(0.4).foregroundColor(C.tenue)
                 }
             }
             .padding(EdgeInsets(top: 34, leading: D.margineProspetto, bottom: 22, trailing: D.margineProspetto))
@@ -42,6 +46,8 @@ struct FoglioProspetto<Contenuto: View>: View {
                     .padding(.top, D.logoProspettoAlto)
                     .padding(.trailing, D.margineProspetto)
             }
+            // Un solo canale, Lucy: niente etichette dei canali, tabelle per canale in una sola
+            .environment(\.canaleUnicoLucy, canaleUnico)
         }
     }
 }
@@ -55,6 +61,8 @@ struct SezioneProspetto: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(verbatim: titolo).font(T.pSezione).foregroundColor(C.titolo)
+                // La sottolineatura d'oro sta nello spazio sotto il titolo: non sposta l'impaginazione
+                .overlay(alignment: .bottomLeading) { SottolineaturaOro().offset(y: D.spessoreOro * 2.6) }
             if let testo {
                 testo.font(T.pCorpo).foregroundColor(C.tenue).lineSpacing(1.6).fixedSize(horizontal: false, vertical: true)
             }
@@ -63,7 +71,7 @@ struct SezioneProspetto: View {
     }
 }
 
-/// Riquadro con la barra blu a sinistra ("In sintesi", "Se il bisogno di liquidità è probabile").
+/// Riquadro con la barra d'oro a sinistra ("In sintesi", "Se il bisogno di liquidità è probabile").
 struct RiquadroBarra<Contenuto: View>: View {
     @Environment(\.paletteDocumento) private var C
     let titolo: String
@@ -147,6 +155,10 @@ struct CifraProspetto: View {
         .padding(9)
         .frame(maxWidth: .infinity, maxHeight: altezzaPiena ? CGFloat.infinity : nil, alignment: .topLeading)
         .riquadroDoc(C.riquadro, raggio: D.raggioPiccolo)
+        // Stile Lucy: un filo d'oro in testa alla cifra, come la sottolineatura dei titoli
+        .overlay(alignment: .top) {
+            Rectangle().fill(C.oro).frame(height: D.spessoreOro).padding(.horizontal, D.raggioPiccolo)
+        }
     }
 }
 
@@ -198,20 +210,46 @@ struct FirmeProspetto: View {
     }
 }
 
-/// Le righe di un canale, sotto la sua etichetta (blu Alleanza, cuoio indipendente).
+/// Le righe di un canale, sotto la sua etichetta. Nei prospetti di Lucy c'è un solo canale: `TabellaCanali` le mette
+/// in una tabella sola.
 struct GruppoCanale {
     let canale: Canale
     let righe: [RigaDoc]
     var nota = ""
 }
 
-/// Una tabella divisa per canale: l'etichetta del canale, poi le sue righe.
+/// Una tabella divisa per canale: l'etichetta del canale, poi le sue righe. Con un solo canale, Lucy
+/// (`\.canaleUnicoLucy`), una tabella sola con tutte le righe e la nota dei gruppi in testa.
 struct TabellaCanali: View {
     @Environment(\.paletteDocumento) private var C
+    @Environment(\.canaleUnicoLucy) private var canaleUnico
     let colonne: [ColonnaDoc]
     let gruppi: [GruppoCanale]
 
     var body: some View {
+        if canaleUnico {
+            unica
+        } else {
+            divisa
+        }
+    }
+
+    /// Un solo canale: tutte le righe in fila, sotto una sola testata.
+    private var unica: some View {
+        let note = gruppi.map(\.nota).filter { !$0.isEmpty }
+        return VStack(alignment: .leading, spacing: 2) {
+            if gruppi.count == 1, let nota = note.first {
+                HStack {
+                    Spacer()
+                    Text(verbatim: nota).font(T.pTabellaNota).foregroundColor(C.tenue)
+                }
+            }
+            TabellaDoc(larghezza: FoglioProspetto<EmptyView>.larghezza, colonne: colonne, righe: gruppi.flatMap(\.righe),
+                       fontTesta: T.pTabellaTesta, fontTestaSotto: T.pTabellaNota, altezzaTesta: 12, margine: 4)
+        }
+    }
+
+    private var divisa: some View {
         VStack(alignment: .leading, spacing: 6) {
             ForEach(Array(gruppi.enumerated()), id: \.offset) { _, g in
                 VStack(alignment: .leading, spacing: 2) {

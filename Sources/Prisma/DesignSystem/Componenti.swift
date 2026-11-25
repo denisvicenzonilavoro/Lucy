@@ -794,8 +794,14 @@ struct EtichettaCanale: View {
 struct EtichettaCanaleStampa: View {
     let canale: Canale
     var compatta = false
+    /// Nei prospetti e nei report di Prospetti c'è un solo canale, Lucy: l'etichetta non si disegna.
+    @Environment(\.canaleUnicoLucy) private var canaleUnico
 
     var body: some View {
+        if !canaleUnico { etichetta }
+    }
+
+    @ViewBuilder private var etichetta: some View {
         let _ = SegnaleNomiCanali.condiviso.nomi
         let c = Tema.Colore.Componenti.self
         let m = Tema.Misura.Componenti.self

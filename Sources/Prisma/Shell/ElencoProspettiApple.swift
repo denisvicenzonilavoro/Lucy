@@ -37,15 +37,31 @@ struct EtichetteVoceProspetto: View {
 
     var body: some View {
         let l = Tema.Apple.Prospetti.Laterale.self
-        HStack(spacing: l.spazioEtichette) {
-            ForEach(versioni, id: \.self) { v in
-                etichetta(TestiElencoProspetti.etichetta(v), testo: l.testoEtichettaVoce, fondo: l.fondoEtichettaVoce)
+        // Tutte su una riga se c'è posto; altrimenti «per l'incontro di oggi» va a capo: nessuna etichetta esce dalla
+        // colonna né tocca il suo bordo
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: l.spazioEtichette) {
+                versioniVista
+                if perIncontroOggi { incontro }
             }
-            if perIncontroOggi {
-                etichetta(TestiElencoProspetti.incontroOggi, testo: l.testoEtichettaIncontro, fondo: l.fondoEtichettaIncontro)
+            VStack(alignment: .leading, spacing: l.spazioEtichette) {
+                HStack(spacing: l.spazioEtichette) { versioniVista }
+                if perIncontroOggi { incontro }
             }
         }
         .padding(.top, l.sopraEtichette)
+    }
+
+    private var versioniVista: some View {
+        let l = Tema.Apple.Prospetti.Laterale.self
+        return ForEach(versioni, id: \.self) { v in
+            etichetta(TestiElencoProspetti.etichetta(v), testo: l.testoEtichettaVoce, fondo: l.fondoEtichettaVoce)
+        }
+    }
+
+    private var incontro: some View {
+        let l = Tema.Apple.Prospetti.Laterale.self
+        return etichetta(TestiElencoProspetti.incontroOggi, testo: l.testoEtichettaIncontro, fondo: l.fondoEtichettaIncontro)
     }
 
     private func etichetta(_ s: String, testo: Color, fondo: Color) -> some View {

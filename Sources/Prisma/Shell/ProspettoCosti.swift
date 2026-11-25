@@ -197,7 +197,7 @@ private struct PaginaCostiTempo: View {
                     .font(T.pCorpo).foregroundColor(C.tenue).fixedSize(horizontal: false, vertical: true)
             } else {
                 TabellaCanali(colonne: [
-                    ColonnaDoc(titolo: "Oggi", sottotitolo: "costo annuo", peso: 2, destra: false), ColonnaDoc(titolo: "Alternativa", sottotitolo: "canale · costo", peso: 2.2, destra: false),
+                    ColonnaDoc(titolo: "Oggi", sottotitolo: "costo annuo", peso: 2, destra: false), ColonnaDoc(titolo: "Alternativa", sottotitolo: "costo annuo", peso: 2.2, destra: false),
                     ColonnaDoc(titolo: "Uscita oggi", sottotitolo: "penali, imposte, ingresso", peso: 1.1), ColonnaDoc(titolo: "In più", sottotitolo: "netto, uscita compresa", peso: 1.1),
                 ], gruppi: Canale.allCases.compactMap { c in
                     let mie = a.conAlternativa.prefix(Misure.Documento.puntiReport).filter { $0.posizione.canale == c }
@@ -205,7 +205,7 @@ private struct PaginaCostiTempo: View {
                     return GruppoCanale(canale: c, righe: mie.compactMap { v in
                         guard let x = v.alternativa else { return nil }
                         return RigaDoc(celle: [CellaDoc(v.posizione.nome, sotto: CifreDoc.percento(v.annuo, decimali: 2), font: T.pTabellaForte),
-                                               CellaDoc(x.prodotto.nome, sotto: "\(x.prodotto.canale.nomeBreve) · \(CifreDoc.percento(x.costoAnnuo, decimali: 2))", font: T.pTabellaForte),
+                                               CellaDoc(x.prodotto.nome, sotto: CifreDoc.percento(x.costoAnnuo, decimali: 2), font: T.pTabellaForte),
                                                CellaDoc(x.costoUscita >= 0.5 ? CifreDoc.togli(x.costoUscita) : "—", font: T.pTabella),
                                                CellaDoc("+ \(CifreDoc.euro(x.guadagno))", sotto: "in \(x.anni) anni", colore: C.positivo, font: T.pTabellaForte)], altezza: 22)
                     }, nota: "")

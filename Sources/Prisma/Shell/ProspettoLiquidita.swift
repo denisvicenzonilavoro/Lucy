@@ -132,7 +132,7 @@ private struct PaginaSalvadanai: View {
                 VStack(alignment: .leading, spacing: 3) {
                     ForEach(e.proposte) { p in
                         PuntoElenco(testo: Text(verbatim: p.nome).bold()
-                                    + Text(verbatim: " · \(p.canale.nome) · \(p.area.nome.lowercased())" + (p.rendimentoAtteso.map { " · rendimento ipotizzato \(CifreDoc.condizione($0))" } ?? "")))
+                                    + Text(verbatim: " · \(p.area.nome.lowercased())" + (p.rendimentoAtteso.map { " · rendimento ipotizzato \(CifreDoc.condizione($0))" } ?? "")))
                     }
                 }
             }

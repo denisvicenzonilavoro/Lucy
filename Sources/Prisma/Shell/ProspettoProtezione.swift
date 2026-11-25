@@ -246,7 +246,7 @@ private struct PaginaMappa: View {
                                        CellaDoc(r.premioAnnuo > 0 ? CifreDoc.euro(r.premioAnnuo) : "—", font: T.pTabella),
                                        perche], altezza: 20)
             }, fontTesta: T.pTabellaTesta, fontTestaSotto: T.pTabellaNota, altezzaTesta: 18, margine: 4)
-            SezioneProspetto(titolo: "Le coperture, per canale",
+            SezioneProspetto(titolo: "Le coperture",
                              testo: Text(verbatim: "In essere e proposte; costo per 1.000 € assicurati = premio annuo diviso per il capitale, per mille."))
             if e.coperture.isEmpty && e.proposte.isEmpty {
                 Text(verbatim: "Nessuna copertura in essere né proposta.").font(T.pCorpo).foregroundColor(C.tenue)

@@ -93,9 +93,11 @@ struct TestiValutazione {
 
     static let consulente = "Denis Vicenzoni"
 
-    var ruoloConsulente: String {
-        prodotto.canale == .alleanza ? "Consulente Alleanza Assicurazioni" : "Consulenza finanziaria"
-    }
+    /// Un solo canale, Lucy: la stessa firma per ogni prodotto.
+    var ruoloConsulente: String { Self.ruoloLucy }
+
+    /// La firma del consulente sotto il nome, nei prospetti e nei report (un solo canale, Lucy).
+    static let ruoloLucy = "Consulenza finanziaria"
 
     // MARK: - Riferimenti
 

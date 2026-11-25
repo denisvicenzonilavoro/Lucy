@@ -137,6 +137,8 @@ extension AppProspetti {
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         }
+        // La colonna non sta schiacciata contro il bordo sinistro della finestra
+        .padding(d.margineEsterno)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 

@@ -130,8 +130,8 @@ enum ProvaProspetti {
                 let pf = MotorePortafoglio.calcola(dati.posizioni, clienti: dati.clienti)
                 let totale = spazi(Formati.euro(pf.riepilogo.attivita))
                 verifica("\(nome): patrimonio seguito \(totale) nel PDF", testo.contains(totale))
-                verifica("\(nome): tutti i clienti e i due canali nel PDF",
-                         dati.clienti.allSatisfy { testo.contains($0.nome) } && Canale.allCases.allSatisfy { testo.contains($0.nomeBreve) })
+                verifica("\(nome): tutti i clienti nel PDF", dati.clienti.allSatisfy { testo.contains($0.nome) })
+                verifica("\(nome): un solo canale, Lucy (nessun nome dei canali)", senzaCanali(testo))
             case .riesame:
                 verifica("\(nome): ordine del giorno e domande nel PDF", testo.contains("Ordine del giorno") && testo.contains("Domande da fare"))
             case .valutazione, .resoconto, .sostituzione, .previdenza, .protezione, .obiettivo, .liquidita, .checkUp, .resistenza, .costi, .successione, .patrimonio, .fascicolo, .annoInsieme:
@@ -217,9 +217,7 @@ enum ProvaProspetti {
                 if !t.andamenti.isEmpty {
                     verifica("\(nome): andamento rispetto all'atteso (\(t.andamenti.count) posizioni)", testo.lowercased().contains(report ? "ci aspettavamo" : "rispetto all"))
                 }
-                for c in t.e.canaliPresenti {
-                    verifica("\(nome): etichetta \(c.nomeBreve) nel PDF", testo.contains(c.nome))
-                }
+                verifica("\(nome): un solo canale, Lucy (nessun nome dei canali)", senzaCanali(testo))
                 if !report {
                     // Ogni posizione in essere compare nel prospetto
                     let mancanti = t.e.voci.filter { !testo.contains(spazi($0.posizione.nome)) }.map(\.posizione.nome)
@@ -608,9 +606,7 @@ enum ProvaProspetti {
                 }
                 verifica("\(nome): le due posizioni, il cliente e il consulente",
                          testo.contains(spazi(pa.nome)) && testo.contains(spazi(pb.nome)) && testo.contains(cliente.nome) && testo.contains(TestiValutazione.consulente))
-                for c in Set([pa.canale, pb.canale]) {
-                    verifica("\(nome): etichetta \(c.nomeBreve) nel PDF", testo.contains(c.nome))
-                }
+                verifica("\(nome): un solo canale, Lucy (nessun nome dei canali)", senzaCanali(testo))
                 if let cartella { try? pdf.write(to: cartella.appendingPathComponent("\(nome).pdf")) }
             }
         }
@@ -720,6 +716,14 @@ enum ProvaProspetti {
                  && StatoShell.pagineAperturaFascicolo(3) == 1, "")
     }
     #endif
+
+    /// Un solo canale, Lucy: nel testo del PDF non c'è l'etichetta di un canale («Denis Vicenzoni · Consulenza
+    /// finanziaria»), né la firma «Consulente Alleanza Assicurazioni», né il nome di prima «Prisma». I dati scritti
+    /// dall'utente (la compagnia di una polizza, il nome di un prodotto) restano come sono.
+    static func senzaCanali(_ testo: String) -> Bool {
+        let t = spazi(testo)
+        return !t.contains(spazi(Canale.indipendente.nome)) && !t.contains("Consulente Alleanza") && !t.contains("Prisma")
+    }
 
     static func spazi(_ s: String) -> String {
         // Le legature tipografiche (ﬁ, ﬃ…) tornano lettere separate: "autosufficienza" resta cercabile

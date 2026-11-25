@@ -215,8 +215,9 @@ struct PaginaCarta: View {
         .frame(width: M.pagina.width, height: M.pagina.height)
         // Carta bianca, come i prospetti di `FoglioProspetto`: le due famiglie di prospetti hanno la stessa veste
         .background(Colori.Carta.foglioProspetto)
-        // Su carta le etichette dei canali sono quelle opache da stampa, e tutto resta chiaro
+        // Su carta le etichette dei canali sono quelle opache da stampa, e tutto resta chiaro; un solo canale, Lucy
         .environment(\.etichetteStampa, true)
+        .environment(\.canaleUnicoLucy, true)
         .environment(\.colorScheme, .light)
     }
 
@@ -231,13 +232,17 @@ struct PaginaCarta: View {
             }
             .frame(height: M.rigaLogoPrima)
             .padding(.bottom, 9)
-            Rectangle().fill(Colori.Carta.filettoForte).frame(height: 2)
+            Rectangle().fill(Colori.Carta.filettoForte).frame(height: 1.2)
             Text(verbatim: contenuto.occhiello.uppercased())
-                .font(Tipo.Carta.occhiello).tracking(1.2).foregroundColor(Colori.Carta.numeroSezione)
+                .font(Tipo.Carta.occhiello).tracking(1.4).foregroundColor(Colori.Carta.numeroSezione)
                 .padding(.top, 14)
             Text(verbatim: contenuto.titolo)
                 .font(Tipo.Carta.titolo).foregroundColor(Colori.Carta.titolo)
                 .lineLimit(1).minimumScaleFactor(0.6)
+                // La sottolineatura d'oro nello spazio sotto il titolo: l'altezza della testata non cambia
+                .overlay(alignment: .bottomLeading) {
+                    SottolineaturaOro(lunghezza: Misure.Documento.lunghezzaOroReport).offset(y: Misure.Documento.spessoreOro * 2.2)
+                }
                 .padding(.top, 4)
             Text(verbatim: contenuto.sottotitolo)
                 .font(Tipo.Carta.sottotitolo).foregroundColor(Colori.Carta.testoTenue)
@@ -299,7 +304,11 @@ struct BloccoCarta: View {
                     Text(verbatim: numero).font(Tipo.Carta.numeroSezione).foregroundColor(Colori.Carta.numeroSezione)
                     Text(verbatim: titolo).font(Tipo.Carta.sezione).foregroundColor(Colori.Carta.titolo)
                 }
+                // Il filo sottile con il tratto d'oro all'inizio (stile Lucy)
                 Rectangle().fill(Colori.Carta.filetto).frame(height: 1)
+                    .overlay(alignment: .leading) {
+                        Rectangle().fill(Colori.Documento.Carta.oro).frame(width: Misure.Documento.lunghezzaOroProspetto, height: Misure.Documento.spessoreOro)
+                    }
             }
         case .indicatori(let elenco):
             HStack(spacing: 8) {
