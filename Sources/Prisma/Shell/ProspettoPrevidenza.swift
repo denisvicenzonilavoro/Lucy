@@ -77,8 +77,9 @@ private struct PaginaDivario: View {
                     ColonnaDoc(titolo: "Imposta", sottotitolo: "aliquota allora", peso: 1),
                     ColonnaDoc(titolo: "Netto", sottotitolo: "in euro di oggi", peso: 1.3),
                     ColonnaDoc(titolo: "Rendita", sottotitolo: "al mese", peso: 0.9),
-                ], gruppi: Canale.allCases.compactMap { c in
-                    let mie = e.piani.filter { $0.posizione.canale == c }
+                ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                    // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                    let mie = e.piani
                     guard !mie.isEmpty else { return nil }
                     return GruppoCanale(canale: c, righe: mie.map { riga($0) }, nota: mie.count == 1 ? "1 piano" : "\(mie.count) piani")
                 })

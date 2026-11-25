@@ -133,7 +133,7 @@ struct ModuloProdottoSulCliente: View {
                 testo.isEmpty || [p.nome, p.emittente, p.tipologia, p.area.nome].contains { $0.lowercased().contains(testo) }
             }
             .sorted { a, b in
-                a.canale == b.canale ? a.nome.localizedCaseInsensitiveCompare(b.nome) == .orderedAscending : a.canale == .alleanza
+                a.nome.localizedCaseInsensitiveCompare(b.nome) == .orderedAscending
             }
     }
 
@@ -143,13 +143,7 @@ struct ModuloProdottoSulCliente: View {
                 TextField("Cerca per nome, compagnia o tipo", text: $ricerca)
                     .textFieldStyle(.roundedBorder)
                     .frame(width: M.ricerca)
-                Picker("", selection: $canale) {
-                    Text("Tutti").tag(Canale?.none)
-                    ForEach(Canale.allCases) { Text($0.nomeBreve).tag(Optional($0)) }
-                }
-                .labelsHidden()
-                .pickerStyle(.segmented)
-                .fixedSize()
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente filtro di canale
             }
             if stato.dati.prodotti.isEmpty {
                 Text("Il catalogo è vuoto: crea le schede in Prodotti (anche dal KID), poi tornano qui.")

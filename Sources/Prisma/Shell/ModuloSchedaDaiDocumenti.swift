@@ -196,12 +196,7 @@ struct ModuloSchedaDaiDocumenti: View {
             VStack(alignment: .leading, spacing: 10) {
                 OcchielloSezione(titolo: "La scheda")
                 if esistente == nil {
-                    CampoModulo(etichetta: "Canale") {
-                        Picker("", selection: $canale) {
-                            ForEach(Canale.allCases) { Text($0.nomeBreve).tag($0) }
-                        }
-                        .labelsHidden().pickerStyle(.segmented).fixedSize()
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                     CampoModulo(etichetta: "Area") {
                         MenuTendina(selezione: $area, opzioni: AreaPosizione.allCases.map { ($0, $0.nome) }, larghezza: 220)
                     }

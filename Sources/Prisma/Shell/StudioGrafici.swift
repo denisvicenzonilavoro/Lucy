@@ -93,22 +93,13 @@ private struct ColonnaIncassoStudio: View {
 
     var body: some View {
         let t = Tema.Apple.Studio.Incassi.self
-        let alleanza = max(0, mese.alleanza ?? 0)
-        let indipendente = max(0, mese.indipendente)
-        let totale = alleanza + indipendente
-        let due = alleanza > 0 && indipendente > 0
-        let utile = max(0, altezza - (due ? t.fraParti : 0))
-        return VStack(spacing: t.fraParti) {
-            if indipendente > 0 {
-                FormaColonnaStudio(alto: t.raggioEsterno, basso: due ? t.raggioInterno : t.raggioEsterno)
-                    .fill(t.coloreIndipendente)
-                    .opacity(t.opacitaIndipendente)
-                    .frame(height: totale > 0 ? utile * CGFloat(indipendente / totale) : 0)
-            }
-            if alleanza > 0 {
-                FormaColonnaStudio(alto: due ? t.raggioInterno : t.raggioEsterno, basso: t.raggioEsterno)
-                    .fill(t.coloreAlleanza)
-                    .frame(height: totale > 0 ? utile * CGFloat(alleanza / totale) : 0)
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: una colonna sola per il totale
+        let totale = max(0, mese.alleanza ?? 0) + max(0, mese.indipendente)
+        return VStack(spacing: 0) {
+            if totale > 0 {
+                FormaColonnaStudio(alto: t.raggioEsterno, basso: t.raggioEsterno)
+                    .fill(t.coloreColonna)
+                    .frame(height: altezza)
             }
         }
         .frame(maxWidth: .infinity)

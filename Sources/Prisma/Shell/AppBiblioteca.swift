@@ -602,7 +602,7 @@ private struct LateraleBiblioteca: View {
 
     @ViewBuilder private func menu(_ d: DocumentoBiblioteca) -> some View {
         if d.daConfermare {
-            Button("Conferma \(d.genereVisto.nome.lowercased()) e canale") { stato.classificaBiblioteca(d.id) }
+            Button("Conferma \(d.genereVisto.nome.lowercased())") { stato.classificaBiblioteca(d.id) }
         }
         Menu("Genere") {
             ForEach(GenereBiblioteca.allCases) { g in
@@ -611,11 +611,7 @@ private struct LateraleBiblioteca: View {
                 }
             }
         }
-        Menu("Canale") {
-            Button { stato.classificaBiblioteca(d.id, canale: .some(.alleanza)) } label: { marcato(Canale.alleanza.nomeBreve, d.canale == .alleanza) }
-            Button { stato.classificaBiblioteca(d.id, canale: .some(.indipendente)) } label: { marcato("Consulenza indipendente", d.canale == .indipendente) }
-            Button { stato.classificaBiblioteca(d.id, canale: .some(nil)) } label: { marcato("Nessuno (di riferimento)", d.canale == nil) }
-        }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente menu del canale
         Menu("Collega a un prodotto") {
             Button { stato.collegaProdottoBiblioteca(d.id, prodotto: nil) } label: { marcato("Nessun prodotto", d.prodottoId == nil) }
             ForEach(stato.dati.prodotti) { p in

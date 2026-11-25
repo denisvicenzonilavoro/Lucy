@@ -187,7 +187,6 @@ enum MotoreTrackRecord {
         var righe: [RigaRaccomandazione] = []
         var ind: [String: Double] = [:]
         func riga(_ etichetta: String, _ valore: String) { righe.append(RigaRaccomandazione(etichetta: etichetta, valore: valore)) }
-        riga("Canale", p.canale.nomeBreve)
         riga("Area", p.area.nome)
         if p.versamentoIniziale > 0 {
             riga("Versamento iniziale", CifreDoc.euro(p.versamentoIniziale))

@@ -177,9 +177,7 @@ struct ConfermaCedolino: View {
                            displayedComponents: .date)
                 TextField("Provvigioni lorde", value: $cedolino.lordo, format: .number.precision(.fractionLength(2)))
                 TextField("Netto pagato", value: $cedolino.netto, format: .number.precision(.fractionLength(2)))
-                Picker("Canale", selection: $canale) {
-                    ForEach(Canale.allCases, id: \.self) { Text($0.nome).tag($0) }
-                }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
             }
             HStack {
                 Spacer()

@@ -1288,7 +1288,6 @@ struct DettaglioAppuntamento: View {
         let cliente = stato.cliente(evento.clienteId)
         let posizione = evento.posizioneId.flatMap { id in stato.posizioni.first { $0.id == id } }
         let collegate = stato.attivitaCollegate(evento.id)
-        let canale = stato.canaleAppuntamento(evento)
         // Una volta sola per body: le azioni compaiono in più versioni della fila (ViewThatFits) e ognuna rifaceva la
         // ricerca del fascicolo fra i documenti e dell'incontro fra gli incontri
         let archiviato = stato.fascicoloArchiviato(per: evento)
@@ -1351,14 +1350,7 @@ struct DettaglioAppuntamento: View {
                             }
                         }
                     }
-                    VoceDettaglio(etichetta: "Canale") {
-                        if let c = canale {
-                            EtichettaCanale(canale: c, compatta: true)
-                        } else {
-                            Pillola(testo: "Da indicare", tono: .neutro)
-                                .help("Indica il canale con «Modifica» o collega una posizione all'appuntamento")
-                        }
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente voce del canale
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text("NOTE PER L'INCONTRO")

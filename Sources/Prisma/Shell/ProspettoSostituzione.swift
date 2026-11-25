@@ -16,21 +16,15 @@ enum ProspettoSostituzione {
 
 private var larghezza: CGFloat { FoglioProspetto<EmptyView>.larghezza }
 
-/// Le etichette dei due canali sopra due colonne della tabella (blu Alleanza, cuoio indipendente).
+/// Le etichette dei due canali sopra due colonne della tabella. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy:
+/// non disegna nulla.
 private struct TestataCanali: View {
     let resto: Posizione
     let cambio: Posizione
     /// Pesi delle colonne prima, sotto la prima strada e sotto la seconda.
     let pesi: (CGFloat, CGFloat, CGFloat)
 
-    var body: some View {
-        let somma = pesi.0 + pesi.1 + pesi.2
-        HStack(spacing: 0) {
-            Color.clear.frame(width: larghezza * pesi.0 / somma, height: 1)
-            EtichettaCanale(canale: resto.canale).frame(width: larghezza * pesi.1 / somma, alignment: .leading)
-            EtichettaCanale(canale: cambio.canale).frame(width: larghezza * pesi.2 / somma, alignment: .leading)
-        }
-    }
+    var body: some View { EmptyView() }
 }
 
 // MARK: - Pagina 1: le due strade

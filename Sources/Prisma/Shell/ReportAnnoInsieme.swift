@@ -88,29 +88,12 @@ private struct IntestazioneAnno: View {
         HStack(alignment: .center, spacing: M.spazioLogo) {
             LogoLucy(colore: K.logo)
                 .frame(height: M.logo)
-            if canali == [.alleanza] {
-                simboloAlleanza
-                Text(verbatim: "\(TestiValutazione.consulente) · Consulente \(Canale.alleanza.nome)")
-                    .carattereApple(F.intestazione)
-                    .foregroundColor(K.alleanza)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            } else if canali == [.indipendente] {
-                Text(verbatim: Canale.indipendente.nome)
-                    .carattereApple(F.intestazione)
-                    .foregroundColor(K.indipendente)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-            } else {
-                Text(verbatim: TestiValutazione.consulente)
-                    .carattereApple(F.intestazione)
-                    .foregroundColor(K.etichetta)
-                    .lineLimit(1)
-                Spacer(minLength: M.spazioLogo)
-                ForEach(canali, id: \.self) { c in
-                    EtichettaCanaleStampa(canale: c)
-                }
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: il nome del consulente, senza canale né simbolo Alleanza
+            Text(verbatim: TestiValutazione.consulente)
+                .carattereApple(F.intestazione)
+                .foregroundColor(K.etichetta)
+                .lineLimit(1)
+            Spacer(minLength: 0)
         }
     }
 
@@ -445,7 +428,7 @@ private struct SuccessoAnno: View {
                 TestoAnno(testo: "Nessuna posizione nuova quest'anno.")
             }
             ForEach(Array(t.scelte.prefix(R.scelte).enumerated()), id: \.offset) { _, s in
-                VoceElencoAnno(testo: s.nome, nota: "\(s.nota) · \(s.canale.nomeBreve)", colore: K.canale(s.canale))
+                VoceElencoAnno(testo: s.nome, nota: s.nota, colore: K.canale(s.canale))
             }
         }
     }

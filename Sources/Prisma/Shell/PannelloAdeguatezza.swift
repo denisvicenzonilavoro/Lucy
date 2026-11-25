@@ -269,7 +269,7 @@ struct PannelloAdeguatezza: View {
     private func opzioniSostituita(_ candidate: [Posizione], attuale: String?) -> [(String?, String)] {
         var opzioni: [(String?, String)] = [(nil, "Nessuna: nuovo investimento")]
         for p in candidate {
-            opzioni.append((p.id, "\(p.nome) · \(p.canale.nomeBreve)"))
+            opzioni.append((p.id, p.nome))
         }
         if let attuale, !candidate.contains(where: { $0.id == attuale }) {
             opzioni.append((attuale, "Posizione non più in essere"))

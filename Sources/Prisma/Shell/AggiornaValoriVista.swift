@@ -37,7 +37,8 @@ struct PannelloAggiornaValori: View {
         _dataComune = State(initialValue: sessione.dataComune)
         _bozze = State(initialValue: sessione.bozze)
         _ambito = State(initialValue: sessione.soloCliente)
-        _canale = State(initialValue: sessione.canale)
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: nessun filtro di canale
+        _canale = State(initialValue: nil)
         _scelte = State(initialValue: sessione.scelte)
     }
 
@@ -337,7 +338,6 @@ struct PannelloAggiornaValori: View {
                     .frame(width: m.segmentiCanale)
             }
             indicatori(esiti, daControllare: daControllare.count)
-            righeCanali(anteprimaElenco)
             TabellaStrumento {
                 Color.clear.frame(width: m.colonnaSpunta, height: Tema.Misura.filo)
                 CellaTesta(testo: TestiAggiornaValori.colonnaRiga, larghezza: m.colonnaRiga, destra: true)
@@ -377,24 +377,6 @@ struct PannelloAggiornaValori: View {
                             nota: TestiAggiornaValori.notaVariazione(totale))
             KPI(titolo: TestiAggiornaValori.kpiDaControllare, valore: "\(daControllare)") {
                 Text(TestiAggiornaValori.notaDaControllare)
-            }
-        }
-    }
-
-    /// Una riga per canale con almeno una posizione aggiornata: prima Alleanza, poi indipendente.
-    @ViewBuilder private func righeCanali(_ r: AggiornaValori.Riepilogo) -> some View {
-        let canali = Canale.allCases.filter { (r.perCanale[$0]?.posizioni ?? 0) > 0 }
-        if !canali.isEmpty {
-            VStack(alignment: .leading, spacing: m.spazioCanali) {
-                ForEach(canali) { c in
-                    HStack(spacing: m.spazioCella) {
-                        EtichettaCanale(canale: c, compatta: true)
-                        Text(TestiAggiornaValori.perCanale(r.perCanale[c] ?? AggiornaValori.Totale()))
-                            .font(Tema.Testo.didascalia)
-                            .foregroundColor(Tema.Colore.inchiostroSecondario)
-                            .lineLimit(1)
-                    }
-                }
             }
         }
     }
@@ -439,7 +421,7 @@ struct PannelloAggiornaValori: View {
         let p = e.posizioneId.flatMap { perId[$0] }
         let candidate: [(String, String)] = e.candidate.compactMap { id -> (String, String)? in
             guard let q = perId[id] else { return nil }
-            return (id, "\(q.nome) · \(nomi[q.clienteId] ?? "") · \(q.canale.nomeBreve)")
+            return (id, "\(q.nome) · \(nomi[q.clienteId] ?? "")")
         }
         let opzioni: [(String, String)] = [("", TestiAggiornaValori.scegli)] + candidate
         VStack(alignment: .leading, spacing: m.spazioTesto) {
@@ -515,11 +497,6 @@ struct PannelloAggiornaValori: View {
                     SegmentiAnalisi(opzioni: opzioni, selezione: $ambito)
                         .frame(width: m.segmentiAmbito)
                 }
-                let canali: [(Canale?, String)] = [(nil, TestiAggiornaValori.canaleTutti),
-                                                   (.alleanza, Canale.alleanza.nomeBreve),
-                                                   (.indipendente, TestiAggiornaValori.canaleIndipendente)]
-                SegmentiAnalisi(opzioni: canali, selezione: $canale)
-                    .frame(width: m.segmentiCanale)
                 Spacer(minLength: m.spazioComandi)
                 Text(TestiAggiornaValori.dataComune)
                     .font(Tema.Testo.corpo)
@@ -625,7 +602,6 @@ struct PannelloAggiornaValori: View {
                         .foregroundColor(Tema.Colore.AggiornaValori.segno(r.totale.variazione))
                 }
             }
-            righeCanali(r)
             if !mostrate.isEmpty {
                 TabellaStrumento {
                     CellaTesta(testo: TestiAggiornaValori.colonnaPosizione)

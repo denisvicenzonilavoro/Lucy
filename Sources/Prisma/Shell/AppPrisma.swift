@@ -270,9 +270,9 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .agenda, .attivita: return "Appuntamenti, attività e scadenze delle posizioni."
         case .incontri: return "Preparazione, ascolto, appunti e decisioni, prossimi passi."
         case .posizioni:
-            return "Il cuore di Lucy: le posizioni dei clienti, in essere e in proposta, con il canale Alleanza / indipendente sempre in vista."
+            return "Il cuore di Lucy: le posizioni dei clienti, in essere e in proposta."
         case .analisi360, .prodotti, .confronti, .simulazioni, .obiettivi:
-            return "Fa parte del modulo Posizioni, il cuore di Lucy, con il canale Alleanza / indipendente sempre in vista."
+            return "Fa parte del modulo Posizioni, il cuore di Lucy."
         case .vera: return "Lucy arriva con il suo modulo: lettura dei documenti, estrazione dei dati e risposte in chat, tutto sul Mac."
         case .documenti: return "KID, polizze ed estratti conto letti sul Mac, con i dati da confermare."
         case .presentazioni: return "Prospetti dettagliati per il consulente e report essenziali per il cliente, in PDF."

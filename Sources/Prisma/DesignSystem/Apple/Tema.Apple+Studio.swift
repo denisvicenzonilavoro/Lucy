@@ -188,6 +188,8 @@ extension Tema.Apple {
             static let coloreAlleanza = Colore.canaleAlleanza
             static let coloreIndipendente = Colore.canaleIndipendente
             static let opacitaIndipendente: Double = 0.9
+            /// La colonna unica del mese (dal 25 novembre 2026 un solo canale, quello di Lucy).
+            static let coloreColonna = Colore.accento
             /// Il mese sotto la colonna: 11 `inchiostro2`, 6 sotto.
             static let mese = Carattere.asse
             static let coloreMese = Colore.inchiostro2

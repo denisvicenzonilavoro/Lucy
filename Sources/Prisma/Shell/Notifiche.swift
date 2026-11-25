@@ -698,11 +698,12 @@ extension MotoreNotifiche {
                     let corpo: String
                     if scelte.nomiClienti {
                         titolo = "\(cosa.isEmpty ? "Una posizione" : cosa) \(fra)"
-                        corpo = [nome(p.clienteId) ?? "", p.canale.nomeBreve, Formati.dataEstesa.string(from: scadenza)]
+                        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente nome del canale
+                        corpo = [nome(p.clienteId) ?? "", Formati.dataEstesa.string(from: scadenza)]
                             .filter { !$0.isEmpty }.joined(separator: " · ")
                     } else {
                         titolo = "Una posizione \(fra)"
-                        corpo = "\(p.canale.nomeBreve) · \(dettagli)"
+                        corpo = dettagli
                     }
                     elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)scadenza-\(p.id)-\(giorni)-\(epoca(scadenza))",
                                                         titolo: titolo, corpo: corpo, gruppo: "posizioni",

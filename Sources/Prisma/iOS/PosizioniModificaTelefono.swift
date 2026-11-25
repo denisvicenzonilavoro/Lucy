@@ -21,13 +21,7 @@ struct ProdottoSulClienteTelefono: View {
     var body: some View {
         NavigationStack {
             List {
-                Section {
-                    Picker("Canale", selection: $canale) {
-                        Text("Tutti").tag(Canale?.none)
-                        ForEach(Canale.allCases) { Text($0.nomeBreve).tag(Optional($0)) }
-                    }
-                    .pickerStyle(.segmented)
-                }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                 if prodotti.isEmpty {
                     Text(stato.dati.prodotti.isEmpty ? "Il catalogo è vuoto: le schede si creano in Prodotti sul Mac (anche dal KID)."
                                                      : "Nessun prodotto con «\(ricerca)».")
@@ -60,7 +54,7 @@ struct ProdottoSulClienteTelefono: View {
         return stato.dati.prodotti
             .filter { canale == nil || $0.canale == canale }
             .filter { p in t.isEmpty || [p.nome, p.emittente, p.tipologia, p.area.nome].contains { $0.lowercased().contains(t) } }
-            .sorted { a, b in a.canale == b.canale ? a.nome.localizedCaseInsensitiveCompare(b.nome) == .orderedAscending : a.canale == .alleanza }
+            .sorted { a, b in a.nome.localizedCaseInsensitiveCompare(b.nome) == .orderedAscending }
     }
 
     private func sottotitolo(_ p: Prodotto) -> String {

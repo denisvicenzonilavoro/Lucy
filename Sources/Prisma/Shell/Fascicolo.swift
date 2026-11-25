@@ -224,7 +224,8 @@ extension StatoShell {
     /// d'incontro dall'appuntamento; con `indiceInCopertina` il riquadro «Dentro» al posto dei cartellini.
     func copertinaFascicolo(_ c: Cliente, voci: [(String, Int)], pagine: Int, indiceInCopertina: Bool) -> CopertinaReport {
         let canali = Canale.allCases.filter { k in posizioniCliente(c.id).contains { $0.canale == k && $0.stato != .chiusa } }
-        let ruolo = canali == [.alleanza] ? "Consulente Alleanza Assicurazioni" : (canali == [.indipendente] ? "Consulenza finanziaria" : "Alleanza Assicurazioni · consulenza finanziaria")
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso ruolo per tutti
+        let ruolo = "Consulenza finanziaria"
         // Per un appuntamento: la data e il tipo d'incontro
         let incontro = incontroDelFascicolo(c)
         let data = incontro?.inizio ?? Date()

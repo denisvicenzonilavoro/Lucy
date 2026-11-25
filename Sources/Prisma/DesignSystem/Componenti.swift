@@ -767,69 +767,26 @@ extension EnvironmentValues {
     }
 }
 
-/// Canale di una posizione o di una proposta: sempre riconoscibile a colpo d'occhio.
-/// Nelle schermate è la capsula in vetro del tema (blu con il simbolo Alleanza, cuoio con la scritta
-/// «Denis Vicenzoni · Consulenza finanziaria»; compatta: pallino e una parola). Sui documenti, con
-/// `\.etichetteStampa` a true, è `EtichettaCanaleStampa`.
-/// Con `.superficiApple()` (`\.etichetteApple`) è l'etichetta del tema Apple, `EtichettaCanaleApple`.
+/// Canale di una posizione o di una proposta. Dal 25 novembre 2026 (decisione dell'utente: «c'è solo un unico
+/// canale, quello di Lucy») non disegna nulla: i richiami restano com'erano e l'etichetta non occupa spazio.
 struct EtichettaCanale: View {
     let canale: Canale
     var compatta = false
-    @Environment(\.etichetteStampa) private var stampa
-    @Environment(\.etichetteApple) private var apple
 
-    var body: some View {
-        if stampa {
-            EtichettaCanaleStampa(canale: canale, compatta: compatta)
-        } else if apple {
-            EtichettaCanaleApple(canale: canale, compatta: compatta)
-        } else {
-            CapsulaCanale(canale: canale, compatta: compatta, completa: !compatta)
-        }
-    }
+    // Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy: il canale non si mostra
+    // più. Il campo `canale` resta nei dati solo per compatibilità; la firma resta perché i richiami compilino.
+    var body: some View { EmptyView() }
 }
 
-/// Etichetta del canale per i documenti su carta bianca (PDF e anteprime): capsula opaca dai colori fissi,
-/// simbolo Alleanza blu o pallino cuoio, scritta completa (compatta: una parola). Sempre chiara.
+/// Etichetta del canale per i documenti su carta bianca (PDF e anteprime). Dal 25 novembre 2026 (un solo canale,
+/// quello di Lucy) non disegna nulla, come `EtichettaCanale`.
 struct EtichettaCanaleStampa: View {
     let canale: Canale
     var compatta = false
 
-    var body: some View {
-        let _ = SegnaleNomiCanali.condiviso.nomi
-        let c = Tema.Colore.Componenti.self
-        let m = Tema.Misura.Componenti.self
-        let alleanza = canale == .alleanza
-        let colore = alleanza ? Tema.Colore.canaleAlleanzaStampa : Tema.Colore.canaleIndipendenteStampa
-        let forma = Capsule(style: .continuous)
-        HStack(spacing: m.spazioStampa) {
-            // Il logo Alleanza solo con il nome di base del primo canale (migliorie d'uso 38)
-            if canale.conLogo, let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
-                Image(piattaforma: simbolo)
-                    .renderingMode(.template)
-                    .resizable()
-                    .interpolation(.high)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: compatta ? m.simboloStampaCompatto : m.simboloStampa)
-                    .foregroundColor(colore)
-            } else {
-                Circle()
-                    .fill(colore)
-                    .frame(width: m.pallinoStampa, height: m.pallinoStampa)
-            }
-            Text(compatta ? canale.nomeBreve : canale.nome)
-                .font(compatta ? Tipo.etichettaCanalePiccola : Tipo.etichettaCanale)
-                .foregroundColor(c.testoCanaleStampa)
-                .lineLimit(1)
-        }
-        .padding(compatta ? m.etichettaStampaCompatta : m.etichettaStampa)
-        .background { forma.fill(alleanza ? c.fondoCanaleAlleanzaStampa : c.fondoCanaleIndipendenteStampa) }
-        .overlay {
-            forma.strokeBorder(alleanza ? c.bordoCanaleAlleanzaStampa : c.bordoCanaleIndipendenteStampa, lineWidth: m.bordoStampa)
-        }
-        .fixedSize()
-        .environment(\.colorScheme, .light)
-    }
+    // Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy: il canale non si mostra
+    // più. Il campo `canale` resta nei dati solo per compatibilità; la firma resta perché i richiami compilino.
+    var body: some View { EmptyView() }
 }
 
 // MARK: - Icone delle app

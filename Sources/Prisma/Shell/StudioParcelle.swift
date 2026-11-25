@@ -93,7 +93,7 @@ enum FiltroParcelle: String, CaseIterable, Hashable {
 
 enum TestiParcelle {
     static let nuova = "＋ Nuova parcella"
-    static let vuotoElenco = "Ancora nessuna parcella. Le parcelle sono della consulenza indipendente: preparane una "
+    static let vuotoElenco = "Ancora nessuna parcella. Le parcelle sono della consulenza: preparane una "
         + "con «Nuova parcella»."
     static let vuotoAnteprima = "Qui vedrai la fattura su carta"
     static let notaXML = "Il file XML della fattura elettronica lo carichi tu sul portale dell’Agenzia delle Entrate, "
@@ -423,7 +423,7 @@ struct ParcelleStudioVista: View {
             }
             .buttonStyle(.applePrimarioGrande)
             .disabled(stato.solaLettura || stato.clienti.isEmpty)
-            .help("Una parcella della consulenza indipendente: il cliente, la consulenza e l’importo")
+            .help("Una parcella della consulenza: il cliente, la consulenza e l’importo")
             .padding(.top, Tema.Apple.Parcelle.nuovaSopra)
             #endif
         }

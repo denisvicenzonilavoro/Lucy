@@ -299,13 +299,7 @@ struct DettaglioOccasione: View {
                     VoceDettaglio(etichetta: "Quando") {
                         valore("\(Formati.giornoSettimana.string(from: o.data)) \(Formati.dataEstesa.string(from: o.data))\n\(quanto(o.data))")
                     }
-                    VoceDettaglio(etichetta: "Canale") {
-                        if let c = o.canale {
-                            EtichettaCanale(canale: c, compatta: true)
-                        } else {
-                            valore("Non legata a un canale")
-                        }
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente voce del canale
                     if let cifra = TestiOccasioni.valore(o) {
                         VoceDettaglio(etichetta: "Cifra") { valore(cifra) }
                     }
@@ -602,15 +596,8 @@ struct ElencoOccasioniAgenda: View {
     /// «23 occasioni · 9 Alleanza · 11 indipendente», senza le parti a zero (i conteggi da `raggruppa`).
     private func riepilogo(_ gruppi: Raggruppate) -> some View {
         let n = elenco.count
-        let alleanza = gruppi.alleanza
-        let indipendente = gruppi.indipendente
-        var testo = Text("\(n)").font(Tipo.notaSettimanaForte) + Text(n == 1 ? " occasione" : " occasioni")
-        if alleanza > 0 {
-            testo = testo + Text(" · ") + Text("\(alleanza)").font(Tipo.notaSettimanaForte) + Text(" " + Canale.alleanza.nomeBreve)
-        }
-        if indipendente > 0 {
-            testo = testo + Text(" · ") + Text("\(indipendente)").font(Tipo.notaSettimanaForte) + Text(" indipendente")
-        }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: solo il numero delle occasioni, senza la divisione per canale
+        let testo = Text("\(n)").font(Tipo.notaSettimanaForte) + Text(n == 1 ? " occasione" : " occasioni")
         return testo
             .font(Tipo.notaSettimana)
             .foregroundColor(Colori.Agenda.notaSettimana)

@@ -194,9 +194,6 @@ struct CopertinaReport: View {
                                     .fixedSize(horizontal: true, vertical: false)
                                 Text(verbatim: CifreDoc.data(data)).font(T.copertinaRuolo).foregroundColor(C.copertinaTesto)
                             }
-                            VStack(alignment: .leading, spacing: 4) {
-                                ForEach(canali, id: \.self) { EtichettaCanale(canale: $0) }
-                            }
                         }
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)

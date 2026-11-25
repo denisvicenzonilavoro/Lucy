@@ -52,8 +52,9 @@ private struct PaginaCapitali: View {
                     ColonnaDoc(titolo: "Posizione", sottotitolo: "tipologia", peso: 2.4, destra: false), ColonnaDoc(titolo: "Scadenza", peso: 0.9),
                     ColonnaDoc(titolo: "Valore", sottotitolo: "versato", peso: 1.1), ColonnaDoc(titolo: "Imposta", sottotitolo: "aliquota", peso: 1),
                     ColonnaDoc(titolo: "Bollo", peso: 0.8), ColonnaDoc(titolo: "Netto", peso: 1.1),
-                ], gruppi: Canale.allCases.compactMap { c in
-                    let mie = e.scadenze.filter { $0.posizione.canale == c }
+                ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                    // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                    let mie = e.scadenze
                     guard !mie.isEmpty else { return nil }
                     return GruppoCanale(canale: c, righe: mie.map { s in
                         let f = s.fisco
@@ -73,8 +74,9 @@ private struct PaginaCapitali: View {
             } else {
                 TabellaCanali(colonne: [ColonnaDoc(titolo: "Conto", sottotitolo: "emittente", peso: 3, destra: false), ColonnaDoc(titolo: "Saldo", peso: 1.2),
                                         ColonnaDoc(titolo: "Bollo", sottotitolo: "in un anno", peso: 1)],
-                              gruppi: Canale.allCases.compactMap { c in
-                                  let mie = e.liquidita.filter { $0.canale == c }
+                              gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                                  // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                                  let mie = e.liquidita
                                   guard !mie.isEmpty else { return nil }
                                   return GruppoCanale(canale: c, righe: mie.map { p in
                                       let bollo = MotoreFiscale.bolloAnnuo(p, valore: p.valore)
@@ -132,7 +134,7 @@ private struct PaginaSalvadanai: View {
                 VStack(alignment: .leading, spacing: 3) {
                     ForEach(e.proposte) { p in
                         PuntoElenco(testo: Text(verbatim: p.nome).bold()
-                                    + Text(verbatim: " · \(p.canale.nome) · \(p.area.nome.lowercased())" + (p.rendimentoAtteso.map { " · rendimento ipotizzato \(CifreDoc.condizione($0))" } ?? "")))
+                                    + Text(verbatim: " · \(p.area.nome.lowercased())" + (p.rendimentoAtteso.map { " · rendimento ipotizzato \(CifreDoc.condizione($0))" } ?? "")))
                     }
                 }
             }

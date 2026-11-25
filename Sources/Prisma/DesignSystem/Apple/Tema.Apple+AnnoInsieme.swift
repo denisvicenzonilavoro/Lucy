@@ -45,7 +45,8 @@ extension Tema.Apple {
                 }
             }
 
-            static func canale(_ c: Canale) -> Color { c == .alleanza ? alleanza : indipendente }
+            /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore per tutti.
+            static func canale(_ c: Canale) -> Color { alleanza }
         }
 
         // MARK: Caratteri

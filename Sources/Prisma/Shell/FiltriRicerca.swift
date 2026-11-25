@@ -174,7 +174,7 @@ enum FiltriRicerca {
     static let chiavi: [SuggerimentoFiltro] = [
         SuggerimentoFiltro(testo: "scade:", descrizione: "scadenza in un anno o un mese", completo: false),
         SuggerimentoFiltro(testo: "sri>", descrizione: "rischio del KID, da 1 a 7", completo: false),
-        SuggerimentoFiltro(testo: "canale:", descrizione: "Alleanza o indipendente", completo: false),
+        // «canale:» non si propone più: dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy
         SuggerimentoFiltro(testo: "costo>", descrizione: "costi annui o RIY, in %", completo: false),
         SuggerimentoFiltro(testo: "beneficiari:vuoti", descrizione: "polizze senza beneficiari"),
         SuggerimentoFiltro(testo: "senza:", descrizione: "clienti senza un'area in essere", completo: false),

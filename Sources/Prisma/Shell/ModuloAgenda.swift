@@ -40,12 +40,7 @@ struct ModuloAppuntamento: View {
                         .labelsHidden()
                         .frame(width: 240)
                     }
-                    CampoModulo(etichetta: "Canale") {
-                        HStack(spacing: 14) {
-                            sceltaCanale(nil)
-                            ForEach(Canale.allCases) { c in sceltaCanale(c) }
-                        }
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                 }
                 sezione("Quando e dove") {
                     if let spiegazione {
@@ -105,7 +100,7 @@ struct ModuloAppuntamento: View {
                         Picker("", selection: $bozza.posizioneId) {
                             Text("Nessuna").tag(String?.none)
                             ForEach(stato.posizioniCliente(bozza.clienteId)) { p in
-                                Text("\(p.stato == .proposta ? "Proposta · " : "")\(p.nome) (\(p.canale.nomeBreve))").tag(Optional(p.id))
+                                Text("\(p.stato == .proposta ? "Proposta · " : "")\(p.nome)").tag(Optional(p.id))
                             }
                         }
                         .labelsHidden()
@@ -174,21 +169,6 @@ struct ModuloAppuntamento: View {
                 .foregroundColor(Colori.Analisi.kpiNota)
                 .fixedSize(horizontal: false, vertical: true)
         }
-    }
-
-    private func sceltaCanale(_ c: Canale?) -> some View {
-        Button { bozza.canale = c } label: {
-            HStack(spacing: 6) {
-                Image(systemName: bozza.canale == c ? "largecircle.fill.circle" : "circle")
-                    .foregroundColor(Colori.Analisi.navBasso)
-                if let c {
-                    EtichettaCanale(canale: c, compatta: true)
-                } else {
-                    Text("Non indicato").font(Tipo.campoValore).foregroundColor(Colori.Rubrica.testo)
-                }
-            }
-        }
-        .buttonStyle(StileSemplice())
     }
 
     private func sezione<C: View>(_ titolo: String, @ViewBuilder _ contenuto: () -> C) -> some View {

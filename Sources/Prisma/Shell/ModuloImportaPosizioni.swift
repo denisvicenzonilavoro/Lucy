@@ -70,14 +70,7 @@ struct ModuloImportaPosizioni: View {
                     }
                     .stileCasella()
                 }
-                if importazione.posizioni.contains(where: { !$0.canaleDalFile }) {
-                    HStack(spacing: 10) {
-                        Text("Canale delle righe che non lo indicano")
-                            .font(Tipo.campoEtichetta).foregroundColor(Colori.Rubrica.testo)
-                        SegmentiAnalisi(opzioni: [(Canale.alleanza, Canale.alleanza.nomeBreve), (.indipendente, Canale.indipendente.nomeBreve)], selezione: $canale)
-                            .frame(width: 240)
-                    }
-                }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente scelta del canale delle righe
                 // Righe di posizioni già in Prisma, con i valori: si possono aggiornare invece di importarle
                 let gia = importazione.posizioni.filter { $0.problema == ImportaPosizioni.giaPresente }.count
                 if gia > 0 && importazione.colonne.contains(.controvalore) {
@@ -101,7 +94,7 @@ struct ModuloImportaPosizioni: View {
                     ForEach(importazione.posizioni) { x in riga(x) }
                 }
                 .contornoTabella()
-                Text("Quando il nome del prodotto corrisponde a una scheda di Prodotti, costi, rendimento e rischio vengono dalla scheda. Area e canale si possono correggere anche dopo, nella scheda di ogni posizione. Il controvalore entra con la data del file o di oggi: è il primo punto dell'andamento.")
+                Text("Quando il nome del prodotto corrisponde a una scheda di Prodotti, costi, rendimento e rischio vengono dalla scheda. L'area si può correggere anche dopo, nella scheda di ogni posizione. Il controvalore entra con la data del file o di oggi: è il primo punto dell'andamento.")
                     .font(Tipo.kpiNota)
                     .foregroundColor(Colori.Analisi.kpiNota)
                     .fixedSize(horizontal: false, vertical: true)

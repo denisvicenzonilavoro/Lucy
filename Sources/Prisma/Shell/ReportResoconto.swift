@@ -264,7 +264,7 @@ private struct SlideAtteso: View {
                 Rectangle().fill(C.canale(p.canale)).frame(width: 3, height: 34)
                 VStack(alignment: .leading, spacing: 2) {
                     Text(verbatim: p.nome).font(T.corpoForte).foregroundColor(C.titolo).lineLimit(1).truncationMode(.tail)
-                    Text(verbatim: "dal \(CifreDoc.dataBreve(a.dal)) · \(p.canale.nomeBreve)").font(T.minimo).foregroundColor(C.tenue)
+                    Text(verbatim: "dal \(CifreDoc.dataBreve(a.dal))").font(T.minimo).foregroundColor(C.tenue)
                 }
             }
             .frame(width: 260, alignment: .leading)
@@ -521,7 +521,7 @@ private struct SlideCosti: View {
                         HStack(spacing: 10) {
                             VStack(alignment: .leading, spacing: 1) {
                                 Text(verbatim: v.posizione.nome).font(T.corpoForte).foregroundColor(C.titolo).lineLimit(1)
-                                Text(verbatim: "\(v.posizione.canale.nome) · " + dettaglioCosti(v.fisco))
+                                Text(verbatim: dettaglioCosti(v.fisco))
                                     .font(T.minimo).foregroundColor(C.tenue).lineLimit(1).minimumScaleFactor(0.8)
                             }
                             .frame(width: 230, alignment: .leading)

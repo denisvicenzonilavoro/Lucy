@@ -54,14 +54,6 @@ struct RigaDaFare: View {
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            if conCanali, !voce.canali.isEmpty {
-                HStack(spacing: F.spazioCanali) {
-                    ForEach(voce.canali, id: \.self) { c in
-                        EtichettaCanaleApple(canale: c, compatta: true)
-                    }
-                }
-                .fixedSize()
-            }
         }
         .padding(F.paddingRiga)
         .frame(minHeight: F.altezzaRiga)

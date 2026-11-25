@@ -63,8 +63,8 @@ struct AppPratiche: View {
         } else {
             let n = stato.schedaPratiche.novita
             InArrivoAppLuce(app: .pratiche, glifo: n.glifo, titolo: n.titolo, frase: n.frase + ".",
-                            nota: "Il canale resta sempre in vista: Alleanza e consulenza indipendente, mai mescolati.",
-                            canali: true)
+                            nota: "Tutti i clienti insieme, in un solo canale: quello di Lucy.",
+                            canali: false)
         }
     }
 }

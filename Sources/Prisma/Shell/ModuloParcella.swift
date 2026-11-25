@@ -50,9 +50,6 @@ struct ModuloParcella: View {
                 Text(nuova ? "Nuova parcella" : "Modifica la bozza")
                     .carattereApple(M.titolo)
                     .foregroundColor(M.coloreTitolo)
-                Text("Consulenza indipendente: la parcella è sempre del canale indipendente.")
-                    .carattereApple(M.sottotitolo)
-                    .foregroundColor(M.coloreSottotitolo)
             }
             ScrollView(.vertical, showsIndicators: false) {
                 VStack(alignment: .leading, spacing: M.spazioSezioni) {
@@ -205,7 +202,7 @@ struct ModuloParcella: View {
         let incontri = stato.dati.incontri.filter { $0.clienteId == id }.sorted { $0.data > $1.data }
             .map { (Optional("incontro:" + $0.id), "Incontro · \($0.titolo) · \(TestiFattura.data($0.data))") }
         let proposte = stato.dati.posizioni.filter { $0.clienteId == id && $0.canale == .indipendente }
-            .map { (Optional("posizione:" + $0.id), "Indipendente · \($0.nome)") }
+            .map { (Optional("posizione:" + $0.id), "Posizione · \($0.nome)") }
         let nessuna: [(String?, String)] = [(nil, "Nessuna in particolare")]
         return nessuna + incontri + proposte
     }

@@ -6,8 +6,8 @@ import SwiftUI
 //
 //   ┌─ Il primo avvio · 1 di 3 ──────────────────────────────┐
 //   │ ▲  Benvenuto in Prisma                                  │  1. benvenuto, tre punti
-//   │    Prisma è lo studio di lavoro…                        │  2. i tuoi canali (due campi)
-//   │    • I calcoli li fa Prisma: tu scegli e spieghi.       │  3. da dove parti (tre opzioni)
+//   │    Prisma è lo studio di lavoro…                        │  2. da dove parti (tre opzioni)
+//   │    • I calcoli li fa Prisma: tu scegli e spieghi.       │  (dal 25 novembre 2026 niente pagina dei canali)
 //   │ ━ • •                              [Indietro] [Avanti]   │
 //   └─────────────────────────────────────────────────────────┘
 //
@@ -39,14 +39,15 @@ enum SceltaInizio: String, CaseIterable, Identifiable {
 
 /// I testi delle tre domande (come nel template).
 enum TestiPrimoAvvio {
-    static let pagine = 3
+    /// Dal 25 novembre 2026 (decisione dell'utente: un solo canale, quello di Lucy) due pagine: niente più «I tuoi canali».
+    static let pagine = 2
     static func occhiello(_ pagina: Int) -> String { "Il primo avvio · \(pagina + 1) di \(pagine)" }
 
     static let benvenuto = "Benvenuto in Lucy"
     static let benvenutoTesto = "Lucy è lo studio di lavoro di un consulente finanziario. Raccoglie le persone che segui e quello che hanno, e ti aiuta a capire che cosa manca e che cosa conviene."
-    /// I primi due punti sono quelli della prima pagina dell'introduzione, poi «Tre domande, e poi si comincia.».
+    /// I primi due punti sono quelli della prima pagina dell'introduzione, poi «Due domande, e poi si comincia.».
     static var punti: [String] {
-        Array((PaginaIntroduzione.pagine.first?.punti ?? []).prefix(2)) + ["Tre domande, e poi si comincia."]
+        Array((PaginaIntroduzione.pagine.first?.punti ?? []).prefix(2)) + ["Due domande, e poi si comincia."]
     }
 
     static let canali = "I tuoi canali"
@@ -66,8 +67,8 @@ enum TestiPrimoAvvio {
     static let primoCanaleSotto = "Blu, sempre."
     static let secondoCanaleSotto = "Cuoio, sempre."
     static let gruppoAvvio = "Il primo avvio"
-    static let rigaAvvio = "Le tre domande della prima volta"
-    static let rigaAvvioSotto = "Benvenuto, i tuoi canali, da dove parti."
+    static let rigaAvvio = "Le domande della prima volta"
+    static let rigaAvvioSotto = "Benvenuto, da dove parti."
     static let rivedi = "Rivedi"
 }
 
@@ -208,7 +209,6 @@ struct PrimoAvvio: View {
     @ViewBuilder private var contenuto: some View {
         switch pagina {
         case 0: benvenuto
-        case 1: canali
         default: daDove
         }
     }
@@ -237,39 +237,6 @@ struct PrimoAvvio: View {
                 }
             }
         }
-    }
-
-    private var canali: some View {
-        let nomi = stato.dati.impostazioni.nomiCanali ?? .base
-        return VStack(alignment: .leading, spacing: 0) {
-            testata(TestiPrimoAvvio.canali, TestiPrimoAvvio.canaliTesto)
-            VStack(spacing: 0) {
-                rigaCanale(TestiPrimoAvvio.primoCanale, .alleanza, nome: nomi.primo)
-                Rectangle()
-                    .fill(Tema.Apple.Colore.separatore)
-                    .frame(height: Tema.Apple.Impostazioni.CampoCanale.spessoreFilo)
-                rigaCanale(TestiPrimoAvvio.secondoCanale, .indipendente, nome: nomi.secondo)
-            }
-            .padding(P.paddingSchedaCanali)
-            .superficieApple(Tema.Apple.Impostazioni.Riga.superficie, raggio: Tema.Apple.Impostazioni.Riga.raggio)
-            .padding(.top, P.sopraScheda)
-            Text(TestiPrimoAvvio.canaliNota)
-                .carattereApple(P.nota)
-                .foregroundColor(P.coloreNota)
-                .padding(.top, P.sopraNota)
-        }
-    }
-
-    private func rigaCanale(_ titolo: String, _ canale: Canale, nome: String) -> some View {
-        HStack(spacing: P.spazioPulsanti) {
-            Text(titolo)
-                .carattereApple(P.rigaCanale)
-                .foregroundColor(P.coloreTitolo)
-                .lineLimit(1)
-            Spacer(minLength: P.spazioPulsanti)
-            CampoNomeCanale(canale: canale, nome: nome) { stato.impostaNomeCanale(canale, $0) }
-        }
-        .padding(.vertical, P.paddingRigaCanale)
     }
 
     private var daDove: some View {

@@ -71,7 +71,8 @@ struct PaletteDocumento {
 
     func area(_ a: AreaPosizione) -> Color { aree[a.ordine % aree.count] }
 
-    func canale(_ c: Canale) -> Color { c == .alleanza ? alleanza : indipendente }
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore per tutti.
+    func canale(_ c: Canale) -> Color { alleanza }
 
     func scenario(_ t: TipoScenario) -> Color {
         switch t {

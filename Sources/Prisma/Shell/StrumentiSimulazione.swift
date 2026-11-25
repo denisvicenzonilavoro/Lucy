@@ -197,14 +197,7 @@ struct SimulatoreIpotesi: View {
                         .equatable()
                     ComandoSimulatoreFermo(etichetta: "Inflazione", valore: b.inflazione, unita: "%", intervallo: 0...10, passo: 0.1, decimali: 1)
                         .equatable()
-                    VStack(alignment: .leading, spacing: M.spazioCanale) {
-                        Text("Canale dell'ipotesi")
-                            .carattereApple(A.etichettaScelta)
-                            .foregroundColor(A.coloreEtichettaScelta)
-                        SegmentiAnalisiFermi(opzioni: [(Canale?.none, "Nessuno"), (.alleanza, "Alleanza"), (.indipendente, "Indip.")],
-                                             selezione: b.canale)
-                            .equatable()
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: il canale dell'ipotesi non si sceglie più
                 }
                 .padding(M.margineConsole)
             }
@@ -412,7 +405,6 @@ struct ScenariSalvati: View {
                     TabellaStrumento {
                         CellaTesta(testo: "", larghezza: 34)
                         CellaTesta(testo: "Scenario")
-                        CellaTesta(testo: "Canale", larghezza: 110)
                         CellaTesta(testo: "Ipotesi", larghezza: 210)
                         CellaTesta(testo: "", larghezza: A.colonnaAzioniScenari)
                     } righe: {
@@ -435,10 +427,6 @@ struct ScenariSalvati: View {
                                 .lineLimit(1)
                                 .padding(Misure.Analisi.cellaMargine)
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                Group {
-                                    if let c = s.canale { EtichettaCanale(canale: c, compatta: true) } else { Text("—").foregroundColor(A.coloreCellaNota) }
-                                }
-                                .frame(width: 110, alignment: .leading)
                                 CellaTabella(testo: "\(Formati.euro(s.capitale)) + \(Formati.euro(s.versamentoMensile))/mese · \(s.anni) a · \(Formati.percentuale(s.rendimento))",
                                              larghezza: 210)
                                 HStack(spacing: 6) {

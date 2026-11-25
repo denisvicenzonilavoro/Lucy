@@ -67,7 +67,6 @@ struct PannelloCosti: View {
         return VStack(spacing: 0) {
             HStack(spacing: 10) {
                 Text("Posizione").frame(maxWidth: .infinity, alignment: .leading)
-                Text("Canale").frame(width: Misure.Analisi.colonnaCanale, alignment: .leading)
                 Text("Costo annuo").frame(width: Misure.Analisi.colonnaCosto, alignment: .trailing)
                 Text("Come nel KID").frame(width: Misure.Analisi.colonnaCosto, alignment: .trailing)
                 Text("Quest'anno").frame(width: Misure.Analisi.colonnaCosto, alignment: .trailing)
@@ -101,8 +100,6 @@ struct PannelloCosti: View {
                     .font(Tipo.chip).foregroundColor(Colori.Analisi.kpiNota).lineLimit(1)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
-            EtichettaCanale(canale: v.posizione.canale, compatta: true)
-                .frame(width: Misure.Analisi.colonnaCanale, alignment: .leading)
             VStack(alignment: .trailing, spacing: 1) {
                 Text(CifreDoc.percento(v.annuo, decimali: 2)).font(Tipo.tabellaCellaForte)
                     .foregroundColor(v.livello == .alto ? Colori.Analisi.erroreTesto : Colori.Analisi.tabellaTesto)

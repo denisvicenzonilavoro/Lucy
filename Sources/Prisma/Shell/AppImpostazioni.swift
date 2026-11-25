@@ -399,16 +399,7 @@ struct AppImpostazioni: View {
                         }
                 }
             }
-            GruppoImpostazioni(titolo: "Canali") {
-                RigaImpostazione(titolo: "Alleanza Assicurazioni", sottotitolo: "Solo prodotti Alleanza") {
-                    EtichettaCanale(canale: .alleanza)
-                }
-                RigaImpostazione(titolo: "Consulenza indipendente", sottotitolo: "Investimenti, risparmio, previdenza, protezione",
-                                 ultima: true) {
-                    EtichettaCanale(canale: .indipendente)
-                }
-            }
-            NotaImpostazioni("Ogni posizione e ogni proposta porta l'etichetta del suo canale.")
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente gruppo «Canali»
         }
     }
 

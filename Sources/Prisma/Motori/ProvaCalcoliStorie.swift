@@ -194,8 +194,9 @@ enum ProvaCalcoliStorie {
             .first(where: { $0.nome == "inArrivo" }) {
             verifica("Storie: con le aliquote entra la provvigione della rata", t, 1_280)
             verifica("Storie: con le aliquote la somma dei giorni è il totale", g.reduce(0) { $0 + $1.importo }, t)
-            verifica.vero("Storie: didascalia «Rinnovi Alleanza e due parcelle» («\(dida)»)",
-                          !parz && dida == "Rinnovi Alleanza e due parcelle")
+            // Dal 25 novembre 2026 (un solo canale, quello di Lucy) la didascalia non dice il canale
+            verifica.vero("Storie: didascalia «Rinnovi e due parcelle» («\(dida)»)",
+                          !parz && dida == "Rinnovi e due parcelle")
         } else {
             verifica.vero("Storie: con le aliquote la pagina «In arrivo» c'è", false)
         }

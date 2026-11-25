@@ -44,14 +44,15 @@ enum ProvaNomiCanali {
         verifica.vero("Canali: i nomi di base scritti nell'archivio si leggono come nessun nome", base != nil && base?.nomiCanali == nil)
 
         #if os(macOS)
-        verifica.vero("Primo avvio: tre domande, tre opzioni",
-                      TestiPrimoAvvio.pagine == 3 && SceltaInizio.allCases.count == 3
+        // Dal 25 novembre 2026 (un solo canale, quello di Lucy) le domande sono due: niente pagina dei canali
+        verifica.vero("Primo avvio: due domande, tre opzioni",
+                      TestiPrimoAvvio.pagine == 2 && SceltaInizio.allCases.count == 3
                       && SceltaInizio.allCases.first == .prova)
-        verifica.vero("Primo avvio: tre punti nella prima pagina, gli ultimi «Tre domande, e poi si comincia.»",
+        verifica.vero("Primo avvio: tre punti nella prima pagina, gli ultimi «Due domande, e poi si comincia.»",
                       TestiPrimoAvvio.punti.count == 3
                       && TestiPrimoAvvio.punti.first == "I calcoli li fa Lucy: tu scegli e spieghi."
-                      && TestiPrimoAvvio.punti.last == "Tre domande, e poi si comincia.")
-        verifica.vero("Primo avvio: «Il primo avvio · 2 di 3»", TestiPrimoAvvio.occhiello(1) == "Il primo avvio · 2 di 3")
+                      && TestiPrimoAvvio.punti.last == "Due domande, e poi si comincia.")
+        verifica.vero("Primo avvio: «Il primo avvio · 2 di 2»", TestiPrimoAvvio.occhiello(1) == "Il primo avvio · 2 di 2")
         #endif
     }
 }

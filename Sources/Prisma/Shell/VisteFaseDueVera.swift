@@ -255,7 +255,7 @@ struct PolliciVera: View {
             if correggi && !salvata && messaggio.voto != false {
                 VStack(alignment: .leading, spacing: 6) {
                     Text("Cosa non va?").carattereApple(Tema.Apple.Carattere.etichetta).foregroundColor(F.coloreFonte)
-                    TextField("Per esempio: con i clienti Alleanza parla di «piano», non di «prodotto»", text: $testo)
+                    TextField("Per esempio: parla di «piano», non di «prodotto»", text: $testo)
                         .textFieldStyle(.plain)
                         .carattereApple(F.correzione)
                         .padding(F.paddingCorrezione)

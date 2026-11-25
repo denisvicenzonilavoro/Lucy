@@ -325,7 +325,6 @@ struct SchedaObiettivoApple: View {
         let a = AvanzamentoObiettivo(o, posizioni: posizioni)
         let curva = CacheMotoriAnalisi.curva(o, posizioni: posizioni)
         let colore = s.colore(o.area)
-        let canali = TestiObiettivoApple.canali(o, posizioni: posizioni)
         let totale = a.versamentiAttivi + o.versamentoMensile
         let forma = RoundedRectangle(cornerRadius: s.raggio, style: .continuous)
         return Button(action: apri) {
@@ -370,12 +369,6 @@ struct SchedaObiettivoApple: View {
                         .foregroundColor(s.coloreTesto)
                         .lineLimit(2)
                         .fixedSize(horizontal: false, vertical: true)
-                }
-                if !canali.isEmpty {
-                    HStack(spacing: s.spazioCanali) {
-                        ForEach(canali) { EtichettaCanaleApple(canale: $0, compatta: true) }
-                    }
-                    .padding(.top, s.sopraCanali)
                 }
                 Spacer(minLength: s.sopraCollegamento)
                 Text("Prova un altro versamento ›")

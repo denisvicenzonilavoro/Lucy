@@ -383,10 +383,10 @@ private struct SchedaNuovoClienteMac: View {
                     tilePotenziale(p, nota: TestiPassaparola.notaPotenzialeLetto)
                         .entrataStile(.tabellaInquadra)
                 }
-                // Migliorie d'uso 43: «＋ Telefono» e «＋ Canale», scritti dall'utente sul Mac
+                // Migliorie d'uso 43: «＋ Telefono», scritto dall'utente sul Mac. Dal 25 novembre 2026 (decisione
+                // dell'utente: un solo canale, quello di Lucy) niente più «＋ Canale»
                 VStack(alignment: .leading, spacing: 0) {
                     RigaTelefonoNuovoCliente(nuovoCliente: nuovoCliente, scrivibile: !stato.solaLettura)
-                    RigaCanaliNuovoCliente(nuovoCliente: nuovoCliente)
                 }
                 .entrataStile(.rigaInquadra)
                 tileModuli
