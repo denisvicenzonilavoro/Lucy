@@ -53,15 +53,6 @@ struct PanoramicaDossierApple: View {
             if Tema.Stile.usaCarta {
                 // Stile Carta (NOVITÀ 5): la cartella dell'incontro composta a vista
                 PulsanteFascicoloInUnTocco(cliente: cliente)
-                // Stile Carta (NOVITÀ 6): lo scontrino del conto di oggi, lo stesso di Prisma AI
-                let conto = stato.ricavato("scontrino.conto.\(cliente.id)") {
-                    MotoreScontrino.contoCliente(stato.posizioniCliente(cliente.id), data: Date())
-                }
-                if conto.posizioni > 0 {
-                    ScontrinoContoCliente(conto: conto)
-                        .entrataDossier(1)
-                    NotePennaVista(note: MotorePennaVera.conto(conto))
-                }
             }
             SussurroDossierVista(cliente: cliente)
                 .entrataDossier(1)
@@ -88,10 +79,31 @@ struct PanoramicaDossierApple: View {
                 }
             }
         }
-        ColonneProporzionaliDossier(proporzione: p.proporzione, spazio: p.spazio, larghezzaMinima: p.larghezzaDueColonne) {
-            QuadroDossierApple(cliente: cliente, completezza: completezza)
-                .entrataDossier(0)
-            destra
+        VStack(alignment: .leading, spacing: p.spazio) {
+            ColonneProporzionaliDossier(proporzione: p.proporzione, spazio: p.spazio, larghezzaMinima: p.larghezzaDueColonne) {
+                QuadroDossierApple(cliente: cliente, completezza: completezza)
+                    .entrataDossier(0)
+                destra
+            }
+            if Tema.Stile.usaCarta {
+                // Stile Carta (NOVITÀ 6): lo scontrino del conto di oggi, lo stesso di Lucy AI, sotto le due colonne con
+                // le note della penna accanto (25 novembre 2026: nella colonna di destra la allungava e le schede del
+                // quadro si stiravano vuote)
+                let conto = stato.ricavato("scontrino.conto.\(cliente.id)") {
+                    MotoreScontrino.contoCliente(stato.posizioniCliente(cliente.id), data: Date())
+                }
+                if conto.posizioni > 0 {
+                    HStack(alignment: .top, spacing: p.spazio) {
+                        ScontrinoContoCliente(conto: conto)
+                            .frame(maxWidth: 360)
+                        NotePennaVista(note: MotorePennaVera.conto(conto))
+                            .frame(maxWidth: 320, alignment: .leading)
+                            .padding(.top, 40)
+                        Spacer(minLength: 0)
+                    }
+                    .entrataDossier(2)
+                }
+            }
         }
     }
     #endif

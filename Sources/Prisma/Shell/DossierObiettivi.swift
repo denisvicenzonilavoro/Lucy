@@ -63,15 +63,17 @@ struct ObiettiviDossierApple: View {
         if let c = MotoreCapsule.perObiettivo(stato.dati.capsule, obiettivoId: o.id) {
             let k = Tema.Apple.SalaRacconti.Capsula.self
             let s = stato.statoCapsula(c)
-            Label(TestiCapsule.dossier(s, sigillataIl: c.sigillataIl), systemImage: s.chiusa ? "lock.fill" : "lock.open")
+            // Solo il lucchetto nell'angolo (25 novembre 2026: con la scritta copriva l'anello nelle schede strette); lo
+            // stato si legge passando sopra e con VoiceOver
+            let testo = TestiCapsule.dossier(s, sigillataIl: c.sigillataIl)
+            Image(systemName: s.chiusa ? "lock.fill" : "lock.open")
                 .carattereApple(k.segnoDossier)
                 .foregroundColor(k.coloreSegnoDossier)
-                .lineLimit(1)
                 .padding(k.paddingSegnoDossier)
-                .background(Capsule(style: .continuous).fill(k.colore.opacity(k.fondoSegnoDossier)))
+                .background(Circle().fill(k.colore.opacity(k.fondoSegnoDossier)))
                 .padding(k.margineSegnoDossier)
-                .help("La capsula del tempo di questo obiettivo: si apre e si consegna nella Sala")
-                .allowsHitTesting(false)
+                .help("La capsula del tempo di questo obiettivo, \(testo): si apre e si consegna nella Sala")
+                .accessibilityLabel("Capsula del tempo, \(testo)")
         }
     }
 
