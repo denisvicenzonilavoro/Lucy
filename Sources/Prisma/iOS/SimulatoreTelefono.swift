@@ -84,7 +84,7 @@ struct SimulatoreTelefono: View {
                 Stepper("\(anni) anni", value: $anni, in: 1...S.anniMassimi)
                     .schedaTelefono()
             }
-            Text("Proiezione con i motori di Prisma: rendimenti lordi annui, costi e imposte della scheda; non è una promessa di rendimento.")
+            Text("Proiezione con i motori di Lucy: rendimenti lordi annui, costi e imposte della scheda; non è una promessa di rendimento.")
                 .carattereApple(E.dettaglio).foregroundColor(E.coloreTerziario)
                 .fixedSize(horizontal: false, vertical: true)
         }

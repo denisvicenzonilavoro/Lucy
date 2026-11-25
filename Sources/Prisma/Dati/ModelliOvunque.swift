@@ -296,31 +296,31 @@ enum ErroreOvunque: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .cartellaNonRaggiungibile:
-            return "La cartella di Prisma ovunque non è raggiungibile: controlla di aver acceso iCloud Drive. I dati restano sul Mac."
+            return "La cartella di Lucy ovunque non è raggiungibile: controlla di aver acceso iCloud Drive. I dati restano sul Mac."
         case .accessoNegato:
-            return "Prisma non ha il permesso di aprire la cartella di Prisma ovunque: scegli di nuovo la cartella."
+            return "Lucy non ha il permesso di aprire la cartella di Lucy ovunque: scegli di nuovo la cartella."
         case .inAttesaDiICloud:
             return "In attesa di iCloud: il file non è ancora su questo dispositivo."
         case .fileMancante(let nome):
-            return "Nella cartella di Prisma ovunque manca «\(nome)»."
+            return "Nella cartella di Lucy ovunque manca «\(nome)»."
         case .spazioMancante:
-            return "In questa cartella non c'è uno spazio di Prisma ovunque: scegli la cartella creata dal Mac."
+            return "In questa cartella non c'è uno spazio di Lucy ovunque: scegli la cartella creata dal Mac."
         case .spazioGiaPresente:
-            return "In questa cartella c'è già uno spazio di Prisma ovunque: aprilo con la sua passphrase."
+            return "In questa cartella c'è già uno spazio di Lucy ovunque: aprilo con la sua passphrase."
         case .spazioDiAltroMac:
-            return "Questo spazio è di un altro Mac (o di questo Mac prima di reinstallare Prisma): per non sovrascriverlo, Prisma non lo riapre qui. Scegli una cartella nuova."
+            return "Questo spazio è di un altro Mac (o di questo Mac prima di reinstallare Lucy): per non sovrascriverlo, Lucy non lo riapre qui. Scegli una cartella nuova."
         case .passphraseErrata:
-            return "La passphrase non apre lo spazio di Prisma ovunque. Controlla di averla scritta bene."
+            return "La passphrase non apre lo spazio di Lucy ovunque. Controlla di averla scritta bene."
         case .passphraseCorta:
             return "La passphrase deve avere almeno \(ErroreOvunque.lunghezzaMinimaPassphrase) caratteri."
         case .fileDanneggiato(let nome):
             return "«\(nome)» è danneggiato o incompleto: lo ignoro finché non arriva una copia buona. I dati restano dove sono."
         case .generazioneCambiata:
-            return "La passphrase di Prisma ovunque è cambiata sul Mac: scrivi quella nuova."
+            return "La passphrase di Lucy ovunque è cambiata sul Mac: scrivi quella nuova."
         case .versionePiuRecente:
-            return "Lo spazio è stato scritto da una versione più recente di Prisma: aggiorna Prisma."
+            return "Lo spazio è stato scritto da una versione più recente di Lucy: aggiorna Lucy."
         case .scrittura(let m):
-            return "Scrittura nella cartella di Prisma ovunque non riuscita: \(m)"
+            return "Scrittura nella cartella di Lucy ovunque non riuscita: \(m)"
         }
     }
 

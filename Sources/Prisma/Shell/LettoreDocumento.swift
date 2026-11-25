@@ -247,7 +247,7 @@ struct LettoreDocumento: View {
             Button("Annulla", role: .cancel) {}
             Button("Elimina", role: .destructive) { elimina() }
         } message: {
-            Text("Il file viene tolto dall'archivio di Prisma. Schede, posizioni e lo storico dei dati portati in Prisma restano. Se serve, lo recuperi da un backup.")
+            Text("Il file viene tolto dall'archivio di Lucy. Schede, posizioni e lo storico dei dati portati in Lucy restano. Se serve, lo recuperi da un backup.")
         }
     }
 

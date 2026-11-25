@@ -528,7 +528,7 @@ struct ControlliPasso: View {
             if segnato {
                 Button("Torna ai dati") { stato.togliSegnoPasso(pratica.id, passo.passo) }
                     .buttonStyle(.appleSobrio)
-                    .help("Toglie il segno a mano: vale di nuovo ciò che Prisma riconosce dai dati")
+                    .help("Toglie il segno a mano: vale di nuovo ciò che Lucy riconosce dai dati")
             }
         }
         .disabled(stato.solaLettura)

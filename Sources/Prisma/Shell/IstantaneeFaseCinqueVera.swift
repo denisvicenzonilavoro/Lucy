@@ -141,7 +141,7 @@ extension Istantanee {
             s.aggiungiMessaggio(m, cliente: id, parla: false)
         }
         scambio("Com'è messa Giulia con il progetto casa?",
-                "Il progetto casa resta la priorità: la quota per l'anticipo procede come previsto. Le cifre esatte sono nella scheda di Prisma.",
+                "Il progetto casa resta la priorità: la quota per l'anticipo procede come previsto. Le cifre esatte sono nella scheda di Lucy.",
                 motore: MotoreLocale.nome(MotoreLocale.modelloPredefinito), modalita: .lavoro)
         scambio("Scrivimi un augurio breve per il suo compleanno.",
                 "Tanti auguri, Giulia! Che sia un anno pieno di belle notizie, a partire dalla casa.",

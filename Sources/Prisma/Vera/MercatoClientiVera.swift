@@ -938,7 +938,7 @@ enum MercatoClientiVera {
             righe.append("Per chi non ha l'analisi 360 salvata i mesi di spese usano il fabbisogno predefinito.")
         }
         righe.append("")
-        righe.append("Le cifre sono di Prisma. Se vuoi preparo le bozze dei messaggi: le apri e le mandi tu.")
+        righe.append("Le cifre sono di Lucy. Se vuoi preparo le bozze dei messaggi: le apri e le mandi tu.")
         return righe.joined(separator: "\n")
     }
 
@@ -1059,7 +1059,7 @@ enum MercatoClientiVera {
     }()
 
     static var istruzioni: String {
-        IstruzioniVera.testo("mercato-clienti") ?? "Scrivi in italiano, a nome del consulente, un messaggio breve per ogni cliente partendo dalla bozza di Prisma. Usa solo i fatti e le cifre del cliente, dai del tu o del Lei come indicato, non promettere rendimenti, non nominare altri clienti, non scrivere oggetto, chiusura né firma. Rispondi solo con il JSON: bozze, ognuna con cliente (l'id dato) e testo."
+        IstruzioniVera.testo("mercato-clienti") ?? "Scrivi in italiano, a nome del consulente, un messaggio breve per ogni cliente partendo dalla bozza di Lucy. Usa solo i fatti e le cifre del cliente, dai del tu o del Lei come indicato, non promettere rendimenti, non nominare altri clienti, non scrivere oggetto, chiusura né firma. Rispondi solo con il JSON: bozze, ognuna con cliente (l'id dato) e testo."
     }
 
     /// I fatti di un cliente per Qwen: il nome (solo il primo), il tono, l'azione, le cifre di Prisma e la bozza fissa.
@@ -1069,7 +1069,7 @@ enum MercatoClientiVera {
         var righe = ["CLIENTE id=\(t.clienteId) · \(ModelliMessaggi.primoNome(c.nome)) (\(tono.lei ? "dai del Lei" : "dai del tu"))",
                      "Canale del messaggio: \(canaleMessaggio(c) == .mail ? "mail" : "messaggio sul telefono")",
                      "Cosa fare: \(t.etichettaAzione)",
-                     "FATTI (cifre esatte di Prisma: usa solo queste)"]
+                     "FATTI (cifre esatte di Lucy: usa solo queste)"]
         for m in t.motivi {
             righe.append("- \(m.testo)")
             righe += m.cifre.map { "  · \($0.etichetta): \($0.valore)" }
@@ -1093,7 +1093,7 @@ enum MercatoClientiVera {
             righe.append(scheda(t, evento: esito.evento, cliente: c, stile: stile, oggi: oggi, cal: cal))
         }
         righe.append("")
-        righe.append("Scrivi una bozza per ogni cliente, dal saluto all'invito finale. Niente oggetto, chiusura né firma: le aggiunge Prisma.")
+        righe.append("Scrivi una bozza per ogni cliente, dal saluto all'invito finale. Niente oggetto, chiusura né firma: le aggiunge Lucy.")
         return [MessaggioModello(ruolo: .sistema, testo: istruzioni), MessaggioModello(ruolo: .utente, testo: righe.joined(separator: "\n"))]
     }
 
@@ -1137,10 +1137,10 @@ enum MercatoClientiVera {
         }
         let fatti = ammessi(t, evento: esito.evento, sintesi: esito.sintesi, cliente: c, oggi: oggi, cal: cal)
         guard CommentoVera.numeriConservati(bozza: fatti, testo: s) else {
-            return "la bozza di Vera citava una cifra che Prisma non ha calcolato"
+            return "la bozza di Vera citava una cifra che Lucy non ha calcolato"
         }
         guard numeriInParoleConservati(fatti: fatti, testo: s) else {
-            return "la bozza di Vera citava una cifra in parole che Prisma non ha calcolato"
+            return "la bozza di Vera citava una cifra in parole che Lucy non ha calcolato"
         }
         if s.range(of: MessaggiVera.promesse, options: [.regularExpression, .caseInsensitive]) != nil {
             return "la bozza di Vera prometteva un risultato"
@@ -1241,11 +1241,11 @@ enum MercatoClientiVera {
                 return BozzaMercatoVera(clienteId: c.id, testo: testo, canale: canale, autore: .vera, modello: modello, avviso: nil)
             case .failure(let e)?:
                 return BozzaMercatoVera(clienteId: c.id, testo: fissa, canale: canale, autore: .modelloFisso,
-                                        avviso: TestiMercatoClienti.maiuscola(e.motivo) + ": resta il testo di Prisma, con le cifre esatte.")
+                                        avviso: TestiMercatoClienti.maiuscola(e.motivo) + ": resta il testo di Lucy, con le cifre esatte.")
             case nil:
                 return BozzaMercatoVera(clienteId: c.id, testo: fissa, canale: canale, autore: .modelloFisso,
-                                        avviso: lette == nil ? "La risposta di Vera non si leggeva: resta il testo di Prisma, con le cifre esatte."
-                                            : "Vera non ha scritto la bozza per questo cliente: resta il testo di Prisma.")
+                                        avviso: lette == nil ? "La risposta di Vera non si leggeva: resta il testo di Lucy, con le cifre esatte."
+                                            : "Vera non ha scritto la bozza per questo cliente: resta il testo di Lucy.")
             }
         }
     }

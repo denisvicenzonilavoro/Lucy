@@ -106,18 +106,14 @@ struct BarraSuperiore: View {
         min(max(valore, -gioco), gioco)
     }
 
-    /// La pillola con il logo e «Prisma»: torna alla scrivania.
+    /// La pillola con il logo e «Lucy»: torna alla scrivania.
     private var marchio: some View {
-        PulsanteBarra(aiuto: "Prisma: torna alla scrivania", forma: .pillola, azione: { stato.mostraScrivania() }) {
+        PulsanteBarra(aiuto: "Lucy: torna alla scrivania", forma: .pillola, azione: { stato.mostraScrivania() }) {
             HStack(spacing: B.spazioMarchio) {
-                if Tema.Stile.usaCarta {
-                    // Il prisma «Cristallo» a inchiostro con la sottolineatura dorata
-                    LogoInchiostro(lato: B.logo + 3)
-                } else {
-                    LogoPrisma(colore: Tema.Apple.Colore.logo)
-                        .frame(height: B.logo)
-                }
-                Text("Prisma")
+                // Il simbolo di Lucy: la L e il disco d'oro (Design/Logo/LucyByLogic)
+                LogoLucy()
+                    .frame(width: B.logo, height: B.logo)
+                Text("Lucy")
                     .carattereApple(Tema.Apple.Carattere.barra)
             }
         }
@@ -259,12 +255,12 @@ struct BarraSuperiore: View {
 
                 #if os(macOS)
                 // Migliorie d'uso 6: «Cerca» è un tasto tondo con la lente, come gli altri strumenti (⌘K nell'aiuto)
-                PulsanteBarra(aiuto: "Cerca in Prisma (⌘K)", azione: { stato.alternaRicerca() }) {
+                PulsanteBarra(aiuto: "Cerca in Lucy (⌘K)", azione: { stato.alternaRicerca() }) {
                     simbolo("magnifyingglass")
                 }
                 .accessibilityLabel(Text("Cerca"))
                 #else
-                PulsanteBarra(aiuto: "Cerca in Prisma (⌘K)", forma: .pillola, azione: { stato.alternaRicerca() }) {
+                PulsanteBarra(aiuto: "Cerca in Lucy (⌘K)", forma: .pillola, azione: { stato.alternaRicerca() }) {
                     HStack(spacing: B.spazioCerca) {
                         Image(systemName: "magnifyingglass")
                             .carattereApple(B.simbolo)
@@ -322,12 +318,12 @@ struct BarraSuperiore: View {
             }
 
             // La guida di Prisma (anche in modalità cliente): come funziona, le app, le parole
-            PulsanteBarra(aiuto: "Guida di Prisma: come funziona, le app, le parole (⌘?)",
+            PulsanteBarra(aiuto: "Guida di Lucy: come funziona, le app, le parole (⌘?)",
                           azione: { stato.apriGuida(stato.paginaGuidaDavanti) }) {
                 simbolo("questionmark")
             }
 
-            PulsanteBarra(aiuto: "Blocca Prisma: la schermata di benvenuto", azione: { stato.blocca() }) {
+            PulsanteBarra(aiuto: "Blocca Lucy: la schermata di benvenuto", azione: { stato.blocca() }) {
                 simbolo("lock")
             }
 

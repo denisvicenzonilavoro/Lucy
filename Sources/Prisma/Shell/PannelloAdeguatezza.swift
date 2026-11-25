@@ -194,7 +194,7 @@ struct PannelloAdeguatezza: View {
             MenuTendina(selezione: selezione, opzioni: opzioni, larghezza: M.colonnaScelte)
             if esito.collegamentoSuggerito, let c = esito.collegamento {
                 HStack(alignment: .firstTextBaseline, spacing: M.spazioPulsanti) {
-                    Text("Prisma suggerisce: \(TestiAdeguatezza.descrizione(c, bisogni: i.bisogni, obiettivi: i.obiettivi))")
+                    Text("Lucy suggerisce: \(TestiAdeguatezza.descrizione(c, bisogni: i.bisogni, obiettivi: i.obiettivi))")
                         .font(Tipo.kpiNota)
                         .foregroundColor(K.nota)
                         .fixedSize(horizontal: false, vertical: true)
@@ -476,7 +476,7 @@ struct PannelloAdeguatezza: View {
             }
             .buttonStyle(StileVetro(accento: true))
             .fixedSize()
-            .help("Registra in Prisma che il cliente ha firmato la scheda: i colori di adesso restano registrati")
+            .help("Registra in Lucy che il cliente ha firmato la scheda: i colori di adesso restano registrati")
         }
     }
 

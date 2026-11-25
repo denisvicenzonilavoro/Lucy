@@ -214,7 +214,7 @@ struct SchedaNotaVocaleArrivo: View {
             HStack(spacing: L.spazio) {
                 AvatarCliente(iniziali: c.iniziali, tinta: c.tinta.colori, lato: L.avatar)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Prisma ha capito che si parla di")
+                    Text("Lucy ha capito che si parla di")
                         .carattereApple(L.didascalia)
                         .foregroundColor(L.coloreDidascalia)
                     Button { apriDossier(c.id) } label: {
@@ -280,7 +280,7 @@ struct SchedaNotaVocaleArrivo: View {
                 CollegamentoConfermaApple(testo: TestiNotaVocale.scartaTutta) { stato.scartaNota(nota.id) }
                     .padding(.top, K.spazioPiede)
             }
-            Text(nota.conQwen ? TestiStatoVera.inVista(mac: "Capito da Vera", altrove: "Capito con Qwen") : "Capito con le regole di Prisma")
+            Text(nota.conQwen ? TestiStatoVera.inVista(mac: "Capito da Vera", altrove: "Capito con Qwen") : "Capito con le regole di Lucy")
                 .carattereApple(S.piede)
                 .foregroundColor(S.colorePiede)
                 .padding(.top, S.piedeSopra)
@@ -600,7 +600,7 @@ struct ComeFunzionaNotaVocale: View {
                 .carattereApple(S.fraseAttesa)
                 .foregroundColor(S.coloreAttesa)
                 .padding(.vertical, S.attesa)
-            Text("Sull’iPhone apri Prisma › Incontri › Nota veloce e detta: la voce diventa testo sull’iPhone, l’audio non si registra. Il testo arriva qui, cifrato in rete locale, e Prisma propone cosa farne: confermi tu.")
+            Text("Sull’iPhone apri Lucy › Incontri › Nota veloce e detta: la voce diventa testo sull’iPhone, l’audio non si registra. Il testo arriva qui, cifrato in rete locale, e Lucy propone cosa farne: confermi tu.")
                 .carattereApple(D.frase)
                 .foregroundColor(D.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)
@@ -654,7 +654,7 @@ struct SchermoNotaDimostrativo: View {
                 HStack {
                     Text(Self.oraDiProva)
                     Spacer(minLength: 0)
-                    Text("Prisma")
+                    Text("Lucy")
                 }
                 .carattereApple(T.testa)
                 .foregroundColor(T.inchiostro.opacity(T.opacitaTesta))

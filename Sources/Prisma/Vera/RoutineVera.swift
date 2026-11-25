@@ -524,7 +524,7 @@ extension RoutineVera {
         let cliente = x.clienteId.flatMap { id in x.dati.clienti.first { $0.id == id } }
         var esito = EsitoRoutine(routineId: r.id, titolo: r.titolo, richiesta: richiesta, clienteId: cliente?.id, data: x.oggi)
         if r.serveCliente && cliente == nil {
-            esito.domanda = x.clienteId == nil ? "Per quale cliente?" : "Non trovo il cliente tra quelli in Prisma."
+            esito.domanda = x.clienteId == nil ? "Per quale cliente?" : "Non trovo il cliente tra quelli in Lucy."
             esito.risultato = RisultatoRoutine(titolo: r.titolo, righe: [], pulsanti: [])
             return esito
         }

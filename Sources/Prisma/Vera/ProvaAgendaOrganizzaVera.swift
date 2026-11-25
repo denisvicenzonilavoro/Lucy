@@ -267,7 +267,7 @@ enum ProvaAgendaOrganizzaVera {
                   "Agenda che si organizza: il testo dice i due orari, il riesame e lo studio: \(testo)")
         controlla(CommentoVera.numeriConservati(bozza: esito.proposte.map { "\(Formati.dataLunga.string(from: $0.inizio)) \(Formati.ora.string(from: $0.inizio))" }.joined(separator: " "),
                                                 testo: testo.components(separatedBy: " Un caro saluto")[0]),
-                  "Agenda che si organizza: nella bozza solo le cifre degli orari trovati da Prisma")
+                  "Agenda che si organizza: nella bozza solo le cifre degli orari trovati da Lucy")
         controlla(AgendaOrganizzaVera.azioneBozza(RicercaOrari(richiesta: r, proposte: [], nota: nil), cliente: marco, impostazioni: x.impostazioni) == nil,
                   "Agenda che si organizza: senza orari nessuna bozza")
 

@@ -67,9 +67,9 @@ struct RisultatoClientela: Codable, Equatable {
     /// «Prisma ha controllato le schede: sono 3 clienti.»
     var frase: String {
         switch righe.count {
-        case 0: return "Prisma ha controllato le schede: nessun cliente."
-        case 1: return "Prisma ha controllato le schede: c'è 1 cliente."
-        default: return "Prisma ha controllato le schede: sono \(righe.count) clienti."
+        case 0: return "Lucy ha controllato le schede: nessun cliente."
+        case 1: return "Lucy ha controllato le schede: c'è 1 cliente."
+        default: return "Lucy ha controllato le schede: sono \(righe.count) clienti."
         }
     }
 }

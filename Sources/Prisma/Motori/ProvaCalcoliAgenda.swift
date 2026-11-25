@@ -379,7 +379,7 @@ enum ProvaCalcoliAgenda {
         let v = vuote.components(separatedBy: "\n")
         verifica.vero("A32 Agenda: senza punti, prima riga", riga(v, 0) == "Ordine del giorno:")
         verifica.vero("A32 Agenda: senza punti, un punto generico", riga(v, 1) == "1. Fare il punto su posizioni, obiettivi e famiglia")
-        verifica.vero("A32 Agenda: senza contatto, primo riesame", v.last == "Nessun incontro registrato in Prisma: è il primo riesame.")
+        verifica.vero("A32 Agenda: senza contatto, primo riesame", v.last == "Nessun incontro registrato in Lucy: è il primo riesame.")
     }
 
     // MARK: - A33-A35 Archivio

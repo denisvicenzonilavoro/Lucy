@@ -54,9 +54,9 @@ enum StrumentoPasso: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .leggiProtezione: return "legge quanto capitale caso morte serve alla famiglia e quanto ce n'è (solo se si parla di protezione)"
         case .leggiObiettivo: return "legge un obiettivo del cliente: importo, data, quanto c'è e quanto manca al mese (campo «obiettivo»: il titolo, vuoto per tutti)"
-        case .simulaDivisioni: return "simula tre divisioni del budget con il simulatore di Prisma (protezione e obiettivi)"
+        case .simulaDivisioni: return "simula tre divisioni del budget con il simulatore di Lucy (protezione e obiettivi)"
         case .controllaVincoli: return "controlla scadenze e vincoli: polizze da rinnovare, obiettivi vicini, sostenibilità del budget"
-        case .scegliESpiega: return "sceglie la divisione con la regola di Prisma e la spiega (sempre l'ultimo passo)"
+        case .scegliESpiega: return "sceglie la divisione con la regola di Lucy e la spiega (sempre l'ultimo passo)"
         }
     }
 
@@ -65,9 +65,9 @@ enum StrumentoPasso: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .leggiProtezione: return "Analisi 360 · protezione"
         case .leggiObiettivo: return "Obiettivi"
-        case .simulaDivisioni: return "Simulatore di Prisma"
+        case .simulaDivisioni: return "Simulatore di Lucy"
         case .controllaVincoli: return "Posizioni e scadenze"
-        case .scegliESpiega: return "Regola di Prisma"
+        case .scegliESpiega: return "Regola di Lucy"
         }
     }
 
@@ -669,8 +669,8 @@ enum PassiVera {
 
     static func esitoProtezione(_ dati: DatiPassi) -> String {
         let e = MotoreAnalisi.protezione(dati.protezione, posizioni: dati.posizioni)
-        guard e.fabbisogno >= 1 else { return "Da Prisma: con queste ipotesi alla famiglia non serve capitale caso morte" }
-        var testo = "Da Prisma: servono \(CifreDoc.euro(e.fabbisogno)), oggi ce ne sono \(CifreDoc.euro(e.capitaleVita))"
+        guard e.fabbisogno >= 1 else { return "Da Lucy: con queste ipotesi alla famiglia non serve capitale caso morte" }
+        var testo = "Da Lucy: servono \(CifreDoc.euro(e.fabbisogno)), oggi ce ne sono \(CifreDoc.euro(e.capitaleVita))"
         if let premio = premioPerColmare(dati) {
             testo += "; per colmare il resto servono circa \(CifreDoc.euro(premio)) al mese"
         } else if e.divario >= 1 {
@@ -837,7 +837,7 @@ enum PassiVera {
 
     static func esitoSimulazione(_ piano: PianoPassi) -> String {
         guard !piano.divisioni.isEmpty else { return "Nessuna divisione da simulare" }
-        return "Con il simulatore di Prisma: " + piano.divisioni.map { "\($0.titolo) (\(ripartizione($0, piano.richiesta)))" }.joined(separator: ", ")
+        return "Con il simulatore di Lucy: " + piano.divisioni.map { "\($0.titolo) (\(ripartizione($0, piano.richiesta)))" }.joined(separator: ", ")
     }
 
     /// «200 € alla protezione e 200 € a «Università di Anna»».
@@ -980,7 +980,7 @@ enum PassiVera {
     ]
 
     static var istruzioniSpiegazione: String {
-        IstruzioniVera.testo("passi-spiega") ?? "Spiega al consulente la divisione scelta da Prisma, chiamandola con il suo nome, senza cambiarla. Usa solo le cifre della bozza e del riepilogo, come sono scritte. Se c'è una scadenza, dilla alla fine. Dai del tu, al massimo 90 parole. Rispondi solo con il JSON: {\"spiegazione\": \"...\"}."
+        IstruzioniVera.testo("passi-spiega") ?? "Spiega al consulente la divisione scelta da Lucy, chiamandola con il suo nome, senza cambiarla. Usa solo le cifre della bozza e del riepilogo, come sono scritte. Se c'è una scadenza, dilla alla fine. Dai del tu, al massimo 90 parole. Rispondi solo con il JSON: {\"spiegazione\": \"...\"}."
     }
 
     static func messaggiSpiegazione(_ piano: PianoPassi) -> [MessaggioModello] {

@@ -106,7 +106,7 @@ enum ProvaFluidita {
             if let cartellaFinta { try? FileManager.default.removeItem(at: cartellaFinta) }
         }
         sessione.controlla(cartellaFinta != nil && Archivio.cartella.path.hasPrefix(cartellaFinta?.path ?? "/nessuna"),
-                           "L'archivio dell'utente è fuori portata: Prisma guarda in una cartella vuota di prova")
+                           "L'archivio dell'utente è fuori portata: Lucy guarda in una cartella vuota di prova")
         guard sessione.errori == 0 else { return 1 }
         // Il genio: i conti delle strisce (CurveGenio) e il verso dell'immagine nelle strisce (MotoreGenio),
         // senza finestra. Gli errori fanno fallire la prova.

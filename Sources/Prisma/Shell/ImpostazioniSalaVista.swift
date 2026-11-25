@@ -18,7 +18,7 @@ struct PaginaImpostazioniSala: View {
         let sala = stato.dati.impostazioni.sala
         let eventi = MotoreLanciaAnno.eventi(risorsa: MotoreLanciaAnno.caricati?.eventi ?? [], utente: sala.eventiAnno)
         return VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Pagina.spazioGruppi) {
-            NotaImpostazioni("Le esperienze della Sala raccontano le cifre dei motori di Prisma. Qui scrivi ciò che Prisma "
+            NotaImpostazioni("Le esperienze della Sala raccontano le cifre dei motori di Lucy. Qui scrivi ciò che Lucy "
                              + "non può inventare: le probabilità degli imprevisti con la loro fonte e i testi delle avvertenze.")
             GruppoImpostazioni(titolo: "Lancia l’anno") {
                 RigaImpostazione(titolo: "Durata della partita", sottotitolo: "Quanti anni si lanciano prima della fine",
@@ -68,19 +68,19 @@ struct PaginaImpostazioniSala: View {
             }
             .cascataImpostazioni(2)
             NotaImpostazioni("I titoli degli imprevisti sono testi di prova (Risorse/Sala/eventi-anno.json). Le cifre del "
-                             + "template valgono solo con i clienti di prova. Prisma non scarica tabelle: l’unica rete è Mercato.")
+                             + "template valgono solo con i clienti di prova. Lucy non scarica tabelle: l’unica rete è Mercato.")
             GruppoImpostazioni(titolo: "Avvertenze e testi") {
                 riga("La lettera dal futuro", \.avvertenzaLettera, segnaposto: ImpostazioniSala.segnapostoAvvertenza)
                 riga("Lancia l’anno", \.avvertenzaLancia, segnaposto: ImpostazioniSala.segnapostoAvvertenza)
                 riga("Quanto vale avermi accanto", \.avvertenzaValore, segnaposto: ImpostazioniSala.segnapostoAvvertenza)
                 // Giro 15: le avvertenze delle cose date al cliente (decisione 56)
-                riga("Il Prisma del cliente", \.avvertenzaFile, segnaposto: ImpostazioniSala.segnapostoAvvertenza)
+                riga("La Lucy del cliente", \.avvertenzaFile, segnaposto: ImpostazioniSala.segnapostoAvvertenza)
                 riga("Il film del piano", \.avvertenzaFilm, segnaposto: ImpostazioniSala.segnapostoAvvertenza)
                 riga("Titolo del valore ({valore}, {periodo})", \.titoloValore, segnaposto: ImpostazioniSala.titoloValoreDiProva)
                 // Giro 15, decisione 3: l'HTML cifrato resta spento finché la prova su iPhone e Android veri non passa
                 RigaImpostazione(titolo: "Prepara anche il file per il browser",
                                  sottotitolo: "Sperimentale: da provare prima su iPhone e Android veri",
-                                 aiuto: "Spento, il Prisma del cliente esce solo come PDF protetto da password. Acceso, Prisma prepara "
+                                 aiuto: "Spento, la Lucy del cliente esce solo come PDF protetto da password. Acceso, Lucy prepara "
                                     + "anche un file HTML cifrato che si apre nel browser con la stessa password, senza rete.",
                                  ultima: true) {
                     Toggle(isOn: Binding(get: { stato.dati.impostazioni.sala.fileHtmlAcceso },
@@ -104,7 +104,7 @@ struct PaginaImpostazioniSala: View {
             }
             .cascataImpostazioni(4)
             NotaImpostazioni("Le immagini della fotocamera restano sull’iPhone e sull’iPad, in memoria: mai nel Rullino. Lo "
-                             + "scatto arriva nel dossier del cliente solo dal tavolo con il Mac, mai da Prisma ovunque.")
+                             + "scatto arriva nel dossier del cliente solo dal tavolo con il Mac, mai da Lucy ovunque.")
         }
     }
 

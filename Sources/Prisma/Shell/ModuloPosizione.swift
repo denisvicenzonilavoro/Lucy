@@ -335,7 +335,7 @@ struct ModuloPosizione: View {
         if bozza.multiramo {
             VStack(alignment: .leading, spacing: m.spazioCampi) {
                 if !bozza.multiramoDivisa {
-                    Text("Oggi Prisma calcola questa polizza come un comparto unico: indica il rendimento della gestione separata e quello dei fondi (o di ogni fondo) per calcoli separati.")
+                    Text("Oggi Lucy calcola questa polizza come un comparto unico: indica il rendimento della gestione separata e quello dei fondi (o di ogni fondo) per calcoli separati.")
                         .font(Tema.Testo.Multiramo.nota)
                         .foregroundColor(Tema.Colore.Multiramo.avviso)
                         .fixedSize(horizontal: false, vertical: true)
@@ -460,7 +460,7 @@ struct ModuloPosizione: View {
     }
 
     @ViewBuilder private var contenutoAnalisi: some View {
-        Text("Facoltativi: rendono più precise le analisi di rendimento, riscatto, costi, rischio e protezione. Un campo vuoto vale «non indicato»: Prisma usa le sue stime e lo dichiara.")
+        Text("Facoltativi: rendono più precise le analisi di rendimento, riscatto, costi, rischio e protezione. Un campo vuoto vale «non indicato»: Lucy usa le sue stime e lo dichiara.")
             .font(Tema.Testo.Inserimento.nota).foregroundColor(Tema.Colore.Inserimento.nota)
             .fixedSize(horizontal: false, vertical: true)
         if bozza.area.proiettabile && bozza.stato == .inEssere { gruppoMovimenti }
@@ -483,7 +483,7 @@ struct ModuloPosizione: View {
         let elenco = bozza.movimenti ?? []
         return VStack(alignment: .leading, spacing: m.spazioCampi) {
             GruppoCampi(titolo: "Versamenti e riscatti con la data",
-                        spiegazione: "Con le date vere il rendimento dei versamenti del cliente è esatto. Se ne inserisci uno, inserisci tutti i versamenti, anche il primo: Prisma userà solo questi. Con i soli riscatti parziali, i versamenti si ricostruiscono da decorrenza e premi.")
+                        spiegazione: "Con le date vere il rendimento dei versamenti del cliente è esatto. Se ne inserisci uno, inserisci tutti i versamenti, anche il primo: Lucy userà solo questi. Con i soli riscatti parziali, i versamenti si ricostruiscono da decorrenza e premi.")
             ForEach(elenco.indices, id: \.self) { i in rigaMovimento(i) }
             HStack(spacing: m.spazioRiga) {
                 Button { aggiungiMovimento() } label: { Label("Movimento", systemImage: "plus") }
@@ -671,7 +671,7 @@ struct ModuloPosizione: View {
     }
 
     private var notaPenaliScheda: String {
-        guard let c = prodotto?.condizioni else { return "Non indicate: Prisma calcola il riscatto senza penali." }
+        guard let c = prodotto?.condizioni else { return "Non indicate: Lucy calcola il riscatto senza penali." }
         if c.penali.isEmpty { return "Valgono quelle della scheda prodotto: nessuna penale." }
         return "Valgono quelle della scheda prodotto: " + c.penali.map { CifreDoc.penale($0) }.joined(separator: " · ") + "."
     }
@@ -681,7 +681,7 @@ struct ModuloPosizione: View {
     private var gruppoKID: some View {
         VStack(alignment: .leading, spacing: Tema.Misura.Inserimento.spazioCampi) {
             GruppoCampi(titolo: "Dal KID",
-                        spiegazione: "Prisma calcola da sé l'incidenza annua dei costi (RIY) e la confronta con quella dichiarata nel KID.")
+                        spiegazione: "Lucy calcola da sé l'incidenza annua dei costi (RIY) e la confronta con quella dichiarata nel KID.")
             CampoModulo(etichetta: "Costi nel KID (RIY)") {
                 CampoCifraFacoltativa(valore: $bozza.incidenzaCostiKID, unita: "% l'anno al periodo raccomandato")
             }
@@ -727,7 +727,7 @@ struct ModuloPosizione: View {
     private var gruppoRischio: some View {
         VStack(alignment: .leading, spacing: Tema.Misura.Inserimento.spazioCampi) {
             GruppoCampi(titolo: bozza.multiramo ? "Rischio del contratto" : "Rischio",
-                        spiegazione: "Per le crisi del passato e gli scenari con le probabilità. Se mancano, Prisma li stima da tipologia e SRI e lo dichiara.")
+                        spiegazione: "Per le crisi del passato e gli scenari con le probabilità. Se mancano, Lucy li stima da tipologia e SRI e lo dichiara.")
             CampoModulo(etichetta: "Quota azionaria") {
                 CampoCifraFacoltativa(valore: $bozza.quotaAzionaria, unita: "% investita in azioni")
             }
@@ -755,7 +755,7 @@ struct ModuloPosizione: View {
     private var gruppoAssicurato: some View {
         VStack(alignment: .leading, spacing: Tema.Misura.Inserimento.spazioCampi) {
             GruppoCampi(titolo: "Persona assicurata",
-                        spiegazione: "Per la protezione di ogni persona della famiglia: su chi è la copertura. Se non la scegli, Prisma la riconosce dal nome scritto in «Assicurato».")
+                        spiegazione: "Per la protezione di ogni persona della famiglia: su chi è la copertura. Se non la scegli, Lucy la riconosce dal nome scritto in «Assicurato».")
             CampoModulo(etichetta: "Persona") {
                 MenuTendina(selezione: assicuratoScelto, opzioni: opzioniPersone,
                             larghezza: Tema.Misura.Inserimento.tendinaPersona)

@@ -42,7 +42,7 @@ enum ProvaCalcoliSmontaggio {
         verifica("Smontaggio: penale 3% × 90.000 se esce ora", euro(.uscita), 2_700)
         verifica.vero("Smontaggio: performance senza importo segnata «mancante»",
                       s.voci.first { $0.tipo == .performance }?.fonte == .mancante && s.mancanti == [.performance])
-        verifica.vero("Smontaggio: la gestione calcolata è una stima di Prisma",
+        verifica.vero("Smontaggio: la gestione calcolata è una stima di Lucy",
                       s.voci.first { $0.tipo == .gestione }?.fonte == .calcolata)
         let senzaVersato = MotoreSmontaggio.smonta(righe(senzaImporto.filter { !$0.hasPrefix("Totale versato") }))
         verifica.vero("Smontaggio: senza versato i costi d'ingresso restano senza cifra",
@@ -94,7 +94,7 @@ enum ProvaCalcoliSmontaggio {
                       riaperte.map(\.riga) == Array(2..<(2 + s.voci.count)) && riaperte.map(\.euro) == s.voci.map(\.euro))
         verifica.vero("Smontaggio 42: ogni voce riaperta trova la sua riga",
                       riaperte.allSatisfy { v in foglio[v.riga].testo.hasPrefix(v.etichetta) })
-        verifica("Smontaggio 42: valore usato da Prisma ricavato dalla gestione calcolata", MotoreSmontaggio.valoreDaVoci(s.voci) ?? -1, 90_000)
+        verifica("Smontaggio 42: valore usato da Lucy ricavato dalla gestione calcolata", MotoreSmontaggio.valoreDaVoci(s.voci) ?? -1, 90_000)
         verifica("Smontaggio 42: versato ricavato dai costi d'ingresso calcolati", MotoreSmontaggio.versatoDaVoci(s.voci) ?? -1, 78_000)
         verifica("Smontaggio 42: anno del documento", Double(MotoreSmontaggio.annoDocumento(righe(TestiSmontaggio.righeFacSimile)) ?? 0), 2025)
         verifica.vero("Smontaggio 42: cifra della voce senza euro «—»",
@@ -131,7 +131,7 @@ enum ProvaCalcoliSmontaggio {
         verifica.vero("Smontaggio 42: riaperto senza testo, stesse cifre voce per voce",
                       senzaTesto.costi.voci.map(\.euro) == conImporto.voci.map(\.euro)
                       && senzaTesto.costi.voci.map(\.fonte) == conImporto.voci.map(\.fonte))
-        verifica("Smontaggio 42: riaperto senza testo, il valore di Prisma", senzaTesto.costi.valore ?? -1, 90_000)
+        verifica("Smontaggio 42: riaperto senza testo, il valore di Lucy", senzaTesto.costi.valore ?? -1, 90_000)
         stato.memorizzaTesto(doc.id, [TestiSmontaggio.righeFacSimile.joined(separator: "\n")])
         let conTesto = stato.riapriSmontaggio(doc)
         verifica.vero("Smontaggio 42: con il testo in memoria il foglio è quello vero, le voci quelle conservate",

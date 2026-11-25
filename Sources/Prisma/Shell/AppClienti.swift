@@ -245,7 +245,7 @@ struct AppClienti: View {
                 perche: "Ogni analisi parte da una persona: chi è, la sua famiglia, il suo lavoro, che cosa le preme.",
                 passi: [
                     ("Aggiungi", "Con «Nuovo cliente» in alto o dall'app Contatti."),
-                    ("Completa", "Prisma ti dice quali dati mancano."),
+                    ("Completa", "Lucy ti dice quali dati mancano."),
                     ("Analizza", "Poi passa a Posizioni."),
                 ],
                 pulsante: "Importa i clienti…",
@@ -591,7 +591,7 @@ private struct MessaggiNoteDossier: View {
                 Label("Scrivi a \(cliente.nome)", systemImage: "envelope")
             }
             .buttonStyle(StileCuoioChiaro())
-            .help("Apre Messaggi su «\(prima.titolo)»: Prisma prepara il testo, lo spedisci tu")
+            .help("Apre Messaggi su «\(prima.titolo)»: Lucy prepara il testo, lo spedisci tu")
         }
     }
 

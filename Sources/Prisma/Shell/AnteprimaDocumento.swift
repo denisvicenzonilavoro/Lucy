@@ -122,9 +122,9 @@ struct AnteprimaDocumento: View {
 
     private func notaFoglio(vuoto: Bool) -> String {
         #if os(macOS)
-        if stato.documentiInLettura.contains(documento.id) { return "Prisma sta leggendo il testo sul Mac…" }
+        if stato.documentiInLettura.contains(documento.id) { return "Lucy sta leggendo il testo sul Mac…" }
         #elseif os(iOS)
-        if stato.documentiInLettura.contains(documento.id) { return "Prisma sta leggendo il testo…" }
+        if stato.documentiInLettura.contains(documento.id) { return "Lucy sta leggendo il testo…" }
         #endif
         if vuoto { return "Il testo di questo documento non è ancora disponibile." }
         return documento.file == nil ? "Documento di prova: pagina ricostruita dal testo" : "Pagina ricostruita dal testo letto"

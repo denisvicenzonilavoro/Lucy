@@ -208,7 +208,7 @@ enum TrentaSecondiVera {
     }()
 
     static var istruzioni: String {
-        IstruzioniVera.testo("trenta") ?? "Riscrivi in modo naturale e breve le cinque sezioni del ritratto di un cliente preparate da Prisma (chi, famiglia, deciso, preferisce, sospeso). Una o due frasi per sezione, in italiano, al consulente. Non aggiungere fatti e non cambiare né aggiungere cifre, date o nomi. Rispondi solo con il JSON."
+        IstruzioniVera.testo("trenta") ?? "Riscrivi in modo naturale e breve le cinque sezioni del ritratto di un cliente preparate da Lucy (chi, famiglia, deciso, preferisce, sospeso). Una o due frasi per sezione, in italiano, al consulente. Non aggiungere fatti e non cambiare né aggiungere cifre, date o nomi. Rispondi solo con il JSON."
     }
 
     static func messaggi(_ s: SchedaTrentaSecondi) -> [MessaggioModello] {

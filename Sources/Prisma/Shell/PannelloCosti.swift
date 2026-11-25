@@ -13,7 +13,7 @@ struct PannelloCosti: View {
     let analisi: AnalisiCosti
 
     private static let nota = "Gestione, caricamenti e trattenute delle posizioni finanziarie in essere; imposte e bollo a parte"
-    private static let metodo = "Il costo pesa due volte: quello che paghi e il rendimento che quei soldi non producono più. «Come nel KID» è l'incidenza annua dei costi (RIY) che Prisma calcola sugli anni raccomandati, prima delle imposte, con sotto quella dichiarata nel KID quando c'è: una stima da confrontare con il documento. Le alternative sono prodotti del catalogo con la stessa area e lo stesso indicatore di rischio, calcolate con lo stesso rendimento lordo e con penali, imposte d'uscita e costo d'ingresso."
+    private static let metodo = "Il costo pesa due volte: quello che paghi e il rendimento che quei soldi non producono più. «Come nel KID» è l'incidenza annua dei costi (RIY) che Lucy calcola sugli anni raccomandati, prima delle imposte, con sotto quella dichiarata nel KID quando c'è: una stima da confrontare con il documento. Le alternative sono prodotti del catalogo con la stessa area e lo stesso indicatore di rischio, calcolate con lo stesso rendimento lordo e con penali, imposte d'uscita e costo d'ingresso."
 
     private var senzaDati: String? {
         analisi.senzaDati.isEmpty ? nil

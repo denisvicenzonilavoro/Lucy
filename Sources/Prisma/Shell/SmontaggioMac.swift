@@ -497,7 +497,7 @@ struct SmontaggioMac: View {
                                scelta: Posizione?, esito: EsitoSostituzione?, attuale: Posizione?) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("In \(IpotesiCalcolo.orizzontePredefinito) anni, con le ipotesi di Prisma")
+                Text("In \(IpotesiCalcolo.orizzontePredefinito) anni, con le ipotesi di Lucy")
                     .carattereApple(Tema.Apple.Carattere.etichetta)
                     .foregroundColor(C.inchiostro2)
                 Spacer(minLength: 8)

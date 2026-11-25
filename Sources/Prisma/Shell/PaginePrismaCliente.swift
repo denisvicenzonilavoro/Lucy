@@ -37,7 +37,7 @@ enum PaginePrismaCliente {
             AnyView(PaginaCartaPrisma(c: c, numero: i + 1, totale: totale) { corpo }
                 .frame(width: formato.width, height: formato.height))
         }
-        return DocumentoStampabile(titolo: "Il Prisma di \(c.nomeBattesimo)", cliente: c.nomeBattesimo, genere: "Report",
+        return DocumentoStampabile(titolo: "La Lucy di \(c.nomeBattesimo)", cliente: c.nomeBattesimo, genere: "Report",
                                    formato: formato, pagine: pagine, tipo: .report)
     }
 
@@ -87,10 +87,10 @@ private struct Copertina: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: PG.spazio) {
-            LogoPrisma(colore: Tema.Colore.logoStampa)
+            LogoLucy(colore: Tema.Colore.logoStampa)
                 .frame(height: PG.logo)
             VStack(alignment: .leading, spacing: PG.spazioTitolo) {
-                Text("Il Prisma di").carattereApple(PG.sopratitolo).foregroundColor(CT.sopratitolo)
+                Text("La Lucy di").carattereApple(PG.sopratitolo).foregroundColor(CT.sopratitolo)
                 Text(c.nomeBattesimo).carattereApple(PG.titolo).foregroundColor(CT.testo)
                 Text("Valido fino al \(Formati.dataEstesa.string(from: c.validoFinoAl)). \(TestiPrismaCliente.fraseScadenza)")
                     .carattereApple(PG.sottotitolo).foregroundColor(CT.sottotitolo)

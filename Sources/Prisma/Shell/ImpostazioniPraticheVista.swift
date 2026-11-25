@@ -34,7 +34,7 @@ struct PaginaImpostazioniPratiche: View {
                         .disabled(stato.solaLettura)
                     }
                 }
-                NotaImpostazioni("Le pratiche ferme restano dentro Prisma: compaiono nel centro notifiche, fra le cose da "
+                NotaImpostazioni("Le pratiche ferme restano dentro Lucy: compaiono nel centro notifiche, fra le cose da "
                                  + "sistemare, e in Pratiche › Dopo la firma. Nessuna notifica di macOS.")
             }
             .cascataImpostazioni(1)
@@ -131,7 +131,7 @@ private struct ImpostazioniSinistri: View {
                     }
                 }
                 RigaImpostazione(titolo: "Aggiungi un tipo",
-                                 sottotitolo: "Gli elenchi li dai tu, per tipo e compagnia: Prisma non li inventa",
+                                 sottotitolo: "Gli elenchi li dai tu, per tipo e compagnia: Lucy non li inventa",
                                  ultima: true) {
                     Button("Aggiungi") {
                         modifica { x in x.documentiPerSinistro = (x.documentiPerSinistro ?? []) + [DocumentiSinistro()] }
@@ -140,7 +140,7 @@ private struct ImpostazioniSinistri: View {
                     .disabled(stato.solaLettura)
                 }
             }
-            NotaImpostazioni("Prisma non è collegato alle compagnie: fasi, date e importi dei sinistri li segni tu. Il "
+            NotaImpostazioni("Lucy non è collegata alle compagnie: fasi, date e importi dei sinistri li segni tu. Il "
                              + "sollecito è una bozza in Mail con solo numero di polizza, numero di sinistro e assicurato; "
                              + "lo controlli e lo spedisci tu.")
         }

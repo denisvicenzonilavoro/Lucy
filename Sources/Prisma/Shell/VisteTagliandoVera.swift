@@ -560,11 +560,11 @@ struct GruppoTagliandoImpostazioni: View {
         let minuto = stato.dati.impostazioni.tagliando.minuto
         GruppoImpostazioni(titolo: "Il tagliando dei dati") {
             RigaImpostazione(titolo: "Controllo notturno", sottotitolo: "Doppioni, campi vuoti, consensi e documenti.",
-                             aiuto: "Ogni notte, con Prisma aperto sul Mac, Vera controlla l'archivio. Se una notte salta, il controllo parte alla prima apertura. Ogni correzione passa da te: nulla si cancella da solo") {
+                             aiuto: "Ogni notte, con Lucy aperta sul Mac, Vera controlla l'archivio. Se una notte salta, il controllo parte alla prima apertura. Ogni correzione passa da te: nulla si cancella da solo") {
                 Toggle(isOn: imp.attivo) { EmptyView() }
                     .toggleStyle(.appleSenzaEtichetta)
             }
-            RigaImpostazione(titolo: "Ora del controllo", sottotitolo: "Con il Mac acceso e Prisma aperto.") {
+            RigaImpostazione(titolo: "Ora del controllo", sottotitolo: "Con il Mac acceso e Lucy aperta.") {
                 MenuTendina(selezione: imp.ora, opzioni: (0..<24).map { ($0, "\($0):" + String(format: "%02d", minuto)) }, larghezza: G.menuOra)
                     .disabled(!attivo)
             }

@@ -18,7 +18,7 @@ struct PaginaImpostazioniTerritorio: View {
         let tabella = stato.territorio.tabella
         return VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Pagina.spazioGruppi) {
             NotaImpostazioni("Territorio mette i clienti sulla mappa con il comune dell'indirizzo o con la posizione che metti a "
-                             + "mano. Prisma non usa servizi di mappe o di percorso: distanze e tempi sono stime in linea d'aria.")
+                             + "mano. Lucy non usa servizi di mappe o di percorso: distanze e tempi sono stime in linea d'aria.")
             VStack(alignment: .leading, spacing: Riga.fraRighe) {
                 GruppoImpostazioni(titolo: "Stima delle distanze") {
                     RigaImpostazione(titolo: "Fattore strada", sottotitolo: "La linea d'aria per questo numero: i km stimati") {
@@ -42,7 +42,7 @@ struct PaginaImpostazioniTerritorio: View {
                         }
                     }
                 }
-                NotaImpostazioni("Prisma non usa servizi di percorso: sono stime in linea d'aria. I km di Studio › Spese restano "
+                NotaImpostazioni("Lucy non usa servizi di percorso: sono stime in linea d'aria. I km di Studio › Spese restano "
                                  + "quelli che scrivi tu.")
             }
             .cascataImpostazioni(1)

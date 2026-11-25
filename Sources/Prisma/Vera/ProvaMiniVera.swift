@@ -76,7 +76,7 @@ enum ProvaMiniVera {
         let righe = mini.cifre.righe
         controlla(righe.count >= 2 && Set(righe.map(\.canale)) == [.alleanza, .indipendente], "Mini Vera: le scadenze con il loro canale")
         controlla(attese.allSatisfy { p in righe.contains { $0.id == p.id && $0.valore == Formati.euro(p.valore) } },
-                  "Mini Vera: le cifre sono quelle calcolate da Prisma")
+                  "Mini Vera: le cifre sono quelle calcolate da Lucy")
         controlla(mini.cifre.linea?.punti.count == righe.count && mini.cifre.linea?.oltre?.contains("→") == true,
                   "Mini Vera: la linea del tempo con le scadenze e l'obiettivo oltre l'orizzonte")
         controlla(mini.cifre.fonte?.hasPrefix("Cifre dai calcoli di Posizioni") == true, "Mini Vera: la riga della fonte")

@@ -77,20 +77,20 @@ enum TestiPalestra {
         return "\(s.nomeBreve) · recitata da Vera"
         #endif
     }
-    static func scarno(_ s: SchedaRecita) -> String { "Di \(s.nomeBreve) Prisma sa poco: l’allenamento sarà generico." }
+    static func scarno(_ s: SchedaRecita) -> String { "Di \(s.nomeBreve) Lucy sa poco: l’allenamento sarà generico." }
     static func obiezione(_ k: Int) -> String { "Obiezione \(k) di \(PalestraVera.obiezioni)" }
 
     static func invito(_ s: SchedaRecita) -> (titolo: String, testo: String) {
         ("Pronto ad allenarti con \(s.nomeBreve)?",
-         "Vera recita \(s.nomeBreve) con il profilo che ha Prisma: tre obiezioni, una alla volta. Scegli la difficoltà e comincia.")
+         "Vera recita \(s.nomeBreve) con il profilo che ha Lucy: tre obiezioni, una alla volta. Scegli la difficoltà e comincia.")
     }
 
     /// «2 risposte che hanno fatto vedere i numeri».
     static func funzionato(_ ottime: Int) -> String {
         switch ottime {
-        case 0: return "nessuna risposta ha fatto vedere i numeri di Prisma."
-        case 1: return "1 risposta che ha fatto vedere i numeri di Prisma."
-        default: return "\(ottime) risposte che hanno fatto vedere i numeri di Prisma."
+        case 0: return "nessuna risposta ha fatto vedere i numeri di Lucy."
+        case 1: return "1 risposta che ha fatto vedere i numeri di Lucy."
+        default: return "\(ottime) risposte che hanno fatto vedere i numeri di Lucy."
         }
     }
 

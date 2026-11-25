@@ -169,9 +169,9 @@ enum ProvaFalloTu {
                                                                      argomenti: ["cliente": "Sofia", "scopo": "altro", "testo": "Il suo piano vale 99.999 €."])],
                                                   richiesta: "Scrivi a Sofia del piano", contesto: x)
         if case .azione(let a)? = preparate.first {
-            controlla((a.avviso ?? "").contains("99.999"), "Registro: una cifra del messaggio che non viene da Prisma diventa un avviso")
+            controlla((a.avviso ?? "").contains("99.999"), "Registro: una cifra del messaggio che non viene da Lucy diventa un avviso")
         } else {
-            controlla(false, "Registro: una cifra del messaggio che non viene da Prisma diventa un avviso")
+            controlla(false, "Registro: una cifra del messaggio che non viene da Lucy diventa un avviso")
         }
     }
 
@@ -212,7 +212,7 @@ enum ProvaFalloTu {
                   "Fallo tu: «sposta l'incontro e avvisala» produce due azioni nella scheda («\(m.testo)»)")
         let testoMessaggio = scheda.azioni[1].argomenti["testo"] ?? ""
         controlla(testoMessaggio.contains("Laura") && testoMessaggio.contains(Formati.dataLunga.string(from: nuovoGiorno)) && testoMessaggio.contains(ora),
-                  "Fallo tu: il testo per Laura lo scrive Prisma con il giorno e l'ora dello spostamento («\(testoMessaggio)»)")
+                  "Fallo tu: il testo per Laura lo scrive Lucy con il giorno e l'ora dello spostamento («\(testoMessaggio)»)")
         let ferma = s.dati.appuntamenti.first { $0.id == "event-laura" }?.inizio == laura.inizio && s.dati.messaggi.count == messaggiPrima
         controlla(ferma, "Fallo tu: prima di «Conferma» non cambia niente")
 
@@ -489,8 +489,8 @@ enum ProvaFalloTu {
         let conRimandi = FontiVera.conRimandi(risposta, fonti: f)
         controlla(conRimandi.contains("\(cifra)¹") && conRimandi.contains("999.999 €²") && !conRimandi.contains("polizze¹"),
                   "Mai a caso: nel testo il rimando dopo ogni cifra («\(conRimandi.prefix(60))…»)")
-        let blocchi = FontiVera.registro(testo: "QUADRO (calcolato da Prisma)\nPatrimonio 120.000 €\nDOMANDA DEL CONSULENTE\nE con 5.000 € in più?")
-        controlla(blocchi.first?.origine == "Calcoli di Prisma · Quadro" && blocchi.last?.origine == FontiVera.origineDomanda,
+        let blocchi = FontiVera.registro(testo: "QUADRO (calcolato da Lucy)\nPatrimonio 120.000 €\nDOMANDA DEL CONSULENTE\nE con 5.000 € in più?")
+        controlla(blocchi.first?.origine == "Calcoli di Lucy · Quadro" && blocchi.last?.origine == FontiVera.origineDomanda,
                   "Mai a caso: le righe della scheda portano il loro blocco, la domanda la sua origine")
         // Un dato letto da un documento porta la pagina
         var documento = Documento(clienteId: "giulia", titolo: "Contratto", tipo: .polizza)

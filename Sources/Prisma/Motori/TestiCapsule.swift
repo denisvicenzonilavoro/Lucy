@@ -15,7 +15,7 @@ enum TestiCapsule {
     }
 
     /// La frase onesta (decisione 41): mai «nemmeno Denis».
-    static let fraseOnesta = "Prisma la sigilla e la cifra: non si può leggere fino al giorno giusto."
+    static let fraseOnesta = "Lucy la sigilla e la cifra: non si può leggere fino al giorno giusto."
     static let segnaposto = "Perché lo stai facendo? Cosa vuoi ricordarti quel giorno?"
     /// Decisione 35: la dettatura del sistema resta attiva, e si dice.
     static let aiutoDettatura = "Si può anche dettare: la dettatura è un servizio del sistema di Apple. Il testo resta su questo Mac, sigillato."
@@ -44,7 +44,7 @@ enum TestiCapsule {
     /// Sotto i pulsanti della consegna: la password del PDF condiviso (nuova a ogni apertura, mai conservata) e, alla
     /// prima uscita per il cliente, l'avviso.
     static func notaPassword(password: String, primaVolta: Bool, nome: String) -> String {
-        var t = "«Condividi…» manda il PDF protetto con la password \(password): dilla a voce, Prisma non la conserva."
+        var t = "«Condividi…» manda il PDF protetto con la password \(password): dilla a voce, Lucy non la conserva."
         if primaVolta { t += " Il PDF contiene il messaggio di \(nome). Esce dal Mac con l’app che scegli: lo mandi tu." }
         return t
     }
@@ -60,7 +60,7 @@ enum TestiCapsule {
     static func sopratitolo(_ d: Date) -> String { sigillataA(d).uppercased() }
 
     /// Il piede del PDF: «Aperta il 9 novembre 2026 · Prisma».
-    static func piede(apertaIl d: Date) -> String { "Aperta il \(Formati.dataEstesa.string(from: d)) · Prisma" }
+    static func piede(apertaIl d: Date) -> String { "Aperta il \(Formati.dataEstesa.string(from: d)) · Lucy" }
 
     /// La seconda riga di una capsula nell'elenco: quando si apre e lo stato (mai il testo).
     static func riga(_ c: CapsulaTempo, stato: StatoCapsula, quando: String) -> String {

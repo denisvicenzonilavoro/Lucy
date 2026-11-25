@@ -34,13 +34,13 @@ extension StatoShell {
                        dettaglio: "Da un CSV con l'elenco delle polizze e dei prodotti; o una per una, anche dai documenti.",
                        pulsante: "Importa le posizioni", fatto: posizioniVere),
             PassoGuida(azione: .togliProva, titolo: "Togli i clienti di prova",
-                       dettaglio: "Giulia, Marco, Laura, Andrea e Sofia escono con tutti i loro dati; prima Prisma fa un backup.",
+                       dettaglio: "Giulia, Marco, Laura, Andrea e Sofia escono con tutti i loro dati; prima Lucy fa un backup.",
                        pulsante: "Toglili", fatto: !haDatiDiProva),
             PassoGuida(azione: .passwordPDF, titolo: "Proteggi i PDF per i clienti",
                        dettaglio: "La password proposta salvando prospetti e report: data di nascita o codice fiscale del cliente.",
                        pulsante: "Attiva", fatto: dati.impostazioni.pdf.proteggi),
             PassoGuida(azione: .primoBackup, titolo: "Fai il primo backup",
-                       dettaglio: "Da qui in poi ci pensa Prisma ogni settimana (si conservano le ultime 8 copie).",
+                       dettaglio: "Da qui in poi ci pensa Lucy ogni settimana (si conservano le ultime 8 copie).",
                        pulsante: "Crea il backup", fatto: b.ultimo != nil && b.cartella != nil),
         ]
         #if os(macOS)
@@ -198,7 +198,7 @@ extension StatoShell {
             case "xls", "numbers":
                 mostraAvviso("«\(url.lastPathComponent)»: da Numbers o dal vecchio Excel salva come .xlsx o CSV, poi trascinalo di nuovo.")
             default:
-                mostraAvviso("«\(url.lastPathComponent)» non è un file che Prisma sa importare.")
+                mostraAvviso("«\(url.lastPathComponent)» non è un file che Lucy sa importare.")
             }
         }
     }

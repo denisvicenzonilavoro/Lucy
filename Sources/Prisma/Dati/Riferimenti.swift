@@ -165,7 +165,7 @@ struct RiferimentiRendimento: Codable, Equatable {
 /// gli anni che mancano li inserisce il consulente (Impostazioni › Riferimenti). Non aggiungere valori incerti.
 enum RiferimentiStorici {
     static let fonteInflazione = "ISTAT, indice dei prezzi al consumo per le famiglie di operai e impiegati (FOI) senza tabacchi: variazione di dicembre su dicembre dell'anno prima (comunicati mensili «Prezzi al consumo»). È l'indice che l'art. 2120 del Codice civile usa per rivalutare il TFR."
-    static let fonteTFR = "Calcolata da Prisma: 1,5% più il 75% dell'inflazione FOI di dicembre su dicembre (art. 2120 c.c.; con inflazione negativa resta l'1,5%), meno l'imposta sostitutiva del 17% (art. 11, c. 3, D.Lgs. 47/2000, aliquota del 17% dalla L. 190/2014). È la rivalutazione netta che la COVIP confronta ogni anno con i rendimenti dei fondi pensione."
+    static let fonteTFR = "Calcolata da Lucy: 1,5% più il 75% dell'inflazione FOI di dicembre su dicembre (art. 2120 c.c.; con inflazione negativa resta l'1,5%), meno l'imposta sostitutiva del 17% (art. 11, c. 3, D.Lgs. 47/2000, aliquota del 17% dalla L. 190/2014). È la rivalutazione netta che la COVIP confronta ogni anno con i rendimenti dei fondi pensione."
     static let fonteGestioniSeparate = "Da inserire: rendimento medio annuo delle gestioni separate (per esempio le statistiche annuali di ANIA o IVASS, o la media delle gestioni che segui). Per confrontarlo con il valore di una polizza usa il rendimento riconosciuto agli assicurati, al netto del trattenuto."
 
     /// FOI senza tabacchi, dicembre su dicembre (%). Fino al 2020 e dal 2024 li inserisce il consulente.

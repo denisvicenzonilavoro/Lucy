@@ -53,7 +53,7 @@ struct LibroMastroCarta: View {
                         .segnoCarta(.sottolinea, chiave: "libro-mastro")
                 } else {
                     Text("Scegli quanto mettere da parte").fontCarta(22, weight: .medium, design: .serif)
-                    Text("La percentuale la decidi tu: Prisma non conosce regole fiscali e non ne inventa.")
+                    Text("La percentuale la decidi tu: Lucy non conosce regole fiscali e non ne inventa.")
                         .fontCarta(12.5).foregroundColor(TemaCarta.Colore.inchiostro2D)
                         .fixedSize(horizontal: false, vertical: true)
                 }

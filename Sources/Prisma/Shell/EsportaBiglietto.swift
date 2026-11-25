@@ -24,12 +24,12 @@ enum TestiBiglietto {
     static let mostraCifra = "Mostra la cifra"
     static let condividi = "Condividi…"
     static let salva = "Salva su file…"
-    static let tornaAllaFrase = "Torna alla frase di Prisma"
+    static let tornaAllaFrase = "Torna alla frase di Lucy"
     static let fatto = "Fatto"
     static let aiutoFrase = "Clic per cambiare la frase del biglietto"
     static let notaFrase = "La frase cambiata vale solo per questo biglietto."
     static let altro = "Altro sul biglietto"
-    static let messaggioSalva = "Il biglietto resta dove lo salvi: Prisma non lo invia a nessuno."
+    static let messaggioSalva = "Il biglietto resta dove lo salvi: Lucy non lo invia a nessuno."
     static let nonDisegnato = "Non riesco a preparare il biglietto"
     /// «Il biglietto contiene il nome di Sofia e le cifre del suo piano. …» con la cifra; senza, solo il nome.
     static func avvisoPrimaVolta(nome: String, conCifra: Bool) -> String {

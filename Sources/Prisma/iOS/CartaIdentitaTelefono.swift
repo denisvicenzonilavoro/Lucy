@@ -167,7 +167,7 @@ struct CartaIdentitaTelefono: View {
             Spacer(minLength: 0)
         }
         if istantanea || ControlloreScannerInquadra.dalVivo {
-            Text("Tieni la carta intera nel riquadro, senza riflessi. Prisma la legge qui sull’iPhone: al Mac va solo il testo, cifrato. L’immagine non si salva.")
+            Text("Tieni la carta intera nel riquadro, senza riflessi. Lucy la legge qui sull’iPhone: al Mac va solo il testo, cifrato. L’immagine non si salva.")
                 .carattereApple(M.frase)
                 .foregroundColor(M.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)
@@ -186,14 +186,14 @@ struct CartaIdentitaTelefono: View {
                 Spacer(minLength: 0)
             }
         } else if ControlloreScannerInquadra.scansioneDisponibile {
-            Text("Su questo dispositivo la lettura dal vivo non c’è: scansiona la carta, poi Prisma la legge qui.")
+            Text("Su questo dispositivo la lettura dal vivo non c’è: scansiona la carta, poi Lucy la legge qui.")
                 .carattereApple(M.frase)
                 .foregroundColor(M.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)
             Button("Scansiona la carta") { scansioneDocumenti = true }
                 .buttonStyle(.applePrimarioGrande)
         } else {
-            Text("La fotocamera non è disponibile: consenti a Prisma di usarla in Impostazioni › Prisma › Fotocamera.")
+            Text("La fotocamera non è disponibile: consenti a Lucy di usarla in Impostazioni › Lucy › Fotocamera.")
                 .carattereApple(M.frase)
                 .foregroundColor(M.coloreFrase)
                 .fixedSize(horizontal: false, vertical: true)

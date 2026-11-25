@@ -98,7 +98,7 @@ struct ModuloSchedaDaiDocumenti: View {
     private var sceltaDocumenti: some View {
         VStack(alignment: .leading, spacing: 12) {
             OcchielloSezione(titolo: "I documenti del prodotto")
-            Text("Scegli insieme KID, DIP o DIP aggiuntivo, condizioni di contratto o di assicurazione e scheda costi. Prisma li legge sul Mac e trova costi, trattenute, tassazione, rischio e scenari del KID: ogni dato con il documento e la pagina, da confermare.")
+            Text("Scegli insieme KID, DIP o DIP aggiuntivo, condizioni di contratto o di assicurazione e scheda costi. Lucy li legge sul Mac e trova costi, trattenute, tassazione, rischio e scenari del KID: ogni dato con il documento e la pagina, da confermare.")
                 .font(Tipo.campoEtichetta).foregroundColor(C.testoSecondario)
                 .fixedSize(horizontal: false, vertical: true)
             Button { apriFile() } label: { Label("Scegli i documenti…", systemImage: "doc.text.magnifyingglass") }
@@ -224,7 +224,7 @@ struct ModuloSchedaDaiDocumenti: View {
             gruppo("Gli scenari del KID (rendimento medio annuo)", LettoreProdotto.Voce.scenari + [.rendimentoPrimaCosti])
             gruppo("Il contratto", [.trattenuto, .minimoGarantito, .caricamento, .costoFisso, .penali, .bloccoRiscatto])
             gruppo("La fiscalità", [.aliquota, .quotaTitoliStato, .impostaPremi])
-            Text("Il rendimento atteso della scheda è lordo: Prisma lo ricava dallo scenario moderato con i costi del KID (lo scenario è al netto dei costi). Con gli scenari del KID le simulazioni usano lo sfavorevole e il favorevole del KID invece dei ±2 punti.")
+            Text("Il rendimento atteso della scheda è lordo: Lucy lo ricava dallo scenario moderato con i costi del KID (lo scenario è al netto dei costi). Con gli scenari del KID le simulazioni usano lo sfavorevole e il favorevole del KID invece dei ±2 punti.")
                 .font(Tipo.campoEtichetta).foregroundColor(C.testoSecondario)
                 .fixedSize(horizontal: false, vertical: true)
         }

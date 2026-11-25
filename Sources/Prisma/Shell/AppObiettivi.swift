@@ -37,7 +37,7 @@ struct AppObiettivi: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 14) {
                             TitoloStrumento(occhiello: "Il quaderno dei progetti", titolo: "Un nome al futuro.",
-                                            testo: "Ogni obiettivo ha un importo e una data: Prisma calcola quanto manca e quanto mettere da parte ogni mese.")
+                                            testo: "Ogni obiettivo ha un importo e una data: Lucy calcola quanto manca e quanto mettere da parte ogni mese.")
                             LazyVGrid(columns: Self.colonneTessere, spacing: Tema.Misura.DossierCliente.spazioGriglia) {
                                 ForEach(elenco) { o in
                                     TesseraObiettivo(obiettivo: o, posizioni: stato.posizioniCliente(cliente), attiva: o.id == scelto?.id) {
@@ -111,11 +111,11 @@ struct AppObiettivi: View {
             VuotoGuidato(
                 icona: "target",
                 titolo: "Nessun obiettivo, per ora",
-                perche: "Un obiettivo è un progetto con un importo e una data: la casa, gli studi dei figli, la pensione anticipata. Prisma calcola quanto manca e quanto mettere da parte ogni mese.",
+                perche: "Un obiettivo è un progetto con un importo e una data: la casa, gli studi dei figli, la pensione anticipata. Lucy calcola quanto manca e quanto mettere da parte ogni mese.",
                 passi: [
                     ("Dagli un nome e una data", "Con «Nuovo obiettivo», qui sotto."),
                     ("Collega le posizioni che servono", "Quelle che già lavorano per quel progetto."),
-                    ("Guarda il versamento mensile", "Prisma dice quanto serve ogni mese."),
+                    ("Guarda il versamento mensile", "Lucy dice quanto serve ogni mese."),
                 ],
                 pulsante: "Nuovo obiettivo",
                 azione: { nuovo() }

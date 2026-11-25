@@ -42,7 +42,7 @@ enum TestiCompletezza {
     /// L'avviso dopo l'esclusione di una voce.
     static func avvisoEsclusa(_ titolo: String, nome: String) -> String { "«\(titolo)» non conta più per \(nome)." }
 
-    static let metodo = "Il punteggio pesa ogni dato da 1 a 3 secondo quanto sposta le cifre: conta per intero se c'è, per metà se è stimato o vecchio (valori oltre 12 mesi, profilo oltre 24 mesi), zero se manca. Misura solo i dati che entrano nei calcoli di Prisma: non sostituisce i questionari di adeguatezza né l'adeguata verifica antiriciclaggio (D.Lgs. 231/2007)."
+    static let metodo = "Il punteggio pesa ogni dato da 1 a 3 secondo quanto sposta le cifre: conta per intero se c'è, per metà se è stimato o vecchio (valori oltre 12 mesi, profilo oltre 24 mesi), zero se manca. Misura solo i dati che entrano nei calcoli di Lucy: non sostituisce i questionari di adeguatezza né l'adeguata verifica antiriciclaggio (D.Lgs. 231/2007)."
 
     // MARK: - Analisi 360
 
@@ -68,10 +68,10 @@ enum TestiCompletezza {
     static let nessunaStima = "Nessuna stima: i dati ci sono tutti"
     static let aiutoAvvisoStime = "Apri l’elenco dei dati da completare: lo stesso della scheda del cliente"
     /// La frase dell'elenco «Dati per l'analisi», uguale in Clienti e in Analisi 360.
-    static let unElencoSolo = "Un elenco solo, lo stesso in Clienti e in Analisi 360. Più dati ci sono, meno stime fa Prisma."
+    static let unElencoSolo = "Un elenco solo, lo stesso in Clienti e in Analisi 360. Più dati ci sono, meno stime fa Lucy."
     static let tuttiIDati = "Tutti i dati ci sono: nessuna stima in uso."
     static func completiAl(_ percentuale: Int) -> String { "Completi al \(percentuale)%" }
-    static let stimaGenerica = "Finché manca, Prisma usa una stima"
+    static let stimaGenerica = "Finché manca, Lucy usa una stima"
 
     /// La riga sotto una voce dell'elenco: l'ipotesi che Prisma usa (o la frase generica) e le aree di Analisi 360
     /// su cui pesa, "Finché manca, Prisma usa una stima · pesa su Previdenza, Protezione".
@@ -180,7 +180,7 @@ enum TestiCompletezza {
     static func sriCliente(nome: String) -> String { "Il rischio di «\(nome)» è stimato." }
 
     static func rendimento(nome: String) -> String {
-        "\(nome): rendimento ipotizzato del \(Formati.percentuale(IpotesiCalcolo.rendimentoPredefinito)) (predefinito di Prisma)."
+        "\(nome): rendimento ipotizzato del \(Formati.percentuale(IpotesiCalcolo.rendimentoPredefinito)) (predefinito di Lucy)."
     }
     static func rendimentoCliente(nome: String) -> String {
         "Per «\(nome)» abbiamo ipotizzato un rendimento del \(Formati.percentuale(IpotesiCalcolo.rendimentoPredefinito)) l'anno, non garantito."
@@ -235,7 +235,7 @@ enum TestiCompletezza {
         static let familiare = "La data di nascita dice per quanti anni la persona resta a carico: serve alla protezione e alla successione."
         static let valore = "Il valore si aggiorna con l'estratto conto o il rendiconto annuale della compagnia o dell'intermediario (per le polizze, Regolamento IVASS n. 41/2018)."
         static let kid = "Costi e indicatore di rischio si leggono nel KID: Regolamento (UE) 1286/2014 (PRIIPs) e Regolamento delegato (UE) 2017/653 (indicatore di rischio e costi, RIY)."
-        static let rendimento = "Il rendimento atteso guida le proiezioni: senza, Prisma usa la sua ipotesi predefinita, che non è garantita."
+        static let rendimento = "Il rendimento atteso guida le proiezioni: senza, Lucy usa la sua ipotesi predefinita, che non è garantita."
         static let quotaGestione = "La divisione tra gestione separata e fondi cambia rischio, costi e bollo: si legge nell'estratto conto della polizza."
         static func beneficiari(previdenza: Bool) -> String {
             "Il beneficiario designato acquista un diritto proprio (art. 1920 c.c.); senza designazione la prestazione segue la successione."

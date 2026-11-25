@@ -153,7 +153,7 @@ enum ProvaFaseTreVera {
         if let p = s.dati.posizioni.first(where: { s.esitoAdeguatezza($0) != nil }), let l = s.secondaLetturaAdeguatezza(p) {
             controlla(l.avvisi.contains { $0.tipo == .profilo }, "Seconda lettura: la scheda di adeguatezza porta i controlli del profilo")
             let b = aspetta { await s.bozzaMotivazione(p) }
-            controlla(b.map { !$0.testo.isEmpty && !$0.conQwen } ?? true, "Seconda lettura: senza Qwen la bozza della motivazione è quella di Prisma")
+            controlla(b.map { !$0.testo.isEmpty && !$0.conQwen } ?? true, "Seconda lettura: senza Qwen la bozza della motivazione è quella di Lucy")
         } else {
             controlla(true, "Seconda lettura: nessuna proposta di prova con la scheda di adeguatezza")
         }
@@ -227,7 +227,7 @@ enum ProvaFaseTreVera {
                   "Differenze: capitale migliora, premio costa di più, compagnia uguale (\(c.righe.map { "\($0.voce): \($0.etichetta)" }))")
         controlla(esito("Carenze") == .migliora && esito("Massimali") == .migliora && esito("Esclusioni") == .migliora,
                   "Differenze: carenza più corta, massimale più alto, meno esclusioni")
-        controlla(c.sintesi.contains("Laura") && c.sintesi.contains("420 €") && c.sintesi.contains("610 €"), "Differenze: la sintesi di Prisma con le cifre della tabella: \(c.sintesi)")
+        controlla(c.sintesi.contains("Laura") && c.sintesi.contains("420 €") && c.sintesi.contains("610 €"), "Differenze: la sintesi di Lucy con le cifre della tabella: \(c.sintesi)")
         var kidA = Documento(clienteId: "laura", titolo: "KID 2025", tipo: .kid)
         kidA.campi = [CampoEstratto(chiave: .sri, valore: "3", pagina: 1)]
         var kidB = Documento(clienteId: "laura", titolo: "KID 2026", tipo: .kid)
@@ -269,7 +269,7 @@ enum ProvaFaseTreVera {
                   "Resoconto: da raccogliere e le fonti")
         let inventato = ResocontoVera.applica(#"{"presenti":"x","parlato":["Il mutuo pesa sulla rata."],"deciso":["Investire 90.000 € subito"],"passi":["Mandare il riepilogo dei costi"],"raccogliere":["Il fabbisogno mensile"],"breve":["Riepilogo dei costi"]}"#, a: r)
         controlla(inventato.sezioni[2].righe == r.sezioni[2].righe && inventato.sezioni[4].righe == ["Il fabbisogno mensile"] && inventato.conQwen,
-                  "Resoconto: la sezione con una cifra inventata resta di Prisma, le altre di Qwen")
+                  "Resoconto: la sezione con una cifra inventata resta di Lucy, le altre di Qwen")
         // «Manda una sintesi a Giulia»: decisioni e prossimi passi, senza cifre nuove né appunti interni
         let sintesi = ResocontoVera.sintesiCliente(r, incontro: i, nome: c.nome) ?? ""
         controlla(sintesi.hasPrefix("Buongiorno Giulia,") && sintesi.contains("Mandare il riepilogo dei costi")

@@ -771,10 +771,10 @@ jobs:
           ls -la rilascio
           test -f rilascio/Prisma.zip
           test -f rilascio/Prisma.ipa
-          NOTE="Prisma al commit ${GITHUB_SHA::7} del $(date -u '+%d/%m/%Y %H:%M') UTC.
+          NOTE="Lucy (prima Prisma) al commit ${GITHUB_SHA::7} del $(date -u '+%d/%m/%Y %H:%M') UTC.
 
-          - Prisma.zip: Prisma per Mac con Apple Silicon (M1 e successivi). Si apre il zip, si trascina Prisma.app in Applicazioni; la prima volta clic destro → Apri.
-          - Prisma.ipa: Prisma per iPhone e iPad, da installare con AltStore o Sideloadly (ID Apple gratuito)."
+          - Prisma.zip: Lucy per Mac con Apple Silicon (M1 e successivi). Il modo più semplice: bash Supporto/installa-ultima.sh, che la installa come Lucy.app; a mano si apre il zip e si trascina Prisma.app in Applicazioni (la prima volta clic destro → Apri).
+          - Prisma.ipa: Lucy per iPhone e iPad, da installare con AltStore o Sideloadly (ID Apple gratuito)."
           gh release delete ultima --yes --cleanup-tag 2>/dev/null || true
           gh release create ultima rilascio/Prisma.zip rilascio/Prisma.ipa \
-            --target "$GITHUB_SHA" --title "Prisma · ultima versione" --notes "$NOTE" --latest
+            --target "$GITHUB_SHA" --title "Lucy · ultima versione" --notes "$NOTE" --latest

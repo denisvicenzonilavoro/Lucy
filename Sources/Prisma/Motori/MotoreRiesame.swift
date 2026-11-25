@@ -275,7 +275,7 @@ enum MotoreRiesame {
         }
         if f.cliente.profilo.aggiornatoIl.map({ $0 < (cal.date(byAdding: .year, value: -2, to: inizio) ?? inizio) }) ?? true {
             punti.append(.init(tema: .dati, titolo: "Aggiornare il profilo dell'investitore",
-                               dettaglio: f.cliente.profilo.aggiornatoIl.map { "Ultimo aggiornamento il \(data($0))." } ?? "Non è mai stato compilato in Prisma.",
+                               dettaglio: f.cliente.profilo.aggiornatoIl.map { "Ultimo aggiornamento il \(data($0))." } ?? "Non è mai stato compilato in Lucy.",
                                priorita: .bassa))
         }
         if f.cliente.bisogni.aggiornatoIl.map({ $0 < unAnnoFa }) ?? true {
@@ -349,7 +349,7 @@ enum MotoreRiesame {
             // Il canale comune a tutte le voci mancanti, se c'è (le voci comuni non hanno canale)
             let canali = Set(mancanti.map(\.canale))
             punti.append(.init(tema: .conformita, titolo: "Dati di conformità da registrare",
-                               dettaglio: "Non registrati in Prisma: " + mancanti.map { TestiConformita.nomeBreve($0.tipo) }.joined(separator: ", ") + ".",
+                               dettaglio: "Non registrati in Lucy: " + mancanti.map { TestiConformita.nomeBreve($0.tipo) }.joined(separator: ", ") + ".",
                                priorita: .bassa, canale: canali.count == 1 ? mancanti.first?.canale : nil))
         }
         return punti

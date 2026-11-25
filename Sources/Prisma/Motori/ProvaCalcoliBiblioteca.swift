@@ -104,9 +104,9 @@ enum ProvaCalcoliBiblioteca {
 
     private static func parametri(_ verifica: VerificaCalcoli) {
         let superato = MotoreBiblioteca.avvisoParametri("I contributi sono deducibili fino a 5.164,57 euro l'anno.")
-        verifica.vero("Biblioteca: una deducibilità diversa da quella di Prisma fa comparire l'avviso",
+        verifica.vero("Biblioteca: una deducibilità diversa da quella di Lucy fa comparire l'avviso",
                       superato?.contains(Formati.euro(RegoleFiscali.limiteDeducibilita)) == true && superato?.contains("superato") == true)
-        verifica.vero("Biblioteca: con la cifra di Prisma nessun avviso",
+        verifica.vero("Biblioteca: con la cifra di Lucy nessun avviso",
                       MotoreBiblioteca.avvisoParametri("I contributi sono deducibili fino a 5.300 euro l'anno.") == nil)
         verifica.vero("Biblioteca: senza parlare di deducibilità nessun avviso",
                       MotoreBiblioteca.avvisoParametri("Il capitale minimo è di 2.000 euro.") == nil)

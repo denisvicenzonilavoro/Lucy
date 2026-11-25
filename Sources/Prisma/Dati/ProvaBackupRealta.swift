@@ -72,7 +72,7 @@ extension ProvaBackup {
         // 4. Lo scatto resta sul Mac: non entra nell'istantanea di «Prisma ovunque»
         let ist = SpazioOvunque.datiIstantanea(estratto)
         guard !ist.documenti.contains(where: { $0.scattoRealta != nil || $0.id == scatto.id }) else {
-            return "lo scatto della realtà aumentata non deve entrare nell'istantanea di Prisma ovunque"
+            return "lo scatto della realtà aumentata non deve entrare nell'istantanea di Lucy ovunque"
         }
         // 5. I campi stanno nella versione 27 dell'archivio di Luce
         guard DatiPrisma.versioneAttuale == 27 else {

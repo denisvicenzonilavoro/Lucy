@@ -8,7 +8,7 @@ enum SuMisuraDiProva {
     static func esempi(oggi: Date = Date()) -> [EsempioVera] {
         let coppie: [(String, String, ModalitaVera)] = [
             ("Giulia Rossi vuole versare 550 € al mese per la casa: come glielo spiego?",
-             "Le direi così: con 550 € al mese mette da parte la quota per l'anticipo senza toccare la liquidità di emergenza. Le cifre esatte gliele mostro dal prospetto di Prisma.", .lavoro),
+             "Le direi così: con 550 € al mese mette da parte la quota per l'anticipo senza toccare la liquidità di emergenza. Le cifre esatte gliele mostro dal prospetto di Lucy.", .lavoro),
             ("Scrivimi una mail cordiale per ricordare a Marco Bianchi l'appuntamento di giovedì.",
              "Gentile Marco, le ricordo il nostro appuntamento di giovedì. Porti pure le domande che le sono venute in mente: le vediamo insieme. A presto, Denis", .conversazione),
             ("Cos'è una gestione separata, in parole semplici?",
@@ -20,7 +20,7 @@ enum SuMisuraDiProva {
             ("Come spiego il rischio a un cliente prudente?",
              "Partirei da una domanda: quanto le darebbe fastidio vedere il valore scendere per qualche mese? Poi mostrerei con un esempio che il rischio si sceglie in base al tempo che ha davanti.", .conversazione),
             ("Marco vuole proteggere la famiglia con 30 € al mese: da dove parto?",
-             "Partirei dalla protezione del reddito: con 30 € al mese si può coprire il rischio più grave per la famiglia. Poi vediamo con il prospetto di Prisma quali coperture entrano nel budget.", .lavoro),
+             "Partirei dalla protezione del reddito: con 30 € al mese si può coprire il rischio più grave per la famiglia. Poi vediamo con il prospetto di Lucy quali coperture entrano nel budget.", .lavoro),
             ("Traduci in inglese: «la ringrazio per la fiducia».",
              "«Thank you for your trust.»", .conversazione),
             ("Giulia ha paura di perdere i soldi: come la rassicuro senza promettere niente?",
@@ -28,7 +28,7 @@ enum SuMisuraDiProva {
             ("Che differenza c'è tra un PIP e un fondo aperto?",
              "Il PIP è un piano previdenziale costruito su una polizza; il fondo aperto è gestito da banche o compagnie. Entrambi hanno i vantaggi fiscali della previdenza complementare: cambiano costi e flessibilità.", .conversazione),
             ("Laura vuole più flessibilità: come imposto il prossimo incontro?",
-             "Partirei dagli obiettivi che sono cambiati, poi le proporrei due strade: una più flessibile e una più stabile, con i pro e i contro di ciascuna. Le cifre le prepara Prisma.", .lavoro),
+             "Partirei dagli obiettivi che sono cambiati, poi le proporrei due strade: una più flessibile e una più stabile, con i pro e i contro di ciascuna. Le cifre le prepara Lucy.", .lavoro),
             ("Dammi tre idee per un messaggio di auguri ai clienti.",
              "1) Un augurio semplice con un ricordo dell'anno insieme. 2) Un pensiero sui progetti del nuovo anno. 3) Un grazie per la fiducia, con l'invito a sentirsi a gennaio.", .conversazione),
         ]

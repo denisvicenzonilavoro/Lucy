@@ -87,7 +87,7 @@ for cartella in Schemi Esempi Valutazione; do
 done
 
 # Icone senza asset catalog: i nomi coincidono con CFBundleIconFiles di Info.plist
-ICONA="$RADICE/Design/Icone/AppIcon.png"
+ICONA="$RADICE/Design/Icone/AppIcon-iOS.png"
 if [ -f "$ICONA" ]; then
     icona() { sips -s format png -z "$1" "$1" "$ICONA" --out "$APP/$2" > /dev/null; }
     icona 120 "AppIcon60x60@2x.png"
@@ -95,7 +95,7 @@ if [ -f "$ICONA" ]; then
     icona 152 "AppIcon76x76@2x~ipad.png"
     icona 167 "AppIcon83.5x83.5@2x~ipad.png"
 else
-    echo "Design/Icone/AppIcon.png assente: nessuna icona"
+    echo "Design/Icone/AppIcon-iOS.png assente: nessuna icona"
 fi
 
 # Firma ad-hoc: il simulatore la accetta; sul dispositivo AltStore o Sideloadly la sostituiscono con l'ID Apple

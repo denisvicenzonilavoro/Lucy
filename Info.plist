@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleName</key>
-    <string>Prisma</string>
+    <string>Lucy</string>
     <key>CFBundleDisplayName</key>
-    <string>Prisma</string>
+    <string>Lucy</string>
     <key>CFBundleExecutable</key>
     <string>Prisma</string>
     <key>CFBundleIdentifier</key>

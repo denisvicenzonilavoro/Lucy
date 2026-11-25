@@ -49,7 +49,7 @@ enum ProvaTrovaPaginaVera {
         controlla(TrovaPaginaVera.leggi(#"{"trovato":false,"passo":"","frase":"","risposta":""}"#, passi: passi, domanda: domanda) == .nonTrovata,
                   "Biblioteca: «trovato: false» è lo stato «non trovata»")
         controlla(isNonVerificata(TrovaPaginaVera.leggi(#"{"trovato":true,"passo":"P9","frase":"\#(frase)","risposta":"Sì."}"#, passi: passi, domanda: domanda)),
-                  "Biblioteca: un passo che Prisma non ha dato non vale")
+                  "Biblioteca: un passo che Lucy non ha dato non vale")
         controlla(TrovaPaginaVera.leggi("niente JSON", passi: passi, domanda: domanda) == nil, "Biblioteca: un JSON guasto si scarta")
 
         qwenFinto(passi: passi, frase: frase, controlla)
@@ -230,7 +230,7 @@ enum ProvaTrovaPaginaVera {
             s.applicaEsitoBiblioteca(.risposta(passo: p, frase: "sono deducibili dal reddito complessivo fino a 5.164,57 euro l'anno", testo: "Fino a 5.164,57 euro l'anno."))
         }
         controlla(s.trovaPagina.risultato?.avviso?.contains("superato") == true,
-                  "Biblioteca: la cifra della circolare diversa dal parametro di Prisma fa comparire l'avviso")
+                  "Biblioteca: la cifra della circolare diversa dal parametro di Lucy fa comparire l'avviso")
         s.chiediBiblioteca("Qual è la ricetta della torta di mele?", subito: true)
         controlla(s.trovaPagina.risultato?.stato == .nonTrovata && s.trovaPagina.risultato?.passo == nil,
                   "Biblioteca: una domanda fuori dai documenti è «non trovata»")

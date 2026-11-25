@@ -32,7 +32,7 @@ enum Parole {
     /// Le quattro aree lette insieme (spariscono: «Panoramica delle aree», «Check-up» a schermo).
     static let ilQuadro = "Il quadro"
     /// Il posto di Posizioni: nessun'altra app si dice «il centro della consulenza».
-    static let posizioniCuore = "Posizioni: il cuore di Prisma"
+    static let posizioniCuore = "Posizioni: il cuore di Lucy"
     /// Ciò che il cliente ha già (spariscono: «Attive», «In corso» come stato di una posizione).
     static let inEssere = "In essere"
     /// Ciò che gli si consiglia (spariscono: «Ipotesi», «Preventivo» come stato di una posizione).

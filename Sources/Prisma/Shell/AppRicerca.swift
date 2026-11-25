@@ -33,7 +33,7 @@ struct AppRicerca: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: Misure.Ricerca.spazioSezioni) {
                         if testo.trimmingCharacters(in: .whitespaces).isEmpty {
-                            vuoto("Cerca in tutto Prisma",
+                            vuoto("Cerca in tutto Lucy",
                                   "Clienti, posizioni, documenti (anche il testo delle pagine), note, appuntamenti, attività, obiettivi, incontri e prodotti. Tutto resta sul Mac.")
                         } else if sezioni.isEmpty {
                             vuoto("Nessun risultato", "Prova con meno parole o con una parte del nome.")

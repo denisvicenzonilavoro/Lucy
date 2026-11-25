@@ -451,7 +451,7 @@ struct NoteDossierMac: View {
         pannello.allowedContentTypes = [.plainText]
         pannello.nameFieldStringValue = "\(n.titoloMostrato.replacingOccurrences(of: "/", with: "-")).txt"
         pannello.canCreateDirectories = true
-        pannello.message = "La copia resta dove la salvi: Prisma non la invia a nessuno."
+        pannello.message = "La copia resta dove la salvi: Lucy non la invia a nessuno."
         if pannello.runModal() == .OK, let url = pannello.url {
             try? Data(stato.testoEsportato(n).utf8).write(to: url)
         }

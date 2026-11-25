@@ -164,7 +164,7 @@ enum ProvaNotte {
         d.notti = [NotteDiProva.notte(d, oggi: Date(), cal: Calendar.current)]
         d.impostazioni.notte.attivo = true
         let ist = SpazioOvunque.datiIstantanea(d)
-        controlla(ist.notti.isEmpty && ist.impostazioni.notte == ImpostazioniNotte(), "Notte: le carte e le impostazioni restano fuori da Prisma ovunque")
+        controlla(ist.notti.isEmpty && ist.impostazioni.notte == ImpostazioniNotte(), "Notte: le carte e le impostazioni restano fuori da Lucy ovunque")
 
         let m = StatoShell(persistente: false)
         let e = EsecutoreBozzeNotte()

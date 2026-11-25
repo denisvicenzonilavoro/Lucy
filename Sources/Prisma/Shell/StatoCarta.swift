@@ -90,7 +90,7 @@ extension StatoShell {
         pannello.allowedContentTypes = [.json]
         pannello.nameFieldStringValue = "Dati di \(c.nome.replacingOccurrences(of: "/", with: "-")).json"
         pannello.canCreateDirectories = true
-        pannello.message = "Tutto ciò che Prisma conserva di \(c.nome). Il file resta dove lo salvi: Prisma non lo invia a nessuno."
+        pannello.message = "Tutto ciò che Lucy conserva di \(c.nome). Il file resta dove lo salvi: Lucy non lo invia a nessuno."
         guard pannello.runModal() == .OK, let url = pannello.url else { return }
         do {
             try EsportazioneCliente.json(di: c.id, da: dati.istantanea).write(to: url, options: .atomic)

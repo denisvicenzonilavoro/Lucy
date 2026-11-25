@@ -371,7 +371,7 @@ extension StatoShell {
     func leggiFileInquadra(_ url: URL) {
         let estensione = url.pathExtension.lowercased()
         guard LetturaDocumenti.estensioniAccettate.contains(estensione) else {
-            mostraAvviso("\(url.lastPathComponent) non si legge: Prisma legge PDF e immagini (PNG, JPEG, TIFF, HEIC).")
+            mostraAvviso("\(url.lastPathComponent) non si legge: Lucy legge PDF e immagini (PNG, JPEG, TIFF, HEIC).")
             return
         }
         let nome = url.lastPathComponent
@@ -419,7 +419,7 @@ extension StatoShell {
         pannello.allowsMultipleSelection = false
         pannello.canChooseDirectories = false
         pannello.prompt = "Leggi"
-        pannello.message = "Scegli la foto o il PDF della polizza: Prisma la legge sul Mac e non la salva."
+        pannello.message = "Scegli la foto o il PDF della polizza: Lucy la legge sul Mac e non la salva."
         guard pannello.runModal() == .OK, let url = pannello.url else { return }
         leggiFileInquadra(url)
     }
@@ -503,7 +503,7 @@ extension StatoShell {
     /// posizione in essere del cliente con il canale e l'area proposti. La scena si chiude con l'avviso.
     func aggiungiInquadrata() {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per creare schede e posizioni.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per creare schede e posizioni.")
             return
         }
         guard let d = inquadra.datiCorretti, !d.campi.isEmpty else { return }
@@ -523,7 +523,7 @@ extension StatoShell {
     /// in Documenti sul confronto «Nel documento / In Prisma», dove si sceglie cosa aggiornare.
     func confrontaInquadrataConPosizione() {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per confrontare e aggiornare.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per confrontare e aggiornare.")
             return
         }
         guard let d = inquadra.datiCorretti, let c = clienteInquadra, let p = posizioneGiaInquadrata,

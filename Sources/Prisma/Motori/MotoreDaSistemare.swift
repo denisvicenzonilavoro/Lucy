@@ -190,15 +190,15 @@ enum TestiDaSistemare {
     static func conteggio(_ n: Int) -> String {
         switch n {
         case ..<1: return niente
-        case 1: return "Una cosa, poi Prisma è a posto."
-        case 2: return "Due cose, poi Prisma è a posto."
-        case 3: return "Tre cose, poi Prisma è a posto."
-        default: return "\(n) cose, poi Prisma è a posto."
+        case 1: return "Una cosa, poi Lucy è a posto."
+        case 2: return "Due cose, poi Lucy è a posto."
+        case 3: return "Tre cose, poi Lucy è a posto."
+        default: return "\(n) cose, poi Lucy è a posto."
         }
     }
 
     static let solaLettura = "L’archivio è in sola lettura"
-    static let solaLetturaSpiegazione = "Salvato da una versione più recente di Prisma."
+    static let solaLetturaSpiegazione = "Salvato da una versione più recente di Lucy."
     static let backupFermi = "I backup automatici sono fermi"
     static let backupFermiSpiegazione = "All’avvio una parte dell’archivio non era leggibile."
     static let backupNonRiuscito = "L’ultimo backup non è riuscito"

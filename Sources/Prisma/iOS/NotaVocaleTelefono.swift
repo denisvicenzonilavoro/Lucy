@@ -111,7 +111,7 @@ struct NotaVocaleTelefono: View {
                         // Solo l'ora: Prisma non sa dove sei (mai «In macchina»)
                         Text(istantanea ? SchermoNotaOra.diProva : Formati.ora.string(from: Date()))
                         Spacer(minLength: 0)
-                        Text("Prisma")
+                        Text("Lucy")
                     }
                     .carattereApple(M.testa)
                     .foregroundColor(M.coloreTesta)

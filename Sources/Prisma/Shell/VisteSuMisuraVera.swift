@@ -81,7 +81,7 @@ enum ConfermaSuMisura: Identifiable, Equatable {
     var messaggio: String {
         switch self {
         case .esporta:
-            return "Prisma salva uno zip dove scegli tu, con i soli esempi resi anonimi che hai visto nell'anteprima. Non lo invia a nessuno: lo porti tu all'addestramento. Le domande dell'esame restano sul Mac."
+            return "Lucy salva uno zip dove scegli tu, con i soli esempi resi anonimi che hai visto nell'anteprima. Non lo invia a nessuno: lo porti tu all'addestramento. Le domande dell'esame restano sul Mac."
         case .usa:
             return "Da adesso risponde la Vera su misura, sul Mac. Puoi tornare alla Vera di prima quando vuoi."
         case .tornaIndietro:
@@ -116,7 +116,7 @@ struct PaginaSuMisuraVista: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             #else
-            Text("Vera su misura si fa da Prisma sul Mac.")
+            Text("Vera su misura si fa da Lucy sul Mac.")
                 .carattereApple(G.testo).foregroundColor(C.inchiostro2)
             #endif
         }

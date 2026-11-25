@@ -523,8 +523,8 @@ enum ProvaCalcoliTerritorio {
         verifica.vero("Territorio · vicini: frase al singolare", TestiTerritorio.vicini(1, nome: "Giulia").hasPrefix("1 cliente a meno"))
         verifica.vero("Territorio · vicini: frase senza vicini",
                       TestiTerritorio.vicini(0, nome: "Giulia") == "Nessun cliente a meno di dieci minuti da Giulia.")
-        verifica.vero("Territorio · scheda: «In Prisma dal» se l'anno viene dalla scheda",
-                      TestiTerritorio.clienteDal(2019, stimato: true) == "In Prisma dal 2019"
+        verifica.vero("Territorio · scheda: «In Lucy dal» se l'anno viene dalla scheda",
+                      TestiTerritorio.clienteDal(2019, stimato: true) == "In Lucy dal 2019"
                       && TestiTerritorio.clienteDal(2019, stimato: false) == "Cliente dal 2019")
     }
 

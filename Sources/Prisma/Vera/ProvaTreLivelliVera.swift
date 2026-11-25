@@ -86,13 +86,13 @@ enum ProvaTreLivelliVera {
                   "Tre livelli: pensione pubblica stimata e tenore desiderato dall'Analisi 360")
         let marginale = RegoleFiscali.aliquotaMarginale(reddito: 48_000)
         controlla(cifra("marginale")?.valore == marginale && cifra("marginale")?.testo == CifreDoc.condizione(marginale),
-                  "Tre livelli: aliquota marginale di Marco dagli scaglioni IRPEF di Prisma (\(CifreDoc.condizione(marginale)))")
+                  "Tre livelli: aliquota marginale di Marco dagli scaglioni IRPEF di Lucy (\(CifreDoc.condizione(marginale)))")
         let recupero = RegoleFiscali.risparmioDeduzione(reddito: 48_000, deduzione: 100)
         controlla(cifra("recupero100")?.testo == CifreDoc.euro(recupero) && cifra("recupero100")?.essenziale == true,
                   "Tre livelli: ogni 100 € versati recupera \(CifreDoc.euro(recupero)), cifra essenziale")
         controlla(cifra("aliquotaBase")?.valore == RegoleFiscali.previdenzaBase && cifra("aliquotaMinima")?.valore == RegoleFiscali.previdenzaMinima
                   && cifra("riduzione")?.testo == "0,3 punti" && cifra("rendimenti")?.valore == RegoleFiscali.previdenzaRendimenti,
-                  "Tre livelli: prestazione dal 15% al 9% (0,3 punti l'anno) e rendimenti al 20%, dalle regole di Prisma")
+                  "Tre livelli: prestazione dal 15% al 9% (0,3 punti l'anno) e rendimenti al 20%, dalle regole di Lucy")
         if let piano = e.inEssere.first {
             controlla(cifra("aliquotaPiano")?.valore == piano.aliquota && s.tecnico.joined().contains(piano.posizione.nome) && s.tecnico.joined().contains("(Alleanza)"),
                       "Tre livelli: l'aliquota del piano di Marco alla pensione, con il nome e il canale")
@@ -111,7 +111,7 @@ enum ProvaTreLivelliVera {
         controlla(s.pagina.titolo == "Il fondo pensione, in una pagina" && s.pagina.sezioni.count >= 2 && s.canale == .alleanza,
                   "Tre livelli: la pagina di Marco ha il titolo del template, almeno due sezioni e il canale Alleanza")
         controlla(s.domanda == domanda && s.clienteId == "marco" && s.creataIl == oggi && !s.conQwen,
-                  "Tre livelli: la bozza ricorda domanda, cliente e giorno, ed è di Prisma")
+                  "Tre livelli: la bozza ricorda domanda, cliente e giorno, ed è di Lucy")
     }
 
     // MARK: - Tutti i clienti, tutti gli argomenti
@@ -130,7 +130,7 @@ enum ProvaTreLivelliVera {
                 if Set(s.cifre.map(\.id)).count != s.cifre.count { rotte.append("\(c.id)/\(a.rawValue): cifre doppie") }
             }
         }
-        controlla(conte >= 15 && rotte.isEmpty, "Tre livelli: per i clienti del template (\(conte) spiegazioni) ogni cifra viene da Prisma e le essenziali stanno in tutte e tre le versioni: \(rotte)")
+        controlla(conte >= 15 && rotte.isEmpty, "Tre livelli: per i clienti del template (\(conte) spiegazioni) ogni cifra viene da Lucy e le essenziali stanno in tutte e tre le versioni: \(rotte)")
         controlla(TreLivelliVera.fonte(dati: dati, clienteId: "nessuno", oggi: oggi) == nil, "Tre livelli: un cliente che non c'è non ha fonte")
     }
 
@@ -182,7 +182,7 @@ enum ProvaTreLivelliVera {
         ]]
         let buona = TreLivelliVera.leggi(json(["tecnico": b.tecnico.map { "1. \($0) (riscritto)" }, "cliente": clienteBuono, "pagina": paginaBuona]), bozza: b)
         controlla(Set(buona.livelliQwen) == Set(LivelloTreLivelli.allCases) && buona.conQwen,
-                  "Tre livelli: con le cifre di Prisma tutti e tre i livelli di Qwen passano: \(buona.livelliQwen.map(\.rawValue))")
+                  "Tre livelli: con le cifre di Lucy tutti e tre i livelli di Qwen passano: \(buona.livelliQwen.map(\.rawValue))")
         controlla(buona.tecnico.first?.hasPrefix("1. ") == false && buona.tecnico.allSatisfy { $0.hasSuffix("(riscritto)") }
                   && buona.pagina.sezioni.first?.titolo == "Quanto ti manca" && buona.pagina.sezioni.first?.righe.first?.hasPrefix("Ti mancano") == true,
                   "Tre livelli: numerazione e segni d'elenco di Qwen tolti")
@@ -225,16 +225,16 @@ enum ProvaTreLivelliVera {
         let anniEta = FontiVera.numeri(eta).first?.valore ?? 0
         let etaInEuro = clienteBuono + " Ti servono \(Int(anniEta)) € in più."
         let pEuro = TreLivelliVera.problemi(etaInEuro, livello: .cliente, spiegazione: b)
-        controlla(anniEta > 0 && pEuro.contains { $0.contains("cifra non di Prisma") },
+        controlla(anniEta > 0 && pEuro.contains { $0.contains("cifra non di Lucy") },
                   "Tre livelli: l'età della pensione (\(eta)) scritta in euro non passa: \(pEuro)")
         let base = t("aliquotaBase")
         let baseValore = FontiVera.numeri(base).first?.valore ?? 0
         let baseInEuro = clienteBuono.replacingOccurrences(of: "il \(base)", with: "\(Int(baseValore)) €")
         let pBase = TreLivelliVera.problemi(baseInEuro, livello: .cliente, spiegazione: b)
-        controlla(baseValore > 0 && baseInEuro != clienteBuono && pBase.contains { $0.contains("cifra non di Prisma") },
+        controlla(baseValore > 0 && baseInEuro != clienteBuono && pBase.contains { $0.contains("cifra non di Lucy") },
                   "Tre livelli: l'aliquota (\(base)) scritta come importo non passa: \(pBase)")
         controlla(TreLivelliVera.problemi(clienteBuono + " Lo dice il tuo piano a \(Int(anniEta)).", livello: .cliente, spiegazione: b).isEmpty,
-                  "Tre livelli: una cifra di Prisma scritta senza unità resta ammessa")
+                  "Tre livelli: una cifra di Lucy scritta senza unità resta ammessa")
 
         // Un anno o un importo da 1900 a 2100 scritto da solo non sfugge più al controllo
         let pAnno = TreLivelliVera.problemi(clienteBuono + " Andrai in pensione nel 2049.", livello: .cliente, spiegazione: b)
@@ -257,7 +257,7 @@ enum ProvaTreLivelliVera {
         // Il messaggio per Qwen e le opzioni
         let m = TreLivelliVera.messaggi(b)
         controlla(m.count == 2 && m[0].ruolo == .sistema && m[1].testo.contains("CIFRE DI PRISMA") && m[1].testo.contains("\(t("divario")) [in tutte e tre]")
-                  && m[1].testo.contains(domanda), "Tre livelli: a Qwen vanno le cifre di Prisma, le essenziali segnate, la domanda e la bozza")
+                  && m[1].testo.contains(domanda), "Tre livelli: a Qwen vanno le cifre di Lucy, le essenziali segnate, la domanda e la bozza")
         let o = TreLivelliVera.opzioni(ImpostazioniVera())
         controlla(o.formato != nil && o.temperatura <= 0.3 && (o.massimoToken ?? 0) > 0, "Tre livelli: Qwen risponde con lo schema JSON")
         controlla(TreLivelliVera.schema["required"] as? [String] == ["tecnico", "cliente", "pagina"], "Tre livelli: lo schema chiede tecnico, cliente e pagina")
@@ -285,8 +285,8 @@ enum ProvaTreLivelliVera {
                   "Tre livelli: la pagina diventa un prospetto con titolo, cliente, canale e giorno")
         controlla(indicatori.map(\.valore) == s.essenziali.map(\.testo) && sezioni == s.pagina.sezioni.count,
                   "Tre livelli: nel PDF le cifre essenziali come indicatori, una sezione per sezione della pagina")
-        controlla(note.contains { $0.contains("Stime di Prisma") && $0.contains("Non sono una promessa di risultato") },
-                  "Tre livelli: il PDF porta l'avvertenza «Stime di Prisma… non sono una promessa di risultato»")
+        controlla(note.contains { $0.contains("Stime di Lucy") && $0.contains("Non sono una promessa di risultato") },
+                  "Tre livelli: il PDF porta l'avvertenza «Stime di Lucy… non sono una promessa di risultato»")
         controlla(testi.joined(separator: "\n").contains(s.essenziali.first?.testo ?? "?"), "Tre livelli: le righe della pagina nel PDF con le stesse cifre")
         controlla(s.testo(.pagina).hasSuffix(TreLivelliVera.avvertenza), "Tre livelli: anche in chat la pagina chiude con l'avvertenza")
 

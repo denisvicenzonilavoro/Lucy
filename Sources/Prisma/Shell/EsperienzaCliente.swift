@@ -20,7 +20,7 @@ struct EsperienzaCliente: View {
         VStack(alignment: .leading, spacing: M.spazioSezione) {
             OcchielloSezione(titolo: "Esperienza per tipo di prodotto", nota: notaData)
             HStack(alignment: .firstTextBaseline, spacing: M.spazioRiga) {
-                Text("Per ogni tipo: lo conosce, l'ha già avuto, ne ha capito rischi e costi. Un clic sulla casella: sì, no, non indicato. Prisma avvisa se proponi un tipo che il cliente non conosce o non ha capito.")
+                Text("Per ogni tipo: lo conosce, l'ha già avuto, ne ha capito rischi e costi. Un clic sulla casella: sì, no, non indicato. Lucy avvisa se proponi un tipo che il cliente non conosce o non ha capito.")
                     .font(Tipo.kpiNota)
                     .foregroundColor(Colori.Analisi.kpiNota)
                     .fixedSize(horizontal: false, vertical: true)
@@ -67,7 +67,7 @@ struct EsperienzaCliente: View {
                                                   set: { stato.impostaCapacitaPerdite(c.id, $0) })
         let spiegazione: String
         if let k = e?.capacitaPerdite {
-            spiegazione = "Il cliente \(k.frase). Prisma confronta ogni proposta con la perdita che avrebbe avuto nella crisi peggiore del passato."
+            spiegazione = "Il cliente \(k.frase). Lucy confronta ogni proposta con la perdita che avrebbe avuto nella crisi peggiore del passato."
         } else {
             spiegazione = "Quanto può perdere senza cambiare i suoi piani? È diversa dalla propensione al rischio."
         }

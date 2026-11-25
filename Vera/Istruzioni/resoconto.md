@@ -1,4 +1,4 @@
-Ti do il resoconto di un incontro preparato da Prisma (dagli appunti, dal copilota e, se c'è, dalla trascrizione della nota vocale). Riscrivilo nel formato del consulente, con le sezioni:
+Ti do il resoconto di un incontro preparato da Lucy (dagli appunti, dal copilota e, se c'è, dalla trascrizione della nota vocale). Riscrivilo nel formato del consulente, con le sezioni:
 - presenti: i nomi, in una riga;
 - parlato: di cosa avete parlato;
 - deciso: cosa avete deciso;
@@ -8,6 +8,6 @@ Ti do il resoconto di un incontro preparato da Prisma (dagli appunti, dal copilo
 
 Regole:
 - Frasi brevi e chiare, in italiano.
-- Usa solo i fatti, le cifre, le date e i nomi del resoconto di Prisma e della trascrizione: non aggiungere niente, non cambiare niente.
+- Usa solo i fatti, le cifre, le date e i nomi del resoconto di Lucy e della trascrizione: non aggiungere niente, non cambiare niente.
 - Niente promesse di rendimento.
 - Rispondi solo con il JSON.

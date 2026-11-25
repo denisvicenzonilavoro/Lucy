@@ -43,7 +43,7 @@ enum TestiMostra {
     }
     static let aiutoPillola = "Mostra al cliente: una vista pulita con il suo quadro, per girare lo schermo (⌥⌘M)"
     static func cosaMostri(_ nome: String) -> String { "Cosa mostri a \(nome)?" }
-    static let aChi = "A chi vuoi mostrare Prisma?"
+    static let aChi = "A chi vuoi mostrare Lucy?"
     static let aChiTesto = "Scegli la persona: vedrà solo le sue cose."
     static let chiudi = "Chiudi"
     static let quadro = "Il suo quadro"
@@ -73,7 +73,7 @@ enum TestiMostra {
     /// «I calcoli li fa Prisma su questo Mac…», composto dalle costanti di `IpotesiCalcolo`: se un giorno le ipotesi
     /// diventano impostazioni, il testo segue da solo.
     static var testoIpotesi: String {
-        "I calcoli li fa Prisma su questo Mac, con i dati delle tue posizioni. Le ipotesi: inflazione al "
+        "I calcoli li fa Lucy su questo Mac, con i dati delle tue posizioni. Le ipotesi: inflazione al "
             + "\(percento(IpotesiCalcolo.inflazione))% l’anno e i rendimenti dichiarati per ogni posizione "
             + "(\(percento(IpotesiCalcolo.rendimentoPredefinito))% quando non è indicato). Sono stime, non garanzie."
     }
@@ -315,7 +315,7 @@ enum ProvaMostraAlCliente {
         s.scegliCliente(nil)
         s.alternaMostraAlCliente()
         controlla(s.sceltaMostra && !s.inVistaCliente && !s.inModoCliente,
-                  "Mostra al cliente: senza cliente ⌥⌘M apre «A chi vuoi mostrare Prisma?»")
+                  "Mostra al cliente: senza cliente ⌥⌘M apre «A chi vuoi mostrare Lucy?»")
         guard let primo = s.rubricaOrdinata.first else {
             controlla(false, "Mostra al cliente: la rubrica di prova ha dei clienti")
             return

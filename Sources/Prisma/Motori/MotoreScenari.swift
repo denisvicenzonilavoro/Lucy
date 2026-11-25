@@ -55,7 +55,7 @@ struct SchedaScenarioVera: Codable, Equatable {
         }.joined(separator: "\n"))
         if !altre.isEmpty { parti.append(altre.joined(separator: "\n")) }
         if !note.isEmpty { parti.append("Da sapere: " + note.joined(separator: " ")) }
-        parti.append("Racconto di Prisma: " + racconto)
+        parti.append("Racconto di Lucy: " + racconto)
         return parti.joined(separator: "\n")
     }
 
@@ -66,7 +66,7 @@ struct SchedaScenarioVera: Codable, Equatable {
         r.append(righe.map { "\($0.voce): \($0.oggi) oggi, \($0.scenario) con lo scenario" }.joined(separator: "\n"))
         r += altre
         r += note
-        r.append("Calcolato da Prisma con le ipotesi del cliente.")
+        r.append("Calcolato da Lucy con le ipotesi del cliente.")
         return r.joined(separator: "\n\n")
     }
 }
@@ -127,7 +127,7 @@ enum MotoreScenari {
                 ip.pensionePubblica = MotoreFiscale.centesimi(base.pensionePubblica * b.nettaMensile / a.nettaMensile)
                 // In percentuale: le cifre assolute della stima contributiva sembrerebbero un'altra pensione accanto a quella in tabella
                 let delta = b.nettaMensile / a.nettaMensile - 1
-                note.append("Pensione pubblica a \(e) anni: quella dell'Analisi 360 \(delta < 0 ? "ridotta" : "aumentata") del \(CifreDoc.percento(abs(delta) * 100, decimali: 1)), come cambia la stima contributiva di Prisma tra \(etaOggi) e \(e) anni.")
+                note.append("Pensione pubblica a \(e) anni: quella dell'Analisi 360 \(delta < 0 ? "ridotta" : "aumentata") del \(CifreDoc.percento(abs(delta) * 100, decimali: 1)), come cambia la stima contributiva di Lucy tra \(etaOggi) e \(e) anni.")
                 if let avviso = b.avvisi.first(where: { $0.contains("requisiti") || $0.contains("anticipata") }) { note.append(avviso) }
             } else {
                 note.append("Senza i dati del lavoro e dei contributi la pensione pubblica resta quella dell'Analisi 360: per l'uscita a \(e) anni va verificata sull'estratto conto INPS.")
@@ -163,7 +163,7 @@ enum MotoreScenari {
             nuovo.rendimentoAtteso = p.rendimento ?? IpotesiCalcolo.rendimentoPredefinito
             elenco.append(nuovo)
             indici = [elenco.count - 1]
-            note.append("\(nome) non ha piani previdenziali in essere: lo scenario ne ipotizza uno nuovo, senza costi, con il rendimento \(p.rendimento == nil ? "predefinito di Prisma" : "indicato").")
+            note.append("\(nome) non ha piani previdenziali in essere: lo scenario ne ipotizza uno nuovo, senza costi, con il rendimento \(p.rendimento == nil ? "predefinito di Lucy" : "indicato").")
         }
         if let v = nuovoMensile {
             if mensileOggi > 0 {

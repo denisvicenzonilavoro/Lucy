@@ -81,7 +81,7 @@ enum TrovaPaginaVera {
         // Un passo che non è tra quelli dati: la risposta non vale (si mostra il primo passo trovato)
         guard let p = passi.first(where: { $0.etichetta == etichetta }) else {
             guard let primo = passi.first else { return .nonTrovata }
-            return .nonVerificata(passo: primo.passo, motivo: "Vera ha citato un passo che Prisma non le aveva dato.")
+            return .nonVerificata(passo: primo.passo, motivo: "Vera ha citato un passo che Lucy non le aveva dato.")
         }
         guard !testo.isEmpty else { return nil }
         guard MotoreBiblioteca.fraseNelPasso(frase, p.passo) else {

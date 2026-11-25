@@ -355,7 +355,7 @@ enum DatiDemo {
             var x = Prodotto(nome: nome, canale: canale, area: area)
             x.id = id
             x.verificatoIl = data(-40)
-            x.fonte = "Esempio didattico Prisma · sostituire con il KID ufficiale"
+            x.fonte = "Esempio didattico Lucy · sostituire con il KID ufficiale"
             configura(&x)
             return x
         }

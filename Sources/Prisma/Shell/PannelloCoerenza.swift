@@ -50,7 +50,7 @@ struct PannelloCoerenza: View {
                 elenco
                 esperienza
                 if esito.propensione == nil {
-                    Text("Indica la propensione al rischio nel profilo del cliente: senza, Prisma controlla solo la concentrazione.")
+                    Text("Indica la propensione al rischio nel profilo del cliente: senza, Lucy controlla solo la concentrazione.")
                         .font(Tipo.kpiNota)
                         .foregroundColor(Colori.Analisi.attenzioneTesto)
                         .fixedSize(horizontal: false, vertical: true)
@@ -231,7 +231,7 @@ struct PannelloCoerenza: View {
     @ViewBuilder private var esperienza: some View {
         if let x = esito.esperienza, !x.verifiche.isEmpty {
             if !x.compilata {
-                notaEsperienza("Esperienza per tipo di prodotto non indicata: compilala in Clienti › Profilo, così Prisma controlla che il cliente conosca i prodotti che gli proponi.",
+                notaEsperienza("Esperienza per tipo di prodotto non indicata: compilala in Clienti › Profilo, così Lucy controlla che il cliente conosca i prodotti che gli proponi.",
                                colore: Colori.Analisi.attenzioneTesto)
             } else {
                 let daChiedere = x.daChiedere

@@ -99,7 +99,7 @@ enum ProvaRiesamiAgenda {
             if let a = s.pianificaRiesame("sofia", oggi: adesso)?.appuntamento {
                 controlla(a.canale == nil, "S4 Sofia: canale entrambi (nessuno indicato)")
                 controlla(a.note.contains("Canale: Alleanza e indipendente"), "S4 Sofia: tutti e due i canali nelle note")
-                controlla(a.note.contains("Nessun incontro registrato in Prisma"), "S4 Sofia: primo riesame nelle note")
+                controlla(a.note.contains("Nessun incontro registrato in Lucy"), "S4 Sofia: primo riesame nelle note")
             } else {
                 controlla(false, "S4 Sofia: nessuna bozza del riesame")
             }

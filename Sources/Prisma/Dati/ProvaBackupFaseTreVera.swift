@@ -68,7 +68,7 @@ extension ProvaBackup {
         let ist = SpazioOvunque.datiIstantanea(conNota)
         guard ist.incontri[k].resoconto == nil, ist.promesse.last?.frase == "", ist.promesse.last?.testo == "Mandare il riepilogo",
               ist.promesse.first?.frase == originale.promesse[0].frase else {
-            return "la nota vocale (trascrizione, resoconto non firmato, frasi delle promesse) non deve entrare nell'istantanea di Prisma ovunque"
+            return "la nota vocale (trascrizione, resoconto non firmato, frasi delle promesse) non deve entrare nell'istantanea di Lucy ovunque"
         }
         var firmato = originale
         firmato.incontri[k].resoconto?.firmatoIl = Date(timeIntervalSinceReferenceDate: 800_000_000)

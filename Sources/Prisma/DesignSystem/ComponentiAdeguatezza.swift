@@ -59,7 +59,7 @@ struct FirmeScheda: View {
         let larghezza = (FoglioProspetto<EmptyView>.larghezza - 2 * D.spazioFirme) / 3
         VStack(alignment: .leading, spacing: D.spazioSchedaPiccolo) {
             if let d = firmataIl {
-                Text(verbatim: "Segnata come firmata in Prisma il \(CifreDoc.data(d)).")
+                Text(verbatim: "Segnata come firmata in Lucy il \(CifreDoc.data(d)).")
                     .font(T.pTabellaNota).foregroundColor(C.tenue)
             }
             HStack(alignment: .bottom, spacing: D.spazioFirme) {

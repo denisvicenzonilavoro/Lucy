@@ -373,22 +373,22 @@ struct VuotoDocumenti: View {
                 .font(Tema.Testo.sezione)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .multilineTextAlignment(.center)
-            Text("Trascina qui i documenti del cliente, o sceglili dal Mac. Prisma li legge sul Mac, trova i dati con la pagina da cui vengono e ti dice cosa non torna con il dossier.")
+            Text("Trascina qui i documenti del cliente, o sceglili dal Mac. Lucy li legge sul Mac, trova i dati con la pagina da cui vengono e ti dice cosa non torna con il dossier.")
                 .font(Tema.Apple.AltreApp.corpoPiccolo.fontLeggibile)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
             HStack(alignment: .top, spacing: m.spazioRiga) {
                 passo(1, "Aggiungi", "KID, polizze, estratti conto, documenti d'identità, questionari. PDF, foto o scansioni.")
-                passo(2, "Leggi", "Prisma legge il testo, anche delle scansioni, e scrive accanto a ogni cifra la sua pagina.")
-                passo(3, "Collega", "Colleghi il documento a una posizione o a una scheda: Prisma confronta e ti mostra le differenze.")
+                passo(2, "Leggi", "Lucy legge il testo, anche delle scansioni, e scrive accanto a ogni cifra la sua pagina.")
+                passo(3, "Collega", "Colleghi il documento a una posizione o a una scheda: Lucy confronta e ti mostra le differenze.")
             }
             .fixedSize(horizontal: false, vertical: true)
             Button(action: importa) {
                 Label("Scegli i file…", systemImage: "doc.badge.plus")
             }
             .buttonStyle(StileBlu(taglia: .grande))
-            Text("I file vengono copiati nell'archivio di Prisma su questo Mac e finiscono nei backup. Nessun file lascia il computer.")
+            Text("I file vengono copiati nell'archivio di Lucy su questo Mac e finiscono nei backup. Nessun file lascia il computer.")
                 .font(Tema.Apple.AltreApp.nota.fontLeggibile)
                 .foregroundColor(Tema.Apple.Colore.inchiostro3)
                 .multilineTextAlignment(.center)

@@ -86,14 +86,14 @@ struct CorniceReport<Contenuto: View>: View {
             ZStack(alignment: .bottomTrailing) {
                 RadialGradient(colors: [tono.0, tono.1], center: UnitPoint(x: 0.1, y: 0.05), startRadius: 0, endRadius: D.report.width)
                 if numero % 4 == 0 {
-                    LogoPrisma(colore: Colori.Documento.logo)
+                    LogoLucy(colore: Colori.Documento.logo)
                         .frame(height: D.logoFiligrana)
                         .opacity(Colori.Documento.filigrana)
                         .padding(.trailing, 30).padding(.bottom, 26)
                 }
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(alignment: .center) {
-                        LogoPrismaConNome(colore: Colori.Documento.logo, altezza: D.logoReport)
+                        LogoLucyConNome(colore: Colori.Documento.logo, altezza: D.logoReport)
                         Spacer()
                         Text(verbatim: intestazione.uppercased()).font(T.testata).tracking(1.6)
                             .foregroundColor(C.tenue).lineLimit(1)
@@ -166,7 +166,7 @@ struct CopertinaReport: View {
             ZStack {
                 LinearGradient(colors: [C.copertina, C.copertinaFine], startPoint: .topLeading, endPoint: .bottomTrailing)
                 // Il logo grande in filigrana, in basso a destra, tagliato dal bordo del foglio
-                LogoPrisma(colore: Colori.Documento.logoCopertina)
+                LogoLucy(colore: Colori.Documento.logoCopertina)
                     .frame(height: D.logoCopertinaFiligrana)
                     .opacity(Colori.Documento.filigranaCopertina)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottomTrailing)
@@ -176,7 +176,7 @@ struct CopertinaReport: View {
                     .padding(D.copertinaCornice)
                 HStack(alignment: .center, spacing: 36) {
                     VStack(alignment: .leading, spacing: 0) {
-                        LogoPrismaConNome(colore: Colori.Documento.logoCopertina, altezza: D.logoCopertina)
+                        LogoLucyConNome(colore: Colori.Documento.logoCopertina, altezza: D.logoCopertina)
                         Spacer(minLength: 0)
                         OcchielloDoc(testo: occhiello, font: T.copertinaOcchiello, colore: C.copertinaTesto)
                         Text(verbatim: titolo).font(T.copertinaTitolo).foregroundColor(.white)

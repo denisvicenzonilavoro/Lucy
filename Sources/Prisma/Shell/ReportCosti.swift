@@ -109,7 +109,7 @@ private struct SlideCostiRendimento: View {
             if incidenze.count > mostrate.count {
                 Text(verbatim: "…e altre \(incidenze.count - mostrate.count) posizioni: le trovi nel prospetto di dettaglio.").font(T.minimo).foregroundColor(C.tenue)
             }
-            Text(verbatim: "Stime di Prisma con i costi registrati e i rendimenti ipotizzati, prima delle imposte; penale e costo d'ingresso compresi. Il dato ufficiale resta quello del KID, che riportiamo accanto quando lo abbiamo.")
+            Text(verbatim: "Stime di Lucy con i costi registrati e i rendimenti ipotizzati, prima delle imposte; penale e costo d'ingresso compresi. Il dato ufficiale resta quello del KID, che riportiamo accanto quando lo abbiamo.")
                 .font(T.minimo).foregroundColor(C.tenue).fixedSize(horizontal: false, vertical: true)
         }
     }

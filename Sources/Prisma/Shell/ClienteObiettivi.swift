@@ -178,11 +178,11 @@ struct ObiettiviCliente: View {
             VuotoGuidato(
                 icona: "target",
                 titolo: "Nessun obiettivo, per ora",
-                perche: "Un progetto con un importo e una data: Prisma calcola quanto manca e quanto mettere da parte.",
+                perche: "Un progetto con un importo e una data: Lucy calcola quanto manca e quanto mettere da parte.",
                 passi: [
                     ("Nome e data", "La casa, gli studi, la pensione."),
                     ("Le posizioni", "Quelle che già lavorano per lui."),
-                    ("Il mese", "Prisma dice quanto serve."),
+                    ("Il mese", "Lucy dice quanto serve."),
                 ],
                 pulsante: "Nuovo obiettivo",
                 azione: { nuovo() }

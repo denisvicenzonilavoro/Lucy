@@ -4,7 +4,7 @@ import Foundation
 /// dai dati del dossier e dai motori di calcolo, con i numeri esatti. Qwen le riceve e le racconta;
 /// da soli non rispondono in chat (lo fanno solo nelle istantanee e nelle prove, dove Qwen non c'è).
 struct MotoreSintesi: MotoreVera {
-    let nome = "Calcoli di Prisma"
+    let nome = "Calcoli di Lucy"
     let descrizione = "Bozze composte dai dati del dossier, sul Mac. Nessun modello di intelligenza artificiale."
     let disponibilita = DisponibilitaVera.pronto
 

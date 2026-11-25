@@ -145,14 +145,14 @@ extension StatoShell {
 
 /// I testi del portafoglio di Posizioni del tema Apple.
 enum TestiPortafoglioApple {
-    static let solaLettura = "Archivio in sola lettura: aggiorna Prisma per segnare le cose fatte."
+    static let solaLettura = "Archivio in sola lettura: aggiorna Lucy per segnare le cose fatte."
     static let titoloRiesame = "Riesame annuale"
     static let titoloCard = "Portafoglio clienti"
     static let titoloLavoro = "Lo stato del tuo lavoro"
     static let titoloNastro = "Da fare, in ordine di tempo"
     static let invitoAnelli = "Chiudi le cose da fare qui sotto: gli anelli si riempiono."
     static let nastroVuoto = "Niente da fare con i clienti per ora: proposte, riesami, conformità e scadenze sono in ordine."
-    static let cifreDaiMotori = "Le cifre vengono dai motori di Prisma"
+    static let cifreDaiMotori = "Le cifre vengono dai motori di Lucy"
 
     /// Il titolo dell'attività che tiene il segno di una scheda fatta.
     static func titoloSegno(_ v: VoceDaFare) -> String { "Fatto: " + v.perche }

@@ -113,7 +113,7 @@ enum ProvaCalcoliDocumenti {
     /// data futura, Qwen, SRI fuori scala, ISIN e codice fiscale; un dato scritto a mano non è mai incerto.
     private static func datiIncerti(_ verifica: VerificaCalcoli) {
         func dato(_ k: CampoDocumento, _ valore: String, estratto: String = "riga del documento",
-                   origine: String = "Regole di Prisma") -> CampoEstratto {
+                   origine: String = "Regole di Lucy") -> CampoEstratto {
             CampoEstratto(chiave: k, valore: valore, pagina: 1, estratto: estratto, origine: origine)
         }
         func perche(_ c: CampoEstratto) -> String? { MotoreDocumenti.perche(c, oggi: oggi) }
@@ -346,7 +346,7 @@ enum ProvaCalcoliDocumenti {
         verifica.vero("D7 Categoria: estratto di Giulia",
                       MotoreDocumenti.categoriaProbabile(DatiDemo.testoDocumento("doc-giulia-estratto") ?? [], tipo: .altro) == .estratto)
         verifica.vero("D7 Categoria: una fattura", MotoreDocumenti.categoriaProbabile(["Fattura n. 12 del 3/2/2026"], tipo: .altro) == .altro)
-        verifica.vero("D7 Categoria: un report è sempre di Prisma", MotoreDocumenti.categoriaProbabile(identita, tipo: .report) == .prisma)
+        verifica.vero("D7 Categoria: un report è sempre di Lucy", MotoreDocumenti.categoriaProbabile(identita, tipo: .report) == .prisma)
         var conQuestionario = kidGiulia
         if !conQuestionario.isEmpty { conQuestionario[0] += "\nquestionario" }
         verifica.vero("D7 Categoria: il KID prevale sui segni del questionario",
@@ -360,7 +360,7 @@ enum ProvaCalcoliDocumenti {
                       Documento(clienteId: "a", titolo: "x", tipo: .estrattoConto).genere == .estratto)
         var report = Documento(clienteId: "a", titolo: "x", tipo: .report)
         report.categoria = .altro
-        verifica.vero("D8 Un report resta di Prisma anche con un'altra categoria", report.genere == .prisma)
+        verifica.vero("D8 Un report resta di Lucy anche con un'altra categoria", report.genere == .prisma)
         let generi = DatiDemo.documenti().map(\.genere)
         verifica.vero("D8 I tre documenti di prova: KID, contratto, estratto", generi == [.kid, .contratto, .estratto])
         let docIdentita = documento("d-i", cliente: "giulia", titolo: "Carta d'identità", tipo: .altro, pagine: identita)
@@ -489,7 +489,7 @@ enum ProvaCalcoliDocumenti {
         verifica.vero("D11b Cartelle: la polizza nella sua posizione, con il canale",
                       polizzaQui?.sezione == MotoreDocumenti.cartellaProdotti && polizzaQui?.chiave == "posizione·pos-marco-infortuni-famiglia"
                       && polizzaQui?.canale == .alleanza)
-        verifica.vero("D11b Cartelle: il prospetto da Prisma",
+        verifica.vero("D11b Cartelle: il prospetto da Lucy",
                       cartelle.contains { $0.titolo == MotoreDocumenti.cartellaPrisma && $0.voci.map(\.id) == ["d-prospetto"] })
         verifica.vero("D11b Cartelle: il KID senza posizione né scheda da collegare",
                       cartelle.last?.titolo == MotoreDocumenti.cartellaDaCollegare
@@ -647,7 +647,7 @@ enum ProvaCalcoliDocumenti {
         verifica.vero("D18 Archivio di prima: il documento si legge", letto != nil)
         verifica.vero("D18 Senza categoria: dal tipo", letto?.categoria == nil && letto?.genere == .kid)
         verifica("D18 Un dato sconosciuto si salta, gli altri restano", Double(letto?.campi.count ?? 0), 1)
-        verifica.vero("D18 Nessuna voce lasciata come in Prisma", letto != nil && letto?.vociTenute == nil)
+        verifica.vero("D18 Nessuna voce lasciata come in Lucy", letto != nil && letto?.vociTenute == nil)
         let futuro = json.replacingOccurrences(of: #""tipo":"kid""#, with: #""tipo":"futuro""#)
         let nuovo = try? JSONDecoder().decode(Documento.self, from: Data(futuro.utf8))
         verifica.vero("D18 Un tipo sconosciuto diventa «altro» e il documento resta", nuovo?.tipo == .altro)

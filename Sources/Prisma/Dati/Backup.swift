@@ -45,16 +45,16 @@ enum ErroreBackup: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .comando(let m): return "Compressione non riuscita: \(m)"
-        case .archivioMancante: return "Il file scelto non è un backup di Prisma."
+        case .archivioMancante: return "Il file scelto non è un backup di Lucy."
         case .archivioNonValido(let m): return "Il backup non è leggibile: \(m)"
         case .cartellaNonRaggiungibile(let p): return "La cartella dei backup non è raggiungibile (\(p)): collega il disco o scegline un'altra."
-        case .versionePiuRecente: return "Il backup è stato creato da una versione più recente di Prisma: aprilo con l'ultima versione."
+        case .versionePiuRecente: return "Il backup è stato creato da una versione più recente di Lucy: aprilo con l'ultima versione."
         case .serveLaPassword: return "Questo backup è protetto da una password: scrivila per ripristinarlo."
         case .passwordErrata: return "La password non apre questo backup. Controlla di averla scritta bene: i backup fatti prima di un cambio di password si aprono con la password di allora."
         case .backupDanneggiato: return "Il backup protetto è danneggiato o incompleto e non si può aprire: prova con un altro backup."
         case .cifratura(let m): return "Protezione del backup non riuscita: \(m)"
         case .passwordNonDisponibile: return "La password dei backup non è disponibile: scrivila in Impostazioni › Archivio. Senza password il backup non si fa, per non salvarlo in chiaro."
-        case .senzaArchivio: return "Nella cartella di Prisma non trovo un archivio completo da salvare: il backup non si fa, per non sostituire quelli buoni. Chiudi Prisma e riaprilo."
+        case .senzaArchivio: return "Nella cartella di Lucy non trovo un archivio completo da salvare: il backup non si fa, per non sostituire quelli buoni. Chiudi Lucy e riaprila."
         }
     }
 

@@ -53,7 +53,7 @@ extension ProvaBackup {
               var azienda = (originaliJSON[i]["aziende"] as? [[String: Any]])?.first else {
             return "azienda di prova non codificata"
         }
-        azienda["forma"] = "cooperativa di un Prisma più nuovo"
+        azienda["forma"] = "cooperativa di una Lucy più nuova"
         azienda["quota"] = 140
         azienda["dipendenti"] = "tanti"
         if var welfare = azienda["welfare"] as? [String: Any] {

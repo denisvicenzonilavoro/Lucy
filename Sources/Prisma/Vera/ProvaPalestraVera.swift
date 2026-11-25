@@ -29,7 +29,7 @@ enum ProvaPalestraVera {
 
     private static func pacchetto(_ controlla: (Bool, String) -> Void) {
         let istruzioni = IstruzioniVera.testo("palestra") ?? ""
-        controlla(istruzioni.contains("JSON") && istruzioni.contains("Difficile") && istruzioni.contains("cifra che non viene da Prisma")
+        controlla(istruzioni.contains("JSON") && istruzioni.contains("Difficile") && istruzioni.contains("cifra che non viene da Lucy")
                   && istruzioni.contains("prossimaObiezione"),
                   "Palestra: istruzioni di Qwen nel pacchetto (Vera/Istruzioni/palestra.md), solo JSON e nessuna cifra inventata")
         let url = Bundle.main.resourceURL?.appendingPathComponent("Vera/Schemi/palestra.json")
@@ -77,7 +77,7 @@ enum ProvaPalestraVera {
         let fonte = FonteVera(oggi: Date(), nomeUtente: "Denis", cliente: scarno, posizioni: [], appuntamenti: [], attivita: [],
                               analisi: s.analisi360(scarno.id), analisiSalvata: false, simulazioni: [])
         let povera = PalestraVera.scheda(fonte)
-        controlla(povera.scarna && povera.testo.contains("Prisma sa poco") && povera.cifre.isEmpty,
+        controlla(povera.scarna && povera.testo.contains("Lucy sa poco") && povera.cifre.isEmpty,
                   "Palestra: profilo scarno, Vera lo sa e non inventa (nessuna cifra)")
         var inventato = ProfiloInventatoPalestra()
         inventato.eta = "45"
@@ -146,7 +146,7 @@ enum ProvaPalestraVera {
                   "Palestra: un JSON non valido si scarta")
         let inventata = turno(giudizio: "buona", replica: "Ma la banca mi dà il 4,5% senza rischi.", convinta: 45,
                               prossima: "E i costi?", suggerite: suggeriteBuone)
-        controlla(PalestraVera.leggi(inventata, ammesse: ammesse, primo: false, ultimo: false) == .scartata("Vera ha scritto una cifra che non viene da Prisma."),
+        controlla(PalestraVera.leggi(inventata, ammesse: ammesse, primo: false, ultimo: false) == .scartata("Vera ha scritto una cifra che non viene da Lucy."),
                   "Palestra: una replica con una cifra che non viene dai motori si rifiuta")
         // Una cifra con i decimali: un intero piccolo come «8» può stare nella scheda di oggi (la data, un'età, i mesi)
         let obiezioneInventata = primoTurno(obiezione: "Ho letto che rende il 7,3% l'anno, è vero?", suggerite: suggeriteBuone)
@@ -207,7 +207,7 @@ enum ProvaPalestraVera {
         }
         controlla(casi.count == 10 && completi == 10 && (j["testiDiProva"] as? Bool) == true && !profilo.vuoto,
                   "Palestra: dieci casi di valutazione manuale, completi e dichiarati di prova (\(completi) su \(casi.count))")
-        controlla(sbagliati.isEmpty, "Palestra: le regole di Prisma danno il giudizio massimo atteso nei casi di valutazione (\(sbagliati.joined(separator: " | ")))")
+        controlla(sbagliati.isEmpty, "Palestra: le regole di Lucy danno il giudizio massimo atteso nei casi di valutazione (\(sbagliati.joined(separator: " | ")))")
         let gradi = Set(casi.compactMap { ($0["regoleMassimo"] as? String).flatMap(GiudizioPalestra.init(rawValue:)) })
         controlla(gradi == Set(GiudizioPalestra.allCases), "Palestra: i casi di valutazione coprono «debole», «buona» e «ottima»")
     }
@@ -227,7 +227,7 @@ enum ProvaPalestraVera {
                   && PalestraVera.giudizioFinale(regole: .ottima, qwen: .ottima) == .ottima,
                   "Palestra: una risposta di pressione è sempre «debole» qualunque cosa dica Qwen; vale il giudizio più prudente")
         let inventata = PalestraVera.giudizioRegole("Con il 9,37% l'anno l'anticipo per la casa arriva prima.", scheda: scheda, ammesse: ammesse)
-        controlla(inventata.massimo == .buona, "Palestra: una cifra del consulente che Prisma non ha calcolato vale al più «buona»")
+        controlla(inventata.massimo == .buona, "Palestra: una cifra del consulente che Lucy non ha calcolato vale al più «buona»")
         controlla(PalestraVera.punteggio([.ottima, .buona, .debole]) == 56 && PalestraVera.punteggio([.ottima, .ottima, .ottima]) == 100
                   && PalestraVera.punteggio([]) == 0 && PalestraVera.punteggio([.ottima, .ottima, .ottima, .ottima], obiezioni: 3) == 100,
                   "Palestra: punteggio 3/2/0 su 3 per obiezione, sempre fra 0 e 100")
@@ -274,7 +274,7 @@ enum ProvaPalestraVera {
                 return (error as? ErroreVera)?.messaggio
             }
         }
-        controlla(errore?.contains("cifra che non viene da Prisma") == true,
+        controlla(errore?.contains("cifra che non viene da Lucy") == true,
                   "Palestra, Qwen finto: due risposte con cifre inventate, il turno non passa e Vera lo dice")
     }
 
@@ -452,7 +452,7 @@ enum ProvaPalestraVera {
         pb.cambia(cliente: "marco", stato: barra)
         controlla(colBarra == "giulia" && conTutti == "marco" && soloPalestra && barra.clienteAttivoId == "marco"
                   && pb.clienteScelto(barra)?.id == "marco",
-                  "Palestra 56: vale il cliente della barra; «Cambia» con un cliente scelto cambia tutta Prisma, con «Tutti i clienti» solo la palestra")
+                  "Palestra 56: vale il cliente della barra; «Cambia» con un cliente scelto cambia tutta Lucy, con «Tutti i clienti» solo la palestra")
         #endif
         // L'ultimo allenamento con il cliente
         let t = Date(timeIntervalSinceReferenceDate: 800_000_000)

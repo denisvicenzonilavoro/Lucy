@@ -47,7 +47,7 @@ struct SezioneImpostazioniSpese: View {
                                           valore: legame(\.euroPerKm))
                     }
                 }
-                NotaImpostazioni("Prisma non calcola i km con servizi di percorso e non manda gli indirizzi dei clienti fuori dal Mac: "
+                NotaImpostazioni("Lucy non calcola i km con servizi di percorso e non manda gli indirizzi dei clienti fuori dal Mac: "
                                  + "i km li scrivi tu una volta per cliente, e un giro lo correggi a mano.")
             }
             VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.fraRighe) {
@@ -74,7 +74,7 @@ struct SezioneImpostazioniSpese: View {
                                           voci: [(annoCorrente, String(annoCorrente)), (annoCorrente + 1, String(annoCorrente + 1))])
                             .fixedSize()
                     }
-                    RigaImpostazione(titolo: "Ore richieste", sottotitolo: "Le scrivi tu: Prisma non contiene i requisiti di IVASS o OCF") {
+                    RigaImpostazione(titolo: "Ore richieste", sottotitolo: "Le scrivi tu: Lucy non contiene i requisiti di IVASS o OCF") {
                         CampoNumeroStudio(etichetta: nil, unita: "ore", larghezza: f.campoNumero, decimali: 1,
                                           valore: Binding(get: { imp.oreAggiornamentoAnno[anno] },
                                                           set: { stato.impostaOreAggiornamento(anno: anno, $0) }))
@@ -96,7 +96,7 @@ struct SezioneImpostazioniSpese: View {
                             .toggleStyle(.appleSenzaEtichetta)
                     }
                 }
-                NotaImpostazioni("Il pacchetto lo salvi dove vuoi e lo consegni tu: Prisma non lo invia a nessuno.")
+                NotaImpostazioni("Il pacchetto lo salvi dove vuoi e lo consegni tu: Lucy non lo invia a nessuno.")
             }
         }
         .disabled(stato.solaLettura)

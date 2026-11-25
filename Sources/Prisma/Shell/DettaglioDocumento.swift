@@ -91,9 +91,9 @@ struct DettaglioDocumento: View {
     }
 
     #if os(macOS)
-    private static let notaImpaginato = "Impaginato da Prisma con i dati del dossier: da consultare, stampare o consegnare. Con «Apri in Anteprima» lo apri sul Mac."
+    private static let notaImpaginato = "Impaginato da Lucy con i dati del dossier: da consultare, stampare o consegnare. Con «Apri in Anteprima» lo apri sul Mac."
     #elseif os(iOS)
-    private static let notaImpaginato = "Impaginato da Prisma con i dati del dossier: da consultare, stampare o consegnare. Con «Condividi…» lo mandi al cliente o lo salvi in File."
+    private static let notaImpaginato = "Impaginato da Lucy con i dati del dossier: da consultare, stampare o consegnare. Con «Condividi…» lo mandi al cliente o lo salvi in File."
     #endif
 
     // MARK: Corpo
@@ -737,7 +737,7 @@ struct SchedaDatiDocumento: View {
             if inLettura {
                 HStack(spacing: m.spazioBarra) {
                     ProgressView().controlSize(.small)
-                    Text("Prisma sta leggendo il documento…")
+                    Text("Lucy sta leggendo il documento…")
                         .font(Tema.Apple.AltreApp.corpoPiccolo.fontLeggibile)
                         .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 }
@@ -1267,7 +1267,7 @@ struct SchedaTestoDocumento: View {
         let pagine = stato.testoDocumento(documento)
         VStack(alignment: .leading, spacing: m.spazioSezioni) {
             if pagine.isEmpty {
-                Text(stato.documentiInLettura.contains(documento.id) ? "Prisma sta leggendo il testo sul Mac…" : "Il testo non è ancora disponibile.")
+                Text(stato.documentiInLettura.contains(documento.id) ? "Lucy sta leggendo il testo sul Mac…" : "Il testo non è ancora disponibile.")
                     .font(Tema.Apple.AltreApp.corpoPiccolo.fontLeggibile)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
             } else {

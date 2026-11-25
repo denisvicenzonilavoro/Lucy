@@ -452,7 +452,7 @@ final class TavoloMac: ObservableObject {
             allaPensione: ProtocolloTavolo.cifra(esito.allaPensione), massimo: ProtocolloTavolo.cifra(esito.massimo),
             etaMassimo: esito.etaMassimo, etaEsaurimento: esito.etaEsaurimento,
             prelievoAnnuo: esito.prelievoAnnuo.map(ProtocolloTavolo.cifra), eventi: voci,
-            nota: "Valori in euro di oggi, anno per anno: una stima con le ipotesi di Prisma, non una previsione.")
+            nota: "Valori in euro di oggi, anno per anno: una stima con le ipotesi di Lucy, non una previsione.")
         let m = MostraTavolo(id: UUID().uuidString, genere: .lineaVita, titolo: "La linea della vita", cliente: cliente.nome,
                              lineaVita: dati)
         mostra(m, cliente: id, descrizione: "La linea della vita", sala: c.dallaSala)
@@ -514,7 +514,7 @@ final class TavoloMac: ObservableObject {
             AzioneTavolo(id: "lineavita", titolo: "Manda la linea della vita", simbolo: "chart.line.uptrend.xyaxis", abilitata: pronto,
                          aiuto: "Il patrimonio da oggi a 90 anni con gli eventi e la pensione, già calcolato") { [weak self] in self?.mandaLineaVita(c) },
             AzioneTavolo(id: "cursore", titolo: "Lascia un cursore al cliente", simbolo: "slider.horizontal.3", abilitata: pronto,
-                         aiuto: "Il cliente sceglie il versamento mensile entro i limiti; Prisma ricalcola sul Mac") { [weak self] in self?.lasciaCursore(c) },
+                         aiuto: "Il cliente sceglie il versamento mensile entro i limiti; Lucy ricalcola sul Mac") { [weak self] in self?.lasciaCursore(c) },
             AzioneTavolo(id: "presavisione", titolo: "Chiedi la presa visione", simbolo: "hand.draw",
                          abilitata: puoChiederePresaVisione(cliente),
                          aiuto: "Il cliente traccia un segno sull'iPad: finisce in fondo al PDF, nei Documenti del cliente") { [weak self] in self?.chiediPresaVisione(c) },

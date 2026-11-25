@@ -264,7 +264,7 @@ private struct SchedaInquadraMac: View {
     private var testa: some View {
         HStack(spacing: S.spazioTesta) {
             SferaVera(misura: S.sfera, viva: true, pensa: inquadra.fase == .lettura)
-            Text("Prisma sul Mac")
+            Text("Lucy sul Mac")
                 .carattereApple(S.etichetta)
                 .foregroundColor(S.coloreEtichetta)
             Spacer(minLength: 0)
@@ -299,11 +299,11 @@ private struct SchedaInquadraMac: View {
         switch inquadra.fase {
         case .attesa:
             if inquadra.perSmontaggio {
-                return "Inquadra l'estratto conto o il rendiconto con l'iPhone (Prisma › Posizioni › Inquadra): le righe arrivano allo Smontaggio, cifrate in rete locale. Oppure trascina qui una foto o un PDF."
+                return "Inquadra l'estratto conto o il rendiconto con l'iPhone (Lucy › Posizioni › Inquadra): le righe arrivano allo Smontaggio, cifrate in rete locale. Oppure trascina qui una foto o un PDF."
             }
-            return "Sull’iPhone apri Prisma › Posizioni › Inquadra: il testo letto arriva qui, cifrato in rete locale. Oppure trascina qui una foto o un PDF."
+            return "Sull’iPhone apri Lucy › Posizioni › Inquadra: il testo letto arriva qui, cifrato in rete locale. Oppure trascina qui una foto o un PDF."
         case .trascina:
-            return "L’iPhone non è collegato: collegalo in Impostazioni › iPhone e iPad, oppure trascina qui una foto o un PDF. Prisma lo legge sul Mac e non lo salva."
+            return "L’iPhone non è collegato: collegalo in Impostazioni › iPhone e iPad, oppure trascina qui una foto o un PDF. Lucy lo legge sul Mac e non lo salva."
         case .lettura:
             return "Leggo «\(inquadra.origine)» sul Mac, senza mandarlo fuori."
         case .illeggibile:
@@ -449,14 +449,14 @@ private struct SchedaInquadraMac: View {
                 Button("Aggiorna la posizione") { stato.confrontaInquadrataConPosizione() }
                     .buttonStyle(.applePrimarioGrande)
                     .keyboardShortcut(.defaultAction)
-                    .help("La polizza è già nelle posizioni del cliente: confronta i dati letti con quelli in Prisma")
+                    .help("La polizza è già nelle posizioni del cliente: confronta i dati letti con quelli in Lucy")
                     .disabled(stato.solaLettura || inquadra.inModifica != nil)
             } else {
                 Button("Aggiungi alle posizioni di \(nome)") { inquadra.conferma = true }
                     .buttonStyle(.applePrimarioGrande)
                     .keyboardShortcut(.defaultAction)
                     .disabled(c == nil || stato.solaLettura || inquadra.inModifica != nil)
-                    .help(stato.solaLettura ? "Archivio in sola lettura: aggiorna Prisma per creare posizioni." : "Aggiungi la polizza alle posizioni del cliente, dopo la conferma")
+                    .help(stato.solaLettura ? "Archivio in sola lettura: aggiorna Lucy per creare posizioni." : "Aggiungi la polizza alle posizioni del cliente, dopo la conferma")
             }
             if inquadra.confronto == nil && !giaPresente {
                 Button("Confronta") { withAnimation(nil) { stato.confrontaInquadrata() } }

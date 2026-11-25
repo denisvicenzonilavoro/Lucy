@@ -31,12 +31,12 @@ struct ArchivioMobile: View {
                                  sottotitolo: "\(stato.clienti.count) clienti · \(stato.posizioni.count) posizioni · \(stato.dati.documenti.count) documenti") {
                     EmptyView()
                 }
-                RigaImpostazione(titolo: "Archivio di Prisma",
+                RigaImpostazione(titolo: "Archivio di Lucy",
                                  sottotitolo: "Solo qui, protetto quando il dispositivo è bloccato e fuori dal backup iCloud del dispositivo") {
                     EmptyView()
                 }
                 RigaImpostazione(titolo: "Apri un altro backup",
-                                 sottotitolo: "I dati di qui vengono sostituiti da un backup creato sul Mac; prima Prisma ne salva una copia di sicurezza",
+                                 sottotitolo: "I dati di qui vengono sostituiti da un backup creato sul Mac; prima Lucy ne salva una copia di sicurezza",
                                  ultima: true) {
                     ValoreRiga(testo: "Apri") { mobile.apriBackup() }
                         .disabled(stato.backupInCorso || mobile.preparazioneBackup)

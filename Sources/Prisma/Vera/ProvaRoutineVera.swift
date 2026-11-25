@@ -235,7 +235,7 @@ enum ProvaRoutineVera {
         controlla(e.azioni.allSatisfy { $0.esito == nil } && e.passi.dropFirst().allSatisfy { $0.stato == .daConfermare }, "Dopo la firma: niente eseguito dal motore")
         if e.azioni.count == 3 {
             controlla(e.azioni[0].argomenti["posizione"] == "pos-giulia-piano-previdenziale-integrativo" && e.azioni[0].dettaglio.hasPrefix("\(Formati.euro(200)) al mese da"),
-                      "Dopo la firma: la proposta presentata di Giulia, con il premio di Prisma: \(e.azioni[0].dettaglio)")
+                      "Dopo la firma: la proposta presentata di Giulia, con il premio di Lucy: \(e.azioni[0].dettaglio)")
             let nomeGiulia = d.clienti.first(where: { $0.id == "giulia" })?.nome ?? "?"
             controlla(e.azioni[0].titolo.hasSuffix(" di \(nomeGiulia)"),
                       "Dopo la firma: il titolo dell'azione nomina il cliente: \(e.azioni[0].titolo)")
@@ -305,7 +305,7 @@ enum ProvaRoutineVera {
         controlla(RoutineVera.dovute([fatta], adesso: giorno(2026, 11, 2, 10, 0), cal: cal).isEmpty, "Programmazione: già lanciata stamattina, non torna")
         var vecchia = lunedi
         vecchia.ultimoLancio = giorno(2026, 10, 26, 9, 0)
-        controlla(RoutineVera.dovute([vecchia], adesso: giorno(2026, 11, 4, 10, 0), cal: cal).count == 1, "Programmazione: Prisma chiuso lunedì, mercoledì si recupera")
+        controlla(RoutineVera.dovute([vecchia], adesso: giorno(2026, 11, 4, 10, 0), cal: cal).count == 1, "Programmazione: Lucy chiusa lunedì, mercoledì si recupera")
         controlla(RoutineVera.dovute([vecchia], adesso: giorno(2026, 11, 5, 10, 0), cal: cal).isEmpty, "Programmazione: oltre tre giorni non si recupera più")
         var spenta = lunedi
         spenta.attiva = false

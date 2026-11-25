@@ -187,7 +187,7 @@ enum LettoreProdotto {
             let fonte = l.dati[.tipologia]
             l.dati[.tipologia] = DatoLetto(voce: .tipologia, testo: r.tipologia, documento: fonte?.documento ?? (l.documenti.first?.nome ?? ""),
                                           tipo: fonte?.tipo ?? (l.documenti.first?.tipo ?? .altro), pagina: fonte?.pagina ?? 1,
-                                          estratto: fonte.map { "Riconosciuta da Prisma; nel documento: «\($0.testo)»" } ?? "Riconosciuta da Prisma dalle parole dei documenti")
+                                          estratto: fonte.map { "Riconosciuta da Lucy; nel documento: «\($0.testo)»" } ?? "Riconosciuta da Lucy dalle parole dei documenti")
         }
         return l
     }

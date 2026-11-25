@@ -133,10 +133,10 @@ extension AppImpostazioni {
         let pillola: Pillola = negati ? Pillola(testo: "Non consentiti", tono: .errore)
             : scelte.attivi ? Pillola(testo: "Attivi", tono: .ok) : Pillola(testo: "Spenti", tono: .neutro)
         return GruppoImpostazioni(titolo: "Promemoria del Mac") {
-            RigaImpostazione(titolo: "Promemoria nel Centro notifiche", sottotitolo: "Anche a Prisma chiusa",
+            RigaImpostazione(titolo: "Promemoria nel Centro notifiche", sottotitolo: "Anche a Lucy chiusa",
                              stato: pillola,
-                             aiuto: "Appuntamenti, attività, scadenze delle polizze, occasioni e compleanni, anche a Prisma chiusa. Nei testi niente cifre dei clienti",
-                             avvertenza: negati ? "Non consentiti da macOS: Impostazioni di Sistema › Notifiche › Prisma" : nil) {
+                             aiuto: "Appuntamenti, attività, scadenze delle polizze, occasioni e compleanni, anche a Lucy chiusa. Nei testi niente cifre dei clienti",
+                             avvertenza: negati ? "Non consentiti da macOS: Impostazioni di Sistema › Notifiche › Lucy" : nil) {
                 HStack(spacing: 8) {
                     if negati {
                         Button { PromemoriaMac.apriImpostazioniDiSistema() } label: { Label("Apri Impostazioni di Sistema", systemImage: "gearshape") }
@@ -276,7 +276,7 @@ extension AppImpostazioni {
                 interruttore(Bindable(stato.dati).impostazioni.pdf.proteggi)
             }
             RigaImpostazione(titolo: "Password proposta", sottotitolo: "Dai dati del cliente",
-                             aiuto: "Prisma non conserva nessuna password", ultima: true) {
+                             aiuto: "Lucy non conserva nessuna password", ultima: true) {
                 MenuTendina(selezione: Bindable(stato.dati).impostazioni.pdf.regola,
                             opzioni: ImpostazioniPDF.Regola.allCases.map { ($0, $0.nome) }, larghezza: M.menuLargo)
             }
@@ -295,7 +295,7 @@ extension AppImpostazioni {
                 RigaImpostazione(titolo: "Qwen sul Mac",
                                  sottotitolo: pronta ? stato.qwen.descrizione : (stato.disponibilitaLocale.motivo ?? "Non collegata"),
                                  stato: Pillola(testo: pronta ? "Collegata" : "Non collegata", tono: pronta ? .ok : .attenzione),
-                                 aiuto: "Vera usa Qwen del tuo Mac: Prisma aperto sul Mac, il ponte attivo sul Mac in Impostazioni › iPhone e iPad, stessa rete Wi‑Fi") {
+                                 aiuto: "Vera usa Qwen del tuo Mac: Lucy aperta sul Mac, il ponte attivo sul Mac in Impostazioni › iPhone e iPad, stessa rete Wi‑Fi") {
                     Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
                 }
@@ -321,7 +321,7 @@ extension AppImpostazioni {
             }
             // Solo iPad: il tavolo con il Mac, con lo stesso codice (TavoloiPad.swift)
             GruppoTavoloiPad()
-            NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Prisma. Mai internet.")
+            NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Lucy. Mai internet.")
         }
     }
     #else
@@ -376,7 +376,7 @@ extension AppImpostazioni {
                 .cascataImpostazioni(2)
                 if vera.ponte.condividi {
                     RigaImpostazione(titolo: "Codice \(vera.ponte.codice)", sottotitolo: "Da scrivere su iPhone e iPad.",
-                                     aiuto: "Scrivilo in Prisma su iPhone e iPad (Impostazioni › Vera), oppure apri lì un backup di questo Mac. Stessa rete Wi‑Fi, tutto cifrato") {
+                                     aiuto: "Scrivilo in Lucy su iPhone e iPad (Impostazioni › Vera), oppure apri lì un backup di questo Mac. Stessa rete Wi‑Fi, tutto cifrato") {
                         Button { stato.dati.impostazioni.vera.ponte.codice = PonteVera.nuovoCodice() } label: {
                             Label("Nuovo codice", systemImage: "key")
                         }
@@ -413,7 +413,7 @@ extension AppImpostazioni {
                 }
                 // Fase 4 di Vera, funzione 20: «Ragiona a passi» (VistePassiVera.swift)
                 RigaImpostazione(titolo: "Ragiona a passi", sottotitolo: "Divide un budget tra protezione e obiettivi.",
-                                 aiuto: "Un piano di al massimo cinque passi, eseguito con i motori di Prisma; la scelta segue una regola scritta") {
+                                 aiuto: "Un piano di al massimo cinque passi, eseguito con i motori di Lucy; la scelta segue una regola scritta") {
                     interruttore(Bindable(stato.dati).impostazioni.vera.passi.attivo)
                 }
                 RigaImpostazione(titolo: "Mostra il ragionamento", sottotitolo: "Il piano e la regola accanto alla risposta.") {
@@ -421,7 +421,7 @@ extension AppImpostazioni {
                         .disabled(!stato.dati.impostazioni.vera.passi.attivo)
                 }
                 RigaImpostazione(titolo: "Pronta all'avvio", sottotitolo: "La prima risposta non aspetta.",
-                                 aiuto: "All'apertura di Prisma Vera avvia Ollama e carica il modello: la prima risposta non aspetta") {
+                                 aiuto: "All'apertura di Lucy Vera avvia Ollama e carica il modello: la prima risposta non aspetta") {
                     interruttore(Bindable(stato.dati).impostazioni.vera.prontaAllAvvio)
                 }
                 RigaImpostazione(titolo: "Conserva le conversazioni", sottotitolo: "Nel dossier, sul Mac e nei backup.", ultima: true) {
@@ -511,7 +511,7 @@ extension AppImpostazioni {
                         .buttonStyle(StilePulsanteRigaImpostazioni())
                         .fixedSize()
                 }
-                RigaImpostazione(titolo: "Due velocità", sottotitolo: "Prima le regole di Prisma, poi Qwen sul Mac. Il modello Apple è spento.",
+                RigaImpostazione(titolo: "Due velocità", sottotitolo: "Prima le regole di Lucy, poi Qwen sul Mac. Il modello Apple è spento.",
                                  stato: Pillola(testo: "Regole e Qwen", tono: .ok)) {
                     Button("Apri") { stato.apriPaginaMotori(.dueVelocita) }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
@@ -566,7 +566,7 @@ extension AppImpostazioni {
                 .cascataImpostazioni(7)
             gruppoVoceVera
                 .cascataImpostazioni(7)
-            NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Prisma. I dati non lasciano il Mac.")
+            NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Lucy. I dati non lasciano il Mac.")
                 .cascataImpostazioni(8)
         }
     }

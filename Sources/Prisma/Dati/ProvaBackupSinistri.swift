@@ -93,7 +93,7 @@ extension ProvaBackup {
         guard vecchie.giorniSinistroFermo == nil, vecchie.sogliaSinistroFermo == ImpostazioniPratiche.giorniSinistroFermoPredefiniti,
               vecchie.indirizziSinistri == nil, vecchie.documentiPerSinistro == nil,
               vecchie.giorniFerma == archivio.impostazioni.pratiche.giorniFerma else {
-            return "sinistri: le impostazioni di un Prisma di prima non si aprono con i valori di base"
+            return "sinistri: le impostazioni di una Lucy di prima non si aprono con i valori di base"
         }
 
         // Un Prisma che non conosce il tipo `.sinistro` salta quel messaggio e tiene gli altri

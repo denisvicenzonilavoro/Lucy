@@ -111,8 +111,8 @@ enum TestiEsperienza {
     /// Il metodo della griglia, per l'aiuto «Come si giudica?».
     static var metodo: [String] {
         [
-            "Per ogni tipo di prodotto: lo conosce, l'ha avuto, ne ha capito il funzionamento. Chi non lo conosce o non l'ha capito riceve un avviso quando gli si propone quel tipo; se l'esperienza non è indicata, Prisma ricorda di chiederla.",
-            "Capacità di sostenere perdite: nessuna, fino al 10%, fino al 25% o oltre il 25% del capitale investito. Per le polizze d'investimento, i fondi e i titoli Prisma calcola la perdita che la proposta avrebbe avuto nella crisi peggiore del passato (2008, 2020, 2022), con la stessa composizione della prova di resistenza; con capacità nessuna basta una perdita sopra lo \(CifreDoc.percento(MotoreEsperienza.sogliaNessuna, decimali: 1)), o una gestione separata senza consolidamento annuo.",
+            "Per ogni tipo di prodotto: lo conosce, l'ha avuto, ne ha capito il funzionamento. Chi non lo conosce o non l'ha capito riceve un avviso quando gli si propone quel tipo; se l'esperienza non è indicata, Lucy ricorda di chiederla.",
+            "Capacità di sostenere perdite: nessuna, fino al 10%, fino al 25% o oltre il 25% del capitale investito. Per le polizze d'investimento, i fondi e i titoli Lucy calcola la perdita che la proposta avrebbe avuto nella crisi peggiore del passato (2008, 2020, 2022), con la stessa composizione della prova di resistenza; con capacità nessuna basta una perdita sopra lo \(CifreDoc.percento(MotoreEsperienza.sogliaNessuna, decimali: 1)), o una gestione separata senza consolidamento annuo.",
             "Il tipo si ricava da area e tipologia: Ramo I, Ramo III (unit linked), multiramo, fondi ed ETF, azioni e obbligazioni, previdenza complementare, protezione. Non sostituisce i questionari di adeguatezza ufficiali.",
         ]
     }

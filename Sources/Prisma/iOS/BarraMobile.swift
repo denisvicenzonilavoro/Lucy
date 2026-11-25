@@ -43,9 +43,9 @@ struct BarraMobile: View {
     private var marchio: some View {
         Button { mobile.mostraHome() } label: {
             HStack(spacing: B.marchioSpazio) {
-                LogoPrisma(colore: Tema.Colore.logo)
+                LogoLucy(colore: Tema.Colore.logo)
                     .frame(height: B.logo)
-                Text("Prisma")
+                Text("Lucy")
                     .font(Tipo.Mobile.barraMarchio)
                     .tracking(Tema.Testo.Shell.spaziaturaMarchio)
                     .foregroundColor(Tema.Colore.inchiostroSfondo)
@@ -57,7 +57,7 @@ struct BarraMobile: View {
             .frame(minHeight: B.tocco)
         }
         .buttonStyle(StilePulsanteBarraMobile(altezza: B.marchio))
-        .accessibilityLabel(Text("Prisma"))
+        .accessibilityLabel(Text("Lucy"))
         .accessibilityHint(Text("Torna alla scrivania"))
         // ⌘H come «Mostra la scrivania», con la tastiera dell'iPad
         .keyboardShortcut("h", modifiers: .command)
@@ -110,7 +110,7 @@ struct BarraMobile: View {
                 ContrassegnoModoCliente()
                     .padding(.horizontal, B.strumentiMargine)
             } else {
-                PulsanteBarraMobile(aiuto: "Cerca in Prisma", azione: { stato.alternaRicerca() }) {
+                PulsanteBarraMobile(aiuto: "Cerca in Lucy", azione: { stato.alternaRicerca() }) {
                     HStack(spacing: B.pulsanteSpazio) {
                         Image(systemName: "magnifyingglass").font(Tipo.Mobile.simboloBarra)
                         if !compatta {

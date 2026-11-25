@@ -886,7 +886,7 @@ enum VoceConfronto: Hashable {
         ServerPonteVera.condiviso.aggiorna(dati.impostazioni.vera)
         // I messaggi nuovi del ponte (giro 5): schede del copilota dall'iPad, testi inquadrati dall'iPhone
         ServerPonteVera.condiviso.consegnaArrivi { [weak self] arrivo in
-            guard let stato = self else { return .rifiutata("Prisma sul Mac si sta chiudendo.") }
+            guard let stato = self else { return .rifiutata("Lucy sul Mac si sta chiudendo.") }
             return await MainActor.run { () -> RicevutaPonte in
                 // Migliorie d'uso 39: il nome del dispositivo, per «I tuoi dispositivi»
                 stato.dispositivi.annotaPonte(nome: arrivo.nomeDispositivo)
@@ -1068,7 +1068,7 @@ enum VoceConfronto: Hashable {
     }
     #elseif os(iOS)
     /// Per le funzioni legate ai pannelli e alle finestre del Mac, che su iPhone e iPad arrivano nei prossimi giri.
-    static let soloSulMacPerOra = "Su iPhone e iPad questa funzione non c'è ancora: usala da Prisma sul Mac."
+    static let soloSulMacPerOra = "Su iPhone e iPad questa funzione non c'è ancora: usala da Lucy sul Mac."
     /// Il file da scegliere con `.fileImporter` (al posto di NSOpenPanel del Mac): lo presenta il guscio
     /// dell'iPad (GuscioiPad), poi StatoMobile.importa passa la copia a `importaClienti(da:)` e simili.
     var sceltaFileMobile: SceltaFileMobile?
@@ -1609,7 +1609,7 @@ enum VoceConfronto: Hashable {
         guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
         guard persistente else { return }
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per importare documenti.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per importare documenti.")
             return
         }
         let cliente = clienteAttivoId
@@ -2207,7 +2207,7 @@ enum VoceConfronto: Hashable {
         if let lordo = MotoreConfrontoDossier.rendimentoLordo(d, soloConfermati: true) {
             p.rendimentoAtteso = (lordo.valore * 100).rounded() / 100
             if lordo.fonte == .stima {
-                p.note = (p.note + " Rendimento lordo stimato da Prisma dallo scenario moderato del KID (netto).")
+                p.note = (p.note + " Rendimento lordo stimato da Lucy dallo scenario moderato del KID (netto).")
                     .trimmingCharacters(in: .whitespaces)
             }
         } else {
@@ -2831,7 +2831,7 @@ enum VoceConfronto: Hashable {
         let scheda = VeraPortafoglio.scheda(dati.istantanea)
         let istruzioni = (IstruzioniVera.testo("chat") ?? "") + "\nQui parli del portafoglio del consulente (tutti i clienti), non di un singolo cliente."
             + (breve ? "\n\n" + IstruzioniVera.mini : "")
-        let richiesta = "SCHEDA DEL PORTAFOGLIO (calcolata da Prisma)\n\(scheda)\n\nBOZZA PREPARATA DA PRISMA (numeri esatti: non cambiarli e non aggiungerne)\n\(bozza.testo)\n\nDOMANDA DEL CONSULENTE: \(testo)"
+        let richiesta = "SCHEDA DEL PORTAFOGLIO (calcolata da Lucy)\n\(scheda)\n\nBOZZA PREPARATA DA PRISMA (numeri esatti: non cambiarli e non aggiungerne)\n\(bozza.testo)\n\nDOMANDA DEL CONSULENTE: \(testo)"
         conQwen(cliente: id) { modello in
             self.veraInCorso = true
             Task { @MainActor in
@@ -3352,7 +3352,7 @@ enum VoceConfronto: Hashable {
         a.luogo = "Telefonata"
         a.durataMinuti = 20
         a.note = [d.motivo.map { "Motivo: \($0)." },
-                  d.ultimoContatto.map { "Ultimo contatto il \(Formati.dataEstesa.string(from: $0))." } ?? "Nessun incontro registrato in Prisma."]
+                  d.ultimoContatto.map { "Ultimo contatto il \(Formati.dataEstesa.string(from: $0))." } ?? "Nessun incontro registrato in Lucy."]
             .compactMap { $0 }.joined(separator: " ")
         return a
     }
@@ -3666,7 +3666,7 @@ enum VoceConfronto: Hashable {
         let archivio = Archivio.cartella.standardizedFileURL.path
         let scelta = url.standardizedFileURL.path
         guard scelta != archivio, !scelta.hasPrefix(archivio + "/") else {
-            mostraAvviso("Scegli una cartella fuori dalla cartella di Prisma, meglio su iCloud Drive o su un disco esterno.")
+            mostraAvviso("Scegli una cartella fuori dalla cartella di Lucy, meglio su iCloud Drive o su un disco esterno.")
             return
         }
         dati.impostazioni.backup.cartella = url.path
@@ -3815,7 +3815,7 @@ enum VoceConfronto: Hashable {
     func ripristina(_ zip: URL, password scritta: String? = nil) {
         guard persistente, !backupInCorso else { return }
         guard !inDimostrazione else { mostraAvviso(TestiDimostrazione.nonDurante); return }
-        guard !ripristinoBloccato else { mostraAvviso("Archivio in sola lettura: apri l'ultima versione di Prisma per ripristinare."); return }
+        guard !ripristinoBloccato else { mostraAvviso("Archivio in sola lettura: apri l'ultima versione di Lucy per ripristinare."); return }
         // Riconosciuto dal contenuto: anche un backup protetto rinominato
         let protetto = CifraturaBackup.cifrato(zip)
         let daPortachiavi = protetto && scritta == nil

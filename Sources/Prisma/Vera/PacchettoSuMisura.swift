@@ -87,7 +87,7 @@ enum PacchettoSuMisura {
         Vera su misura · pacchetto di addestramento
         ===========================================
 
-        Esempi: \(m.esempi) (resi anonimi e approvati da te in Prisma) · lezioni: \(m.lezioni)
+        Esempi: \(m.esempi) (resi anonimi e approvati da te in Lucy) · lezioni: \(m.lezioni)
         Modello di partenza: \(m.modelloDiPartenza) (per Unsloth: \(m.modelloUnsloth), da verificare)
         Nome del modello addestrato: \(m.nomeModello)
 
@@ -104,7 +104,7 @@ enum PacchettoSuMisura {
         1. Apri il notebook su Google Colab o Kaggle con una GPU gratuita e carica questa cartella.
         2. Esegui le celle in ordine (circa due ore).
         3. Scarica lo zip finale (il file .gguf e \(SuMisuraVera.nomeFileRapporto)).
-        4. In Prisma: Vera › Vera su misura › «Importa il modello addestrato».
+        4. In Lucy: Vera › Vera su misura › «Importa il modello addestrato».
         La nuova Vera prende il posto di quella di oggi solo se supera l'esame sul Mac.
         """
     }

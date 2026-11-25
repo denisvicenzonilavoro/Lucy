@@ -28,7 +28,7 @@ extension StatoShell {
 
     /// Apre un documento del cliente (il PDF del resoconto firmato) in Documenti.
     func apriDocumentoVera(_ id: String) {
-        guard dati.documenti.contains(where: { $0.id == id }) else { return mostraAvviso("Il documento non è più in Prisma.") }
+        guard dati.documenti.contains(where: { $0.id == id }) else { return mostraAvviso("Il documento non è più in Lucy.") }
         documentoSelezionato = id
         apri(.documenti)
     }
@@ -236,7 +236,7 @@ extension StatoShell {
         let id = chiave != VeraPortafoglio.chiave && cliente(chiave) != nil ? chiave : nil
         let e = secondaLettura(daLeggere, oggetto: "Il testo", cliente: id, fonti: "")
         let n = e.daGuardare.count
-        rispostaFaseTre(e.pulito ? "Riletto: nessuna frase a rischio e le cifre tornano con Prisma." :
+        rispostaFaseTre(e.pulito ? "Riletto: nessuna frase a rischio e le cifre tornano con Lucy." :
                             "Riletto: \(n == 1 ? "una cosa da guardare" : "\(n) cose da guardare"). Ti propongo le correzioni, decidi tu.",
                         titolo: "La seconda lettura", chiave: chiave) { $0.lettura = e }
         return true
@@ -497,7 +497,7 @@ extension StatoShell {
             return true
         }
         guard let i = incontroPerResoconto(cliente: id) else {
-            rispostaFaseTre("Con \(c.nome) non c'è ancora un incontro in Prisma: il resoconto parte dagli appunti dell'incontro, dal copilota o da una nota vocale.",
+            rispostaFaseTre("Con \(c.nome) non c'è ancora un incontro in Lucy: il resoconto parte dagli appunti dell'incontro, dal copilota o da una nota vocale.",
                             titolo: "Il resoconto", chiave: chiave)
             return true
         }

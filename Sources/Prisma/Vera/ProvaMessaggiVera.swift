@@ -8,8 +8,8 @@ import Foundation
 enum ProvaMessaggiVera {
     static func esegui(_ controlla: (Bool, String) -> Void) {
         let istruzioni = IstruzioniVera.testo("messaggi") ?? ""
-        controlla(istruzioni.contains("Prisma non spedisce") && istruzioni.contains("firma") && istruzioni.contains("rendimenti"),
-                  "Messaggi: istruzioni di Qwen nel pacchetto (Vera/Istruzioni/messaggi.md): niente invii, firma di Prisma, niente promesse")
+        controlla(istruzioni.contains("Lucy non spedisce") && istruzioni.contains("firma") && istruzioni.contains("rendimenti"),
+                  "Messaggi: istruzioni di Qwen nel pacchetto (Vera/Istruzioni/messaggi.md): niente invii, firma di Lucy, niente promesse")
 
         let oggi = AiutiProva.data(2026, 11, 4)
         var marco = Cliente(id: "marco", nome: "Marco Bianchi", iniziali: "MB", tinta: .blu, tema: "", email: "marco.prova@example.com",
@@ -53,12 +53,12 @@ enum ProvaMessaggiVera {
         controlla(!utente.contains("marco.prova@example.com") && !utente.contains("333"),
                   "Messaggi, Qwen finto: nella scheda il nome del cliente, mai email e telefono")
         controlla(MessaggiVera.piano(o, cliente: marco, tono: .cordiale, canale: .mail, bozza: bozza, vera: vera).scelta.modalita == .lavoro,
-                  "Messaggi: Vera scrive in modalità lavoro (numeri solo da Prisma)")
+                  "Messaggi: Vera scrive in modalità lavoro (numeri solo da Lucy)")
         controlla(primo.autore == .vera && primo.modello == motore.modello && primo.avviso == nil
                   && primo.testo.hasPrefix("Ciao Marco,\n\nla tua «Infortuni famiglia» scade il 19 dicembre 2026")
                   && primo.testo.hasSuffix("Ti va di vederci nei prossimi giorni?\n\nUn saluto,\nDenis")
                   && primo.testo.components(separatedBy: "Un saluto").count == 2 && primo.oggetto == bozza.oggetto,
-                  "Messaggi, Qwen finto: un testo con le cifre della scheda passa, con la chiusura e la firma di Prisma una volta sola")
+                  "Messaggi, Qwen finto: un testo con le cifre della scheda passa, con la chiusura e la firma di Lucy una volta sola")
         controlla((pezzi.valore ?? 0) >= 1, "Messaggi, Qwen finto: il testo arriva in streaming (\(pezzi.valore ?? 0) aggiornamenti)")
 
         let secondo = aspetta {

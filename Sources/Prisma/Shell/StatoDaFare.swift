@@ -49,7 +49,7 @@ enum TestiDaFare {
 
     /// «Giulia Rossi: fatto. La voce sparisce da tutta Prisma» (per una voce «Per te» senza il nome).
     static func fatto(_ v: VoceDaFare) -> String {
-        v.cliente.id.isEmpty ? "Fatto. La voce sparisce da tutta Prisma" : "\(v.cliente.nome): fatto. La voce sparisce da tutta Prisma"
+        v.cliente.id.isEmpty ? "Fatto. La voce sparisce da tutta Lucy" : "\(v.cliente.nome): fatto. La voce sparisce da tutta Lucy"
     }
 
     static func diNuovo(_ v: VoceDaFare) -> String {
@@ -367,7 +367,7 @@ enum ProvaDaFareShell {
         s.spuntaAttivitaAgenda("prova-agenda")
         controlla(s.dati.attivita.first { $0.id == "prova-agenda" }?.completata == true && s.fatteDaFare.count == 1
                   && s.voceDaFare(attivitaId: "prova-agenda") == nil,
-                  "Da fare: la spunta dell'Agenda segna la voce come fatta in tutta Prisma")
+                  "Da fare: la spunta dell'Agenda segna la voce come fatta in tutta Lucy")
         s.annullaUltimoFattoDaFare()
         controlla(s.dati.attivita.first { $0.id == "prova-agenda" }?.completata == false
                   && s.voceDaFare(attivitaId: "prova-agenda") != nil,

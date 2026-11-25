@@ -14,20 +14,20 @@ enum TestiSceltaCliente {
     static let recenti = "Recenti"
     static func tutti(_ n: Int) -> String { "Tutti · \(n)" }
     static let nessuno = "Nessun cliente con questo nome."
-    static func avvisoCliente(_ nome: String) -> String { "Tutta Prisma ora parla di \(nome)" }
+    static func avvisoCliente(_ nome: String) -> String { "Tutta Lucy ora parla di \(nome)" }
     static let avvisoTutti = "Tutti i clienti: tornano le viste d’insieme"
     // Il vuoto delle app che lavorano su una persona
     static let scegli = "Scegli il cliente"
     static let oppure = "oppure"
     static let nuovoCliente = "Nuovo cliente"
     static let analisiTitolo = "Analisi 360 lavora su una persona alla volta."
-    static let analisiTesto = "Scegli il cliente nella barra in alto: tutta Prisma lo segue, senza doverlo riscegliere in ogni app."
+    static let analisiTesto = "Scegli il cliente nella barra in alto: tutta Lucy lo segue, senza doverlo riscegliere in ogni app."
     static let salaTitolo = "La Sala si apre per una persona."
     static let salaTesto = "Scegli il cliente in alto: le esperienze parlano di lui."
     static let prospettiTitolo = "I prospetti si preparano per una persona."
     static let prospettiTesto = "Scegli il cliente in alto: trovi i suoi report per l’incontro."
     static let tuaRubrica = "La tua rubrica"
-    static let tuaRubricaTesto = "Scegli una persona a sinistra, oppure nella barra in alto: vale per tutta Prisma."
+    static let tuaRubricaTesto = "Scegli una persona a sinistra, oppure nella barra in alto: vale per tutta Lucy."
     /// Le quattro cifre della rubrica con «Tutti i clienti» (migliorie d'uso 2, template riga 3124).
     static let personeSeguite = "Persone seguite"
     static let inRegola = "In regola"

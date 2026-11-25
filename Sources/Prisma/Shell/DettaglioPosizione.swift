@@ -352,10 +352,10 @@ struct DettaglioPosizione: View {
                         .help(IncidenzaCostiKID.metodo)
                     if let d = k.dichiarato {
                         RigaDato("RIY del KID",
-                                 CifreDoc.percento(d, decimali: 2) + (k.scarto.map { " · Prisma \(Self.punti($0))" } ?? ""),
+                                 CifreDoc.percento(d, decimali: 2) + (k.scarto.map { " · Lucy \(Self.punti($0))" } ?? ""),
                                  larghezza: l,
                                  pillola: (k.scarto ?? 0) > MotoreCosti.scartoMinimo ? Pillola(testo: "più del KID", tono: .attenzione) : nil)
-                            .help("Il RIY dichiarato nel KID resta quello del documento: Prisma lo confronta con il suo calcolo, sugli stessi anni.")
+                            .help("Il RIY dichiarato nel KID resta quello del documento: Lucy lo confronta con il suo calcolo, sugli stessi anni.")
                     }
                 }
                 RigaDato("Fiscalità", p.aliquotaFiscale.map { Formati.percentuale($0) + " sul rendimento" } ?? "", larghezza: 118)

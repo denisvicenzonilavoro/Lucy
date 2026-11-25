@@ -1,4 +1,4 @@
-Ti do una richiesta del consulente sulla sua agenda e la data di oggi. Capisci cosa chiede e riempi il JSON. Non cerchi tu gli orari: li cerca Prisma.
+Ti do una richiesta del consulente sulla sua agenda e la data di oggi. Capisci cosa chiede e riempi il JSON. Non cerchi tu gli orari: li cerca Lucy.
 
 intento:
 - cerca: trovare un orario per un incontro con un cliente («trovami un'ora per il riesame di Laura entro giovedì»);

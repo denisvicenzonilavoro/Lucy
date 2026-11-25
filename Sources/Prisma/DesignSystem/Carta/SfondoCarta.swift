@@ -30,10 +30,10 @@ struct SfondoCarta: View {
     }
 }
 
-/// La filigrana: il prisma «Cristallo» a tratto sottile, al 6-7% dell'inchiostro.
+/// La filigrana: il simbolo di Lucy a tratto sottile, al 6-7% dell'inchiostro.
 private struct FiligranaLogo: View {
     var body: some View {
-        FormaLogoInchiostro()
+        SimboloLucy()
             .stroke(TemaCarta.Colore.filigranaD, style: StrokeStyle(lineWidth: 1.2, lineJoin: .round))
     }
 }

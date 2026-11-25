@@ -745,7 +745,7 @@ struct ConfiguraFinestra: NSViewRepresentable {
         override func viewDidMoveToWindow() {
             super.viewDidMoveToWindow()
             guard let w = window else { return }
-            w.title = "Prisma"
+            w.title = "Lucy"
             w.titleVisibility = .hidden
             w.titlebarAppearsTransparent = true
             w.isMovableByWindowBackground = false

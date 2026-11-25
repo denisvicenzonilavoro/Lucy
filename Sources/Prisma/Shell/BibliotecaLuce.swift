@@ -262,7 +262,7 @@ extension StatoShell {
         p.allowedContentTypes = [.pdf, .png, .jpeg, .tiff, .heic]
         p.allowsMultipleSelection = true
         p.prompt = "Aggiungi"
-        p.message = "Scegli i PDF che usi (condizioni, KID, circolari, normativa): restano sul Mac, nella Biblioteca di Prisma."
+        p.message = "Scegli i PDF che usi (condizioni, KID, circolari, normativa): restano sul Mac, nella Biblioteca di Lucy."
         if p.runModal() == .OK { importaInBiblioteca(p.urls) }
     }
     #endif

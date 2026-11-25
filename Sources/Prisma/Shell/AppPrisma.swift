@@ -171,7 +171,7 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
     /// Occhiello dell'intestazione dentro la finestra.
     var occhiello: String {
         switch self {
-        case .clienti: return "Rubrica Prisma"
+        case .clienti: return "Rubrica Lucy"
         case .analisi360:
             #if os(macOS)
             // Migliorie d'uso 10: il centro è Posizioni; Analisi 360 dice il suo lavoro
@@ -185,10 +185,10 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .confronti: return "Ipotesi trasparenti"
         case .prodotti: return "Schede e fonti verificabili"
         case .simulazioni: return "Il laboratorio delle ipotesi"
-        case .agenda: return "Prisma · Agenda personale"
-        case .attivita: return "Prisma · Promemoria"
+        case .agenda: return "Lucy · Agenda personale"
+        case .attivita: return "Lucy · Promemoria"
         case .note: return "Taccuino personale"
-        case .documenti: return "Archivio Prisma"
+        case .documenti: return "Archivio Lucy"
         case .presentazioni: return "Una prospettiva condivisa"
         case .messaggi: return "Vera prepara, tu spedisci"
         // Nella testata l'occhiello lo scrive il motore del mercato (OcchielloMercato: «Aggiornato oggi alle 18:00»,
@@ -223,8 +223,8 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .impostazioni: return "Sentiti a casa."
         case .note: return "Un'idea alla volta."
         case .studio: return "Il tuo studio."
-        case .messaggi: return "Prisma scrive per te."
-        case .mercato: return "Prisma conosce il mercato."
+        case .messaggi: return "Lucy scrive per te."
+        case .mercato: return "Lucy conosce il mercato."
         case .territorio: return "Il tuo territorio."
         case .pratiche: return "Le pratiche."
         case .sala: return "La sala."
@@ -270,14 +270,14 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .agenda, .attivita: return "Appuntamenti, attività e scadenze delle posizioni."
         case .incontri: return "Preparazione, ascolto, appunti e decisioni, prossimi passi."
         case .posizioni:
-            return "Il cuore di Prisma: le posizioni dei clienti, in essere e in proposta, con il canale Alleanza / indipendente sempre in vista."
+            return "Il cuore di Lucy: le posizioni dei clienti, in essere e in proposta, con il canale Alleanza / indipendente sempre in vista."
         case .analisi360, .prodotti, .confronti, .simulazioni, .obiettivi:
-            return "Fa parte del modulo Posizioni, il cuore di Prisma, con il canale Alleanza / indipendente sempre in vista."
+            return "Fa parte del modulo Posizioni, il cuore di Lucy, con il canale Alleanza / indipendente sempre in vista."
         case .vera: return "Vera arriva con il suo modulo: lettura dei documenti, estrazione dei dati e risposte in chat, tutto sul Mac."
         case .documenti: return "KID, polizze ed estratti conto letti sul Mac, con i dati da confermare."
         case .presentazioni: return "Prospetti dettagliati per il consulente e report essenziali per il cliente, in PDF."
         case .messaggi:
-            return "Vera preparerà i messaggi ai clienti (scadenze, riesami, auguri) dai dati di Prisma, sul Mac: li leggerai, li correggerai e li spedirai tu."
+            return "Vera preparerà i messaggi ai clienti (scadenze, riesami, auguri) dai dati di Lucy, sul Mac: li leggerai, li correggerai e li spedirai tu."
         case .mercato:
             return "Quote dei fondi, tassi e indici aggiornati, con gli avvisi e i clienti toccati da ogni movimento."
         case .studio: return "Il cruscotto del tuo lavoro: ricavi, obiettivi dell'anno, proposte e incassi."

@@ -22,7 +22,7 @@ struct NeutraTavoloiPad: View {
 
     var body: some View {
         VStack(spacing: T.spazioLogo) {
-            LogoPrisma(colore: T.coloreLogo)
+            LogoLucy(colore: T.coloreLogo)
                 .frame(height: T.logo)
             Text(stato ?? " ")
                 .carattereApple(T.stato)

@@ -27,7 +27,7 @@ enum TestiMercato {
     /// di dati pubblici, con l'interruttore spento niente.
     static func riservatezza(attivo: Bool) -> String {
         attivo
-            ? "Dal Mac escono solo le richieste di dati pubblici (BCE, Eurostat): nessun dato dei clienti lascia Prisma."
+            ? "Dal Mac escono solo le richieste di dati pubblici (BCE, Eurostat): nessun dato dei clienti lascia Lucy."
             : "Nessun dato esce dal Mac."
     }
 

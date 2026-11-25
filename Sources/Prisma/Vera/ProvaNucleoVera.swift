@@ -65,7 +65,7 @@ enum ProvaNucleoVera {
                   && ruoli == ["system", "user"] && (opzioni["num_ctx"] as? Int) == 8_192 && c["tools"] == nil,
                   "Ollama: /api/chat in streaming, senza ragionamento, keep_alive e finestra")
         o.pensa = true
-        o.strumenti = [StrumentoModello(nome: "apri_sezione", descrizione: "Apre una sezione di Prisma",
+        o.strumenti = [StrumentoModello(nome: "apri_sezione", descrizione: "Apre una sezione di Lucy",
                                         parametri: ["type": "object", "properties": ["sezione": ["type": "string"]]])]
         let c2 = FornitoreOllama.corpo(modello: "qwen3.5:4b", messaggi: messaggi, opzioni: o)
         let strumento = ((c2["tools"] as? [[String: Any]])?.first?["function"] as? [String: Any])?["name"] as? String
@@ -201,16 +201,16 @@ enum ProvaNucleoVera {
         controlla(lavoro.messaggi.first?.ruolo == .sistema && lavoro.messaggi.first?.testo == IstruzioniVera.chat
                   && chiacchiera.messaggi.first?.testo == IstruzioniVera.conversazione,
                   "Vera: istruzioni fisse in testa, per modalità (Ollama le tiene in cache)")
-        controlla(ultimoLavoro.hasPrefix("CONTESTO: ") && ultimoLavoro.contains("cliente attivo: \(f.cliente.nome)") && ultimoLavoro.contains("app aperte in Prisma: Clienti, Vera")
+        controlla(ultimoLavoro.hasPrefix("CONTESTO: ") && ultimoLavoro.contains("cliente attivo: \(f.cliente.nome)") && ultimoLavoro.contains("app aperte in Lucy: Clienti, Vera")
                   && ultimoLavoro.contains("SCHEDA DEL CLIENTE") && ultimoLavoro.contains("CALCOLI DI PRISMA PERTINENTI"),
-                  "Vera: in lavoro la riga di contesto, la scheda e i calcoli di Prisma")
+                  "Vera: in lavoro la riga di contesto, la scheda e i calcoli di Lucy")
         controlla(ultimoChiacchiera.hasPrefix("CONTESTO: ") && !ultimoChiacchiera.contains("SCHEDA DEL CLIENTE") && ultimoChiacchiera.hasSuffix("Cos'è l'inflazione?"),
                   "Vera: in conversazione niente scheda del cliente")
         controlla(lavoro.opzioni.temperatura == 0.3 && chiacchiera.opzioni.temperatura == 0.7 && !chiacchiera.opzioni.pensa
                   && chiacchiera.opzioni.restaInMemoria == MotoreLocale.restaInMemoria,
                   "Vera: temperatura 0,3 in lavoro e 0,7 in conversazione")
         let spunto = NucleoVera.piano(RichiestaVera(domanda: SpuntoVera.riepilogo.domanda, spunto: .riepilogo, fonte: f, storia: []), impostazioni: vera, ambiente: ambiente)
-        controlla((spunto.messaggi.last?.testo ?? "").contains("BOZZA PREPARATA DA PRISMA"), "Vera: gli spunti portano la bozza di Prisma")
+        controlla((spunto.messaggi.last?.testo ?? "").contains("BOZZA PREPARATA DA PRISMA"), "Vera: gli spunti portano la bozza di Lucy")
         // La modalità scelta nella testata di Vera vince su quella letta dalla domanda
         var inConversazione = ambiente
         inConversazione.modalita = .conversazione
@@ -223,7 +223,7 @@ enum ProvaNucleoVera {
                   "Vera: «Lavoro / Conversazione» della testata decide la modalità")
         let spuntoForzato = NucleoVera.piano(RichiestaVera(domanda: SpuntoVera.riepilogo.domanda, spunto: .riepilogo, fonte: f, storia: []), impostazioni: vera, ambiente: inConversazione)
         controlla(spuntoForzato.scelta.modalita == .lavoro && (spuntoForzato.messaggi.last?.testo ?? "").contains("BOZZA PREPARATA DA PRISMA"),
-                  "Vera: gli spunti restano in lavoro con le cifre di Prisma anche in «Conversazione»")
+                  "Vera: gli spunti restano in lavoro con le cifre di Lucy anche in «Conversazione»")
 
         // Storia: molte battute brevi entrano tutte (oggi più di 4), quelle lunghe si fermano al budget
         var brevi: [MessaggioVera] = []
@@ -246,7 +246,7 @@ enum ProvaNucleoVera {
         var avviso = MessaggioVera(autore: .vera, testo: "Ollama non è aperto.", titolo: "Qwen non è pronto", motore: "Prisma")
         avviso.modalita = nil
         let s3 = NucleoVera.storia([MessaggioVera(autore: .utente, testo: "Ciao"), avviso], budget: 1_000)
-        controlla(s3.count == 1, "Vera: gli avvisi di Prisma restano fuori dalla storia")
+        controlla(s3.count == 1, "Vera: gli avvisi di Lucy restano fuori dalla storia")
         let pieno = NucleoVera.piano(RichiestaVera(domanda: "E quindi?", spunto: nil, fonte: f, storia: lunghe), impostazioni: vera, ambiente: ambiente)
         let totale = pieno.messaggi.reduce(0) { $0 + NucleoVera.token($1.testo) + 4 }
         controlla(totale <= NucleoVera.finestra - NucleoVera.riservaRisposta, "Vera: istruzioni, storia e domanda stanno nella finestra (\(totale) token su \(NucleoVera.finestra))")

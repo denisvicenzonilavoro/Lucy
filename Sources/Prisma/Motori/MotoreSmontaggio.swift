@@ -383,7 +383,7 @@ enum TestiSmontaggio {
 
     static func maiuscola(_ s: String) -> String { s.prefix(1).uppercased() + s.dropFirst() }
 
-    static let vuoto = "Inquadra con l'iPhone o trascina qui un estratto conto, un rendiconto o un KID: Prisma cerchia i costi."
+    static let vuoto = "Inquadra con l'iPhone o trascina qui un estratto conto, un rendiconto o un KID: Lucy cerchia i costi."
     static let nessunCosto = "Non ho trovato voci di costo in questo documento. Se ci sono, segnale tu: clic sulla riga."
     static let scegliProposta = "Scegli un prodotto da confrontare"
     static let provvisoria = "Posizione non registrata: crea la posizione per salvarla."
@@ -397,7 +397,7 @@ enum TestiSmontaggio {
     static let voceIndice = "Smontaggio di un documento"
     static let costiOggi = "Costi l’anno, oggi"
     static let conLaProposta = "Con la tua proposta"
-    static let fraseVuotoCliente = "Inquadra un estratto conto o un rendiconto: Prisma cerchia i costi e li mette in fila, in euro."
+    static let fraseVuotoCliente = "Inquadra un estratto conto o un rendiconto: Lucy cerchia i costi e li mette in fila, in euro."
     static let daAssegnare = "Documento da assegnare"
     static let conservato = "Già nei Documenti del cliente: le voci e le cifre sono quelle di quando è stato aggiunto."
     static func vuotoCliente(_ nome: String) -> String { "Nessun documento smontato per \(nome)." }
@@ -421,7 +421,7 @@ enum TestiSmontaggio {
     }
 
     static func didascalia(rendimento: Double, anni: Int) -> String {
-        "Con la penale, i costi d'ingresso e le tasse. Stima con rendimento lordo del \(percento(rendimento)) l'anno, su \(anni) anni: le ipotesi di Prisma, che puoi cambiare."
+        "Con la penale, i costi d'ingresso e le tasse. Stima con rendimento lordo del \(percento(rendimento)) l'anno, su \(anni) anni: le ipotesi di Lucy, che puoi cambiare."
     }
 
     /// Le righe del fac-simile del template (dati di prova dichiarati), per l'esempio e le prove. Il versato (78.000 €)

@@ -72,13 +72,14 @@ struct IconaCarta: View {
     }
 }
 
-/// La Scrivania nel dock: il prisma a inchiostro con la sottolineatura dorata.
+/// La Scrivania nel dock: il simbolo di Lucy (la L e il disco d'oro).
 struct IconaScrivaniaCarta: View {
     let lato: CGFloat
 
     var body: some View {
         TesseraCarta(lato: lato) {
-            LogoInchiostro(lato: lato * 0.62)
+            LogoLucy()
+                .frame(width: lato * 0.5, height: lato * 0.5)
         }
     }
 }

@@ -9,7 +9,7 @@ extension MotoreSintesi {
         var parti: [String] = []
         let campi = d.campi
         guard !d.tipo.creatoDaPrisma else {
-            return RispostaVera(titolo: d.titolo, testo: "È un documento impaginato da Prisma con i dati del dossier: le cifre sono quelle dei calcoli dell'app. Lo trovi in Prospetti e report, dove posso spiegarlo con «Chiedi a Vera».")
+            return RispostaVera(titolo: d.titolo, testo: "È un documento impaginato da Lucy con i dati del dossier: le cifre sono quelle dei calcoli dell'app. Lo trovi in Prospetti e report, dove posso spiegarlo con «Chiedi a Vera».")
         }
         guard !campi.isEmpty else {
             return RispostaVera(titolo: d.titolo, testo: d.lettura == .illeggibile
@@ -69,7 +69,7 @@ extension MotoreSintesi {
         let elenco = f.documenti.filter { !$0.tipo.creatoDaPrisma }.sorted { $0.importatoIl > $1.importatoIl }
         guard !elenco.isEmpty else {
             return RispostaVera(titolo: "Nessun documento",
-                               testo: "\(f.cliente.nome) non ha ancora documenti. Si importano nella scheda Documenti del cliente (KID, polizze, estratti conto): Prisma li legge sul Mac e io li spiego.")
+                               testo: "\(f.cliente.nome) non ha ancora documenti. Si importano nella scheda Documenti del cliente (KID, polizze, estratti conto): Lucy li legge sul Mac e io li spiego.")
         }
         var righe: [String] = []
         var avvisi: [String] = []

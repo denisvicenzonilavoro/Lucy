@@ -4,7 +4,7 @@ import Foundation
 /// come tali): le condizioni di una polizza «Infortuni famiglia» con gli articoli del template e una proposta della
 /// stessa copertura, migliorata. Nessun prodotto reale, nessuna compagnia reale.
 enum FacSimiliVera {
-    static let avvertenza = "FAC-SIMILE scritto per le prove di Prisma. Nessun prodotto reale."
+    static let avvertenza = "FAC-SIMILE scritto per le prove di Lucy. Nessun prodotto reale."
 
     /// Le condizioni della polizza attuale (due pagine).
     static let polizza: [String] = [

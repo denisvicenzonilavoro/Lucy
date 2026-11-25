@@ -447,7 +447,7 @@ enum TestiDettaglioPosizione {
         case .liquidita:
             let soglia = sogliaMesi ?? 6
             guard let m = mesiSpese else {
-                return "Le spese della famiglia non sono indicate: Prisma non può dire quanti mesi copre la riserva."
+                return "Le spese della famiglia non sono indicate: Lucy non può dire quanti mesi copre la riserva."
             }
             return m >= Double(soglia)
                 ? "La riserva supera i \(soglia) mesi di spese: il resto può lavorare."

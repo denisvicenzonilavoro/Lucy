@@ -107,7 +107,7 @@ struct ModuloImportaPosizioni: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         } piede: {
-            Text("Prima dell'importazione Prisma salva un backup.")
+            Text("Prima dell'importazione Lucy salva un backup.")
                 .font(Tipo.kpiNota)
                 .foregroundColor(Colori.Rubrica.secondario)
             Spacer()

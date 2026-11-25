@@ -152,7 +152,7 @@ struct ScontrinoCarta<Righe: View>: View {
             CodiceScontrino(seme: titolo + totale)
                 .padding(.top, 16)
                 .padding(.horizontal, 30)
-            Text("Lo stesso conto di Prisma AI".uppercased())
+            Text("Lo stesso conto di Lucy AI".uppercased())
                 .fontCarta(k.testata)
                 .tracking(2)
                 .foregroundColor(TemaCarta.Colore.matitaD)

@@ -237,7 +237,7 @@ enum FiscoPolizze {
     /// Le regole applicate, con le fonti (note di metodo dei prospetti).
     static let metodo = [
         "Detrazione IRPEF del 19% dei premi (art. 15 TUIR): caso morte, invalidità permanente oltre il 5% e infortuni fino a 530 € l'anno; con la non autosufficienza fino a 1.291,14 € in tutto; per contribuente, piena fino a 120.000 € di reddito e poi ridotta fino a zero a 240.000 €. Premi pagati con mezzi tracciabili.",
-        "Chi detrae: il contraente, per sé e per i familiari fiscalmente a carico; Prisma considera contraente il cliente per sé e per chi è a carico, e ogni altro familiare assicurato per sé. Non applicato il tetto alle spese detraibili oltre 75.000 € di reddito (art. 16-ter TUIR).",
+        "Chi detrae: il contraente, per sé e per i familiari fiscalmente a carico; Lucy considera contraente il cliente per sé e per chi è a carico, e ogni altro familiare assicurato per sé. Non applicato il tetto alle spese detraibili oltre 75.000 € di reddito (art. 16-ter TUIR).",
         "Capitali caso morte: esenti IRPEF per la parte di rischio demografico (art. 34 D.P.R. 601/1973) e fuori dalla successione (art. 12 D.Lgs. 346/1990); nelle polizze di investimento si tassa il guadagno finanziario. I contratti di capitalizzazione entrano nell'asse.",
         "Imposta di bollo dello 0,20% annuo sui prodotti finanziari (D.P.R. 642/1972, art. 13, c. 2-ter): esenti le polizze di Ramo I (e IV) e i fondi pensione; soggetti il Ramo III, il Ramo V (capitalizzazione) e la parte delle multiramo fuori dalla gestione separata; nelle polizze si paga al riscatto.",
         "Guadagni al 26%, con la parte in titoli di Stato ed equiparati al 12,5% (aliquota ponderata).",

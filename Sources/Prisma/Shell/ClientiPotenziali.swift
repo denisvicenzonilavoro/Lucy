@@ -855,7 +855,7 @@ struct ModuloPotenziale: View {
                 CampoModulo(etichetta: "Nota") {
                     TextField("", text: $bozza.nota, axis: .vertical).textFieldStyle(.roundedBorder).lineLimit(2...4)
                 }
-                Text("L'informativa ai terzi la dai tu: Prisma ne registra solo la data. Senza informativa e consenso «Scrivigli» resta spento.")
+                Text("L'informativa ai terzi la dai tu: Lucy ne registra solo la data. Senza informativa e consenso «Scrivigli» resta spento.")
                     .font(Tipo.campoEtichetta)
                     .foregroundColor(Tema.Colore.inchiostroSecondario)
                     .fixedSize(horizontal: false, vertical: true)

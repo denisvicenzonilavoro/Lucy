@@ -161,7 +161,7 @@ enum RegistroStrumenti {
                       descrizione: "Prepara la bozza di un messaggio per un cliente (non lo invia: il consulente lo apre e lo spedisce lui). «Avvisala» dopo uno spostamento = scopo spostamento.",
                       parametri: oggetto(["cliente": schemaCliente,
                                           "scopo": scelta(["spostamento", "promemoria", "consenso", "saluto", "altro"], "Perché si scrive."),
-                                          "testo": testo("Il testo del messaggio, breve, con il Lei. Vuoto per lo spostamento: lo scrive Prisma.")],
+                                          "testo": testo("Il testo del messaggio, breve, con il Lei. Vuoto per lo spostamento: lo scrive Lucy.")],
                                          richiesti: ["cliente", "scopo"]),
                       disponibile: true, annullabile: true, nelDossier: true),
         StrumentoVera(nome: posizioniScadenza, app: .posizioni,
@@ -171,7 +171,7 @@ enum RegistroStrumenti {
                                          richiesti: ["cliente", "scadenza"]),
                       disponibile: true, annullabile: true, nelDossier: true),
         StrumentoVera(nome: simulatoreApri, app: .simulazioni,
-                      descrizione: "Apre il simulatore di Prisma per un cliente, sulla posizione indicata se c'è.",
+                      descrizione: "Apre il simulatore di Lucy per un cliente, sulla posizione indicata se c'è.",
                       parametri: oggetto(["cliente": schemaCliente, "posizione": testo("La posizione da simulare, se il consulente la dice.")],
                                          richiesti: ["cliente"]),
                       disponibile: true, annullabile: false, nelDossier: true),
@@ -192,7 +192,7 @@ enum RegistroStrumenti {
                                          richiesti: ["testo"]),
                       disponibile: true, annullabile: true, nelDossier: true),
         StrumentoVera(nome: documentiArchivia, app: .documenti,
-                      descrizione: "Archivia un documento trascinato su Prisma nel cliente giusto, con i dati letti.",
+                      descrizione: "Archivia un documento trascinato su Lucy nel cliente giusto, con i dati letti.",
                       parametri: oggetto([:], richiesti: []),
                       disponibile: true, annullabile: true, nelDossier: true, soloPrisma: true),
         // Vera, fase 4: «Le routine» (funzione 3, CollegaRoutineShell.swift): solo Prisma le prepara
@@ -648,7 +648,7 @@ enum RegistroStrumenti {
             }
             let senza = cifreSenzaFonte(testo, fonti: richiesta + "\n" + dettagli)
             if !senza.isEmpty {
-                a.avviso = "Controlla nel testo \(senza.joined(separator: ", ")): non viene da Prisma né dalla tua richiesta."
+                a.avviso = "Controlla nel testo \(senza.joined(separator: ", ")): non viene da Lucy né dalla tua richiesta."
             }
             // «Scrive come te» (fase 4, funzione 15): saluto, chiusura e firma del profilo; una regola grave ancora
             // violata diventa l'avviso
@@ -689,7 +689,7 @@ enum RegistroStrumenti {
         let p: Posizione
         switch posizione(a.testo("posizione"), di: c, x) {
         case .trovato(let t): p = t
-        case .nessuno: return .impossibile("\(c.nome) non ha posizioni in Prisma.")
+        case .nessuno: return .impossibile("\(c.nome) non ha posizioni in Lucy.")
         case .ambiguo(let elenco): return .domanda("Quale posizione di \(c.nome): \(elenco.prefix(4).map { "«\($0.nome)»" }.joined(separator: ", "))?")
         }
         guard let nuova = giorno(a.testo("scadenza"), oggi: x.oggi, cal: x.calendario) else { return .domanda("Qual è la nuova scadenza?") }
@@ -728,6 +728,6 @@ enum RegistroStrumenti {
         return .azione(AzioneConferma(strumento: attivitaNuova, app: .pratiche, titolo: "Segno un'attività per la pratica",
                                       dettaglio: "«\(titolo)» tra le attività di \(c.nome)",
                                       argomenti: ["cliente": c.id, "titolo": titolo, "scadenza": isoData(x.calendario.startOfDay(for: x.oggi))],
-                                      avviso: "Pratiche non è ancora pronta in Prisma: al suo posto ti segno un'attività."))
+                                      avviso: "Pratiche non è ancora pronta in Lucy: al suo posto ti segno un'attività."))
     }
 }

@@ -35,7 +35,7 @@ struct PaginaImpostazioniStudio: View {
         let senzaDecorrenza = stato.cruscottoStudio().posizioniSenzaDecorrenza
         let f = Tema.Apple.Studio.Impostazioni.self
         return VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Pagina.spazioGruppi) {
-            NotaImpostazioni("Studio misura il tuo lavoro con i numeri che scrivi qui: Prisma non li inventa. "
+            NotaImpostazioni("Studio misura il tuo lavoro con i numeri che scrivi qui: Lucy non li inventa. "
                              + "Un campo vuoto resta vuoto, e Studio dice che cosa manca.")
             VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.fraRighe) {
                 GruppoImpostazioni(titolo: "Le tue aliquote \(Canale.alleanza.nomeBreve)") {
@@ -81,8 +81,8 @@ struct PaginaImpostazioniStudio: View {
                             .disabled(stato.solaLettura)
                     }
                     RigaImpostazione(titolo: VoceObiettivoStudio.nuoviClienti.nome,
-                                     sottotitolo: "Clienti inseriti in Prisma nell’anno",
-                                     aiuto: "Si contano dalla data in cui il cliente è stato inserito in Prisma.") {
+                                     sottotitolo: "Clienti inseriti in Lucy nell’anno",
+                                     aiuto: "Si contano dalla data in cui il cliente è stato inserito in Lucy.") {
                         CampoNumeroStudio(etichetta: nil, unita: "clienti", larghezza: f.campoNumero, decimali: 0,
                                           valore: legameObiettivo(.nuoviClienti))
                             .disabled(stato.solaLettura)
@@ -95,7 +95,7 @@ struct PaginaImpostazioniStudio: View {
                             .disabled(stato.solaLettura)
                     }
                 }
-                NotaImpostazioni("Un obiettivo vuoto non disegna il suo anello. Quanto hai fatto lo calcola Prisma dai tuoi dati.")
+                NotaImpostazioni("Un obiettivo vuoto non disegna il suo anello. Quanto hai fatto lo calcola Lucy dai tuoi dati.")
             }
             // Chilometri, spese e scadenze («Luce» giro 9, ImpostazioniSpeseVista.swift), con la sua ancora
             #if os(macOS)

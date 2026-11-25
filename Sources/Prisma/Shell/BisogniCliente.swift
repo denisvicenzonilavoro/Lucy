@@ -129,7 +129,7 @@ struct BisogniCliente: View {
         let scartati = rilevati.filter { profilo.esiti[$0.id] == false }
         OcchielloSezione(titolo: "Rilevati dai dati", nota: rilevati.isEmpty ? "Nessun segnale nei dati" : "Conferma o scarta: la ruota si aggiorna")
         if rilevati.isEmpty {
-            Text("Più dati inserisci (famiglia, posizioni, Analisi 360), più Prisma riesce a suggerire i bisogni.")
+            Text("Più dati inserisci (famiglia, posizioni, Analisi 360), più Lucy riesce a suggerire i bisogni.")
                 .font(Tipo.bisognoTesto)
                 .foregroundColor(Colori.Rubrica.secondario)
         }

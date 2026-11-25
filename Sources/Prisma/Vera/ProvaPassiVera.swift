@@ -115,7 +115,7 @@ enum ProvaPassiVera {
         let piano = PassiVera.eseguiTutto(PassiVera.piano(r, dati: dati), dati: dati)
         controlla(piano.finito && piano.divisioni.count == 3 && piano.divisioni.allSatisfy { abs($0.totaleObiettivi - 30_000) < 1 && $0.protezioneMensile == 0 }
                   && piano.consigliata != nil && !piano.passi.contains { $0.strumento == .leggiProtezione },
-                  "Altre richieste: tre divisioni dei 30.000 €, tutte senza protezione, e la scelta con la regola di Prisma")
+                  "Altre richieste: tre divisioni dei 30.000 €, tutte senza protezione, e la scelta con la regola di Lucy")
         controlla(piano.passi.first { $0.strumento == .leggiObiettivo }?.esito.contains("al mese") == false
                   && !piano.vincoli.contains { $0.tipo == .sostenibilita } && piano.spiegazione.contains("Ti consiglio")
                   && PassiVera.azioni(piano, cliente: dati.cliente).first?.argomenti["testo"]?.contains("una tantum") == true,
@@ -200,7 +200,7 @@ enum ProvaPassiVera {
         let letto = PassiVera.leggiPiano(buono, richiesta: r, dati: dati)
         controlla(letto?.count == 4 && letto?[1].obiettivoId == "obiettivo-prova-studi" && letto?[0].titolo == "Leggo la protezione di Elena",
                   "Piano di Qwen: valido, con l'obiettivo risolto e i titoli di Qwen: \(letto?.map(\.titolo) ?? [])")
-        controlla(letto?[2].titolo == "Simulo tre divisioni dei 400 €", "Piano di Qwen: un titolo con cifre lascia il posto a quello di Prisma: \(letto?[2].titolo ?? "")")
+        controlla(letto?[2].titolo == "Simulo tre divisioni dei 400 €", "Piano di Qwen: un titolo con cifre lascia il posto a quello di Lucy: \(letto?[2].titolo ?? "")")
 
         let senzaScelta = #"{"passi":[{"strumento":"leggi_protezione","titolo":"Leggo"},{"strumento":"leggi_obiettivo","titolo":"Guardo"},{"strumento":"simula_divisioni","titolo":"Simulo"},{"strumento":"controlla_vincoli","titolo":"Controllo"}]}"#
         controlla(PassiVera.leggiPiano(senzaScelta, richiesta: r, dati: dati)?.last?.strumento == .scegliESpiega,
@@ -240,11 +240,11 @@ enum ProvaPassiVera {
         controlla(altri && piano.passi[0].stato == .fatto && piano.passi[1...].allSatisfy { $0.stato == .daFare },
                   "Esecuzione: un passo alla volta")
         controlla(piano.passi[0].esito.contains("725.000 €") && piano.passi[0].esito.contains("150.000 €") && piano.passi[0].esito.contains("al mese"),
-                  "Esecuzione: la protezione letta da Prisma (fabbisogno, coperture e premio per colmare): \(piano.passi[0].esito)")
+                  "Esecuzione: la protezione letta da Lucy (fabbisogno, coperture e premio per colmare): \(piano.passi[0].esito)")
         piano = PassiVera.eseguiTutto(piano, dati: dati)
         controlla(piano.finito && piano.passi.allSatisfy { !$0.esito.isEmpty }, "Esecuzione: tutti i passi fatti, ognuno con il suo esito")
         controlla(piano.passi[1].esito.contains("25.000 €") && piano.passi[1].esito.contains("settembre 2036") && piano.passi[1].esito.contains("5.400 €"),
-                  "Esecuzione: l'obiettivo letto da Prisma: \(piano.passi[1].esito)")
+                  "Esecuzione: l'obiettivo letto da Lucy: \(piano.passi[1].esito)")
 
         let d = piano.divisioni
         controlla(d.map(\.tipo) == TipoDivisione.allCases && d.map(\.titolo) == ["Più protezione", "Equilibrio", "Più per «Università di Anna»"],
@@ -257,7 +257,7 @@ enum ProvaPassiVera {
         let capitali = d.compactMap(\.capitaleAggiunto)
         controlla(capitali.count == 3 && capitali[0] >= capitali[1] && capitali[1] > capitali[2]
                   && capitali.allSatisfy { $0.truncatingRemainder(dividingBy: 5_000) == 0 },
-                  "Divisioni: il capitale dalla tariffa di Prisma (3,6 € ogni 1.000 €), a multipli di 5.000 €: \(capitali.map { CifreDoc.euro($0) })")
+                  "Divisioni: il capitale dalla tariffa di Lucy (3,6 € ogni 1.000 €), a multipli di 5.000 €: \(capitali.map { CifreDoc.euro($0) })")
         // 120 € al mese di premio = 1.440 € l'anno = 400.000 € di capitale con la tariffa del cliente
         controlla(d.last?.capitaleAggiunto == 400_000, "Divisioni: 120 € al mese comprano 400.000 € di capitale caso morte")
         controlla(d[0].reggeObiettivi == false && d[1].reggeObiettivi && d[2].reggeObiettivi,
@@ -277,8 +277,8 @@ enum ProvaPassiVera {
                   "Vincoli: 400 € su 31.500 € netti l'anno sono sostenibili e bastano per gli studi")
         controlla(piano.spiegazione.hasPrefix("Ti consiglio «Equilibrio»") && piano.spiegazione.contains("Elena")
                   && piano.spiegazione.contains("settembre 2036") && piano.spiegazione.contains("Prima, però: Infortuni famiglia da rinnovare entro il 17 dicembre"),
-                  "Spiegazione: la bozza di Prisma dice la scelta, il perché e il vincolo: \(piano.spiegazione)")
-        controlla(!piano.spiegazioneConQwen, "Spiegazione: senza Qwen resta la bozza di Prisma")
+                  "Spiegazione: la bozza di Lucy dice la scelta, il perché e il vincolo: \(piano.spiegazione)")
+        controlla(!piano.spiegazioneConQwen, "Spiegazione: senza Qwen resta la bozza di Lucy")
     }
 
     // MARK: - La spiegazione di Qwen
@@ -287,10 +287,10 @@ enum ProvaPassiVera {
         let piano = PassiVera.eseguiTutto(PassiVera.piano(r, dati: dati), dati: dati)
         let m = PassiVera.messaggiSpiegazione(piano)
         controlla(m.count == 2 && m[1].testo.contains("Equilibrio") && m[1].testo.contains(PassiVera.regola),
-                  "Spiegazione: a Qwen vanno la regola, la scelta di Prisma e il riepilogo")
+                  "Spiegazione: a Qwen vanno la regola, la scelta di Lucy e il riepilogo")
         let buona = #"{"spiegazione":"Ti consiglio Equilibrio: porta «Università di Anna» in tempo per settembre 2036 e intanto protegge Elena. Prima, però, rinnova Infortuni famiglia entro il 17 dicembre."}"#
         let p = PassiVera.conSpiegazione(buona, piano: piano)
-        controlla(p.spiegazioneConQwen && p.spiegazione.hasPrefix("Ti consiglio Equilibrio"), "Spiegazione: il testo di Qwen con le cifre di Prisma si tiene")
+        controlla(p.spiegazioneConQwen && p.spiegazione.hasPrefix("Ti consiglio Equilibrio"), "Spiegazione: il testo di Qwen con le cifre di Lucy si tiene")
         let cifraNuova = #"{"spiegazione":"Ti consiglio Equilibrio: rende il 9,5% l'anno e protegge Elena."}"#
         controlla(PassiVera.leggiSpiegazione(cifraNuova, piano: piano) == nil, "Spiegazione: una cifra inventata da Qwen fa tenere la bozza")
         let altraScelta = #"{"spiegazione":"Ti consiglio Più protezione: Elena è al sicuro."}"#
@@ -300,7 +300,7 @@ enum ProvaPassiVera {
                   "Spiegazione: «L'Equilibrio non basta: ti consiglio Più protezione» nomina la scelta ma ne consiglia un'altra, resta la bozza")
         let confronto = #"{"spiegazione":"Ti consiglio Equilibrio: rispetto a Più protezione porta «Università di Anna» in tempo per settembre 2036 e protegge Elena."}"#
         controlla(PassiVera.leggiSpiegazione(confronto, piano: piano) != nil,
-                  "Spiegazione: consigliare la scelta di Prisma confrontandola con un'altra divisione va bene")
+                  "Spiegazione: consigliare la scelta di Lucy confrontandola con un'altra divisione va bene")
         if let scelta = piano.divisioneConsigliata {
             let divs = piano.divisioni
             controlla(scelta.tipo == .equilibrio
@@ -317,7 +317,7 @@ enum ProvaPassiVera {
                       && !PassiVera.consigliaSolo(scelta, tra: divs, testo: "Ti consiglio Equilibrio, anche se Più protezione sarebbe meglio."),
                       "Spiegazione: «Più protezione è la scelta migliore» o «sarebbe meglio», con la divisione prima della parola, fanno tenere la bozza")
             controlla(PassiVera.consigliaSolo(scelta, tra: divs, testo: "Più protezione copre di più, ma Equilibrio è la scelta migliore per Elena."),
-                      "Spiegazione: «Equilibrio è la scelta migliore» dopo aver nominato un'altra divisione consiglia la scelta di Prisma")
+                      "Spiegazione: «Equilibrio è la scelta migliore» dopo aver nominato un'altra divisione consiglia la scelta di Lucy")
         } else {
             controlla(false, "Spiegazione: manca la divisione consigliata per le prove di consigliaSolo")
         }

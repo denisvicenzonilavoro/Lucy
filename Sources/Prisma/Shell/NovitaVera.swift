@@ -90,8 +90,8 @@ enum NovitaVera: String, CaseIterable, Identifiable {
     /// l'esportazione di «Vera su misura» aspetta la tua approvazione).
     var frase: String {
         switch self {
-        case .falloTu: return "Le chiedi una cosa a parole e Vera la fa, in qualsiasi app di Prisma, dopo la tua conferma"
-        case .clientela: return "Domande su tutti i clienti insieme: Vera le traduce in filtri, Prisma fa il calcolo"
+        case .falloTu: return "Le chiedi una cosa a parole e Vera la fa, in qualsiasi app di Lucy, dopo la tua conferma"
+        case .clientela: return "Domande su tutti i clienti insieme: Vera le traduce in filtri, Lucy fa il calcolo"
         case .routine: return "Sequenze di lavoro salvate una volta e lanciate con una frase"
         case .agenda: return "Gli orari giusti, gli spostamenti in blocco, due orari da proporre al cliente"
         case .tagliando: return "Ogni notte il controllo dell’archivio: tu approvi le correzioni"
@@ -109,11 +109,11 @@ enum NovitaVera: String, CaseIterable, Identifiable {
         case .treLivelli: return "La stessa spiegazione per te, per il cliente e in una pagina"
         case .memoria: return "I ricordi su di te e sui clienti: si vedono, si correggono, si cancellano"
         case .maiACaso: return "Ogni cifra con la sua fonte; se manca, Vera lo dice"
-        case .ragionaAPassi: return "Un piano visibile, eseguito un passo alla volta con i motori di Prisma"
+        case .ragionaAPassi: return "Un piano visibile, eseguito un passo alla volta con i motori di Lucy"
         case .impara: return "Pollici e correzioni diventano lezioni"
         case .suMisura: return "L’addestramento sui tuoi esempi resi anonimi, solo se supera l’esame"
-        case .dueVelocita: return TestiStatoVera.inVista(mac: "Le cose rapide alle regole di Prisma, il resto a Vera sul Mac (il modello Apple è spento)",
-                                                   altrove: "Le cose rapide alle regole di Prisma, il resto a Qwen (il modello Apple è spento)")
+        case .dueVelocita: return TestiStatoVera.inVista(mac: "Le cose rapide alle regole di Lucy, il resto a Vera sul Mac (il modello Apple è spento)",
+                                                   altrove: "Le cose rapide alle regole di Lucy, il resto a Qwen (il modello Apple è spento)")
         case .filoLungo: return "Più contesto e un riassunto progressivo: nelle chat lunghe Vera non perde il filo"
         case .cervelloGrande: return "Un motore esterno predisposto e non collegato: i dati dei clienti restano sul Mac"
         }
@@ -341,7 +341,7 @@ enum ProvaNovitaVera {
                   && NovitaVera.cervelloGrande.numero == 25,
                   "Novità di Vera: i cinque gruppi del template, con i numeri del brief")
         controlla(NovitaVera.dueVelocita.frase.contains("spento") && NovitaVera.cervelloGrande.frase.contains("non collegato"),
-                  "Novità di Vera: le frasi dicono ciò che Prisma fa davvero (modello Apple spento, motore esterno non collegato)")
+                  "Novità di Vera: le frasi dicono ciò che Lucy fa davvero (modello Apple spento, motore esterno non collegato)")
         for v in tutte {
             let s = StatoShell(persistente: false)
             s.clienteAttivoId = "marco"

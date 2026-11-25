@@ -173,8 +173,8 @@ extension StatoShell {
         var t = fatti == e.passi.count ? "Ecco «\(e.titolo)», passo per passo." : "Ecco «\(e.titolo)»: \(fatti) passi su \(e.passi.count), gli altri te li segnalo."
         switch e.azioni.count {
         case 0: break
-        case 1: t += " L'azione che cambia qualcosa in Prisma aspetta la tua «Conferma»."
-        default: t += " Le \(SchedaConfermaVera.numero(e.azioni.count)) azioni che cambiano qualcosa in Prisma aspettano la tua «Conferma»."
+        case 1: t += " L'azione che cambia qualcosa in Lucy aspetta la tua «Conferma»."
+        default: t += " Le \(SchedaConfermaVera.numero(e.azioni.count)) azioni che cambiano qualcosa in Lucy aspettano la tua «Conferma»."
         }
         return t
     }
@@ -368,7 +368,7 @@ extension StatoShell {
         let passi = r.passi.enumerated().map { "\($0.offset + 1). \($0.element.tipo.descrizione)" }.joined(separator: "\n")
         let quando: String
         if let p = r.programmazione {
-            quando = "Parte da sola: \(p.etichetta.prefix(1).lowercased() + p.etichetta.dropFirst()), con Prisma aperto."
+            quando = "Parte da sola: \(p.etichetta.prefix(1).lowercased() + p.etichetta.dropFirst()), con Lucy aperta."
         } else if RoutineVera.programmazioneTolta(richiesta: richiesta, routine: r) {
             quando = "Ha passi su un cliente: non può partire da sola. La lanci dicendo «\(r.frase)» e scegli il cliente."
         } else {
@@ -572,7 +572,7 @@ extension StatoShell {
     func eseguiPosizioneFirmataRoutine(_ a: AzioneConferma) -> EsitoAzioneVera {
         let arg = a.argomenti
         guard let id = arg["posizione"], let i = dati.posizioni.firstIndex(where: { $0.id == id }) else {
-            return EsitoAzioneVera(fatta: false, messaggio: "La proposta non è più in Prisma.")
+            return EsitoAzioneVera(fatta: false, messaggio: "La proposta non è più in Lucy.")
         }
         let prima = dati.posizioni[i]
         if let c = arg["cliente"], c != prima.clienteId { return EsitoAzioneVera(fatta: false, messaggio: "La proposta non è più di questo cliente.") }

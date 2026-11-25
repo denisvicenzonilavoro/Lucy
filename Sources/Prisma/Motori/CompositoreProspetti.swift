@@ -216,7 +216,7 @@ enum CompositoreProspetti {
                     }
                 )))
                 var riy: [CampoVoce] = [
-                    CampoVoce(etichetta: "RIY calcolato da Prisma a \(kid.periodoRaccomandato) \(kid.periodoRaccomandato == 1 ? "anno" : "anni")",
+                    CampoVoce(etichetta: "RIY calcolato da Lucy a \(kid.periodoRaccomandato) \(kid.periodoRaccomandato == 1 ? "anno" : "anni")",
                               valore: kid.calcolato.map { percentuale2($0) } ?? "—"),
                     CampoVoce(etichetta: "RIY dichiarato nel KID", valore: kid.dichiarato.map { percentuale2($0) } ?? "non indicato"),
                 ]

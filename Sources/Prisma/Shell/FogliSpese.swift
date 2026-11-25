@@ -115,7 +115,7 @@ private struct FoglioInquadraScontrino: View {
                     if let errore {
                         NotaFoglio(testo: errore, colore: M.coloreAvviso)
                     }
-                    NotaFoglio(testo: "Prisma legge lo scontrino qui sul Mac e ti propone data, importo ed esercente: "
+                    NotaFoglio(testo: "Lucy legge lo scontrino qui sul Mac e ti propone data, importo ed esercente: "
                                + "controlli e scegli tu la categoria. Niente esce dal Mac.")
                 }
             } piede: {
@@ -167,7 +167,7 @@ private struct FoglioInquadraScontrino: View {
 
     private func accetta(_ url: URL) {
         guard LetturaDocumenti.estensioniAccettate.contains(url.pathExtension.lowercased()) else {
-            errore = "Prisma legge foto (JPG, PNG, HEIC, TIFF) e PDF: questo file non lo riconosce."
+            errore = "Lucy legge foto (JPG, PNG, HEIC, TIFF) e PDF: questo file non lo riconosce."
             return
         }
         file = url
@@ -270,7 +270,7 @@ struct ModuloSpesaStudio: View {
                             MenuTendina(selezione: $bozza.categoria, opzioni: CategoriaSpesa.allCases.map { ($0, $0.nome) },
                                         larghezza: M.sceltaPresso)
                             if proposta?.categoria != nil, bozza.categoria == proposta?.categoria {
-                                NotaFoglio(testo: "proposta da Prisma: la scegli tu")
+                                NotaFoglio(testo: "proposta da Lucy: la scegli tu")
                             }
                         }
                     }
@@ -295,7 +295,7 @@ struct ModuloSpesaStudio: View {
                             Toggle("Da controllare", isOn: $bozza.daControllare).stileCasella()
                         }
                     }
-                    NotaFoglio(testo: "Prisma riporta solo i fatti: deducibilità e IVA le valuta il tuo commercialista.")
+                    NotaFoglio(testo: "Lucy riporta solo i fatti: deducibilità e IVA le valuta il tuo commercialista.")
                 }
                 anteprima
             }
@@ -330,7 +330,7 @@ struct ModuloSpesaStudio: View {
             }
             Button("Lascia com’è", role: .cancel) {}
         } message: {
-            Text("La spesa e il file del suo scontrino si tolgono da Prisma. Restano nei backup già fatti.")
+            Text("La spesa e il file del suo scontrino si tolgono da Lucy. Restano nei backup già fatti.")
         }
     }
 
@@ -461,7 +461,7 @@ private struct ModuloScadenzaStudio: View {
                         Toggle(bozza.ricorrenza == nil ? "Fatta" : "Fatta (nasce la prossima)", isOn: $fatta).stileCasella()
                     }
                 }
-                NotaFoglio(testo: "Prisma non conosce il calendario fiscale: le scadenze sono quelle che scrivi tu.")
+                NotaFoglio(testo: "Lucy non conosce il calendario fiscale: le scadenze sono quelle che scrivi tu.")
             }
         } piede: {
             if !nuova {
@@ -498,7 +498,7 @@ private struct ModuloScadenzaStudio: View {
             }
             Button("Lascia com’è", role: .cancel) {}
         } message: {
-            Text("La scadenza si toglie da Prisma. Resta nei backup già fatti.")
+            Text("La scadenza si toglie da Lucy. Resta nei backup già fatti.")
         }
     }
 }
@@ -625,8 +625,8 @@ private struct FoglioCorsiStudio: View {
             Button("Lascia com’è", role: .cancel) { daEliminare = nil }
         } message: {
             Text(daEliminare?.attestato == nil
-                 ? "Il corso «\(daEliminare?.titolo ?? "")» si toglie da Prisma. Resta nei backup già fatti."
-                 : "Il corso «\(daEliminare?.titolo ?? "")» e il file del suo attestato si tolgono da Prisma. Restano nei backup già fatti.")
+                 ? "Il corso «\(daEliminare?.titolo ?? "")» si toglie da Lucy. Resta nei backup già fatti."
+                 : "Il corso «\(daEliminare?.titolo ?? "")» e il file del suo attestato si tolgono da Lucy. Restano nei backup già fatti.")
         }
     }
 
@@ -664,7 +664,7 @@ private struct FoglioVisiteSpese: View {
         return CorniceModulo(titolo: "Le visite di \(TestiSpese.mese(mese))") {
             VStack(alignment: .leading, spacing: M.spazioRighe) {
                 NotaFoglio(testo: "I km sono quelli di andata e ritorno che scrivi per ogni cliente; se un giro unisce più "
-                           + "clienti, correggilo a mano con il doppio clic sui km nella card. Prisma non usa servizi di percorso.")
+                           + "clienti, correggilo a mano con il doppio clic sui km nella card. Lucy non usa servizi di percorso.")
                 if km.vuoto {
                     NotaFoglio(testo: TestiSpese.nessunKm(mese))
                 }

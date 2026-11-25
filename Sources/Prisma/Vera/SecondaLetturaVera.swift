@@ -66,11 +66,11 @@ enum SecondaLetturaVera {
             if let v = vicina {
                 let corretta = v.unita == .euro ? Formati.euro(v.valore) : (v.unita == .percento ? Formati.percentuale(v.valore) : FontiVera.testoValore(v.valore))
                 avvisi.append(AvvisoLettura(tipo: .numero, gravita: .arancio, titolo: "Il numero non torna",
-                                            dettaglio: "«\(c.testo)» non è in Prisma; nella fonte c'è \(corretta) (\(v.origine)).",
+                                            dettaglio: "«\(c.testo)» non è in Lucy; nella fonte c'è \(corretta) (\(v.origine)).",
                                             trovato: c.testo, correzione: corretta))
             } else {
                 avvisi.append(AvvisoLettura(tipo: .numero, gravita: .arancio, titolo: "Una cifra senza fonte",
-                                            dettaglio: "«\(c.testo)» non viene dalla scheda né dai calcoli di Prisma: controllala.", trovato: nil, correzione: nil))
+                                            dettaglio: "«\(c.testo)» non viene dalla scheda né dai calcoli di Lucy: controllala.", trovato: nil, correzione: nil))
             }
         }
         // 3. Gli allegati
@@ -116,7 +116,7 @@ enum SecondaLetturaVera {
     }
 
     static var istruzioniMotivazione: String {
-        IstruzioniVera.testo("motivazione") ?? "Scrivi la motivazione di adeguatezza di una proposta, a partire dalla bozza di Prisma: tre o quattro frasi in italiano, formali, in terza persona sul cliente. Usa solo i fatti e le cifre della bozza, senza cambiarle e senza aggiungerne. Niente promesse di rendimento."
+        IstruzioniVera.testo("motivazione") ?? "Scrivi la motivazione di adeguatezza di una proposta, a partire dalla bozza di Lucy: tre o quattro frasi in italiano, formali, in terza persona sul cliente. Usa solo i fatti e le cifre della bozza, senza cambiarle e senza aggiungerne. Niente promesse di rendimento."
     }
 
     static func messaggiMotivazione(_ bozza: String, cliente: String) -> [MessaggioModello] {

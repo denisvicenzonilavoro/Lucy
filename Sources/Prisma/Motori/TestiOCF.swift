@@ -66,12 +66,12 @@ enum TestiOCF {
         "Nell'intestazione del CSV mancano le colonne: \(c.joined(separator: ", "))."
     }
     static let jsonRotto = "Il file non è un JSON valido."
-    static let strutturaJSON = "Il JSON non ha la struttura delle domande di Prisma (servono «formato», «versione» e l'elenco «domande»)."
+    static let strutturaJSON = "Il JSON non ha la struttura delle domande di Lucy (servono «formato», «versione» e l'elenco «domande»)."
     static func formatoSconosciuto(_ f: String?) -> String {
         "Formato «\(f ?? "")» non riconosciuto: serve «\(ImportaOCF.formato)»."
     }
     static let versioneMancante = "Manca la versione del formato."
     static func versioneSconosciuta(_ v: Int) -> String {
-        "Versione \(v) del formato non riconosciuta: Prisma legge la versione \(ImportaOCF.versione)."
+        "Versione \(v) del formato non riconosciuta: Lucy legge la versione \(ImportaOCF.versione)."
     }
 }

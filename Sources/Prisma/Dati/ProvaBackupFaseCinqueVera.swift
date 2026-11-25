@@ -93,11 +93,11 @@ extension ProvaBackup {
         // Prisma ovunque: le impostazioni di Vera restano sul Mac
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.impostazioni.vera.suMisura == ImpostazioniSuMisura(), ist.impostazioni.vera.motoreEsterno == ImpostazioniMotoreEsterno() else {
-            return "Vera su misura e il motore esterno non devono entrare nell'istantanea di Prisma ovunque"
+            return "Vera su misura e il motore esterno non devono entrare nell'istantanea di Lucy ovunque"
         }
         let byte = try Archivio.codificatore.encode(ist)
         guard byte.range(of: Data(versioneInUsoDiProva.utf8)) == nil else {
-            return "il nome della Vera su misura è finito nell'istantanea di Prisma ovunque"
+            return "il nome della Vera su misura è finito nell'istantanea di Lucy ovunque"
         }
         return nil
     }

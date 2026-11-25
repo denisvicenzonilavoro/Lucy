@@ -231,8 +231,8 @@ enum ProvaCalcoliRiferimenti {
     private static func valoriDiPrisma(_ verifica: VerificaCalcoli) {
         let t = TabellaRiferimenti(RiferimentiRendimento())
         let v2022 = t.valore(SerieRiferimento.idInflazione, anno: 2022)
-        verifica("Riferimenti: RF12 inflazione 2022 di Prisma", v2022?.valore ?? -1, 11.3, tolleranza: 1e-9)
-        verifica.vero("Riferimenti: RF12 origine di Prisma", v2022?.origine == .prisma)
+        verifica("Riferimenti: RF12 inflazione 2022 di Lucy", v2022?.valore ?? -1, 11.3, tolleranza: 1e-9)
+        verifica.vero("Riferimenti: RF12 origine di Lucy", v2022?.origine == .prisma)
         verifica.vero("Riferimenti: RF12 il 2020 non è precompilato", t.valore(SerieRiferimento.idInflazione, anno: 2020) == nil)
         verifica.vero("Riferimenti: RF12 il 2019 non è precompilato", t.valore(SerieRiferimento.idInflazione, anno: 2019) == nil)
         verifica("Riferimenti: RF12 ultimo anno dell'inflazione", Double(t.ultimoAnno(SerieRiferimento.idInflazione) ?? -1), 2023)
@@ -240,7 +240,7 @@ enum ProvaCalcoliRiferimenti {
         verifica("Riferimenti: RF12 ultimo anno del TFR", Double(t.ultimoAnno(SerieRiferimento.idTFR) ?? -1), 2023)
         verifica("Riferimenti: RF12 TFR 2023 dall'inflazione 0,6", t.valore(SerieRiferimento.idTFR, anno: 2023)?.valore ?? -1, 1.6185, tolleranza: 1e-9)
         let elenco: [SerieRiferimento] = t.serie
-        verifica.vero("Riferimenti: RF12 serie di Prisma in ordine",
+        verifica.vero("Riferimenti: RF12 serie di Lucy in ordine",
                       elenco.map(\.id) == [SerieRiferimento.idInflazione, SerieRiferimento.idTFR, SerieRiferimento.idGestioniSeparate])
         verifica.vero("Riferimenti: RF12 un indice sconosciuto non ha valori", t.valore("indice-sconosciuto", anno: 2022) == nil)
     }
@@ -279,7 +279,7 @@ enum ProvaCalcoliRiferimenti {
         verifica.vero("Riferimenti: anni stimati al plurale",
                       TestiRiferimenti.stimati([2025, 2026], ultimo: 2024).hasPrefix("Il 2025 e il 2026 non sono ancora pubblicati"))
         verifica.vero("Riferimenti: anno stimato al singolare",
-                      TestiRiferimenti.stimati([2026], ultimo: 2025) == "Il 2026 non è ancora pubblicato: Prisma usa il valore del 2025. A inizio anno aggiorna i valori.")
+                      TestiRiferimenti.stimati([2026], ultimo: 2025) == "Il 2026 non è ancora pubblicato: Lucy usa il valore del 2025. A inizio anno aggiorna i valori.")
         verifica.vero("Riferimenti: anni mancanti",
                       TestiRiferimenti.mancanti([2019, 2018], inflazione) == "Mancano i valori del 2018 e del 2019 per «Inflazione (FOI)»: senza, il confronto non si può fare.")
         verifica.vero("Riferimenti: valori da aggiornare",

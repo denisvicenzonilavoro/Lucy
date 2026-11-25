@@ -129,7 +129,7 @@ enum ProvaOvunque {
             try provaNotteOvunque()
             try controllaGiro15()
             try provaSpazio(radice: radice)
-            print("Prova di Prisma ovunque riuscita")
+            print("Prova di Lucy ovunque riuscita")
             return 0
         } catch let f as Fallita {
             print("ERRORE: \(f.motivo)")
@@ -214,7 +214,7 @@ enum ProvaOvunque {
         let codificato = try Archivio.codificatore.encode(dati)
         let letto = try Archivio.decodifica(codificato)
         try controlla(letto.impostazioni.ovunque == o, "le impostazioni dello spazio non tornano uguali dall'archivio")
-        try controlla(DatiPrisma.versioneAttuale >= 26, "l'archivio con Prisma ovunque deve essere almeno alla versione 26")
+        try controlla(DatiPrisma.versioneAttuale >= 26, "l'archivio con Lucy ovunque deve essere almeno alla versione 26")
 
         guard var radice = try JSONSerialization.jsonObject(with: codificato) as? [String: Any],
               var impostazioni = radice["impostazioni"] as? [String: Any] else {
@@ -226,7 +226,7 @@ enum ProvaOvunque {
         for k in ["giornaleOvunque", "conflittiOvunque", "arriviOvunque", "inquadratureDaConfermare"] { radice.removeValue(forKey: k) }
         let senza = try Archivio.decodifica(JSONSerialization.data(withJSONObject: radice))
         try controlla(senza.impostazioni.ovunque == ImpostazioniOvunque() && senza.giornaleOvunque.isEmpty && senza.conflittiOvunque.isEmpty
-                      && senza.clienti == letto.clienti, "un archivio senza Prisma ovunque non si apre con lo spazio spento")
+                      && senza.clienti == letto.clienti, "un archivio senza Lucy ovunque non si apre con lo spazio spento")
         // Impostazioni illeggibili: spazio spento, archivio aperto
         impostazioni["ovunque"] = "non sono impostazioni"
         radice["impostazioni"] = impostazioni
@@ -288,7 +288,7 @@ enum ProvaOvunque {
         dati.impostazioni.sala.scattoConStanza = true
         let istantanea = SpazioOvunque.datiIstantanea(dati)
         try controlla(!istantanea.documenti.contains { $0.id == scatto.id || $0.scattoRealta != nil },
-                      "lo scatto della realtà aumentata entra nell'istantanea di Prisma ovunque")
+                      "lo scatto della realtà aumentata entra nell'istantanea di Lucy ovunque")
         try controlla(istantanea.documenti.contains { $0.id == altro.id }, "gli altri documenti non entrano più nell'istantanea")
         let chiaro = try JSONOvunque.codificatore().encode(istantanea)
         let letto = try JSONOvunque.decodificatore().decode(DatiPrisma.self, from: chiaro)
@@ -319,12 +319,12 @@ enum ProvaOvunque {
         dati.kmClienti = ProvaBackup.kmClientiDiProvaBackup
         try controlla(!dati.speseStudio.vuoto && !dati.kmClienti.isEmpty, "i dati di prova delle spese sono vuoti")
         let istantanea = SpazioOvunque.datiIstantanea(dati)
-        try controlla(istantanea.speseStudio == ArchivioSpese(), "le spese del consulente entrano nell'istantanea di Prisma ovunque")
+        try controlla(istantanea.speseStudio == ArchivioSpese(), "le spese del consulente entrano nell'istantanea di Lucy ovunque")
         try controlla(istantanea.impostazioni.studio.spese == ImpostazioniSpese() && istantanea.kmClienti.isEmpty,
-                      "i km per cliente e le correzioni dei giri entrano nell'istantanea di Prisma ovunque")
+                      "i km per cliente e le correzioni dei giri entrano nell'istantanea di Lucy ovunque")
         let chiaro = String(data: try JSONOvunque.codificatore().encode(istantanea), encoding: .utf8) ?? ""
         try controlla(!chiaro.contains("Pranzo di lavoro (prova)") && !chiaro.contains("Corso di prova"),
-                      "un testo delle spese è nell'istantanea di Prisma ovunque")
+                      "un testo delle spese è nell'istantanea di Lucy ovunque")
         // Sul dispositivo: l'istantanea del Mac (senza spese) non cancella quelle locali
         let ist = IstantaneaOvunque(generazione: 1, mac: "mac-prova", nomeMac: "Mac", scrittaIl: Date(), vistoFinoA: [:], lamport: 0,
                                     modificheAmmesse: true, dati: istantanea)
@@ -361,7 +361,7 @@ enum ProvaOvunque {
         dati.impostazioni.territorio.fattoreStrada = 1.5
         let istantanea = SpazioOvunque.datiIstantanea(dati)
         try controlla(istantanea.clienti[0].luogo == dati.clienti[0].luogo && istantanea.impostazioni.territorio.fattoreStrada == 1.5,
-                      "la posizione a mano o le impostazioni del Territorio non entrano nell'istantanea di Prisma ovunque")
+                      "la posizione a mano o le impostazioni del Territorio non entrano nell'istantanea di Lucy ovunque")
         let letta = try JSONOvunque.decodificatore().decode(DatiPrisma.self, from: JSONOvunque.codificatore().encode(istantanea))
         try controlla(letta.clienti[0].luogo == dati.clienti[0].luogo && letta.impostazioni.territorio == dati.impostazioni.territorio,
                       "la posizione a mano o le impostazioni del Territorio non tornano uguali dall'istantanea")
@@ -390,7 +390,7 @@ enum ProvaOvunque {
         stato.mandaGiroAlliPhone(Date())
         try controlla(stato.territorio.giroIPhone == nil && stato.ovunque.giri == giri && !stato.ovunque.inCorso
                         && !stato.giroSulliPhone(Date()),
-                      "con «Prisma ovunque» spento «Manda il giro all'iPhone» ha cercato di scrivere l'istantanea")
+                      "con «Lucy ovunque» spento «Manda il giro all'iPhone» ha cercato di scrivere l'istantanea")
         #endif
     }
 
@@ -402,7 +402,7 @@ enum ProvaOvunque {
         guard let i = mac.pratiche.indices.first else { throw Fallita(motivo: "nessuna pratica nei dati di prova") }
         let originale = mac
         let istantanea = SpazioOvunque.datiIstantanea(mac)
-        try controlla(istantanea.pratiche == mac.pratiche, "le pratiche non entrano nell'istantanea di Prisma ovunque")
+        try controlla(istantanea.pratiche == mac.pratiche, "le pratiche non entrano nell'istantanea di Lucy ovunque")
         let regole = CampiOvunque.regole(.pratica)
         try controlla(regole.campi == ["passi", "conclusaIl"] && !regole.creabile && !regole.eliminabile,
                       "dal giornale le pratiche si devono poter cambiare solo nei passi")
@@ -562,10 +562,10 @@ enum ProvaOvunque {
         dati.clienti[i].cittadinanza = "Italiana"
         dati.noteInArrivo = [NotaVocaleDiProva.inArrivo(dati, oggi: ora(0))]
         let istantanea = SpazioOvunque.datiIstantanea(dati)
-        try controlla(istantanea.noteInArrivo.isEmpty, "le note dettate sull'iPhone entrano nell'istantanea di Prisma ovunque")
+        try controlla(istantanea.noteInArrivo.isEmpty, "le note dettate sull'iPhone entrano nell'istantanea di Lucy ovunque")
         let chiaro = try JSONOvunque.codificatore().encode(istantanea)
         try controlla(!String(decoding: chiaro, as: UTF8.self).contains("mandarle il confronto"),
-                      "il testo di una nota dettata è nell'istantanea di Prisma ovunque")
+                      "il testo di una nota dettata è nell'istantanea di Lucy ovunque")
         let letto = try JSONOvunque.decodificatore().decode(DatiPrisma.self, from: chiaro)
         try controlla(letto.clienti.first { $0.id == "giulia" }?.cittadinanza == "Italiana", "la cittadinanza non torna dall'istantanea")
         var telefono = DatiPrisma.demo()
@@ -584,11 +584,11 @@ enum ProvaOvunque {
         dati.notti = [NotteDiProva.notte(dati, oggi: ora(0))]
         dati.impostazioni.notte.attivo = true
         let istantanea = SpazioOvunque.datiIstantanea(dati)
-        try controlla(istantanea.notti.isEmpty, "le carte della notte entrano nell'istantanea di Prisma ovunque")
+        try controlla(istantanea.notti.isEmpty, "le carte della notte entrano nell'istantanea di Lucy ovunque")
         try controlla(istantanea.impostazioni.notte == ImpostazioniNotte(), "le impostazioni di «Stanotte» entrano nell'istantanea")
         let chiaro = try JSONOvunque.codificatore().encode(istantanea)
         try controlla(!String(decoding: chiaro, as: UTF8.self).contains(NotteDiProva.prefisso),
-                      "una carta della notte è nell'istantanea di Prisma ovunque")
+                      "una carta della notte è nell'istantanea di Lucy ovunque")
         var telefono = DatiPrisma.demo()
         telefono.notti = []
         let ist = IstantaneaOvunque(generazione: 1, mac: "mac-prova", nomeMac: "Mac", scrittaIl: Date(), vistoFinoA: [:], lamport: 0,
@@ -625,17 +625,17 @@ enum ProvaOvunque {
         dati.esperienzeFatte = [fatta]
         let istantanea = SpazioOvunque.datiIstantanea(dati)
         try controlla(istantanea.capsule.isEmpty && istantanea.uscite.isEmpty,
-                      "le capsule del tempo o le uscite entrano nell'istantanea di Prisma ovunque")
-        try controlla(istantanea.esperienzeFatte.isEmpty, "le esperienze della Sala fatte entrano nell'istantanea di Prisma ovunque")
+                      "le capsule del tempo o le uscite entrano nell'istantanea di Lucy ovunque")
+        try controlla(istantanea.esperienzeFatte.isEmpty, "le esperienze della Sala fatte entrano nell'istantanea di Lucy ovunque")
         let chiaro = try JSONOvunque.codificatore().encode(istantanea)
         let testo = String(decoding: chiaro, as: UTF8.self)
         for segreto in ["Obiettivo riservato 3H8T", "Biglietto riservato 9P4K", "Descrizione riservata 6W1R", "SIN-PROVA-4417",
                         "doc-riservato-2Q7V"] {
-            try controlla(!testo.contains(segreto), "«\(segreto)» è nell'istantanea di Prisma ovunque")
+            try controlla(!testo.contains(segreto), "«\(segreto)» è nell'istantanea di Lucy ovunque")
         }
         let letto = try JSONOvunque.decodificatore().decode(DatiPrisma.self, from: chiaro)
         guard let s = letto.sinistri.first(where: { $0.id == sinistro.id }) else {
-            throw Fallita(motivo: "il sinistro non entra nell'istantanea di Prisma ovunque")
+            throw Fallita(motivo: "il sinistro non entra nell'istantanea di Lucy ovunque")
         }
         try controlla(s.titolo == sinistro.titolo && s.fase == .perizia && s.eventi == sinistro.eventi && s.documenti.count == 1,
                       "il sinistro non torna con titolo, fase, fatti e documenti dall'istantanea")

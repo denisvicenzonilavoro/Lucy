@@ -75,7 +75,7 @@ extension ProvaBackup {
         guard biblio?.first?.articoli.first?.numero == "177" else { return "biblioteca: i testi non tornano dal backup" }
         // L'istantanea di «Prisma ovunque» non porta niente della memoria (che non sta nell'archivio)
         let istantanea = try Archivio.codificatore.encode(SpazioOvunque.datiIstantanea(DatiPrisma.demo()))
-        guard istantanea.range(of: Data("Paolo, il marito".utf8)) == nil else { return "memoria di Vera: un ricordo nell'istantanea di Prisma ovunque" }
+        guard istantanea.range(of: Data("Paolo, il marito".utf8)) == nil else { return "memoria di Vera: un ricordo nell'istantanea di Lucy ovunque" }
         return nil
     }
 }

@@ -541,7 +541,7 @@ enum ProvaCalcoliMessaggi {
         verifica.vero("M10 Verifica: un testo troppo lungo non passa",
                       !passa("Ciao Marco, " + String(repeating: "davvero ", count: RegoleMessaggi.paroleTollerate)))
         let pulito = MessaggiVera.pulisci("Oggetto: La tua polizza\n**Ciao Marco,**\n\nGuardiamola insieme.\n\nUn saluto,\nDenis", firma: "Denis")
-        verifica.vero("M10 Verifica: dal testo di Vera si tolgono oggetto, grassetti, chiusura e firma (le mette Prisma)",
+        verifica.vero("M10 Verifica: dal testo di Vera si tolgono oggetto, grassetti, chiusura e firma (le mette Lucy)",
                       pulito == "Ciao Marco,\n\nGuardiamola insieme.")
         verifica.vero("M10 Verifica: una firma diversa in fondo si toglie lo stesso",
                       MessaggiVera.pulisci("Ciao Marco,\n\nA presto!\nDenis Vicenzoni", firma: "Denis") == "Ciao Marco,")

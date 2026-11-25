@@ -46,7 +46,7 @@ extension EsperienzaSala {
         case .disegna:
             return CopioneSala(apertura: "«Mi disegni come vorrebbe che crescessero i suoi risparmi.»",
                                passi: ["Non correggere il disegno",
-                                       "Lascia che Prisma lo trasformi nel piano possibile",
+                                       "Lascia che Lucy lo trasformi nel piano possibile",
                                        "Fai notare dove disegno e piano si staccano"],
                                domanda: "«Cosa dovrebbe succedere in quel punto?»")
         case .giocoRischio:

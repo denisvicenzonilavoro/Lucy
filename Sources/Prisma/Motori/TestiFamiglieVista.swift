@@ -244,7 +244,7 @@ extension TestiFamiglie {
     // MARK: Nota
 
     static let notaDiProva = "Confronto di prova: il file caricato ha valori segnaposto, non statistiche vere. "
-        + "Le tavole della Banca d’Italia incluse in Prisma tornano con «Usa le tavole incluse» in Impostazioni."
+        + "Le tavole della Banca d’Italia incluse in Lucy tornano con «Usa le tavole incluse» in Impostazioni."
 
     /// «Fonte: Banca d'Italia, …, edizione 2022 (…). Tabelle caricate il 3 novembre 2026: restano sul Mac, niente
     /// internet.» L'anno si aggiunge solo se la fonte non lo dice già.

@@ -225,7 +225,7 @@ struct PaginaCarta: View {
             // Il logo da solo: il genere è già nell'occhiello sotto («Prospetto di dettaglio · …»).
             // La riga tiene l'altezza di prima, così l'impaginazione della prima pagina non cambia
             HStack(alignment: .center, spacing: 8) {
-                LogoPrismaConNome(colore: Colori.Carta.logo, altezza: M.logoTestata)
+                LogoLucyConNome(colore: Colori.Carta.logo, altezza: M.logoTestata)
                 Spacer()
                 Text(verbatim: Formati.dataEstesa.string(from: contenuto.data)).font(Tipo.Carta.data).foregroundColor(Colori.Carta.testoTenue)
             }
@@ -260,7 +260,7 @@ struct PaginaCarta: View {
     private var testataCorrente: some View {
         VStack(spacing: 5) {
             HStack(spacing: 6) {
-                LogoPrismaConNome(colore: Colori.Carta.logo, altezza: M.logoCorrente)
+                LogoLucyConNome(colore: Colori.Carta.logo, altezza: M.logoCorrente)
                 Text(verbatim: "· \(contenuto.titolo)").font(Tipo.Carta.corrente).foregroundColor(Colori.Carta.testoTenue).lineLimit(1)
                 Spacer()
                 Text(verbatim: contenuto.cliente).font(Tipo.Carta.corrente).foregroundColor(Colori.Carta.testoTenue)
@@ -273,7 +273,7 @@ struct PaginaCarta: View {
         VStack(spacing: 5) {
             Rectangle().fill(Colori.Carta.filetto).frame(height: 1)
             HStack {
-                Text(verbatim: "Prisma · \(genere.lowercased()) · \(contenuto.cliente) · \(Formati.dataBreve.string(from: contenuto.data))")
+                Text(verbatim: "Lucy · \(genere.lowercased()) · \(contenuto.cliente) · \(Formati.dataBreve.string(from: contenuto.data))")
                 Spacer()
                 Text(verbatim: "Pagina \(numero) di \(totale)")
             }

@@ -291,7 +291,7 @@ enum MotoreAree360 {
 
 /// Le parole della griglia e dei dettagli: mesi con la virgola, accordo al genere, domande a Vera.
 enum TestiAree360 {
-    static let cifreDaiMotori = "Le cifre vengono dai motori di Prisma"
+    static let cifreDaiMotori = "Le cifre vengono dai motori di Lucy"
     static let solaLettura = "In sola lettura le proposte non si salvano."
 
     static func intero(_ v: Double) -> String { String(Int(v.rounded())) }

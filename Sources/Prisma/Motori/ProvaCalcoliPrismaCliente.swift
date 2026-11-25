@@ -53,123 +53,123 @@ enum ProvaCalcoliPrismaCliente {
         // Disponibilità
         let d = CompositorePrismaCliente.disponibilita(cliente: c, posizioni: [pos], obiettivi: [senzaImporto], preparazione: senzaNascita,
                                                        lettera: nil, film: nil, luce: false, giornata: false, sinistri: [])
-        verifica.vero("Prisma del cliente: senza obiettivi con importo la voce è spenta con il motivo", d[.obiettivi] != nil)
-        verifica.vero("Prisma del cliente: senza data di nascita niente linea della vita", d[.lineaVita] != nil)
-        verifica.vero("Prisma del cliente: lettera e film non pronti hanno il motivo", d[.lettera] != nil && d[.film] != nil)
-        verifica.vero("Prisma del cliente: con una posizione in essere le posizioni si possono accendere", d[.posizioni] == nil)
+        verifica.vero("Lucy del cliente: senza obiettivi con importo la voce è spenta con il motivo", d[.obiettivi] != nil)
+        verifica.vero("Lucy del cliente: senza data di nascita niente linea della vita", d[.lineaVita] != nil)
+        verifica.vero("Lucy del cliente: lettera e film non pronti hanno il motivo", d[.lettera] != nil && d[.film] != nil)
+        verifica.vero("Lucy del cliente: con una posizione in essere le posizioni si possono accendere", d[.posizioni] == nil)
         let tutte = CompositorePrismaCliente.disponibilita(cliente: c, posizioni: [pos], obiettivi: [casa], preparazione: preparazione,
                                                            lettera: "x", film: nil, luce: true, giornata: true, sinistri: [])
-        verifica.vero("Prisma del cliente: obiettivi e linea della vita disponibili con i dati", tutte[.obiettivi] == nil && tutte[.lineaVita] == nil)
+        verifica.vero("Lucy del cliente: obiettivi e linea della vita disponibili con i dati", tutte[.obiettivi] == nil && tutte[.lineaVita] == nil)
 
         // Voci spente fuori dal JSON
         let base = componi(VoceFilePrisma.accesePredefinite)
         let json = (try? base.json()).flatMap { String(data: $0, encoding: .utf8) } ?? ""
-        verifica.vero("Prisma del cliente: JSON del contenuto prodotto", !json.isEmpty)
+        verifica.vero("Lucy del cliente: JSON del contenuto prodotto", !json.isEmpty)
         for vietato in ["Piano Lampone Prova", "23417.83", "BRNTTV91C50A944K", "esempio.invalid", "765 4219", "CONTR-778213", "Brunelleschi"] {
-            verifica.vero("Prisma del cliente: «\(vietato)» non è nel JSON con le posizioni spente", !json.contains(vietato))
+            verifica.vero("Lucy del cliente: «\(vietato)» non è nel JSON con le posizioni spente", !json.contains(vietato))
         }
-        verifica.vero("Prisma del cliente: posizioni spente = nessuna posizione", base.posizioni == nil)
+        verifica.vero("Lucy del cliente: posizioni spente = nessuna posizione", base.posizioni == nil)
         let conPosizioni = componi([.posizioni])
-        verifica.vero("Prisma del cliente: posizioni accese con nome e canale, senza contratto",
+        verifica.vero("Lucy del cliente: posizioni accese con nome e canale, senza contratto",
                       conPosizioni.posizioni?.first?.nome == "Piano Lampone Prova"
                           && !((try? conPosizioni.json()).flatMap { String(data: $0, encoding: .utf8) } ?? "").contains("CONTR-778213"))
 
         // Obiettivi
         let titoli = base.obiettivi?.map(\.titolo) ?? []
-        verifica.vero("Prisma del cliente: obiettivo senza importo escluso", !titoli.contains("Sogno senza cifra"))
-        verifica.vero("Prisma del cliente: obiettivi per priorità (prima il più importante)", titoli.first == "Anticipo casa")
-        verifica(  "Prisma del cliente: quota = già da parte / importo", base.obiettivi?.first?.quota ?? -1, 4_130.0 / 10_325.0,
+        verifica.vero("Lucy del cliente: obiettivo senza importo escluso", !titoli.contains("Sogno senza cifra"))
+        verifica.vero("Lucy del cliente: obiettivi per priorità (prima il più importante)", titoli.first == "Anticipo casa")
+        verifica(  "Lucy del cliente: quota = già da parte / importo", base.obiettivi?.first?.quota ?? -1, 4_130.0 / 10_325.0,
                  tolleranza: 0.0001)
-        verifica.vero("Prisma del cliente: colore dell'area in esadecimale", base.obiettivi?.first?.coloreHex.hasPrefix("#") == true
+        verifica.vero("Lucy del cliente: colore dell'area in esadecimale", base.obiettivi?.first?.coloreHex.hasPrefix("#") == true
                           && base.obiettivi?.first?.coloreHex.count == 7)
-        verifica.vero("Prisma del cliente: frase del già da parte", TestiPrismaCliente.fraseObiettivo(0.4) == "Hai già messo da parte il 40%")
+        verifica.vero("Lucy del cliente: frase del già da parte", TestiPrismaCliente.fraseObiettivo(0.4) == "Hai già messo da parte il 40%")
 
         // Linea della vita
         let linea = base.lineaVita
-        verifica(  "Prisma del cliente: 13 serie a 35 anni (58-70)", Double(linea?.serie.count ?? 0), 13)
+        verifica(  "Lucy del cliente: 13 serie a 35 anni (58-70)", Double(linea?.serie.count ?? 0), 13)
         let vecchio = PreparazioneLineaVita(ingresso: IngressoLineaVita(etaOggi: 61, etaPensione: 67, patrimonioIniziale: 52_310,
                                                                        risparmioAnnuo: 2_140, rendimentoReale: 1.3, redditoDesiderato: nil),
                                             motivoAssente: nil, avvisi: [], ipotesi: [], etaPensioneIpotizzata: false, eventiSenzaCifra: 0)
         let lineaVecchio = CompositorePrismaCliente.lineaVita(vecchio)
-        verifica.vero("Prisma del cliente: le età fino a quella di oggi sono escluse",
+        verifica.vero("Lucy del cliente: le età fino a quella di oggi sono escluse",
                       lineaVecchio?.serie.allSatisfy { $0.etaPensione > 61 } == true && lineaVecchio?.serie.count == 9)
-        verifica.vero("Prisma del cliente: senza reddito desiderato la linea è indicativa", lineaVecchio?.indicativa == true)
-        verifica.vero("Prisma del cliente: con reddito e pensione la linea non è indicativa", linea?.indicativa == false)
-        verifica.vero("Prisma del cliente: ogni serie va da oggi a 90 anni",
+        verifica.vero("Lucy del cliente: senza reddito desiderato la linea è indicativa", lineaVecchio?.indicativa == true)
+        verifica.vero("Lucy del cliente: con reddito e pensione la linea non è indicativa", linea?.indicativa == false)
+        verifica.vero("Lucy del cliente: ogni serie va da oggi a 90 anni",
                       linea?.serie.allSatisfy { $0.valori.count == (linea?.etaFine ?? 0) - 35 + 1 } == true)
         if let l = linea, let s67 = l.serie(67) {
             var i = ingresso
             i.etaPensione = 67
             let r = MotoreLineaVita.calcola(i)
-            verifica.vero("Prisma del cliente: la serie a 67 è quella del motore", s67.valori == r.punti.map(\.valore)
+            verifica.vero("Lucy del cliente: la serie a 67 è quella del motore", s67.valori == r.punti.map(\.valore)
                               && s67.etaEsaurimento == r.etaEsaurimento)
             let righe = CompositorePrismaCliente.righeTabella(l)
-            verifica.vero("Prisma del cliente: tabella 60/62/64/67/70", righe.map(\.eta) == [60, 62, 64, 67, 70])
-            verifica.vero("Prisma del cliente: frasi della tabella", righe.allSatisfy { $0.frase.hasPrefix("I risparmi bastano") })
+            verifica.vero("Lucy del cliente: tabella 60/62/64/67/70", righe.map(\.eta) == [60, 62, 64, 67, 70])
+            verifica.vero("Lucy del cliente: frasi della tabella", righe.allSatisfy { $0.frase.hasPrefix("I risparmi bastano") })
         } else {
-            verifica.vero("Prisma del cliente: serie a 67 presente", false)
+            verifica.vero("Lucy del cliente: serie a 67 presente", false)
         }
-        verifica.vero("Prisma del cliente: frase oltre i 90", TestiPrismaCliente.frasePensione(esaurimento: nil, etaFine: 90) == "I risparmi bastano oltre i 90 anni")
-        verifica.vero("Prisma del cliente: frase fino a N", TestiPrismaCliente.frasePensione(esaurimento: 83, etaFine: 90) == "I risparmi bastano fino a 83 anni")
-        verifica.vero("Prisma del cliente: senza data di nascita nessuna linea", componi([.lineaVita], preparazione: senzaNascita).lineaVita == nil)
+        verifica.vero("Lucy del cliente: frase oltre i 90", TestiPrismaCliente.frasePensione(esaurimento: nil, etaFine: 90) == "I risparmi bastano oltre i 90 anni")
+        verifica.vero("Lucy del cliente: frase fino a N", TestiPrismaCliente.frasePensione(esaurimento: 83, etaFine: 90) == "I risparmi bastano fino a 83 anni")
+        verifica.vero("Lucy del cliente: senza data di nascita nessuna linea", componi([.lineaVita], preparazione: senzaNascita).lineaVita == nil)
 
         // Lettera solo con la sua voce
-        verifica.vero("Prisma del cliente: lettera con la voce accesa", base.lettera != nil)
-        verifica.vero("Prisma del cliente: lettera spenta fuori dal file", componi([.obiettivi]).lettera == nil)
-        verifica.vero("Prisma del cliente: lettera vuota fuori dal file", componi([.lettera], lettera: "  \n").lettera == nil)
+        verifica.vero("Lucy del cliente: lettera con la voce accesa", base.lettera != nil)
+        verifica.vero("Lucy del cliente: lettera spenta fuori dal file", componi([.obiettivi]).lettera == nil)
+        verifica.vero("Lucy del cliente: lettera vuota fuori dal file", componi([.lettera], lettera: "  \n").lettera == nil)
 
         // Cifratura (poche iterazioni: la prova è sul formato, non sulla lentezza)
         let password = "Prova-Calcoli-Lampo-73"
         if let cifrato = try? FilePrismaCliente.cifra(base, password: password, iterazioni: 1_000) {
             let (i, blocco) = cifrato
             let aperto = try? FilePrismaCliente.decifra(blocco, i, password: password)
-            verifica.vero("Prisma del cliente: cifra e decifra uguali", aperto == base)
+            verifica.vero("Lucy del cliente: cifra e decifra uguali", aperto == base)
             var sbagliata = false
             do { _ = try FilePrismaCliente.decifra(blocco, i, password: "Prova-Calcoli-Lampo-74") } catch { sbagliata = true }
-            verifica.vero("Prisma del cliente: password sbagliata rifiutata", sbagliata)
+            verifica.vero("Lucy del cliente: password sbagliata rifiutata", sbagliata)
             var alterata = i
             alterata.scadenza = "2099-12-31"
             var rifiutata = false
             do { _ = try FilePrismaCliente.decifra(blocco, alterata, password: password) } catch { rifiutata = true }
-            verifica.vero("Prisma del cliente: dati associati alterati rifiutati", rifiutata)
-            verifica.vero("Prisma del cliente: sale di 16 byte e nonce di 12", i.sale.count == 16 && i.nonce.count == 12)
-            verifica.vero("Prisma del cliente: scadenza in chiaro nel formato aaaa-mm-gg", i.scadenza == FilePrismaCliente.giorno(fino))
-            verifica.vero("Prisma del cliente: intestazione riletta dal suo JSON", FilePrismaCliente.Intestazione.daJSON(i.json) == i)
+            verifica.vero("Lucy del cliente: dati associati alterati rifiutati", rifiutata)
+            verifica.vero("Lucy del cliente: sale di 16 byte e nonce di 12", i.sale.count == 16 && i.nonce.count == 12)
+            verifica.vero("Lucy del cliente: scadenza in chiaro nel formato aaaa-mm-gg", i.scadenza == FilePrismaCliente.giorno(fino))
+            verifica.vero("Lucy del cliente: intestazione riletta dal suo JSON", FilePrismaCliente.Intestazione.daJSON(i.json) == i)
         } else {
-            verifica.vero("Prisma del cliente: cifratura riuscita", false)
+            verifica.vero("Lucy del cliente: cifratura riuscita", false)
         }
-        verifica.vero("Prisma del cliente: 600.000 iterazioni nel file", FilePrismaCliente.iterazioni == 600_000)
+        verifica.vero("Lucy del cliente: 600.000 iterazioni nel file", FilePrismaCliente.iterazioni == 600_000)
 
         // L'HTML: fuori dal blocco niente nome né cifre
         if let dati = try? FilePrismaCliente.html(base, password: password, iterazioni: 1_000),
            let html = String(data: dati, encoding: .utf8) {
             let fuori = FilePrismaCliente.fuoriDalBlocco(html)
-            verifica.vero("Prisma del cliente: fuori dal blocco niente nome", !fuori.contains("Ottavia") && !fuori.contains("Brunelleschi"))
-            verifica.vero("Prisma del cliente: fuori dal blocco niente obiettivi né lettera",
+            verifica.vero("Lucy del cliente: fuori dal blocco niente nome", !fuori.contains("Ottavia") && !fuori.contains("Brunelleschi"))
+            verifica.vero("Lucy del cliente: fuori dal blocco niente obiettivi né lettera",
                           !fuori.contains("Anticipo casa") && !fuori.contains("Cara Ottavia"))
-            verifica.vero("Prisma del cliente: fuori dal blocco niente password", !html.contains(password))
-            verifica.vero("Prisma del cliente: nessun indirizzo web nell'HTML", !html.contains("http://") && !html.contains("https://"))
+            verifica.vero("Lucy del cliente: fuori dal blocco niente password", !html.contains(password))
+            verifica.vero("Lucy del cliente: nessun indirizzo web nell'HTML", !html.contains("http://") && !html.contains("https://"))
             if let parti = FilePrismaCliente.parti(html) {
                 let (i, blocco) = parti
-                verifica.vero("Prisma del cliente: l'HTML si riapre con la password", (try? FilePrismaCliente.decifra(blocco, i, password: password)) == base)
+                verifica.vero("Lucy del cliente: l'HTML si riapre con la password", (try? FilePrismaCliente.decifra(blocco, i, password: password)) == base)
             } else {
-                verifica.vero("Prisma del cliente: parti dell'HTML leggibili", false)
+                verifica.vero("Lucy del cliente: parti dell'HTML leggibili", false)
             }
         } else {
-            verifica.vero("Prisma del cliente: HTML prodotto (risorse del lettore nel pacchetto)", false)
+            verifica.vero("Lucy del cliente: HTML prodotto (risorse del lettore nel pacchetto)", false)
         }
 
         // Messaggio e nome del file
         let proposta = GeneratorePassword.nuova(cliente: c)
         let testo = TestiPrismaCliente.messaggio(c)
-        verifica.vero("Prisma del cliente: il testo di Messaggi non contiene la password", !testo.contains(proposta) && !testo.contains(password))
-        verifica.vero("Prisma del cliente: il testo di Messaggi dice che la password arriva a voce", testo.contains("a voce"))
+        verifica.vero("Lucy del cliente: il testo di Messaggi non contiene la password", !testo.contains(proposta) && !testo.contains(password))
+        verifica.vero("Lucy del cliente: il testo di Messaggi dice che la password arriva a voce", testo.contains("a voce"))
         let nomePDF = FilePrismaCliente.nomeFile(base, estensione: "pdf")
-        verifica.vero("Prisma del cliente: nome del file con il solo nome di battesimo",
+        verifica.vero("Lucy del cliente: nome del file con il solo nome di battesimo",
                       nomePDF == "Il-Prisma-di-Ottavia.pdf" && !nomePDF.contains("Brunelleschi"))
-        verifica.vero("Prisma del cliente: nome del file senza accenti né spazi", TestiPrismaCliente.baseNomeFile("Niccolò Maria") == "Il-Prisma-di-NiccoloMaria")
-        verifica.vero("Prisma del cliente: traccia senza password", !TestiPrismaCliente.descrizioneUscita(base.voci, html: false).contains(password))
-        verifica.vero("Prisma del cliente: voci per l'esperienza della Sala",
+        verifica.vero("Lucy del cliente: nome del file senza accenti né spazi", TestiPrismaCliente.baseNomeFile("Niccolò Maria") == "Il-Prisma-di-NiccoloMaria")
+        verifica.vero("Lucy del cliente: traccia senza password", !TestiPrismaCliente.descrizioneUscita(base.voci, html: false).contains(password))
+        verifica.vero("Lucy del cliente: voci per l'esperienza della Sala",
                       VoceFilePrisma.perEsperienza(.film) == .film && VoceFilePrisma.perEsperienza(.disegna) == nil)
     }
 }

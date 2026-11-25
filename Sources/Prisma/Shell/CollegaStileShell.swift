@@ -130,19 +130,19 @@ enum ScritturaStileVera {
             let r = try await motore.scrivi(p, aggiorna: suPezzo)
             let pulito = MessaggiVera.pulisci(r.testo, firma: firma)
             if let motivo = MessaggiVera.controlla(pulito, occasione: o, cliente: cliente, tono: tono, bozza: bozza) {
-                return fisso(maiuscola(motivo) + ": resta il testo di Prisma, con le cifre esatte.")
+                return fisso(maiuscola(motivo) + ": resta il testo di Lucy, con le cifre esatte.")
             }
             let ritoccato = StileVera.applica(pulito + bozza.chiusura, profilo: profilo, cliente: cliente, oggi: oggi, clienteNuovo: clienteNuovo)
             let violazioni = StileVera.verifica(ritoccato.testo, profilo: profilo, cliente: cliente, oggi: oggi, clienteNuovo: clienteNuovo)
             if let motivo = StileVera.motivoScarto(violazioni) {
-                return fisso(maiuscola(motivo) + ": resta il testo di Prisma, con le cifre esatte.")
+                return fisso(maiuscola(motivo) + ": resta il testo di Lucy, con le cifre esatte.")
             }
             return TestoScrittoMessaggio(oggetto: bozza.oggetto, testo: ritoccato.testo, autore: .vera, modello: motore.modello, avviso: nil)
         } catch is CancellationError {
-            return fisso("Riscrittura interrotta: resta il testo di Prisma.")
+            return fisso("Riscrittura interrotta: resta il testo di Lucy.")
         } catch {
             let m = (error as? ErroreVera)?.messaggio ?? error.localizedDescription
-            return fisso("Vera non ha potuto scrivere il messaggio (\(m)). Resta il testo di Prisma.")
+            return fisso("Vera non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
         }
     }
 
@@ -564,7 +564,7 @@ extension StatoShell {
     func riscriviNelloStile(_ testo: String, clienteId: String?, chiave: String, oggi: Date = Date()) {
         let p = dati.impostazioni.stileVera
         guard !p.vuoto else {
-            rispostaStile("Non ho ancora regole di stile: le imparo dai messaggi che apri da Prisma in Mail o in Messaggi, oppure le scrivi tu in Impostazioni › Vera › Il tuo stile.",
+            rispostaStile("Non ho ancora regole di stile: le imparo dai messaggi che apri da Lucy in Mail o in Messaggi, oppure le scrivi tu in Impostazioni › Vera › Il tuo stile.",
                           chiave: chiave, scheda: SchedaStileVera(tipo: .profilo))
             return
         }
@@ -768,7 +768,7 @@ extension StatoShell {
     /// scheda l'ha scritta (`AnnullaStileVera`), per «Annulla».
     func eseguiStileVera(_ a: AzioneConferma) -> EsitoAzioneVera {
         let no = { (m: String) in EsitoAzioneVera(fatta: false, messaggio: m) }
-        guard !solaLettura else { return no("Prisma è in sola lettura: non ho cambiato niente.") }
+        guard !solaLettura else { return no("Lucy è in sola lettura: non ho cambiato niente.") }
         guard !inModoCliente else { return no("In modalità cliente non cambio il tuo stile.") }
         let arg = a.argomenti
         guard let k = ChiaveRegolaStile(rawValue: arg["regola"] ?? "") else { return no("Non so quale regola del tuo stile cambiare.") }

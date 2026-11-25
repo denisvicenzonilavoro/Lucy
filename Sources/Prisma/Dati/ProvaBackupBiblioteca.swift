@@ -87,7 +87,7 @@ extension ProvaBackup {
         guard avanzi.isEmpty else { return "biblioteca: la copia senza la Biblioteca è rimasta nella cartella temporanea" }
         // L'istantanea di «Prisma ovunque» non porta la Biblioteca (sta fuori dall'archivio)
         let istantanea = try Archivio.codificatore.encode(SpazioOvunque.datiIstantanea(archivio))
-        guard istantanea.range(of: Data("Piano rivalutabile".utf8)) == nil else { return "biblioteca: un documento nell'istantanea di Prisma ovunque" }
+        guard istantanea.range(of: Data("Piano rivalutabile".utf8)) == nil else { return "biblioteca: un documento nell'istantanea di Lucy ovunque" }
         return nil
     }
 }

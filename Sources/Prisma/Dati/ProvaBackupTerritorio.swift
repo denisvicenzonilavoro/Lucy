@@ -85,7 +85,7 @@ extension ProvaBackup {
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.clienti.first?.luogo == originale.clienti.first?.luogo,
               ist.impostazioni.territorio == originale.impostazioni.territorio else {
-            return "la posizione a mano o le impostazioni del Territorio non entrano nell'istantanea di Prisma ovunque"
+            return "la posizione a mano o le impostazioni del Territorio non entrano nell'istantanea di Lucy ovunque"
         }
         // 5. I campi stanno nella versione 27 dell'archivio di Luce
         guard DatiPrisma.versioneAttuale == 27 else { return "i campi del giro 11 stanno nella versione 27 dell'archivio di Luce" }

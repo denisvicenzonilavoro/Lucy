@@ -274,7 +274,7 @@ enum ProvaMercatoClientiVera {
         controlla(carla?.azione == .chiamaOggi && carla?.etichettaAzione == "Chiama Carla oggi" && (carla?.motivo.contains("prudente") ?? false),
                   "Mercato per i clienti: Carla è prudente → «Chiama Carla oggi» (anche con l'incontro giovedì)")
         controlla((carla?.motivo.contains("40%") ?? false) && (carla?.motivo.contains("640") ?? false),
-                  "Mercato per i clienti: Carla, 40% in azioni e circa 640 € di calo, calcolati da Prisma: \(carla?.motivo ?? "")")
+                  "Mercato per i clienti: Carla, 40% in azioni e circa 640 € di calo, calcolati da Lucy: \(carla?.motivo ?? "")")
         let bruno = toccato(esito, "bruno")
         controlla(bruno?.azione == .rassicura && (bruno?.motivo.contains("33%") ?? false) && (bruno?.motivo.contains("2.880") ?? false),
                   "Mercato per i clienti: Bruno, 33% in azioni (36.000 €), calo di 2.880 € → «Rassicura»: \(bruno?.motivo ?? "")")
@@ -391,7 +391,7 @@ enum ProvaMercatoClientiVera {
                   "Mercato per i clienti: la bozza fissa di Bruno dà del Lei: \(bb)")
         let nessuna = MercatoClientiVera.bozze(esito, clienti: d.clienti, stile: s, json: nil, oggi: oggi, cal: cal)
         controlla(nessuna.count == 3 && nessuna.allSatisfy { $0.autore == .modelloFisso && ($0.avviso?.contains("Vera non è pronta") ?? false) },
-                  "Mercato per i clienti: senza Qwen restano le bozze di Prisma, con l'avviso")
+                  "Mercato per i clienti: senza Qwen restano le bozze di Lucy, con l'avviso")
         controlla(nessuna.first { $0.clienteId == "bruno" }?.canale == .mail && nessuna.first { $0.clienteId == "anna" }?.canale == .messaggi,
                   "Mercato per i clienti: Messaggi con il cellulare, Mail senza")
     }
@@ -420,7 +420,7 @@ enum ProvaMercatoClientiVera {
         let bozze = MercatoClientiVera.bozze(esito, clienti: d.clienti, stile: s, json: json, modello: "qwen3.5:4b", oggi: oggi, cal: cal)
         let anna = bozze.first { $0.clienteId == "anna" }
         controlla(anna?.autore == .vera && anna?.modello == "qwen3.5:4b" && (anna?.testo.hasSuffix("\n\nDenis") ?? false),
-                  "Mercato per i clienti: la bozza di Qwen per Anna passa, con la firma di Prisma")
+                  "Mercato per i clienti: la bozza di Qwen per Anna passa, con la firma di Lucy")
         let bruno = bozze.first { $0.clienteId == "bruno" }
         controlla(bruno?.autore == .modelloFisso && (bruno?.avviso?.contains("tu") ?? false), "Mercato per i clienti: a Bruno (Lei) una bozza col tu si scarta: \(bruno?.avviso ?? "")")
         let carla = bozze.first { $0.clienteId == "carla" }
@@ -436,7 +436,7 @@ enum ProvaMercatoClientiVera {
         let inParole = #"{"bozze":[{"cliente":"anna","testo":"Ciao Anna, le borse hanno perso l'8% in una settimana: un terzo del tuo piano è da rivedere. Ne parliamo?"}]}"#
         let bozzaParole = MercatoClientiVera.bozze(esito, clienti: d.clienti, stile: s, json: inParole, oggi: oggi, cal: cal).first { $0.clienteId == "anna" }
         controlla(bozzaParole?.autore == .modelloFisso && (bozzaParole?.avviso?.contains("cifra") ?? false),
-                  "Mercato per i clienti: «un terzo» che Prisma non ha calcolato si scarta: \(bozzaParole?.avviso ?? "")")
+                  "Mercato per i clienti: «un terzo» che Lucy non ha calcolato si scarta: \(bozzaParole?.avviso ?? "")")
         // Il Lei a chi riceve il tu si scarta (Anna riceve il tu)
         let leiAdAnna = #"{"bozze":[{"cliente":"anna","testo":"Ciao Anna, La chiamo oggi per guardare i Suoi numeri."}]}"#
         let bozzaLei = MercatoClientiVera.bozze(esito, clienti: d.clienti, stile: s, json: leiAdAnna, oggi: oggi, cal: cal).first { $0.clienteId == "anna" }
@@ -457,7 +457,7 @@ enum ProvaMercatoClientiVera {
         controlla(!MercatoClientiVera.numeriInParoleConservati(fatti: fattiParole, testo: "La metà della quota."),
                   "Mercato per i clienti: «metà della» resta un numero da controllare")
         let rotta = MercatoClientiVera.bozze(esito, clienti: d.clienti, stile: s, json: "non è JSON", oggi: oggi, cal: cal)
-        controlla(rotta.allSatisfy { $0.autore == .modelloFisso && $0.avviso != nil }, "Mercato per i clienti: un JSON illeggibile lascia le bozze di Prisma")
+        controlla(rotta.allSatisfy { $0.autore == .modelloFisso && $0.avviso != nil }, "Mercato per i clienti: un JSON illeggibile lascia le bozze di Lucy")
     }
 
     // MARK: - La scheda «Conferma»

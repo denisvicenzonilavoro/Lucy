@@ -9,7 +9,7 @@ enum TestiSinistri {
     static let nuovo = "+ Nuovo sinistro"
     static let nessunoAperto = "Nessun sinistro aperto"
     static let fraseVuota = "Quando un cliente ha un sinistro, lo segui qui come una spedizione."
-    static let notaVuota = "Prisma non è collegato alla compagnia: ogni fase, data e importo li segni tu."
+    static let notaVuota = "Lucy non è collegata alla compagnia: ogni fase, data e importo li segni tu."
     /// Decisione 36: la nota fissa sotto i campi di testo.
     static let notaBreve = "Scrivi solo fatti brevi: niente diagnosi né referti (i referti vanno nei Documenti)"
     static let polizzaDaCollegare = "polizza da collegare"
@@ -38,21 +38,21 @@ enum TestiSinistri {
     /// «Così lo vede Marco».
     static func cosiLoVede(_ nome: String) -> String { "Così lo vede \(nome)" }
     /// «Il Prisma di Marco».
-    static func ilPrismaDi(_ nome: String) -> String { "Il Prisma di \(nome)" }
+    static func ilPrismaDi(_ nome: String) -> String { "La Lucy di \(nome)" }
     /// «Aggiornato da Denis · 29 ott».
     static func aggiornatoDa(_ consulente: String, il data: Date) -> String {
         "Aggiornato da \(consulente) · \(Formati.giornoMeseBreve.string(from: data))"
     }
     /// «Gli aggiornamenti per Marco sono spenti».
     static func aggiornamentiSpenti(_ nome: String) -> String { "Gli aggiornamenti per \(nome) sono spenti" }
-    static let comeAccenderli = "Accendili nel sinistro con «Il cliente riceve gli aggiornamenti»: il messaggio lo prepari tu, Prisma non spedisce niente."
+    static let comeAccenderli = "Accendili nel sinistro con «Il cliente riceve gli aggiornamenti»: il messaggio lo prepari tu, Lucy non spedisce niente."
     static let anteprima = "Un'anteprima sul Mac: il cliente vede lo stato quando riceve il messaggio o il suo file."
     static let riceveAggiornamenti = "Il cliente riceve gli aggiornamenti"
     static let mostraImporto = "Mostra l'importo pagato"
 
     /// «Aggiornamento per Marco pronto in Messaggi», con la nota del file se il blocco del sinistro c'è.
     static func aggiornamentoPronto(_ nome: String, nelFile: Bool) -> String {
-        nelFile ? "Aggiornamento per \(nome) pronto in Messaggi: lo vedrà anche nel suo Prisma quando rifai il file"
+        nelFile ? "Aggiornamento per \(nome) pronto in Messaggi: lo vedrà anche nella sua Lucy quando rifai il file"
             : "Aggiornamento per \(nome) pronto in Messaggi: lo controlli e lo mandi tu"
     }
 

@@ -354,7 +354,7 @@ struct SmontaggioApple: View {
                                attuale: Posizione?) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack {
-                Text("In \(IpotesiCalcolo.orizzontePredefinito) anni, con le ipotesi di Prisma")
+                Text("In \(IpotesiCalcolo.orizzontePredefinito) anni, con le ipotesi di Lucy")
                     .carattereApple(Tema.Apple.Carattere.etichetta)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 Spacer(minLength: 8)
@@ -682,7 +682,7 @@ struct FumettoCosto: View {
     private var fonte: String {
         switch voce.fonte {
         case .scritta: return "Scritto nel documento."
-        case .calcolata: return "Calcolato da Prisma (stima)."
+        case .calcolata: return "Calcolato da Lucy (stima)."
         case .mancante: return voce.motivoMancante.map { TestiSmontaggio.maiuscola($0) + "." } ?? "Cifra non calcolabile."
         }
     }
@@ -740,7 +740,7 @@ extension StatoShell {
     func leggiFileSmontaggio(_ url: URL) {
         let estensione = url.pathExtension.lowercased()
         guard LetturaDocumenti.estensioniAccettate.contains(estensione) else {
-            mostraAvviso("\(url.lastPathComponent) non si legge: Prisma legge PDF e immagini (PNG, JPEG, TIFF, HEIC).")
+            mostraAvviso("\(url.lastPathComponent) non si legge: Lucy legge PDF e immagini (PNG, JPEG, TIFF, HEIC).")
             return
         }
         smontaggio.inLettura = true
@@ -797,7 +797,7 @@ extension StatoShell {
     /// posizione se lo Smontaggio ne ha una.
     func aggiungiSmontaggioAlDossier(_ costi: SmontaggioCosti) {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per aggiungere documenti.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per aggiungere documenti.")
             return
         }
         guard let id = smontaggio.clienteId, let c = cliente(id), !costi.vuoto, !documentoSmontaggioPresente(costi) else { return }

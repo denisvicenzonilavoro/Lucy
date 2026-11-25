@@ -146,7 +146,7 @@ enum ConfrontoModelli {
             s.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: ">", with: "&gt;")
         }
         var p = ["<!doctype html><html lang=\"it\"><head><meta charset=\"utf-8\"><title>Confronto tra modelli di Vera</title><style>\(StileConfronto.css)</style></head><body>"]
-        p.append("<h1>Confronto tra modelli di Vera</h1><div class=\"nota\">\(h(Formati.dataEstesa.string(from: r.data))) · domande sui dati di prova di Prisma · tempi: prima parola / risposta completa</div>")
+        p.append("<h1>Confronto tra modelli di Vera</h1><div class=\"nota\">\(h(Formati.dataEstesa.string(from: r.data))) · domande sui dati di prova di Lucy · tempi: prima parola / risposta completa</div>")
         p.append("<table><tr><th>Domanda</th>" + r.modelli.map { "<th>\(h($0))</th>" }.joined() + "</tr>")
         p.append("<tr><td>Caricamento</td>" + r.modelli.map { "<td>\(secondi(r.caricamento[$0]))</td>" }.joined() + "</tr>")
         for d in r.domande {

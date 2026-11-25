@@ -21,7 +21,7 @@ enum CorsiaVera: String, Codable, CaseIterable {
     /// modello Apple; altrimenti Qwen.
     static func da(motore: String?) -> CorsiaVera {
         guard let m = motore, !m.isEmpty else { return .regole }
-        if m == StatoShell.motoreAzioni || m == "Prisma" || m == MotoriVera.sintesi.nome { return .regole }
+        if m == StatoShell.motoreAzioni || m == "Prisma" || m == MotoriVera.sintesi.nome || m == MotoriVera.nomeSintesiDiPrima { return .regole }
         if m == CervelloGrandeVera.nome { return .esterno }
         if m == ModelloAppleVera.nome { return .apple }
         return .qwen

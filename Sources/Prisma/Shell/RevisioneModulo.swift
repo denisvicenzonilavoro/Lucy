@@ -182,7 +182,7 @@ private struct ElencoRevisione: View {
         let n = modello.campi.count
         let base = "\(n) caselle riconosciute"
         let conferme = daConfermare == 0 ? "" : (daConfermare == 1 ? ", 1 da confermare" : ", \(daConfermare) da confermare")
-        return base + conferme + ". Le risposte del cliente e le firme Prisma non le compila mai."
+        return base + conferme + ". Le risposte del cliente e le firme Lucy non le compila mai."
     }
 
     private func riga(_ c: ModelloModulo.Campo, numero: Int) -> some View {
@@ -231,7 +231,7 @@ private struct ElencoRevisione: View {
         let dati = DatoModulo.allCases.filter { !modello.tipo.risposteDelCliente || $0.anagrafico }
         return Menu {
             Button("Lascia vuota") { stato.associaCampoRevisione(c.id, dato: nil) }
-            Button("Risposta del cliente (Prisma non la compila)") { stato.associaCampoRevisione(c.id, dato: nil, risposta: true) }
+            Button("Risposta del cliente (Lucy non la compila)") { stato.associaCampoRevisione(c.id, dato: nil, risposta: true) }
             Button("Firma (solo evidenziata)") { stato.associaCampoRevisione(c.id, dato: nil, firma: true) }
             Divider()
             ForEach(dati) { d in

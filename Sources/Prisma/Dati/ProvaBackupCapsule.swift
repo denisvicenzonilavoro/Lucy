@@ -30,7 +30,7 @@ extension ProvaBackup {
         try fm.createDirectory(at: dati, withIntermediateDirectories: true)
 
         // Una capsula sigillata con una chiave di prova (non quella dei dati di prova: si vede che è la chiave del backup)
-        let chiave = SymmetricKey(data: SHA256.hash(data: Data("Prisma · prova del backup delle capsule · non segreta".utf8)))
+        let chiave = SymmetricKey(data: SHA256.hash(data: Data("Lucy · prova del backup delle capsule · non segreta".utf8)))
         let byteChiave = chiave.withUnsafeBytes { Data($0) }
         let testo = "Giulia, prova del backup: la chiave torna solo con la password. Numero di controllo 6271."
         let t0 = Date(timeIntervalSinceReferenceDate: 815_117_903)

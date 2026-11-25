@@ -110,7 +110,7 @@ enum TestiStudio {
     static let parcelleInArrivo = "Le parcelle arrivano con Parcelle e fatture"
     static let provvigioniStimate = "provvigioni stimate dalle tue aliquote"
     static let parcelleConsulenza = "parcelle della consulenza"
-    static let primoAnno = "primo anno in Prisma"
+    static let primoAnno = "primo anno in Lucy"
     static let datiDiProva = "dati di prova"
     static let obiettiviScrivania = "Dai a Studio gli obiettivi dell’anno"
     static let senzaAliquoteScrivania = "stima senza le tue aliquote"

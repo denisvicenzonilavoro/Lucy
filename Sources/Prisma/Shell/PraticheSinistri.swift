@@ -244,7 +244,7 @@ private struct TestataSinistro: View {
         .confirmationDialog("Eliminare il sinistro «\(sinistro.titolo)»?", isPresented: $confermaElimina, titleVisibility: .visible) {
             Button("Elimina il sinistro", role: .destructive) { stato.eliminaSinistro(sinistro.id) }
         } message: {
-            Text("Fasi, fatti e documenti del sinistro escono da Prisma. I file restano nei Documenti del cliente.")
+            Text("Fasi, fatti e documenti del sinistro escono da Lucy. I file restano nei Documenti del cliente.")
         }
     }
 }

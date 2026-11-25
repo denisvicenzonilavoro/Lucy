@@ -338,8 +338,8 @@ struct VeraScrivania: View {
                     .font(Tema.Testo.VeraScrivania.saluto)
                     .tracking(Tema.Testo.VeraScrivania.spaziaturaSaluto)
                     .foregroundColor(c.testo)
-                Text(portafoglio ? "Chiedimi del portafoglio: ti mostro le cifre di Prisma."
-                                 : "Chiedimi di \(stato.clienteAttivo?.nome ?? "un cliente"): ti mostro le cifre di Prisma.")
+                Text(portafoglio ? "Chiedimi del portafoglio: ti mostro le cifre di Lucy."
+                                 : "Chiedimi di \(stato.clienteAttivo?.nome ?? "un cliente"): ti mostro le cifre di Lucy.")
                     .font(Tema.Testo.VeraScrivania.sottotitolo)
                     .foregroundColor(c.testoSecondario)
                     .fixedSize(horizontal: false, vertical: true)

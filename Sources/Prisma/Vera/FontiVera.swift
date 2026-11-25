@@ -67,7 +67,7 @@ struct FonteCifra: Codable, Equatable, Identifiable {
 
 enum FontiVera {
     /// La spiegazione di una cifra senza fonte.
-    static let nonTrovata = "Non viene da Prisma: non la trovo nella scheda, nei calcoli o nei documenti. Non usarla."
+    static let nonTrovata = "Non viene da Lucy: non la trovo nella scheda, nei calcoli o nei documenti. Non usarla."
     static let origineDomanda = "La tua domanda"
     static let origineFilo = "Filo della conversazione"
     static let origineDocumenti = "Documenti e note del cliente"
@@ -158,7 +158,7 @@ enum FontiVera {
     /// con il blocco da cui viene («QUADRO (calcolato da Prisma)» → «Calcoli di Prisma · Quadro») e la sua riga.
     static func registro(testo: String) -> [VoceFonte] {
         var voci: [VoceFonte] = []
-        var blocco = "Calcoli di Prisma"
+        var blocco = "Calcoli di Lucy"
         for riga in testo.components(separatedBy: .newlines) {
             var contenuto = riga.trimmingCharacters(in: .whitespaces)
             if let (titolo, resto) = intestazione(contenuto) {
@@ -197,13 +197,13 @@ enum FontiVera {
         switch nome {
         case let n where n.hasPrefix("domanda"): return (origineDomanda, resto)
         case let n where n.hasPrefix("contesto"): return ("Contesto", resto)
-        case let n where n.hasPrefix("scheda"): return ("Scheda del cliente · Prisma", resto)
-        case let n where n.hasPrefix("bozza"): return ("Bozza di Prisma", resto)
-        case let n where n.hasPrefix("calcoli"): return ("Calcoli di Prisma", resto)
+        case let n where n.hasPrefix("scheda"): return ("Scheda del cliente · Lucy", resto)
+        case let n where n.hasPrefix("bozza"): return ("Bozza di Lucy", resto)
+        case let n where n.hasPrefix("calcoli"): return ("Calcoli di Lucy", resto)
         case let n where n.hasPrefix("il filo"): return (origineFilo, resto)
         case let n where n.hasPrefix("ricordi"): return ("Memoria di Vera", resto)
         case let n where n.hasPrefix("dai documenti"): return (origineDocumenti, resto)
-        default: return ("Calcoli di Prisma · \(bello)", resto)
+        default: return ("Calcoli di Lucy · \(bello)", resto)
         }
     }
 

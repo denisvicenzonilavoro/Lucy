@@ -215,7 +215,7 @@ extension SchedaTFR {
                     }
                     notaComando(i.rendimentoNetto
                                 ? "Già tolti costi e imposta, come nei dati COVIP e nelle schede"
-                                : "Prisma toglie costi (ISC) e imposta sui rendimenti")
+                                : "Lucy toglie costi (ISC) e imposta sui rendimenti")
                     if !i.rendimentoNetto {
                         ComandoSimulatoreFermo(etichetta: "Costi del fondo (ISC)", valore: b.costoFondo, unita: "%",
                                                intervallo: Console.costo, passo: Console.passoCosto, decimali: 2)

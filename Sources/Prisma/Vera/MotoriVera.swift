@@ -19,7 +19,7 @@ enum IstruzioniVera {
 
     /// La risposta breve della mini finestra di Vera.
     static let mini: String =
-        testo("mini") ?? "Rispondi in al massimo tre frasi brevi, senza elenchi: le cifre nel dettaglio le mostra Prisma sotto la risposta."
+        testo("mini") ?? "Rispondi in al massimo tre frasi brevi, senza elenchi: le cifre nel dettaglio le mostra Lucy sotto la risposta."
 
     /// Istruzioni della modalità conversazione (uso generale).
     static let conversazione: String =
@@ -36,6 +36,8 @@ protocol MotoreGenerativo {
 /// I calcoli di Prisma (`sintesi`) preparano le cifre esatte che Qwen racconta, ma non rispondono da soli.
 enum MotoriVera {
     static let sintesi = MotoreSintesi()
+    /// Il nome del motore dei calcoli prima di Lucy (24 novembre 2026): i messaggi già salvati lo portano ancora.
+    static let nomeSintesiDiPrima = "Calcoli di Prisma"
 
     /// Qwen sul Mac, con lo stato verificato dall'ultima chiamata a Ollama.
     static func qwen(_ vera: ImpostazioniVera, locale: DisponibilitaVera) -> MotoreLocale {

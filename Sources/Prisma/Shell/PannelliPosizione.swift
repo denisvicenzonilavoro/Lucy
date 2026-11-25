@@ -446,7 +446,7 @@ struct PannelloComposizione: View {
 
     private var compartoUnico: some View {
         VStack(alignment: .leading, spacing: M.spazioPannello) {
-            nota("Oggi Prisma calcola questa polizza come un comparto unico: indica i rendimenti della gestione separata e dei fondi per calcoli separati.",
+            nota("Oggi Lucy calcola questa polizza come un comparto unico: indica i rendimenti della gestione separata e dei fondi per calcoli separati.",
                  colore: C.avviso)
             if let completa {
                 Button { completa() } label: { Label("Completa i dati", systemImage: "pencil") }

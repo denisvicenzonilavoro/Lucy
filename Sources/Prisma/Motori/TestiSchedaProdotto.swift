@@ -29,7 +29,7 @@ enum TestiCatalogo {
     static let inUnaFrase = "In una frase"
     static let ePer = "È per"
     static let nonEPer = "Non è per"
-    static let scritteDaPrisma = "Scritte da Prisma dai dati della scheda: correggi i dati in «Modifica» se non tornano."
+    static let scritteDaPrisma = "Scritte da Lucy dai dati della scheda: correggi i dati in «Modifica» se non tornano."
 
     static let suDiecimila = "Su 10.000 € in dieci anni"
     static let allaFine = "alla fine, tolti i costi"

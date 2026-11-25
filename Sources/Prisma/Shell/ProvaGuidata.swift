@@ -73,11 +73,11 @@ final class ProvaGuidata {
         let secondi = passi.reduce(M.attesaIniziale) { $0 + $1.durata + ($1.preavviso == nil ? 0 : M.preavviso) }
         let conferma = NSAlert()
         conferma.messageText = "Prova della fluidità"
-        conferma.informativeText = "Per circa \(Int(secondi.rounded(.up))) secondi Prisma lavora da solo: apre e chiude "
+        conferma.informativeText = "Per circa \(Int(secondi.rounded(.up))) secondi Lucy lavora da sola: apre e chiude "
             + "alcune app (\(app.map(\.titolo).joined(separator: ", "))), passa dall'una all'altra, riduce una finestra "
             + "nel dock e la ripristina, ingrandisce, apre il centro notifiche, blocca e sblocca. Alla fine ti chiede di "
             + "passare il puntatore sul dock per qualche secondo.\n\n"
-            + "Nel frattempo non toccare mouse e tastiera; Esc interrompe. Poi Prisma torna com'era e mostra i risultati, "
+            + "Nel frattempo non toccare mouse e tastiera; Esc interrompe. Poi Lucy torna com'era e mostra i risultati, "
             + "senza dati dei clienti."
         conferma.addButton(withTitle: "Avvia la prova")
         conferma.addButton(withTitle: "Annulla")
@@ -108,7 +108,7 @@ final class ProvaGuidata {
     private func impedimento(_ stato: StatoShell) -> String? {
         if !stato.persistente { return "La prova gira solo nell'app vera." }
         if stato.bloccato { return "Togli prima la schermata di benvenuto, poi riprova." }
-        if stato.guida != nil { return "Chiudi prima la guida di Prisma, poi riprova." }
+        if stato.guida != nil { return "Chiudi prima la guida di Lucy, poi riprova." }
         if stato.modoCliente != nil { return "Esci prima dalla modalità cliente: la prova apre app che lì restano chiuse." }
         if stato.presentazione != nil { return "Chiudi prima la presentazione, poi riprova." }
         if stato.menu.conversazioneAVoce {
@@ -309,13 +309,13 @@ final class ProvaGuidata {
             VoceContesto(etichetta: "Mac", valore: mac),
             VoceContesto(etichetta: "macOS", valore: sistema),
             VoceContesto(etichetta: "Schermo", valore: schermo),
-            VoceContesto(etichetta: "Finestra di Prisma", valore: cornice),
+            VoceContesto(etichetta: "Finestra di Lucy", valore: cornice),
             VoceContesto(etichetta: "Aspetto", valore: aspetto == NSAppearance.Name.darkAqua ? "scuro" : "chiaro"),
             VoceContesto(etichetta: "Riduci movimento", valore: calmo ? "acceso" : "spento"),
             VoceContesto(etichetta: "Risparmio energetico", valore: info.isLowPowerModeEnabled ? "acceso" : "spento"),
             VoceContesto(etichetta: "Sfondo d'acqua", valore: stato.dati.impostazioni.sfondoAnimato ? "in movimento" : "fermo"),
             VoceContesto(etichetta: "Temperatura del Mac", valore: temperatura),
-            VoceContesto(etichetta: "Memoria di Prisma",
+            VoceContesto(etichetta: "Memoria di Lucy",
                          valore: "\(Int(inizio.memoria.rounded())) MB all'inizio, \(Int(MisuratoreFluidita.improntaMB().rounded())) MB alla fine"),
             VoceContesto(etichetta: "Archivio", valore: "\(stato.dati.clienti.count) clienti, \(stato.dati.posizioni.count) posizioni"),
             VoceContesto(etichetta: "App della prova", valore: app.map(\.titolo).joined(separator: ", ")),
@@ -399,7 +399,7 @@ final class ProvaGuidata {
         let misura = NSSize(width: M.larghezzaRisultati, height: M.altezzaRisultati)
         let f = NSWindow(contentRect: NSRect(origin: .zero, size: misura),
                          styleMask: [.titled, .closable], backing: .buffered, defer: false)
-        f.title = "Fluidità di Prisma"
+        f.title = "Fluidità di Lucy"
         f.isReleasedWhenClosed = false
         f.contentView = host
         if let p = finestra?.frame {
@@ -459,7 +459,7 @@ struct ResocontoProvaGuidata {
     let calmo: Bool
     let acquaInMoto: Bool
 
-    static let legenda = "Persi: fotogrammi in cui il thread principale di Prisma era occupato, su quelli attesi. "
+    static let legenda = "Persi: fotogrammi in cui il thread principale di Lucy era occupato, su quelli attesi. "
         + "Peggiore: la pausa più lunga tra due fotogrammi (a 60 Hz uno ogni 17 ms). Blocchi: pause oltre 50 ms. "
         + "Acqua: fotogrammi al secondo dello sfondo («ferma» se la scrivania era coperta)."
 
@@ -504,7 +504,7 @@ struct ResocontoProvaGuidata {
         let data = DateFormatter()
         data.locale = Locale(identifier: "it_IT")
         data.dateFormat = "dd/MM/yyyy HH:mm"
-        var righeTesto = ["Prova della fluidità di Prisma · \(data.string(from: quando))",
+        var righeTesto = ["Prova della fluidità di Lucy · \(data.string(from: quando))",
                           "Esito: \(giudizio.testo). \(sintesi)"]
         righeTesto += avvertenze
         righeTesto.append("")
@@ -558,7 +558,7 @@ private struct RisultatiProvaGuidata: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: M.spaziatura) {
-            Text("Fluidità di Prisma")
+            Text("Fluidità di Lucy")
                 .font(Tipo.provaTitolo)
             HStack(spacing: M.spaziaturaRighe) {
                 Text("Esito:")

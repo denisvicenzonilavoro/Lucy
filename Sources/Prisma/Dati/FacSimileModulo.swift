@@ -91,7 +91,7 @@ enum FacSimileModulo {
             ]),
         ])
 
-    static let piede = "Fac-simile di prova generato da Prisma: non è il modulo di nessuna compagnia. Testi di prova."
+    static let piede = "Fac-simile di prova generato da Lucy: non è il modulo di nessuna compagnia. Testi di prova."
     static let versione = "fac-simile, ed. di prova"
 
     // MARK: Misure (punti PDF, A4)
@@ -158,7 +158,7 @@ enum FacSimileModulo {
         let dati = NSMutableData()
         guard let consumatore = CGDataConsumer(data: dati as CFMutableData) else { return nil }
         var box = CGRect(origin: .zero, size: formato)
-        let info: [CFString: Any] = [kCGPDFContextTitle: "\(p.titolo) · fac-simile", kCGPDFContextCreator: "Prisma (fac-simile di prova)"]
+        let info: [CFString: Any] = [kCGPDFContextTitle: "\(p.titolo) · fac-simile", kCGPDFContextCreator: "Lucy (fac-simile di prova)"]
         guard let ctx = CGContext(consumer: consumatore, mediaBox: &box, info as CFDictionary) else { return nil }
         ctx.beginPDFPage(nil)
         // La scritta di traverso
@@ -173,7 +173,7 @@ enum FacSimileModulo {
         // Occhiello, titolo e la nota in alto a destra
         scrivi(p.occhiello, 8.5, grassetto: true, colore: grigio, a: CGPoint(x: margine, y: formato.height - alto - 8), ctx)
         scrivi(p.titolo, 24, grassetto: true, colore: inchiostro, a: CGPoint(x: margine, y: formato.height - alto - 40), ctx)
-        let nota = riga("Fac-simile generato da Prisma · pagina 1 di 1", 7.5, grassetto: false, colore: chiaro)
+        let nota = riga("Fac-simile generato da Lucy · pagina 1 di 1", 7.5, grassetto: false, colore: chiaro)
         let ln = CTLineGetTypographicBounds(nota, nil, nil, nil)
         ctx.textPosition = CGPoint(x: formato.width - margine - ln, y: formato.height - alto - 8)
         CTLineDraw(nota, ctx)

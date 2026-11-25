@@ -119,7 +119,7 @@ if (typeof document !== 'undefined') {
       var nome = String(c.consulente || '');
       var chi = nome.indexOf(' · il tuo consulente') > 0 ? 'a ' + nome.split(' ')[0] : 'al tuo consulente';
       var box = el('section', 'scaduto');
-      box.appendChild(el('p', null, 'Questo Prisma era valido fino al ' + L.data(c.validoFinoAl) + '. Chiedi ' + chi +
+      box.appendChild(el('p', null, 'Questa Lucy era valida fino al ' + L.data(c.validoFinoAl) + '. Chiedi ' + chi +
         ' una copia aggiornata.'));
       var comunque = el('button', 'secondario', 'Mostralo lo stesso');
       comunque.addEventListener('click', function () { box.remove(); disegna(c); });

@@ -108,8 +108,8 @@ extension StatoShell {
             #endif
             risposta = cervello
                 ? "Il motore esterno non è collegato: oggi Vera lavora tutta sul Mac. Quando lo collegherai riceverà solo le domande generali, mai i dati dei clienti."
-                : TestiStatoVera.inVista(mac: "Prima le regole di Prisma (comandi, agenda, routine, tagliando: senza modello), poi Vera sul Mac.",
-                            altrove: "Prima le regole di Prisma (comandi, agenda, routine, tagliando: senza modello), poi Qwen sul Mac. Il modello Apple è spento.")
+                : TestiStatoVera.inVista(mac: "Prima le regole di Lucy (comandi, agenda, routine, tagliando: senza modello), poi Vera sul Mac.",
+                            altrove: "Prima le regole di Lucy (comandi, agenda, routine, tagliando: senza modello), poi Qwen sul Mac. Il modello Apple è spento.")
         }
         aggiungiMessaggio(MessaggioVera(autore: .vera, testo: risposta, titolo: Self.titoloMotori, motore: MotoriVera.sintesi.nome), cliente: chiave)
         return true

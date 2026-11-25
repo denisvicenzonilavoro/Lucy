@@ -162,9 +162,9 @@ enum TestiMemoria {
     /// «Dal riesame del 12 marzo 2026 · 7 mesi fa».
     static func notaCambiato(data d: Date, tempo: String) -> String { "Dal riesame del \(data(d)) · \(tempo)" }
 
-    static let primaFotografia = "Prima fotografia: da questo riesame Prisma conserva le cifre chiave del cliente e al prossimo mostra che cosa è cambiato."
+    static let primaFotografia = "Prima fotografia: da questo riesame Lucy conserva le cifre chiave del cliente e al prossimo mostra che cosa è cambiato."
 
-    static let nessunaFotografia = "Nessuna fotografia salvata. Prisma ne salva una a ogni riesame: quando archivi, salvi, stampi o presenti il prospetto del riesame, quando concludi un incontro o un appuntamento di revisione, oppure con «\(salvaOggi)»."
+    static let nessunaFotografia = "Nessuna fotografia salvata. Lucy ne salva una a ogni riesame: quando archivi, salvi, stampi o presenti il prospetto del riesame, quando concludi un incontro o un appuntamento di revisione, oppure con «\(salvaOggi)»."
 
     /// «L'ultima fotografia è del 20 ottobre 2026, meno di 30 giorni fa: …».
     static func soloRecenti(data d: Date) -> String {
@@ -327,6 +327,6 @@ enum TestiMemoria {
     static var metodo: String {
         let m = MotoreMemoria.self
         let quota = percento(m.sogliaPatrimonioQuota)
-        return "Memoria dei riesami: a ogni riesame Prisma conserva le cifre chiave del cliente (profilo, famiglia, semafori del check-up, divario pensione, protezione, obiettivi, patrimonio per canale, completezza dei dati, conformità) e le confronta con la fotografia di almeno \(m.giorniTraRiesami) giorni prima. Si segnalano: divario pensione da \(cifra(m.sogliaDivarioPensione)) \(euroMese), ammanco da \(cifra(m.sogliaAmmanco)) \(euroMese), scoperto caso morte da \(cifra(m.sogliaCasoMorte)) \(euroUnita), patrimonio e debiti da \(cifra(m.sogliaPatrimonio)) \(euroUnita) e \(dal(quota)), obiettivi e completezza da \(m.sogliaPuntiObiettivo) punti, ogni cambio di profilo, famiglia, semaforo e conformità. Il patrimonio che cresce o cala non si giudica: può dipendere da versamenti o riscatti."
+        return "Memoria dei riesami: a ogni riesame Lucy conserva le cifre chiave del cliente (profilo, famiglia, semafori del check-up, divario pensione, protezione, obiettivi, patrimonio per canale, completezza dei dati, conformità) e le confronta con la fotografia di almeno \(m.giorniTraRiesami) giorni prima. Si segnalano: divario pensione da \(cifra(m.sogliaDivarioPensione)) \(euroMese), ammanco da \(cifra(m.sogliaAmmanco)) \(euroMese), scoperto caso morte da \(cifra(m.sogliaCasoMorte)) \(euroUnita), patrimonio e debiti da \(cifra(m.sogliaPatrimonio)) \(euroUnita) e \(dal(quota)), obiettivi e completezza da \(m.sogliaPuntiObiettivo) punti, ogni cambio di profilo, famiglia, semaforo e conformità. Il patrimonio che cresce o cala non si giudica: può dipendere da versamenti o riscatti."
     }
 }

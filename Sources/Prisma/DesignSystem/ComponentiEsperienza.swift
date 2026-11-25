@@ -145,7 +145,7 @@ struct GrigliaEsperienza: View {
                 Text(d.titolo).frame(width: M.colonnaDomanda, alignment: .center)
             }
             Text("Livello").frame(width: M.colonnaLivello, alignment: .leading)
-            Text("In Prisma").frame(maxWidth: .infinity, alignment: .leading)
+            Text("In Lucy").frame(maxWidth: .infinity, alignment: .leading)
         }
         .font(Tipo.tabellaTesta)
         .foregroundColor(Colori.Analisi.tabellaTesta)
@@ -206,7 +206,7 @@ struct GrigliaEsperienza: View {
                         .buttonStyle(StileSemplice())
                         .font(Tipo.colonnaCollegamento)
                         .foregroundColor(Colori.Colonna.collegamento)
-                        .help("Già in Prisma: " + s.posizioni.map(\.nome).joined(separator: ", "))
+                        .help("Già in Lucy: " + s.posizioni.map(\.nome).joined(separator: ", "))
                 }
             }
         }

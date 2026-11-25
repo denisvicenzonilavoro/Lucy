@@ -15,7 +15,7 @@ private struct DossierEsportato: Encodable {
 }
 
 private struct EsportazioneDati: Encodable {
-    let formato = "Prisma · esportazione dei dati di un cliente (GDPR art. 15 e 20)"
+    let formato = "Lucy · esportazione dei dati di un cliente (GDPR art. 15 e 20)"
     let esportatoIl: Date
     let dossier: DossierEsportato
     let appuntamenti: [Appuntamento]

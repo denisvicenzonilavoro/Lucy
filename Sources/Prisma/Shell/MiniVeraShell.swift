@@ -214,7 +214,7 @@ extension StatoShell {
             // Lo scenario «E se…?»: la tabella prima/dopo di Prisma e i due pulsanti della scheda
             c = CifreMiniVera()
             c.scenario = s
-            c.fonte = "Cifre dai calcoli di Prisma, con le ipotesi di \(s.nomeCliente)"
+            c.fonte = "Cifre dai calcoli di Lucy, con le ipotesi di \(s.nomeCliente)"
             c.azioni = [AzioneMiniVera(titolo: s.salvata ? "Nel dossier" : "Salva nel dossier", simbolo: s.salvata ? "checkmark" : "tray.and.arrow.down",
                                       tipo: .salvaScenario(m.id), primaria: !s.salvata),
                         AzioneMiniVera(titolo: s.simulazione == nil ? "Apri in Analisi 360" : "Apri in Simulazioni", simbolo: "arrow.up.forward",
@@ -314,7 +314,7 @@ extension StatoShell {
         case .confermaVera(let messaggio):
             let esiti = confermaSchedaVera(messaggio: messaggio) ?? []
             if !esiti.isEmpty, esiti.allSatisfy(\.fatta) {
-                commiato = "Fatto: lo trovi nelle app di Prisma"
+                commiato = "Fatto: lo trovi nelle app di Lucy"
             } else if esiti.contains(where: \.fatta) {
                 commiato = "Fatto in parte: guarda in Vera cosa non è riuscito"
             } else {

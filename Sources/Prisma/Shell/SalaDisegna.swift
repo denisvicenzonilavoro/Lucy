@@ -368,7 +368,7 @@ private struct CorpoDisegno: View {
                 .carattereApple(D.titolo)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .fixedSize(horizontal: false, vertical: true)
-            Text("Con il dito sull’iPad, o con il mouse qui, da sinistra a destra. Prisma lo trasforma nel piano che si può fare davvero.")
+            Text("Con il dito sull’iPad, o con il mouse qui, da sinistra a destra. Lucy lo trasforma nel piano che si può fare davvero.")
                 .carattereApple(D.spiegazione)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)

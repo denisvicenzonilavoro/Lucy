@@ -21,7 +21,7 @@ extension PonteVera {
     /// 2: in più «prisma/copilota» e «prisma/inquadra».
     /// 3 («Luce» giro 13): in più «prisma/carta» e «prisma/nota».
     static let versioneProtocollo = 3
-    static let macDaAggiornare = "Il Mac ha una versione di Prisma che non riceve ancora queste schede: aggiorna Prisma sul Mac."
+    static let macDaAggiornare = "Il Mac ha una versione di Lucy che non riceve ancora queste schede: aggiorna Lucy sul Mac."
 
     // I limiti di un messaggio (stanno ben sotto `massimoBusta`)
     static let massimoSchede = 200

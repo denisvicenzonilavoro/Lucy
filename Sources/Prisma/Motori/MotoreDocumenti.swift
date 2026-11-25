@@ -302,7 +302,7 @@ enum MotoreDocumenti {
 
     static let cartellaPersonali = "Personali"
     static let cartellaProdotti = "Dei prodotti"
-    static let cartellaPrisma = "Da Prisma"
+    static let cartellaPrisma = "Da Lucy"
     static let cartellaDaCollegare = "Da collegare"
 
     /// I gruppi della scheda Documenti dentro il cliente: «Personali» (identità e questionari), «Dei prodotti» (un
@@ -604,7 +604,7 @@ enum MotoreDocumenti {
                 case .kid:
                     note.append("Prima dei costi il KID indica il \(dueDecimali(lordo.valore))% l'anno.")
                 case .stima:
-                    note.append("Prima dei costi rende circa il \(dueDecimali(lordo.valore))% l'anno (stima di Prisma dallo scenario moderato, che è al netto dei costi).")
+                    note.append("Prima dei costi rende circa il \(dueDecimali(lordo.valore))% l'anno (stima di Lucy dallo scenario moderato, che è al netto dei costi).")
                 }
             }
         case .scadenze:
@@ -659,7 +659,7 @@ extension MotoreDocumenti.Stato {
         let delCliente = i.categoria == .identita || i.categoria == .questionario
         switch self {
         case .inLettura:
-            return "Prisma sta leggendo il testo sul Mac"
+            return "Lucy sta leggendo il testo sul Mac"
         case .illeggibile:
             return "Serve una scansione più nitida o il PDF originale"
         case .conDifferenze:

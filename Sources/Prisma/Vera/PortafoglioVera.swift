@@ -99,7 +99,7 @@ enum VeraPortafoglio {
                                    testo: "Tutti i clienti hanno un incontro negli ultimi \(Portafoglio.mesiSenzaContatto) mesi o un appuntamento in agenda.")
             }
             let righe = p.daRicontattare.map { d -> String in
-                let quando = d.ultimoContatto.map { "ultimo contatto il \(Formati.dataEstesa.string(from: $0))" } ?? "mai incontrato in Prisma"
+                let quando = d.ultimoContatto.map { "ultimo contatto il \(Formati.dataEstesa.string(from: $0))" } ?? "mai incontrato in Lucy"
                 return "• \(d.cliente.nome): \(d.motivo.map { $0 + "; " } ?? "")\(quando)"
             }
             return RispostaVera(titolo: "Da ricontattare: \(p.daRicontattare.count)",
@@ -114,7 +114,7 @@ enum VeraPortafoglio {
             }
             let righe = dovuti.prefix(10).map { d -> String in
                 let quando = d.dovutoDal.map { d.scaduto(oggi) ? "scaduto dal \(Formati.dataEstesa.string(from: $0))" : "dovuto dal \(Formati.dataEstesa.string(from: $0))" }
-                    ?? "mai incontrato in Prisma"
+                    ?? "mai incontrato in Lucy"
                 return "• \(d.cliente.nome): \(quando)"
             }
             let scaduti = dovuti.filter { $0.scaduto(oggi) }.count
@@ -133,7 +133,7 @@ enum VeraPortafoglio {
                     + (f.reddito == nil ? " (reddito non indicato)" : ", circa \(euro(f.risparmioPossibile)) di IRPEF in meno")
             }
             return RispostaVera(titolo: "Spazio deducibile entro il 31 dicembre",
-                               testo: righe.joined(separator: "\n") + "\n\nVale per i versamenti alla previdenza complementare fatti entro fine anno, fino a \(euro(RegoleFiscali.limiteDeducibilita)) compresi i contributi del datore di lavoro (che Prisma non conosce: chiedili al cliente).")
+                               testo: righe.joined(separator: "\n") + "\n\nVale per i versamenti alla previdenza complementare fatti entro fine anno, fino a \(euro(RegoleFiscali.limiteDeducibilita)) compresi i contributi del datore di lavoro (che Lucy non conosce: chiedili al cliente).")
 
         case .settimana:
             let cal = Calendar.current

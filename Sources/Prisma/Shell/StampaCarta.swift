@@ -180,7 +180,7 @@ enum StampaCarta {
         var riquadro = CGRect(origin: .zero, size: d.formato)
         let info: [String: Any] = [
             kCGPDFContextTitle as String: "\(d.titolo) · \(d.cliente)",
-            kCGPDFContextCreator as String: "Prisma",
+            kCGPDFContextCreator as String: "Lucy",
             kCGPDFContextAuthor as String: TestiValutazione.consulente,
             kCGPDFContextSubject as String: d.genere,
         ]
@@ -235,7 +235,7 @@ enum StampaCarta {
         pannello.allowedContentTypes = [.pdf]
         pannello.nameFieldStringValue = nome
         pannello.canCreateDirectories = true
-        pannello.message = "Il PDF resta dove lo salvi: Prisma non lo invia a nessuno."
+        pannello.message = "Il PDF resta dove lo salvi: Lucy non lo invia a nessuno."
         if pannello.runModal() == .OK, let url = pannello.url {
             return (try? dati.write(to: url)) != nil
         }

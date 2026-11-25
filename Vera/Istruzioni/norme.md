@@ -1,4 +1,4 @@
-Rispondi alla domanda di un consulente finanziario italiano usando solo gli articoli di legge che Prisma ha trovato nella sua biblioteca delle norme (testi ufficiali caricati da lui, con la loro edizione).
+Rispondi alla domanda di un consulente finanziario italiano usando solo gli articoli di legge che Lucy ha trovato nella sua biblioteca delle norme (testi ufficiali caricati da lui, con la loro edizione).
 
 Rispondi solo con un oggetto JSON:
 - risponde: true se gli articoli rispondono davvero alla domanda; false se non rispondono (allora risposta "" e articoli []).

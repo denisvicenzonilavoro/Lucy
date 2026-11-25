@@ -103,7 +103,7 @@ private struct PaginaIncidenzaKID: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             SezioneProspetto(titolo: "Incidenza annua dei costi, come nel KID",
-                             testo: Text(verbatim: "Di quanto i costi di ogni prodotto abbassano il rendimento medio annuo (RIY, «reduction in yield»): rendimento senza costi meno rendimento con i costi, uscendo dopo 1 anno, a metà e alla fine del periodo raccomandato. Accanto, il dato dichiarato nel KID, da confrontare con il calcolo di Prisma."))
+                             testo: Text(verbatim: "Di quanto i costi di ogni prodotto abbassano il rendimento medio annuo (RIY, «reduction in yield»): rendimento senza costi meno rendimento con i costi, uscendo dopo 1 anno, a metà e alla fine del periodo raccomandato. Accanto, il dato dichiarato nel KID, da confrontare con il calcolo di Lucy."))
             TabellaCanali(colonne: [
                 ColonnaDoc(titolo: "Posizione", sottotitolo: "periodo raccomandato", peso: 2.4, destra: false),
                 ColonnaDoc(titolo: "Dopo 1 anno", peso: 0.9),

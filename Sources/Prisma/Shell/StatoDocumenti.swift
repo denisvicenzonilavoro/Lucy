@@ -105,7 +105,7 @@ extension StatoShell {
     /// dati portati.
     func aggiornaClienteDaDocumento(_ id: String, campi: Set<CampoDocumento>, canale: Canale?) {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per cambiare il dossier.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per cambiare il dossier.")
             return
         }
         guard let d = documento(id), var c = dati.clienti.first(where: { $0.id == d.clienteId }) else { return }
@@ -156,7 +156,7 @@ extension StatoShell {
     /// posizione collegata o della più probabile (che resta collegata).
     func aggiornaValoreDaDocumento(_ id: String) {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per registrare il valore.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per registrare il valore.")
             return
         }
         guard let d = documento(id) else { return }
@@ -173,7 +173,7 @@ extension StatoShell {
     /// Crea dal documento una scheda prodotto, una posizione in essere o una proposta (con la scheda, se manca).
     func creaDaDocumento(_ id: String, cosa: CreaDaDocumento, canale: Canale, area: AreaPosizione, confermaPrima: Bool) {
         guard !solaLettura else {
-            mostraAvviso("Archivio in sola lettura: aggiorna Prisma per creare schede e posizioni.")
+            mostraAvviso("Archivio in sola lettura: aggiorna Lucy per creare schede e posizioni.")
             return
         }
         guard let d = documento(id) else { return }
@@ -196,7 +196,7 @@ extension StatoShell {
         let accettati = urls.filter { LetturaDocumenti.estensioniAccettate.contains($0.pathExtension.lowercased()) }
         let rifiutati = urls.filter { !LetturaDocumenti.estensioniAccettate.contains($0.pathExtension.lowercased()) }
         if let primo = rifiutati.first {
-            let formati = "Prisma legge PDF e immagini (PNG, JPEG, TIFF, HEIC)"
+            let formati = "Lucy legge PDF e immagini (PNG, JPEG, TIFF, HEIC)"
             mostraAvviso(rifiutati.count == 1
                          ? "\(primo.lastPathComponent) non si può aggiungere: \(formati)"
                          : "\(rifiutati.count) file non si possono aggiungere: \(formati)")

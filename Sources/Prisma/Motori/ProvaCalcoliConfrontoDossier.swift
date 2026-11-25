@@ -200,13 +200,13 @@ enum ProvaCalcoliConfrontoDossier {
         verifica.vero("DD4 Tenute: chiave «scadenza|2026-12-01|2026-12-13» (\(chiave))", chiave == "scadenza|2026-12-01|2026-12-13")
         tenuto.vociTenute = [chiave]
         let ct = Motore.confronta(tenuto, con: q)
-        verifica.vero("DD4 Tenute: scadenza lasciata in Prisma", ct.riga(.scadenza)?.esito == .tenuto)
+        verifica.vero("DD4 Tenute: scadenza lasciata in Lucy", ct.riga(.scadenza)?.esito == .tenuto)
         verifica("DD4 Tenute: 2 differenze", Double(ct.differenze), 2)
         verifica.vero("DD4 Tenute: preselezionato solo il capitale", ct.preselezione == [.capitaleAssicurato])
         verifica.vero("DD4 Tenute: non allineato", !ct.allineato)
         q.scadenza = AiutiProva.data(2026, 12, 14)
         let cs = Motore.confronta(tenuto, con: q)
-        verifica.vero("DD4 Tenute: con la scadenza di Prisma cambiata la riga torna diversa", cs.riga(.scadenza)?.esito == .diverso)
+        verifica.vero("DD4 Tenute: con la scadenza di Lucy cambiata la riga torna diversa", cs.riga(.scadenza)?.esito == .diverso)
         verifica("DD4 Tenute: di nuovo 3 differenze", Double(cs.differenze), 3)
 
         // DD5. Capitale non confermato
@@ -597,7 +597,7 @@ enum ProvaCalcoliConfrontoDossier {
         let proiezione = MotoreProiezione.calcola(ParametriProiezione(capitaleIniziale: 10_000, versamento: 0, frequenza: .unica, anni: 8,
                                                                       rendimento: multiramo ?? 0, costoIngresso: 1, costoAnnuo: 2.05,
                                                                       aliquotaFiscale: 0, inflazione: 0))
-        verifica("DD27 Lordo: la proiezione di Prisma rifà lo scenario (10.000 × 1,026^8)",
+        verifica("DD27 Lordo: la proiezione di Lucy rifà lo scenario (10.000 × 1,026^8)",
                  proiezione.punti.first { $0.anno == 8 }?.valore ?? 0, 12_279.45, tolleranza: 1)
 
         // DD28. Rendimento lordo di un documento

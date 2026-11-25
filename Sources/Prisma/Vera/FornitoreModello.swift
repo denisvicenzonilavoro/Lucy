@@ -255,7 +255,7 @@ enum IndirizzoLocale {
     }
 
     static func errore(_ indirizzo: String) -> ErroreVera {
-        ErroreVera(messaggio: "Prisma parla solo con un modello sul Mac (127.0.0.1): l'indirizzo «\(indirizzo)» non è locale.")
+        ErroreVera(messaggio: "Lucy parla solo con un modello sul Mac (127.0.0.1): l'indirizzo «\(indirizzo)» non è locale.")
     }
 }
 

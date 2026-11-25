@@ -10,7 +10,7 @@ import SwiftUI
 enum CollegamentoPrismaAI {
     /// Spento: nessuna lettera arriva. Non si cambia senza la decisione dell'utente.
     static let collegamentoAmmesso = false
-    static let statoSpento = "Il collegamento con Prisma AI è spento: si accenderà quando esisterà il suo server, con connessione cifrata e accesso protetto. Da Prisma non parte nessun dato."
+    static let statoSpento = "Il collegamento con Lucy AI è spento: si accenderà quando esisterà il suo server, con connessione cifrata e accesso protetto. Da Lucy non parte nessun dato."
 }
 
 /// Una richiesta di consulenza arrivata da Prisma AI, solo in memoria.
@@ -51,7 +51,7 @@ extension StatoShell {
         let oggi = Calendar.current.startOfDay(for: Date())
         let id = "prisma-ai-\(l.id)-\(Int(oggi.timeIntervalSinceReferenceDate))"
         guard !dati.attivita.contains(where: { $0.id == id }) else { return }
-        salvaAttivita(Attivita(id: id, clienteId: "", titolo: "Richiamare \(l.nome) (richiesta da Prisma AI)",
+        salvaAttivita(Attivita(id: id, clienteId: "", titolo: "Richiamare \(l.nome) (richiesta da Lucy AI)",
                                scadenza: oggi, priorita: .alta, completata: false, note: l.frase))
         mostraAvviso("In agenda per oggi: richiamare \(l.nome).")
     }

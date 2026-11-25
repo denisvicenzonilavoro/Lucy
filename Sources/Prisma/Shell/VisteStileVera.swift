@@ -39,7 +39,7 @@ struct ProfiloStileVista: View {
                         Button("Impara di nuovo") { stato.aggiornaStileVera() }
                             .buttonStyle(.apple).fixedSize()
                             .disabled(stato.solaLettura)
-                            .help("Rilegge i messaggi aperti da Prisma in Mail e in Messaggi. Le regole scritte da te restano")
+                            .help("Rilegge i messaggi aperti da Lucy in Mail e in Messaggi. Le regole scritte da te restano")
                     }
                 }
                 .padding(.top, F.sopraScheda / 2)
@@ -213,7 +213,7 @@ struct GruppoStileVeraImpostazioni: View {
             if let esempio {
                 BozzaStileVista(scheda: esempio)
             }
-            Text("Vera impara solo dai messaggi che apri da Prisma in Mail o in Messaggi: regole, mai i testi. Le regole scritte da te non le cambia più.")
+            Text("Vera impara solo dai messaggi che apri da Lucy in Mail o in Messaggi: regole, mai i testi. Le regole scritte da te non le cambia più.")
                 .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                 .fixedSize(horizontal: false, vertical: true)
         }

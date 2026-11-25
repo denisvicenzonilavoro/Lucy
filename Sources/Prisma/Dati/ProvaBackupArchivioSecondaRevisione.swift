@@ -82,7 +82,7 @@ extension ProvaBackup {
         try Data("indice rovinato".utf8).write(to: ArchivioPezzi.indice(in: cartella))
         let e = caricaEConverti(cartella)
         guard e.dati.impostazioni.ovunque == d.impostazioni.ovunque, e.dati.impostazioni == d.impostazioni else {
-            return "riserva: ricostruito l'indice, i contatori di Prisma ovunque sono tornati a quelli dell'avvio (visti \(e.dati.impostazioni.ovunque.vistoFinoA))"
+            return "riserva: ricostruito l'indice, i contatori di Lucy ovunque sono tornati a quelli dell'avvio (visti \(e.dati.impostazioni.ovunque.vistoFinoA))"
         }
         guard !e.dati.clienti.contains(where: { $0.id == nuovo.id }), e.dati == d else {
             return "riserva: ricostruito l'indice, l'archivio non è quello dell'ultimo salvataggio (o il cliente tolto è tornato)"
@@ -113,8 +113,8 @@ extension ProvaBackup {
         }
         let e = caricaEConverti(cartella)
         guard e.dati.clienti.map(\.id) == d0.clienti.map(\.id), e.dati.impostazioni.ovunque == d0.impostazioni.ovunque,
-              e.avviso?.contains("Prisma ovunque") == true else {
-            return "riserva rovinata: senza riserva l'archivio non si ricostruisce dalla copia d'avvio con l'avviso su Prisma ovunque (\(e.avviso ?? "nessun avviso"))"
+              e.avviso?.contains("Lucy ovunque") == true else {
+            return "riserva rovinata: senza riserva l'archivio non si ricostruisce dalla copia d'avvio con l'avviso su Lucy ovunque (\(e.avviso ?? "nessun avviso"))"
         }
         return nil
     }

@@ -8,7 +8,7 @@ import Foundation
 enum TestiStorie {
     static let tranquilla = "Una settimana tranquilla: niente in agenda per ora."
     static let buonaSettimana = "Buona settimana."
-    static let prontaAnche = "Prisma è pronta, tu anche."
+    static let prontaAnche = "Lucy è pronta, tu anche."
     static let guardaAnno = "Guarda anche «Il tuo anno»"
     static let questaSettimana = "Questa settimana"
     static let inArrivo = "In arrivo"
@@ -18,7 +18,7 @@ enum TestiStorie {
     static let annoSottotitolo = "Il tuo anno da consulente, in un minuto."
     static let protetto = "Quest’anno hai protetto"
     static let segui = "Segui"
-    static let primoAnno = "Da quest’anno in Prisma"
+    static let primoAnno = "Da quest’anno in Lucy"
     static let momento = "Il momento dell’anno"
     static let grazie = "Grazie per il lavoro che fai."
     static let percorso = "Per andarli a trovare hai fatto"

@@ -204,7 +204,7 @@ extension StatoShell {
         paginaTagliandoAperta = false
         switch d {
         case .scheda(let id, let sezione):
-            guard cliente(id) != nil else { return mostraAvviso("La scheda del cliente non è più in Prisma.") }
+            guard cliente(id) != nil else { return mostraAvviso("La scheda del cliente non è più in Lucy.") }
             clienteAttivoId = id
             switch sezione {
             case .anagrafica: schedaCliente = .anagrafica
@@ -213,7 +213,7 @@ extension StatoShell {
             }
             apri(.clienti)
         case .posizione(let id):
-            guard let p = dati.posizioni.first(where: { $0.id == id }) else { return mostraAvviso("La posizione non è più in Prisma.") }
+            guard let p = dati.posizioni.first(where: { $0.id == id }) else { return mostraAvviso("La posizione non è più in Lucy.") }
             apriPosizione(p)
         }
     }
@@ -270,7 +270,7 @@ extension StatoShell {
     @discardableResult
     func sistemaTuttoTagliando(chiave: String = VeraPortafoglio.chiave, parla: Bool = false) -> String? {
         if solaLettura {
-            let detto = "Prisma è in sola lettura: non posso preparare correzioni."
+            let detto = "Lucy è in sola lettura: non posso preparare correzioni."
             if parla { rispostaTagliando(detto, chiave: chiave) } else { mostraAvviso(detto) }
             return nil
         }

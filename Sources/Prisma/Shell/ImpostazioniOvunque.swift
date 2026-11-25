@@ -190,7 +190,7 @@ private struct CorpoImpostazioniOvunque: View {
                 }
             }
             NotaImpostazioni(suMac
-                ? "In iCloud Drive c’è solo un file cifrato con la tua passphrase: nessun server, nessun contenitore di Prisma in iCloud. Documenti, conversazioni con Vera e trascrizioni restano sul Mac."
+                ? "In iCloud Drive c’è solo un file cifrato con la tua passphrase: nessun server, nessun contenitore di Lucy in iCloud. Documenti, conversazioni con Vera e trascrizioni restano sul Mac."
                 : "La copia arriva dal Mac in un file cifrato. Le modifiche di qui tornano al Mac nel giornale cifrato di questo dispositivo.")
                 .padding(.top, P.fraRighe)
                 .entrataCascata(8, base: base)
@@ -394,7 +394,7 @@ private struct CorpoImpostazioniOvunque: View {
 
     private var rigaPassphrase: some View {
         RigaImpostazione(titolo: "Passphrase",
-                         sottotitolo: "Solo tua: Prisma non la conserva. Su questo Mac la chiave sta nel Portachiavi.") {
+                         sottotitolo: "Solo tua: Lucy non la conserva. Su questo Mac la chiave sta nel Portachiavi.") {
             ValoreRiga(testo: "Cambia…") { apriModulo(.cambia) }
                 .disabled(ovunque.inCorso || ovunque.chiave == nil)
         }
@@ -447,11 +447,11 @@ private struct ModuloOvunqueVista: View {
         case .accendi:
             return suMac
                 ? "Scegli la cartella in iCloud Drive e una passphrase: solo con lei la copia si apre, sul Mac, sull’iPhone e sull’iPad."
-                : "Scegli in File la cartella di Prisma ovunque creata dal Mac (iCloud Drive › Prisma ovunque) e scrivi la sua passphrase. I dati di questo dispositivo vengono sostituiti dalla copia del Mac."
+                : "Scegli in File la cartella di Lucy ovunque creata dal Mac (iCloud Drive › Lucy ovunque) e scrivi la sua passphrase. I dati di questo dispositivo vengono sostituiti dalla copia del Mac."
         case .passphrase:
             return "La passphrase con cui hai creato la copia sul Mac. Se l’hai cambiata sul Mac, scrivi quella nuova."
         case .cambia:
-            return "Prima Prisma unisce le modifiche arrivate, poi riscrive la copia con la passphrase nuova: iPhone e iPad te la chiederanno."
+            return "Prima Lucy unisce le modifiche arrivate, poi riscrive la copia con la passphrase nuova: iPhone e iPad te la chiederanno."
         }
     }
 

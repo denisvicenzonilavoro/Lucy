@@ -10,7 +10,7 @@ import SwiftUI
 // Il disegno del film del piano («Luce» giro 15, §3.2.3): un solo disegno per anteprima, video e istantanee. È una
 // funzione pura del tempo (niente animazioni di SwiftUI, niente Timer) in Core Graphics e Core Text, utilizzabile fuori
 // dal thread principale (la codifica del video gira su una coda propria). SwiftUI serve solo per il tracciato vettoriale
-// del logo (`GeometriaLogo.tracciato(_:in:)`, un valore). Il contesto ha **l'origine in alto a sinistra** (y verso il
+// del logo (`GeometriaLucy.elle` e `disco`, valori). Il contesto ha **l'origine in alto a sinistra** (y verso il
 // basso): `Canvas.withCGContext` lo è già, `RegistaFilm` capovolge il pixel buffer prima di chiamare il disegno; il testo
 // si scrive con `textMatrix = (1, −1)`. Tutte le misure in punti del film (880×495), scalate alla dimensione chiesta.
 
@@ -354,13 +354,13 @@ enum DisegnoFilm {
     // MARK: Forme
 
     private static func logo(_ ctx: CGContext, in rect: CGRect) {
-        let spicchi = [GeometriaLogo.sinistra, GeometriaLogo.destra, GeometriaLogo.base]
-        for (i, s) in spicchi.enumerated() {
-            let opacita = F.opacitaSpicchi.indices.contains(i) ? F.opacitaSpicchi[i] : 1
-            ctx.addPath(GeometriaLogo.tracciato(s, in: rect).cgPath)
-            ctx.setFillColor(colore(F.testo, alfa: opacita))
-            ctx.fillPath()
-        }
+        // Il simbolo di Lucy: la L nel colore del testo, il disco d'oro del marchio
+        ctx.addPath(GeometriaLucy.elle(in: rect).cgPath)
+        ctx.setFillColor(colore(F.testo, alfa: 1))
+        ctx.fillPath()
+        ctx.addPath(GeometriaLucy.disco(in: rect).cgPath)
+        ctx.setFillColor(colore(ColoreFilm.hex("#CDA04A"), alfa: 1))
+        ctx.fillPath()
     }
 
     private static func anello(_ ctx: CGContext, centro: CGPoint, quota: Double, colore c: ColoreFilm) {

@@ -18,7 +18,7 @@ struct PaginaImpostazioniModuli: View {
         let modelli = stato.moduli.tutti
         let conIban = stato.clientiConIban
         return VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Pagina.spazioGruppi) {
-            NotaImpostazioni("I moduli che usi, caricati da te in Pratiche › Moduli: Prisma ne riconosce i campi e li "
+            NotaImpostazioni("I moduli che usi, caricati da te in Pratiche › Moduli: Lucy ne riconosce i campi e li "
                              + "compila con i dati del dossier. Restano sul Mac, entrano nei backup e non vanno su iPhone e iPad.")
             VStack(alignment: .leading, spacing: Riga.fraRighe) {
                 GruppoImpostazioni(titolo: "I tuoi moduli") {
@@ -67,7 +67,7 @@ struct PaginaImpostazioniModuli: View {
                     }
                 }
                 NotaImpostazioni("Le risposte del questionario e delle dichiarazioni antiriciclaggio (titolare effettivo, persona "
-                                 + "politicamente esposta, origine dei fondi) le dà il cliente ogni volta: Prisma non le compila. "
+                                 + "politicamente esposta, origine dei fondi) le dà il cliente ogni volta: Lucy non le compila. "
                                  + "Le firme sono caselle evidenziate da firmare a penna: niente firma elettronica.")
             }
             .cascataImpostazioni(2)
@@ -80,7 +80,7 @@ struct PaginaImpostazioniModuli: View {
                 daTogliere = nil
             }
         } message: {
-            Text("Il PDF vuoto e la sua mappa escono da Prisma. I moduli già compilati restano nei Documenti dei clienti.")
+            Text("Il PDF vuoto e la sua mappa escono da Lucy. I moduli già compilati restano nei Documenti dei clienti.")
         }
         .confirmationDialog("Togliere gli IBAN salvati?", isPresented: $confermaSpegni, titleVisibility: .visible) {
             Button("Togli gli IBAN (\(conIban))", role: .destructive) { stato.impostaConservaIban(false) }

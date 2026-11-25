@@ -117,7 +117,7 @@ extension ProvaBackup {
             return "spese di prova non codificate"
         }
         var strana = prima
-        strana["categoria"] = "categoria di un Prisma più nuovo"
+        strana["categoria"] = "categoria di una Lucy più nuova"
         strana["iva"] = -3
         elencoSpese.append(["descrizione": "Senza id"])
         elencoSpese[0] = strana

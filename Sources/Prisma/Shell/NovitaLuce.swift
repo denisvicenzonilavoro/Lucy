@@ -49,7 +49,7 @@ enum NovitaLuce: String, CaseIterable, Identifiable {
 
     var titolo: String {
         switch self {
-        case .prismaCliente: return "Il Prisma del cliente"
+        case .prismaCliente: return "La Lucy del cliente"
         case .territorio: return "Il tuo territorio"
         case .lettera: return "La lettera dal futuro"
         case .film: return "Il film del piano"
@@ -64,7 +64,7 @@ enum NovitaLuce: String, CaseIterable, Identifiable {
         case .lanciaAnno: return "Lancia l’anno"
         case .valoreConsulente: return "Quanto vale avermi accanto"
         case .realtaAumentata: return "La realtà aumentata"
-        case .stanotte: return "Stanotte Prisma ha lavorato"
+        case .stanotte: return "Stanotte Lucy ha lavorato"
         case .propostaDaSola: return "La proposta si costruisce da sola"
         case .compilaDaSolo: return "Compila da solo"
         case .dopoLaFirma: return "Le pratiche dopo la firma"

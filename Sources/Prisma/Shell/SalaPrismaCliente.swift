@@ -95,7 +95,7 @@ struct PalcoPrismaCliente: View {
             MiniPrisma(contenuto: contenuto, voci: voci, eta: eta)
         }
         .scaleEffect(scala, anchor: .topLeading)
-        .accessibilityLabel(Text("Anteprima del Prisma di \(contenuto.nomeBattesimo)"))
+        .accessibilityLabel(Text("Anteprima della Lucy di \(contenuto.nomeBattesimo)"))
     }
 
     // MARK: La colonna larga
@@ -323,7 +323,7 @@ struct PalcoPrismaCliente: View {
                     .carattereApple(P.motivo)
                     .foregroundColor(P.coloreErrore)
             } else {
-                Text("Dilla a voce: Prisma non la conserva.")
+                Text("Dilla a voce: Lucy non la conserva.")
                     .carattereApple(P.motivo)
                     .foregroundColor(P.coloreMotivo)
             }
@@ -772,11 +772,11 @@ private struct TestataMini: View {
                 OndaMini(indice: i)
                     .position(x: centro.x, y: centro.y)
             }
-            LogoPrisma(colore: C.logo)
-                .frame(width: M.logo * GeometriaLogo.proporzione, height: M.logo)
+            LogoLucy(colore: C.logo)
+                .frame(width: M.logo, height: M.logo)
                 .offset(x: M.posizioneLogo.x, y: M.posizioneLogo.y)
             VStack(alignment: .leading, spacing: M.spazioStretto) {
-                Text("Il Prisma di")
+                Text("La Lucy di")
                     .carattereApple(M.sopraNome)
                     .foregroundColor(C.testo.opacity(M.opacitaSopraNome))
                 NomeCheSiScrive(nome: nome)

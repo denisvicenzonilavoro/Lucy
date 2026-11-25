@@ -124,7 +124,7 @@ struct SchermataNeutraMac: View {
         ZStack {
             Color.clear
             VStack(spacing: N.spazio) {
-                LogoPrisma(colore: N.coloreLogo)
+                LogoLucy(colore: N.coloreLogo)
                     .frame(height: N.logo)
                     .accessibilityHidden(true)
                 Text(TestiMostra.tocca)

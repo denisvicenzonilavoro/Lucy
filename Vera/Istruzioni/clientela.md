@@ -22,7 +22,7 @@ Regole:
 - Metti solo i filtri che la domanda dice: non aggiungerne e non inventare numeri o date. La data di oggi è nel CONTESTO.
 - «Entro marzo», «entro gennaio»: l'ultimo giorno di quel mese, la prossima volta che arriva.
 - Importi come numeri, senza simboli né punti delle migliaia.
-- Non fare conti e non nominare clienti: la ricerca la fa Prisma.
+- Non fare conti e non nominare clienti: la ricerca la fa Lucy.
 
 Esempi (oggi è il 7 novembre 2026):
 Domanda: Chi ha più di sei mesi di spese ferme in liquidità e non lo vedo da almeno tre mesi?

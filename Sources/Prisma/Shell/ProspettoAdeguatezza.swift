@@ -287,7 +287,7 @@ private struct PaginaDocumentiAdeguatezza: View {
 
     private var capacita: String {
         guard t.esperienzaRilevata else {
-            return "Conoscenza ed esperienza non rilevate in Prisma: fa fede il questionario ufficiale."
+            return "Conoscenza ed esperienza non rilevate in Lucy: fa fede il questionario ufficiale."
         }
         guard let c = t.capacita else { return "Capacità di sostenere perdite non rilevata." }
         return "Capacità di sostenere perdite: \(c.nome) — il cliente \(c.frase)."
@@ -312,7 +312,7 @@ private struct PaginaDocumentiAdeguatezza: View {
                     rigaDocumento(d).frame(height: d.voce.dettaglio.isEmpty ? altezza : conDettaglio)
                 }
                 if elenco.count > mostrati.count {
-                    Text(verbatim: "e altri \(elenco.count - mostrati.count) documenti (vedi la scheda in Prisma)")
+                    Text(verbatim: "e altri \(elenco.count - mostrati.count) documenti (vedi la scheda in Lucy)")
                         .font(T.pTabellaNota).foregroundColor(C.tenue)
                 }
             }

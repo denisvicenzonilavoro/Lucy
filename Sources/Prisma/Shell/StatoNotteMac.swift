@@ -83,7 +83,7 @@ extension StatoShell {
         let lavoro = notte.lavoro
         lavoro.fermatoPer = nil
         lavoro.attivita = ProcessInfo.processInfo.beginActivity(options: [.background, .idleSystemSleepDisabled],
-                                                                reason: "Prisma prepara le carte di domani")
+                                                                reason: "Lucy prepara le carte di domani")
         lavoro.guardia = Task { @MainActor [weak self] in
             try? await Task.sleep(nanoseconds: UInt64(ImpostazioniNotte.minutiMassimi) * 60 * 1_000_000_000)
             if !Task.isCancelled { self?.fermaLavoroNotte(.tempo) }

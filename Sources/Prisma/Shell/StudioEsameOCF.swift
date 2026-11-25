@@ -39,7 +39,7 @@ enum TestiEsameOCF {
     static let impostaData = "Imposta la data dell’esame"
     /// Migliorie d'uso 55: la nota dice che le materie si toccano.
     static let notaManuale = "Le domande vengono dal tuo manuale. Tocca una materia per ripassare quella."
-    static let notaEsempio = "Tra le domande ci sono quelle di esempio, scritte per prova da Prisma: non vengono dal "
+    static let notaEsempio = "Tra le domande ci sono quelle di esempio, scritte per prova da Lucy: non vengono dal "
         + "manuale né da quiz ufficiali. Importa le tue per allenarti davvero."
     static let giusto = "Giusto."
     static let sbagliato = "Non proprio: torna tra un giorno."
@@ -62,7 +62,7 @@ enum TestiEsameOCF {
     static let vuotoTitolo = "Importa le domande del tuo manuale"
     static let vuotoTesto = "Un file CSV o JSON: una domanda per riga, con le quattro risposte, quella corretta e, se "
         + "vuoi, la spiegazione. Le domande restano solo su questo Mac, nel tuo archivio e nei tuoi backup."
-    static let vuotoNota = "Le domande di esempio sono sette, scritte per prova da Prisma: non vengono dal manuale."
+    static let vuotoNota = "Le domande di esempio sono sette, scritte per prova da Lucy: non vengono dal manuale."
     static let finitoTitolo = "Per oggi il ripasso è finito."
     static let altreNuove = "Altre domande nuove ›"
     static let nessunaNuova = "Hai già visto tutte le domande: importane altre per continuare."

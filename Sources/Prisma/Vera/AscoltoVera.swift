@@ -185,7 +185,7 @@ final class AscoltoVera: ObservableObject {
             segnala("Non sono riuscita a capirti: \(e). \(dettaglio)")
         } else if piccoMassimo < 0.01 {
             fallimento = .senzaSuono
-            segnala("Non arriva nessun suono dal microfono. Controlla in Impostazioni di Sistema › Suono › Ingresso quale microfono è scelto, e in Privacy e sicurezza › Microfono che Prisma sia attivo. \(dettaglio)")
+            segnala("Non arriva nessun suono dal microfono. Controlla in Impostazioni di Sistema › Suono › Ingresso quale microfono è scelto, e in Privacy e sicurezza › Microfono che Lucy sia attivo. \(dettaglio)")
         } else {
             fallimento = .senzaParole
             segnala("Ti ho sentito ma il riconoscimento non mi ha restituito parole. \(dettaglio)")
@@ -366,7 +366,7 @@ final class AscoltoVera: ObservableObject {
         #if os(iOS)
         // Su iPhone e iPad la voce di Vera arriva più avanti (microfono e riconoscimento vanno dichiarati e provati):
         // per ora niente richieste di permesso, si dice perché
-        DispatchQueue.main.async { esito("Su iPhone e iPad Vera non ascolta ancora: usa la conversazione a voce da Prisma sul Mac.") }
+        DispatchQueue.main.async { esito("Su iPhone e iPad Vera non ascolta ancora: usa la conversazione a voce da Lucy sul Mac.") }
         #elseif os(macOS)
         let microfono = "Vera non ha il permesso di usare il microfono: concedilo in Impostazioni di Sistema › Privacy e sicurezza › Microfono."
         SFSpeechRecognizer.requestAuthorization { parlato in

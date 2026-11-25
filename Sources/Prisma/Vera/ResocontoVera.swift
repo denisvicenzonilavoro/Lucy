@@ -77,7 +77,7 @@ enum ResocontoVera {
     }()
 
     static var istruzioni: String {
-        IstruzioniVera.testo("resoconto") ?? "Riscrivi il resoconto di un incontro preparato da Prisma nel formato del consulente: presenti, parlato (di cosa abbiamo parlato), deciso, passi (prossimi passi), raccogliere (dati da raccogliere), più breve (al massimo quattro punti). Frasi brevi, in italiano. Usa solo i fatti e le cifre del resoconto di Prisma e della trascrizione: non aggiungere niente, non cambiare cifre, date o nomi. Rispondi solo con il JSON."
+        IstruzioniVera.testo("resoconto") ?? "Riscrivi il resoconto di un incontro preparato da Lucy nel formato del consulente: presenti, parlato (di cosa abbiamo parlato), deciso, passi (prossimi passi), raccogliere (dati da raccogliere), più breve (al massimo quattro punti). Frasi brevi, in italiano. Usa solo i fatti e le cifre del resoconto di Lucy e della trascrizione: non aggiungere niente, non cambiare cifre, date o nomi. Rispondi solo con il JSON."
     }
 
     static func messaggi(_ r: ResocontoIncontro, cliente: String) -> [MessaggioModello] {

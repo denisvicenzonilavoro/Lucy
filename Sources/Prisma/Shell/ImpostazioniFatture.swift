@@ -27,7 +27,7 @@ struct SezioneDatiFatture: View {
         return VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Pagina.spazioGruppi) {
             VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.fraRighe) {
                 GruppoImpostazioni(titolo: "Dati per le fatture") {
-                    RigaImpostazione(titolo: "Prisma prepara il file, non lo invia",
+                    RigaImpostazione(titolo: "Lucy prepara il file, non lo invia",
                                      sottotitolo: "Il PDF e il file XML della fattura elettronica (tracciato FatturaPA): il file lo carichi tu sul portale «Fatture e Corrispettivi» o lo dai al commercialista",
                                      stato: mancanti.isEmpty ? Pillola(testo: "Dati completi", tono: .ok)
                                                              : Pillola(testo: "Da completare", tono: .attenzione),
@@ -39,7 +39,7 @@ struct SezioneDatiFatture: View {
                 if mancanti.isEmpty {
                     NotaImpostazioni("Ci sono tutti i dati per il file XML. Le voci fiscali seguono il regime che hai scritto qui.")
                 }
-                NotaImpostazioni("Prisma non sceglie il regime fiscale e non mette aliquote, contributi, ritenute o bolli: "
+                NotaImpostazioni("Lucy non sceglie il regime fiscale e non mette aliquote, contributi, ritenute o bolli: "
                                  + "scrivi i tuoi, con il tuo commercialista. Un campo vuoto resta vuoto.")
             }
             gruppoAnagrafica
@@ -215,7 +215,7 @@ struct SezioneDatiFatture: View {
                 testo(\.numerazione.modello, larghezza: I.campoMedio)
             }
             riga("Prefisso", "Facoltativo") { testo(\.numerazione.prefisso, larghezza: I.campoCorto) }
-            riga("Primo numero del \(String(anno))", "Se cominci a usare Prisma a metà anno; vuoto: da 1") {
+            riga("Primo numero del \(String(anno))", "Se cominci a usare Lucy a metà anno; vuoto: da 1") {
                 intero(primoNumero(anno), unita: "", larghezza: I.campoCorto)
             }
             riga("Prossimo numero", "La parcella emessa oggi prenderebbe questo numero") {

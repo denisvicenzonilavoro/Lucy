@@ -87,7 +87,7 @@ extension ProvaBackup {
         guard d.uscite == uscite else { return "giro 15: le uscite non tornano uguali dal backup" }
         guard d.sinistri == [sinistro] else { return "giro 15: i sinistri non tornano uguali dal backup" }
         guard d.clienti.first(where: { $0.id == "giulia" })?.prismaCliente == archivio.clienti[i].prismaCliente else {
-            return "giro 15: lo stato del Prisma del cliente non torna dal backup"
+            return "giro 15: lo stato della Lucy del cliente non torna dal backup"
         }
         guard d.clienti.first(where: { $0.id == "giulia" })?.consensi == archivio.clienti[i].consensi else {
             return "giro 15: il consenso a WhatsApp non torna dal backup"

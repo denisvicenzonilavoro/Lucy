@@ -7,14 +7,14 @@ enum TestiPassaparola {
 
     #if os(macOS)
     /// Migliorie d'uso 47: il clic apre la scheda, con il prossimo passo.
-    static let notaPercorso = "Tocca una scheda per aprirla: dentro c'è il prossimo passo. Prisma ricorda chi l'ha presentata: quando diventa cliente compare nell'albero del passaparola."
+    static let notaPercorso = "Tocca una scheda per aprirla: dentro c'è il prossimo passo. Lucy ricorda chi l'ha presentata: quando diventa cliente compare nell'albero del passaparola."
     #else
-    static let notaPercorso = "Tocca una scheda per farla avanzare. Prisma ricorda chi l'ha presentata: quando diventa cliente, compare nell'albero del passaparola."
+    static let notaPercorso = "Tocca una scheda per farla avanzare. Lucy ricorda chi l'ha presentata: quando diventa cliente, compare nell'albero del passaparola."
     #endif
     static let notaPercorsoSolaLettura = "Su iPad il percorso si guarda soltanto: le schede si spostano dal Mac."
     static let aggiungi = "Aggiungi un potenziale cliente"
     static let aggiungiBreve = "+ Potenziale"
-    static let vuoto = "Nessun potenziale cliente per ora. Quando qualcuno ti viene presentato, o ti contatta, aggiungilo qui: Prisma ricorda chi te l'ha presentato."
+    static let vuoto = "Nessun potenziale cliente per ora. Quando qualcuno ti viene presentato, o ti contatta, aggiungilo qui: Lucy ricorda chi te l'ha presentato."
     static let stimaDaInserire = "stima da inserire"
     static let informativaDaDare = "informativa da dare"
     static let datiDiProva = "dati di prova"
@@ -174,7 +174,7 @@ enum TestiPassaparola {
     static let nessunContatto = "Scrivi un telefono, o l'informativa e il consenso, con «Modifica…»."
     static let copiaNumero = "Copia il numero"
     static let numeroCopiato = "Numero copiato"
-    static let notaChiama = "Prisma non chiama: componi il numero dal telefono."
+    static let notaChiama = "Lucy non chiama: componi il numero dal telefono."
 
     // MARK: - Albero
 
@@ -274,7 +274,7 @@ enum TestiPassaparola {
     static let capsulaPotenziale = "Potenziale"
     static let chiediPresentazione = "Chiedi una presentazione"
     /// Decisione 48-a: senza un fatto bello in corso, niente richiesta.
-    static let momentoDaPrisma = "Il momento giusto per chiedere te lo dice Prisma, dopo un fatto bello."
+    static let momentoDaPrisma = "Il momento giusto per chiedere te lo dice Lucy, dopo un fatto bello."
     static let suggerimentoNodo = "Clic: il suo ramo · ⌘-clic: il dossier"
 
     /// «Ringrazia Sofia».

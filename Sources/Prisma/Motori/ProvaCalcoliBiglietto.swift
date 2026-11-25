@@ -30,7 +30,7 @@ enum ProvaCalcoliBiglietto {
         let spenta = TestiBiglietto.contenuto(t, mostraCifra: false, frase: nil)
         verifica.vero("Biglietto: con «Mostra la cifra» spento niente cifra", spenta.cifra == nil)
         verifica.vero("Biglietto: con «Mostra la cifra» spento niente didascalia della cifra", spenta.didascalia == nil)
-        verifica.vero("Biglietto: con la cifra spenta restano saluto e frase di Prisma",
+        verifica.vero("Biglietto: con la cifra spenta restano saluto e frase di Lucy",
                       spenta.saluto == t.saluto && spenta.frase == t.frase)
         let accesa = TestiBiglietto.contenuto(t, mostraCifra: true, frase: nil)
         verifica("Biglietto: con «Mostra la cifra» acceso la cifra del traguardo", accesa.cifra ?? -1, 87_341)
@@ -43,11 +43,11 @@ enum ProvaCalcoliBiglietto {
 
         // La frase scritta a mano
         let scritta = TestiBiglietto.contenuto(t, mostraCifra: false, frase: "  Un abbraccio per la casa nuova, Sofia.\n")
-        verifica.vero("Biglietto: la frase scritta a mano (ripulita) al posto di quella di Prisma",
+        verifica.vero("Biglietto: la frase scritta a mano (ripulita) al posto di quella di Lucy",
                       scritta.frase == "Un abbraccio per la casa nuova, Sofia.")
-        verifica.vero("Biglietto: una frase vuota torna a quella di Prisma",
+        verifica.vero("Biglietto: una frase vuota torna a quella di Lucy",
                       TestiBiglietto.contenuto(t, mostraCifra: false, frase: "  \n ").frase == t.frase)
-        verifica.vero("Biglietto: la frase uguale a quella di Prisma non conta come cambiata",
+        verifica.vero("Biglietto: la frase uguale a quella di Lucy non conta come cambiata",
                       TestiBiglietto.fraseScritta(t.frase, traguardo: t) == nil)
         let lunga = String(repeating: "parola ", count: 80)
         verifica.vero("Biglietto: la frase scritta a mano si taglia alla misura del biglietto",
