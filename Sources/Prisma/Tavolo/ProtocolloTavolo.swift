@@ -467,6 +467,17 @@ struct RealtaTavolo: Codable, Equatable, Sendable {
     var scattoConStanza: Bool
     /// L'ultimo scatto archiviato sul Mac («Foto salvata nel dossier di …»), nil prima.
     var ultimoScatto: String?
+    /// Il sole del piano (25 novembre 2026): solo le coperture degli obiettivi e la luce, mai nomi né identificativi.
+    /// Facoltativo: un Mac di prima non lo manda e l'iPad mostra il disco spento.
+    var sole: SoleTavolo? = nil
+}
+
+/// Il sole del piano per l'iPad del tavolo: cifre già calcolate dal Mac, senza nomi.
+struct SoleTavolo: Codable, Equatable, Sendable {
+    /// 0…1, una per obiettivo, nell'ordine del dossier.
+    var coperture: [Double]
+    /// 0…1: quanto del piano è coperto.
+    var luce: Double
 }
 
 struct StratoRealtaTavolo: Codable, Equatable, Sendable {

@@ -73,6 +73,8 @@ struct EsitoLuce: Equatable {
     let motivoSenzaAnni: String?
     /// Il patrimonio più alto degli anni del cursore (per la lunghezza del ventaglio).
     let massimo: Double
+    /// Il sole del piano (25 novembre 2026, al posto del prisma): un raggio per obiettivo, la luce = obiettivi coperti.
+    var sole: SolePiano = .spento
 
     var vuota: Bool { totaleOggi <= 0 }
     var annoOggi: Int? { anni.first?.anno }
@@ -122,9 +124,10 @@ enum MotoreLuce {
         let primo = cliente.nome.split(separator: " ").first.map(String.init) ?? cliente.nome
         let motivo: String? = anni.isEmpty ? "Per vedere il patrimonio negli anni serve la data di nascita di \(primo)." : nil
         let massimo = max(totale, anni.map(\.totale).max() ?? 0)
+        let sole = MotoreSole.calcola(obiettivi: obiettivi.filter { $0.clienteId == cliente.id }, posizioni: proprie, oggi: oggi)
         return EsitoLuce(totaleOggi: totale, investimento: fasceInvestimento(comp), obiettivo: perObiettivo,
                          canale: fasceCanale(comp), stimata: comp.stimata, obiettiviOltreTotale: oltre, anni: anni,
-                         motivoSenzaAnni: motivo, massimo: massimo)
+                         motivoSenzaAnni: motivo, massimo: massimo, sole: sole)
     }
 
     // MARK: - Le fasce

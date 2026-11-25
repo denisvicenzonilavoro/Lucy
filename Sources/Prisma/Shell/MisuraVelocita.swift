@@ -188,7 +188,7 @@ final class MisuraVelocita: ObservableObject {
             ("5 clienti", "avvio (stato, dati e primo disegno)", 200, 180),
             ("5 clienti", "apri Posizioni", 120, 260),
             ("5 clienti", "modifica una nota (un tasto)", 60, 70),
-            ("5 clienti", "Luce · apri il prisma di luce", 90, 140),
+            ("5 clienti", "Luce · apri il sole del piano", 90, 140),
             ("200 clienti", "apri Posizioni", 300, 420),
             ("200 clienti", "Luce · apri il radar", 150, 210),
         ]

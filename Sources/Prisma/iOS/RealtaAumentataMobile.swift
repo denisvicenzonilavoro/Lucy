@@ -204,7 +204,7 @@ struct RealtaAumentataMobile: View {
         }
         .confirmationDialog(TestiRealta.confermaStanza(nome), isPresented: $confermaStanza, titleVisibility: .visible) {
             Button("Manda la foto con la stanza") { scattaConStanza(annoMostrato) }
-            Button("Solo il cristallo") { scattaCristallo(annoMostrato) }
+            Button("Solo il sole del piano") { scattaCristallo(annoMostrato) }
             Button("Annulla", role: .cancel) {}
         }
     }

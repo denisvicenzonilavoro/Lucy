@@ -94,7 +94,7 @@ struct PaginaImpostazioniSala: View {
                              + "con l’OCF o con la compagnia). Finché restano vuote si vede il segnaposto dichiarato.")
             GruppoImpostazioni(titolo: "La realtà aumentata") {
                 RigaImpostazione(titolo: TestiRealta.scattoConStanzaTitolo,
-                                 sottotitolo: "Di base lo scatto è solo il cristallo su fondo neutro",
+                                 sottotitolo: "Di base lo scatto è solo il sole del piano su fondo neutro",
                                  aiuto: TestiRealta.scattoConStanzaAiuto, ultima: true) {
                     Toggle(isOn: Binding(get: { sala.scattoConStanza },
                                          set: { v in modifica { $0.scattoConStanza = v } })) { EmptyView() }

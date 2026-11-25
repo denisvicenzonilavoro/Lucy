@@ -15,6 +15,7 @@ enum ProvaCalcoliRealta {
         movimento(verifica)
         tavolo(verifica)
         testi(verifica)
+        sole(verifica)
     }
 
     /// I clienti del template.
@@ -149,10 +150,53 @@ enum ProvaCalcoliRealta {
         let r = MotoreRealtaAumentata.daTavolo(t)
         verifica.vero("Realtà: dal tavolo tornano gli stessi strati", r.strati == e.strati)
         verifica.vero("Realtà: dal tavolo tornano gli stessi anni e la stima", r.anni == e.anni && r.stimata == e.stimata)
+        verifica.vero("Realtà: dal tavolo torna il sole del piano (coperture e luce)",
+                      r.sole.raggi.map(\.copertura) == e.sole.raggi.map(\.copertura) && abs(r.sole.luce - e.sole.luce) < 1e-9)
+        verifica.vero("Realtà: al tavolo il sole non porta i nomi degli obiettivi", r.sole.raggi.allSatisfy { $0.nome.isEmpty })
         verifica.vero("Realtà: al tavolo solo il nome di battesimo", t.nome == TestiRealta.primoNome(c.nome) && !t.nome.contains(" "))
         var guasto = t
         guasto.strati.append(StratoRealtaTavolo(classe: "ologramma", nome: "Ologramma", quota: 0.1, valoreOggi: 1_234))
         verifica.vero("Realtà: una classe sconosciuta si scarta", MotoreRealtaAumentata.daTavolo(guasto).strati.count == e.strati.count)
+    }
+
+    /// Il sole del piano (25 novembre 2026): coperture e luce da `MotoreObiettivo`, un raggio per obiettivo, il disco
+    /// chiuso e ben orientato come la maglia degli strati.
+    private static func sole(_ verifica: VerificaCalcoli) {
+        let d = DatiPrisma.demo()
+        for c in d.clienti {
+            let proprie = d.posizioni.filter { $0.clienteId == c.id }
+            let obiettivi = d.obiettivi.filter { $0.clienteId == c.id }
+            let sole = MotoreSole.calcola(obiettivi: obiettivi, posizioni: proprie, oggi: AiutiProva.oggi)
+            verifica("Sole: \(c.id), un raggio per obiettivo", Double(sole.raggi.count), Double(min(obiettivi.count, MotoreSole.raggiMassimi)))
+            verifica.vero("Sole: \(c.id), la luce fra 0 e 1", sole.luce >= 0 && sole.luce <= 1)
+            for (o, r) in zip(obiettivi, sole.raggi) {
+                let atteso = MotoreObiettivo.calcola(o, posizioni: proprie, data: AiutiProva.oggi).copertura
+                verifica("Sole: \(c.id), la copertura del raggio è quella dell'obiettivo", r.copertura, min(1, max(0, atteso)), tolleranza: 1e-9)
+            }
+        }
+        verifica.vero("Sole: senza obiettivi il disco è spento", MotoreSole.calcola(obiettivi: [], posizioni: []) == .spento)
+        let mezzo = MotoreSole.sole([(id: "a", nome: "A", copertura: 1, dovuto: 100, proiezione: 150),
+                                     (id: "b", nome: "B", copertura: 0, dovuto: 100, proiezione: 0)])
+        verifica("Sole: la luce è la parte coperta del dovuto", mezzo.luce, 0.5, tolleranza: 1e-9)
+        verifica.vero("Sole: i numeri non validi diventano 0", MotoreSole.limita(.nan) == 0 && MotoreSole.limita(.infinity) == 0)
+        verifica.vero("Sole: un raggio è un filo anche a copertura zero", MotoreSole.lunghezza(0) > 0 && MotoreSole.lunghezza(1) == 1)
+        let venti: [(id: String, nome: String, copertura: Double, dovuto: Double, proiezione: Double)] =
+            (0..<20).map { (id: "o\($0)", nome: "O", copertura: 0.5, dovuto: 10.0, proiezione: 5.0) }
+        let tanti = MotoreSole.sole(venti)
+        verifica("Sole: al più dodici raggi", Double(tanti.raggi.count), Double(MotoreSole.raggiMassimi))
+        // Il disco: chiuso, normali di lunghezza 1, coperchio alto verso l'alto, rotondo
+        let m = MotoreRealtaAumentata.magliaDisco(basso: 0.01, alto: 0.05)
+        verifica.vero("Sole: disco con tante normali quanti vertici", m.posizioni.count == m.normali.count && !m.posizioni.isEmpty)
+        verifica.vero("Sole: disco con normali di lunghezza 1", m.normali.allSatisfy { abs(simd_length($0) - 1) < 1e-4 })
+        var orientati = true
+        for t in stride(from: 0, to: m.indici.count, by: 3) {
+            let a = Int(m.indici[t]), b = Int(m.indici[t + 1]), c = Int(m.indici[t + 2])
+            let n = simd_cross(m.posizioni[b] - m.posizioni[a], m.posizioni[c] - m.posizioni[a])
+            if simd_dot(n, m.normali[a] + m.normali[b] + m.normali[c]) <= 0 { orientati = false }
+        }
+        verifica.vero("Sole: triangoli del disco in senso antiorario visti da fuori", orientati)
+        verifica.vero("Sole: il disco è rotondo",
+                      MotoreRealtaAumentata.piantaDisco().allSatisfy { abs(simd_length($0.punto) - MotoreRealtaAumentata.raggioDisco) < 1e-4 })
     }
 
     /// Nessuna frase fissa con cifre inventate o nomi di clienti.

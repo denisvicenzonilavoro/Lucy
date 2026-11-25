@@ -193,7 +193,8 @@ jobs:
           # «Luce» giro 16 (decisioni 26 e 27): niente Rullino, niente mappe del mondo salvate, niente rete propria
           if grep -nE 'UIImageWriteToSavedPhotosAlbum|PHPhotoLibrary|import Photos|ARWorldMap|getCurrentWorldMap|URLSession|URLRequest' \
               Sources/Prisma/Motori/MotoreRealtaAumentata.swift Sources/Prisma/Shell/*Realta*.swift \
-              Sources/Prisma/iOS/RealtaAumentataMobile.swift Sources/Prisma/DesignSystem/CristalloFermo.swift; then
+              Sources/Prisma/iOS/RealtaAumentataMobile.swift Sources/Prisma/DesignSystem/CristalloFermo.swift \
+              Sources/Prisma/DesignSystem/SoleDelPiano.swift Sources/Prisma/Motori/MotoreSole.swift; then
             echo "::error::La realtà aumentata non deve salvare nel Rullino, salvare mappe del mondo o usare la rete"
             exit 1
           fi
@@ -265,7 +266,7 @@ jobs:
           # Prova del tavolo con l'iPad: Mac e iPad nello stesso processo su 127.0.0.1 (abbinamento, pagine, cursore,
           # presa visione nel PDF, caduta della connessione con la schermata neutra)
           "$APP/Contents/MacOS/Prisma" --prova-tavolo
-          # Prova di fattibilità della realtà aumentata: il cristallo in RealityKit (MeshDescriptor, materiali, vista virtuale)
+          # Prova di fattibilità della realtà aumentata: il sole del piano in RealityKit (MeshDescriptor, materiali, vista virtuale)
           # senza fotocamera; senza Metal (PRISMA_SENZA_METAL=1, come per la fluidità: sulla GPU virtuale del runner Metal
           # può fermare il processo con un'asserzione) la parte RealityKit si salta e resta il fermo-immagine; RealityKit
           # e la vista virtuale restano provati sul Mac dell'utente e nel simulatore

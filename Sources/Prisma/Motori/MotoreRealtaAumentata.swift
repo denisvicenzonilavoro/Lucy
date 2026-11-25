@@ -44,6 +44,8 @@ struct EsitoRealta: Equatable {
     let motivoSenzaAnni: String?
     /// Il patrimonio più alto fra oggi e gli anni del cursore (per l'altezza del cristallo).
     let massimo: Double
+    /// Il sole del piano (25 novembre 2026): il disco d'oro sopra gli strati, un raggio per obiettivo.
+    var sole: SolePiano = .spento
 
     var vuota: Bool { totaleOggi <= 0 || strati.isEmpty }
     var annoOggi: Int? { anni.first?.anno }
@@ -114,8 +116,9 @@ enum MotoreRealtaAumentata {
         let primo = TestiRealta.primoNome(cliente.nome)
         let motivo: String? = anni.isEmpty ? TestiRealta.senzaAnni(primo) : nil
         let massimo = max(totale, anni.map(\.totale).max() ?? 0)
+        let sole = MotoreSole.calcola(obiettivi: obiettivi.filter { $0.clienteId == cliente.id }, posizioni: proprie, oggi: oggi)
         return EsitoRealta(totaleOggi: totale, strati: strati, anni: anni, stimata: comp.stimata,
-                           motivoSenzaAnni: motivo, massimo: massimo)
+                           motivoSenzaAnni: motivo, massimo: massimo, sole: sole)
     }
 
     /// Le classi con valore > 0, nell'ordine delle classi, con quote che sommano a 1.
@@ -263,9 +266,9 @@ enum MotoreRealtaAumentata {
 /// controlla che nessuna porti cifre inventate. I nomi arrivano sempre da fuori.
 enum TestiRealta {
     static let etichettaColonna = "SUL TAVOLO, DAVANTI A"
-    static let titolo = "Il patrimonio diventa un cristallo che si può guardare da ogni lato."
-    static let testo = "Ogni strato di vetro è un tipo di investimento. Fai scorrere gli anni e il cristallo cresce; «Esploso» separa gli strati e mostra quanto vale ciascuno. La luce che li attraversa colora il tavolo."
-    static let notaAnteprima = "Anteprima simulata. Sull'iPad e sull'iPhone veri il cristallo si posa sul tavolo con la fotocamera, e si guarda girandoci intorno."
+    static let titolo = "Il piano diventa un sole d'oro che si può guardare da ogni lato."
+    static let testo = "Ogni disco d'oro è un tipo di investimento; sopra, il sole si riempie di luce con gli obiettivi coperti, un raggio per obiettivo. Fai scorrere gli anni e il sole si accende; «Esploso» separa i dischi e mostra quanto vale ciascuno."
+    static let notaAnteprima = "Anteprima simulata. Sull'iPad e sull'iPhone veri il sole del piano si posa sul tavolo con la fotocamera, e si guarda girandoci intorno."
     static let marchio = "◉ Lucy · AR"
     static let cercoSuperficie = "Cerco una superficie…"
     static let tavoloTrovato = "✓ Tavolo trovato"
@@ -277,12 +280,12 @@ enum TestiRealta {
     static let fine = "Fine"
     static let apri = "Apri in realtà aumentata"
     static let stimata = "Composizione in parte stimata"
-    static let fotocameraAssente = "La fotocamera non è disponibile: il cristallo resta sul tavolo virtuale"
+    static let fotocameraAssente = "La fotocamera non è disponibile: il sole del piano resta sul tavolo virtuale"
     static let consentiImpostazioni = "Consenti in Impostazioni"
-    static let fotocameraNegata = "Lucy non ha il permesso della fotocamera: il cristallo resta sul tavolo virtuale"
+    static let fotocameraNegata = "Lucy non ha il permesso della fotocamera: il sole del piano resta sul tavolo virtuale"
     static let scattoSoloAlTavolo = "Lo scatto arriva nel dossier solo al tavolo con il Mac"
     static let scattoConStanzaTitolo = "Lo scatto può comprendere la stanza"
-    static let scattoConStanzaAiuto = "Di base lo scatto è solo il cristallo su fondo neutro. Acceso, sull'iPad del tavolo si può scattare anche la foto con la stanza, con una conferma a ogni scatto. Mai nel Rullino: la foto va solo nel dossier del cliente sul Mac."
+    static let scattoConStanzaAiuto = "Di base lo scatto è solo il sole del piano su fondo neutro. Acceso, sull'iPad del tavolo si può scattare anche la foto con la stanza, con una conferma a ogni scatto. Mai nel Rullino: la foto va solo nel dossier del cliente sul Mac."
     static let stanzaNonPermessa = "Lo scatto con la stanza non è permesso (Impostazioni › Sala)"
     static let scattoGuasto = "Lo scatto è arrivato guasto: rifallo."
     static let notaFoglio = "Rappresentazione del patrimonio di oggi (o stimato per l'anno): non è una previsione."
@@ -308,17 +311,17 @@ enum TestiRealta {
     }
 
     static func colonna(_ primo: String) -> String { "\(etichettaColonna) \(primo.uppercased())" }
-    static func senzaAnni(_ primo: String) -> String { "Per far crescere il cristallo negli anni serve la data di nascita di \(primo)." }
+    static func senzaAnni(_ primo: String) -> String { "Per accendere il sole negli anni serve la data di nascita di \(primo)." }
     static func senzaPosizioni(_ primo: String) -> String {
-        "\(primo) non ha ancora posizioni in essere: il cristallo nasce dal suo patrimonio"
+        "\(primo) non ha ancora posizioni in essere: il sole del piano nasce dal suo patrimonio"
     }
     static func patrimonioNel(_ anno: Int) -> String { "Patrimonio nel \(anno)" }
     static func targhetta(_ primo: String, anno: Int) -> String { "\(primo) · \(anno)" }
     static func fotoSalvata(_ cliente: String) -> String { "Foto salvata nel dossier di \(cliente)" }
     static func confermaStanza(_ primo: String) -> String { "La foto comprende la stanza: la mando nel dossier di \(primo)?" }
     static func confermaCifre(_ primo: String) -> String { "Sull'iPad compaiono le cifre di \(primo). Vanno bene per chi è al tavolo?" }
-    static func titoloFoglio(_ cliente: String, anno: Int) -> String { "Il cristallo di \(cliente) · \(anno)" }
-    static func titoloDocumento(anno: Int, ora: String) -> String { "Il cristallo · \(anno) · \(ora)" }
+    static func titoloFoglio(_ cliente: String, anno: Int) -> String { "Il sole del piano di \(cliente) · \(anno)" }
+    static func titoloDocumento(anno: Int, ora: String) -> String { "Il sole del piano · \(anno) · \(ora)" }
     static func capsulaArrivata(_ primo: String) -> String { "Il messaggio di \(primo) è arrivato dall'iPad ed è sigillato" }
     static func attesaCapsula(_ primo: String) -> String { "\(primo) scrive sull'iPad…" }
     /// «Si apre a marzo 2027» sull'iPad: la frase di `MotoreCapsule.quando` con la maiuscola.

@@ -170,7 +170,7 @@ private struct PaginaImmagini: View {
     var body: some View {
         VStack(alignment: .leading, spacing: PG.spazio) {
             if let luce = PaginePrismaCliente.immagine(c.luce) {
-                Text("Il prisma di luce").carattereApple(PG.titoloSezione).foregroundColor(CT.testo)
+                Text("Il sole del piano").carattereApple(PG.titoloSezione).foregroundColor(CT.testo)
                 luce.resizable().aspectRatio(contentMode: .fit)
                     .frame(maxWidth: .infinity, maxHeight: PG.altezzaImmagine)
                     .clipShape(RoundedRectangle(cornerRadius: PG.raggioImmagine, style: .continuous))

@@ -1,14 +1,15 @@
 import SwiftUI
 import simd
 
-// Il cristallo della realtà aumentata disegnato in SwiftUI («Luce» giro 16, §2.3.3 e decisione 27): il fermo-immagine
-// delle istantanee, il ripiego quando RealityKit non c'è (o Metal manca) e **lo scatto su fondo neutro**, che è sempre
-// questo disegno e mai un'immagine della fotocamera (stesso risultato su Mac, iPad e iPhone). Il prisma triangolare
-// arrotondato (`MotoreRealtaAumentata.pianta`) in assonometria: facce laterali più scure, faccia alta chiara con il logo,
-// ombra colorata sotto. Niente Canvas né filtri: solo forme e gradienti (le istantanee li disegnano sempre).
+// La realtà aumentata disegnata in SwiftUI («Luce» giro 16, §2.3.3 e decisione 27): il fermo-immagine delle istantanee,
+// il ripiego quando RealityKit non c'è (o Metal manca) e **lo scatto su fondo neutro**, che è sempre questo disegno e mai
+// un'immagine della fotocamera (stesso risultato su Mac, iPad e iPhone). Dal 25 novembre 2026 (decisione dell'utente) il
+// disegno è il sole del piano: gli strati del patrimonio come dischi d'oro sottili (`MotoreRealtaAumentata.raggioDisco`)
+// in assonometria e sopra il disco del sole con i raggi degli obiettivi (`SoleDelPiano`), con l'ombra calda sotto. Niente
+// Canvas né filtri: solo forme e gradienti (le istantanee li disegnano sempre).
 // Più il foglio dello scatto per i Documenti del cliente (`FoglioScattoRealta`, A4 su carta bianca).
 
-/// Il fondo dietro il cristallo fermo.
+/// Il fondo dietro il sole del piano fermo.
 enum FondoCristallo: Equatable {
     /// Il fondo chiaro del palco del Mac.
     case palco
@@ -18,7 +19,7 @@ enum FondoCristallo: Equatable {
     case neutro
 }
 
-/// La proiezione del cristallo: punti del prisma (x, y, z in unità) sullo schermo.
+/// La proiezione della scena: punti (x, y, z in unità) sullo schermo.
 struct ProiezioneCristallo {
     let centro: CGPoint
     let scala: CGFloat
@@ -52,23 +53,27 @@ struct PoligonoCristallo: Shape {
     }
 }
 
-/// Il cristallo fermo: strati, logo e ombra su uno dei tre fondi.
+/// Il sole del piano fermo (25 novembre 2026, al posto del cristallo): gli strati del patrimonio come dischi d'oro
+/// sottili impilati, velati appena dal colore della loro classe, e sopra il disco del sole con un raggio per obiettivo,
+/// disteso sul tavolo in assonometria. Il nome del tipo resta per non cambiare le chiamate (fermo-immagine, ripiego,
+/// scatto).
 struct CristalloFermo: View {
     let esito: EsitoRealta
     var anno: Int?
     var esploso = false
     var scelto: String?
     var fondo: FondoCristallo = .palco
+    /// false: lo scatto e le immagini ferme, sempre nello stato finale.
+    var animato = true
 
     private typealias F = Tema.Apple.RealtaAumentata.Fermo
     private typealias R = Tema.Apple.RealtaAumentata
+    private typealias S = Tema.Sole
 
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width, h = geo.size.height
-            let proiezione = ProiezioneCristallo(centro: CGPoint(x: w * F.centro.x, y: h * F.centro.y),
-                                                 scala: min(w, h) * F.quotaScala, rotazione: F.rotazione,
-                                                 schiacciamento: F.schiacciamento)
+            let proiezione = Self.proiezione(geo.size)
             ZStack {
                 sfondo(w: w, h: h)
                 if !esito.vuota {
@@ -76,13 +81,13 @@ struct CristalloFermo: View {
                     ForEach(Array(esito.strati.enumerated()), id: \.element.id) { i, s in
                         strato(i, s, proiezione)
                     }
-                    logo(proiezione)
+                    sole(proiezione)
                 }
             }
             .frame(width: w, height: h)
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text("Il cristallo del patrimonio"))
+        .accessibilityLabel(Text("Il sole del piano sul tavolo"))
     }
 
     @ViewBuilder
@@ -115,78 +120,77 @@ struct CristalloFermo: View {
         }
     }
 
-    private func colore(_ s: StratoRealta) -> Color { R.Strati.colore(s.classe) }
-
     private func opacita(_ s: StratoRealta) -> Double {
-        guard let scelto, scelto != s.id else { return F.opacitaFacce }
-        return F.opacitaFacce * R.Strato.opacitaAltri
+        guard let scelto, scelto != s.id else { return 1 }
+        return R.Strato.opacitaAltri
     }
 
+    private func estremi(_ i: Int) -> (basso: Float, alto: Float) {
+        MotoreRealtaAumentata.estremi(strato: i, bordi: esito.bordi,
+                                      altezza: MotoreRealtaAumentata.spessoreDisco(esito, anno: anno),
+                                      esploso: esploso ? 1 : 0, crescita: 1)
+    }
+
+    /// Uno strato: un disco d'oro sottile (fianco più scuro, faccia alta più chiara) velato dal colore della sua classe.
     private func strato(_ i: Int, _ s: StratoRealta, _ p: ProiezioneCristallo) -> some View {
-        let e = MotoreRealtaAumentata.estremi(strato: i, bordi: esito.bordi, altezza: esito.altezza(anno: anno),
-                                              esploso: esploso ? 1 : 0, crescita: 1)
-        let anello = MotoreRealtaAumentata.piantaConNormali()
-        let m = anello.count
-        // Le facce che guardano chi osserva, dalla più lontana alla più vicina
-        let facce: [(profondita: Double, punti: [CGPoint])] = (0..<m).compactMap { k in
-            let j = (k + 1) % m
-            let n = SIMD2<Float>((anello[k].normale.x + anello[j].normale.x) / 2, (anello[k].normale.y + anello[j].normale.y) / 2)
-            let d = p.versoOsservatore(n)
-            guard d > 0 else { return nil }
-            let a = anello[k].punto, b = anello[j].punto
-            return (d, [p.punto(a.x, e.basso, a.y), p.punto(b.x, e.basso, b.y), p.punto(b.x, e.alto, b.y), p.punto(a.x, e.alto, a.y)])
-        }.sorted { $0.profondita < $1.profondita }
-        let alto = anello.map { p.punto($0.punto.x, e.alto, $0.punto.y) }
-        let tinta = colore(s)
+        let e = estremi(i)
+        let rx = p.scala * CGFloat(MotoreRealtaAumentata.raggioDisco)
+        let ry = rx * p.schiacciamento
+        let alto = p.punto(0, e.alto, 0)
+        let basso = p.punto(0, e.basso, 0)
+        let fianco = FiancoDisco(alto: alto, basso: basso, rx: rx, ry: ry)
+        let faccia = Ellipse().path(in: CGRect(x: alto.x - rx, y: alto.y - ry, width: rx * 2, height: ry * 2))
+        let tinta = R.Strati.colore(s.classe)
         return ZStack {
-            ForEach(Array(facce.enumerated()), id: \.offset) { _, f in
-                PoligonoCristallo(punti: f.punti)
-                    .fill(tinta.opacity(1 - F.scuroFacce * (1 - f.profondita)))
-            }
-            PoligonoCristallo(punti: alto)
-                .fill(LinearGradient(colors: [Color.white.opacity(F.chiaroAlto), tinta], startPoint: .top, endPoint: .bottom))
-            PoligonoCristallo(punti: alto).stroke(F.bordo, lineWidth: F.spessoreBordo)
+            fianco.fill(S.oroFisso)
+            fianco.fill(tinta.opacity(S.velaturaClasse))
+            fianco.fill(Color.black.opacity(S.scuroFianco))
+            faccia.fill(S.oroFisso)
+            faccia.fill(tinta.opacity(S.velaturaClasse))
+            faccia.fill(LinearGradient(colors: [Color.white.opacity(F.chiaroAlto), .clear], startPoint: .top, endPoint: .bottom))
+            faccia.stroke(F.bordo, lineWidth: F.spessoreBordo)
         }
         .opacity(opacita(s))
     }
 
-    /// Il logo inciso sulla faccia alta dell'ultimo strato presente.
+    /// Il sole sulla faccia alta dell'ultimo strato: il disco che si riempie di luce e i raggi distesi sul tavolo.
+    /// L'alone si accende con il cursore degli anni (il patrimonio dell'anno rispetto al più alto).
     @ViewBuilder
-    private func logo(_ p: ProiezioneCristallo) -> some View {
+    private func sole(_ p: ProiezioneCristallo) -> some View {
         let n = esito.strati.count
         if n > 0 {
-            let e = MotoreRealtaAumentata.estremi(strato: n - 1, bordi: esito.bordi, altezza: esito.altezza(anno: anno),
-                                                  esploso: esploso ? 1 : 0, crescita: 1)
+            let e = estremi(n - 1)
             let centro = p.punto(0, e.alto, 0)
-            let lato = p.scala * F.logo
-            LogoLucy(colore: F.coloreLogo)
+            let lato = p.scala * CGFloat(MotoreRealtaAumentata.raggioDisco) / S.quotaDisco
+            SoleDelPiano(sole: esito.sole, accensione: esito.massimo > 0 ? esito.totale(anno: anno) / esito.massimo : 1,
+                         oro: S.oroFisso, animato: animato)
                 .frame(width: lato, height: lato)
-                .scaleEffect(x: 1, y: p.schiacciamento * F.schiacciamentoLogo)
+                .scaleEffect(x: 1, y: p.schiacciamento)
                 .position(centro)
         }
     }
 
-    /// L'ombra colorata ovale sul tavolo, spostata verso la luce.
+    /// L'ombra calda ovale sul tavolo, spostata verso la luce.
     private func ombra(_ p: ProiezioneCristallo) -> some View {
         let s = Tema.Apple.RealtaAumentata.Ombra.spostamento
         let centro = p.punto(s.x, 0, s.y)
-        let larghezza = p.scala * CGFloat(MotoreRealtaAumentata.raggio) * 2 * F.quotaOmbra
-        let colori = esito.strati.map { colore($0).opacity(Tema.Apple.RealtaAumentata.Ombra.opacita) }
+        let larghezza = p.scala * CGFloat(MotoreRealtaAumentata.raggioDisco) * 2 * F.quotaOmbra
         return Ellipse()
-            .fill(RadialGradient(colors: (colori.isEmpty ? [F.ombra] : colori) + [.clear], center: .center,
-                                 startRadius: 0, endRadius: larghezza / 2))
+            .fill(RadialGradient(colors: [S.oroFisso.opacity(Tema.Apple.RealtaAumentata.Ombra.opacita), F.ombra, .clear],
+                                 center: .center, startRadius: 0, endRadius: larghezza / 2))
             .frame(width: larghezza, height: larghezza * p.schiacciamento)
             .position(centro)
     }
 
-    /// Il punto dello schermo sopra la faccia alta (per la targhetta), in una vista di misura `misura`.
+    /// Il punto dello schermo sopra il sole (per la targhetta), in una vista di misura `misura`.
     static func puntoTarghetta(_ esito: EsitoRealta, anno: Int?, esploso: Bool, misura: CGSize) -> CGPoint {
         let p = proiezione(misura)
         let n = esito.strati.count
         guard n > 0 else { return p.centro }
-        let e = MotoreRealtaAumentata.estremi(strato: n - 1, bordi: esito.bordi, altezza: esito.altezza(anno: anno),
+        let e = MotoreRealtaAumentata.estremi(strato: n - 1, bordi: esito.bordi,
+                                              altezza: MotoreRealtaAumentata.spessoreDisco(esito, anno: anno),
                                               esploso: esploso ? 1 : 0, crescita: 1)
-        return p.punto(0, e.alto, -MotoreRealtaAumentata.raggio * F.quotaTarghetta)
+        return p.punto(0, e.alto, -MotoreRealtaAumentata.raggioDisco * F.quotaTarghetta)
     }
 
     /// Il punto accanto a ogni strato (per le pillole con «Esploso»).
@@ -194,28 +198,54 @@ struct CristalloFermo: View {
         let p = proiezione(misura)
         var punti: [String: CGPoint] = [:]
         for (i, s) in esito.strati.enumerated() {
-            let e = MotoreRealtaAumentata.estremi(strato: i, bordi: esito.bordi, altezza: esito.altezza(anno: anno),
+            let e = MotoreRealtaAumentata.estremi(strato: i, bordi: esito.bordi,
+                                                  altezza: MotoreRealtaAumentata.spessoreDisco(esito, anno: anno),
                                                   esploso: esploso ? 1 : 0, crescita: 1)
-            punti[s.id] = p.punto(MotoreRealtaAumentata.raggio * F.quotaPillole, (e.basso + e.alto) / 2, 0)
+            punti[s.id] = p.punto(MotoreRealtaAumentata.raggioDisco * F.quotaPillole, (e.basso + e.alto) / 2, 0)
         }
         return punti
     }
 
     private static func proiezione(_ misura: CGSize) -> ProiezioneCristallo {
-        ProiezioneCristallo(centro: CGPoint(x: misura.width * F.centro.x, y: misura.height * F.centro.y),
-                            scala: min(misura.width, misura.height) * F.quotaScala, rotazione: F.rotazione,
+        ProiezioneCristallo(centro: CGPoint(x: misura.width * S.centroFermo.x, y: misura.height * S.centroFermo.y),
+                            scala: min(misura.width, misura.height) * S.quotaScalaFermo, rotazione: F.rotazione,
                             schiacciamento: F.schiacciamento)
     }
 
-    /// Lo scatto su fondo neutro (decisione 27): il cristallo in un'immagine quadrata, mai la fotocamera.
+    /// Lo scatto su fondo neutro (decisione 27): il sole del piano in un'immagine quadrata, mai la fotocamera.
     @MainActor
     static func scatto(_ esito: EsitoRealta, anno: Int?, esploso: Bool, lato: CGFloat = Tema.Apple.RealtaAumentata.Foglio.lato) -> CGImage? {
-        let r = ImageRenderer(content: CristalloFermo(esito: esito, anno: anno, esploso: esploso, fondo: .neutro)
+        let r = ImageRenderer(content: CristalloFermo(esito: esito, anno: anno, esploso: esploso, fondo: .neutro, animato: false)
             .frame(width: lato, height: lato)
-            .environment(\.colorScheme, .light))
+            .environment(\.colorScheme, .light)
+            .environment(\.prismaStatoFinale, true))
         r.proposedSize = ProposedViewSize(width: lato, height: lato)
         r.scale = 1
         return r.immaginePrisma
+    }
+}
+
+/// Il fianco di un disco in assonometria: il rettangolo fra i centri della faccia alta e di quella bassa, chiuso sotto
+/// dalla metà davanti dell'ellisse bassa.
+struct FiancoDisco: Shape {
+    let alto: CGPoint
+    let basso: CGPoint
+    let rx: CGFloat
+    let ry: CGFloat
+
+    func path(in rect: CGRect) -> Path {
+        var p = Path()
+        p.move(to: CGPoint(x: alto.x - rx, y: alto.y))
+        p.addLine(to: CGPoint(x: basso.x - rx, y: basso.y))
+        // La metà davanti dell'ellisse bassa, da sinistra a destra passando sotto
+        let passi = 24
+        for k in 1...passi {
+            let a = Double.pi - Double.pi * Double(k) / Double(passi)
+            p.addLine(to: CGPoint(x: basso.x + rx * CGFloat(cos(a)), y: basso.y + ry * CGFloat(sin(a))))
+        }
+        p.addLine(to: CGPoint(x: alto.x + rx, y: alto.y))
+        p.closeSubpath()
+        return p
     }
 }
 

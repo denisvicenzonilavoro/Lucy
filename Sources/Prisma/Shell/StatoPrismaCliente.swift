@@ -131,7 +131,7 @@ extension StatoShell {
                                                 conFilm: ultimoFilm(clienteId: c.id) != nil)
     }
 
-    /// Il prisma di luce come immagine ferma (decisione 7), sempre notte.
+    /// Il sole del piano come immagine ferma (decisione 7), sempre notte.
     @MainActor
     func immagineLucePrisma(_ c: Cliente) -> Data? {
         #if os(macOS)
@@ -141,7 +141,7 @@ extension StatoShell {
         let f = e.fasce(.investimento)
         let vista = PrismaDiLuceFermo(fasce: ColoriLuce.colori(f).map { FasciaLuceFermo(colore: $0, peso: 1) },
                                       bordi: GeometriaLuce.bordi(f.map(\.quota)), rotazione: 0,
-                                      frazione: e.frazione(anno: e.annoOggi), spento: e.vuota)
+                                      frazione: e.frazione(anno: e.annoOggi), spento: e.vuota, sole: e.sole)
         return StatoShell.pngPrisma(vista, misura: CGSize(width: 720, height: 405))
         #else
         return nil
