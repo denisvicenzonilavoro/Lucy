@@ -99,18 +99,20 @@ extension Tema.Apple.Clienti {
             static let collegamento = Tema.Apple.Carattere(dimensione: 13, peso: .semibold)
             static let coloreCollegamento = Tema.Apple.Colore.accento
             static let spazioTestata: CGFloat = 12
-            /// La griglia 2×2 dei riquadri delle aree: spazio 10, a 12 sotto la testata.
-            static let spazioGriglia: CGFloat = 10
+            /// I quattro riquadri delle aree in una riga (25 novembre 2026, scelta dell'utente): quadrati uguali, spazio
+            /// 12, a 12 sotto la testata; il lato segue la larghezza della card, al più 220.
+            static let spazioGriglia: CGFloat = 12
             static let sopraGriglia: CGFloat = 12
-            /// Un riquadro (`.tile` senza ombra): padding 10×14, anello e testi a 14, inclinazione massima 4.
+            static let latoMassimoTessera: CGFloat = 220
+            /// Un riquadro (`.tile` senza ombra): padding 14, anello in alto e testi sotto a 8, inclinazione massima 4.
             static let superficieTessera = Tema.Apple.Superficie.tile
             static let raggioTessera: CGFloat = Tema.Apple.Raggio.tile
-            static let paddingTessera = EdgeInsets(top: 10, leading: 14, bottom: 10, trailing: 14)
-            static let spazioTessera: CGFloat = 14
+            static let paddingTessera = EdgeInsets(top: 14, leading: 14, bottom: 14, trailing: 14)
+            static let spazioTessera: CGFloat = 8
             static let inclinazioneTessera: Double = 4
-            /// Anello 76/9 con la cifra 17 bold al centro (i mesi 12,5, su due righe «3,5» / «mesi»).
-            static let anello: CGFloat = 76
-            static let spessoreAnello: CGFloat = 9
+            /// Anello 64/8 con la cifra 17 bold al centro (i mesi 12,5, su due righe «3,5» / «mesi»).
+            static let anello: CGFloat = 64
+            static let spessoreAnello: CGFloat = 8
             static let cifra = Tema.Apple.Carattere(dimensione: 17, peso: .bold, interlinea: 1.05, tabellare: true)
             static let cifraMesi = Tema.Apple.Carattere(dimensione: 12.5, peso: .bold, interlinea: 1.05, tabellare: true)
             static let coloreCifra = Tema.Apple.Colore.inchiostro
