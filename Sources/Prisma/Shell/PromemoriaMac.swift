@@ -323,7 +323,7 @@ extension StatoShell {
             return
         }
         guard persistente, PromemoriaMac.disponibili else {
-            mostraAvviso("I promemoria del Mac funzionano solo aprendo Prisma.app")
+            mostraAvviso("I promemoria del Mac funzionano solo aprendo Lucy")
             return
         }
         PromemoriaMac.condiviso.chiediPermesso { [weak self] consentiti, errore in

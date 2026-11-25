@@ -340,10 +340,15 @@ struct AvvioLucy: View {
         let scala = altezza / 160
         let simbolo = CGPoint(x: (120 - vb.minX) * scala, y: (172 - vb.minY) * scala)
         ZStack {
+            // La L si disegna: un tratto largo che corre lungo il contorno la scopre (come in Lucy AI)
             ElleLucy().fill(colore)
                 .frame(width: 160 * scala, height: 160 * scala)
-                .opacity(elle ? 1 : 0)
-                .offset(y: elle ? 0 : 8)
+                .mask {
+                    ElleLucy()
+                        .trim(from: 0, to: elle ? 1 : 0)
+                        .stroke(style: StrokeStyle(lineWidth: 160 * scala * GeometriaLucy.spessore * 2.2, lineCap: .round, lineJoin: .round))
+                        .frame(width: 160 * scala, height: 160 * scala)
+                }
                 .position(simbolo)
             DiscoLucy().fill(Tema.Marca.oro)
                 .frame(width: 160 * scala, height: 160 * scala)
@@ -382,9 +387,42 @@ struct AvvioLucy: View {
         nome = false
         firma = false
         let attesa = 0.35
-        withAnimation(.easeOut(duration: 0.65).delay(attesa + 0.25)) { elle = true }
+        withAnimation(.easeInOut(duration: 0.65).delay(attesa + 0.25)) { elle = true }
         withAnimation(.timingCurve(0.3, 1.45, 0.5, 1, duration: 0.8).delay(attesa + 0.8)) { disco = true }
         withAnimation(.easeOut(duration: 0.6).delay(attesa + 1.5)) { nome = true }
         withAnimation(.easeOut(duration: 0.5).delay(attesa + 2.1)) { firma = true }
+    }
+}
+
+/// Lo splash all'apertura dell'app (richiesta dell'utente del 25 novembre 2026: «si deve sempre vedere a inizio
+/// applicazione», come in Lucy AI): fondo del marchio a tutto schermo, il simbolo e il nome che si disegnano, poi l'app
+/// dopo circa 3 s. Con «Riduci movimento» il marchio compare fermo per 0,8 s. Un clic lo salta.
+struct SplashLucy: View {
+    let finito: () -> Void
+    @Environment(\.prismaCalmo) private var calmo
+    @Environment(\.colorScheme) private var schema
+    @State private var chiuso = false
+
+    var body: some View {
+        ZStack {
+            (schema == .dark ? Tema.Marca.fondoScuro : Tema.Marca.fondoChiaro)
+                .ignoresSafeArea()
+            AvvioLucy(altezza: 96)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: chiudi)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Lucy by Logic")
+        .task {
+            let durata: Double = calmo ? 0.8 : 3.0
+            try? await Task.sleep(nanoseconds: UInt64(durata * 1_000_000_000))
+            chiudi()
+        }
+    }
+
+    private func chiudi() {
+        guard !chiuso else { return }
+        chiuso = true
+        finito()
     }
 }

@@ -30,10 +30,23 @@ import SwiftUI
 /// passaggi di cornice): la disposizione dei riquadri non si ricalcola per nessuna di queste.
 struct RiquadriScrivania: View {
     @Environment(StatoFinestre.self) var sistema
+    @Environment(StatoShell.self) var stato
 
     var body: some View {
+        #if os(macOS)
+        // Stile Carta sul Mac (25 novembre 2026): la scrivania del template (ScrivaniaCarta.swift); in modalità cliente
+        // resta quella di prima
+        if Tema.Stile.usaCarta && !stato.inModoCliente {
+            ScrivaniaCarta()
+                .allowsHitTesting(sistema.appAttiva == nil)
+        } else {
+            CorpoRiquadriScrivania(sistema: sistema, bloccato: sistema.bloccato, davanti: sistema.appAttiva != nil)
+                .equatable()
+        }
+        #else
         CorpoRiquadriScrivania(sistema: sistema, bloccato: sistema.bloccato, davanti: sistema.appAttiva != nil)
             .equatable()
+        #endif
     }
 
     /// true sull'iPad quando la scrivania è più stretta della soglia (in verticale); sul Mac mai.

@@ -72,14 +72,16 @@ struct IconaCarta: View {
     }
 }
 
-/// La Scrivania nel dock: il simbolo di Lucy (la L e il disco d'oro).
+/// La Scrivania nel dock: una casetta a inchiostro (25 novembre 2026, richiesta dell'utente: il simbolo di Lucy sta
+/// solo sull'assistente, due loghi uguali nel dock stonavano).
 struct IconaScrivaniaCarta: View {
     let lato: CGFloat
 
     var body: some View {
         TesseraCarta(lato: lato) {
-            LogoLucy()
-                .frame(width: lato * 0.5, height: lato * 0.5)
+            Image(systemName: "house")
+                .font(.system(size: lato * 0.42, weight: .regular))
+                .foregroundColor(TemaCarta.Colore.inchiostroD)
         }
     }
 }

@@ -39,6 +39,12 @@ struct SchermataBenvenuto: View {
     @State private var arrivata = false
     /// Si entra: il gesto non conta più (una volta sola).
     @State private var entrata = false
+    /// Il tastierino del PIN è aperto (dopo l'impronta rifiutata o se il Mac non ha Touch ID).
+    @State private var chiedePin = false
+    /// L'impronta è in corso: un secondo gesto non la richiede.
+    @State private var inAttesaImpronta = false
+    /// Cresce a ogni ingresso annullato: il cursore torna al suo posto.
+    @State private var tentativo = 0
 
     private typealias L = Tema.Apple.Lucchetto
 
@@ -50,6 +56,17 @@ struct SchermataBenvenuto: View {
             // Il velo sopra l'acqua (la scrivania sotto è nascosta: niente sfocatura a tutto schermo)
             Tema.Apple.Colore.veloBlocco
             colonna
+            if chiedePin {
+                TastierinoSblocco(modo: .entra, riuscito: {
+                    chiedePin = false
+                    apri(velocita: 0)
+                }, annulla: {
+                    chiedePin = false
+                    tentativo += 1
+                })
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .transition(.opacity)
+            }
         }
         .opacity(dentro ? 1 : 0)
         .offset(y: dentro || fermo ? 0 : Tema.Apple.Moto.Blocco.spostamento)
@@ -63,8 +80,9 @@ struct SchermataBenvenuto: View {
                 .frame(width: 0, height: 0)
                 .opacity(0)
                 .accessibilityHidden(true)
+                .disabled(chiedePin)
         }
-        .accessibilityElement(children: .combine)
+        .accessibilityElement(children: chiedePin ? .contain : .combine)
         .accessibilityAddTraits(.isButton)
         .accessibilityHint("Tocca per entrare in Lucy")
         .accessibilityAction { entra() }
@@ -84,6 +102,7 @@ struct SchermataBenvenuto: View {
                 .padding(.top, L.oraSottoLogo)
             Spacer(minLength: 0)
             CursoreEntraBlocco(fermo: istantanea || calmo) { velocita in entra(velocita: velocita) }
+                .id(tentativo)
                 .padding(.bottom, L.pulsanteDalFondo)
         }
         .foregroundColor(Tema.Apple.Colore.inchiostroAcqua)
@@ -106,8 +125,26 @@ struct SchermataBenvenuto: View {
         withAnimation(Tema.Apple.Moto.animazione(Tema.Apple.Moto.Blocco.animazione, calmo: calmo)) { arrivata = true }
     }
 
-    /// Si entra una volta sola.
+    /// Il gesto d'ingresso: senza PIN si entra subito; con il PIN prima l'impronta (se c'è), poi il tastierino.
     private func entra(velocita: Double = 0) {
+        guard !entrata, !chiedePin, !inAttesaImpronta else { return }
+        guard !istantanea, stato.persistente, PortachiaviPin.presente else {
+            apri(velocita: velocita)
+            return
+        }
+        if ImprontaSblocco.disponibile {
+            inAttesaImpronta = true
+            ImprontaSblocco.chiedi { ok in
+                inAttesaImpronta = false
+                if ok { apri(velocita: velocita) } else { withAnimation(.easeOut(duration: 0.15)) { chiedePin = true } }
+            }
+        } else {
+            withAnimation(.easeOut(duration: 0.15)) { chiedePin = true }
+        }
+    }
+
+    /// Si entra una volta sola.
+    private func apri(velocita: Double) {
         guard !entrata else { return }
         entrata = true
         stato.sblocca(velocita: velocita)

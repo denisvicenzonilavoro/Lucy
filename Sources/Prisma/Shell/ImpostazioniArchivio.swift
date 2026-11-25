@@ -146,6 +146,10 @@ extension AppImpostazioni {
                     .cascataImpostazioni(8)
             }
 
+            // Ingresso con Touch ID o PIN (25 novembre 2026, richiesta dell'utente; SbloccoLucy.swift)
+            GruppoIngressoImpostazioni()
+                .cascataImpostazioni(8)
+
             GruppoImpostazioni(titolo: "Archivio di Lucy") {
                 RigaImpostazione(titolo: "Sul Mac", sottotitolo: Archivio.percorsoBreve(Archivio.cartella),
                                  stato: Pillola(testo: "Versione \(DatiPrisma.versioneAttuale)", tono: .neutro), ultima: true) {
