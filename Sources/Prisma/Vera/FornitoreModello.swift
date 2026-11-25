@@ -264,6 +264,8 @@ enum TipoFornitore: String, Codable, CaseIterable, Identifiable {
     case ollama
     /// MLX, llama.cpp, LM Studio: /v1/chat/completions.
     case compatibileOpenAI
+    /// Mistral in cloud con la chiave dell'utente (25 novembre 2026, FornitoreMistral.swift): le domande escono dal Mac.
+    case mistral
 
     var id: String { rawValue }
 
@@ -271,6 +273,7 @@ enum TipoFornitore: String, Codable, CaseIterable, Identifiable {
         switch self {
         case .ollama: return "Ollama"
         case .compatibileOpenAI: return "Compatibile OpenAI"
+        case .mistral: return "Mistral in cloud"
         }
     }
 }
@@ -311,6 +314,9 @@ enum FornitoriVera {
             return FornitoreOllama(indirizzo: vera.indirizzoLocale, modello: vera.modelloLocale.trimmingCharacters(in: .whitespaces), sessione: sessione)
         case .compatibileOpenAI:
             return FornitoreCompatibileOpenAI(indirizzo: vera.indirizzoCompatibile, modello: vera.modelloCompatibile.trimmingCharacters(in: .whitespaces), sessione: sessione)
+        case .mistral:
+            let m = vera.modelloMistral.trimmingCharacters(in: .whitespaces)
+            return FornitoreMistral(modello: m.isEmpty ? FornitoreMistral.modelloPredefinito : m, sessione: sessione)
         }
     }
 }

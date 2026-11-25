@@ -399,6 +399,12 @@ extension AppImpostazioni {
                 .id(TestiNotte.ancoraImpostazioni)
                 .cascataImpostazioni(5)
             #endif
+            #if os(macOS)
+            // Mistral in cloud (25 novembre 2026, scelta dell'utente): chiave nel Portachiavi e modello
+            GruppoMistralImpostazioni()
+                .id("imp-vera-mistral")
+                .cascataImpostazioni(5)
+            #endif
             GruppoImpostazioni(titolo: "Come lavora") {
                 RigaImpostazione(titolo: "Modello", sottotitolo: "Il nome in Ollama.") {
                     TextField(vera.fornitore == .ollama ? MotoreLocale.modelloPredefinito : "nome del modello", text: Bindable(stato.dati).impostazioni.vera.modello)

@@ -59,6 +59,8 @@ enum MotoriVera {
         #if os(iOS)
         return generativo(vera, locale: locale)
         #else
+        // Mistral in cloud: un solo modello, quello delle impostazioni (niente scelta tra i modelli locali)
+        if vera.fornitore == .mistral { return generativo(vera, locale: locale) }
         if scelta.dove == .computerIA {
             // Senza lo stato del computer dell'IA (appena scollegato) risponde il modello del Mac
             guard let ia = computerIA else { return generativo(vera, locale: locale) }

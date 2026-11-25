@@ -207,7 +207,8 @@ struct FornitorePonte: FornitoreModello {
     private var interno: FornitoreModello {
         switch tipo {
         case .ollama: return FornitoreOllama(indirizzo: FornitoreOllama.indirizzoPredefinito, modello: modello, sessione: sessione)
-        case .compatibileOpenAI:
+        case .compatibileOpenAI, .mistral:
+            // Mistral in cloud sul Mac: stesso formato delle righe compatibili OpenAI (la chiave resta sul Mac)
             return FornitoreCompatibileOpenAI(indirizzo: FornitoreCompatibileOpenAI.indirizzoPredefinito, modello: modello, sessione: sessione)
         }
     }
