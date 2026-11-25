@@ -103,7 +103,7 @@ struct DueVelocitaVista: View {
                 }
                 VStack(spacing: S.spazioTappa) {
                     SferaVera(misura: D.sfera, viva: true, pensa: stato.veraInCorso)
-                    Text("Vera smista").carattereApple(D.titoloCentro).foregroundColor(C.inchiostro)
+                    Text("Lucy smista").carattereApple(D.titoloCentro).foregroundColor(C.inchiostro)
                     Text("Sceglie da sola il motore giusto").carattereApple(D.sottotitolo).foregroundColor(C.inchiostro2)
                         .multilineTextAlignment(.center)
                 }
@@ -113,14 +113,14 @@ struct DueVelocitaVista: View {
                                 colore: D.profonda, richieste: profonde, media: media(profonde)) { EmptyView() }
             }
             .frame(maxHeight: .infinity, alignment: .top)
-            Text("Tempi indicativi. Se la risposta veloce non basta, Vera passa la domanda a Qwen.")
+            Text("Tempi indicativi. Se la risposta veloce non basta, Lucy passa la domanda a Qwen.")
                 .carattereApple(D.nota).foregroundColor(C.inchiostro2)
         }
     }
 
     private var nomeQwen: String {
         let m = stato.dati.impostazioni.vera.modello
-        return SuMisuraVera.eSuMisura(m) ? "Vera su misura" : m
+        return SuMisuraVera.eSuMisura(m) ? "Lucy su misura" : m
     }
 
     private func media(_ r: [RichiestaSmistata]) -> Double? {
@@ -197,7 +197,7 @@ struct CervelloGrandeVista: View {
         let pronto = stato.disponibilitaLocale.pronto
         let tipo = Bindable(stato.dati).impostazioni.vera.motoreEsterno.tipo
         return VStack(alignment: .leading, spacing: K.spazio) {
-            Text("I motori di Vera").carattereApple(Tema.Apple.Carattere.etichetta).foregroundColor(C.inchiostro2)
+            Text("I motori di Lucy").carattereApple(Tema.Apple.Carattere.etichetta).foregroundColor(C.inchiostro2)
             RigaMotoreVista(titolo: stato.qwen.nome.replacingOccurrences(of: " sul Mac", with: "") + " · " + stato.dati.impostazioni.vera.modello,
                             sotto: "Sul Mac · per ragionare", pillola: Pillola(testo: pronto ? "Attivo" : "Non pronto", tono: pronto ? .ok : .attenzione)) {
                 SferaVera(misura: K.icona, viva: false)
@@ -225,7 +225,7 @@ struct CervelloGrandeVista: View {
                 Text(stato.dati.impostazioni.vera.motoreEsterno.tipo.spiegazione)
                     .carattereApple(K.sotto).foregroundColor(C.inchiostro2)
                     .fixedSize(horizontal: false, vertical: true)
-                Button("Collega quando vuoi") { stato.mostraAvviso("Lo colleghi tu, quando decidi: oggi Vera lavora tutta sul Mac") }
+                Button("Collega quando vuoi") { stato.mostraAvviso("Lo colleghi tu, quando decidi: oggi Lucy lavora tutta sul Mac") }
                     .buttonStyle(.applePrimario).fixedSize()
             }
             .padding(K.paddingMotore)

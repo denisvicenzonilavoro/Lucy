@@ -1502,7 +1502,7 @@ struct DettaglioAppuntamento: View {
     }
     #else
     private var azioneVera: some View {
-        PulsanteAzione(titolo: "Prepara con Vera", simbolo: "sparkles") {
+        PulsanteAzione(titolo: "Prepara con Lucy", simbolo: "sparkles") {
             // Un blocco «Non disponibile» non ha cliente: Vera si apre su quello di prima
             if !evento.clienteId.isEmpty { stato.clienteAttivoId = evento.clienteId }
             stato.apri(.vera)

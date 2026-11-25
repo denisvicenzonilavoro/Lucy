@@ -130,7 +130,7 @@ struct RiquadroMossaTelefono: View {
                     stato.clienteAttivoId = m.cliente.id
                     mobile.apri(.vera, da: origineVera.punto)
                 } label: {
-                    Text("Prepara con Vera")
+                    Text("Prepara con Lucy")
                         .lineLimit(1)
                         .minimumScaleFactor(Tema.Apple.Telefono.Mossa.riduzionePulsanti)
                         .frame(maxWidth: .infinity, minHeight: Tema.Apple.Telefono.tocco)
@@ -483,7 +483,7 @@ struct RiquadroVeraTelefono: View {
                 .puntoAcqua(.sferaVera)
                 .misuraOrigine(origine)
             VStack(alignment: .leading, spacing: Tema.Apple.Telefono.Elenco.spazioTesto) {
-                Text("Ritrova il filo con Vera.")
+                Text("Ritrova il filo con Lucy.")
                     .carattereApple(R.nome)
                     .foregroundColor(Tema.Apple.Colore.inchiostro)
                     .fixedSize(horizontal: false, vertical: true)

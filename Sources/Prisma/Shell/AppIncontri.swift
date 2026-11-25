@@ -407,7 +407,7 @@ struct AppIncontri: View {
                         stato.apri(.vera)
                         stato.chiediVera(SpuntoVera.incontro.domanda, spunto: .incontro)
                     } label: {
-                        Label("Prepara con Vera", systemImage: "sparkles")
+                        Label("Prepara con Lucy", systemImage: "sparkles")
                     }
                     .buttonStyle(StileVetro())
                     .fixedSize()
@@ -1327,7 +1327,7 @@ struct AppIncontri: View {
             Spacer(minLength: mi.spazioGettoni)
             if stato.estrazioneInCorso {
                 ProgressView().controlSize(.small)
-                    .help(TestiStatoVera.inVista(mac: "Anche Vera sta leggendo gli appunti", altrove: "Anche Qwen sta leggendo gli appunti"))
+                    .help(TestiStatoVera.inVista(mac: "Anche Lucy sta leggendo gli appunti", altrove: "Anche Qwen sta leggendo gli appunti"))
             }
             Button { stato.estraiProposte(i) } label: {
                 Label(proposte == nil ? "Leggi gli appunti" : "Rileggi", systemImage: "text.magnifyingglass")
@@ -1426,7 +1426,7 @@ struct AppIncontri: View {
                 if p.origine == "Qwen" {
                     Image(systemName: "sparkles")
                         .foregroundColor(ci.secondario)
-                        .help(TestiStatoVera.inVista(mac: "Proposta letta da Vera", altrove: "Proposta letta da Qwen"))
+                        .help(TestiStatoVera.inVista(mac: "Proposta letta da Lucy", altrove: "Proposta letta da Qwen"))
                 }
             }
             .padding(EdgeInsets(top: mi.marginePropostaV, leading: mi.marginePropostaO,

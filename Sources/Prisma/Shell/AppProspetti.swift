@@ -861,11 +861,11 @@ struct AppProspetti: View {
                 .fixedSize()
             }
             if scelta.spuntoVera != nil {
-                Button { stato.chiediVeraDelDocumento(scelta) } label: { Label("Chiedi a Vera", systemImage: "sparkles") }
+                Button { stato.chiediVeraDelDocumento(scelta) } label: { Label("Chiedi a Lucy", systemImage: "sparkles") }
                     .buttonStyle(StileVetro())
                     .fixedSize()
                     .disabled(stato.veraInCorso)
-                    .help("Chiedi a Vera: spiega le cifre di questo documento, per te")
+                    .help("Chiedi a Lucy: spiega le cifre di questo documento, per te")
             }
             // Il portafoglio parla di tutti i clienti: non si mostra a un cliente
             if scelta.tipo != .portafoglio {
@@ -1098,7 +1098,7 @@ private struct PannelloCommento: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("IL COMMENTO DEL CONSULENTE").font(SSP.etichetta).foregroundColor(SSP.coloreEtichetta)
             if salvato == nil && testo.isEmpty {
-                Text("Una lettera breve al cliente, nella pagina dopo la copertina. Vera la scrive con le cifre del report; tu la rileggi e la cambi come vuoi.")
+                Text("Una lettera breve al cliente, nella pagina dopo la copertina. Lucy la scrive con le cifre del report; tu la rileggi e la cambi come vuoi.")
                     .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             } else {
                 TextEditor(text: $testo)
@@ -1129,7 +1129,7 @@ private struct PannelloCommento: View {
                     // Il commento salvato o le modifiche in corso non si perdono senza chiedere
                     if salvato != nil || !testo.isEmpty { confermaRiscrivi = true } else { stato.scriviCommentoConVera(scelta) }
                 } label: {
-                    Label(stato.veraInCorso ? "Vera scrive…" : (salvato == nil ? "Scrivi con Vera" : "Riscrivi"), systemImage: "sparkles")
+                    Label(stato.veraInCorso ? "Lucy scrive…" : (salvato == nil ? "Scrivi con Lucy" : "Riscrivi"), systemImage: "sparkles")
                 }
                 .buttonStyle(StileAzioneSceltaProspetto(taglia: .compatta))
                 .fixedSize()
@@ -1152,11 +1152,11 @@ private struct PannelloCommento: View {
             }
         }
         .padding(12)
-        .confirmationDialog("Vera riscrive il commento", isPresented: $confermaRiscrivi) {
-            Button("Riscrivi con Vera", role: .destructive) { stato.scriviCommentoConVera(scelta) }
+        .confirmationDialog("Lucy riscrive il commento", isPresented: $confermaRiscrivi) {
+            Button("Riscrivi con Lucy", role: .destructive) { stato.scriviCommentoConVera(scelta) }
             Button("Annulla", role: .cancel) {}
         } message: {
-            Text("Il testo attuale del commento viene sostituito dalla nuova stesura di Vera.")
+            Text("Il testo attuale del commento viene sostituito dalla nuova stesura di Lucy.")
         }
         .onAppear { if !caricato { testo = salvato?.testo ?? ""; caricato = true } }
         .onChange(of: salvato?.aggiornatoIl) { _ in testo = stato.commento(scelta)?.testo ?? "" }

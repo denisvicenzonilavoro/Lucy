@@ -47,7 +47,7 @@ struct SussurroDossierVista: View {
                     .strokeBorder(A.sussurroBordo, lineWidth: A.sussurroFiloBordo)
             }
             .accessibilityElement(children: .contain)
-            .accessibilityLabel(Text("Vera ti sussurra"))
+            .accessibilityLabel(Text("Lucy ti sussurra"))
             .fuoriDalloScorrimento { fuoriVista = $0 }
         }
     }
@@ -104,11 +104,11 @@ struct SussurroDossierVista: View {
                     SchedaConfermaVeraVista(scheda: scheda, messaggio: messaggio)
                         .padding(.top, A.sussurroSopraScheda)
                 } else if let inChat {
-                    Button("In attesa nella chat di Vera") { stato.apriSchedaSussurroInChat(inChat) }
+                    Button("In attesa nella chat di Lucy") { stato.apriSchedaSussurroInChat(inChat) }
                         .buttonStyle(.apple)
                         .fixedSize()
                         .padding(.top, A.sussurroSopraScheda)
-                        .help("La scheda «Conferma» con questa voce aspetta nella chat di Vera")
+                        .help("La scheda «Conferma» con questa voce aspetta nella chat di Lucy")
                 }
             }
             Spacer(minLength: 0)
@@ -278,7 +278,7 @@ private struct TestataSussurro: View {
         HStack(spacing: A.sussurroSpazioTestata) {
             SferaVera(misura: A.sussurroSfera, viva: viva, pensa: pensa)
             VStack(alignment: .leading, spacing: A.sussurroSpazioTitoli) {
-                Text("Vera ti sussurra")
+                Text("Lucy ti sussurra")
                     .carattereApple(A.sussurroTitolo)
                     .foregroundColor(A.sussurroRubino)
                 Text(Self.sottotitolo(quante))

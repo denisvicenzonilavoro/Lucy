@@ -107,7 +107,7 @@ struct SceltaClienteCadutoVista: View {
             }
             .padding(.top, F.sopraScheda)
         } else {
-            Text("Trascinalo di nuovo su Vera per scegliere il cliente.")
+            Text("Trascinalo di nuovo su Lucy per scegliere il cliente.")
                 .carattereApple(F.fonti).foregroundColor(F.coloreFonte)
                 .padding(.top, F.sopraScheda)
         }
@@ -125,7 +125,7 @@ struct ArchiviatiOggiVeraVista: View {
         if !elenco.isEmpty {
             VStack(alignment: .leading, spacing: F.spazioArchiviati) {
                 HStack {
-                    Text("Archiviati da Vera").carattereApple(col.etichetta).foregroundColor(col.coloreEtichetta)
+                    Text("Archiviati da Lucy").carattereApple(col.etichetta).foregroundColor(col.coloreEtichetta)
                     Spacer(minLength: 0)
                     Text("oggi · \(elenco.count)").carattereApple(F.dettaglioArchiviato).foregroundColor(F.coloreFonte)
                 }
@@ -140,7 +140,7 @@ struct ArchiviatiOggiVeraVista: View {
             .frame(maxWidth: .infinity, alignment: .leading)
             .superficieApple(col.superficieScheda, raggio: col.raggioScheda)
             .accessibilityElement(children: .contain)
-            .accessibilityLabel(Text("Archiviati da Vera oggi: \(elenco.count)"))
+            .accessibilityLabel(Text("Archiviati da Lucy oggi: \(elenco.count)"))
         }
     }
 

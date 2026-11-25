@@ -852,7 +852,7 @@ enum TreLivelliVera {
             blocchi.append(.sezione(numero: String(format: "%02d", n + 1), titolo: sezione.titolo))
             blocchi.append(.testo(sezione.righe.map { "• \($0)" }.joined(separator: "\n")))
         }
-        blocchi.append(.nota(avvertenza + " I numeri sono calcolati da Lucy (\(s.argomento.motore)), le parole sono di Vera."))
+        blocchi.append(.nota(avvertenza + " I numeri sono calcolati da Lucy (\(s.argomento.motore)), le parole sono di Lucy."))
         return ContenutoProspetto(occhiello: "Per \(s.nomeCliente)", titolo: s.pagina.titolo, sottotitolo: s.argomento.nome,
                                   cliente: s.nomeCliente, data: s.creataIl, canale: s.canale, blocchi: blocchi)
     }

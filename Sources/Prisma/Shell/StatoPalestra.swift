@@ -230,7 +230,7 @@ import Observation
         } catch {
             guard !Task.isCancelled else { return }
             parziale = ""
-            fase = .errore((error as? ErroreVera)?.messaggio ?? "Vera non è riuscita a recitare il turno: riprova.")
+            fase = .errore((error as? ErroreVera)?.messaggio ?? "Lucy non è riuscita a recitare il turno: riprova.")
         }
     }
 

@@ -201,7 +201,7 @@ enum RegistroStrumenti {
                       parametri: oggetto([:], richiesti: []),
                       disponibile: true, annullabile: true, nelDossier: true, soloPrisma: true),
         StrumentoVera(nome: RoutineVera.strumentoSalva, app: .vera,
-                      descrizione: "Salva una routine nuova di Vera, capita a parole.",
+                      descrizione: "Salva una routine nuova di Lucy, capita a parole.",
                       parametri: oggetto([:], richiesti: []),
                       disponibile: true, annullabile: true, nelDossier: false, soloPrisma: true),
         // Il tagliando dei dati (funzione 5, CollegaTagliandoShell.swift): solo Prisma le prepara dalle voci del controllo
@@ -270,9 +270,9 @@ enum RegistroStrumenti {
             var argomenti = ["testo": t, "fonte": "in chat"]
             if let cliente { argomenti["cliente"] = cliente }
             return .azione(AzioneConferma(strumento: memoriaRicorda, app: .vera, titolo: chi.map { "Ricordo per \($0)" } ?? "Ricordo su di te",
-                                          dettaglio: "«\(t)» · nella memoria di Vera, sul Mac, cifrata", argomenti: argomenti))
+                                          dettaglio: "«\(t)» · nella memoria di Lucy, sul Mac, cifrata", argomenti: argomenti))
         case documentiArchivia:
-            return .impossibile("I documenti si archiviano trascinandoli su Vera.")
+            return .impossibile("I documenti si archiviano trascinandoli su Lucy.")
         case studioChilometri:
             return .impossibile("Studio non registra ancora i chilometri: quando sarà pronto lo farò io. Per ora segnali tu in Studio.")
         case TagliandoVera.strumentoUnisci, TagliandoVera.strumentoCompleta, TagliandoVera.strumentoDocumento:

@@ -77,7 +77,7 @@ extension Istantanee {
         v.esame = nil
         vera.suMisura.versioni = [v]
         s.dati.impostazioni.vera = vera
-        s.lavoroSuMisura = "domanda 12 di 80 · Vera di oggi"
+        s.lavoroSuMisura = "domanda 12 di 80 · Lucy di oggi"
         s.esameSuMisuraInCorso = true
         // La chat aspetta: un modello alla volta
         s.aggiungiMessaggio(MessaggioVera(autore: .utente, testo: "Com'è messa Giulia con la casa?"), cliente: "giulia", parla: false)

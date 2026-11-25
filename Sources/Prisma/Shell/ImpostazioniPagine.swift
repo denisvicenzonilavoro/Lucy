@@ -295,7 +295,7 @@ extension AppImpostazioni {
                 RigaImpostazione(titolo: "Qwen sul Mac",
                                  sottotitolo: pronta ? stato.qwen.descrizione : (stato.disponibilitaLocale.motivo ?? "Non collegata"),
                                  stato: Pillola(testo: pronta ? "Collegata" : "Non collegata", tono: pronta ? .ok : .attenzione),
-                                 aiuto: "Vera usa Qwen del tuo Mac: Lucy aperta sul Mac, il ponte attivo sul Mac in Impostazioni › iPhone e iPad, stessa rete Wi‑Fi") {
+                                 aiuto: "Lucy usa Qwen del tuo Mac: Lucy aperta sul Mac, il ponte attivo sul Mac in Impostazioni › iPhone e iPad, stessa rete Wi‑Fi") {
                     Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
                 }
@@ -311,7 +311,7 @@ extension AppImpostazioni {
                         .onSubmit { stato.verificaMotoreLocale() }
                 }
                 RigaImpostazione(titolo: "Ragionamento", sottotitolo: "Sulle domande difficili",
-                                 aiuto: "Automatico: Vera ragiona sulle domande difficili o quando le dici «pensaci bene». Risponde più piano") {
+                                 aiuto: "Automatico: Lucy ragiona sulle domande difficili o quando le dici «pensaci bene». Risponde più piano") {
                     MenuTendina(selezione: Bindable(stato.dati).impostazioni.vera.ragionamento,
                                 opzioni: SceltaRagionamento.allCases.map { ($0, $0.nome) }, larghezza: M.menuMedio)
                 }
@@ -321,7 +321,7 @@ extension AppImpostazioni {
             }
             // Solo iPad: il tavolo con il Mac, con lo stesso codice (TavoloiPad.swift)
             GruppoTavoloiPad()
-            NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Lucy. Mai internet.")
+            NotaImpostazioni("Lucy spiega e racconta; le cifre le calcola Lucy. Mai internet.")
         }
     }
     #else
@@ -348,7 +348,7 @@ extension AppImpostazioni {
                                  sottotitolo: motore,
                                  stato: Pillola(testo: pronta ? "Pronto" : "Non pronto", tono: pronta ? .ok : .attenzione),
                                  aiuto: pronta ? nil : stato.disponibilitaLocale.motivo,
-                                 avvertenza: pronta ? nil : "Serve l'app gratuita Ollama con \(MotoreLocale.modelloPredefinito) (circa 3,5 GB mentre risponde). Senza Qwen Vera non risponde.") {
+                                 avvertenza: pronta ? nil : "Serve l'app gratuita Ollama con \(MotoreLocale.modelloPredefinito) (circa 3,5 GB mentre risponde). Senza Qwen Lucy non risponde.") {
                     Button { stato.verificaMotoreLocale() } label: { Label("Verifica", systemImage: "arrow.clockwise") }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
                         .fixedSize()
@@ -357,14 +357,14 @@ extension AppImpostazioni {
                 #if os(macOS)
                 // Migliorie d'uso 39: il collegamento con iPhone e iPad sta in un posto solo, Impostazioni › iPhone e iPad
                 RigaImpostazione(titolo: "iPhone e iPad", sottotitolo: TestiCollegamenti.rimandoVera,
-                                 aiuto: "Il codice, i dispositivi collegati e che cosa fanno insieme al Mac (Vera, Inquadra, la nota a voce, il tavolo)") {
+                                 aiuto: "Il codice, i dispositivi collegati e che cosa fanno insieme al Mac (Lucy, Inquadra, la nota a voce, il tavolo)") {
                     Button("Apri") { stato.schedaImpostazioni = .ovunque }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
                         .fixedSize()
                 }
                 .cascataImpostazioni(2)
                 #else
-                RigaImpostazione(titolo: "iPhone e iPad", sottotitolo: "Usano Vera del Mac attraverso la rete di casa, cifrata. Mai internet.",
+                RigaImpostazione(titolo: "iPhone e iPad", sottotitolo: "Usano Lucy del Mac attraverso la rete di casa, cifrata. Mai internet.",
                                  aiuto: "iPhone e iPad usano Qwen di questo Mac attraverso la rete di casa o dello studio, cifrato con un codice") {
                     interruttore(Binding(get: { vera.ponte.condividi }, set: { attivo in
                         if attivo, !stato.dati.impostazioni.vera.ponte.abbinato {
@@ -376,7 +376,7 @@ extension AppImpostazioni {
                 .cascataImpostazioni(2)
                 if vera.ponte.condividi {
                     RigaImpostazione(titolo: "Codice \(vera.ponte.codice)", sottotitolo: "Da scrivere su iPhone e iPad.",
-                                     aiuto: "Scrivilo in Lucy su iPhone e iPad (Impostazioni › Vera), oppure apri lì un backup di questo Mac. Stessa rete Wi‑Fi, tutto cifrato") {
+                                     aiuto: "Scrivilo in Lucy su iPhone e iPad (Impostazioni › Lucy), oppure apri lì un backup di questo Mac. Stessa rete Wi‑Fi, tutto cifrato") {
                         Button { stato.dati.impostazioni.vera.ponte.codice = PonteVera.nuovoCodice() } label: {
                             Label("Nuovo codice", systemImage: "key")
                         }
@@ -387,7 +387,7 @@ extension AppImpostazioni {
                     .cascataImpostazioni(3)
                 }
                 #endif
-                RigaImpostazione(titolo: "Scorciatoia", sottotitolo: "Apri la mini Vera; tienila premuta per parlare.", ultima: true) {
+                RigaImpostazione(titolo: "Scorciatoia", sottotitolo: "Apri la mini Lucy; tienila premuta per parlare.", ultima: true) {
                     TastiScorciatoia(tasti: ["⌥", "Spazio"])
                 }
                 .cascataImpostazioni(4)
@@ -407,7 +407,7 @@ extension AppImpostazioni {
                         .onSubmit { stato.verificaMotoreLocale() }
                 }
                 RigaImpostazione(titolo: "Ragionamento", sottotitolo: "Sulle domande difficili.",
-                                 aiuto: "Automatico: Vera ragiona sulle domande difficili o quando le dici «pensaci bene». Risponde più piano") {
+                                 aiuto: "Automatico: Lucy ragiona sulle domande difficili o quando le dici «pensaci bene». Risponde più piano") {
                     MenuTendina(selezione: Bindable(stato.dati).impostazioni.vera.ragionamento,
                                 opzioni: SceltaRagionamento.allCases.map { ($0, $0.nome) }, larghezza: M.menuMedio)
                 }
@@ -421,7 +421,7 @@ extension AppImpostazioni {
                         .disabled(!stato.dati.impostazioni.vera.passi.attivo)
                 }
                 RigaImpostazione(titolo: "Pronta all'avvio", sottotitolo: "La prima risposta non aspetta.",
-                                 aiuto: "All'apertura di Lucy Vera avvia Ollama e carica il modello: la prima risposta non aspetta") {
+                                 aiuto: "All'apertura di Lucy Lucy avvia Ollama e carica il modello: la prima risposta non aspetta") {
                     interruttore(Bindable(stato.dati).impostazioni.vera.prontaAllAvvio)
                 }
                 RigaImpostazione(titolo: "Conserva le conversazioni", sottotitolo: "Nel dossier, sul Mac e nei backup.", ultima: true) {
@@ -469,12 +469,12 @@ extension AppImpostazioni {
             #endif
             // Fase 2 del brief di Vera: memoria, lezioni, filo lungo e ricerca per significato
             GruppoImpostazioni(titolo: "Memoria") {
-                RigaImpostazione(titolo: "Vera ricorda", sottotitolo: "Propone i ricordi, li salva dopo il tuo sì.",
+                RigaImpostazione(titolo: "Lucy ricorda", sottotitolo: "Propone i ricordi, li salva dopo il tuo sì.",
                                  aiuto: "Ricordi su di te e sui clienti, sul Mac e cifrati. Mai numeri di documenti, conti o password") {
                     interruttore(Bindable(stato.dati).impostazioni.vera.memoriaAttiva)
                 }
                 RigaImpostazione(titolo: "Impara dalle correzioni", sottotitolo: "👍 e 👎 sotto le risposte.",
-                                 aiuto: "Una correzione scritta diventa una lezione che Vera rilegge prima di ogni risposta") {
+                                 aiuto: "Una correzione scritta diventa una lezione che Lucy rilegge prima di ogni risposta") {
                     interruttore(Bindable(stato.dati).impostazioni.vera.imparaDalleCorrezioni)
                 }
                 // Fase 4 di Vera, funzione 7: «Il sussurro» nella Panoramica del dossier (VisteSussurroVera.swift)
@@ -505,7 +505,7 @@ extension AppImpostazioni {
             // Fase 5 di Vera: «Vera su misura», «Due velocità», «Il cervello grande» e l'etichetta sotto le risposte (regola
             // bloccata: niente interruttore). Le pagine si aprono sopra la chat di Vera (VisteSuMisuraVera, VisteMotoriVera)
             GruppoImpostazioni(titolo: "Motori e su misura") {
-                RigaImpostazione(titolo: "Vera su misura", sottotitolo: stato.statoSuMisuraInBreve,
+                RigaImpostazione(titolo: "Lucy su misura", sottotitolo: stato.statoSuMisuraInBreve,
                                  stato: Pillola(testo: stato.pillolaSuMisura, tono: tonoSuMisura)) {
                     Button("Apri") { stato.apriPaginaSuMisura() }
                         .buttonStyle(StilePulsanteRigaImpostazioni())
@@ -566,7 +566,7 @@ extension AppImpostazioni {
                 .cascataImpostazioni(7)
             gruppoVoceVera
                 .cascataImpostazioni(7)
-            NotaImpostazioni("Vera spiega e racconta; le cifre le calcola Lucy. I dati non lasciano il Mac.")
+            NotaImpostazioni("Lucy spiega e racconta; le cifre le calcola Lucy. I dati non lasciano il Mac.")
                 .cascataImpostazioni(8)
         }
     }
@@ -597,7 +597,7 @@ extension AppImpostazioni {
     @ViewBuilder var righeVoce: some View {
         let voci = VoceVera.vociItaliane()
         let scelta: String = VoceVera.voce(stato.dati.impostazioni.vera.voce).map { "Ora " + VoceVera.nome($0) } ?? "La migliore voce italiana installata"
-        RigaImpostazione(titolo: "Voce di Vera", sottotitolo: scelta,
+        RigaImpostazione(titolo: "Voce di Lucy", sottotitolo: scelta,
                          aiuto: VoceVera.soloVociStandard
                             ? "Per una voce più naturale scarica «Federica (Premium)» in Impostazioni di Sistema › Accessibilità › Contenuti letti ad alta voce › Voce di sistema › Gestisci voci › Italiano"
                             : nil) {
@@ -635,7 +635,7 @@ extension AppImpostazioni {
         }
         RigaImpostazione(titolo: "Prova il riconoscimento",
                          sottotitolo: stato.esitoProvaRiconoscimento ?? "Senza microfono, con ogni riconoscimento",
-                         aiuto: "Vera dice una frase e la fa capire a ogni riconoscimento (nuovo, dettatura di sistema, classico). Poi «Copia» per mandare il risultato") {
+                         aiuto: "Lucy dice una frase e la fa capire a ogni riconoscimento (nuovo, dettatura di sistema, classico). Poi «Copia» per mandare il risultato") {
             HStack(spacing: 8) {
                 Button { stato.provaRiconoscimento() } label: { Label("Prova", systemImage: "waveform") }
                     .buttonStyle(StilePulsanteRigaImpostazioni())
@@ -644,12 +644,12 @@ extension AppImpostazioni {
                     .buttonStyle(StilePulsanteRigaImpostazioni())
             }
         }
-        RigaImpostazione(titolo: "Mostra i passaggi dell'ascolto", sottotitolo: "Sotto il campo di Vera",
-                         aiuto: "Sotto il campo di Vera compare l'ultimo passaggio (preparazione, microfono, risultati, voce, dettatura): si vede dove si ferma") {
+        RigaImpostazione(titolo: "Mostra i passaggi dell'ascolto", sottotitolo: "Sotto il campo di Lucy",
+                         aiuto: "Sotto il campo di Lucy compare l'ultimo passaggio (preparazione, microfono, risultati, voce, dettatura): si vede dove si ferma") {
             interruttore(Bindable(stato.dati).impostazioni.vera.mostraPassaggiVoce)
         }
-        RigaImpostazione(titolo: "Conversazione continua", sottotitolo: "Vera torna ad ascoltarti",
-                         aiuto: "Dopo aver risposto Vera torna ad ascoltarti, finché non le dici «basta così» · ⌥⌘E per parlarle",
+        RigaImpostazione(titolo: "Conversazione continua", sottotitolo: "Lucy torna ad ascoltarti",
+                         aiuto: "Dopo aver risposto Lucy torna ad ascoltarti, finché non le dici «basta così» · ⌥⌘E per parlarle",
                          ultima: true) {
             interruttore(Bindable(stato.dati).impostazioni.vera.conversazioneContinua)
         }
@@ -663,7 +663,7 @@ private struct RigaMemoriaVera: View {
 
     var body: some View {
         let _ = ContaCorpi.segna()
-        RigaImpostazione(titolo: "La memoria di Vera", sottotitolo: "\(memoria.ricordi.count) ricordi · \(memoria.lezioni.count) lezioni", ultima: true) {
+        RigaImpostazione(titolo: "La memoria di Lucy", sottotitolo: "\(memoria.ricordi.count) ricordi · \(memoria.lezioni.count) lezioni", ultima: true) {
             ValoreRiga(testo: memoria.aperta ? "Nascondi" : "Mostra") {
                 let v = !memoria.aperta
                 if v { stato.apri(.vera) }

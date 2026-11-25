@@ -112,7 +112,7 @@ final class ProvaGuidata {
         if stato.modoCliente != nil { return "Esci prima dalla modalità cliente: la prova apre app che lì restano chiuse." }
         if stato.presentazione != nil { return "Chiudi prima la presentazione, poi riprova." }
         if stato.menu.conversazioneAVoce {
-            return "Chiudi prima la conversazione con Vera: la schermata di benvenuto la fermerebbe."
+            return "Chiudi prima la conversazione con Lucy: la schermata di benvenuto la fermerebbe."
         }
         return nil
     }

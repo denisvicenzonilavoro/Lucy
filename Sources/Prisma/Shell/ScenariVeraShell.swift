@@ -92,7 +92,7 @@ extension StatoShell {
                     // Nuova conversazione: la risposta interrotta non resta
                 } catch {
                     self.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: error.localizedDescription,
-                                                        titolo: "Vera non ha potuto rispondere", motore: motore.nome), cliente: chiave)
+                                                        titolo: "Lucy non ha potuto rispondere", motore: motore.nome), cliente: chiave)
                 }
                 self.flussoVera.chiudi()
                 self.veraInCorso = false

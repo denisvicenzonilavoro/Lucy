@@ -314,7 +314,7 @@ enum ProvaSuMisuraVera {
         passi.valore = []
         let esito = aspetta { await EsameSuMisura.esegui(domande, attuale: attuale, nuovo: nuovo, vera: ImpostazioniVera(), sessione: sessione) { passi.valore?.append($0) } }
         controlla(esito.superato && esito.percentuale(nuovo) == 100 && esito.percentuale(attuale) == 0 && esito.breve.superato,
-                  "Esame: la Vera su misura migliore supera l'esame (\(esito.percentuale(attuale))% → \(esito.percentuale(nuovo))%)")
+                  "Esame: la Lucy su misura migliore supera l'esame (\(esito.percentuale(attuale))% → \(esito.percentuale(nuovo))%)")
         let registro = ServerFintoSuMisura.registro.filter { $0.percorso == "/api/chat" }
         let domandeChat = registro.filter { !$0.precarica }
         let ordine = domandeChat.map(\.modello)
@@ -323,9 +323,9 @@ enum ProvaSuMisuraVera {
         let liberaPrimo = registro.firstIndex { $0.precarica && $0.modello == attuale && $0.keepAlive == "0" }
         let primaDelSecondo = registro.firstIndex { !$0.precarica && $0.modello == nuovo }
         controlla(liberaPrimo != nil && primaDelSecondo != nil && liberaPrimo! < primaDelSecondo!,
-                  "Esame: la memoria della Vera di oggi si libera prima della Vera su misura")
+                  "Esame: la memoria della Lucy di oggi si libera prima della Lucy su misura")
         controlla(domandeChat.allSatisfy { $0.temperatura == 0 && $0.pensa == false }, "Esame: temperatura 0 e niente ragionamento")
-        controlla((passi.valore ?? []).contains("domanda 1 di \(domande.count) · Vera di oggi"), "Esame: l'avanzamento dice a che domanda è")
+        controlla((passi.valore ?? []).contains("domanda 1 di \(domande.count) · Lucy di oggi"), "Esame: l'avanzamento dice a che domanda è")
         // Un modello che Ollama non ha: errore, non superato
         ServerFintoSuMisura.prepara(installati: [attuale], risposte: [attuale: domande.map(\.attesa)])
         let senza = aspetta { await EsameSuMisura.esegui(domande, attuale: attuale, nuovo: nuovo, vera: ImpostazioniVera(), sessione: sessione) }
@@ -358,17 +358,17 @@ enum ProvaSuMisuraVera {
         }
         var bocciata = con(.nonSuperata, superato: false)
         controlla(!SuMisuraVera.sostituisci(nome, in: &bocciata) && bocciata.modelloLocale == MotoreLocale.modelloPredefinito,
-                  "Su misura: con l'esame non superato la Vera di oggi resta")
+                  "Su misura: con l'esame non superato la Lucy di oggi resta")
         var attesa = con(.importata, superato: false)
         attesa.suMisura.versioni[0].esame = nil
         controlla(!SuMisuraVera.sostituisci(nome, in: &attesa), "Su misura: senza esame niente sostituzione")
         var promossa = con(.superata, superato: true)
         controlla(SuMisuraVera.sostituisci(nome, in: &promossa) && promossa.modelloLocale == nome
                   && promossa.suMisura.modelloPrecedente == MotoreLocale.modelloPredefinito && promossa.suMisura.versioni[0].stato == .inUso,
-                  "Su misura: con l'esame superato la Vera su misura prende il posto di quella di oggi")
+                  "Su misura: con l'esame superato la Lucy su misura prende il posto di quella di oggi")
         controlla(SuMisuraVera.tornaIndietro(in: &promossa) && promossa.modelloLocale == MotoreLocale.modelloPredefinito
                   && promossa.suMisura.versioni[0].stato == .ritirata,
-                  "Su misura: «Torna alla Vera di prima» rimette qwen3.5:4b e la versione resta")
+                  "Su misura: «Torna alla Lucy di prima» rimette qwen3.5:4b e la versione resta")
         controlla(SuMisuraVera.sostituisci(nome, in: &promossa) && promossa.modelloLocale == nome, "Su misura: una versione ritirata si può riprovare")
         var openAI = con(.superata, superato: true)
         openAI.fornitore = .compatibileOpenAI
@@ -382,8 +382,8 @@ enum ProvaSuMisuraVera {
         }
         controlla(tante.suMisura.versioni.count == SuMisuraVera.massimoVersioni && tante.suMisura.versioni.last?.id == "vera-su-misura:v8",
                   "Su misura: al massimo \(SuMisuraVera.massimoVersioni) versioni, le più vecchie escono")
-        controlla(MotoreLocale.nome(nome) == "Vera su misura sul Mac" && MotoreLocale.nome("qwen3.5:4b") == "Qwen sul Mac",
-                  "Su misura: sotto le risposte si legge «Vera su misura sul Mac»")
+        controlla(MotoreLocale.nome(nome) == "Lucy su misura sul Mac" && MotoreLocale.nome("qwen3.5:4b") == "Qwen sul Mac",
+                  "Su misura: sotto le risposte si legge «Lucy su misura sul Mac»")
 
         // Nell'app (senza Ollama: la verifica fallisce in silenzio, conta solo ciò che resta nelle impostazioni)
         let s = StatoShell(persistente: false)
@@ -392,15 +392,15 @@ enum ProvaSuMisuraVera {
                   "Su misura nell'app: esame non superato, il modello non cambia")
         s.dati.impostazioni.vera = con(.superata, superato: true)
         controlla(s.installaSuMisura(nome) && s.dati.impostazioni.vera.modelloLocale == nome && s.dati.impostazioni.vera.suMisura.modelloPrecedente == MotoreLocale.modelloPredefinito,
-                  "Su misura nell'app: esame superato, la Vera su misura è in uso")
+                  "Su misura nell'app: esame superato, la Lucy su misura è in uso")
         if case .inUso = s.faseSuMisura {
-            controlla(true, "Su misura nell'app: la pagina mostra la Vera su misura in uso")
+            controlla(true, "Su misura nell'app: la pagina mostra la Lucy su misura in uso")
         } else {
-            controlla(false, "Su misura nell'app: la pagina mostra la Vera su misura in uso")
+            controlla(false, "Su misura nell'app: la pagina mostra la Lucy su misura in uso")
         }
         controlla(s.tornaAllaVeraDiPrima() && s.dati.impostazioni.vera.modelloLocale == MotoreLocale.modelloPredefinito
                   && s.dati.impostazioni.vera.suMisura.versioni.first?.stato == .ritirata,
-                  "Su misura nell'app: tornata alla Vera di prima")
+                  "Su misura nell'app: tornata alla Lucy di prima")
         s.dati.impostazioni.vera.fornitore = .compatibileOpenAI
         controlla(!s.installaSuMisura(nome) && s.faseSuMisura == .soloOllama, "Su misura nell'app: con «Compatibile OpenAI» la pagina dice «solo con Ollama»")
         // Pochi esempi: la pagina dice quanti ne mancano
@@ -445,25 +445,25 @@ enum ProvaSuMisuraVera {
         let s = StatoShell(persistente: false)
         s.rispostePreparate = true
         let prima = s.dati.impostazioni.vera
-        let gestita = s.chiediVera("Addestra Vera")
+        let gestita = s.chiediVera("Addestra Lucy")
         #if os(macOS)
-        controlla(gestita && s.paginaSuMisuraAperta && s.dati.impostazioni.vera == prima, "Su misura: «addestra Vera» apre la pagina e non cambia niente")
+        controlla(gestita && s.paginaSuMisuraAperta && s.dati.impostazioni.vera == prima, "Su misura: «addestra Lucy» apre la pagina e non cambia niente")
         #else
-        controlla(gestita && s.dati.impostazioni.vera == prima, "Su misura: «addestra Vera» risponde e non cambia niente")
+        controlla(gestita && s.dati.impostazioni.vera == prima, "Su misura: «addestra Lucy» risponde e non cambia niente")
         #endif
         let risposta = s.conversazione(s.chiaveConversazione).last
         controlla(risposta?.titolo == StatoShell.titoloSuMisura && risposta?.autore == .vera, "Su misura: in chat lo stato in una riga")
         s.chiudiPaginaSuMisura()
-        controlla(s.chiediVera("Vera su misura") && s.chiediVera("com'è andato l'esame?") && s.chiediVera("torna alla Vera di prima")
+        controlla(s.chiediVera("Lucy su misura") && s.chiediVera("com'è andato l'esame?") && s.chiediVera("torna alla Lucy di prima")
                   && s.dati.impostazioni.vera == prima, "Su misura: le altre frasi rispondono senza fare azioni")
         s.chiudiPaginaSuMisura()
         s.modoCliente = "giulia"
-        _ = s.chiediVera("Vera su misura")
+        _ = s.chiediVera("Lucy su misura")
         controlla(!s.paginaSuMisuraAperta, "Su misura: in modalità cliente la pagina non si apre")
         s.apriPaginaSuMisura()
         controlla(!s.paginaSuMisuraAperta, "Su misura: in modalità cliente la pagina non si apre nemmeno dal pulsante")
         s.modoCliente = nil
-        controlla(!s.chiediSuMisura("misura la stanza", chiave: s.chiaveConversazione), "Su misura: «misura la stanza» non è Vera su misura")
+        controlla(!s.chiediSuMisura("misura la stanza", chiave: s.chiaveConversazione), "Su misura: «misura la stanza» non è Lucy su misura")
     }
 }
 

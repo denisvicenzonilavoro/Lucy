@@ -1140,7 +1140,7 @@ private struct CorpoVeraScrivaniaApple: View, Equatable {
                     // Mentre Vera risponde l'acqua vibra intorno a questa sfera (OsservatoreAcqua)
                     .puntoAcqua(.sferaVera)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Vera")
+                    Text("Lucy")
                         .carattereApple(e.nome)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
                     #if os(macOS)
@@ -1222,7 +1222,7 @@ private struct SuggerimentoVeraScrivania: View {
         .offset(y: alzato ? Tema.Apple.Scrivania.Moto.sollevamentoSuggerimento : 0)
         .animation(fermo ? nil : Tema.Apple.Scrivania.Moto.sopraSuggerimento, value: alzato)
         .modifier(PassaggioRiquadro(sopra: $sopra))
-        .help("Apre Vera sulla scrivania e le chiede: \(testo)")
+        .help("Apre Lucy sulla scrivania e le chiede: \(testo)")
     }
 }
 

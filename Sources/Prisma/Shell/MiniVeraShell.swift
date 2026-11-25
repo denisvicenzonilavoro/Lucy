@@ -63,14 +63,14 @@ extension StatoShell {
         guard persistente else { return }
         guard !veraInCorso else {
             mini.vai(.scrivi)
-            mini.nota = "Sto ancora rispondendo nell'app Vera: un attimo e ci sono."
+            mini.nota = "Sto ancora rispondendo nell'app Lucy: un attimo e ci sono."
             return
         }
         let vera = dati.impostazioni.vera
         // La dettatura di macOS scrive solo nel campo dell'app Vera: qui si scrive
         if vera.riconoscimento == .dettatura || (vera.riconoscimento == .automatico && usaDettatura) {
             mini.vai(.scrivi)
-            mini.nota = "Con la dettatura del Mac scrivi qui sotto, oppure parla con Vera nella sua app (⌥⌘E)."
+            mini.nota = "Con la dettatura del Mac scrivi qui sotto, oppure parla con Lucy nella sua app (⌥⌘E)."
             return
         }
         fermaLetturaTrenta()
@@ -137,7 +137,7 @@ extension StatoShell {
         guard !testo.isEmpty else { return }
         guard !veraInCorso else {
             mini.vai(.scrivi)
-            mini.nota = "Sto ancora rispondendo nell'app Vera: un attimo e ci sono."
+            mini.nota = "Sto ancora rispondendo nell'app Lucy: un attimo e ci sono."
             return
         }
         mini.testo = ""
@@ -223,18 +223,18 @@ extension StatoShell {
             // «Fallo tu»: le azioni della scheda nel testo, «Conferma» qui o tutto nell'app Vera
             c = CifreMiniVera()
             c.azioni = [AzioneMiniVera(titolo: s.origine == .clientela ? "Crea le attività" : "Conferma", simbolo: "checkmark", tipo: .confermaVera(m.id), primaria: true),
-                        AzioneMiniVera(titolo: "Rivedi in Vera", simbolo: "arrow.up.forward", tipo: .rivediInVera)]
+                        AzioneMiniVera(titolo: "Rivedi in Lucy", simbolo: "arrow.up.forward", tipo: .rivediInVera)]
             let righe = s.attive.prefix(Tema.Apple.ConfermaVera.righeVisibili).map { "• \($0.titolo): \($0.dettaglio)" }
             mini.rispondi(testo: ([NucleoVera.pulisci(m.testo)] + righe).joined(separator: "\n"), titolo: m.titolo, cifre: c, inArrivo: false)
             return true
         } else if m.clientela != nil {
             c = CifreMiniVera()
-            c.azioni = [AzioneMiniVera(titolo: "Rivedi in Vera", simbolo: "arrow.up.forward", tipo: .rivediInVera, primaria: true)]
+            c.azioni = [AzioneMiniVera(titolo: "Rivedi in Lucy", simbolo: "arrow.up.forward", tipo: .rivediInVera, primaria: true)]
         } else if let a = m.azione {
             // Vera ha fatto qualcosa (un appuntamento, un promemoria): il pulsante lo apre
             c = CifreMiniVera()
             c.azioni = [AzioneMiniVera(titolo: Self.titoloAzione(a), simbolo: "arrow.up.forward", tipo: .azioneVera(a), primaria: true)]
-        } else if m.titolo == "Vera non ha potuto rispondere" || m.motore == StatoShell.motoreAzioni {
+        } else if TestiStatoVera.nonHaPotuto(m.titolo) || m.motore == StatoShell.motoreAzioni {
             c = CifreMiniVera()
         }
         mini.rispondi(testo: NucleoVera.pulisci(m.testo), titolo: m.titolo, cifre: c, inArrivo: false)
@@ -316,9 +316,9 @@ extension StatoShell {
             if !esiti.isEmpty, esiti.allSatisfy(\.fatta) {
                 commiato = "Fatto: lo trovi nelle app di Lucy"
             } else if esiti.contains(where: \.fatta) {
-                commiato = "Fatto in parte: guarda in Vera cosa non è riuscito"
+                commiato = "Fatto in parte: guarda in Lucy cosa non è riuscito"
             } else {
-                commiato = "Non sono riuscita a farlo: guarda in Vera"
+                commiato = "Non sono riuscita a farlo: guarda in Lucy"
             }
         case .rivediInVera:
             apriInVeraDaMiniVera()

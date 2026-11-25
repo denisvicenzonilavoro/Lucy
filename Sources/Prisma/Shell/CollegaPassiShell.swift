@@ -328,7 +328,7 @@ extension StatoShell {
             controlla(f.clientePassi(frase, chiave: "marco") == "marco",
                       "Ragiona a passi: con più clienti nominati vale il dossier aperto se è tra loro")
             controlla(f.clientePassi(frase, chiave: altro.id) == nil,
-                      "Ragiona a passi: con più clienti nominati il dossier di \(altro.nome) non vale, Vera chiede di chi si parla")
+                      "Ragiona a passi: con più clienti nominati il dossier di \(altro.nome) non vale, Lucy chiede di chi si parla")
         } else {
             controlla(false, "Ragiona a passi: con i clienti fittizi la frase del template dovrebbe nominare Marco e Tommaso: \(nominati.map(\.nome))")
         }
@@ -339,16 +339,16 @@ extension StatoShell {
         let p = VeraPortafoglio.chiave
         s.veraPortafoglio = true
         controlla(s.chiediPassi(richiesta, chiave: p) && s.conversazione(p).last?.testo == domandaClientePassi,
-                  "Ragiona a passi: nel portafoglio senza un nome Vera chiede di quale cliente")
+                  "Ragiona a passi: nel portafoglio senza un nome Lucy chiede di quale cliente")
         controlla(s.richiestaPassiInSospeso(p) == richiesta, "Ragiona a passi: la richiesta resta in sospeso fino alla risposta")
         let n = s.conversazione(p).count
         controlla(!s.chiediPassi("Che tempo fa domani?", chiave: p) && s.conversazione(p).count == n,
                   "Ragiona a passi: una frase che non risponde alla domanda passa agli altri motori")
-        controlla(s.chiediPassi("Marco", chiave: p), "Ragiona a passi: «Marco» risponde alla domanda di Vera")
+        controlla(s.chiediPassi("Marco", chiave: p), "Ragiona a passi: «Marco» risponde alla domanda di Lucy")
         let conv = s.conversazione(p)
         controlla(conv.count >= 2 && conv[conv.count - 2].autore == .utente && conv[conv.count - 2].testo == "Marco"
                   && (conv.last?.titolo == titoloPassi),
-                  "Ragiona a passi: la risposta resta com'è scritta e Vera riprende la richiesta su Marco")
+                  "Ragiona a passi: la risposta resta com'è scritta e Lucy riprende la richiesta su Marco")
         guard let piano = conv.last?.pianoPassi, piano.richiesta.clienteId == "marco" else {
             return controlla(false, "Ragiona a passi: dopo «Marco» manca il piano su Marco: \(conv.last?.testo ?? "")")
         }
@@ -367,7 +367,7 @@ extension StatoShell {
         vecchio.richiesta.obiettiviIds = Array(piano.richiesta.obiettiviIds.prefix(1)) + ["obiettivo-tolto"]
         s.rifaiPassi(vecchio, chiave: p)
         controlla(s.conversazione(p).last?.pianoPassi == nil && s.conversazione(p).last?.testo == avvisoRifaiPassiUnSolo,
-                  "Ragiona a passi: con un solo obiettivo rimasto e senza protezione Vera lo dice invece di un piano vuoto")
+                  "Ragiona a passi: con un solo obiettivo rimasto e senza protezione Lucy lo dice invece di un piano vuoto")
         controlla(s.richiestaPassiInSospeso(p) == nil,
                   "Ragiona a passi: l'avviso di «Rifai i calcoli» non è una domanda che aspetta risposta")
         // Un piano preparato tempo fa e pubblicato adesso ha la data di adesso
@@ -398,7 +398,7 @@ extension StatoShell {
         let n = a.conversazione(p).count
         controlla(!a.chiediPassi("Raccontami Marco", chiave: p) && !a.chiediPassi("Perché il fondo pensione conviene a Marco?", chiave: p)
                   && a.conversazione(p).count == n && a.richiestaPassiInSospeso(p) == richiesta,
-                  "Ragiona a passi: «Raccontami Marco» e «Perché…?» non rispondono alla domanda di Vera, la richiesta resta in sospeso")
+                  "Ragiona a passi: «Raccontami Marco» e «Perché…?» non rispondono alla domanda di Lucy, la richiesta resta in sospeso")
         _ = a.smistaVera("Raccontami Marco", chiave: p)
         controlla(a.conversazione(p).last?.pianoPassi == nil && a.conversazione(p).last?.titolo != titoloPassi,
                   "Ragiona a passi: dopo «Di quale cliente…?», «Raccontami Marco» va a «Il cliente in 30 secondi», non al piano")
@@ -412,7 +412,7 @@ extension StatoShell {
         f.veraPortafoglio = true
         let dueNomi = "Marco ha 400 € al mese: proteggere Elena e gli studi di Tommaso, come li divido?"
         controlla(f.chiediPassi(dueNomi, chiave: p) && f.conversazione(p).last?.testo == domandaClientePassi,
-                  "Ragiona a passi: con Marco e Tommaso nominati nel portafoglio Vera chiede di quale cliente")
+                  "Ragiona a passi: con Marco e Tommaso nominati nel portafoglio Lucy chiede di quale cliente")
         controlla(f.chiediPassi("Marco", chiave: p), "Ragiona a passi: «Marco» risponde anche con due clienti nominati")
         if f.conversazione(p).last?.pianoPassi == nil, let obiettivo = f.datiPassi(cliente: "marco")?.obiettivi.first?.titolo {
             controlla(f.sospesoPassi(p)?.clienteScelto == "marco",

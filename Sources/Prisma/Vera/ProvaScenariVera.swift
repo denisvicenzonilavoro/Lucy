@@ -99,7 +99,7 @@ enum ProvaScenariVera {
             let unito = ScenariVera.unisci(modello: letto?.parametri ?? ParametriScenarioVera(), regole: r)
             controlla(unito.stessi(x.atteso), "Scenari, Qwen e regole insieme: «\(x.frase)»")
             let domanda = ScenariVera.domandaMancante(unito, cliente: unito.clienteId.flatMap { s.cliente($0) })
-            controlla((domanda != nil) == x.domanda, x.domanda ? "Scenari: manca l'area, Vera chiede «\(domanda ?? "")»" : "Scenari: «\(x.frase)» si calcola senza domande")
+            controlla((domanda != nil) == x.domanda, x.domanda ? "Scenari: manca l'area, Lucy chiede «\(domanda ?? "")»" : "Scenari: «\(x.frase)» si calcola senza domande")
         }
         // Un modello che sbaglia una cifra scritta nella frase: vincono le regole
         let frase = "E se Marco va in pensione a 63 anni e smette di versare?"
@@ -300,7 +300,7 @@ enum ProvaScenariVera {
         let domanda = s.conversazione("giulia").last
         controlla(domanda?.motore == StatoShell.motoreAzioni && domanda?.scenario == nil && s.scenarioInSospeso != nil
                   && (domanda?.testo ?? "").contains("previdenza, investimenti, risparmio o protezione"),
-                  "Scenari: se manca l'area Vera la chiede («\(domanda?.testo ?? "")»)")
+                  "Scenari: se manca l'area Lucy la chiede («\(domanda?.testo ?? "")»)")
         s.chiediVera("Sul risparmio")
         let completo = s.conversazione("giulia").last?.scenario
         controlla(completo?.area == .risparmio && completo?.parametri.variazioneVersamento == 100 && s.scenarioInSospeso == nil,
@@ -313,7 +313,7 @@ enum ProvaScenariVera {
         let prima = s.conversazione("giulia").count
         s.chiediVera("Cos'è un PIP?")
         controlla(s.conversazione("giulia").count == prima + 2 && s.conversazione("giulia").last?.scenario == nil,
-                  "Scenari: «Cos'è un PIP?» resta una domanda a Vera")
+                  "Scenari: «Cos'è un PIP?» resta una domanda a Lucy")
         // Dal portafoglio: solo con un cliente nominato
         s.veraPortafoglio = true
         s.chiediVeraPortafoglio("E se Laura smette di versare nel fondo pensione?")
@@ -325,7 +325,7 @@ enum ProvaScenariVera {
         s.entraModoCliente()
         s.chiediVera("E se Laura smette di versare nel fondo pensione?")
         controlla(s.conversazione("marco").last?.scenario == nil && (s.conversazione("marco").last?.testo ?? "").contains("modalità cliente"),
-                  "Scenari: in modalità cliente Vera resta sul cliente davanti a te")
+                  "Scenari: in modalità cliente Lucy resta sul cliente davanti a te")
 
         // La scheda si conserva con la conversazione (archivio e backup)
         if let originale = m, let d = try? JSONEncoder().encode(originale), let letto = try? JSONDecoder().decode(MessaggioVera.self, from: d) {
@@ -351,7 +351,7 @@ enum ProvaScenariVera {
         }
         let ultimo = s.conversazione("marco").last
         controlla(partita && TestiStatoVera.eTitoloNonPronta(ultimo?.titolo) && ultimo?.scenario == nil && !s.veraInCorso,
-                  "Scenari: se Qwen non è pronto Vera lo dice e non risponde («\(ultimo?.testo.prefix(60) ?? "")…»)")
+                  "Scenari: se Qwen non è pronto Lucy lo dice e non risponde («\(ultimo?.testo.prefix(60) ?? "")…»)")
     }
     #endif
 

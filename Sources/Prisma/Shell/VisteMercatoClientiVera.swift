@@ -114,9 +114,9 @@ struct SchedaMercatoClientiVeraVista: View {
                         Button(esito.etichettaBozze) { stato.preparaBozzeMercatoClienti(messaggio: messaggio) }
                             .buttonStyle(.applePrimario)
                             .disabled(stato.veraInCorso || stato.solaLettura || !stato.appConsentita(.messaggi))
-                            .help("Vera scrive le bozze nel tuo stile; le apri e le spedisci tu, dopo «Conferma».")
+                            .help("Lucy scrive le bozze nel tuo stile; le apri e le spedisci tu, dopo «Conferma».")
                     }
-                    Text("Le cifre sono di Lucy: Vera scrive solo le parole.")
+                    Text("Le cifre sono di Lucy: Lucy scrive solo le parole.")
                         .carattereApple(K.nota)
                         .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         .lineLimit(2)
@@ -244,7 +244,7 @@ private struct ElencoMercatoClientiVera: View {
                         .buttonStyle(.applePrimario)
                         .disabled(esempio || stato.veraInCorso || stato.solaLettura || !stato.appConsentita(.messaggi))
                         .help(esempio ? "È un esempio: per le bozze dimmi in chat l'evento vero."
-                              : "Vera scrive le bozze nel tuo stile; le apri e le spedisci tu, dopo «Conferma».")
+                              : "Lucy scrive le bozze nel tuo stile; le apri e le spedisci tu, dopo «Conferma».")
                 }
             }
             if esito.toccati.isEmpty {

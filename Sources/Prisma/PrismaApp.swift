@@ -128,7 +128,7 @@ struct ComandiPrisma: Commands {
             Button("Spazi di lavoro…") { stato.pannelloSpazi = true }
                 .disabled(menu.inModoCliente)
             Button("Le tue app aperte…") { stato.pannelloAppAperte = true }
-            Button(menu.conversazioneAVoce ? "Chiudi la conversazione con Vera" : "Parla con Vera") { stato.alternaAscolto(daMenu: true) }
+            Button(menu.conversazioneAVoce ? "Chiudi la conversazione con Lucy" : "Parla con Lucy") { stato.alternaAscolto(daMenu: true) }
                 .keyboardShortcut("e", modifiers: [.command, .option])
             Divider()
             Button("Scrivania") { stato.mostraScrivania() }

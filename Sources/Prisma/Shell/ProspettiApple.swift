@@ -609,12 +609,12 @@ extension AppProspetti {
             }
             if scelta.spuntoVera != nil {
                 Button { stato.chiediVeraDelDocumento(scelta) } label: {
-                    etichettaAzione("Chiedi a Vera", simbolo: "sparkles", soloIcona: soloIcona)
+                    etichettaAzione("Chiedi a Lucy", simbolo: "sparkles", soloIcona: soloIcona)
                 }
                 .buttonStyle(.apple)
                 .fixedSize()
                 .disabled(stato.veraInCorso)
-                .help("Chiedi a Vera: spiega le cifre di questo documento, per te")
+                .help("Chiedi a Lucy: spiega le cifre di questo documento, per te")
             }
             // Il portafoglio parla di tutti i clienti: non si mostra a un cliente
             if scelta.tipo != .portafoglio {
@@ -1229,10 +1229,10 @@ enum TestiAzioniProspetto {
     static let altro = "Altro"
     static let stampa = "Stampa…"
     static let archivia = "Archivia nei Documenti"
-    static let chiediVera = "Chiedi a Vera di commentarlo"
+    static let chiediVera = "Chiedi a Lucy di commentarlo"
     static let alTavolo = "Al tavolo…"
     static let archiviato = "Archiviato in Documenti"
-    static let aiutoAltro = "Stampa, archivia nei Documenti, chiedi a Vera, il tavolo con l'iPad"
+    static let aiutoAltro = "Stampa, archivia nei Documenti, chiedi a Lucy, il tavolo con l'iPad"
     static let aiutoPortafoglio = "Il portafoglio parla di tutti i clienti: non si mostra a un cliente"
     static let aiutoMostra = "Mostra al cliente: il documento a tutto schermo dalla pagina mostrata (← → per sfogliare, esc per uscire), nella vista pulita"
     static let aiutoMostraPerTe = "Mostra al cliente: la versione per il cliente a tutto schermo, dalla prima pagina, nella vista pulita"

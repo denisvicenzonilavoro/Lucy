@@ -1167,7 +1167,7 @@ extension StatoShell {
         controlla(s.dati.sussurriChiusi.contains { $0.chiave == sussurroDoppia.chiave && $0.clienteId == principale }
                   && s.dati.conversazioni[principale]?.contains { $0.id == messaggioDoppia.id } == true
                   && (dop == principale || s.dati.conversazioni[dop] == nil),
-                  "Tagliando nell'app: anche sussurro chiuso e conversazione di Vera passano sulla principale")
+                  "Tagliando nell'app: anche sussurro chiuso e conversazione di Lucy passano sulla principale")
         controlla(s.dati.esperienzeFatte.contains { $0.id == fattaDoppia.id && $0.clienteId == principale },
                   "Tagliando nell'app: le esperienze della Sala fatte passano sulla principale (migliorie d'uso 60)")
         if dop == doppia.id {

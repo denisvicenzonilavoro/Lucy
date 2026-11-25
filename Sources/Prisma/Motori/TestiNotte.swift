@@ -107,14 +107,14 @@ enum TestiNotte {
     static let saltataTitolo = "Stanotte il Mac dormiva."
     static let saltataTesto = "Preparo adesso le cose di oggi? Ci vogliono pochi minuti."
     static let saltataSpentoTitolo = "Il lavoro della notte è spento."
-    static let saltataSpentoTesto = "Preparo adesso le cose di oggi? Puoi accenderlo in Impostazioni › Vera."
+    static let saltataSpentoTesto = "Preparo adesso le cose di oggi? Puoi accenderlo in Impostazioni › Lucy."
     static let nienteTitolo = "Oggi non c'era niente da preparare."
     static let nienteTesto = "Nessun incontro, nessuna scadenza nei prossimi 30 giorni, nessun riesame dovuto."
     static let inCorsoTitolo = "Sto preparando le cose di oggi."
     static let inCorsoTesto = "Le carte arrivano qui una alla volta, appena sono pronte."
 
     static func daFinireQwen(_ n: Int) -> String {
-        "Vera non era pronta: \(n == 1 ? "1 bozza" : "\(n) bozze") da scrivere quando vuoi."
+        "Lucy non era pronta: \(n == 1 ? "1 bozza" : "\(n) bozze") da scrivere quando vuoi."
     }
 
     static func daFinireMemoria(_ n: Int) -> String {
@@ -157,7 +157,7 @@ enum TestiNotte {
     static func titoloMessaggio(nome: String, occasione: String) -> String { "Bozza per \(primoNome(nome)): \(occasione)" }
 
     static func descrizioneMessaggio(perche: String, firma: Bool) -> String {
-        "\(perche). Tono cordiale, scritta da Vera: da rivedere in Messaggi prima di mandarla." + (firma ? "" : " " + senzaFirma)
+        "\(perche). Tono cordiale, scritta da Lucy: da rivedere in Messaggi prima di mandarla." + (firma ? "" : " " + senzaFirma)
     }
 
     static let confermaMessaggio = "Bozza pronta in Messaggi"
@@ -267,7 +267,7 @@ enum TestiNotte {
     static let rigaAttivo = "Lavora di notte"
     static let rigaInizio = "Dalle"
     static let fineFinestra = "alle 6:00"
-    static let rigaBozze = "Bozze con Vera"
+    static let rigaBozze = "Bozze con Lucy"
     static let notaBozze = "al massimo 10, una alla volta"
     static let rigaApri = "Apri le carte al mattino"
     static let rigaNotifica = "Notifica sul Mac"

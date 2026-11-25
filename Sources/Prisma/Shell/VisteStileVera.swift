@@ -114,7 +114,7 @@ struct BozzaStileVista: View {
                     }
                     Spacer(minLength: 0)
                     if versione == .tua {
-                        PillolaFaseTre(testo: scheda.conQwen ? TestiStatoVera.inVista(mac: "Nel tuo stile · Vera", altrove: "Nel tuo stile · Qwen") : "Nel tuo stile", colore: Tema.Apple.stileVera)
+                        PillolaFaseTre(testo: scheda.conQwen ? TestiStatoVera.inVista(mac: "Nel tuo stile · Lucy", altrove: "Nel tuo stile · Qwen") : "Nel tuo stile", colore: Tema.Apple.stileVera)
                     } else {
                         PillolaFaseTre(testo: "Generica", colore: F.neutro)
                     }
@@ -144,9 +144,9 @@ struct BozzaStileVista: View {
                     Button("Usa questa bozza") { stato.proponiBozzaStile(scheda, chiave: chiave) }
                         .buttonStyle(.applePrimario).fixedSize()
                         .disabled(scheda.grave || c == nil || stato.solaLettura || versione == .generica)
-                        .help(scheda.grave ? "Prima sistema le regole segnate in rosso: Vera non propone un testo fuori dal tuo stile"
+                        .help(scheda.grave ? "Prima sistema le regole segnate in rosso: Lucy non propone un testo fuori dal tuo stile"
                                            : "La bozza va in Messaggi dopo «Conferma»: la apri e la spedisci tu")
-                    Text("Vera non invia mai senza il tuo via.").carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
+                    Text("Lucy non invia mai senza il tuo via.").carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                 }
             }
             .padding(F.paddingResoconto)
@@ -213,7 +213,7 @@ struct GruppoStileVeraImpostazioni: View {
             if let esempio {
                 BozzaStileVista(scheda: esempio)
             }
-            Text("Vera impara solo dai messaggi che apri da Lucy in Mail o in Messaggi: regole, mai i testi. Le regole scritte da te non le cambia più.")
+            Text("Lucy impara solo dai messaggi che apri da Lucy in Mail o in Messaggi: regole, mai i testi. Le regole scritte da te non le cambia più.")
                 .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                 .fixedSize(horizontal: false, vertical: true)
         }

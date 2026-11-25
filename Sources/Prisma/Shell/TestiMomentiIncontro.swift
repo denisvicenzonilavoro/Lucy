@@ -33,7 +33,7 @@ enum TestiMomentiIncontro {
     static let puntiDaToccare = "Punti da toccare"
     static let iniziaIncontro = "Inizia l’incontro"
     static let apriDossier = "Apri il dossier"
-    static let chiediVera = "Chiedi a Vera"
+    static let chiediVera = "Chiedi a Lucy"
     static let preparazioneDaRileggere = "Incontro concluso: la preparazione resta da rileggere."
     static func ultimaVolta(_ data: Date) -> String { "L’ultima volta · \(Formati.giornoMese.string(from: data))" }
     static func daFarePer(_ nome: String) -> String { "Da fare per \(nome)" }

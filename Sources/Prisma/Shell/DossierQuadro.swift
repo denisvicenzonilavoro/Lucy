@@ -40,7 +40,7 @@ enum TestiQuadroDossier {
     static func titolo(_ nome: String) -> String { "Il quadro di \(nome)" }
     static let apriAnalisi = "Apri Analisi 360 ›"
     static let trentaSecondi = "Il cliente in 30 secondi ›"
-    static func aiutoTrentaSecondi(_ nome: String) -> String { "Apre Vera e ti racconta \(nome) a voce in 30 secondi" }
+    static func aiutoTrentaSecondi(_ nome: String) -> String { "Apre Lucy e ti racconta \(nome) a voce in 30 secondi" }
     static func aiutoArea(_ area: String) -> String { "Apri \(area) in Analisi 360" }
     static func daCompletare(_ n: Int) -> String { "\(n) da completare ›" }
     static let datiCompleti = "Dati completi"

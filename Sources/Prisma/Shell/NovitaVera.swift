@@ -30,11 +30,11 @@ enum NovitaVera: String, CaseIterable, Identifiable {
 
         var titolo: String {
             switch self {
-            case .faLeCose: return "Vera che fa le cose"
-            case .conosceIClienti: return "Vera che conosce i tuoi clienti"
-            case .leggeEControlla: return "Vera che legge e controlla"
-            case .scriveComeTe: return "Vera che scrive come te"
-            case .piuIntelligente: return "Vera più intelligente"
+            case .faLeCose: return "Lucy che fa le cose"
+            case .conosceIClienti: return "Lucy che conosce i tuoi clienti"
+            case .leggeEControlla: return "Lucy che legge e controlla"
+            case .scriveComeTe: return "Lucy che scrive come te"
+            case .piuIntelligente: return "Lucy più intelligente"
             }
         }
 
@@ -79,7 +79,7 @@ enum NovitaVera: String, CaseIterable, Identifiable {
         case .maiACaso: return "Mai a caso"
         case .ragionaAPassi: return "Ragiona a passi"
         case .impara: return "Impara dalle correzioni"
-        case .suMisura: return "Vera su misura"
+        case .suMisura: return "Lucy su misura"
         case .dueVelocita: return "Due velocità"
         case .filoLungo: return "Il filo lungo"
         case .cervelloGrande: return "Il cervello grande"
@@ -90,16 +90,16 @@ enum NovitaVera: String, CaseIterable, Identifiable {
     /// l'esportazione di «Vera su misura» aspetta la tua approvazione).
     var frase: String {
         switch self {
-        case .falloTu: return "Le chiedi una cosa a parole e Vera la fa, in qualsiasi app di Lucy, dopo la tua conferma"
-        case .clientela: return "Domande su tutti i clienti insieme: Vera le traduce in filtri, Lucy fa il calcolo"
+        case .falloTu: return "Le chiedi una cosa a parole e Lucy la fa, in qualsiasi app di Lucy, dopo la tua conferma"
+        case .clientela: return "Domande su tutti i clienti insieme: Lucy le traduce in filtri, Lucy fa il calcolo"
         case .routine: return "Sequenze di lavoro salvate una volta e lanciate con una frase"
         case .agenda: return "Gli orari giusti, gli spostamenti in blocco, due orari da proporre al cliente"
         case .tagliando: return "Ogni notte il controllo dell’archivio: tu approvi le correzioni"
         case .trentaSecondi: return "Prima di una chiamata, la relazione raccontata in cinque punti"
         case .sussurro: return "Aprendo la scheda, le due o tre cose da sapere adesso"
         case .promesse: return "Gli impegni presi con i clienti, ricordati prima che scadano"
-        case .lasciaCadere: return "Trascini un documento: Vera capisce cos’è, di chi è e dove va"
-        case .secondaLettura: return "Prima che esca, Vera rilegge: profilo, numeri, frasi a rischio, allegati"
+        case .lasciaCadere: return "Trascini un documento: Lucy capisce cos’è, di chi è e dove va"
+        case .secondaLettura: return "Prima che esca, Lucy rilegge: profilo, numeri, frasi a rischio, allegati"
         case .differenze: return "Due documenti a confronto, voce per voce"
         case .cosaNonCopre: return "Esclusioni, carenze, franchigie e massimali, ognuno con l’articolo"
         case .codiceInTasca: return "Le norme che hai caricato, con l’articolo citato"
@@ -108,13 +108,13 @@ enum NovitaVera: String, CaseIterable, Identifiable {
         case .resoconto: return "Il verbale dell’incontro dalla nota vocale e dal copilota"
         case .treLivelli: return "La stessa spiegazione per te, per il cliente e in una pagina"
         case .memoria: return "I ricordi su di te e sui clienti: si vedono, si correggono, si cancellano"
-        case .maiACaso: return "Ogni cifra con la sua fonte; se manca, Vera lo dice"
+        case .maiACaso: return "Ogni cifra con la sua fonte; se manca, Lucy lo dice"
         case .ragionaAPassi: return "Un piano visibile, eseguito un passo alla volta con i motori di Lucy"
         case .impara: return "Pollici e correzioni diventano lezioni"
         case .suMisura: return "L’addestramento sui tuoi esempi resi anonimi, solo se supera l’esame"
-        case .dueVelocita: return TestiStatoVera.inVista(mac: "Le cose rapide alle regole di Lucy, il resto a Vera sul Mac (il modello Apple è spento)",
+        case .dueVelocita: return TestiStatoVera.inVista(mac: "Le cose rapide alle regole di Lucy, il resto a Lucy sul Mac (il modello Apple è spento)",
                                                    altrove: "Le cose rapide alle regole di Lucy, il resto a Qwen (il modello Apple è spento)")
-        case .filoLungo: return "Più contesto e un riassunto progressivo: nelle chat lunghe Vera non perde il filo"
+        case .filoLungo: return "Più contesto e un riassunto progressivo: nelle chat lunghe Lucy non perde il filo"
         case .cervelloGrande: return "Un motore esterno predisposto e non collegato: i dati dei clienti restano sul Mac"
         }
     }
@@ -153,7 +153,7 @@ extension StatoShell {
     /// Apre il pannello «Le 25 novità di Vera» sopra la finestra di Vera (chiude le altre pagine di Vera e le Novità).
     func apriNovitaVera() {
         guard !inModoCliente else {
-            return mostraAvviso("In modalità cliente le novità di Vera non si aprono: portano anche a pagine su tutti i clienti.")
+            return mostraAvviso("In modalità cliente le novità di Lucy non si aprono: portano anche a pagine su tutti i clienti.")
         }
         chiudiNovita()
         paginaTagliandoAperta = false
@@ -190,10 +190,10 @@ extension StatoShell {
         case .filoLungo:
             schedaImpostazioni = .vera
             apri(.impostazioni)
-            mostraAvviso("«Il filo lungo»: la finestra di Vera (8.000, 16.000 o 32.000 token) è in Impostazioni › Vera.")
+            mostraAvviso("«Il filo lungo»: la finestra di Lucy (8.000, 16.000 o 32.000 token) è in Impostazioni › Lucy.")
         case .lasciaCadere:
             if !aperta(.vera) { apri(.vera) }
-            mostraAvviso("Trascina un documento su Vera o sulla scrivania: lo leggo sul Mac e ti dico dove va.")
+            mostraAvviso("Trascina un documento su Lucy o sulla scrivania: lo leggo sul Mac e ti dico dove va.")
         default:
             guard let frase = v.esempio(nome: nome) else { return }
             // La frase d'esempio nel campo, nella conversazione giusta: si manda con Invio, niente parte da sola
@@ -245,7 +245,7 @@ struct PannelloNovitaVera: View {
         VStack(alignment: .leading, spacing: N.sopraGriglia) {
             HStack(spacing: N.spazioTestata) {
                 SferaVera(misura: N.sfera, viva: true, pensa: false)
-                Text("Le \(NovitaVera.allCases.count) novità di Vera").carattereApple(N.titolo).foregroundColor(Tema.Apple.Colore.inchiostro)
+                Text("Le \(NovitaVera.allCases.count) novità di Lucy").carattereApple(N.titolo).foregroundColor(Tema.Apple.Colore.inchiostro)
                     .accessibilityAddTraits(.isHeader)
                 Spacer(minLength: 0)
                 Text("Tutte sul Mac · scegli una novità per provarla").carattereApple(N.nota).foregroundColor(Tema.Apple.Colore.inchiostro2)
@@ -320,7 +320,7 @@ struct PulsanteNovitaVera: View {
         if !stato.inModoCliente {
             Button { stato.apriNovitaVera() } label: { Text("✦ Novità") }
                 .buttonStyle(StileVetro())
-                .help("Le 25 novità di Vera")
+                .help("Le 25 novità di Lucy")
         }
     }
 }
@@ -334,19 +334,19 @@ enum ProvaNovitaVera {
         let tutte = NovitaVera.allCases
         controlla(tutte.count == 25 && tutte.map(\.numero) == Array(1...25) && tutte.allSatisfy(\.disponibile)
                   && Set(tutte.map(\.titolo)).count == 25,
-                  "Novità di Vera: 25 voci numerate da 1 a 25, tutte accese")
+                  "Novità di Lucy: 25 voci numerate da 1 a 25, tutte accese")
         controlla(NovitaVera.Gruppo.allCases.map { $0.voci.count } == [5, 4, 5, 3, 8]
                   && NovitaVera.falloTu.numero == 1 && NovitaVera.trentaSecondi.numero == 6 && NovitaVera.lasciaCadere.numero == 9
                   && NovitaVera.mercato.numero == 14 && NovitaVera.resoconto.numero == 16 && NovitaVera.ragionaAPassi.numero == 20
                   && NovitaVera.cervelloGrande.numero == 25,
-                  "Novità di Vera: i cinque gruppi del template, con i numeri del brief")
+                  "Novità di Lucy: i cinque gruppi del template, con i numeri del brief")
         controlla(NovitaVera.dueVelocita.frase.contains("spento") && NovitaVera.cervelloGrande.frase.contains("non collegato"),
-                  "Novità di Vera: le frasi dicono ciò che Lucy fa davvero (modello Apple spento, motore esterno non collegato)")
+                  "Novità di Lucy: le frasi dicono ciò che Lucy fa davvero (modello Apple spento, motore esterno non collegato)")
         for v in tutte {
             let s = StatoShell(persistente: false)
             s.clienteAttivoId = "marco"
             s.apriNovitaVera()
-            guard s.paginaNovitaVeraAperta, s.aperta(.vera) else { return controlla(false, "Novità di Vera: il pannello si apre sopra Vera") }
+            guard s.paginaNovitaVeraAperta, s.aperta(.vera) else { return controlla(false, "Novità di Lucy: il pannello si apre sopra Lucy") }
             let messaggi = s.conversazione("marco").count + s.conversazione(VeraPortafoglio.chiave).count
             s.apriVoceNovitaVera(v)
             let nessunaRisposta = s.conversazione("marco").count + s.conversazione(VeraPortafoglio.chiave).count == messaggi
@@ -363,11 +363,11 @@ enum ProvaNovitaVera {
             case .lasciaCadere: dove = s.aperta(.vera)
             default: dove = s.aperta(.vera) && !s.domandaVera.isEmpty
             }
-            controlla(!s.paginaNovitaVeraAperta && dove && nessunaRisposta, "Novità di Vera: «\(v.titolo)» porta dove si prova (e niente parte da solo)")
+            controlla(!s.paginaNovitaVeraAperta && dove && nessunaRisposta, "Novità di Lucy: «\(v.titolo)» porta dove si prova (e niente parte da solo)")
         }
         let s = StatoShell(persistente: false)
         s.modoCliente = "giulia"
         s.apriNovitaVera()
-        controlla(!s.paginaNovitaVeraAperta, "Novità di Vera: in modalità cliente il pannello non si apre")
+        controlla(!s.paginaNovitaVeraAperta, "Novità di Lucy: in modalità cliente il pannello non si apre")
     }
 }

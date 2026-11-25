@@ -120,17 +120,17 @@ enum ProvaTrovaPaginaVera {
                      "Il riscatto della polizza di Marco"]
         controlla(condizioni.allSatisfy { TrovaPaginaVera.proponeBiblioteca($0, clienti: noti) }
                     && !altre.contains { TrovaPaginaVera.proponeBiblioteca($0, clienti: noti) },
-                  "Biblioteca: Vera propone «Cerca nella Biblioteca» solo per le domande su condizioni o normativa")
+                  "Biblioteca: Lucy propone «Cerca nella Biblioteca» solo per le domande su condizioni o normativa")
         #if os(macOS)
         let domanda = MessaggioVera(autore: .utente, testo: "Il riscatto nei primi anni ha penali?")
         let risposta = MessaggioVera(autore: .vera, testo: "Risposta di prova.")
         controlla(s.domandaPerBiblioteca(in: [domanda, risposta]) == domanda.testo
                     && s.domandaPerBiblioteca(in: [domanda]) == nil
                     && s.domandaPerBiblioteca(in: [MessaggioVera(autore: .utente, testo: "Quanto ha Marco?"), risposta]) == nil,
-                  "Biblioteca: la proposta va sotto l'ultima risposta di Vera, con la domanda dell'utente")
+                  "Biblioteca: la proposta va sotto l'ultima risposta di Lucy, con la domanda dell'utente")
         let vuota = StatoShell(persistente: false)
         controlla(vuota.domandaPerBiblioteca(in: [domanda, risposta]) == nil,
-                  "Biblioteca: senza documenti nella Biblioteca Vera non propone di cercarci")
+                  "Biblioteca: senza documenti nella Biblioteca Lucy non propone di cercarci")
         s.cercaNellaBiblioteca(domanda.testo, subito: true)
         controlla(s.appAttiva == .biblioteca && s.trovaPagina.risultato?.passo?.pagina == 14,
                   "Biblioteca: «Cerca nella Biblioteca» apre la Biblioteca con la stessa ricerca (pagina 14)")
@@ -224,7 +224,7 @@ enum ProvaTrovaPaginaVera {
                   "Biblioteca: «Copia la citazione» con documento, edizione, pagina, articolo e frase")
         s.senzaVeraBiblioteca()
         controlla(s.trovaPagina.risultato?.stato == .senzaVera && s.trovaPagina.risultato?.passiEvidenziati.isEmpty == false,
-                  "Biblioteca: senza Vera resta la pagina con i passi trovati evidenziati")
+                  "Biblioteca: senza Lucy resta la pagina con i passi trovati evidenziati")
         s.chiediBiblioteca("Quanto si deduce del fondo pensione?", subito: true)
         if let p = s.trovaPagina.risultato?.passo {
             s.applicaEsitoBiblioteca(.risposta(passo: p, frase: "sono deducibili dal reddito complessivo fino a 5.164,57 euro l'anno", testo: "Fino a 5.164,57 euro l'anno."))
@@ -237,7 +237,7 @@ enum ProvaTrovaPaginaVera {
         s.chiediBiblioteca("Riscatto del fondo pensione online?", subito: true)
         s.applicaEsitoBiblioteca(.nonTrovata)
         controlla(s.trovaPagina.risultato?.stato == .nonTrovata && (1...3).contains(s.trovaPagina.risultato?.vicini.count ?? 0),
-                  "Biblioteca: quando Vera dice che i passi non rispondono, le pagine più vicine (al più tre)")
+                  "Biblioteca: quando Lucy dice che i passi non rispondono, le pagine più vicine (al più tre)")
         // Un documento letto: genere e canale proposti, da confermare; diventato normativa ha gli articoli
         let pagine = ["CONDIZIONI DI ASSICURAZIONE\nAlleanza · prodotto di prova\nEdizione 03/2026", "Art. 1 – Oggetto\n\nTesto di prova dell'articolo uno, abbastanza lungo da cercare."]
         if let d = s.aggiungiLettoInBiblioteca(titolo: "Prova", file: "prova.pdf", pagine: pagine, pagineOCR: 0, dimensione: 10) {

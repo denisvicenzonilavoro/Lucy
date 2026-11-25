@@ -108,7 +108,7 @@ enum ProvaCalcoliCapsule {
         let fonte = FonteVera(oggi: oggi, nomeUtente: "Prova", cliente: cliente, posizioni: [], appuntamenti: [], attivita: [],
                               analisi: Analisi360(), analisiSalvata: false, simulazioni: [])
         let campi = Mirror(reflecting: fonte).children.compactMap { $0.label?.lowercased() }
-        verifica.vero("Capsula: la fonte di Vera non ha campi di capsule", !campi.isEmpty && !campi.contains { $0.contains("capsul") })
+        verifica.vero("Capsula: la fonte di Lucy non ha campi di capsule", !campi.isEmpty && !campi.contains { $0.contains("capsul") })
 
         // Le capsule dei dati di prova: dichiarate, aperte con la chiave di prova, Sofia pronta, stesse a ogni lettura
         let demo = DatiPrisma.demo()

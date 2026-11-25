@@ -40,7 +40,7 @@ private struct RilascioDocumentiVera: ViewModifier {
                             .strokeBorder(F.cornice, style: StrokeStyle(lineWidth: F.spessoreCornice, dash: F.trattino))
                         VStack(spacing: 6) {
                             Text("Lascia cadere qui").carattereApple(F.testoCornice).foregroundColor(Tema.Apple.Colore.inchiostro)
-                            Text("PDF, foto o scansione: Vera lo legge sul Mac, riconosce il cliente e ti chiede conferma.")
+                            Text("PDF, foto o scansione: Lucy lo legge sul Mac, riconosce il cliente e ti chiede conferma.")
                                 .carattereApple(F.notaCornice).foregroundColor(Tema.Apple.Colore.inchiostro2)
                         }
                     }
@@ -92,12 +92,12 @@ struct MemoriaVeraVista: View {
         let _ = ContaCorpi.segna()
         VStack(alignment: .leading, spacing: 14) {
             HStack {
-                Text("La memoria di Vera").carattereApple(F.titoloPagina)
+                Text("La memoria di Lucy").carattereApple(F.titoloPagina)
                 Spacer()
                 Button("Fine") { memoria.aperta = false }.buttonStyle(.applePrimario)
             }
             HStack(spacing: 12) {
-                Toggle("Vera ricorda", isOn: Bindable(stato.dati).impostazioni.vera.memoriaAttiva).toggleStyle(.switch)
+                Toggle("Lucy ricorda", isOn: Bindable(stato.dati).impostazioni.vera.memoriaAttiva).toggleStyle(.switch)
                 Text("\(memoria.ricordi.count) ricordi · sul Mac, cifrati").carattereApple(F.fonteRicordo).foregroundColor(F.testoPillola)
                 Spacer()
                 pillola("Non ricorda mai: numeri di documenti, conti, password")
@@ -121,7 +121,7 @@ struct MemoriaVeraVista: View {
             }
             Spacer()
         }
-        .alert("Cancellare la memoria di Vera?", isPresented: $confermaRicomincia) {
+        .alert("Cancellare la memoria di Lucy?", isPresented: $confermaRicomincia) {
             Button("Annulla", role: .cancel) {}
             Button("Ricomincia da capo", role: .destructive) { memoria.ricomincia() }
         } message: {
@@ -135,7 +135,7 @@ struct MemoriaVeraVista: View {
             colonna("Sui clienti", memoria.ricordi.filter { $0.clienteId != nil })
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text("Le lezioni di Vera").carattereApple(F.titoloColonna)
+                    Text("Le lezioni di Lucy").carattereApple(F.titoloColonna)
                     pillola("\(memoria.lezioni.count)")
                     Spacer()
                     Toggle("", isOn: Bindable(stato.dati).impostazioni.vera.imparaDalleCorrezioni).toggleStyle(.switch).labelsHidden()
@@ -145,7 +145,7 @@ struct MemoriaVeraVista: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 8) {
                         if memoria.lezioni.isEmpty {
-                            Text("Nessuna lezione: con 👎 sotto una risposta scrivi cosa non va, e Vera lo rilegge prima di rispondere.")
+                            Text("Nessuna lezione: con 👎 sotto una risposta scrivi cosa non va, e Lucy lo rilegge prima di rispondere.")
                                 .carattereApple(F.fonteRicordo).foregroundColor(F.testoPillola)
                         }
                         ForEach(memoria.lezioni.reversed()) { l in
@@ -174,7 +174,7 @@ struct MemoriaVeraVista: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 8) {
                     if ricordi.isEmpty {
-                        Text("Ancora niente: di' a Vera «ricorda che…» oppure conferma i ricordi che ti propone.")
+                        Text("Ancora niente: di' a Lucy «ricorda che…» oppure conferma i ricordi che ti propone.")
                             .carattereApple(F.fonteRicordo).foregroundColor(F.testoPillola)
                     }
                     ForEach(ricordi.reversed()) { r in voce(r) }
@@ -203,7 +203,7 @@ struct MemoriaVeraVista: View {
             }
             Spacer(minLength: 0)
             tasto("pencil") { testo = r.testo; inModifica = r.id }
-            tasto("xmark") { memoria.dimentica(r.id); stato.mostraAvviso("Dimenticato: Vera non lo userà più") }
+            tasto("xmark") { memoria.dimentica(r.id); stato.mostraAvviso("Dimenticato: Lucy non lo userà più") }
         }
         .padding(F.paddingRicordo)
         .superficieApple(Tema.Apple.Vera.SchedaCalcoli.superficie, raggio: Tema.Apple.Raggio.tile)
@@ -333,7 +333,7 @@ struct FiloConversazioneVista: View {
                 }
                 .frame(height: F.altezzaBarraFilo)
                 if let r = f.riassunto {
-                    Text("Riassunto che Vera tiene da parte (\(f.uscite) battute): \(r.replacingOccurrences(of: "\n", with: " · "))")
+                    Text("Riassunto che Lucy tiene da parte (\(f.uscite) battute): \(r.replacingOccurrences(of: "\n", with: " · "))")
                         .carattereApple(F.testoFilo).foregroundColor(F.coloreFonte)
                         .lineLimit(F.righeRiassunto)
                         .help(r)
@@ -416,13 +416,13 @@ struct TrentaSecondiVista: View {
             if inCorso {
                 Button { stato.fermaLetturaTrenta() } label: { Label("Ferma", systemImage: "stop.fill") }
                     .buttonStyle(.apple).fixedSize()
-                    .help("Vera smette di raccontare")
+                    .help("Lucy smette di raccontare")
             } else if let messaggio {
                 Button { stato.ascoltaTrentaSecondi(messaggio: messaggio) } label: {
                     Label(l == nil ? "Ascolta" : "Ascolta di nuovo", systemImage: "play.fill")
                 }
                 .buttonStyle(.apple).fixedSize()
-                .help("Vera te lo racconta a voce in 30 secondi")
+                .help("Lucy te lo racconta a voce in 30 secondi")
             }
         }
     }
@@ -460,7 +460,7 @@ struct AnelloTrentaSecondi: View {
             withAnimation(Tema.Apple.Moto.uscita(F.fineAnello)) { resto = 0 }
         }
         .accessibilityElement()
-        .accessibilityLabel(Text(inCorso ? "Vera sta raccontando" : "30 secondi"))
+        .accessibilityLabel(Text(inCorso ? "Lucy sta raccontando" : "30 secondi"))
     }
 
     private func parti() {
@@ -514,7 +514,7 @@ struct TrentaSecondiDossierVista: View {
                 Button { stato.trentaSecondiDallaScheda(cliente.id) } label: { Label("Raccontami \(primo)", systemImage: "play.fill") }
                     .buttonStyle(.apple).fixedSize()
                     .disabled(stato.veraInCorso)
-                    .help("Apre Vera e ti racconta \(primo) a voce in 30 secondi")
+                    .help("Apre Lucy e ti racconta \(primo) a voce in 30 secondi")
             }
             .padding(P.paddingLaterali)
             .frame(maxWidth: .infinity, alignment: .leading)

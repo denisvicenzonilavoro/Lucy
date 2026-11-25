@@ -185,7 +185,7 @@ extension StatoShell {
         let no = { (m: String) in EsitoAzioneVera(fatta: false, messaggio: m) }
         guard !solaLettura else { return no("Lucy è in sola lettura: non ho salvato niente.") }
         guard let id = a.argomenti["spiegazione"], let s = trelivelliSpiegazione(id), let c = cliente(s.clienteId) else {
-            return no("La spiegazione non è più in Lucy: chiedila di nuovo a Vera.")
+            return no("La spiegazione non è più in Lucy: chiedila di nuovo a Lucy.")
         }
         if inModoCliente, c.id != clienteAttivoId { return no("In modalità cliente resto sul dossier di \(clienteAttivo?.nome ?? "questo cliente").") }
         let documento = DocumentoStampabile(TreLivelliVera.contenuto(s))

@@ -44,7 +44,7 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
 
     static func nome(_ modello: String) -> String {
         // «Vera su misura» (fase 5): il modello addestrato sui tuoi esempi
-        if SuMisuraVera.eSuMisura(modello) { return "Vera su misura sul Mac" }
+        if SuMisuraVera.eSuMisura(modello) { return "Lucy su misura sul Mac" }
         let famiglia = modello.split(separator: ":").first.map(String.init) ?? modello
         let lettere = famiglia.prefix { $0.isLetter }
         return lettere.isEmpty ? "Modello sul Mac" : String(lettere.prefix(1)).uppercased() + String(lettere.dropFirst()) + " sul Mac"

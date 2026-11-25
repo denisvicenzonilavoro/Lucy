@@ -17,7 +17,7 @@ enum ProvaMotoreDaSistemare {
         let template = MotoreDaSistemare.calcola(t)
         verifica.vero("Da sistemare: il caso del template ha tre cose in ordine",
                       ids(template) == ["backup-mai", "promemoria-spenti", "fatture-mancanti"])
-        verifica.vero("Da sistemare: «Vera è pronta» in «A posto», niente backup né promemoria",
+        verifica.vero("Da sistemare: «Lucy è pronta» in «A posto», niente backup né promemoria",
                       idsOk(template) == ["vera-pronta"])
         verifica.vero("Da sistemare: etichette della colonna per pagina",
                       template.etichetta(per: .archivio)?.etichettaColonna == "mai fatto"
@@ -41,7 +41,7 @@ enum ProvaMotoreDaSistemare {
         let tutto = MotoreDaSistemare.calcola(ok)
         verifica.vero("Da sistemare: a zero niente da sistemare", tutto.conteggio == 0)
         verifica.vero("Da sistemare: a zero «Non c’è niente da sistemare.»", TestiDaSistemare.conteggio(0) == TestiDaSistemare.niente)
-        verifica.vero("Da sistemare: «A posto» con backup, Vera, promemoria e fatture",
+        verifica.vero("Da sistemare: «A posto» con backup, Lucy, promemoria e fatture",
                       Set(idsOk(tutto)) == ["backup-fatto", "vera-pronta", "promemoria-accesi", "fatture-complete"])
         verifica.vero("Da sistemare: il backup non protetto non si dice protetto",
                       tutto.aPosto.first { $0.id == "backup-fatto" }?.spiegazione.contains("password") == false)
@@ -61,13 +61,13 @@ enum ProvaMotoreDaSistemare {
         // Vera: solo dopo la prima verifica
         var nonVerificata = FattiDaSistemare()
         nonVerificata.veraMotivo = StatoShell.veraNonVerificata
-        verifica.vero("Da sistemare: Vera non ancora verificata non conta",
+        verifica.vero("Da sistemare: Lucy non ancora verificata non conta",
                       !ids(MotoreDaSistemare.calcola(nonVerificata)).contains("vera-non-pronta"))
         var nonPronta = nonVerificata
         nonPronta.veraVerificata = true
         nonPronta.veraMotivo = "Ollama non è aperto."
         let np = MotoreDaSistemare.calcola(nonPronta)
-        verifica.vero("Da sistemare: Vera non pronta dopo la verifica, con il motivo",
+        verifica.vero("Da sistemare: Lucy non pronta dopo la verifica, con il motivo",
                       np.etichetta(per: .vera)?.etichettaColonna == "non pronta"
                       && np.etichetta(per: .vera)?.spiegazione == "Ollama non è aperto.")
 

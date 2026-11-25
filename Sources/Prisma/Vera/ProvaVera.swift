@@ -16,8 +16,8 @@ enum ProvaVera {
         let istruzioni = IstruzioniVera.testo("chat")
         controlla(istruzioni != nil, "Istruzioni della chat nel pacchetto (\(IstruzioniVera.cartella)/chat.md)")
         controlla((istruzioni ?? "").contains("Alleanza"), "Le istruzioni distinguono i canali")
-        controlla((istruzioni ?? "").contains("Ti chiami Vera") && (istruzioni ?? "").contains("ancora Ruby o Eve") && IstruzioniVera.conversazione.contains("Ti chiami Vera"),
-                  "Le istruzioni chiamano l'assistente Vera (e lei si riconosce anche come Ruby ed Eve, i nomi di prima)")
+        controlla((istruzioni ?? "").contains("Ti chiami Lucy") && (istruzioni ?? "").contains("ancora Ruby o Eve") && IstruzioniVera.conversazione.contains("Ti chiami Lucy"),
+                  "Le istruzioni chiamano l'assistente Lucy (e lei si riconosce anche come Ruby ed Eve, i nomi di prima)")
 
         let stato = StatoShell(persistente: false)
         for c in stato.clienti {
@@ -42,7 +42,7 @@ enum ProvaVera {
             controlla(r.titolo == "Andamento di \(p.nome)", "Domanda su «\(p.nome)»: risponde con l'andamento (\(r.titolo ?? "nessun titolo"))")
             controlla(ContestoVera.riga(p).contains("andamento dal"), "La scheda per il modello riporta l'andamento di \(p.nome)")
             let resoconto = MotoriVera.sintesi.componi(RichiestaVera(domanda: "", spunto: .resoconto, fonte: f, storia: []))
-            controlla(resoconto.testo.contains("rispetto all'atteso"), "Il resoconto di Vera confronta l'andamento con l'atteso")
+            controlla(resoconto.testo.contains("rispetto all'atteso"), "Il resoconto di Lucy confronta l'andamento con l'atteso")
             // Un valore passato aggiunto a mano entra nello storico; toglierlo lo fa sparire
             let prima = p.storicoValori.count
             let quando = Calendar.current.date(byAdding: .month, value: -30, to: Date()) ?? Date()
@@ -232,7 +232,7 @@ enum ProvaVera {
             let su = MotoreSuccessione.calcola(cliente: f.cliente, posizioni: f.posizioni, oggi: f.oggi)
             let r = MotoriVera.sintesi.componi(RichiestaVera(domanda: "", spunto: .successione, fonte: f, storia: []))
             controlla(r.titolo == "Il passaggio generazionale di Marco Bianchi" && MotoreSuccessione.sintesi(su).allSatisfy { r.testo.contains($0) },
-                      "Passaggio generazionale di Marco: Vera riporta le cifre del motore")
+                      "Passaggio generazionale di Marco: Lucy riporta le cifre del motore")
             controlla(ContestoVera.scheda(f).contains("SUCCESSIONE (stima di Lucy"), "La scheda per il modello riporta la successione")
             controlla(ContestoVera.scheda(f).contains("PATRIMONIO NEL TEMPO"), "La scheda per il modello riporta il patrimonio nel tempo")
         }
@@ -241,7 +241,7 @@ enum ProvaVera {
             let a = MotoreCosti.calcola(f.posizioni, prodotti: f.prodotti, cliente: f.cliente.id)
             let r = MotoriVera.sintesi.componi(RichiestaVera(domanda: "", spunto: .costi, fonte: f, storia: []))
             controlla(!a.voci.isEmpty && r.titolo == "I costi di Marco Bianchi" && MotoreCosti.sintesi(a).allSatisfy { r.testo.contains($0) },
-                      "Costi di Marco: Vera riporta le cifre del motore")
+                      "Costi di Marco: Lucy riporta le cifre del motore")
             controlla(ContestoVera.scheda(f).contains("COSTI (calcolati da Lucy)"), "La scheda per il modello riporta i costi")
         }
         // Prova di resistenza: le stesse cifre del pannello in Posizioni
@@ -249,13 +249,13 @@ enum ProvaVera {
             let prova = MotoreResistenza.calcola(f.posizioni, profilo: f.cliente.profilo)
             let r = MotoriVera.sintesi.componi(RichiestaVera(domanda: "", spunto: .resistenza, fonte: f, storia: []))
             controlla(!prova.vuota && r.titolo == "Prova di resistenza di Marco Bianchi" && MotoreResistenza.sintesi(prova).allSatisfy { r.testo.contains($0) },
-                      "Prova di resistenza di Marco: Vera riporta le cifre del motore")
+                      "Prova di resistenza di Marco: Lucy riporta le cifre del motore")
             controlla(ContestoVera.scheda(f).contains("PROVA DI RESISTENZA"), "La scheda per il modello riporta la prova di resistenza")
         }
         // Ogni documento di analisi ha il suo spunto
         for scelta in [SceltaProspetto.resoconto(report: false), .previdenza(report: true), .protezione(report: false),
                        .liquidita(report: false), .checkUp(report: true), .resistenza(report: true), .costi(report: true), .successione(report: true), .patrimonio(report: true), .obiettivo("", report: false), .sostituzione("", "", report: false)] {
-            controlla(scelta.spuntoVera != nil, "Spunto di Vera per «\(scelta.tipo.nome)»")
+            controlla(scelta.spuntoVera != nil, "Spunto di Lucy per «\(scelta.tipo.nome)»")
         }
         // Le bozze passate al modello restano nello spazio previsto (avviso, non errore: si tagliano)
         for c in stato.clienti {
@@ -271,7 +271,7 @@ enum ProvaVera {
         stato.prospetto = .previdenza(report: false)
         stato.chiediVeraDelDocumento(.previdenza(report: false))
         controlla(stato.conversazione("laura").last?.titolo == "La pensione di Laura Moretti",
-                  "Chiedi a Vera dal piano previdenziale: risposta salvata")
+                  "Chiedi a Lucy dal piano previdenziale: risposta salvata")
 
         // Il commento dei report: bozza per ogni documento di analisi e cliente, nei limiti, con le cifre del report
         controlla(IstruzioniVera.testo("commento") != nil, "Istruzioni del commento nel pacchetto (\(IstruzioniVera.cartella)/commento.md)")
@@ -325,7 +325,7 @@ enum ProvaVera {
             stato.rispostePreparate = true
             let prima = stato.conversazione("marco").count
             stato.spiegaDocumentoConVera(polizza.id)
-            controlla(stato.conversazione("marco").count == prima + 2 && stato.clienteAttivoId == "marco", "«Chiedi a Vera» da Documenti: domanda e spiegazione salvate")
+            controlla(stato.conversazione("marco").count == prima + 2 && stato.clienteAttivoId == "marco", "«Chiedi a Lucy» da Documenti: domanda e spiegazione salvate")
         } else {
             controlla(false, "Marco ha una polizza di prova")
         }
@@ -369,7 +369,7 @@ enum ProvaVera {
                           && nuova?.capitaleAssicurato == p.capitale,
                           "Proposta «\(p.titolo)» → una sola bozza in Posizioni, con area e cifre")
                 if let fd = stato.fonteVera("giulia") {
-                    controlla(!MotoreSintesi.calcolaProposte(fd).contains { $0.id == p.id }, "Dopo la bozza, Vera non ripropone «\(p.titolo)»")
+                    controlla(!MotoreSintesi.calcolaProposte(fd).contains { $0.id == p.id }, "Dopo la bozza, Lucy non ripropone «\(p.titolo)»")
                 }
             } else {
                 controlla(false, "Il messaggio delle proposte di Giulia ha le azioni")
@@ -436,7 +436,7 @@ enum ProvaVera {
         controlla(AppPrisma.delDock == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio, .messaggi, .pratiche,
                                         .presentazioni, .sala, .biblioteca, .mercato, .studio, .vera, .impostazioni]
                   && AppPrisma.altreApp == altreAppAttese,
-                  "Dock di «Luce»: Clienti, Posizioni, Analisi 360, Incontri, Agenda, Territorio, Messaggi, Pratiche, Prospetti, Sala, Biblioteca, Mercato, Studio, Vera, Impostazioni; Prodotti, Note e Ricerca fuori dal dock")
+                  "Dock di «Luce»: Clienti, Posizioni, Analisi 360, Incontri, Agenda, Territorio, Messaggi, Pratiche, Prospetti, Sala, Biblioteca, Mercato, Studio, Lucy, Impostazioni; Prodotti, Note e Ricerca fuori dal dock")
         controlla(Array(AppPrisma.delDock.prefix(9)) == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio,
                                                          .messaggi, .pratiche, .presentazioni],
                   "iPhone e iPad: il dock resta nell'ordine di sempre, da Clienti a Prospetti nelle prime nove")
@@ -448,7 +448,7 @@ enum ProvaVera {
         controlla(AppPrisma.dockMac == [.clienti, .posizioni, .analisi360, .agenda, .incontri, .presentazioni, .sala, .pratiche,
                                         .messaggi, .territorio, .mercato, .biblioteca, .studio, .vera, .impostazioni]
                   && AppPrisma.gruppiDockMac.map(\.count) == [3, 5, 2, 3, 2],
-                  "Gruppi del dock: Clienti, Posizioni, Analisi 360 | Agenda, Incontri, Prospetti, Sala, Pratiche | Messaggi, Territorio | Mercato, Biblioteca, Studio | Vera, Impostazioni")
+                  "Gruppi del dock: Clienti, Posizioni, Analisi 360 | Agenda, Incontri, Prospetti, Sala, Pratiche | Messaggi, Territorio | Mercato, Biblioteca, Studio | Lucy, Impostazioni")
         controlla(Array(AppPrisma.dockMac.prefix(9)) == [.clienti, .posizioni, .analisi360, .agenda, .incontri, .presentazioni,
                                                          .sala, .pratiche, .messaggi],
                   "Scorciatoie ⌥1…⌥9 del Mac: le prime nove del dock in gruppi, da Clienti a Messaggi (Territorio senza scorciatoia)")
@@ -478,7 +478,7 @@ enum ProvaVera {
             let okClienti: Bool = abs(clienti - (meta + primo) - passoFilo) < 0.01
             let okLarghezza: Bool = abs(tutti.larghezza - attesa) < 0.01
             controlla(okImp && okVera && okStudio && okClienti && okLarghezza,
-                      "Dock in gruppi: Impostazioni è l'ultima icona e fra Studio e Vera, come fra la Scrivania e Clienti, c'è un filo")
+                      "Dock in gruppi: Impostazioni è l'ultima icona e fra Studio e Lucy, come fra la Scrivania e Clienti, c'è un filo")
         } else {
             controlla(false, "Dock in gruppi: i centri delle icone ci sono tutti")
         }
@@ -496,7 +496,7 @@ enum ProvaVera {
             let okMercato: Bool = abs(mercato - sala - passoFilo) < 0.01
             let senzaRiservate: Bool = senzaImpostazioni && senzaMessaggi && senzaTerritorio
             controlla(quattroGruppi && senzaRiservate && okVeraUltima && okStudio && okMercato,
-                      "Modalità cliente: il gruppo «il contatto» sparisce con il suo filo (niente filo doppio), Vera è l'ultima icona")
+                      "Modalità cliente: il gruppo «il contatto» sparisce con il suo filo (niente filo doppio), Lucy è l'ultima icona")
         } else {
             controlla(false, "Modalità cliente: i centri delle icone consentite ci sono")
         }
@@ -722,9 +722,9 @@ enum ProvaVera {
         if let incontro = SpazioLavoro.predefiniti.first {
             apriSpazio(incontro)
             #if os(macOS)
-            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .incontri], "Spazio «\(incontro.nome)»: Incontri in primo piano, Vera accanto")
+            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .incontri], "Spazio «\(incontro.nome)»: Incontri in primo piano, Lucy accanto")
             #else
-            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .clienti], "Spazio «\(incontro.nome)»: Vera e Clienti in primo piano")
+            controlla(spazi.finestreVisibili.map(\.app) == [.vera, .clienti], "Spazio «\(incontro.nome)»: Lucy e Clienti in primo piano")
             #endif
             controlla(!sovrapposte(spazi) && dentro(spazi), "Spazio «\(incontro.nome)»: finestre affiancate, dentro lo schermo")
             controlla(spazi.finestreVisibili.allSatisfy { spazi.cornice(di: $0).width >= Misure.Finestra.minima.width && spazi.cornice(di: $0).height >= Misure.Finestra.minima.height },
@@ -755,14 +755,14 @@ enum ProvaVera {
         spazi.affianca(.vera)
         if let vera = spazi.finestreVisibili.first(where: { $0.app == .vera }), let agenda = spazi.finestreVisibili.first(where: { $0.app == .agenda }) {
             controlla(spazi.cornice(di: vera).maxX <= spazi.cornice(di: agenda).minX + 1 && spazi.appAttiva == .vera && !sovrapposte(spazi),
-                      "◫ affianca Vera (a sinistra) e Agenda (a destra)")
+                      "◫ affianca Lucy (a sinistra) e Agenda (a destra)")
         }
 
         #if os(macOS)
         // Migliorie d'uso 67: il menu della pillola dell'app, con le app aperte tranne quella davanti e gli spazi pronti
         let menu = StatoShell(persistente: false)
         controlla(SpazioLavoro.predefiniti.map(\.nome) == ["Preparo un incontro", "Faccio un’analisi", "Comincio la giornata"]
-                  && SpazioLavoro.predefiniti.map(TestiMenuApp.appDelloSpazio) == ["Incontri + Vera", "Analisi 360 + Posizioni", "Agenda + Messaggi"],
+                  && SpazioLavoro.predefiniti.map(TestiMenuApp.appDelloSpazio) == ["Incontri + Lucy", "Analisi 360 + Posizioni", "Agenda + Messaggi"],
                   "Menu delle app: i tre spazi pronti con i nomi del template e le loro app")
         controlla(menu.appRecentiMenu.isEmpty, "Menu delle app: dalla scrivania nessun’altra app aperta")
         menu.scegliCliente("giulia")
@@ -994,7 +994,7 @@ enum ProvaVera {
         // Vera legge il taccuino: le note del cliente nella scheda e nella traccia dell'incontro
         let conNote = StatoShell(persistente: false)
         if let f = conNote.fonteVera("giulia") {
-            controlla(ContestoVera.scheda(f).contains("La casa è un nuovo inizio"), "Scheda di Vera: le note del taccuino")
+            controlla(ContestoVera.scheda(f).contains("La casa è un nuovo inizio"), "Scheda di Lucy: le note del taccuino")
             let traccia = MotoriVera.sintesi.componi(RichiestaVera(domanda: "", spunto: .incontro, fonte: f, storia: []))
             controlla(traccia.testo.contains("Dal tuo taccuino") && traccia.testo.contains("La casa è un nuovo inizio"), "Traccia dell'incontro: le note del taccuino")
         }
@@ -1015,7 +1015,7 @@ enum ProvaVera {
         cambio.eliminaCliente("laura")
         controlla(cambio.filtroClienteNote == nil, "Note: eliminato il cliente, il filtro torna a tutti")
         if let f = cambio.fonteVera("giulia") {
-            controlla(ContestoVera.scheda(f).contains("Prossimo passo"), "Scheda di Vera: il testo delle note oltre la prima riga")
+            controlla(ContestoVera.scheda(f).contains("Prossimo passo"), "Scheda di Lucy: il testo delle note oltre la prima riga")
         }
         avvisi.dati.impostazioni.backup.ultimoErrore = "Disco esterno non collegato"
         for k in 0..<12 {
@@ -1030,26 +1030,26 @@ enum ProvaVera {
         pf.rispostePreparate = true
         let quadro = VeraPortafoglio.risposta(.quadro, domanda: "", dati: pf.dati.istantanea)
         let calcolato = VeraPortafoglio.portafoglio(pf.dati.istantanea, oggi: Date())
-        controlla(quadro.testo.contains(Formati.euro(calcolato.riepilogo.attivita)), "Vera · portafoglio: il patrimonio seguito come nel Portafoglio")
+        controlla(quadro.testo.contains(Formati.euro(calcolato.riepilogo.attivita)), "Lucy · portafoglio: il patrimonio seguito come nel Portafoglio")
         controlla(SpuntoPortafoglio.da("chi devo chiamare questa settimana?") == .ricontattare && SpuntoPortafoglio.da("cosa scade a dicembre?") == .scadenze
                   && SpuntoPortafoglio.da("Come vanno le PROPOSTE") == .proposte && SpuntoPortafoglio.da("ciao") == .quadro,
-                  "Vera · portafoglio: argomenti delle domande scritte a mano")
+                  "Lucy · portafoglio: argomenti delle domande scritte a mano")
         if let primo = calcolato.scadenze.first {
             let m = Calendar.current.component(.month, from: primo.inizio)
             let r = VeraPortafoglio.risposta(.scadenze, domanda: "cosa scade a \(VeraPortafoglio.mesi[m - 1])?", dati: pf.dati.istantanea)
             let altri = calcolato.scadenze.filter { Calendar.current.component(.month, from: $0.inizio) != m }.flatMap(\.posizioni)
             controlla(primo.posizioni.allSatisfy { r.testo.contains($0.nome) } && altri.allSatisfy { a in !primo.posizioni.contains { $0.nome == a.nome } ? !r.testo.contains(a.nome) : true },
-                      "Vera · portafoglio: le scadenze del mese chiesto, solo quelle")
+                      "Lucy · portafoglio: le scadenze del mese chiesto, solo quelle")
         }
         pf.dati.appuntamenti.removeAll { $0.clienteId == "laura" }
         pf.dati.incontri.removeAll { $0.clienteId == "laura" }
-        controlla(VeraPortafoglio.risposta(.ricontattare, domanda: "", dati: pf.dati.istantanea).testo.contains("Laura Moretti"), "Vera · portafoglio: chi ricontattare")
-        controlla(SpuntoPortafoglio.da("quali revisioni devo fare quest'anno?") == .riesami, "Vera · portafoglio: «revisioni» sono i riesami")
-        controlla(SpuntoPortafoglio.da("chi può ancora dedurre qualcosa?") == .fineAnno, "Vera · portafoglio: «dedurre» è la fine dell'anno")
+        controlla(VeraPortafoglio.risposta(.ricontattare, domanda: "", dati: pf.dati.istantanea).testo.contains("Laura Moretti"), "Lucy · portafoglio: chi ricontattare")
+        controlla(SpuntoPortafoglio.da("quali revisioni devo fare quest'anno?") == .riesami, "Lucy · portafoglio: «revisioni» sono i riesami")
+        controlla(SpuntoPortafoglio.da("chi può ancora dedurre qualcosa?") == .fineAnno, "Lucy · portafoglio: «dedurre» è la fine dell'anno")
         let fine = VeraPortafoglio.risposta(.fineAnno, domanda: "", dati: pf.dati.istantanea)
-        controlla(!(fine.titolo ?? "").isEmpty && !fine.testo.isEmpty, "Vera · portafoglio: spazio deducibile entro fine anno (\(fine.titolo ?? ""))")
+        controlla(!(fine.titolo ?? "").isEmpty && !fine.testo.isEmpty, "Lucy · portafoglio: spazio deducibile entro fine anno (\(fine.titolo ?? ""))")
         let riesami = VeraPortafoglio.risposta(.riesami, domanda: "", dati: pf.dati.istantanea)
-        controlla((riesami.titolo ?? "").hasPrefix("Riesami annuali") || (riesami.titolo ?? "").hasPrefix("Nessun riesame"), "Vera · portafoglio: i riesami da fare (\(riesami.titolo ?? ""))")
+        controlla((riesami.titolo ?? "").hasPrefix("Riesami annuali") || (riesami.titolo ?? "").hasPrefix("Nessun riesame"), "Lucy · portafoglio: i riesami da fare (\(riesami.titolo ?? ""))")
         // Fissare l'appuntamento toglie il cliente dall'elenco
         if let laura = VeraPortafoglio.portafoglio(pf.dati.istantanea, oggi: Date()).daRicontattare.first(where: { $0.id == "laura" }) {
             let a = pf.bozzaRicontatto(laura)
@@ -1063,11 +1063,11 @@ enum ProvaVera {
         let primaGiulia = pf.conversazione("giulia").count
         pf.chiediVeraPortafoglio("Chi devo ricontattare?")
         controlla(pf.conversazione(VeraPortafoglio.chiave).count == 2 && pf.conversazione("giulia").count == primaGiulia,
-                  "Vera · portafoglio: domanda e risposta nella conversazione del portafoglio, non in quella del cliente")
+                  "Lucy · portafoglio: domanda e risposta nella conversazione del portafoglio, non in quella del cliente")
         pf.veraPortafoglio = true
         pf.nuovaConversazione()
-        controlla(pf.conversazione(VeraPortafoglio.chiave).isEmpty, "Vera · portafoglio: nuova conversazione")
-        controlla(VeraPortafoglio.scheda(pf.dati.istantanea).count <= ContestoVera.limite, "Vera · portafoglio: scheda entro il limite del modello")
+        controlla(pf.conversazione(VeraPortafoglio.chiave).isEmpty, "Lucy · portafoglio: nuova conversazione")
+        controlla(VeraPortafoglio.scheda(pf.dati.istantanea).count <= ContestoVera.limite, "Lucy · portafoglio: scheda entro il limite del modello")
 
         // Voce: il testo parlato è pulito e breve, le impostazioni vecchie si leggono, «basta» chiude
         let parlato = TestoParlato.da(titolo: "Check-up di Marco", testo: "• **Oggi**: € 12.000 → in crescita\n1. Protezione · scoperta\n\nAltro", completo: true)
@@ -1077,17 +1077,17 @@ enum ProvaVera {
         controlla(breve.count <= TestoParlato.limite && breve.hasSuffix("."), "Voce: senza «leggi tutto» dice solo l'inizio, a fine frase (\(breve.count) caratteri)")
         controlla(TestoParlato.da(titolo: nil, testo: lungo, completo: true).count > TestoParlato.limite, "Voce: con «leggi tutto» dice tutta la risposta")
         controlla(TestoParlato.da(titolo: "Riepilogo", testo: "Riepilogo del cliente: tutto bene", completo: false) == "Riepilogo del cliente: tutto bene.", "Voce: il titolo non si ripete")
-        let congedi: [Bool] = ["Basta così, grazie", "grazie Vera", "Ok, è tutto.", "Basta con i costi alti: cosa propongo?", "Ciao Vera", "Ciao Eve", "Ciao Ruby", "È vera questa cosa sul fondo?"].map(CongedoVera.e)
-        controlla(congedi == [true, true, true, false, true, true, true, false], "Voce: «basta così» e «Ciao Vera» chiudono la conversazione (anche «Ciao Eve» e «Ciao Ruby»), una domanda no, nemmeno con la parola «vera»")
-        controlla(InterpreteComandi.pulisci("Ehi Vera, apri l'agenda") == "apri l'agenda" && InterpreteComandi.pulisci("Ehi Eve, apri l'agenda") == "apri l'agenda"
+        let congedi: [Bool] = ["Basta così, grazie", "grazie Lucy", "Ok, è tutto.", "Basta con i costi alti: cosa propongo?", "Ciao Lucy", "Ciao Eve", "Ciao Ruby", "È vera questa cosa sul fondo?"].map(CongedoVera.e)
+        controlla(congedi == [true, true, true, false, true, true, true, false], "Voce: «basta così» e «Ciao Lucy» chiudono la conversazione (anche «Ciao Eve» e «Ciao Ruby»), una domanda no, nemmeno con la parola «vera»")
+        controlla(InterpreteComandi.pulisci("Ehi Lucy, apri l'agenda") == "apri l'agenda" && InterpreteComandi.pulisci("Ehi Eve, apri l'agenda") == "apri l'agenda"
                   && InterpreteComandi.pulisci("Ehi Ruby, apri l'agenda") == "apri l'agenda",
-                  "Voce: «Ehi Vera» (e i vecchi «Ehi Ruby» ed «Ehi Eve») non entra nella domanda")
+                  "Voce: «Ehi Lucy» (e i vecchi «Ehi Ruby» ed «Ehi Eve») non entra nella domanda")
         let vecchie = (try? JSONDecoder().decode(ImpostazioniVera.self, from: Data(#"{"motore":"sintesi","conservaConversazioni":false}"#.utf8))) ?? ImpostazioniVera()
         // «motore» (Apple, sintesi…) non esiste più: la chiave si ignora, il resto si legge
         let vecchieOk: Bool = !vecchie.conservaConversazioni
             && vecchie.risposteAVoce == ImpostazioniVera.RisposteAVoce.quandoParli && vecchie.voce == nil
             && vecchie.velocitaVoce == 1.0 && vecchie.conversazioneContinua
-        controlla(vecchieOk, "Voce: le impostazioni di Vera di prima si leggono con i valori predefiniti della voce")
+        controlla(vecchieOk, "Voce: le impostazioni di Lucy di prima si leggono con i valori predefiniti della voce")
         let fuori = (try? JSONDecoder().decode(ImpostazioniVera.self, from: Data(#"{"velocitaVoce":9}"#.utf8))) ?? ImpostazioniVera()
         controlla(fuori.velocitaVoce == 1.4, "Voce: una velocità fuori misura torna nei limiti")
         let voci = VoceVera.vociItaliane()
@@ -1110,14 +1110,14 @@ enum ProvaVera {
         func capisce(_ frase: String, attivo: String? = "giulia") -> ComandoVera? {
             InterpreteComandi.interpreta(frase, clienti: noti, attivo: attivo, oggi: martedi)
         }
-        controlla(capisce("Ok Vera, preparami il report della prova di resistenza per Marco Bianchi") == .documento(.resistenza(report: true), cliente: "marco"),
+        controlla(capisce("Ok Lucy, preparami il report della prova di resistenza per Marco Bianchi") == .documento(.resistenza(report: true), cliente: "marco"),
                   "Comandi: «preparami il report della prova di resistenza per Marco Bianchi»")
         controlla(capisce("mi prepari il prospetto dei costi per favore") == .documento(.costi(report: false), cliente: nil), "Comandi: «mi prepari il prospetto dei costi» (cliente aperto)")
         controlla(capisce("Fammi il fascicolo per l'incontro con Laura") == .documento(.fascicolo, cliente: "laura"), "Comandi: il fascicolo per l'incontro con Laura")
         if case .chiedi? = capisce("preparami un report") {
-            controlla(true, "Comandi: «preparami un report» senza dire quale: Vera chiede")
+            controlla(true, "Comandi: «preparami un report» senza dire quale: Lucy chiede")
         } else {
-            controlla(false, "Comandi: «preparami un report» senza dire quale: Vera chiede")
+            controlla(false, "Comandi: «preparami un report» senza dire quale: Lucy chiede")
         }
         controlla(capisce("Fissa un appuntamento con Giulia giovedì alle 15")
                   == .appuntamento(.init(cliente: "giulia", giorno: dataProva(29), ora: 15, minuti: 0, tipo: .altro, titolo: "")),
@@ -1138,7 +1138,7 @@ enum ProvaVera {
                   "Comandi: «i conti correnti» non è il cliente Andrea Conti")
         for domanda in ["Cosa proporre al cliente?", "Quanto pesano i costi?", "Fammi un riepilogo del cliente", "Prepara il prossimo incontro",
                         "Conviene restare o cambiare?", "Come stanno andando le posizioni di Marco?"] {
-            controlla(capisce(domanda) == nil, "Comandi: «\(domanda)» resta una domanda per Vera")
+            controlla(capisce(domanda) == nil, "Comandi: «\(domanda)» resta una domanda per Lucy")
         }
         let quando = DateItaliane.trova("il 3 novembre alle 10:30", oggi: martedi)
         controlla(quando.data() == dataProva(3, 11, 10, 30), "Date: «il 3 novembre alle 10:30»")
@@ -1153,7 +1153,7 @@ enum ProvaVera {
         let appuntamentiPrima = e.dati.appuntamenti.count
         let chiesto = e.eseguiComandoVera("fissa un incontro con Marco Bianchi", oggi: martedi)
         let domandaQuando = e.conversazione("giulia").last?.testo ?? ""
-        controlla(chiesto && e.appuntamentoInSospeso != nil && domandaQuando.hasPrefix("Per quando"), "Eseguiti: l'incontro senza giorno, Vera chiede per quando")
+        controlla(chiesto && e.appuntamentoInSospeso != nil && domandaQuando.hasPrefix("Per quando"), "Eseguiti: l'incontro senza giorno, Lucy chiede per quando")
         let completato = e.eseguiComandoVera("giovedì alle 11", oggi: martedi)
         // Dal brief di Vera (regola 2): le azioni passano dalla scheda di conferma, e si eseguono solo dopo «Conferma»
         let scheda = e.conversazione("giulia").last
@@ -1183,16 +1183,16 @@ enum ProvaVera {
         if let m = e.conversazione("giulia").last { e.confermaSchedaVera(messaggio: m.id) }
         let notaOk: Bool = annotato && notaInAttesa && e.dati.note.count == notePrima + 1 && (e.dati.note.last?.clienteId ?? "") == "giulia"
         controlla(notaOk, "Eseguiti: la nota va nel taccuino di Giulia, dopo «Conferma»")
-        let preparato = e.eseguiComandoVera("Ok Vera, preparami il report del patrimonio di Marco", oggi: martedi)
+        let preparato = e.eseguiComandoVera("Ok Lucy, preparami il report del patrimonio di Marco", oggi: martedi)
         let reportOk: Bool = preparato && e.prospetto == SceltaProspetto.patrimonio(report: true) && e.clienteAttivoId == "marco"
         controlla(reportOk && e.aperta(.presentazioni), "Eseguiti: il report del patrimonio di Marco aperto in Prospetti e report")
         e.chiediVera("Apri l'agenda")
         controlla(e.aperta(.agenda), "Eseguiti: «apri l'agenda» dalla conversazione")
-        controlla(!e.eseguiComandoVera("Quanto pesano i costi?", oggi: martedi), "Eseguiti: una domanda passa a Vera")
+        controlla(!e.eseguiComandoVera("Quanto pesano i costi?", oggi: martedi), "Eseguiti: una domanda passa a Lucy")
         e.entraModoCliente()
         _ = e.eseguiComandoVera("passa a Sofia", oggi: martedi)
         _ = e.eseguiComandoVera("preparami il report dei costi di Giulia Rossi", oggi: martedi)
-        controlla(e.clienteAttivoId == "marco", "Eseguiti: in modalità cliente Vera resta sul cliente davanti a te")
+        controlla(e.clienteAttivoId == "marco", "Eseguiti: in modalità cliente Lucy resta sul cliente davanti a te")
 
         // Il nucleo della nuova Vera: fornitori, streaming, modalità, contesto, indirizzi solo locali (ProvaNucleoVera.swift)
         ProvaNucleoVera.esegui(controlla)
@@ -1373,7 +1373,7 @@ enum ProvaVera {
         let voce = VoceVera(muta: true)
         var finiti = 0
         voce.finito = { finiti += 1 }
-        voce.di("Ciao, sono Vera.", voce: nil, velocita: 1)
+        voce.di("Ciao, sono Lucy.", voce: nil, velocita: 1)
         voce.speechSynthesizer(AVSpeechSynthesizer(), didCancel: AVSpeechUtterance(string: "vecchia"))
         attendi(0.05)
         controlla(voce.parla && finiti == 0, "Voce: l'annullamento di una frase vecchia non spegne quella nuova")
@@ -1389,14 +1389,14 @@ enum ProvaVera {
         d.rispostePreparate = true
         d.dettaturaAttiva = true
         controlla(d.chiediVera("Fammi un riepilogo del cliente") && !d.dettaturaAttiva, "Dettatura: inviare da tastiera la spegne e la domanda parte")
-        controlla(!d.chiediVera("   "), "Vera: una domanda vuota non parte")
+        controlla(!d.chiediVera("   "), "Lucy: una domanda vuota non parte")
         d.dettaturaAttiva = true
         d.dettaturaNonPartita()
         let titoloNonPartita: String = d.conversazione(d.clienteAttivoId).last?.titolo ?? ""
         controlla(!d.dettaturaAttiva && !d.usaDettatura && titoloNonPartita == "La dettatura del Mac non è partita",
-                  "Dettatura: se non parte, Vera lo scrive subito")
+                  "Dettatura: se non parte, Lucy lo scrive subito")
         d.clienteAttivoId = "giulia"
-        controlla(d.chiediVera("parliamo di Marco Bianchi") && d.clienteAttivoId == "marco", "Vera: un comando che cambia cliente conta come domanda partita")
+        controlla(d.chiediVera("parliamo di Marco Bianchi") && d.clienteAttivoId == "marco", "Lucy: un comando che cambia cliente conta come domanda partita")
         d.ripiegoAscolto = .classico
         d.usaDettatura = true
         d.azzeraRipieghiAscolto()
@@ -1431,10 +1431,10 @@ enum ProvaVera {
         controlla(diagnostica.hasPrefix("Lucy · diagnostica dell'ascolto"), "Voce: la diagnostica dell'ascolto si può copiare")
 
         if errori == 0 {
-            print("OK: Vera verificata")
+            print("OK: Lucy verificata")
             return 0
         }
-        print("ERRORE: \(errori) verifiche di Vera non riuscite")
+        print("ERRORE: \(errori) verifiche di Lucy non riuscite")
         return 1
     }
 
@@ -1472,7 +1472,7 @@ enum ProvaVera {
                 bozzeOk = false
             }
         }
-        controlla(schedeOk && bozzeOk, "Clienti fittizi: Vera ha la scheda di ognuno e le cifre per ogni spunto")
+        controlla(schedeOk && bozzeOk, "Clienti fittizi: Lucy ha la scheda di ognuno e le cifre per ogni spunto")
         s.rimuoviDatiDiProva()
         controlla(s.dati.clienti.isEmpty && s.dati.posizioni.isEmpty, "Clienti fittizi: «Togli i clienti di prova» toglie anche loro")
         return esiti
@@ -1613,9 +1613,9 @@ enum ProvaVera {
                   "Note del dossier: «Metti in evidenza» ne lascia una sola, in cima all'elenco")
         if let fonte = s.fonteVera("marco") {
             controlla(ContestoVera.scheda(fonte).contains("Da ricordare: «Vecchia»: Prima nota"),
-                      "Note del dossier: Vera riceve la nota in evidenza come «Da ricordare»")
+                      "Note del dossier: Lucy riceve la nota in evidenza come «Da ricordare»")
         } else {
-            controlla(false, "Note del dossier: la fonte di Vera per Marco")
+            controlla(false, "Note del dossier: la fonte di Lucy per Marco")
         }
         s.togliEvidenza(cliente: "marco")
         controlla(s.notaInEvidenza(marco)?.daRicordare == true, "Note del dossier: «Tolta dall'evidenza» rimette «Da ricordare»")

@@ -201,7 +201,7 @@ enum FontiVera {
         case let n where n.hasPrefix("bozza"): return ("Bozza di Lucy", resto)
         case let n where n.hasPrefix("calcoli"): return ("Calcoli di Lucy", resto)
         case let n where n.hasPrefix("il filo"): return (origineFilo, resto)
-        case let n where n.hasPrefix("ricordi"): return ("Memoria di Vera", resto)
+        case let n where n.hasPrefix("ricordi"): return ("Memoria di Lucy", resto)
         case let n where n.hasPrefix("dai documenti"): return (origineDocumenti, resto)
         default: return ("Calcoli di Lucy · \(bello)", resto)
         }

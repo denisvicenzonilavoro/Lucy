@@ -293,7 +293,7 @@ enum ProvaTreLivelliVera {
         let a = TreLivelliVera.azioneManda(s, cliente: c)
         controlla(a.strumento == RegistroStrumenti.messaggiPrepara && a.app == .messaggi && a.argomenti["cliente"] == "marco"
                   && a.argomenti["testo"] == s.cliente && a.esito == nil && a.avviso == nil,
-                  "Tre livelli: «Manda a Marco» è una bozza da confermare, con il testo semplice (Vera non invia)")
+                  "Tre livelli: «Manda a Marco» è una bozza da confermare, con il testo semplice (Lucy non invia)")
         var rotta = s
         rotta.cliente += " Ti costerà 7.777 €."
         controlla(TreLivelliVera.azioneManda(rotta, cliente: c).avviso != nil, "Tre livelli: se le cifre non tornano la scheda di conferma avvisa")

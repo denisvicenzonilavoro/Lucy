@@ -47,7 +47,7 @@ struct TimbroTondo: View {
         .scaleEffect(fatto ? 1 : 1.4)
         .rotationEffect(.degrees(k.inclinazione))
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel("Timbro di Vera: \(scritta)")
+        .accessibilityLabel("Timbro di Lucy: \(scritta)")
         .onAppear {
             guard !statoFinale else { return }
             withAnimation(Tema.Apple.Moto.Curva.molla.animazione(k.durata).ritardoPrisma(0.3)) { posato = true }

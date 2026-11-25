@@ -142,7 +142,7 @@ enum ScritturaStileVera {
             return fisso("Riscrittura interrotta: resta il testo di Lucy.")
         } catch {
             let m = (error as? ErroreVera)?.messaggio ?? error.localizedDescription
-            return fisso("Vera non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
+            return fisso("Lucy non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
         }
     }
 
@@ -564,7 +564,7 @@ extension StatoShell {
     func riscriviNelloStile(_ testo: String, clienteId: String?, chiave: String, oggi: Date = Date()) {
         let p = dati.impostazioni.stileVera
         guard !p.vuoto else {
-            rispostaStile("Non ho ancora regole di stile: le imparo dai messaggi che apri da Lucy in Mail o in Messaggi, oppure le scrivi tu in Impostazioni › Vera › Il tuo stile.",
+            rispostaStile("Non ho ancora regole di stile: le imparo dai messaggi che apri da Lucy in Mail o in Messaggi, oppure le scrivi tu in Impostazioni › Lucy › Il tuo stile.",
                           chiave: chiave, scheda: SchedaStileVera(tipo: .profilo))
             return
         }
@@ -575,7 +575,7 @@ extension StatoShell {
             if s.modifiche.isEmpty && !s.conQwen {
                 detto = "Il testo segue già la forma del tuo stile."
             } else {
-                detto = s.conQwen ? TestiStatoVera.inVista(mac: "Ecco il testo come lo scrivi tu: l'ha riscritto Vera con le stesse cifre.",
+                detto = s.conQwen ? TestiStatoVera.inVista(mac: "Ecco il testo come lo scrivi tu: l'ha riscritto Lucy con le stesse cifre.",
                                                   altrove: "Ecco il testo come lo scrivi tu: l'ha riscritto Qwen con le stesse cifre.") :
                     (s.modifiche.count == 1 ? "Ecco il testo come lo scrivi tu: un ritocco." : "Ecco il testo come lo scrivi tu: \(s.modifiche.count) ritocchi.")
             }

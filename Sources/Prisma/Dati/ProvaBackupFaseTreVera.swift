@@ -36,7 +36,7 @@ extension ProvaBackup {
     /// Restituisce il motivo dell'errore (nil = tutto bene).
     static func verificaFaseTreVera(originale: DatiPrisma, estratto: DatiPrisma) throws -> String? {
         guard originale.promesse.count == 2, originale.coperture.count == 1, let k = originale.incontri.firstIndex(where: { $0.resoconto != nil }) else {
-            return "l'archivio di prova non ha i dati della fase 3 di Vera"
+            return "l'archivio di prova non ha i dati della fase 3 di Lucy"
         }
         guard estratto.promesse == originale.promesse, estratto.confrontiDocumenti == originale.confrontiDocumenti,
               estratto.coperture == originale.coperture, estratto.incontri[k].resoconto == originale.incontri[k].resoconto else {
@@ -52,7 +52,7 @@ extension ProvaBackup {
         let senza = try Archivio.decodifica(JSONSerialization.data(withJSONObject: radice))
         guard senza.promesse.isEmpty, senza.confrontiDocumenti.isEmpty, senza.coperture.isEmpty, senza.incontri.allSatisfy({ $0.resoconto == nil }),
               senza.incontri.count == originale.incontri.count, senza.clienti.count == originale.clienti.count else {
-            return "un archivio senza i dati della fase 3 di Vera non si apre con le liste vuote"
+            return "un archivio senza i dati della fase 3 di Lucy non si apre con le liste vuote"
         }
         guard let buona = (try JSONSerialization.jsonObject(with: Archivio.codificatore.encode([originale.promesse[0]])) as? [[String: Any]])?.first else {
             return "promessa di prova non codificata"

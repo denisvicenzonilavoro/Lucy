@@ -44,7 +44,7 @@ struct TreLivelliVeraVista: View {
             .padding(.top, F.sopraScheda)
         } else {
             // La spiegazione è uscita dalla potatura (si tengono le ultime 20 per cliente)
-            Text("La spiegazione non è più in Lucy (si tengono le ultime 20 per cliente): chiedila di nuovo a Vera.")
+            Text("La spiegazione non è più in Lucy (si tengono le ultime 20 per cliente): chiedila di nuovo a Lucy.")
                 .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, F.sopraScheda)
@@ -213,7 +213,7 @@ struct TreLivelliVeraVista: View {
         return VStack(alignment: .leading, spacing: T.spazioRighe) {
             HStack(spacing: T.spazioPunto) {
                 if s.livelliQwen.contains(livello) {
-                    PillolaFaseTre(testo: TestiStatoVera.inVista(mac: "Parole di Vera", altrove: "Parole di Qwen"), colore: F.verde)
+                    PillolaFaseTre(testo: TestiStatoVera.inVista(mac: "Parole di Lucy", altrove: "Parole di Qwen"), colore: F.verde)
                 } else {
                     PillolaFaseTre(testo: "Scritto da Lucy", colore: F.blu)
                 }
@@ -221,7 +221,7 @@ struct TreLivelliVeraVista: View {
                     PillolaFaseTre(testo: "Le cifre non tornano", colore: F.arancio)
                         .help("Un livello ha una cifra diversa dalle altre due: rileggi prima di usarlo.")
                 }
-                Text(livello == .pagina ? "La pagina si stampa o si manda a \(nome) così com'è. I numeri arrivano da Lucy, le parole da Vera."
+                Text(livello == .pagina ? "La pagina si stampa o si manda a \(nome) così com'è. I numeri arrivano da Lucy, le parole da Lucy."
                                         : "I numeri arrivano da Lucy (\(s.argomento.motore)), uguali nei tre livelli.")
                     .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                     .fixedSize(horizontal: false, vertical: true)

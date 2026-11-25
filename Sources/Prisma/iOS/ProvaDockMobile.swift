@@ -53,7 +53,7 @@ enum ProvaDockMobile {
         verifica("il dock dell'iPhone non ripete le app", Set(nelDock).count == nelDock.count)
         verifica("il dock dell'iPhone ha solo app di Lucy", Set(nelDock).isSubset(of: tutte))
         let dockiPad = DisposizioneDockMobile.app(.iPad, consentita: { _ in true })
-        verifica("il dock dell'iPad ha le app del dock del Mac fino a Prospetti, più Sala e Vera, nello stesso ordine",
+        verifica("il dock dell'iPad ha le app del dock del Mac fino a Prospetti, più Sala e Lucy, nello stesso ordine",
                  dockiPad == [.clienti, .posizioni, .analisi360, .incontri, .agenda, .territorio, .messaggi, .pratiche,
                               .presentazioni, .sala, .vera])
         verifica("il dock dell'iPad ha solo app del dock del Mac, senza ripetizioni",

@@ -129,14 +129,14 @@ enum ProvaMercatoClientiVera {
         controlla(evento("Piazza Affari crolla del −12%")?.misura == -12, "Mercato per i clienti: il segno scritto vale (−12%)")
         controlla(evento("Le borse guadagnano il 5% da inizio anno")?.misura == 5, "Mercato per i clienti: un rialzo delle borse (+5%)")
         if case .incompleto(let t, _) = MercatoClientiVera.riconosci("La BCE ha tagliato i tassi", oggi: oggi, cal: cal) {
-            controlla(t == .tassiBCE, "Mercato per i clienti: senza la misura Vera chiede di quanti punti")
+            controlla(t == .tassiBCE, "Mercato per i clienti: senza la misura Lucy chiede di quanti punti")
         } else {
-            controlla(false, "Mercato per i clienti: senza la misura Vera chiede di quanti punti")
+            controlla(false, "Mercato per i clienti: senza la misura Lucy chiede di quanti punti")
         }
         if case .incompleto = MercatoClientiVera.riconosci("I tassi BCE sono al 2%", oggi: oggi, cal: cal) {
-            controlla(true, "Mercato per i clienti: «al 2%» è un livello, non una variazione: Vera chiede")
+            controlla(true, "Mercato per i clienti: «al 2%» è un livello, non una variazione: Lucy chiede")
         } else {
-            controlla(false, "Mercato per i clienti: «al 2%» è un livello, non una variazione: Vera chiede")
+            controlla(false, "Mercato per i clienti: «al 2%» è un livello, non una variazione: Lucy chiede")
         }
         controlla(MercatoClientiVera.riconosci("Fissa un incontro con Marco giovedì alle 10", oggi: oggi, cal: cal) == .nessuno,
                   "Mercato per i clienti: un comando d'agenda non è un evento di mercato")
@@ -390,7 +390,7 @@ enum ProvaMercatoClientiVera {
         controlla(bb.hasPrefix("Buongiorno Bruno,") && bb.contains("Suoi") && DateItaliane.cerca(#"\b(?:ti|tuo|tuoi)\b"#, bb.lowercased()) == nil,
                   "Mercato per i clienti: la bozza fissa di Bruno dà del Lei: \(bb)")
         let nessuna = MercatoClientiVera.bozze(esito, clienti: d.clienti, stile: s, json: nil, oggi: oggi, cal: cal)
-        controlla(nessuna.count == 3 && nessuna.allSatisfy { $0.autore == .modelloFisso && ($0.avviso?.contains("Vera non è pronta") ?? false) },
+        controlla(nessuna.count == 3 && nessuna.allSatisfy { $0.autore == .modelloFisso && ($0.avviso?.contains("Lucy non è pronta") ?? false) },
                   "Mercato per i clienti: senza Qwen restano le bozze di Lucy, con l'avviso")
         controlla(nessuna.first { $0.clienteId == "bruno" }?.canale == .mail && nessuna.first { $0.clienteId == "anna" }?.canale == .messaggi,
                   "Mercato per i clienti: Messaggi con il cellulare, Mail senza")

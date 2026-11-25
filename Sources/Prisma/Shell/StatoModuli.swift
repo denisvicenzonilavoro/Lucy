@@ -572,14 +572,14 @@ extension StatoShell {
                 if self.disponibilitaLocale != d { self.disponibilitaLocale = d }
             }
             guard self.generativo != nil else {
-                self.mostraAvviso("Vera non è pronta: associa tu le caselle che mancano.")
+                self.mostraAvviso("Lucy non è pronta: associa tu le caselle che mancano.")
                 return
             }
             guard let proposte = try? await ModuliVera.chiedi(motore: self.qwen, vera: vera, etichette: etichette),
                   var attuale = self.moduli.revisione, attuale.id == r.id else { return }
             for i in attuale.campi.indices { ModuliVera.applica(proposte, a: &attuale.campi[i]) }
             self.moduli.revisione = attuale
-            self.mostraAvviso(proposte.isEmpty ? "Vera non ha proposte per queste caselle." : "Vera ha proposto \(proposte.count) caselle: controllale")
+            self.mostraAvviso(proposte.isEmpty ? "Lucy non ha proposte per queste caselle." : "Lucy ha proposto \(proposte.count) caselle: controllale")
         }
     }
 

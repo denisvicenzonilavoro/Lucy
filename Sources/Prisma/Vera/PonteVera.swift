@@ -129,7 +129,7 @@ struct ImpostazioniPonte: Codable, Equatable {
         }
     }
 
-    static let veraSpenta = "Sul Mac «Vera» è spenta per iPhone e iPad: accendila in Impostazioni › iPhone e iPad."
+    static let veraSpenta = "Sul Mac «Lucy» è spenta per iPhone e iPad: accendila in Impostazioni › iPhone e iPad."
 }
 
 /// Cosa c'è dentro una busta: quando è partita, il percorso e il corpo per il modello.
@@ -221,7 +221,7 @@ struct FornitorePonte: FornitoreModello {
 
     /// La richiesta del ponte: la busta cifrata con il percorso e il corpo del fornitore del Mac.
     func busta(_ percorso: String, corpo: Data?, attesa: TimeInterval) throws -> URLRequest {
-        guard let k = chiave else { throw ErroreVera(messaggio: "Il codice del Mac non è valido: ricopialo da Impostazioni › Vera sul Mac.") }
+        guard let k = chiave else { throw ErroreVera(messaggio: "Il codice del Mac non è valido: ricopialo da Impostazioni › Lucy sul Mac.") }
         guard let u = urlPonte else { throw ErroreVera(messaggio: "Non trovo il Mac in rete: Mac e telefono devono essere sulla stessa rete Wi‑Fi.") }
         var r = URLRequest(url: u, timeoutInterval: attesa)
         r.httpMethod = "POST"
@@ -266,10 +266,10 @@ struct FornitorePonte: FornitoreModello {
     }
 
     func verifica() async -> DisponibilitaVera {
-        guard chiave != nil else { return .nonDisponibile("Il codice del Mac non è valido: ricopialo da Impostazioni › Vera sul Mac.") }
+        guard chiave != nil else { return .nonDisponibile("Il codice del Mac non è valido: ricopialo da Impostazioni › Lucy sul Mac.") }
         guard urlPonte != nil else { return .nonDisponibile(PonteVera.macNonTrovato) }
         guard let s = await stato() else {
-            return .nonDisponibile("Il Mac non risponde: Lucy deve essere aperta sul Mac, con «iPhone e iPad» attivo in Impostazioni › Vera, e il codice deve essere lo stesso.")
+            return .nonDisponibile("Il Mac non risponde: Lucy deve essere aperta sul Mac, con «iPhone e iPad» attivo in Impostazioni › Lucy, e il codice deve essere lo stesso.")
         }
         PonteVera.ricorda(s)
         return s.pronto ? .pronto : .nonDisponibile("Sul \(s.mac): " + (s.motivo ?? "Qwen non è pronto."))
@@ -297,7 +297,7 @@ struct FornitorePonte: FornitoreModello {
         guard arrivo.valido, let corpo = try? arrivo.corpo(), corpo.count <= PonteVera.massimoBusta / 2 else {
             return .rifiutata("Il messaggio è troppo grande per il ponte: manda meno righe alla volta.")
         }
-        guard let k = chiave else { return .rifiutata("Il codice del Mac non è valido: ricopialo da Impostazioni › Vera sul Mac.") }
+        guard let k = chiave else { return .rifiutata("Il codice del Mac non è valido: ricopialo da Impostazioni › Lucy sul Mac.") }
         guard let r = try? busta(arrivo.percorso, corpo: corpo, attesa: attesa) else { return .rifiutata(PonteVera.macNonTrovato) }
         guard case let (dati, risposta)? = try? await sessione.data(for: r) else { return .rifiutata(PonteVera.macNonTrovato) }
         switch (risposta as? HTTPURLResponse)?.statusCode ?? 0 {
@@ -309,7 +309,7 @@ struct FornitorePonte: FornitoreModello {
         case 404:
             return .rifiutata(PonteVera.macDaAggiornare)
         case 403:
-            return .rifiutata("Il Mac non riconosce questo dispositivo: il codice deve essere lo stesso di Impostazioni › Vera sul Mac.")
+            return .rifiutata("Il Mac non riconosce questo dispositivo: il codice deve essere lo stesso di Impostazioni › Lucy sul Mac.")
         default:
             return .rifiutata("Il Mac non ha ricevuto il messaggio: riprova.")
         }
@@ -363,7 +363,7 @@ extension PonteVera {
     /// Manda al Mac un messaggio nuovo con le impostazioni del telefono (cerca il Mac se non lo conosce ancora).
     static func manda(_ arrivo: ArrivoPonte, vera: ImpostazioniVera) async -> RicevutaPonte {
         guard vera.ponte.abbinato else {
-            return .rifiutata("Collega il dispositivo al Mac: sul Mac, in Impostazioni › Vera, attiva «iPhone e iPad» e scrivi qui il codice che compare.")
+            return .rifiutata("Collega il dispositivo al Mac: sul Mac, in Impostazioni › Lucy, attiva «iPhone e iPad» e scrivi qui il codice che compare.")
         }
         if indirizzo == nil {
             guard let trovato = await RicercaMac.trova() else { return .rifiutata(macNonTrovato) }
@@ -375,7 +375,7 @@ extension PonteVera {
     /// Cerca il Mac: prima l'ultimo indirizzo, poi Bonjour. Restituisce la disponibilità (con il motivo se no).
     static func collega(_ vera: ImpostazioniVera) async -> DisponibilitaVera {
         guard vera.ponte.abbinato else {
-            return .nonDisponibile("Collega il telefono al Mac: sul Mac, in Impostazioni › Vera, attiva «iPhone e iPad» e scrivi qui il codice che compare.")
+            return .nonDisponibile("Collega il telefono al Mac: sul Mac, in Impostazioni › Lucy, attiva «iPhone e iPad» e scrivi qui il codice che compare.")
         }
         // L'ultimo indirizzo risponde ancora: niente ricerca
         if indirizzo != nil, await fornitore(vera).stato(attesa: 2) != nil { return await fornitore(vera).verifica() }

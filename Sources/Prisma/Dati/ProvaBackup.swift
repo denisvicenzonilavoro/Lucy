@@ -472,7 +472,7 @@ enum ProvaBackup {
             let ponteTornato = estratto.dati.impostazioni.vera.ponte
             guard !ponteTornato.inquadra, !ponteTornato.tavolo, ponteTornato.modello, ponteTornato.nota,
                   ponteTornato == originale.impostazioni.vera.ponte else {
-                print("ERRORE: i filtri del ponte (Vera, Inquadra, Nota a voce, Al tavolo) non tornano uguali dal backup")
+                print("ERRORE: i filtri del ponte (Lucy, Inquadra, Nota a voce, Al tavolo) non tornano uguali dal backup")
                 return 1
             }
             // Esperienza per tipo di prodotto (versione 21): griglia e capacità di Giulia identiche dal backup
@@ -784,7 +784,7 @@ enum ProvaBackup {
                 print("ERRORE: \(errore)")
                 return 1
             }
-            print("OK: backup, rotazione (\(elenco.count) copie), ripristino, backup protetti da password, salvataggio in background, lettore zip e archivi col vecchio nome di Vera verificati")
+            print("OK: backup, rotazione (\(elenco.count) copie), ripristino, backup protetti da password, salvataggio in background, lettore zip e archivi col vecchio nome di Lucy verificati")
             return 0
         } catch {
             print("ERRORE: \(error.localizedDescription)")

@@ -81,18 +81,18 @@ enum TrovaPaginaVera {
         // Un passo che non è tra quelli dati: la risposta non vale (si mostra il primo passo trovato)
         guard let p = passi.first(where: { $0.etichetta == etichetta }) else {
             guard let primo = passi.first else { return .nonTrovata }
-            return .nonVerificata(passo: primo.passo, motivo: "Vera ha citato un passo che Lucy non le aveva dato.")
+            return .nonVerificata(passo: primo.passo, motivo: "Lucy ha citato un passo che Lucy non le aveva dato.")
         }
         guard !testo.isEmpty else { return nil }
         guard MotoreBiblioteca.fraseNelPasso(frase, p.passo) else {
-            return .nonVerificata(passo: p.passo, motivo: "Vera non ha trovato una frase che lo dica esattamente.")
+            return .nonVerificata(passo: p.passo, motivo: "Lucy non ha trovato una frase che lo dica esattamente.")
         }
         let fonte = p.passo.testo + "\n" + p.passo.intestazione
         guard CommentoVera.numeriConservati(bozza: fonte, testo: testo) else {
-            return .nonVerificata(passo: p.passo, motivo: "La risposta di Vera aveva una cifra che non è nel passo.")
+            return .nonVerificata(passo: p.passo, motivo: "La risposta di Lucy aveva una cifra che non è nel passo.")
         }
         if nomeAggiunto(testo, domanda: domanda, nomi: nomiClienti) {
-            return .nonVerificata(passo: p.passo, motivo: "La risposta di Vera nominava un cliente che non era nella domanda.")
+            return .nonVerificata(passo: p.passo, motivo: "La risposta di Lucy nominava un cliente che non era nella domanda.")
         }
         return .risposta(passo: p.passo, frase: frase, testo: testo)
     }
@@ -114,7 +114,7 @@ enum TrovaPaginaVera {
             if let esito = leggi(json, passi: passi, domanda: domanda, nomiClienti: nomiClienti) { return esito }
         }
         guard let primo = passi.first else { return .nonTrovata }
-        return .nonVerificata(passo: primo.passo, motivo: "Vera non ha dato una risposta leggibile.")
+        return .nonVerificata(passo: primo.passo, motivo: "Lucy non ha dato una risposta leggibile.")
     }
 
     // MARK: - «Cerca nella Biblioteca» da Vera (§8.1.5.2 punto 6)

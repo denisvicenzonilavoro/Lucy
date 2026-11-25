@@ -9,13 +9,13 @@ enum TestiStatoVera {
     static let pronta = "Pronta"
     static let nonPronta = "Non pronta"
     /// Nella colonna dell'app Vera e nella testata della Vera della scrivania.
-    static let veraPronta = "Vera · pronta"
-    static let veraNonPronta = "Vera · non pronta"
+    static let veraPronta = "Lucy · pronta"
+    static let veraNonPronta = "Lucy · non pronta"
 
     /// Il titolo del messaggio di Vera quando il motore non c'è. Si confronta sempre con `eTitoloNonPronta(_:)`, mai con
     /// la stringa: le conversazioni salvate prima tengono il titolo di prima.
     #if os(macOS)
-    static let titoloNonPronta = "Vera non è pronta"
+    static let titoloNonPronta = "Lucy non è pronta"
     #else
     static let titoloNonPronta = titoloDiPrima
     #endif
@@ -23,11 +23,11 @@ enum TestiStatoVera {
     static let titoloDiPrima = "Qwen non è pronto"
 
     /// La spiegazione senza nomi tecnici.
-    static let spiegazione = "Vera non risponde ancora: controlla in Impostazioni › Vera."
+    static let spiegazione = "Lucy non risponde ancora: controlla in Impostazioni › Lucy."
     /// Il pulsante che porta dove si vede il motivo.
-    static let apriImpostazioni = "Apri Impostazioni › Vera"
+    static let apriImpostazioni = "Apri Impostazioni › Lucy"
     /// L'aiuto di «Verifica».
-    static let aiutoVerifica = "Controlla di nuovo se Vera è pronta"
+    static let aiutoVerifica = "Controlla di nuovo se Lucy è pronta"
 
     /// Un testo che sul Mac non nomina il motore (dice «Vera» o «Prisma») e su iPhone e iPad resta quello di prima.
     static func inVista(mac: String, altrove: String) -> String {
@@ -38,9 +38,15 @@ enum TestiStatoVera {
         #endif
     }
 
-    /// true se il titolo è quello di Vera non pronta, di oggi o di prima.
+    /// true se il titolo è quello dell'assistente non pronta, di oggi o di prima (anche «Vera non è pronta», il nome
+    /// fino al 25 novembre 2026, nei messaggi già salvati).
     static func eTitoloNonPronta(_ titolo: String?) -> Bool {
         guard let t = titolo else { return false }
-        return t == titoloNonPronta || t == titoloDiPrima
+        return t == titoloNonPronta || t == titoloDiPrima || t == "Vera non è pronta"
+    }
+
+    /// true se il messaggio è l'avviso «… non ha potuto rispondere», con il nome di oggi (Lucy) o di prima (Vera).
+    static func nonHaPotuto(_ titolo: String?) -> Bool {
+        titolo == "Lucy non ha potuto rispondere" || titolo == "Vera non ha potuto rispondere"
     }
 }

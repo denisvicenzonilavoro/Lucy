@@ -524,7 +524,7 @@ enum SussurroVera {
             }
             return [VoceSussurro(chiave: "preferenza-\(normale(ricordo).prefix(40))", clienteId: f.cliente.id,
                                  categoria: .preferenza, tono: .blu, testo: frase(ricordo), azione: azione,
-                                 fonte: "La memoria di Vera", rango: rango, data: nil)]
+                                 fonte: "La memoria di Lucy", rango: rango, data: nil)]
         }
         return []
     }

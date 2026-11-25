@@ -76,7 +76,7 @@ extension SpazioLavoro {
         return [
             SpazioLavoro(id: "pronto-incontro", nome: "Incontro con il cliente",
                          finestre: [.destra(.vera), .sinistra(.clienti)], predefinito: true),
-            SpazioLavoro(id: "pronto-analisi", nome: "Analisi 360 con Vera",
+            SpazioLavoro(id: "pronto-analisi", nome: "Analisi 360 con Lucy",
                          finestre: [.destra(.vera), .sinistra(.analisi360)], predefinito: true),
             // Le attività vivono nell'Agenda (vista mese, con la colonna del giorno): accanto la scheda del cliente
             SpazioLavoro(id: "pronto-giornata", nome: "La giornata",

@@ -231,12 +231,12 @@ struct ChiaveTestoMessaggio: Hashable {
 
 /// I testi dell'app Messaggi (Design/template-novita-specifica.md §5.1 e §5.1.6).
 enum TestiMessaggi {
-    static let notaColonna = "Vera scrive, tu spedisci: niente parte da solo. Ogni messaggio resta nel dossier del cliente."
+    static let notaColonna = "Lucy scrive, tu spedisci: niente parte da solo. Ogni messaggio resta nel dossier del cliente."
     static let nienteOggi = "Niente da mandare oggi"
     static let vuoto = "Nessun messaggio da preparare. Quando c'è un incontro, una scadenza, un compleanno o un consenso da "
         + "rinnovare, lo trovi qui."
-    static let veraScrive = "Vera scrive con i dati del dossier"
-    static let veraStaScrivendo = "Vera sta scrivendo con i dati del dossier"
+    static let veraScrive = "Lucy scrive con i dati del dossier"
+    static let veraStaScrivendo = "Lucy sta scrivendo con i dati del dossier"
     static let testoPrisma = "Testo di Lucy, con i dati del dossier"
     static let cifreDaPrisma = "Le cifre vengono da Lucy"
     static let spedisciTu = "Lo controlli e lo spedisci tu"
@@ -296,18 +296,18 @@ enum TestiMessaggi {
 
     /// «Vera ha usato 1 dato del dossier ›» / «Vera ha usato 5 dati del dossier ›».
     static func datiUsati(_ n: Int) -> String {
-        "Vera ha usato \(n) \(n == 1 ? "dato" : "dati") del dossier ›"
+        "Lucy ha usato \(n) \(n == 1 ? "dato" : "dati") del dossier ›"
     }
 
     /// La frase della scheda «Da dove vengono le cifre».
     static func cifreDelDossier(_ nome: String) -> String {
-        "Vera ha scritto il testo con questi dati del dossier di \(nome): le cifre le dà Lucy."
+        "Lucy ha scritto il testo con questi dati del dossier di \(nome): le cifre le dà Lucy."
     }
 
     /// Chi ha scritto il testo, senza il nome del modello (regola 9): «Scritto da Vera» o «Testo di Prisma».
     static func scrittoDa(_ s: TestoScrittoMessaggio) -> String {
         switch s.autore {
-        case .vera: return "Scritto da Vera"
+        case .vera: return "Scritto da Lucy"
         case .modelloFisso: return "Testo di Lucy"
         }
     }
@@ -337,9 +337,9 @@ enum TestiMessaggi {
         switch s.autore {
         #if os(macOS)
         // Migliorie d'uso 9: senza il modello (il nome del motore sta in Impostazioni › Vera)
-        case .vera: return "Scritto da Vera"
+        case .vera: return "Scritto da Lucy"
         #else
-        case .vera: return "Scritto da Vera" + (s.modello.map { " con \($0)" } ?? "")
+        case .vera: return "Scritto da Lucy" + (s.modello.map { " con \($0)" } ?? "")
         #endif
         case .modelloFisso: return "Testo di Lucy"
         }

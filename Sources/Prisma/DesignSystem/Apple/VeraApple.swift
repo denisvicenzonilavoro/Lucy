@@ -160,7 +160,7 @@ struct PuntiniScrittura: View {
         }
         .padding(.vertical, e.paddingVerticale)
         .fixedSize()
-        .accessibilityLabel(Text("Vera sta scrivendo"))
+        .accessibilityLabel(Text("Lucy sta scrivendo"))
     }
 
     /// Salita (0…1) e luce (0…1) di un puntino: la salita va da 0 al 30% e torna a 100%; la luce torna giù al 60%.

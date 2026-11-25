@@ -57,13 +57,13 @@ struct VoceAnteprimaSuMisura: Identifiable, Equatable {
 }
 
 extension StatoShell {
-    static let titoloSuMisura = "Vera su misura"
+    static let titoloSuMisura = "Lucy su misura"
 
     // MARK: - La pagina
 
     func apriPaginaSuMisura() {
         guard !inModoCliente else {
-            return mostraAvviso("Vera su misura legge le conversazioni di tutti i clienti: fuori dalla modalità cliente.")
+            return mostraAvviso("Lucy su misura legge le conversazioni di tutti i clienti: fuori dalla modalità cliente.")
         }
         memoriaVera.carica()
         paginaTagliandoAperta = false
@@ -109,20 +109,20 @@ extension StatoShell {
     /// Lo stato in una riga, per la chat e per Impostazioni › Vera.
     var statoSuMisuraInBreve: String {
         switch faseSuMisura {
-        case .soloOllama: return "Vera su misura funziona solo con Ollama: in Impostazioni › Vera il fornitore è «Compatibile OpenAI»."
-        case .memoriaBloccata: return "La memoria di Vera è bloccata: aprila con la password dei backup per leggere gli esempi."
-        case .lavoro(let l): return "Vera su misura: \(l)"
+        case .soloOllama: return "Lucy su misura funziona solo con Ollama: in Impostazioni › Lucy il fornitore è «Compatibile OpenAI»."
+        case .memoriaBloccata: return "La memoria di Lucy è bloccata: aprila con la password dei backup per leggere gli esempi."
+        case .lavoro(let l): return "Lucy su misura: \(l)"
         case .nessunEsempio: return "Nessun esempio approvato: segna con 👍 le risposte che ti piacciono e diventano esempi."
-        case .pochiEsempi(let p, let m): return "Vera su misura: \(p) esempi pronti, ne mancano \(m) per il primo addestramento."
+        case .pochiEsempi(let p, let m): return "Lucy su misura: \(p) esempi pronti, ne mancano \(m) per il primo addestramento."
         case .pronti(let n):
-            return "Vera su misura: \(n) esempi pronti." + (SuMisuraVera.esportazioneApprovata ? " Guarda l'anteprima e prepara il pacchetto."
+            return "Lucy su misura: \(n) esempi pronti." + (SuMisuraVera.esportazioneApprovata ? " Guarda l'anteprima e prepara il pacchetto."
                                                                                   : " L'esportazione del pacchetto aspetta il tuo sì.")
         case .inAttesaModello(let d): return "Pacchetto preparato il \(Formati.dataLunga.string(from: d)): in attesa del modello addestrato."
         case .daEsaminare: return "Il modello addestrato è in Ollama: manca l'esame."
-        case .superata(let v): return "Esame superato (\(v.esame?.percentualeAttuale ?? 0)% → \(v.esame?.percentualeNuova ?? 0)%): puoi usare la Vera su misura."
-        case .nonSuperata(let v): return "Esame non superato (\(v.esame?.percentualeAttuale ?? 0)% → \(v.esame?.percentualeNuova ?? 0)%): resta la Vera di oggi."
-        case .inUso(let v): return "In uso: \(SuMisuraVera.nomeVersione(v)). Puoi sempre tornare alla Vera di prima."
-        case .ritirata: return "Sei tornato alla Vera di prima: la versione su misura resta e si può riprovare."
+        case .superata(let v): return "Esame superato (\(v.esame?.percentualeAttuale ?? 0)% → \(v.esame?.percentualeNuova ?? 0)%): puoi usare la Lucy su misura."
+        case .nonSuperata(let v): return "Esame non superato (\(v.esame?.percentualeAttuale ?? 0)% → \(v.esame?.percentualeNuova ?? 0)%): resta la Lucy di oggi."
+        case .inUso(let v): return "In uso: \(SuMisuraVera.nomeVersione(v)). Puoi sempre tornare alla Lucy di prima."
+        case .ritirata: return "Sei tornato alla Lucy di prima: la versione su misura resta e si può riprovare."
         }
     }
 
@@ -139,7 +139,7 @@ extension StatoShell {
         case .superata: return "Esame superato"
         case .nonSuperata: return "Esame non superato"
         case .inUso: return "In uso"
-        case .ritirata: return "Vera di prima"
+        case .ritirata: return "Lucy di prima"
         }
     }
 
@@ -167,7 +167,7 @@ extension StatoShell {
             if !a.pulito {
                 motivo = "Resta qualcosa che fa riconoscere un cliente: non entra."
             } else if !SuMisuraVera.addestrabile(e) {
-                motivo = "Ha cifre che non vengono dalla domanda: non entra (Vera imparerebbe a scrivere numeri senza fonte)."
+                motivo = "Ha cifre che non vengono dalla domanda: non entra (Lucy imparerebbe a scrivere numeri senza fonte)."
             } else if usati.contains(e.id) {
                 motivo = "Già in un pacchetto di prima."
             }
@@ -312,7 +312,7 @@ extension StatoShell {
                 var vera = self.dati.impostazioni.vera
                 SuMisuraVera.aggiungi(v, in: &vera)
                 self.dati.impostazioni.vera = vera
-                self.mostraAvviso("La Vera su misura è in Ollama: manca l'esame")
+                self.mostraAvviso("La Lucy su misura è in Ollama: manca l'esame")
             } catch {
                 self.mostraAvviso(error.localizedDescription)
             }
@@ -345,7 +345,7 @@ extension StatoShell {
         }
         let attuale = modelloDiPartenzaSuMisura
         let vera = dati.impostazioni.vera
-        lavoroSuMisura = "Carico la Vera di oggi…"
+        lavoroSuMisura = "Carico la Lucy di oggi…"
         esameSuMisuraInCorso = true
         compitoSuMisura = Task { @MainActor in
             let esito = await EsameSuMisura.esegui(domande, attuale: attuale, nuovo: id, vera: vera, sessione: sessione) { t in
@@ -358,7 +358,7 @@ extension StatoShell {
             self.esameSuMisuraInCorso = false
             self.lavoroSuMisura = nil
             self.compitoSuMisura = nil
-            self.mostraAvviso(esito.superato ? "Esame superato: puoi usare la Vera su misura" : "Esame non superato: resta la Vera di oggi")
+            self.mostraAvviso(esito.superato ? "Esame superato: puoi usare la Lucy su misura" : "Esame non superato: resta la Lucy di oggi")
             // Il modello di oggi torna pronto per la chat
             self.verificaMotoreLocale()
         }
@@ -379,7 +379,7 @@ extension StatoShell {
         guard SuMisuraVera.sostituisci(id, in: &vera) else { return false }
         dati.impostazioni.vera = vera
         verificaMotoreLocale()
-        mostraAvviso("La Vera su misura è in uso")
+        mostraAvviso("La Lucy su misura è in uso")
         return true
     }
 
@@ -391,7 +391,7 @@ extension StatoShell {
         guard SuMisuraVera.tornaIndietro(in: &vera) else { return false }
         dati.impostazioni.vera = vera
         verificaMotoreLocale()
-        mostraAvviso("Sei tornato alla Vera di prima")
+        mostraAvviso("Sei tornato alla Lucy di prima")
         return true
     }
 
@@ -429,13 +429,13 @@ extension StatoShell {
         domandaVera = ""
         let risposta: String
         if inModoCliente {
-            risposta = "In modalità cliente la pagina di Vera su misura non si apre: legge le conversazioni di tutti i clienti."
+            risposta = "In modalità cliente la pagina di Lucy su misura non si apre: legge le conversazioni di tutti i clienti."
         } else {
             #if os(macOS)
             apriPaginaSuMisura()
             risposta = statoSuMisuraInBreve + (t.contains("torna alla vera di prima") ? " Per tornare indietro usa il pulsante nella pagina." : "")
             #else
-            risposta = "Vera su misura si fa da Lucy sul Mac."
+            risposta = "Lucy su misura si fa da Lucy sul Mac."
             #endif
         }
         aggiungiMessaggio(MessaggioVera(autore: .vera, testo: risposta, titolo: Self.titoloSuMisura, motore: MotoriVera.sintesi.nome), cliente: chiave)
@@ -444,7 +444,7 @@ extension StatoShell {
 
     /// Il messaggio della chat mentre l'esame usa il modello (un modello alla volta sul Mac da 8 GB).
     func esameSuMisuraInPausa(cliente id: String) {
-        aggiungiMessaggio(MessaggioVera(autore: .vera, testo: "Sto facendo l'esame della Vera su misura: rispondo appena finisce.",
+        aggiungiMessaggio(MessaggioVera(autore: .vera, testo: "Sto facendo l'esame della Lucy su misura: rispondo appena finisce.",
                                        titolo: Self.titoloSuMisura, motore: "Prisma"), cliente: id)
     }
 }

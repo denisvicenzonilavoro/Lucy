@@ -309,7 +309,7 @@ enum TestiTraguardi {
         + "accanto in questo percorso."
     static let notaColonna = "Lucy si accorge da sola dei traguardi: obiettivi raggiunti, anniversari, un mutuo estinto, "
         + "un figlio all’università con il piano pronto."
-    static let scrittaDaPrisma = "Frase scritta da Lucy: Vera la riscriverà con un prossimo aggiornamento."
+    static let scrittaDaPrisma = "Frase scritta da Lucy: Lucy la riscriverà con un prossimo aggiornamento."
     static let senzaIdea = "Nessuna idea dalle note"
     static let titoloMomento = "Il momento, già pronto"
     static let biglietto = "Il biglietto"

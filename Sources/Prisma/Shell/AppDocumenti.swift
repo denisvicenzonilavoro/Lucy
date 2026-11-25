@@ -283,7 +283,7 @@ struct ElencoDocumenti: View {
                 stato.leggiDocumento(d.id)
             }
             .disabled(file == nil || d.tipo.creatoDaPrisma || stato.solaLettura || stato.documentiInLettura.contains(d.id))
-            Button("Apri con Vera") {
+            Button("Apri con Lucy") {
                 TestiRinviati.scriviOra()
                 stato.spiegaDocumentoConVera(d.id)
             }

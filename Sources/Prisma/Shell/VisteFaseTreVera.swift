@@ -51,7 +51,7 @@ struct PromesseVeraVista: View {
         let elenco = ids.compactMap { id in stato.dati.promesse.first { $0.id == id } }.filter { stato.visibileAlCliente($0.clienteId) }
         VStack(alignment: .leading, spacing: F.spazioRighe) {
             ForEach(elenco) { p in riga(p) }
-            Text("Vera non inventa promesse: le prende solo da quello che hai scritto o detto tu.")
+            Text("Lucy non inventa promesse: le prende solo da quello che hai scritto o detto tu.")
                 .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
         }
         .padding(.top, F.sopraScheda)
@@ -139,7 +139,7 @@ struct AvvisiLetturaVista: View {
                     }
                 }
             }
-            Text("Vera segnala e propone: la valutazione resta tua.").carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
+            Text("Lucy segnala e propone: la valutazione resta tua.").carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
         }
     }
 }
@@ -174,7 +174,7 @@ struct FoglioSecondaLettura: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(spacing: 10) {
                 IconaApp(app: .vera, lato: 26)
-                Text("Vera ha riletto: \(esito.oggetto.prefix(1).lowercased() + esito.oggetto.dropFirst())").carattereApple(F.titoloFoglio)
+                Text("Lucy ha riletto: \(esito.oggetto.prefix(1).lowercased() + esito.oggetto.dropFirst())").carattereApple(F.titoloFoglio)
             }
             ScrollView { AvvisiLetturaVista(esito: esito) }
                 .frame(maxHeight: 360)
@@ -230,7 +230,7 @@ struct ConfrontoVeraVista: View {
                 }
                 .padding(.vertical, 4)
                 .superficieApple(Tema.Apple.Vera.SchedaCalcoli.superficie, raggio: Tema.Apple.Raggio.tile)
-                Text("Salvato nella scheda di \(stato.cliente(c.clienteId)?.nome ?? "del cliente") · Vera confronta il testo letto dai documenti, non l'impaginazione.")
+                Text("Salvato nella scheda di \(stato.cliente(c.clienteId)?.nome ?? "del cliente") · Lucy confronta il testo letto dai documenti, non l'impaginazione.")
                     .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
             }
             .padding(.top, F.sopraScheda)
@@ -267,7 +267,7 @@ struct CoperturaVeraVista: View {
                     ForEach(LimiteCopertura.Tipo.allCases, id: \.self) { t in riquadro(t, voci: c.voci(t)) }
                 }
                 HStack {
-                    Text("\(c.articoliLetti) articoli letti in «\(c.titolo)»\(c.conQwen ? " · " + TestiStatoVera.inVista(mac: "spiegati da Vera", altrove: "spiegati da Qwen") + ", controllati con gli articoli" : "")")
+                    Text("\(c.articoliLetti) articoli letti in «\(c.titolo)»\(c.conQwen ? " · " + TestiStatoVera.inVista(mac: "spiegati da Lucy", altrove: "spiegati da Qwen") + ", controllati con gli articoli" : "")")
                         .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                     Spacer()
                     if !c.voci.isEmpty, !stato.inModoCliente {
@@ -397,7 +397,7 @@ struct ResocontoVeraVista: View {
             case .notaVocale: return "dalla nota vocale (l'audio non è conservato)"
             }
         }
-        return nomi.isEmpty ? "Scritto con Vera" : "Scritto con Vera " + nomi.joined(separator: ", ")
+        return nomi.isEmpty ? "Scritto con Lucy" : "Scritto con Lucy " + nomi.joined(separator: ", ")
     }
 }
 
@@ -418,11 +418,11 @@ struct LetturaAdeguatezzaVista: View {
         let _ = ContaCorpi.segna()
         VStack(alignment: .leading, spacing: F.spazioRighe) {
             HStack(spacing: 8) {
-                Button(esito == nil ? "Rileggi con Vera" : "Rileggi di nuovo") {
+                Button(esito == nil ? "Rileggi con Lucy" : "Rileggi di nuovo") {
                     esito = stato.secondaLetturaAdeguatezza(posizione)
                 }
                 .buttonStyle(.apple).fixedSize()
-                Button(scrive ? "Vera scrive…" : "Abbozza la motivazione") {
+                Button(scrive ? "Lucy scrive…" : "Abbozza la motivazione") {
                     scrive = true
                     inserita = false
                     Task { @MainActor in
@@ -443,7 +443,7 @@ struct LetturaAdeguatezzaVista: View {
                             inserita = true
                         }
                         .buttonStyle(.applePrimario).disabled(firmata || inserita)
-                        Text(b.conQwen ? TestiStatoVera.inVista(mac: "Scritta da Vera con le sole cifre di Lucy", altrove: "Scritta da Qwen con le sole cifre di Lucy") : "Scritta da Lucy con i controlli della scheda")
+                        Text(b.conQwen ? TestiStatoVera.inVista(mac: "Scritta da Lucy con le sole cifre di Lucy", altrove: "Scritta da Qwen con le sole cifre di Lucy") : "Scritta da Lucy con i controlli della scheda")
                             .carattereApple(F.nota).foregroundColor(F.coloreDettaglio)
                     }
                 }

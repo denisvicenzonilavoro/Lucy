@@ -144,7 +144,7 @@ enum ProvaNotte {
         controlla(carte.contains { $0.tipo == .fascicolo && $0.riferimento == NotteDiProva.prefisso + "incontro" }
                     && carte.contains { $0.tipo == .domani },
                   "Notte: la fase 1 prepara il fascicolo e la borsa per l'incontro di domani")
-        controlla(!carte.contains { $0.tipo.conQwen }, "Notte: la fase 1 non scrive bozze di Vera")
+        controlla(!carte.contains { $0.tipo.conQwen }, "Notte: la fase 1 non scrive bozze di Lucy")
         let ids = s.dati.notti.flatMap { $0.carte.map(\.id) }
         let ancora = s.preparaNotteSenzaQwen(adesso: adesso)
         controlla(ancora.isEmpty && s.dati.notti.flatMap { $0.carte.map(\.id) } == ids, "Notte: rifare il lavoro non duplica le carte (id stabili)")
@@ -176,7 +176,7 @@ enum ProvaNotte {
         m.notte.inCorso = true
         m.notte.lavoro.esecutore = e
         m.fermaLavoroNotte(.memoria)
-        controlla(e.motivo == .memoria && m.notte.lavoro.fermatoPer == .memoria, "Notte: l'avviso di memoria ferma le bozze di Vera")
+        controlla(e.motivo == .memoria && m.notte.lavoro.fermatoPer == .memoria, "Notte: l'avviso di memoria ferma le bozze di Lucy")
         let c = MotoreNotte.carta(PreparativoNotte(tipo: .daFinire, clienteId: nil, riferimento: "bozze", dettagli: .daFinire(bozze: 3, motivo: .memoria)),
                                   giorno: Date(), adesso: Date(), nomi: [:])
         controlla(c.titolo == TestiNotte.daFinireMemoria(3) && c.daFinire == 3, "Notte: dopo l'avviso di memoria resta una carta «Da finire»")

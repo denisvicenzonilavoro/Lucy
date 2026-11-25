@@ -88,7 +88,7 @@ enum ProvaMotoriMistral {
         controlla(comando.dove == .mac && comando.ruolo == .lampo, "Computer dell'IA: i comandi restano al Lampo sul Mac, subito")
         let notte = SceltaMotori.scegli(.lavoroLungo, vera: vera, memoriaMac: 8, installati: nil, computerIA: studio, notte: true)
         controlla(notte.ruolo == .quotidiano && notte.dove == .computerIA && (notte.ripiego ?? "").contains("600 GB"),
-                  "Computer dell'IA: Large 4 non entra in 512 GB, di notte lavora Small 4 e Vera dice perché (\(notte.ripiego ?? "-"))")
+                  "Computer dell'IA: Large 4 non entra in 512 GB, di notte lavora Small 4 e Lucy dice perché (\(notte.ripiego ?? "-"))")
         var conLarge3 = vera
         conLarge3.motori.modelloProfondo = CatalogoMistral.large3.nome
         let large3 = SceltaMotori.scegli(.lavoroLungo, vera: conLarge3, memoriaMac: 8, installati: nil, computerIA: studio, notte: true)
@@ -173,7 +173,7 @@ enum ProvaMotoriMistral {
         let kid = SceltaMotori.scegli(.kid, vera: vera, memoriaMac: 8, installati: tutti, notte: false)
         controlla(kid.ruoloChiesto == .quotidiano && kid.ruolo == .lampo && kid.modello == vera.modello
                   && (kid.ripiego ?? "").contains("Mistral Small 4") && (kid.ripiego ?? "").contains("72 GB"),
-                  "Motori: sul MacBook da 8 GB il KID va a Ministral 3 e Vera dice perché (\(kid.ripiego ?? "-"))")
+                  "Motori: sul MacBook da 8 GB il KID va a Ministral 3 e Lucy dice perché (\(kid.ripiego ?? "-"))")
         let notte = SceltaMotori.scegli(.lavoroLungo, vera: vera, memoriaMac: 8, installati: tutti, notte: true)
         controlla(notte.ruoloChiesto == .profondo && notte.ruolo == .lampo && notte.modello == vera.modello
                   && (notte.ripiego ?? "").contains("Mistral Large 4"),
@@ -251,6 +251,6 @@ enum ProvaMotoriMistral {
         controlla(rovinate.motori == ImpostazioniMotori(), "Motori: valori sconosciuti o vuoti tornano a quelli di base")
         controlla(PacchettoSuMisura.modelloUnsloth(per: "ministral-3:3b") == "unsloth/Ministral-3-3B-Instruct-2512"
                   && PacchettoSuMisura.modelloUnsloth(per: "qwen3.5:4b") == "unsloth/Qwen3.5-4B",
-                  "Motori: Vera su misura parte da Ministral 3 (Unsloth), le versioni da Qwen restano")
+                  "Motori: Lucy su misura parte da Ministral 3 (Unsloth), le versioni da Qwen restano")
     }
 }

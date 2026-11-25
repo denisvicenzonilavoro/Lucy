@@ -12,34 +12,34 @@ enum ProvaVeraDimostrazione {
         #if os(macOS)
         let stato = StatoShell(persistente: false)
         guard let i = stato.dati.clienti.indices.first else {
-            controlla(false, "Dimostrazione e Vera: nessun cliente nei dati di prova")
+            controlla(false, "Dimostrazione e Lucy: nessun cliente nei dati di prova")
             return
         }
         let nomeVero = "Ermenegilda Pastrocchi"
         stato.dati.clienti[i].nome = nomeVero
         let idVero = stato.dati.clienti[i].id
         controlla(stato.fonteVera(idVero).map { ContestoVera.scheda($0).contains(nomeVero) } == true,
-                  "Dimostrazione e Vera: spenta, la scheda del cliente vero porta il suo nome")
+                  "Dimostrazione e Lucy: spenta, la scheda del cliente vero porta il suo nome")
 
         stato.accendiDimostrazione(.cinque, avviso: false)
-        controlla(stato.inDimostrazione, "Dimostrazione e Vera: si accende")
+        controlla(stato.inDimostrazione, "Dimostrazione e Lucy: si accende")
         let schede = stato.dati.clienti.compactMap { stato.fonteVera($0.id) }.map(ContestoVera.scheda)
         let portafoglio = VeraPortafoglio.scheda(stato.dati.istantanea)
         controlla(!schede.isEmpty && !schede.contains { $0.contains(nomeVero) } && !portafoglio.contains(nomeVero),
-                  "Dimostrazione e Vera: le schede dei clienti e del portafoglio non portano il cliente vero")
+                  "Dimostrazione e Lucy: le schede dei clienti e del portafoglio non portano il cliente vero")
         controlla(stato.fonteVera(idVero).map { ContestoVera.scheda($0).contains(nomeVero) } != true,
-                  "Dimostrazione e Vera: la scheda del cliente vero non si compone")
-        controlla(!stato.guidaVisibile, "Dimostrazione e Vera: la guida non si mostra")
-        controlla(stato.controllaRoutineDovute().isEmpty, "Dimostrazione e Vera: le routine programmate non partono")
+                  "Dimostrazione e Lucy: la scheda del cliente vero non si compone")
+        controlla(!stato.guidaVisibile, "Dimostrazione e Lucy: la guida non si mostra")
+        controlla(stato.controllaRoutineDovute().isEmpty, "Dimostrazione e Lucy: le routine programmate non partono")
         let nota = NotaVocalePonte(id: "nota-prova-dimostrazione", testo: NotaVocaleDiProva.testo, durata: 9, dispositivo: "iPhone di prova")
         let ricevuta = stato.riceviDalPonte(.notaVocale(nota))
         controlla(!ricevuta.accettato && ricevuta.motivo == TestiDimostrazione.notaRifiutata
                   && !stato.dati.noteInArrivo.contains { $0.id == nota.id },
-                  "Dimostrazione e Vera: la nota dettata resta sull'iPhone (il Mac la rifiuta con il motivo)")
+                  "Dimostrazione e Lucy: la nota dettata resta sull'iPhone (il Mac la rifiuta con il motivo)")
 
         stato.spegniDimostrazione(avviso: nil)
         controlla(!stato.inDimostrazione && stato.cliente(idVero)?.nome == nomeVero,
-                  "Dimostrazione e Vera: spenta, il cliente vero torna")
+                  "Dimostrazione e Lucy: spenta, il cliente vero torna")
         #endif
     }
 }

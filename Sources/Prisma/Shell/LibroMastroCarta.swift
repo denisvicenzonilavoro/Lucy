@@ -137,7 +137,7 @@ struct LibroMastroCarta: View {
         VStack(spacing: 6) {
             Image(systemName: "doc.text.viewfinder").fontCarta(22, weight: .light)
             Text("Scegli o trascina qui il cedolino").fontCarta(12.5, weight: .medium)
-            Text("Vera lo legge sul Mac: tu confermi le cifre").fontCarta(11).multilineTextAlignment(.center)
+            Text("Lucy lo legge sul Mac: tu confermi le cifre").fontCarta(11).multilineTextAlignment(.center)
         }
         .foregroundColor(sopra ? TemaCarta.Colore.pennaD : TemaCarta.Colore.inchiostro2D)
         .padding(14)

@@ -363,7 +363,7 @@ extension StatoShell {
             return true
         }
         guard let d = polizzaDellaRichiesta(testo, cliente: id) else {
-            rispostaFaseTre("Nei Documenti di \(c.nome) non c'è una polizza o una proposta da leggere: trascinala su Vera e la archivio.",
+            rispostaFaseTre("Nei Documenti di \(c.nome) non c'è una polizza o una proposta da leggere: trascinala su Lucy e la archivio.",
                             titolo: "Cosa non copre", chiave: chiave)
             return true
         }
@@ -375,7 +375,7 @@ extension StatoShell {
         }
         let base = CoperturaVera.copertura(d, pagine: pagine)
         guard base.articoliLetti > 0 else {
-            rispostaFaseTre("In «\(d.titolo)» non trovo articoli numerati: Vera cita ogni limite con il suo articolo, quindi qui non risponde.",
+            rispostaFaseTre("In «\(d.titolo)» non trovo articoli numerati: Lucy cita ogni limite con il suo articolo, quindi qui non risponde.",
                             titolo: "Cosa non copre", chiave: chiave)
             return true
         }
@@ -604,7 +604,7 @@ extension StatoShell {
     /// Una nota vocale trascinata su Vera (m4a, mp3, wav, fino a 60 minuti): con il consenso del cliente alla
     /// registrazione, si trascrive sul Mac e diventa il resoconto del suo ultimo incontro. L'audio non si salva.
     func notaVocale(_ url: URL, chiave: String) {
-        guard !veraInCorso else { return mostraAvviso("Vera sta ancora rispondendo: trascina la nota vocale tra poco.") }
+        guard !veraInCorso else { return mostraAvviso("Lucy sta ancora rispondendo: trascina la nota vocale tra poco.") }
         if !aperta(.vera) { apri(.vera) }
         aggiungiMessaggio(MessaggioVera(autore: .utente, testo: "🎙 \(url.lastPathComponent)"), cliente: chiave, parla: false)
         guard let id = chiave != VeraPortafoglio.chiave && cliente(chiave) != nil ? chiave : nil, let c = cliente(id) else {

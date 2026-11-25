@@ -136,7 +136,7 @@ enum EsameSuMisura {
             impostazioni.fornitore = .ollama
             impostazioni.modelloLocale = modello
             let motore = MotoreLocale(impostazioni, disponibilita: .pronto, sessione: sessione)
-            let chi = indice == 0 ? "Vera di oggi" : "Vera su misura"
+            let chi = indice == 0 ? "Lucy di oggi" : "Lucy su misura"
             avanzamento("Carico la \(chi)…")
             if let motivo = await motore.fornitore.verifica().motivo {
                 esito.errori[modello] = motivo

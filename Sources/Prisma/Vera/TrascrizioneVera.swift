@@ -59,7 +59,7 @@ enum Trascrizioni {
     static func prepara(_ scelta: SceltaRiconoscimento, avviso: @escaping (String) -> Void) async -> Result<TrascrizioneVera, ErroreVera> {
         switch scelta {
         case .dettatura:
-            return .failure(ErroreVera(messaggio: "La dettatura di macOS scrive nel campo di Vera: non si prova qui."))
+            return .failure(ErroreVera(messaggio: "La dettatura di macOS scrive nel campo di Lucy: non si prova qui."))
         case .automatico:
             // Il primo anello della catena; i successivi li decide chi ascolta (VoceShell.problemaAscolto)
             let primo = await prepara(SceltaRiconoscimento.catenaAutomatica.first ?? .classico, avviso: avviso)

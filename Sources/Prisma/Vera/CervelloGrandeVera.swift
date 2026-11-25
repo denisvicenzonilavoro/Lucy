@@ -86,7 +86,7 @@ enum CervelloGrandeVera {
     /// Nessuna richiesta parte: il motore esterno non è collegato. Si cambia solo quando l'utente deciderà di collegarlo.
     static let collegamentoAmmesso = false
     static let nome = "Motore esterno"
-    static let nonCollegato = "Il motore esterno non è collegato: oggi Vera lavora tutta sul Mac."
+    static let nonCollegato = "Il motore esterno non è collegato: oggi Lucy lavora tutta sul Mac."
     /// Le battute di conversazione portate al motore esterno, al massimo.
     static let massimoBattute = 12
 
@@ -116,7 +116,7 @@ enum CervelloGrandeVera {
     static func guardiano(domanda: String, scelta: SceltaVera, storia: [MessaggioVera], inModoCliente: Bool,
                           identificativi: IdentificativiClienti, ammesso: Bool = collegamentoAmmesso) -> EsitoGuardiano {
         guard ammesso else { return .bloccato(nonCollegato) }
-        guard !inModoCliente else { return .bloccato("In modalità cliente risponde solo Vera sul Mac.") }
+        guard !inModoCliente else { return .bloccato("In modalità cliente risponde solo Lucy sul Mac.") }
         guard scelta.modalita == .conversazione, !scelta.conScheda else { return .bloccato("Schede, documenti e numeri restano a Qwen, sul Mac.") }
         let d = domanda.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !d.isEmpty else { return .bloccato("Nessuna domanda.") }
@@ -169,7 +169,7 @@ struct EtichettaMotore: Equatable {
         case .apple: return EtichettaMotore(testo: "Sul Mac · modello Apple", tono: .sulMac)
         case .qwen:
             let nome = motore.hasSuffix(" sul Mac") ? String(motore.dropLast(" sul Mac".count)) : motore
-            if nome == "Vera su misura" { return EtichettaMotore(testo: "Sul Mac · Vera su misura", tono: .sulMac) }
+            if nome == "Lucy su misura" { return EtichettaMotore(testo: "Sul Mac · Lucy su misura", tono: .sulMac) }
             return EtichettaMotore(testo: "Sul Mac · \(nome)" + (m.modalita == .lavoro ? " · dati del cliente" : ""), tono: .sulMac)
         }
     }

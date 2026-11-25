@@ -143,9 +143,9 @@ enum ProvaFalloTu {
             controlla(false, "Registro: «apri una pratica per Elena» diventa un'attività per Marco")
         }
         if case .impossibile(let m) = RegistroStrumenti.prepara(ChiamataStrumento(nome: RegistroStrumenti.studioChilometri, argomenti: ["chilometri": 24]), contesto: x) {
-            controlla(m.contains("Studio"), "Registro: i chilometri di Studio non sono ancora registrabili e Vera lo dice")
+            controlla(m.contains("Studio"), "Registro: i chilometri di Studio non sono ancora registrabili e Lucy lo dice")
         } else {
-            controlla(false, "Registro: i chilometri di Studio non sono ancora registrabili e Vera lo dice")
+            controlla(false, "Registro: i chilometri di Studio non sono ancora registrabili e Lucy lo dice")
         }
         if case .impossibile = RegistroStrumenti.prepara(ChiamataStrumento(nome: "cancella_tutto", argomenti: [:]), contesto: x) {
             controlla(true, "Registro: uno strumento inventato dal modello si scarta")
@@ -154,9 +154,9 @@ enum ProvaFalloTu {
         }
         // Dati mancanti: Vera chiede
         if case .domanda(let d) = RegistroStrumenti.prepara(ChiamataStrumento(nome: RegistroStrumenti.agendaNuovo, argomenti: ["cliente": "Marco"]), contesto: x) {
-            controlla(d.hasPrefix("Per quando"), "Registro: un impegno senza giorno, Vera chiede per quando")
+            controlla(d.hasPrefix("Per quando"), "Registro: un impegno senza giorno, Lucy chiede per quando")
         } else {
-            controlla(false, "Registro: un impegno senza giorno, Vera chiede per quando")
+            controlla(false, "Registro: un impegno senza giorno, Lucy chiede per quando")
         }
         // Il numero di telefono si controlla con regole
         if case .impossibile = RegistroStrumenti.prepara(ChiamataStrumento(nome: RegistroStrumenti.clienteAggiorna, argomenti: ["cliente": "Giulia", "campo": "cellulare", "valore": "abc"]), contesto: x) {
@@ -225,7 +225,7 @@ enum ProvaFalloTu {
         let dopo = s.messaggioVera(m.id)?.conferma
         controlla(dopo?.stato == .eseguita && dopo?.azioni.allSatisfy { $0.esito?.fatta == true } == true
                   && s.conversazione("giulia").last?.testo.hasPrefix("Fatto") == true,
-                  "Fallo tu: la scheda segna le azioni fatte e Vera lo dice")
+                  "Fallo tu: la scheda segna le azioni fatte e Lucy lo dice")
         s.annullaSchedaVera(messaggio: m.id)
         controlla(s.dati.appuntamenti.first { $0.id == "event-laura" }?.inizio == laura.inizio && s.dati.messaggi.count == messaggiPrima
                   && s.messaggioVera(m.id)?.conferma?.stato == .annullata,
@@ -236,7 +236,7 @@ enum ProvaFalloTu {
         controlla(soloTesto.conferma == nil && soloTesto.testo == "Non è un'azione.", "Fallo tu: senza chiamate la risposta resta una frase")
         let nessuno = s.rispondiFalloTu(RispostaConStrumenti(testo: "", chiamate: [ChiamataStrumento(nome: RegistroStrumenti.notaNuova, argomenti: ["cliente": "Topolino", "testo": "ciao"])]),
                                         richiesta: "x", chiave: "giulia", motore: "Qwen sul Mac")
-        controlla(nessuno.conferma == nil && nessuno.testo.contains("Topolino"), "Fallo tu: un cliente inventato non diventa un'azione, Vera lo dice")
+        controlla(nessuno.conferma == nil && nessuno.testo.contains("Topolino"), "Fallo tu: un cliente inventato non diventa un'azione, Lucy lo dice")
     }
 
     // MARK: - La scheda
@@ -334,7 +334,7 @@ enum ProvaFalloTu {
     private static func riconoscimento(_ controlla: (Bool, String) -> Void) {
         let si = ["Sposta l'incontro con Laura di domani alle 10 a giovedì, stessa ora, e avvisala con un messaggio.",
                   "Liberami venerdì pomeriggio", "Il nuovo cellulare di Giulia è 347 555 0182", "Apri una pratica per la protezione di Elena",
-                  "Scrivi a Sofia per il consenso", "La rivalutabile di Sofia scade il 15 gennaio", "Segna 24 chilometri per oggi", "Ok Vera, aggiorna l'email di Marco"]
+                  "Scrivi a Sofia per il consenso", "La rivalutabile di Sofia scade il 15 gennaio", "Segna 24 chilometri per oggi", "Ok Lucy, aggiorna l'email di Marco"]
         let no = ["Quanto ha Giulia nel piano per la casa?", "Cosa ho domani?", "Chi compie 50 anni entro marzo?", "Spiegami il piano pensione",
                   "E se Marco va in pensione a 63 anni?", "Quando scade la polizza di Marco?"]
         let sbagliateSi = si.filter { !FalloTuVera.eUnaRichiesta($0) }
@@ -433,7 +433,7 @@ enum ProvaFalloTu {
             controlla(s.dati.attivita.count == attivita + r1.righe.count, "Clientela: dopo la conferma un'attività per ogni cliente")
         }
         let vuoto = s.rispondiClientela([], domanda: "Chi tifa per la Juventus?", motore: "Qwen", oggi: oggi)
-        controlla(vuoto.clientela == nil && vuoto.testo.contains("Non so ancora"), "Clientela: una domanda che i filtri non coprono, Vera lo dice")
+        controlla(vuoto.clientela == nil && vuoto.testo.contains("Non so ancora"), "Clientela: una domanda che i filtri non coprono, Lucy lo dice")
         s.entraModoCliente()
         controlla(s.chiediClientela("Chi compie 50 anni entro marzo?") && s.conversazione(s.chiaveConversazione).last?.testo.contains("modalità cliente") == true,
                   "Clientela: in modalità cliente non si cerca tra gli altri clienti")

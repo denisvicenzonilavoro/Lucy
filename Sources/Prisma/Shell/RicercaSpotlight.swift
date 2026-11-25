@@ -811,7 +811,7 @@ enum TestiRicercaMac {
     static let fraseVuoto = "Scrivi un nome, un prodotto o una parola. Oppure quello che vuoi fare: «nuovo cliente», «aggiorna»."
     static func nessunRisultato(_ testo: String) -> String { "Nessun risultato per «\(testo)»." }
     static let nessunSotto = "Prova con una parte del nome, o togli un filtro."
-    static let chiediVera = "Chiedilo a Vera"
+    static let chiediVera = "Chiedilo a Lucy"
     static let completaFiltro = "Completa il filtro: per esempio scade:2027, sri>4, canale:alleanza, stato:proposta."
     static let soloMac = "Cerca solo su questo Mac"
     static let esc = "esc"

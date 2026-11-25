@@ -57,7 +57,7 @@ enum ProvaLetteraVera {
                   && utente.contains("LETTERA DI PRISMA") && (ricevuto["think"] as? Bool) == false,
                   "Lettera, Qwen finto: istruzioni fisse, scheda con le cifre di Lucy e la lettera fissa, senza ragionamento")
         controlla(LetteraVera.piano(s, .conPiano, vera: vera).scelta.modalita == .lavoro,
-                  "Lettera: Vera scrive in modalità lavoro (numeri solo da Lucy)")
+                  "Lettera: Lucy scrive in modalità lavoro (numeri solo da Lucy)")
         controlla(primo.autore == .vera && primo.avviso == nil && primo.testo.hasPrefix("Giulia,")
                   && primo.testo.hasSuffix("Giulia, 67 anni") && primo.testo.components(separatedBy: "Giulia, 67 anni").count == 2,
                   "Lettera, Qwen finto: una lettera con le cifre della scheda passa, con la firma di Lucy una volta sola (\(primo.avviso ?? "ok"))")
@@ -84,9 +84,9 @@ enum ProvaLetteraVera {
         // Qwen non pronto: niente richiesta, resta la lettera di Prisma e Vera lo dice
         let spento = MotoreLocale(vera, disponibilita: .nonDisponibile("Ollama non risponde sul Mac."), sessione: sessione)
         let quinto = aspetta { await LetteraVera.scrivi(s, versione: .conPiano, posizioni: [], motore: spento, vera: vera) }
-        controlla(quinto.autore == .modelloFisso && (quinto.avviso ?? "").hasPrefix("Vera non è pronta")
+        controlla(quinto.autore == .modelloFisso && (quinto.avviso ?? "").hasPrefix("Lucy non è pronta")
                   && (quinto.avviso ?? "").contains("la lettera è quella di Lucy"),
-                  "Lettera: se Qwen non è pronto resta la lettera di Lucy e Vera lo dice («\(quinto.avviso ?? "")»)")
+                  "Lettera: se Qwen non è pronto resta la lettera di Lucy e Lucy lo dice («\(quinto.avviso ?? "")»)")
         let senzaMotore = aspetta { await LetteraVera.scrivi(s, versione: .senzaPiano, posizioni: [], motore: nil, vera: vera) }
         controlla(senzaMotore.autore == .modelloFisso && senzaMotore.testo.hasPrefix("Giulia,")
                   && senzaMotore.testo.contains("1.400 euro"),

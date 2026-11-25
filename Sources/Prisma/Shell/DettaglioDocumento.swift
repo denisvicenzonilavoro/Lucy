@@ -335,7 +335,7 @@ struct DettaglioDocumento: View {
         return HStack(spacing: m.spazioBarra) {
             azionePrincipaleVista(compatta: compatta)
             if d.genere != .prisma {
-                PulsanteIcona(simbolo: "sparkles", aiuto: "Apri con Vera: spiega il documento e lo confronta con il dossier") {
+                PulsanteIcona(simbolo: "sparkles", aiuto: "Apri con Lucy: spiega il documento e lo confronta con il dossier") {
                     TestiRinviati.scriviOra()
                     stato.spiegaDocumentoConVera(d.id)
                 }
@@ -385,7 +385,7 @@ struct DettaglioDocumento: View {
         var voci: [VoceMenuAzioni] = []
         if d.genere != .prisma {
             let id = d.id
-            voci.append(VoceMenuAzioni.azione("Apri con Vera", attiva: !stato.veraInCorso && !inLettura) {
+            voci.append(VoceMenuAzioni.azione("Apri con Lucy", attiva: !stato.veraInCorso && !inLettura) {
                 TestiRinviati.scriviOra()
                 stato.spiegaDocumentoConVera(id)
             })

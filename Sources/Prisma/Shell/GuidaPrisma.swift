@@ -101,7 +101,7 @@ enum GuidaTesti {
                           "Tocca un impegno: prima dell’ora lo prepari, dopo dici com’è andato.",
                           "Con un cliente scelto in alto vedi solo i suoi impegni."])
         case .messaggi:
-            return guida("Vera prepara i messaggi ai clienti, li spedisci tu.",
+            return guida("Lucy prepara i messaggi ai clienti, li spedisci tu.",
                          ["Scegli il messaggio a sinistra: con un cliente scelto vedi solo i suoi.",
                           "Rileggi, cambia il tono, scegli se inviarlo con Mail o con Messaggi.",
                           "Dopo averlo aperto, di’ a Lucy se l’hai spedito: resta tra i «Mandati oggi»."])
@@ -123,7 +123,7 @@ enum GuidaTesti {
         case .vera:
             return guida("L’assistente di Lucy: legge i dati e li racconta. Tutto resta su questo Mac.",
                          ["Scrivi, o scegli una delle domande d’esempio.",
-                          "I numeri li calcola Lucy, Vera li spiega.",
+                          "I numeri li calcola Lucy, Lucy li spiega.",
                           "Con un cliente scelto in alto parla di lui."])
         case .impostazioni:
             return guida("Il tuo modo di lavorare: aspetto, dispositivi, backup e le regole del lavoro.",
@@ -221,7 +221,7 @@ enum GuidaTesti {
                 parole: [])
         case .note:
             return AiutoApp(
-                aCosaServe: "Il taccuino: appunti liberi, collegati a una persona se vuoi. Vera li legge per rispondere meglio.",
+                aCosaServe: "Il taccuino: appunti liberi, collegati a una persona se vuoi. Lucy li legge per rispondere meglio.",
                 inBreve: "Gli appunti, collegati ai clienti",
                 passi: ["«Nuova nota».",
                         "Scrivi, e scegli il cliente se riguarda lui.",
@@ -253,10 +253,10 @@ enum GuidaTesti {
                 parole: [.canale, .inEssere])
         case .messaggi:
             return AiutoApp(
-                aCosaServe: "Lucy trova le occasioni per scrivere ai clienti (il riepilogo di un incontro, una scadenza, un compleanno, un consenso da rinnovare, un riesame) e Vera prepara il messaggio con le cifre esatte di Lucy, sul Mac. Lo controlli, lo correggi e lo spedisci tu: niente parte da solo.",
-                inBreve: "Vera prepara i messaggi, tu li spedisci",
+                aCosaServe: "Lucy trova le occasioni per scrivere ai clienti (il riepilogo di un incontro, una scadenza, un compleanno, un consenso da rinnovare, un riesame) e Lucy prepara il messaggio con le cifre esatte di Lucy, sul Mac. Lo controlli, lo correggi e lo spedisci tu: niente parte da solo.",
+                inBreve: "Lucy prepara i messaggi, tu li spedisci",
                 passi: ["A sinistra scegli un'occasione: «Da mandare oggi» o «Questa settimana», con il perché adesso.",
-                        "Scegli il tono (Cordiale, Formale, Breve) e il canale (Mail o Messaggi): Vera scrive, tu correggi il testo se serve.",
+                        "Scegli il tono (Cordiale, Formale, Breve) e il canale (Mail o Messaggi): Lucy scrive, tu correggi il testo se serve.",
                         "«Apri in Mail» o «Apri in Messaggi» lo apre già compilato; in «Campagne» Lucy prepara una bozza per ogni cliente con lo stesso bisogno, e le apri tu una alla volta."],
                 parole: [.canale])
         case .mercato:
@@ -269,7 +269,7 @@ enum GuidaTesti {
                 parole: [.canale])
         case .vera:
             return AiutoApp(
-                aCosaServe: "Vera risponde alle tue domande sui clienti, le posizioni e i documenti. Le cifre le calcola Lucy, Vera le spiega. Funziona sul Mac, senza internet.",
+                aCosaServe: "Lucy risponde alle tue domande sui clienti, le posizioni e i documenti. Le cifre le calcola Lucy, Lucy le spiega. Funziona sul Mac, senza internet.",
                 inBreve: "L'assistente: domande in chat o a voce",
                 passi: ["Scegli il cliente di cui parlare.",
                         "Scrivi la domanda (o premi il microfono).",
@@ -423,7 +423,7 @@ struct PaginaIntroduzione {
             app: [.analisi360, .clienti]),
         PaginaIntroduzione(
             titolo: "Spiegarlo in modo chiaro",
-            testo: "Da **Prospetti e report** esce il documento in PDF: il *prospetto* dettagliato per te, il *report* essenziale da lasciare al cliente. **Vera** risponde alle tue domande e spiega i documenti, con le cifre di Lucy.",
+            testo: "Da **Prospetti e report** esce il documento in PDF: il *prospetto* dettagliato per te, il *report* essenziale da lasciare al cliente. **Lucy** risponde alle tue domande e spiega i documenti, con le cifre di Lucy.",
             punti: [puntoComeSiUsa,
                     "Menu Aiuto › Guida di Lucy (⌘?) per rivedere tutto, quando vuoi."],
             app: [.presentazioni, .vera], conPercorso: true),

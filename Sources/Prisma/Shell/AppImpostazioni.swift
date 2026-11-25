@@ -272,14 +272,14 @@ struct AppImpostazioni: View {
         let pronta = stato.disponibilitaLocale.pronto
         #if os(macOS)
         let vera = stato.dati.impostazioni.vera
-        return TesseraImpostazioni(pagina: .vera, etichetta: "Vera · \(stato.qwen.nome)", valore: vera.modello,
+        return TesseraImpostazioni(pagina: .vera, etichetta: "Lucy · \(stato.qwen.nome)", valore: vera.modello,
                                    nota: pronta ? "Sul Mac, senza internet" : "Qwen non risponde",
                                    stato: Pillola(testo: pronta ? "Pronta" : "Non pronta", tono: pronta ? .ok : .attenzione)) {
             stato.schedaImpostazioni = .vera
         }
         #else
         let abbinato = stato.dati.impostazioni.vera.ponte.abbinato
-        return TesseraImpostazioni(pagina: .vera, etichetta: "Vera", valore: "Qwen sul Mac",
+        return TesseraImpostazioni(pagina: .vera, etichetta: "Lucy", valore: "Qwen sul Mac",
                                    nota: abbinato ? "Abbinata al Mac" : "Da abbinare al Mac",
                                    stato: Pillola(testo: pronta ? "Collegata" : "Non collegata", tono: pronta ? .ok : .attenzione)) {
             stato.schedaImpostazioni = .vera
@@ -356,7 +356,7 @@ struct AppImpostazioni: View {
         }
         #if os(macOS)
         if !stato.disponibilitaLocale.pronto {
-            return ("Vera non è pronta", stato.disponibilitaLocale.motivo ?? "Qwen non risponde", .vera)
+            return ("Lucy non è pronta", stato.disponibilitaLocale.motivo ?? "Qwen non risponde", .vera)
         }
         #endif
         return nil
@@ -468,7 +468,7 @@ struct AppImpostazioni: View {
                 .cascataImpostazioni(3)
                 // «L'acqua risponde» (SfondoAcquaRisposta.swift): gocce al clic, alle notifiche e allo sblocco
                 RigaImpostazione(titolo: "L'acqua della scrivania", sottotitolo: testoAcqua,
-                                 aiuto: "Una goccia al clic sul fondo libero, alle notifiche nuove e allo sblocco; l'acqua vibra piano mentre Vera risponde") {
+                                 aiuto: "Una goccia al clic sul fondo libero, alle notifiche nuove e allo sblocco; l'acqua vibra piano mentre Lucy risponde") {
                     Toggle(isOn: Bindable(stato.dati).impostazioni.acquaDellaScrivania) { EmptyView() }
                         .toggleStyle(.appleSenzaEtichetta)
                         .accessibilityLabel("L'acqua della scrivania")
@@ -542,7 +542,7 @@ struct AppImpostazioni: View {
                 RigaImpostazione(titolo: "Cerca ovunque") { TastiScorciatoia(tasti: ["⌘", "K"]) }
                 RigaImpostazione(titolo: "Torna alla scrivania", sottotitolo: "Riduce tutte le finestre") { TastiScorciatoia(tasti: ["⌥", "0"]) }
                 RigaImpostazione(titolo: "Modalità cliente") { TastiScorciatoia(tasti: ["⌥", "⌘", "M"]) }
-                RigaImpostazione(titolo: "Parla con Vera", sottotitolo: "Di nuovo per mandare la frase", ultima: true) {
+                RigaImpostazione(titolo: "Parla con Lucy", sottotitolo: "Di nuovo per mandare la frase", ultima: true) {
                     TastiScorciatoia(tasti: ["⌥", "⌘", "E"])
                 }
             }
@@ -591,8 +591,8 @@ struct AppImpostazioni: View {
 
     /// «Parlare con Vera» › «Voce e ascolto», chiusa (per ora Vera non parla).
     var gruppoVoceVera: some View {
-        GruppoImpostazioni(titolo: "Parlare con Vera") {
-            rigaApri("Voce e ascolto", "Per ora Vera non parla", aperta: $mostraVoce, ultima: !mostraVoce)
+        GruppoImpostazioni(titolo: "Parlare con Lucy") {
+            rigaApri("Voce e ascolto", "Per ora Lucy non parla", aperta: $mostraVoce, ultima: !mostraVoce)
             if mostraVoce {
                 righeVoce
             }

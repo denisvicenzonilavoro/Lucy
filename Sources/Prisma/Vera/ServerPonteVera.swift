@@ -86,7 +86,7 @@ final class ServerPonteVera: @unchecked Sendable {
         let parametri = NWParameters.tcp
         parametri.includePeerToPeer = false
         guard let a = try? NWListener(using: parametri, on: p == 0 ? .any : (NWEndpoint.Port(rawValue: p) ?? .any)) else {
-            DiagnosticaVoce.annota("Ponte di Vera: la porta \(p) non è libera")
+            DiagnosticaVoce.annota("Ponte di Lucy: la porta \(p) non è libera")
             return
         }
         blocco.lock()
@@ -101,7 +101,7 @@ final class ServerPonteVera: @unchecked Sendable {
                 self.porta = a.port?.rawValue
                 self.blocco.unlock()
             case .failed(let e):
-                DiagnosticaVoce.annota("Ponte di Vera: \(e.localizedDescription)")
+                DiagnosticaVoce.annota("Ponte di Lucy: \(e.localizedDescription)")
                 self.ferma()
             default: break
             }

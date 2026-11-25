@@ -254,7 +254,7 @@ struct VistaBiblioteca: View {
     }
 
     private var nota: some View {
-        Text("La risposta viene solo dal documento: se il testo non dice una cosa, Vera lo scrive.")
+        Text("La risposta viene solo dal documento: se il testo non dice una cosa, Lucy lo scrive.")
             .carattereApple(B.nota)
             .foregroundColor(B.coloreNota)
             .fixedSize(horizontal: false, vertical: true)
@@ -264,7 +264,7 @@ struct VistaBiblioteca: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(spacing: 8) {
                 SferaVera(misura: B.sferaRisposta, pensa: r.stato == .cerca)
-                Text("Vera").carattereApple(B.nomeVera).foregroundColor(C.inchiostro)
+                Text("Lucy").carattereApple(B.nomeVera).foregroundColor(C.inchiostro)
                 Spacer()
                 Text("ho cercato in \(r.pagineCercate) \(r.pagineCercate == 1 ? "pagina" : "pagine")")
                     .carattereApple(B.notaCercate).foregroundColor(C.inchiostro2).monospacedDigit()
@@ -280,7 +280,7 @@ struct VistaBiblioteca: View {
                 case .nonVerificata(let motivo):
                     Text("\(motivo) Guarda il passo evidenziato sulla pagina.")
                 case .senzaVera:
-                    Text("Vera non è pronta: ti mostro la pagina più vicina alla domanda, senza risposta scritta.")
+                    Text("Lucy non è pronta: ti mostro la pagina più vicina alla domanda, senza risposta scritta.")
                 }
             }
             .carattereApple(B.risposta)
@@ -561,7 +561,7 @@ private struct LateraleBiblioteca: View {
         let esempi = documenti.contains { $0.diProva == true }
         var testo = documenti.isEmpty && trova.letture.isEmpty
             ? "Trascina qui i PDF che usi: condizioni, KID, circolari, normativa."
-            : "Trascina qui i PDF che usi. Vera li legge sul Mac e risponde citando documento e pagina."
+            : "Trascina qui i PDF che usi. Lucy li legge sul Mac e risponde citando documento e pagina."
         if esempi { testo += " Testi di esempio." }
         if trova.indice.esclusi > 0 {
             testo += " Indice parziale: \(trova.indice.documenti) di \(trova.indice.documenti + trova.indice.esclusi) documenti."

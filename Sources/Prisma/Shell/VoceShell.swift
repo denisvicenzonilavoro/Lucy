@@ -174,7 +174,7 @@ extension StatoShell {
         DiagnosticaVoce.annota("Dettatura di macOS: nessun campo di testo pronto")
         chiudiDettatura()
         usaDettatura = false
-        avvisoVoce("La dettatura del Mac non è partita: il mio campo non ha preso il cursore. Clicca nel campo e premi il tasto microfono (fn) della tastiera, oppure scegli un altro riconoscimento in Impostazioni › Parlare con Vera.",
+        avvisoVoce("La dettatura del Mac non è partita: il mio campo non ha preso il cursore. Clicca nel campo e premi il tasto microfono (fn) della tastiera, oppure scegli un altro riconoscimento in Impostazioni › Parlare con Lucy.",
                    titolo: "La dettatura del Mac non è partita", breve: "La dettatura del Mac non è partita. Ti ho scritto cosa fare.", poi: nil)
     }
 
@@ -293,6 +293,6 @@ extension StatoShell {
         if dettaturaAttiva { chiudiDettatura() }
         let vera = dati.impostazioni.vera
         voceVera.finito = nil
-        voceVera.di("Ciao \(nomeUtente), sono Vera. Dimmi pure: ti preparo quello che serve.", voce: vera.voce, velocita: vera.velocitaVoce)
+        voceVera.di("Ciao \(nomeUtente), sono Lucy. Dimmi pure: ti preparo quello che serve.", voce: vera.voce, velocita: vera.velocitaVoce)
     }
 }

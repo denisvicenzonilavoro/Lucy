@@ -23,8 +23,8 @@ struct TurnoNotteWidget: View {
         if let r = stato.resocontoNotte, !stato.inModoCliente {
             Button { stato.apri(.vera) } label: { contenuto(r) }
                 .buttonStyle(.plain)
-                .help("Apri Vera: le carte della notte da approvare")
-                .accessibilityHint("Apre Vera")
+                .help("Apri Lucy: le carte della notte da approvare")
+                .accessibilityHint("Apre Lucy")
         }
     }
 

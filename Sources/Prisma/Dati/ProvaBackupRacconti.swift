@@ -113,7 +113,7 @@ extension ProvaBackup {
         let t0 = Date(timeIntervalSinceReferenceDate: 815_017_293)
         let lettere = [
             LetteraFuturo(id: "lettera-prova-g1", clienteId: "giulia", scrittaIl: t0, versione: .conPiano,
-                          testo: "Giulia,\n\nlettera di prova scritta da Vera 4K7M.\n\nGiulia, 67 anni", autore: .vera,
+                          testo: "Giulia,\n\nlettera di prova scritta da Lucy 4K7M.\n\nGiulia, 67 anni", autore: .vera,
                           modello: "qwen3.5:4b", cifre: ["etaTraguardo": "67", "pensioneMensile": "1.730"]),
             LetteraFuturo(id: "lettera-prova-g2", clienteId: "giulia", scrittaIl: t0.addingTimeInterval(61), versione: .senzaPiano,
                           testo: "Giulia,\n\nlettera di prova di Lucy 2R9T.\n\nGiulia, 67 anni", autore: .modelloFisso),
@@ -195,7 +195,7 @@ extension ProvaBackup {
             return "lettere: Giulia dei dati di prova non ha la scheda della lettera con il piano"
         }
         s.dati.lettere = []
-        s.sala.stesureLettera["giulia"] = [.conPiano: TestoLettera(testo: "Giulia,\n\nstesura di Vera di prova 3N5Q.\n\nGiulia, 67 anni",
+        s.sala.stesureLettera["giulia"] = [.conPiano: TestoLettera(testo: "Giulia,\n\nstesura di Lucy di prova 3N5Q.\n\nGiulia, 67 anni",
                                                                    autore: .vera, modello: "qwen3.5:4b", avviso: nil)]
         if s.voceAggiunta(.lettera, cliente: giulia) { s.aggiungiAlPrismaCliente(.lettera, cliente: giulia) }
         s.aggiungiAlPrismaCliente(.lettera, cliente: giulia)

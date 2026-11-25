@@ -106,20 +106,20 @@ enum MessaggiVera {
     static func controlla(_ testo: String, occasione o: OccasioneMessaggio, cliente: Cliente, tono: TonoMessaggio,
                           bozza: TestoMessaggio) -> String? {
         let t = testo.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !t.isEmpty else { return "il testo di Vera è vuoto" }
+        guard !t.isEmpty else { return "il testo di Lucy è vuoto" }
         if t.contains("[") || t.contains("]") || t.contains("{") || t.contains("}") || t.contains("<") || t.contains(">") {
-            return "il testo di Vera ha dei segnaposto da completare"
+            return "il testo di Lucy ha dei segnaposto da completare"
         }
         guard CommentoVera.numeriConservati(bozza: ammessi(o, cliente: cliente, bozza: bozza), testo: t) else {
-            return "il testo di Vera citava una cifra che non è nella scheda"
+            return "il testo di Lucy citava una cifra che non è nella scheda"
         }
         if t.range(of: promesse, options: [.regularExpression, .caseInsensitive]) != nil {
-            return "il testo di Vera prometteva un risultato"
+            return "il testo di Lucy prometteva un risultato"
         }
         if tono == .breve {
-            if (t + bozza.chiusura).count > RegoleMessaggi.caratteriBreve { return "il testo di Vera era troppo lungo" }
+            if (t + bozza.chiusura).count > RegoleMessaggi.caratteriBreve { return "il testo di Lucy era troppo lungo" }
         } else if t.split(whereSeparator: { $0.isWhitespace }).count > RegoleMessaggi.paroleTollerate {
-            return "il testo di Vera era troppo lungo"
+            return "il testo di Lucy era troppo lungo"
         }
         return nil
     }
@@ -174,7 +174,7 @@ enum MessaggiVera {
         // I motivi di DisponibilitaVera finiscono con il punto: qui il punto lo mette la frase
         let m = (motivo ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: ".").union(.whitespaces))
-        return "Vera non è pronta" + (m.isEmpty ? "" : ": \(m)") + ". Resta il testo di Lucy, con le cifre esatte: lo puoi correggere tu."
+        return "Lucy non è pronta" + (m.isEmpty ? "" : ": \(m)") + ". Resta il testo di Lucy, con le cifre esatte: lo puoi correggere tu."
     }
 
     /// Scrive il messaggio con Qwen in streaming (`aggiorna` riceve il testo fin qui, già pulito, da qualunque thread:
@@ -209,7 +209,7 @@ enum MessaggiVera {
             return fisso(bozza, avviso: "Riscrittura interrotta: resta il testo di Lucy.")
         } catch {
             let m = (error as? ErroreVera)?.messaggio ?? error.localizedDescription
-            return fisso(bozza, avviso: "Vera non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
+            return fisso(bozza, avviso: "Lucy non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
         }
     }
 

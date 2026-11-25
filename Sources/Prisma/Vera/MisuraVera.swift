@@ -169,7 +169,7 @@ enum MisuraVera {
 
     /// La tabella in Markdown, per «Copia».
     static func markdown(_ t: Tempi, data: Date = Date()) -> String {
-        var testo = ["### Tempi di Vera · \(t.modello) con \(t.fornitore)", "", "| Misura | Tempo |", "|---|---:|"]
+        var testo = ["### Tempi di Lucy · \(t.modello) con \(t.fornitore)", "", "| Misura | Tempo |", "|---|---:|"]
         for r in righe(t) { testo.append("| \(r.voce) | \(r.valore) |") }
         testo.append("")
         testo.append("Domanda fissa senza dati dei clienti, al massimo \(massimoToken) token; parole al secondo = parole "

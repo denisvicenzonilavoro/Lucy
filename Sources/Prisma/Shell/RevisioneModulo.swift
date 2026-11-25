@@ -156,10 +156,10 @@ private struct ElencoRevisione: View {
                 Button(moduli.aggiungiCasella ? "Tocca la pagina…" : "Aggiungi una casella") { moduli.aggiungiCasella.toggle() }
                     .buttonStyle(.apple)
                 if !nonRiconosciute.isEmpty {
-                    Button(moduli.veraInCorso ? "Vera legge…" : "✦ Chiedi a Vera") { stato.chiediAVeraModulo() }
+                    Button(moduli.veraInCorso ? "Lucy legge…" : "✦ Chiedi a Lucy") { stato.chiediAVeraModulo() }
                         .buttonStyle(.apple)
                         .disabled(moduli.veraInCorso)
-                        .help("A Vera va solo il testo delle etichette del modulo vuoto, nessun dato dei clienti. Le sue proposte restano da confermare.")
+                        .help("A Lucy va solo il testo delle etichette del modulo vuoto, nessun dato dei clienti. Le sue proposte restano da confermare.")
                 }
             }
             HStack(spacing: M.spazioRighe) {

@@ -105,7 +105,7 @@ struct PrimaPaginaWidget: View {
                 colonna("Da chiamare", p.daChiamare.first.map { "\($0.chi): \($0.perche)" }
                         ?? (p.incontri.first.map { "Alle \(Formati.ora.string(from: $0.ora)): \($0.chi)" } ?? "Nessuno oggi."),
                         penna: false)
-                colonna("La nota di Vera", p.notaVera ?? notaDaScadenze(p), penna: true)
+                colonna("La nota di Lucy", p.notaVera ?? notaDaScadenze(p), penna: true)
             }
             .padding(.top, 10)
 

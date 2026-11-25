@@ -245,7 +245,7 @@ enum FiloLungoVera {
     /// Le battute che la storia non porta più al modello (le più vecchie), in ordine.
     static func uscite(_ messaggi: [MessaggioVera], budget: Int) -> [MessaggioVera] {
         let dentro = NucleoVera.storia(messaggi, budget: budget).count
-        let valide = messaggi.filter { !($0.autore == .vera && ($0.motore == "Prisma" || $0.titolo == "Vera non ha potuto rispondere")) }
+        let valide = messaggi.filter { !($0.autore == .vera && ($0.motore == "Prisma" || TestiStatoVera.nonHaPotuto($0.titolo))) }
         guard valide.count > dentro else { return [] }
         return Array(valide.prefix(valide.count - dentro))
     }
@@ -256,7 +256,7 @@ enum FiloLungoVera {
         let righe = uscite.map { m -> String in
             let testo = m.testo.replacingOccurrences(of: "\n", with: " ")
             let massimo = m.autore == .utente ? 200 : 110
-            return "\(m.autore == .utente ? "Tu" : "Vera"): \(testo.count > massimo ? String(testo.prefix(massimo)) + "…" : testo)"
+            return "\(m.autore == .utente ? "Tu" : "Lucy"): \(testo.count > massimo ? String(testo.prefix(massimo)) + "…" : testo)"
         }
         guard righe.reduce(0, { $0 + $1.count + 1 }) > massimoCaratteri else { return righe.joined(separator: "\n") }
         var inizio: [String] = []
@@ -276,11 +276,11 @@ enum FiloLungoVera {
     }
 
     static var istruzioni: String {
-        IstruzioniVera.testo("filo") ?? "Aggiorna il riassunto di una conversazione tra un consulente finanziario e Vera, la sua assistente. Tieni i fatti, le decisioni, le preferenze e le cifre così come sono scritte (non rifare conti, non aggiungere niente). Al massimo dieci righe brevi, in italiano, senza titoli."
+        IstruzioniVera.testo("filo") ?? "Aggiorna il riassunto di una conversazione tra un consulente finanziario e Lucy, la sua assistente. Tieni i fatti, le decisioni, le preferenze e le cifre così come sono scritte (non rifare conti, non aggiungere niente). Al massimo dieci righe brevi, in italiano, senza titoli."
     }
 
     static func messaggi(precedente: String?, nuove: [MessaggioVera]) -> [MessaggioModello] {
-        let battute = nuove.map { ($0.autore == .utente ? "Consulente: " : "Vera: ") + $0.testo }.joined(separator: "\n")
+        let battute = nuove.map { ($0.autore == .utente ? "Consulente: " : "Lucy: ") + $0.testo }.joined(separator: "\n")
         let testo = "RIASSUNTO FIN QUI\n\(precedente ?? "(nessuno)")\n\nBATTUTE DA AGGIUNGERE\n\(battute)\n\nScrivi solo il riassunto aggiornato."
         return [MessaggioModello(ruolo: .sistema, testo: istruzioni), MessaggioModello(ruolo: .utente, testo: testo)]
     }

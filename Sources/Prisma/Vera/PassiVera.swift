@@ -1117,11 +1117,11 @@ enum PassiVera {
         var parti: [String] = []
         if mostraRagionamento {
             let righe = piano.passi.map { p in "\(p.id). \(p.titolo)" + (p.esito.isEmpty ? "" : " — \(p.esito)") }
-            parti.append("Il piano di Vera\n" + righe.joined(separator: "\n"))
+            parti.append("Il piano di Lucy\n" + righe.joined(separator: "\n"))
         }
         if !piano.divisioni.isEmpty {
             let righe = piano.divisioni.map { d -> String in
-                let segno = d.tipo == piano.consigliata ? " (Vera consiglia)" : ""
+                let segno = d.tipo == piano.consigliata ? " (Lucy consiglia)" : ""
                 var r = "• \(d.titolo)\(segno): \(ripartizione(d, piano.richiesta))"
                 let dettagli = [testoProtezione(d, piano.richiesta)].compactMap { $0 } + d.quote.map(testoObiettivo)
                 if !dettagli.isEmpty { r += ". " + dettagli.joined(separator: "; ") }
@@ -1139,7 +1139,7 @@ enum PassiVera {
     static func azioni(_ piano: PianoPassi, cliente c: Cliente) -> [AzioneConferma] {
         var elenco: [AzioneConferma] = []
         if let d = piano.divisioneConsigliata {
-            let nota = "Divisione dei \(piano.richiesta.dicitura) consigliata da Vera: «\(d.titolo)», \(ripartizione(d, piano.richiesta))."
+            let nota = "Divisione dei \(piano.richiesta.dicitura) consigliata da Lucy: «\(d.titolo)», \(ripartizione(d, piano.richiesta))."
             elenco.append(AzioneConferma(strumento: RegistroStrumenti.notaNuova, app: .note, titolo: "Metto «\(d.titolo)» nel taccuino di \(c.nome)",
                                          dettaglio: "«\(nota)» · nel taccuino del cliente",
                                          argomenti: ["cliente": c.id, "testo": nota]))

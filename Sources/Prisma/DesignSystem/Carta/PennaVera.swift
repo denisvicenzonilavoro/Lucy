@@ -51,7 +51,7 @@ struct NotaPennaVista: View {
         .opacity(statoFinale || visibile ? 1 : 0)
         .offset(y: statoFinale || visibile ? 0 : 5)
         .accessibilityElement(children: .combine)
-        .accessibilityLabel("Nota di Vera: \(nota.testo)")
+        .accessibilityLabel("Nota di Lucy: \(nota.testo)")
         .onAppear {
             guard !statoFinale else { return }
             withAnimation(Tema.Apple.Moto.Curva.uscita.animazione(0.6).ritardoPrisma(0.4)) { visibile = true }
@@ -70,7 +70,7 @@ struct PulsanteNoteVera: View {
             Button {
                 stato.noteVeraAccese.toggle()
             } label: {
-                Label("Note di Vera", systemImage: "pencil")
+                Label("Note di Lucy", systemImage: "pencil")
                     .fontCarta(TemaCarta.Penna.pulsante)
                     .padding(.horizontal, 13)
                     .frame(height: TemaCarta.Penna.altezzaPulsante)
@@ -81,10 +81,10 @@ struct PulsanteNoteVera: View {
                     .overlay { Capsule().strokeBorder(acceso ? Color.clear : TemaCarta.Colore.filo2D, lineWidth: 1) }
             }
             .buttonStyle(.plain)
-            .help(acceso ? "Spegni le note di Vera a margine" : "Accendi le note di Vera a margine")
+            .help(acceso ? "Spegni le note di Lucy a margine" : "Accendi le note di Lucy a margine")
             .accessibilityValue(acceso ? "accese" : "spente")
             .accessibilityAddTraits(.isToggle)
-            .accessibilityHint("Mostra o nasconde le note di Vera a margine")
+            .accessibilityHint("Mostra o nasconde le note di Lucy a margine")
         }
     }
 }

@@ -499,7 +499,7 @@ struct DettaglioAttivita: View {
     }
 
     private var azioneVera: some View {
-        PulsanteAzione(titolo: "Chiedi a Vera", simbolo: "sparkles") {
+        PulsanteAzione(titolo: "Chiedi a Lucy", simbolo: "sparkles") {
             stato.clienteAttivoId = attivita.clienteId
             stato.apri(.vera)
         }

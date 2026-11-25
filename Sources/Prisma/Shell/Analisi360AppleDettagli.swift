@@ -436,7 +436,7 @@ private struct PiedeDettaglioArea360: View {
             .disabled(stato.solaLettura)
             .help("Le proposte che le analisi di Lucy suggeriscono per l'area diventano una bozza in Posizioni")
             Button(action: chiediVera) {
-                Text("Chiedi a Vera di spiegarlo")
+                Text("Chiedi a Lucy di spiegarlo")
             }
             .buttonStyle(.appleGrande)
             Spacer(minLength: 0)

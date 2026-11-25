@@ -25,7 +25,7 @@ enum TipoCartaNotte: String, Codable, CaseIterable, Identifiable {
         case .fascicolo: return "Fascicoli degli incontri"
         case .moduli: return "Moduli da firmare"
         case .campagna: return "Una campagna"
-        case .messaggio: return "Bozze dei messaggi con Vera"
+        case .messaggio: return "Bozze dei messaggi con Lucy"
         case .daFinire: return "Da finire"
         }
     }

@@ -116,7 +116,7 @@ enum ProvaFaseDueVera {
                   && MemoriaVera.richiestaEsplicita("Ricorda di chiamare Laura domani") == nil,
                   "Memoria: «ricorda che…» è un ricordo, «ricordami di…» resta un promemoria")
         let proposte = MemoriaVera.proposte(da: "Marco preferisce le videochiamate al mattino. Quanto ha nel fondo?")
-        controlla(proposte == ["Marco preferisce le videochiamate al mattino"], "Memoria: dalla domanda Vera propone il ricordo giusto")
+        controlla(proposte == ["Marco preferisce le videochiamate al mattino"], "Memoria: dalla domanda Lucy propone il ricordo giusto")
 
         // Cifratura
         if let k = MemoriaVera.nuovaChiave(), let altra = MemoriaVera.nuovaChiave() {
@@ -142,25 +142,25 @@ enum ProvaFaseDueVera {
         }
         _ = s.ricordaVera("Ricorda che l'IBAN di Marco è IT60X0542811101000000123456", chiave: "giulia")
         controlla(s.memoriaVera.ricordi.isEmpty && s.conversazione("giulia").last?.testo.contains("IBAN") == true,
-                  "Memoria: un IBAN non si ricorda e Vera lo dice")
+                  "Memoria: un IBAN non si ricorda e Lucy lo dice")
         if let scheda = s.schedaRicordi(da: "Marco preferisce le videochiamate al mattino", chiave: "marco") {
             controlla(scheda.origine == .memoria && scheda.azioni.first?.argomenti["cliente"] == "marco" && s.memoriaVera.ricordi.isEmpty,
-                      "Memoria: Vera propone il ricordo e non lo salva prima del sì")
+                      "Memoria: Lucy propone il ricordo e non lo salva prima del sì")
             var m = MessaggioVera(autore: .vera, testo: "Risposta")
             m.conferma = scheda
             s.aggiungiMessaggio(m, cliente: "marco")
             s.confermaSchedaVera(messaggio: m.id)
             controlla(s.memoriaVera.ricordi.contains { $0.clienteId == "marco" }, "Memoria: con «Ricorda» il ricordo è salvato")
         } else {
-            controlla(false, "Memoria: Vera propone il ricordo dalla domanda")
+            controlla(false, "Memoria: Lucy propone il ricordo dalla domanda")
         }
         _ = s.memoriaVera.ricorda("Preferisco i report in una pagina", cliente: nil, fonte: "in chat")
-        controlla(s.ricordiPerVera(cliente: "marco").count == 2, "Memoria: a Vera vanno i ricordi del cliente e quelli su di te")
+        controlla(s.ricordiPerVera(cliente: "marco").count == 2, "Memoria: a Lucy vanno i ricordi del cliente e quelli su di te")
         s.entraModoCliente()
         controlla(s.ricordiPerVera(cliente: s.clienteAttivoId).allSatisfy { r in s.memoriaVera.ricordi.contains { $0.testo == r && $0.clienteId == s.clienteAttivoId } },
                   "Memoria: in modalità cliente solo i ricordi del cliente davanti a te")
         s.dati.impostazioni.vera.memoriaAttiva = false
-        controlla(s.ricordiPerVera(cliente: "marco").isEmpty, "Memoria: spenta, Vera non usa i ricordi")
+        controlla(s.ricordiPerVera(cliente: "marco").isEmpty, "Memoria: spenta, Lucy non usa i ricordi")
     }
 
     // MARK: - Lezioni
@@ -319,7 +319,7 @@ enum ProvaFaseDueVera {
         controlla(s.letturaTrenta?.finita == true, "Trenta secondi: «Ferma» chiude la lettura")
         s.trentaSecondiDallaScheda("laura")
         controlla(s.conversazione("laura").last?.trenta?.clienteId == "laura" && s.aperta(.vera) && s.clienteAttivoId == "laura",
-                  "Trenta secondi: con un tocco dalla scheda del cliente Vera si apre e racconta")
+                  "Trenta secondi: con un tocco dalla scheda del cliente Lucy si apre e racconta")
     }
 
     // MARK: - Il codice in tasca
@@ -355,7 +355,7 @@ enum ProvaFaseDueVera {
                   "Norme: senza un articolo vero la risposta non vale")
         let no = s.rispondiNorme(#"{"risponde":false,"risposta":"","articoli":[]}"#, domanda: "Ogni quanto aggiorno il questionario?", trovati: trovati, chiave: "giulia", motore: "Qwen")
         controlla(no.norme?.nonRisponde == true && no.testo.contains("La norma non risponde") && no.testo.contains("3 articoli"),
-                  "Norme: se la norma non risponde Vera lo dice, con quanti articoli ha cercato")
+                  "Norme: se la norma non risponde Lucy lo dice, con quanti articoli ha cercato")
         let si = s.rispondiNorme(#"{"risponde":true,"risposta":"Entro trenta giorni.","articoli":["\#(id)"]}"#, domanda: "Entro quanto?", trovati: trovati, chiave: "giulia", motore: "Qwen")
         controlla(si.norme?.citazioni.count == 1, "Norme: nella conversazione la citazione con «Apri l'articolo»")
         if let c = si.norme?.citazioni.first {
@@ -397,7 +397,7 @@ enum ProvaFaseDueVera {
         controlla(s.dati.documenti.count == documenti && s.dati.attivita.count == attivita, "Lascia cadere: «Annulla» toglie documento e promemoria")
         s.veraPortafoglio = true
         let ignoto = s.rispondiDocumentoCaduto(file, pagine: ["Un documento senza nomi"], pagineOCR: 0, chiave: VeraPortafoglio.chiave)
-        controlla(ignoto.conferma == nil && ignoto.testo.contains("non trovo il cliente"), "Lascia cadere: senza cliente riconoscibile Vera lo dice e non archivia")
+        controlla(ignoto.conferma == nil && ignoto.testo.contains("non trovo il cliente"), "Lascia cadere: senza cliente riconoscibile Lucy lo dice e non archivia")
     }
 
     /// «Lascia cadere qui» come nel template: l'estratto conto va in Posizioni (posizioni lette, da confermare), la carta
@@ -460,7 +460,7 @@ enum ProvaFaseDueVera {
         let archiviati = s.archiviatiDaVeraOggi()
         controlla(archiviati.first?.titolo == "Estratto conto ottobre" && archiviati.first?.dove == "Posizioni"
                   && archiviati.first?.dettaglio.contains("posizioni lette") == true,
-                  "Lascia cadere: «Archiviati da Vera oggi» dice che l'estratto conto è andato in Posizioni")
+                  "Lascia cadere: «Archiviati da Lucy oggi» dice che l'estratto conto è andato in Posizioni")
         s.annullaSchedaVera(messaggio: e.id)
         controlla(s.dati.posizioni.count == posizioni && s.archiviatiDaVeraOggi().isEmpty,
                   "Lascia cadere: «Annulla» toglie le posizioni aggiunte e il documento esce dagli archiviati di oggi")
@@ -485,14 +485,14 @@ enum ProvaFaseDueVera {
                   && s.dati.documenti.last?.campi.first { $0.chiave == .scadenza }?.valore == "15/03/2031",
                   "Lascia cadere: dopo «Conferma» la carta d'identità è in anagrafica con numero e scadenza corretta")
         controlla(s.archiviatiDaVeraOggi().first?.dove == "Anagrafica" && s.archiviatiDaVeraOggi().first?.dettaglio.contains("2031") == true,
-                  "Lascia cadere: «Archiviati da Vera oggi» con la carta d'identità in Anagrafica e la scadenza")
+                  "Lascia cadere: «Archiviati da Lucy oggi» con la carta d'identità in Anagrafica e la scadenza")
 
         // Più clienti: si sceglie dalla risposta
         s.veraPortafoglio = true
         let due = s.rispondiDocumentoCaduto(file("Comunicazione.pdf"), pagine: ["Comunicazione per Marco Bianchi e Laura Moretti (fac-simile)"],
                                             pagineOCR: 0, chiave: VeraPortafoglio.chiave)
         controlla(due.titolo == StatoShell.titoloSceltaCaduto && due.conferma == nil && Set(s.scelteClienteCaduto[due.id]?.possibili ?? []) == ["marco", "laura"],
-                  "Lascia cadere: con più clienti nel documento Vera chiede di chi è, con un pulsante per cliente")
+                  "Lascia cadere: con più clienti nel documento Lucy chiede di chi è, con un pulsante per cliente")
         let scelta = s.scegliClienteCaduto(messaggio: due.id, cliente: "laura", chiave: VeraPortafoglio.chiave)
         controlla(scelta?.conferma?.azioni.first?.argomenti["cliente"] == "laura" && s.scelteClienteCaduto[due.id] == nil
                   && s.scegliClienteCaduto(messaggio: due.id, cliente: "marco", chiave: VeraPortafoglio.chiave) == nil,
@@ -514,9 +514,9 @@ enum ProvaFaseDueVera {
         controlla(a.votate == 5 && a.approvate == 3 && a.percentuale == 60 && a.perSettimana.count == AndamentoApprovazioni.settimane
                   && a.perSettimana.last.flatMap { $0 }.map { abs($0 - 2.0 / 3.0) < 0.001 } == true && a.perSettimana[5] == 1
                   && a.perSettimana.compactMap { $0 }.count == 2,
-                  "Lezioni di Vera: approvate al primo colpo e andamento per settimana dai voti veri (\(a.perSettimana))")
+                  "Lezioni di Lucy: approvate al primo colpo e andamento per settimana dai voti veri (\(a.perSettimana))")
         controlla(AndamentoApprovazioni.da([MessaggioVera(autore: .vera, testo: "x")], oggi: oggi).percentuale == nil,
-                  "Lezioni di Vera: senza voti nessuna percentuale")
+                  "Lezioni di Lucy: senza voti nessuna percentuale")
 
         let s = StatoShell(persistente: false)
         s.clienteAttivoId = "giulia"

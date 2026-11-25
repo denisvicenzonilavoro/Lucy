@@ -522,7 +522,7 @@ struct GlossarioVista: View {
         #if os(macOS)
         return "Nessuna parola così."
         #else
-        return "Nessuna parola trovata. Prova con una parte della parola, o chiedi a Vera."
+        return "Nessuna parola trovata. Prova con una parte della parola, o chiedi a Lucy."
         #endif
     }
 

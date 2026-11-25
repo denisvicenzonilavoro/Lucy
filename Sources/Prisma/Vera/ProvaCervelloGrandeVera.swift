@@ -86,12 +86,12 @@ enum ProvaCervelloGrandeVera {
                   "Etichetta: regole e calcoli di Lucy")
         controlla(EtichettaMotore.per(esterno) == EtichettaMotore(testo: "Motore esterno · nessun dato dei clienti", tono: .esterno),
                   "Etichetta: «Motore esterno · nessun dato dei clienti»")
-        controlla(EtichettaMotore.per(suMisura)?.testo == "Sul Mac · Vera su misura", "Etichetta: «Sul Mac · Vera su misura»")
+        controlla(EtichettaMotore.per(suMisura)?.testo == "Sul Mac · Lucy su misura", "Etichetta: «Sul Mac · Lucy su misura»")
         controlla(EtichettaMotore.per(MessaggioVera(autore: .utente, testo: "Ciao")) == nil, "Etichetta: niente sotto i messaggi dell'utente")
         // Regola 3 bloccata: ogni messaggio di Vera con un motore ha la sua etichetta, nei dati di prova di tutte le chat
         let s = StatoShell(persistente: false)
         let senza = s.dati.conversazioni.values.flatMap { $0 }.filter { $0.autore == .vera && ($0.motore ?? "").isEmpty == false && EtichettaMotore.per($0) == nil }
-        controlla(senza.isEmpty, "Etichetta: ogni risposta di Vera con un motore ha l'etichetta")
+        controlla(senza.isEmpty, "Etichetta: ogni risposta di Lucy con un motore ha l'etichetta")
     }
 
     private static func impostazioni(_ controlla: (Bool, String) -> Void) {
@@ -100,7 +100,7 @@ enum ProvaCervelloGrandeVera {
         let testo = ((try? e.encode(ImpostazioniVera())).flatMap { String(data: $0, encoding: .utf8) } ?? "").lowercased()
         let vietate = ["\"chiave", "apikey", "api_key", "token", "password", "segreto", "secret", "\"url"]
         controlla(!testo.isEmpty && !vietate.contains { testo.contains($0) } && testo.contains("motoreesterno"),
-                  "Cervello grande: nessuna chiave, indirizzo o password nelle impostazioni di Vera")
+                  "Cervello grande: nessuna chiave, indirizzo o password nelle impostazioni di Lucy")
         var vera = ImpostazioniVera()
         vera.motoreEsterno.tipo = .servizio
         let d = JSONDecoder()

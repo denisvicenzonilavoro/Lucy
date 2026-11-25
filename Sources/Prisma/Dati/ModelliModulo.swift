@@ -54,7 +54,7 @@ enum OrigineCampoModulo: String, Codable {
         switch self {
         case .acroForm: return "campo del PDF"
         case .regole: return "riconosciuto dalle regole"
-        case .vera: return "proposto da Vera"
+        case .vera: return "proposto da Lucy"
         case .mano: return "segnato da te"
         }
     }

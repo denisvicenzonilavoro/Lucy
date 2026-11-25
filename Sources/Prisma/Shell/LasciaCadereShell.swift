@@ -48,7 +48,7 @@ extension StatoShell {
         let documenti = urls.filter { LetturaDocumenti.estensioniAccettate.contains($0.pathExtension.lowercased()) }
         guard !documenti.isEmpty else { return }
         guard !solaLettura else { return mostraAvviso("Archivio in sola lettura: aggiorna Lucy per archiviare documenti.") }
-        guard !veraInCorso else { return mostraAvviso("Vera sta ancora rispondendo: trascina il documento tra poco.") }
+        guard !veraInCorso else { return mostraAvviso("Lucy sta ancora rispondendo: trascina il documento tra poco.") }
         // Vera si apre prima di tutto: anche la scheda di «Dopo la firma» deve vedersi (apri non cambia la conversazione)
         if !aperta(.vera) { apri(.vera) }
         // «Dopo la firma» aspettava il PDF firmato: il documento diventa il contratto del cliente (CollegaRoutineShell.swift)
@@ -138,7 +138,7 @@ extension StatoShell {
                 return m
             }
             if temporanea { try? FileManager.default.removeItem(at: cartellaCopia) }
-            return rispondi("Ho letto «\(nome)», \(Self.cosa(l.tipo)). Nel documento non trovo il cliente: apri il suo dossier in Vera e trascinalo di nuovo.")
+            return rispondi("Ho letto «\(nome)», \(Self.cosa(l.tipo)). Nel documento non trovo il cliente: apri il suo dossier in Lucy e trascinalo di nuovo.")
         }
         let azioni = LasciaCadereVera.azioni(l, cliente: c, file: copia, testo: testo, oggi: oggi, posizioni: dati.posizioni)
         let scheda = SchedaConfermaVera(richiesta: nome, azioni: azioni, origine: .documento)
@@ -230,7 +230,7 @@ extension StatoShell {
                           area: AreaPosizione(rawValue: arg["area"] ?? "") ?? .investimento, nome: nome)
         p.controvalore = valore
         p.dataValore = data
-        p.note = "Letta con Vera da «\(arg["documento"] ?? "un estratto conto")»" + (arg["isin"].map { ", ISIN \($0)" } ?? "") + "."
+        p.note = "Letta con Lucy da «\(arg["documento"] ?? "un estratto conto")»" + (arg["isin"].map { ", ISIN \($0)" } ?? "") + "."
         dati.posizioni.append(p)
         return EsitoAzioneVera(fatta: true, messaggio: "«\(nome)» è tra le posizioni di \(c.nome).", oggetto: p.id)
     }

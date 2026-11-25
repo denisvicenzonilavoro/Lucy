@@ -284,7 +284,7 @@ enum ProvaCalcoliNotte {
         verifica.vero("Notte: i tipi spenti non nascono", !prepara(d, solo([.documento]), conDati: ["sofia"], occasioni: [o]).contains { $0.tipo != .documento })
         var senzaQwen = ImpostazioniNotte()
         senzaQwen.usaQwen = false
-        verifica.vero("Notte: senza Vera nessuna bozza", !prepara(d, senzaQwen, occasioni: [o]).contains { $0.tipo == .messaggio })
+        verifica.vero("Notte: senza Lucy nessuna bozza", !prepara(d, senzaQwen, occasioni: [o]).contains { $0.tipo == .messaggio })
     }
 
     // MARK: - 6 Id stabili
@@ -408,7 +408,7 @@ enum ProvaCalcoliNotte {
                                        scrivi: { (c: Int) async -> Int? in conti.scritte += 1; return c }, libera: { conti.liberate += 1 })
             return (esito, conti.scritte, conti.liberate)
         }
-        verifica.vero("Notte: Vera non pronta → nessuna bozza, 10 da finire, libera una volta",
+        verifica.vero("Notte: Lucy non pronta → nessuna bozza, 10 da finire, libera una volta",
                       r3.0.fatte.isEmpty && r3.0.daFinire == 10 && r3.0.motivo == .qwenNonPronto && r3.1 == 0 && r3.2 == 1)
 
         // Massimo 0: nessun caricamento

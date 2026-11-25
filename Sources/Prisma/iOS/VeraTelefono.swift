@@ -89,7 +89,7 @@ struct VeraTelefono: View {
     private var avviso: some View {
         let forma = RoundedRectangle(cornerRadius: M.raggioAvviso, style: .continuous)
         return VStack(alignment: .leading, spacing: M.spazio) {
-            Text("Vera usa Qwen del tuo Mac")
+            Text("Lucy usa Qwen del tuo Mac")
                 .carattereApple(M.titoloAvviso)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
             Text(stato.disponibilitaLocale.motivo ?? "Cerco il Mac in rete…")
@@ -201,7 +201,7 @@ struct VeraTelefono: View {
         let forma = Capsule(style: .continuous)
         let vuota = stato.domandaVera.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
         return HStack(alignment: .bottom, spacing: C.spazio) {
-            TextField("Chiedi a Vera…", text: Bindable(stato).domandaVera, axis: .vertical)
+            TextField("Chiedi a Lucy…", text: Bindable(stato).domandaVera, axis: .vertical)
                 .carattereApple(C.testo)
                 .foregroundColor(C.coloreTesto)
                 .lineLimit(1...5)

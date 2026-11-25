@@ -249,7 +249,7 @@ final class AscoltoVera: ObservableObject {
             DiagnosticaVoce.annota("Il riconoscimento non è pronto dopo \(Int(secondi)) s")
             self.lasciaPerdere()
             self.fallimento = .nonPronto
-            self.segnala("Il riconoscimento non è pronto: ho aspettato \(Int(secondi)) secondi. Riprova tra poco; se succede ancora, scegli un altro riconoscimento in Impostazioni › Parlare con Vera.")
+            self.segnala("Il riconoscimento non è pronto: ho aspettato \(Int(secondi)) secondi. Riprova tra poco; se succede ancora, scegli un altro riconoscimento in Impostazioni › Parlare con Lucy.")
         }
     }
 
@@ -336,7 +336,7 @@ final class AscoltoVera: ObservableObject {
 
     /// Tre secondi di microfono senza riconoscimento: pezzi di audio e picco. Separa il microfono dal riconoscimento.
     func provaMicrofono(_ esito: @escaping (String) -> Void) {
-        guard !ascolta else { esito("Vera sta già ascoltando: riprova tra un attimo."); return }
+        guard !ascolta else { esito("Lucy sta già ascoltando: riprova tra un attimo."); return }
         chiediPermessi { [weak self] motivo in
             guard let self else { return }
             if let motivo { esito(motivo); return }
@@ -366,13 +366,13 @@ final class AscoltoVera: ObservableObject {
         #if os(iOS)
         // Su iPhone e iPad la voce di Vera arriva più avanti (microfono e riconoscimento vanno dichiarati e provati):
         // per ora niente richieste di permesso, si dice perché
-        DispatchQueue.main.async { esito("Su iPhone e iPad Vera non ascolta ancora: usa la conversazione a voce da Lucy sul Mac.") }
+        DispatchQueue.main.async { esito("Su iPhone e iPad Lucy non ascolta ancora: usa la conversazione a voce da Lucy sul Mac.") }
         #elseif os(macOS)
-        let microfono = "Vera non ha il permesso di usare il microfono: concedilo in Impostazioni di Sistema › Privacy e sicurezza › Microfono."
+        let microfono = "Lucy non ha il permesso di usare il microfono: concedilo in Impostazioni di Sistema › Privacy e sicurezza › Microfono."
         SFSpeechRecognizer.requestAuthorization { parlato in
             guard parlato == .authorized else {
                 DispatchQueue.main.async {
-                    esito("Vera non ha il permesso di riconoscere la voce: concedilo in Impostazioni di Sistema › Privacy e sicurezza › Riconoscimento vocale.")
+                    esito("Lucy non ha il permesso di riconoscere la voce: concedilo in Impostazioni di Sistema › Privacy e sicurezza › Riconoscimento vocale.")
                 }
                 return
             }

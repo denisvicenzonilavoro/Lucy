@@ -380,28 +380,28 @@ extension RoutineVera {
     /// Le quattro routine del template.
     static func pronte() -> [RoutineVera] {
         let inizio = Date(timeIntervalSinceReferenceDate: 0)
-        let prepara = RoutineVera(id: idPrepara, titolo: "Prepara l'incontro", frase: "Vera, prepara l'incontro con Marco",
+        let prepara = RoutineVera(id: idPrepara, titolo: "Prepara l'incontro", frase: "Lucy, prepara l'incontro con Marco",
                                   // L'oggetto subito dopo il verbo: «prepara un messaggio… dell'appuntamento» o «preparami il resoconto
                                   // dell'incontro» restano a «Fallo tu» e al resoconto
                                   inneschi: [#"\bprepara(?:mi)? (?:l'|il |la |lo )?(?:incontro|appuntamento|colloquio|riunione|scaletta)\b"#],
                                   passi: [PassoRoutine(.schedaCliente), PassoRoutine(.ultimoIncontro), PassoRoutine(.scadenzeCliente),
                                           PassoRoutine(.cosaManca), PassoRoutine(.scaletta)],
                                   pronta: true, creataIl: inizio)
-        let lunedi = RoutineVera(id: idLunedi, titolo: "Il mio lunedì", frase: "Vera, com'è la settimana?",
+        let lunedi = RoutineVera(id: idLunedi, titolo: "Il mio lunedì", frase: "Lucy, com'è la settimana?",
                                  inneschi: [#"\bcom'(?:è|e) (?:la|questa) (?:mia )?settimana\b"#, #"\bcome (?:va|è|e'|sarà) (?:la|questa) (?:mia )?settimana\b"#,
                                             #"\bil mio lunedì\b"#, #"\bla mia settimana\b"#, #"\bcosa (?:c'è|ho) questa settimana\b"#],
                                  passi: [PassoRoutine(.agendaSettimana), PassoRoutine(.buchiSettimana), PassoRoutine(.promesseScadenze),
                                          PassoRoutine(.mossaSettimana)],
                                  programmazione: ProgrammazioneRoutine(tipo: .settimanale, giorno: 2, ora: 8, minuto: 30),
                                  pronta: true, creataIl: inizio)
-        let fineMese = RoutineVera(id: idFineMese, titolo: "Fine mese", frase: "Vera, chiudiamo il mese",
+        let fineMese = RoutineVera(id: idFineMese, titolo: "Fine mese", frase: "Lucy, chiudiamo il mese",
                                    // «Fine mese» da sola; dentro una domanda («quali promesse scadono a fine mese?») resta agli altri motori
                                    inneschi: [#"\bchiud(?:iamo|i|ere) il mese\b"#, #"^(?:la |a )?fine (?:del )?mese$"#, #"\bchiusura del mese\b"#],
                                    passi: [PassoRoutine(.parcelleMese), PassoRoutine(.chilometriMese), PassoRoutine(.fattureDaEmettere),
                                            PassoRoutine(.scadenzeMeseDopo)],
                                    programmazione: ProgrammazioneRoutine(tipo: .fineMese, ora: 17, minuto: 30),
                                    pronta: true, creataIl: inizio)
-        let firma = RoutineVera(id: idDopoFirma, titolo: "Dopo la firma", frase: "Vera, ho firmato con Giulia",
+        let firma = RoutineVera(id: idDopoFirma, titolo: "Dopo la firma", frase: "Lucy, ho firmato con Giulia",
                                 inneschi: [innescoFirma],
                                 passi: [PassoRoutine(.archiviaContratto), PassoRoutine(.aggiornaPosizioni),
                                         PassoRoutine(.fissaControllo, mesi: mesiControllo), PassoRoutine(.messaggioBenvenuto)],
@@ -431,7 +431,7 @@ extension RoutineVera {
     }
 
     /// Le parole con la maiuscola dopo «con/di/per» che non sono nomi di clienti (Vera stessa, i canali).
-    private static let nonNomi: Set<String> = ["vera", "ruby", "eve", "alleanza", "prisma", "denis"]
+    private static let nonNomi: Set<String> = ["lucy", "vera", "ruby", "eve", "alleanza", "prisma", "denis"]
 
     /// true se la frase originale nomina qualcuno con la maiuscola dopo «con», «di» o «per» (già sappiamo che non è
     /// un cliente: `clientiNominati` non l'ha trovato).
@@ -1162,9 +1162,9 @@ extension RoutineVera {
         if let p, x.dati.documenti.contains(where: { $0.clienteId == c.id && $0.posizioneId == p.id && $0.tipo == .polizza }) {
             return EsitoPassoRoutine(tipo: .archiviaContratto, titolo: titolo, dettaglio: "Il contratto di «\(nomePosizione(p))» è già nei Documenti", stato: .fatto, fonte: "Documenti")
         }
-        l.righe.append("Contratto: trascinalo su Vera e lo archivio nella scheda di \(primoNome(c.nome))")
+        l.righe.append("Contratto: trascinalo su Lucy e lo archivio nella scheda di \(primoNome(c.nome))")
         return EsitoPassoRoutine(tipo: .archiviaContratto, titolo: titolo,
-                          dettaglio: "Trascina su Vera il PDF firmato: lo archivio nella scheda di \(c.nome) · Documenti", stato: .inAttesa, fonte: "Documenti")
+                          dettaglio: "Trascina su Lucy il PDF firmato: lo archivio nella scheda di \(c.nome) · Documenti", stato: .inAttesa, fonte: "Documenti")
     }
 
     /// «550 € al mese», «12.000 € premio unico».
@@ -1385,7 +1385,7 @@ extension RoutineVera {
 
     private static func nuova(titolo: String, frase: String?, passi: [PassoRoutine], programmazione voluta: ProgrammazioneRoutine?, oggi: Date) -> RoutineVera {
         let prog = programmazioneTenuta(voluta, passi: passi)
-        let lancio = frase ?? (prog?.tipo == .dopoFirma ? "Vera, ho firmato con…" : "Vera, \(minuscola(titolo))")
+        let lancio = frase ?? (prog?.tipo == .dopoFirma ? "Lucy, ho firmato con…" : "Lucy, \(minuscola(titolo))")
         return RoutineVera(id: "routine-\(UUID().uuidString.prefix(8).lowercased())", titolo: titolo, frase: lancio,
                            inneschi: inneschiDa(titolo: titolo, frase: lancio, programmazione: prog),
                            passi: passi, programmazione: prog, creataIl: oggi)

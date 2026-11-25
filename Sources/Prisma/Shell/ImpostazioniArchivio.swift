@@ -198,7 +198,7 @@ extension AppImpostazioni {
                 .fixedSize()
                 .disabled(stato.backupInCorso || stato.inDimostrazione)
                 .help(stato.inDimostrazione ? TestiDimostrazione.backupFermo
-                                            : "Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Vera")
+                                            : "Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Lucy")
         }
         .padding(k.padding)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -220,7 +220,7 @@ extension AppImpostazioni {
         let b = stato.dati.impostazioni.backup
         if let e = b.ultimoErrore, !stato.backupInCorso { return e }
         if b.ultimo == nil && !stato.backupInCorso { return "Il primo backup protegge tutto il lavoro fatto finora." }
-        let contenuto = "Clienti, agenda, posizioni, documenti e impostazioni di Vera"
+        let contenuto = "Clienti, agenda, posizioni, documenti e impostazioni di Lucy"
         return b.cifrato ? contenuto + " · cifrato" : contenuto
     }
 

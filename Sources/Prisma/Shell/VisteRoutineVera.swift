@@ -127,7 +127,7 @@ struct RoutineEsitoVista: View {
         .accessibilityElement(children: .combine)
     }
 
-    static let avvisoBozzaPersa = "La bozza si conferma nella chat di Vera, e quella conversazione non c'è più: rilancia la routine"
+    static let avvisoBozzaPersa = "La bozza si conferma nella chat di Lucy, e quella conversazione non c'è più: rilancia la routine"
 
     private var risultato: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -358,7 +358,7 @@ struct RoutineVeraPagina: View {
                     .toggleStyle(.switch)
                     // In modalità cliente le routine del consulente non si accendono né si spengono
                     .disabled(stato.solaLettura || stato.inModoCliente)
-                    .help("Spenta, Vera non la riconosce e non la lancia da sola")
+                    .help("Spenta, Lucy non la riconosce e non la lancia da sola")
             }
             HStack(spacing: 8) {
                 lancia(r)
@@ -376,7 +376,7 @@ struct RoutineVeraPagina: View {
             Button("Annulla", role: .cancel) {}
             Button("Togli", role: .destructive) { stato.eliminaRoutine(r.id) }
         } message: {
-            Text("Vera non la riconoscerà più. I lanci passati non cambiano.")
+            Text("Lucy non la riconoscerà più. I lanci passati non cambiano.")
         }
     }
 
@@ -420,7 +420,7 @@ struct RoutineVeraPagina: View {
                 }
                 .padding(.vertical, Tema.Apple.routineSpazioPasso)
             }
-            Text("Vera esegue i passi con gli strumenti di Lucy: le cifre le calcola Lucy, e niente cambia senza «Conferma».")
+            Text("Lucy esegue i passi con gli strumenti di Lucy: le cifre le calcola Lucy, e niente cambia senza «Conferma».")
                 .carattereApple(F.nota).foregroundColor(F.coloreDettaglio).padding(.top, 8)
         }
     }

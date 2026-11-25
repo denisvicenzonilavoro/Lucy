@@ -18,7 +18,7 @@ enum Parole {
     /// Il solo pulsante per presentare (spariscono: «Modalità cliente», «Presenta al cliente», «Presenta all'incontro»).
     static let mostraAlCliente = "Mostra al cliente"
     /// L'assistente (spariscono in vista: «Eve», «Ruby», «Qwen»; l'etichetta del motore sotto le risposte resta).
-    static let vera = "Vera"
+    static let vera = "Lucy"
     /// Il pulsante che prepara un incontro (spariscono: «Prepara con Eve», «Prepara l'incontro»).
     static let preparamiIncontro = "Preparami l'incontro"
     /// Lo spunto di Vera per l'incontro (miglioria 9): sul Mac «Preparami l'incontro», su iPhone e iPad come prima.

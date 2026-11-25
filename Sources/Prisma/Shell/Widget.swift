@@ -524,7 +524,7 @@ private struct CorpoWidgetCliente: View, Equatable {
                         stato.apri(.posizioni, da: originePosizioni.punto)
                     }
                     .misuraOrigine(originePosizioni)
-                    Button("Chiedi a Vera") { stato.apri(.vera, da: origineVera.punto) }
+                    Button("Chiedi a Lucy") { stato.apri(.vera, da: origineVera.punto) }
                         .misuraOrigine(origineVera)
                 }
                 .buttonStyle(StileVetro())
@@ -606,7 +606,7 @@ struct WidgetVera: View {
             HStack(spacing: Tema.Misura.Shell.rigaSpazio) {
                 IconaApp(app: .vera, lato: Tema.Misura.Shell.iconaVera)
                 VStack(alignment: .leading, spacing: Tema.Misura.Shell.rigaTestoSpazio) {
-                    Text("Ritrova il filo con Vera.")
+                    Text("Ritrova il filo con Lucy.")
                         .font(Tema.Testo.Shell.titoloVera)
                         .foregroundColor(Tema.Colore.inchiostro)
                     Text(stato.veraPortafoglio ? "Il tuo portafoglio, chi ricontattare, le scadenze" : "Incontri, sintesi e prossimi passi")

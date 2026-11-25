@@ -892,7 +892,7 @@ struct LettoreDocumento: View {
         let collegati = stato.bersagli(d)
         var voci: [VoceMenuAzioni] = [
             VoceMenuAzioni.azione(TestiDocumenti.mostraIlTesto, spuntata: mostraTesto) { mostraTesto.toggle() },
-            VoceMenuAzioni.azione("Apri con Vera", attiva: !stato.veraInCorso && !inLettura) {
+            VoceMenuAzioni.azione("Apri con Lucy", attiva: !stato.veraInCorso && !inLettura) {
                 TestiRinviati.scriviOra()
                 stato.spiegaDocumentoConVera(id)
             },

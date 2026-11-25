@@ -214,9 +214,9 @@ enum TestiDaSistemare {
         "L’ultima copia è di \(Formati.giornoRelativo(ultimo))" + (protetto ? ", protetta da password." : ".")
     }
 
-    static let veraNonPronta = "Vera non è pronta"
-    static let veraNonProntaSpiegazione = TestiStatoVera.inVista(mac: "Vera non risponde ancora sul Mac.", altrove: "Qwen non risponde sul Mac.")
-    static let veraPronta = "Vera è pronta"
+    static let veraNonPronta = "Lucy non è pronta"
+    static let veraNonProntaSpiegazione = TestiStatoVera.inVista(mac: "Lucy non risponde ancora sul Mac.", altrove: "Qwen non risponde sul Mac.")
+    static let veraPronta = "Lucy è pronta"
     static let veraProntaSpiegazione = "Risponde dal Mac: niente esce da qui."
 
     static let promemoriaSpenti = "I promemoria sono spenti"

@@ -43,14 +43,14 @@ struct MotoreSintesi: MotoreVera {
             if let s = SpuntoVera.argomento(r.domanda) {
                 let risposta = componi(RichiestaVera(domanda: s.domanda, spunto: s, fonte: f, storia: []))
                 return RispostaVera(titolo: risposta.titolo, testo: risposta.testo
-                    + "\n\nHo letto la domanda come «\(s.domanda)». " + TestiStatoVera.inVista(mac: "Per le domande libere serve che Vera sia pronta sul Mac.",
+                    + "\n\nHo letto la domanda come «\(s.domanda)». " + TestiStatoVera.inVista(mac: "Per le domande libere serve che Lucy sia pronta sul Mac.",
                                                                 altrove: "Per le domande libere serve Qwen sul Mac."),
                     proposte: risposta.proposte)
             }
             var risposta = riepilogo(f)
             risposta.titolo = "Ecco cosa trovo nel dossier"
             return RispostaVera(titolo: risposta.titolo, testo: risposta.testo
-                + "\n\n" + TestiStatoVera.inVista(mac: "Per capire domande libere serve che Vera sia pronta sul Mac.",
+                + "\n\n" + TestiStatoVera.inVista(mac: "Per capire domande libere serve che Lucy sia pronta sul Mac.",
                                         altrove: "Per capire domande libere serve Qwen sul Mac.")
                 + " Intanto puoi usare gli spunti qui sotto.")
         }

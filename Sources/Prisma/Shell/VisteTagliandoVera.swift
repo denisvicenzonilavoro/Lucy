@@ -160,7 +160,7 @@ struct PaginaTagliandoVista: View {
                 .help(e.azioni.isEmpty ? "Le voci rimaste si sistemano dalla loro scheda" : "Tutte le correzioni in una scheda «Conferma»")
                 .padding(.top, G.sopraSistema)
             Spacer(minLength: G.sopraSistema)
-            Text("Vera non cancella mai nulla da sola: ogni correzione passa da te.")
+            Text("Lucy non cancella mai nulla da sola: ogni correzione passa da te.")
                 .carattereApple(G.nota).foregroundColor(C.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -399,7 +399,7 @@ struct TagliandoChatVista: View {
                             .disabled(stato.solaLettura)
                     }
                 }
-                Text("Vera non cancella mai nulla da sola: ogni correzione passa da te.")
+                Text("Lucy non cancella mai nulla da sola: ogni correzione passa da te.")
                     .carattereApple(G.nota).foregroundColor(C.inchiostro2)
             }
             .padding(.top, G.sopraScheda)
@@ -560,7 +560,7 @@ struct GruppoTagliandoImpostazioni: View {
         let minuto = stato.dati.impostazioni.tagliando.minuto
         GruppoImpostazioni(titolo: "Il tagliando dei dati") {
             RigaImpostazione(titolo: "Controllo notturno", sottotitolo: "Doppioni, campi vuoti, consensi e documenti.",
-                             aiuto: "Ogni notte, con Lucy aperta sul Mac, Vera controlla l'archivio. Se una notte salta, il controllo parte alla prima apertura. Ogni correzione passa da te: nulla si cancella da solo") {
+                             aiuto: "Ogni notte, con Lucy aperta sul Mac, Lucy controlla l'archivio. Se una notte salta, il controllo parte alla prima apertura. Ogni correzione passa da te: nulla si cancella da solo") {
                 Toggle(isOn: imp.attivo) { EmptyView() }
                     .toggleStyle(.appleSenzaEtichetta)
             }

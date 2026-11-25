@@ -137,8 +137,8 @@ enum TestiCollegamenti {
 
     static let dati = "I dati"
     static let datiSotto = "Copia cifrata in iCloud Drive: lavori anche con il Mac spento."
-    static let vera = "Vera"
-    static let veraSotto = "iPhone e iPad usano Vera del Mac, dalla rete di casa."
+    static let vera = "Lucy"
+    static let veraSotto = "iPhone e iPad usano Lucy del Mac, dalla rete di casa."
     static let inquadra = "Inquadra un documento"
     static let inquadraSotto = "Con la fotocamera dell’iPhone, da Posizioni."
     static let notaVoce = "Nota a voce"
@@ -148,7 +148,7 @@ enum TestiCollegamenti {
 
     static let schedaOcchiello = "Collega un dispositivo"
     static let schedaTitolo = "Apri Lucy sull’iPhone o sull’iPad e scrivi questo codice"
-    static let schedaFrase = "Si fa una volta sola: vale per Vera, per inquadrare i documenti, per le note a voce e per il tavolo."
+    static let schedaFrase = "Si fa una volta sola: vale per Lucy, per inquadrare i documenti, per le note a voce e per il tavolo."
     static let schedaDati = "Per i dati serve anche la passphrase della copia cifrata, che scegli accendendo «I dati»."
     static let nuovoCodice = "Nuovo codice"
     static let nuovoCodiceAiuto = "Il codice vecchio smette di valere: va riscritto su iPhone e iPad"

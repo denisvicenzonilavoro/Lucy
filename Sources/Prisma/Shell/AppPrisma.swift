@@ -121,7 +121,7 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .messaggi: return "Messaggi"
         case .mercato: return "Mercato"
         case .studio: return "Studio"
-        case .vera: return "Vera"
+        case .vera: return "Lucy"
         case .ricerca: return "Ricerca"
         case .impostazioni: return "Impostazioni"
         case .territorio: return "Territorio"
@@ -155,7 +155,7 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .note: return "Le parole da ricordare"
         case .documenti: return "Tutto al proprio posto"
         case .presentazioni: return "Il dettaglio per te, l'essenziale per il cliente"
-        case .messaggi: return "Vera prepara, tu spedisci"
+        case .messaggi: return "Lucy prepara, tu spedisci"
         case .mercato: return "Quote, tassi e chi è toccato"
         case .studio: return "Il tuo lavoro, come un portafoglio"
         case .vera: return "Un filo tra le tue app"
@@ -190,7 +190,7 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .note: return "Taccuino personale"
         case .documenti: return "Archivio Lucy"
         case .presentazioni: return "Una prospettiva condivisa"
-        case .messaggi: return "Vera prepara, tu spedisci"
+        case .messaggi: return "Lucy prepara, tu spedisci"
         // Nella testata l'occhiello lo scrive il motore del mercato (OcchielloMercato: «Aggiornato oggi alle 18:00»,
         // «Mai aggiornato»); questo resta per chi legge l'occhiello fisso dell'app
         case .mercato: return "Tassi, indici e quote, con la loro fonte"
@@ -252,7 +252,7 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .messaggi: return "Messaggi"
         case .mercato: return "Mercato"
         case .studio: return "Studio"
-        case .vera: return "Vera"
+        case .vera: return "Lucy"
         case .ricerca: return "Ricerca"
         case .impostazioni: return "Impostazioni"
         // Le quattro icone di «Luce» (Design/Icone/genera-icone.js, dal template della versione)
@@ -273,17 +273,17 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
             return "Il cuore di Lucy: le posizioni dei clienti, in essere e in proposta, con il canale Alleanza / indipendente sempre in vista."
         case .analisi360, .prodotti, .confronti, .simulazioni, .obiettivi:
             return "Fa parte del modulo Posizioni, il cuore di Lucy, con il canale Alleanza / indipendente sempre in vista."
-        case .vera: return "Vera arriva con il suo modulo: lettura dei documenti, estrazione dei dati e risposte in chat, tutto sul Mac."
+        case .vera: return "Lucy arriva con il suo modulo: lettura dei documenti, estrazione dei dati e risposte in chat, tutto sul Mac."
         case .documenti: return "KID, polizze ed estratti conto letti sul Mac, con i dati da confermare."
         case .presentazioni: return "Prospetti dettagliati per il consulente e report essenziali per il cliente, in PDF."
         case .messaggi:
-            return "Vera preparerà i messaggi ai clienti (scadenze, riesami, auguri) dai dati di Lucy, sul Mac: li leggerai, li correggerai e li spedirai tu."
+            return "Lucy preparerà i messaggi ai clienti (scadenze, riesami, auguri) dai dati di Lucy, sul Mac: li leggerai, li correggerai e li spedirai tu."
         case .mercato:
             return "Quote dei fondi, tassi e indici aggiornati, con gli avvisi e i clienti toccati da ogni movimento."
         case .studio: return "Il cruscotto del tuo lavoro: ricavi, obiettivi dell'anno, proposte e incassi."
         case .note: return "Appunti, dettagli e prossimi passi, collegati alle persone."
         case .ricerca: return "Clienti, posizioni, documenti, agenda e attività in un'unica ricerca (⌘K)."
-        case .impostazioni: return "Profilo, backup manuale e settimanale, ripristino e impostazioni di Vera."
+        case .impostazioni: return "Profilo, backup manuale e settimanale, ripristino e impostazioni di Lucy."
         // «Luce»: le quattro app nuove, il cui contenuto arriva nei giri successivi
         case .territorio:
             return "I clienti come luci sulla mappa della tua zona, la crescita negli anni e il giro di domani, con distanze stimate sul Mac."

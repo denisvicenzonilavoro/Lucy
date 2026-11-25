@@ -699,7 +699,7 @@ private struct TileFinali: View {
             if vera {
                 HStack(spacing: Tema.Apple.Pratiche.Moduli.spazioMedio) {
                     SferaVera(misura: M.sferaVera, viva: true)
-                    Text("Vera")
+                    Text("Lucy")
                         .carattereApple(M.nomeVera)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
                 }

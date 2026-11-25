@@ -118,7 +118,7 @@ extension StatoShell {
                     // Nuova conversazione: la risposta interrotta non resta
                 } catch {
                     self.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: error.localizedDescription,
-                                                        titolo: "Vera non ha potuto rispondere", motore: motore.nome), cliente: chiave)
+                                                        titolo: "Lucy non ha potuto rispondere", motore: motore.nome), cliente: chiave)
                 }
                 self.veraInCorso = false
                 self.compitoVera = nil
@@ -345,7 +345,7 @@ extension StatoShell {
             x.titolo = arg["titolo"] ?? RegistroStrumenti.titoloImpegno(x.tipo, cliente: c.nome)
             x.durataMinuti = Int(arg["durata"] ?? "") ?? 60
             x.luogo = arg["luogo"] ?? "In studio"
-            x.note = "Fissato con Vera."
+            x.note = "Fissato con Lucy."
             dati.appuntamenti.append(x)
             return EsitoAzioneVera(fatta: true, messaggio: "«\(x.titolo)» è in agenda \(DateItaliane.descrivi(inizio, conOra: true, oggi: oggi)).", oggetto: x.id)
 
@@ -362,7 +362,7 @@ extension StatoShell {
             let motivo = arg["motivo"] ?? ""
             let x = Appuntamento(id: "event-\(UUID().uuidString.prefix(8).lowercased())", clienteId: "",
                                  titolo: motivo.isEmpty ? "Non disponibile" : "Non disponibile · \(motivo)", inizio: inizio,
-                                 durataMinuti: Int(arg["durata"] ?? "") ?? 60, luogo: "", note: "Bloccato con Vera.", stato: .pianificato, tipo: .nonDisponibile)
+                                 durataMinuti: Int(arg["durata"] ?? "") ?? 60, luogo: "", note: "Bloccato con Lucy.", stato: .pianificato, tipo: .nonDisponibile)
             dati.appuntamenti.append(x)
             return EsitoAzioneVera(fatta: true, messaggio: "\(DateItaliane.descrivi(inizio, conOra: false, oggi: oggi).prefix(1).uppercased() + DateItaliane.descrivi(inizio, conOra: false, oggi: oggi).dropFirst()) dalle \(Formati.ora.string(from: x.inizio)) alle \(Formati.ora.string(from: x.fine)) sei «Non disponibile».", oggetto: x.id)
 
@@ -370,7 +370,7 @@ extension StatoShell {
             guard let id = arg["cliente"], let c = cliente(id), let titolo = arg["titolo"] else { return no("Non ho trovato il cliente dell'attività.") }
             var t = Attivita.nuova(clienteId: id, scadenza: RegistroStrumenti.daIso(arg["scadenza"]) ?? oggi)
             t.titolo = titolo
-            t.note = "Chiesta a Vera."
+            t.note = "Chiesta a Lucy."
             dati.attivita.append(t)
             return EsitoAzioneVera(fatta: true, messaggio: "«\(titolo)» è tra le attività di \(c.nome).", oggetto: t.id)
 
@@ -451,12 +451,12 @@ extension StatoShell {
             return EsitoAzioneVera(fatta: true, messaggio: "Il simulatore è aperto.")
 
         case RegistroStrumenti.memoriaRicorda:
-            guard dati.impostazioni.vera.memoriaAttiva else { return no("La memoria di Vera è spenta (Impostazioni › Vera).") }
+            guard dati.impostazioni.vera.memoriaAttiva else { return no("La memoria di Lucy è spenta (Impostazioni › Lucy).") }
             guard let testo = arg["testo"] else { return no("Non c'è niente da ricordare.") }
             if let motivo = MemoriaVera.vietato(testo) { return no(motivo) }
             let gia = Set(memoriaVera.ricordi.map(\.id))
             guard let r = memoriaVera.ricorda(testo, cliente: arg["cliente"], fonte: arg["fonte"] ?? "in chat") else {
-                return no(memoriaVera.bloccata ? "La memoria non si apre su questo Mac: sbloccala da Impostazioni › Vera." : "Non l'ho ricordato.")
+                return no(memoriaVera.bloccata ? "La memoria non si apre su questo Mac: sbloccala da Impostazioni › Lucy." : "Non l'ho ricordato.")
             }
             // Un ricordo che c'era già: «Annulla» non deve cancellare quello vecchio
             if gia.contains(r.id) { return EsitoAzioneVera(fatta: true, messaggio: "Lo ricordavo già: «\(r.testo)».", oggetto: nil, prima: "gia") }
@@ -601,7 +601,7 @@ extension StatoShell {
                 } catch is CancellationError {
                 } catch {
                     self.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: error.localizedDescription,
-                                                        titolo: "Vera non ha potuto rispondere", motore: motore.nome), cliente: chiave)
+                                                        titolo: "Lucy non ha potuto rispondere", motore: motore.nome), cliente: chiave)
                 }
                 self.veraInCorso = false
                 self.compitoVera = nil

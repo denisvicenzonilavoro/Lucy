@@ -38,11 +38,11 @@ extension ProvaBackup {
     static func verificaFaseCinqueVera(originale: DatiPrisma, estratto: DatiPrisma) throws -> String? {
         let vera = originale.impostazioni.vera
         guard vera.suMisura.versioni.count == 2, vera.motoreEsterno.tipo == .servizio else {
-            return "l'archivio di prova non ha i dati della fase 5 di Vera"
+            return "l'archivio di prova non ha i dati della fase 5 di Lucy"
         }
         guard estratto.impostazioni.vera.suMisura == vera.suMisura, estratto.impostazioni.vera.motoreEsterno == vera.motoreEsterno,
               estratto.impostazioni.vera.modelloLocale == vera.modelloLocale else {
-            return "le versioni di Vera su misura o il tipo di motore esterno non tornano uguali dal backup"
+            return "le versioni di Lucy su misura o il tipo di motore esterno non tornano uguali dal backup"
         }
 
         // Scrittura a pezzi: stanno nelle impostazioni (indice) e tornano uguali
@@ -53,7 +53,7 @@ extension ProvaBackup {
         try ScrittorePezzi(cartella: cartella).scrivi(originale)
         let letto = try ArchivioPezzi.leggi(ArchivioPezzi.cartellaPezzi(in: cartella)).lettura.dati
         guard letto.impostazioni.vera.suMisura == vera.suMisura, letto.impostazioni.vera.motoreEsterno == vera.motoreEsterno else {
-            return "Vera su misura o il motore esterno non tornano uguali dall'archivio a pezzi"
+            return "Lucy su misura o il motore esterno non tornano uguali dall'archivio a pezzi"
         }
 
         // Un archivio di prima: senza «suMisura» e «motoreEsterno» nelle impostazioni di Vera (chiave «eve»)
@@ -70,7 +70,7 @@ extension ProvaBackup {
         let senza = try Archivio.decodifica(JSONSerialization.data(withJSONObject: radice))
         guard senza.impostazioni.vera.suMisura == ImpostazioniSuMisura(), senza.impostazioni.vera.motoreEsterno == ImpostazioniMotoreEsterno(),
               senza.impostazioni.vera.passi == vera.passi, senza.clienti.count == originale.clienti.count else {
-            return "un archivio senza Vera su misura e motore esterno non si apre con i valori di base"
+            return "un archivio senza Lucy su misura e motore esterno non si apre con i valori di base"
         }
 
         // Una versione rovinata (stato sconosciuto) si scarta, le altre restano; un tipo di motore sconosciuto torna «server»
@@ -87,17 +87,17 @@ extension ProvaBackup {
         guard rovinato.impostazioni.vera.suMisura.versioni.map(\.id) == [versioneBocciataDiProva],
               rovinato.impostazioni.vera.suMisura.modelloPrecedente == vera.suMisura.modelloPrecedente,
               rovinato.impostazioni.vera.motoreEsterno.tipo == .server else {
-            return "una versione di Vera su misura rovinata fa perdere le altre, o un tipo di motore sconosciuto non torna di base"
+            return "una versione di Lucy su misura rovinata fa perdere le altre, o un tipo di motore sconosciuto non torna di base"
         }
 
         // Prisma ovunque: le impostazioni di Vera restano sul Mac
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.impostazioni.vera.suMisura == ImpostazioniSuMisura(), ist.impostazioni.vera.motoreEsterno == ImpostazioniMotoreEsterno() else {
-            return "Vera su misura e il motore esterno non devono entrare nell'istantanea di Lucy ovunque"
+            return "Lucy su misura e il motore esterno non devono entrare nell'istantanea di Lucy ovunque"
         }
         let byte = try Archivio.codificatore.encode(ist)
         guard byte.range(of: Data(versioneInUsoDiProva.utf8)) == nil else {
-            return "il nome della Vera su misura è finito nell'istantanea di Lucy ovunque"
+            return "il nome della Lucy su misura è finito nell'istantanea di Lucy ovunque"
         }
         return nil
     }

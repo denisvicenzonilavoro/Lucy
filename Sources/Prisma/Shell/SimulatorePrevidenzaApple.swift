@@ -355,7 +355,7 @@ private struct CorpoSimulatorePrevidenzaApple: View {
                 .help(salvabile
                       ? "Crea in Posizioni una proposta di \(Formati.euro(delta)) al mese in più, sul canale scelto"
                       : "Sposta il cursore oltre il versamento di oggi per salvare una proposta")
-            Button("Chiedi a Vera di spiegarlo", action: chiediVera)
+            Button("Chiedi a Lucy di spiegarlo", action: chiediVera)
                 .buttonStyle(.appleGrande)
                 .disabled(stato.veraInCorso)
             #if os(macOS)

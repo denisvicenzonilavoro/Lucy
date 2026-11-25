@@ -173,7 +173,7 @@ enum NucleoVera {
             parti.append("IL FILO DELLA CONVERSAZIONE (riassunto delle battute di prima, che non vedi più)\n" + f)
         }
         if !ambiente.ricordi.isEmpty {
-            parti.append("RICORDI (dalla memoria di Vera, confermati dal consulente)\n" + ambiente.ricordi.map { "- \($0)" }.joined(separator: "\n"))
+            parti.append("RICORDI (dalla memoria di Lucy, confermati dal consulente)\n" + ambiente.ricordi.map { "- \($0)" }.joined(separator: "\n"))
         }
         if scelta.conScheda, !ambiente.brani.isEmpty {
             parti.append("DAI DOCUMENTI E DALLE NOTE DEL CLIENTE (passaggi trovati da Lucy: cita la fonte, per esempio documento e pagina)\n"
@@ -187,7 +187,7 @@ enum NucleoVera {
     /// Le battute che il piano non porta più al modello (le più vecchie, uscite dalla finestra), in ordine.
     static func uscite(_ storia: [MessaggioVera], piano: PianoVera) -> [MessaggioVera] {
         let dentro = max(0, piano.messaggi.count - 2)
-        let valide = storia.filter { !($0.autore == .vera && ($0.motore == "Prisma" || $0.titolo == "Vera non ha potuto rispondere")) }
+        let valide = storia.filter { !($0.autore == .vera && ($0.motore == "Prisma" || TestiStatoVera.nonHaPotuto($0.titolo))) }
         guard valide.count > dentro else { return [] }
         return Array(valide.prefix(valide.count - dentro))
     }
@@ -199,7 +199,7 @@ enum NucleoVera {
         var resto = budget
         for m in messaggi.reversed() {
             guard scelti.count < massimoBattute else { break }
-            if m.autore == .vera && (m.motore == "Prisma" || m.titolo == "Vera non ha potuto rispondere") { continue }
+            if m.autore == .vera && (m.motore == "Prisma" || TestiStatoVera.nonHaPotuto(m.titolo)) { continue }
             var testo = m.testo
             if m.autore == .vera, let t = m.titolo, !t.isEmpty { testo = t + "\n" + testo }
             if testo.count > massimoCaratteriBattuta { testo = String(testo.prefix(massimoCaratteriBattuta)) + "…" }
