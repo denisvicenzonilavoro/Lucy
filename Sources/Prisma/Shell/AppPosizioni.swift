@@ -493,16 +493,18 @@ struct AppPosizioni: View {
                     }
 
                     // Sull'iPad stretto i due pannelli vanno uno sotto l'altro (sul Mac sempre affiancati)
+                    // Le due card alte uguali (25 novembre 2026, scelta dell'utente), senza buchi sotto la più bassa
                     Affiancati(soglia: SoglieAffiancati.posizioni, spazio: 24) {
-                        PannelloAnalisi(titolo: "Ripartizione per area", nota: "Posizioni in essere, debiti a parte") { EmptyView() } contenuto: {
+                        PannelloAnalisi(titolo: "Ripartizione per area", nota: "Posizioni in essere, debiti a parte", pieno: true) { EmptyView() } contenuto: {
                             Self.ripartizione(r)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        PannelloAnalisi(titolo: "In scadenza", nota: "Entro \(RiepilogoPosizioni.giorniScadenza) giorni") { EmptyView() } contenuto: {
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        PannelloAnalisi(titolo: "In scadenza", nota: "Entro \(RiepilogoPosizioni.giorniScadenza) giorni", pieno: true) { EmptyView() } contenuto: {
                             Self.canali(r, apri: { stato.posizioneInDettaglio = $0.id })
                         }
-                        .larghezzaAffiancata(330, alignment: .leading)
+                        .larghezzaAffiancata(330, alignment: .topLeading)
                     }
+                    .stessaAltezza()
 
                     // Calcolate una volta e riusate finché i dati non cambiano (DerivatiDati)
                     let analisi = stato.analisiDossier(stato.clienteAttivoId)

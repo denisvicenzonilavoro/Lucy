@@ -204,6 +204,54 @@ enum TemaCarta {
         static let lato = 200
     }
 
+    // MARK: - Moduli (il nuovo impegno dell'Agenda, 25 novembre 2026)
+
+    /// Un modulo su carta: testata con l'occhiello in SF Mono, il titolo in New York e la sottolineatura dorata; i campi
+    /// in gruppi (schede con il filo), l'etichetta sopra il controllo; il piede con i pulsanti a capsula allineati.
+    enum Modulo {
+        /// La misura del foglio.
+        static let misura = CGSize(width: 660, height: 700)
+        /// Margini: 32 ai lati, 26 sopra la testata, 18 sotto; 24 fra i gruppi.
+        static let margine: CGFloat = 32
+        static let sopraTestata: CGFloat = 26
+        static let sottoTestata: CGFloat = 18
+        static let spazioGruppi: CGFloat = 18
+        /// Testata: occhiello 10,5 mono, titolo 28 New York medio, sottotitolo 13; la sottolineatura dorata 46×2,5.
+        static let occhiello = TestoCarta(dimensione: 10.5, peso: .medium, disegno: .monospaced)
+        static let tracciaOcchiello: CGFloat = 1.2
+        static let titolo = TestoCarta(dimensione: 28, peso: .medium, disegno: .serif)
+        static let sottotitolo = TestoCarta(dimensione: 13)
+        static let sottolineatura = CGSize(width: 46, height: 2.5)
+        static let sopraSottolineatura: CGFloat = 6
+        static let spazioTestata: CGFloat = 4
+        /// Un gruppo: scheda con il filo, raggio 14, padding 18×20; titolo del gruppo 17 New York, campi a 14.
+        static let raggioGruppo: CGFloat = 14
+        static let paddingGruppo = EdgeInsets(top: 16, leading: 20, bottom: 18, trailing: 20)
+        static let titoloGruppo = TestoCarta(dimensione: 17, peso: .medium, disegno: .serif)
+        static let notaGruppo = TestoCarta(dimensione: 12, corsivo: true)
+        static let spazioCampi: CGFloat = 14
+        static let spazioColonne: CGFloat = 16
+        /// Un campo: etichetta 10 mono maiuscola sopra, a 6 dal controllo; il valore 13,5; le caselle di testo alte 32
+        /// con raggio 8; le note alte 92.
+        static let etichetta = TestoCarta(dimensione: 10, peso: .medium, disegno: .monospaced)
+        static let tracciaEtichetta: CGFloat = 0.9
+        static let sottoEtichetta: CGFloat = 6
+        static let valore = TestoCarta(dimensione: 13.5)
+        static let avviso = TestoCarta(dimensione: 12)
+        static let altezzaCampo: CGFloat = 32
+        static let paddingCampo: CGFloat = 10
+        static let raggioCampo: CGFloat = 8
+        static let altezzaNote: CGFloat = 92
+        /// Piede: filo sopra, alto 64, pulsanti a capsula alti 34 con padding 18, spazio 10; testo 13 semibold.
+        static let piede: CGFloat = 64
+        static let altezzaPulsante: CGFloat = 34
+        static let paddingPulsante: CGFloat = 18
+        static let spazioPulsanti: CGFloat = 10
+        static let pulsante = TestoCarta(dimensione: 13, peso: .semibold)
+        static let opacitaSpento: Double = 0.45
+        static let opacitaPremuto: Double = 0.75
+    }
+
     // MARK: - Caratteri
 
     /// Il disegno dei caratteri con lo stile Carta: New York (serif di sistema) per titoli e numeri grandi, SF Mono

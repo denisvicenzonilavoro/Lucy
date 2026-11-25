@@ -15,8 +15,9 @@ import SwiftUI
 ///   pertinente». Strumento del consulente: in modalità cliente la card non c'è.
 /// - «Da ricordare» è la nota del cliente; il prossimo incontro viene dall'agenda e la card apre l'Agenda sul giorno.
 /// - I blocchi entrano con `.entrataDossier(i)`, la percentuale si conta, l'anello parte a 0,15 s.
-/// - Sul Mac (migliorie d'uso 5, DossierQuadro.swift) a sinistra c'è «Il quadro di <Nome>» con le quattro aree e i dati
-///   da completare in una riga in fondo; l'elenco nasce dalla riga. iPhone e iPad restano come sopra.
+/// - Sul Mac (migliorie d'uso 5, DossierQuadro.swift) in alto c'è «Il quadro di <Nome>» con le quattro aree in una riga
+///   di riquadri quadrati e i dati da completare in una riga in fondo; l'elenco nasce dalla riga. Sotto, le altre card
+///   su due colonne. iPhone e iPad restano come sopra.
 struct PanoramicaDossierApple: View {
     @Environment(StatoShell.self) var stato
     let cliente: Cliente
@@ -43,13 +44,15 @@ struct PanoramicaDossierApple: View {
     }
 
     #if os(macOS)
-    /// Migliorie d'uso 5 (DossierQuadro.swift): a sinistra «Il quadro di <Nome>» con le quattro aree e la riga dei dati
-    /// da completare (non in modalità cliente); a destra il sussurro, «Da fare per <Nome>» (non in modalità cliente),
-    /// «Prossimo incontro» e «Da ricordare», poi «Da festeggiare» e i sinistri. «Il cliente in 30 secondi» è un
-    /// collegamento nella testata del quadro.
+    /// Migliorie d'uso 5 (DossierQuadro.swift), riviste il 25 novembre 2026 (scelta dell'utente): in alto, a tutta
+    /// larghezza, «Il quadro di <Nome>» con le quattro aree in una riga di riquadri quadrati uguali e la riga dei dati
+    /// da completare (non in modalità cliente), così il quadro sta nella prima schermata senza scorrere. Sotto, su due
+    /// colonne: a sinistra la cartella e lo scontrino (Carta), il sussurro e «Da fare per <Nome>» (non in modalità
+    /// cliente); a destra «Prossimo incontro» e «Da ricordare», poi la Sala, «Da festeggiare» e i sinistri.
+    /// «Il cliente in 30 secondi» è un collegamento nella testata del quadro.
     @ViewBuilder private func grigliaQuadro(completezza: CompletezzaCliente?, prossimo: Appuntamento?) -> some View {
         let p = Tema.Apple.Clienti.Panoramica.self
-        let destra = VStack(alignment: .leading, spacing: p.spazio) {
+        let sinistra = VStack(alignment: .leading, spacing: p.spazio) {
             if Tema.Stile.usaCarta {
                 // Stile Carta (NOVITÀ 5): la cartella dell'incontro composta a vista
                 PulsanteFascicoloInUnTocco(cliente: cliente)
@@ -60,6 +63,8 @@ struct PanoramicaDossierApple: View {
                 DaFareDossierApple(cliente: cliente)
                     .entrataDossier(1)
             }
+        }
+        let destra = VStack(alignment: .leading, spacing: p.spazio) {
             ProssimoIncontroApple(cliente: cliente, appuntamento: prossimo)
                 .entrataDossier(2)
             DaRicordareApple(cliente: cliente)
@@ -80,15 +85,17 @@ struct PanoramicaDossierApple: View {
             }
         }
         VStack(alignment: .leading, spacing: p.spazio) {
+            QuadroDossierApple(cliente: cliente, completezza: completezza)
+                .entrataDossier(0)
             ColonneProporzionaliDossier(proporzione: p.proporzione, spazio: p.spazio, larghezzaMinima: p.larghezzaDueColonne) {
-                QuadroDossierApple(cliente: cliente, completezza: completezza)
-                    .entrataDossier(0)
+                sinistra
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
                 destra
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
             }
             if Tema.Stile.usaCarta {
-                // Stile Carta (NOVITÀ 6): lo scontrino del conto di oggi, lo stesso di Lucy AI, sotto le due colonne con
-                // le note della penna accanto (25 novembre 2026: nella colonna di destra la allungava e le schede del
-                // quadro si stiravano vuote)
+                // Stile Carta (NOVITÀ 6): lo scontrino del conto di oggi, lo stesso di Lucy AI, sotto le colonne con le
+                // note della penna accanto
                 let conto = stato.ricavato("scontrino.conto.\(cliente.id)") {
                     MotoreScontrino.contoCliente(stato.posizioniCliente(cliente.id), data: Date())
                 }
