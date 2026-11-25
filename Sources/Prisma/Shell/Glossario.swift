@@ -265,7 +265,7 @@ enum Glossario {
           "Lucy le tiene distinte ovunque: le analisi mostrano la situazione di oggi e come cambierebbe con le proposte.",
           nil, [.posizioni]),
         v(.canale, "Canale", nil, .prisma,
-          "C'è un solo canale, quello di Lucy: tutti i clienti e tutte le posizioni si gestiscono e si analizzano insieme.",
+          "Un solo canale, quello di Lucy: tutti i clienti e tutte le posizioni si gestiscono e si analizzano insieme.",
           "Dal 25 novembre 2026 Lucy non distingue più fra canali: niente etichette né divisioni per canale, nelle schermate e nei PDF.",
           nil, [.posizioni, .prodotti]),
         v(.dossier, "Dossier", nil, .prisma,
