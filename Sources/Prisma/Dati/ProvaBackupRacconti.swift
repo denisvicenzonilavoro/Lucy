@@ -6,6 +6,8 @@ import Foundation
 // valore) tornano uguali dal backup; un archivio senza i campi nuovi si apre senza, con il resto uguale; un evento
 // rovinato si scarta e gli altri restano, una probabilità fuori scala diventa «non scritta». L'inizio del rapporto entra
 // nell'istantanea di «Prisma ovunque» con il cliente. Le partite di Lancia l'anno non si salvano.
+// Il catalogo delle compagnie (25 novembre 2026): la riga abbinata a una posizione (`Posizione.catalogoId`) torna uguale
+// dal backup e un archivio di prima, senza il campo, si apre senza.
 // Le lettere dal futuro conservate (§3.1.5 punto 5, `provaLettere`): nel file del cliente, uguali da backup e ripristino,
 // un archivio di prima si apre senza, una lettera senza testo si scarta, mai nell'istantanea di «Prisma ovunque»;
 // «Aggiungi al Prisma» conserva la «Con il piano» e il file del cliente la ritrova dopo un riavvio (senza le stesure in
@@ -18,7 +20,11 @@ extension ProvaBackup {
         guard let c = d.clienti.first else { return }
         // Date a secondi interi, come le altre dell'archivio di prova
         d.clienti[0].clienteDal = Date(timeIntervalSinceReferenceDate: 700_000_000)
-        if let i = d.posizioni.firstIndex(where: { $0.clienteId == c.id }) { d.posizioni[i].indennizzoStimato = 9_000 }
+        if let i = d.posizioni.firstIndex(where: { $0.clienteId == c.id }) {
+            d.posizioni[i].indennizzoStimato = 9_000
+            // Il catalogo delle compagnie: l'id di una riga di prova (non serve che esista nel catalogo)
+            d.posizioni[i].catalogoId = "investimento-prova"
+        }
         var sala = ImpostazioniSala()
         sala.eventiAnno = [
             EventoAnno(id: "caldaia", titolo: "La caldaia (di prova)", effetto: .spesa, importo: 8_500, tono: .arancio,
@@ -37,11 +43,13 @@ extension ProvaBackup {
     static func verificaRacconti(originale: DatiPrisma, estratto: DatiPrisma) throws -> String? {
         // 1. Dal backup tornano uguali
         guard originale.clienti.first?.clienteDal != nil, originale.posizioni.contains(where: { $0.indennizzoStimato == 9_000 }),
+              originale.posizioni.contains(where: { $0.catalogoId == "investimento-prova" }),
               originale.impostazioni.sala.eventiAnno.count == 2 else {
             return "l'archivio di prova non ha l'inizio del rapporto, l'indennizzo stimato o le impostazioni della Sala"
         }
         guard estratto.clienti.map(\.clienteDal) == originale.clienti.map(\.clienteDal),
               estratto.posizioni.map(\.indennizzoStimato) == originale.posizioni.map(\.indennizzoStimato),
+              estratto.posizioni.map(\.catalogoId) == originale.posizioni.map(\.catalogoId),
               estratto.impostazioni.sala == originale.impostazioni.sala else {
             return "inizio del rapporto, indennizzo stimato o impostazioni della Sala non tornano uguali dal backup"
         }
@@ -59,12 +67,16 @@ extension ProvaBackup {
               clienti[0].removeValue(forKey: "clienteDal") != nil else {
             return "archivio di prova senza i campi del giro 8 non preparato"
         }
-        for i in posizioni.indices { posizioni[i].removeValue(forKey: "indennizzoStimato") }
+        for i in posizioni.indices {
+            posizioni[i].removeValue(forKey: "indennizzoStimato")
+            posizioni[i].removeValue(forKey: "catalogoId")
+        }
         radice["clienti"] = clienti
         radice["posizioni"] = posizioni
         radice["impostazioni"] = impostazioni
         let letto = try Archivio.decodifica(JSONSerialization.data(withJSONObject: radice))
         guard letto.clienti.allSatisfy({ $0.clienteDal == nil }), letto.posizioni.allSatisfy({ $0.indennizzoStimato == nil }),
+              letto.posizioni.allSatisfy({ $0.catalogoId == nil }),
               letto.impostazioni.sala == ImpostazioniSala(), letto.clienti.count == originale.clienti.count,
               letto.posizioni.count == originale.posizioni.count else {
             return "archivio senza i campi del giro 8 non letto correttamente (attesi nessun inizio, nessun indennizzo, Sala vuota)"

@@ -410,6 +410,9 @@ struct AzioniPosizioni: View {
                     aiuto: "Un prodotto del catalogo sul cliente: scrivi solo importi e durata, il resto viene dalla scheda") {
                 s.richiestaDalCatalogo = .proposta
             },
+            .azione(TestiCatalogoCompagnie.titolo, aiuto: TestiCatalogoCompagnie.aiutoIngresso) {
+                s.richiestaCatalogoCompagnie = RichiestaCatalogoCompagnie()
+            },
             .separatore,
             .azione("Importa…", attiva: modifica,
                     aiuto: "Importa posizioni da Excel o CSV (elenco delle polizze, portafoglio). Puoi anche trascinare il file sulla finestra.") {

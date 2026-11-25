@@ -153,6 +153,13 @@ struct AppPosizioni: View {
                                      tuttiICampi: { p in dopoCatalogo = p })
                 .environment(stato)
         }
+        #if os(macOS)
+        // Il catalogo delle compagnie: l'elenco e la scheda del prodotto (CatalogoCompagnie.swift)
+        .sheet(item: Bindable(stato).richiestaCatalogoCompagnie) { r in
+            FoglioCatalogoCompagnie(richiesta: r)
+                .environment(stato)
+        }
+        #endif
         .sheet(item: $modulo, onDismiss: { fuocoPosizione = nil }) { p in
             ModuloPosizione(bozza: p, nuova: !stato.posizioni.contains { $0.id == p.id }) { stato.salvaPosizione($0) }
                 .environment(\.fuocoModulo, fuocoPosizione)
@@ -177,6 +184,10 @@ struct AppPosizioni: View {
         .onAppear {
             controllaRichiesta(stato.richiestaNuovaPosizione)
             controllaCompletamento(stato.richiestaCompletamento)
+            #if os(macOS)
+            // Il catalogo delle compagnie (circa 600 KB) si legge fuori dal thread principale, prima del primo uso
+            CatalogoProdotti.precarica()
+            #endif
             // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: nessun filtro di canale,
             // nemmeno nelle istantanee
         }

@@ -309,6 +309,9 @@ enum VoceConfronto: Hashable {
     var richiestaNuovaPosizione: StatoPosizione?
     /// «Dal catalogo» nell'intestazione di Posizioni: il prodotto sul cliente in due passi (in essere o proposta).
     var richiestaDalCatalogo: StatoPosizione?
+    /// «Dal catalogo delle compagnie» (Posizioni e dettaglio della posizione, solo Mac): il foglio con l'elenco e la
+    /// scheda del prodotto del catalogo delle compagnie (CatalogoCompagnie.swift). Solo in memoria.
+    var richiestaCatalogoCompagnie: RichiestaCatalogoCompagnie?
     /// Il pulsante "Nuovo cliente" dell'intestazione chiede alla rubrica di aprire il modulo.
     var richiestaNuovoCliente = false
     /// «Modifica» nella riga in testa del dossier (migliorie d'uso 12, Mac): l'id del cliente di cui aprire il modulo,

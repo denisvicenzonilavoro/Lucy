@@ -1839,6 +1839,8 @@ enum Istantanee {
         tutteLeScene += sceneAzienda
         // Il prodotto sul cliente (12 novembre 2026): dal catalogo in due passi (Shell/IstantaneeProdottoCliente.swift)
         tutteLeScene += sceneProdottoCliente
+        // Il catalogo delle compagnie (25 novembre 2026): l'elenco e la scheda del prodotto (Shell/IstantaneeCatalogoCompagnie.swift)
+        tutteLeScene += sceneCatalogoCompagnie
         // «Luce», giro 9: Studio › Spese, chilometri, spese e scadenze (Shell/IstantaneeSpese.swift)
         tutteLeScene += sceneSpese
         // «Luce», giro 11: Territorio, il tuo territorio (Shell/IstantaneeTerritorio.swift)
@@ -1894,9 +1896,10 @@ enum Istantanee {
                 // La mini finestra di Vera è un pannello a parte: qui si disegna sopra la shell, dove compare
                 let vetrina = sceneVetrina.contains(scena.nome)
                 // Il foglio della fattura a grandezza piena (515): solo la carta, sempre chiara
-                let carta = cartaIstantanea(scena.nome, stato) ?? moduloAziendaIstantanea(scena.nome, stato)
+                let cartaPrima = cartaIstantanea(scena.nome, stato) ?? moduloAziendaIstantanea(scena.nome, stato)
                     ?? moduloProdottoClienteIstantanea(scena.nome, stato) ?? tavolaLuce(scena.nome)
                     ?? tavolaParola(scena.nome) ?? tavolaConferme(scena.nome)
+                let carta: AnyView? = cartaPrima ?? catalogoCompagnieIstantanea(scena.nome, stato)
                 let vista = ZStack(alignment: .topTrailing) {
                     if vetrina {
                         VetrinaApple(intensita: stato.dati.impostazioni.pioggia.forza)

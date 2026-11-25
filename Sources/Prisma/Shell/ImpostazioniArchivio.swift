@@ -165,6 +165,17 @@ extension AppImpostazioni {
             }
             .id("imp-archivio-mac")
             .cascataImpostazioni(9)
+            // Il catalogo dei prodotti delle compagnie (25 novembre 2026): è una risorsa dell'app, non archivio, e
+            // si aggiorna con una nuova versione di Lucy (Supporto/catalogo)
+            GruppoImpostazioni(titolo: "Catalogo dei prodotti") {
+                RigaImpostazione(titolo: "Catalogo dei prodotti", sottotitolo: TestiCatalogoCompagnie.versioneInstallata,
+                                 aiuto: "Costi e condizioni dei prodotti delle compagnie dai documenti pubblici, dentro Lucy: non è nei backup e nessun dato esce dal Mac. Fanno fede i documenti contrattuali.",
+                                 ultima: true) {
+                    EmptyView()
+                }
+            }
+            .id("imp-archivio-catalogo")
+            .cascataImpostazioni(9)
             HStack(spacing: Tema.Apple.Impostazioni.Backup.fraNumeri) {
                 numero(stato.clienti.count, "clienti")
                 numero(stato.appuntamenti.count, "appuntamenti")

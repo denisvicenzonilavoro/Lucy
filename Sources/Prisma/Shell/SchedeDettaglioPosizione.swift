@@ -35,6 +35,12 @@ extension DettaglioPosizione {
                             .padding(.top, K.fraseSopra)
                             .padding(.bottom, K.fraseSotto)
                         cifre(calcoli)
+                        // Il catalogo delle compagnie: «Dal catalogo: <prodotto>» o «Abbina al catalogo»
+                        // (CatalogoCompagnie.swift); in modalità cliente solo la riga già abbinata
+                        if !stato.inModoCliente || p.catalogoId != nil {
+                            RigaCatalogoPosizione(posizione: p)
+                                .padding(.top, K.schedeSopra)
+                        }
                         if disponibili.count > 1 {
                             SegmentatoPillola(selezione: Binding(get: { mostrata }, set: { scheda = $0 }),
                                               voci: disponibili.map { ($0, $0.titolo(protezione: p.area == .protezione)) })
