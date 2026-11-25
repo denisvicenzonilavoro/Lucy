@@ -1,10 +1,13 @@
 #!/bin/bash
-# Costruisce Prisma.app sul Mac, solo per Apple Silicon. Dal 16 novembre 2026 il lavoro è solo in locale:
-# --prove fa anche i controlli che prima stavano nel workflow di GitHub (Supporto/controlli-locali.sh).
+# Costruisce Lucy (pacchetto tecnico Prisma.app) sul Mac, solo per Apple Silicon. Dal 25 novembre 2026 è la via delle
+# prove veloci sul Mac dell'utente (CLAUDE.md › Regole di sviluppo); GitHub resta il riferimento per main e la release.
+# Si compila file per file (-no-whole-module-optimization) sugli 8 core: la prima volta circa 16 minuti, poi solo i file
+# cambiati, e se il comando viene fermato la volta dopo riparte da dove era arrivato.
+# --prove fa anche i controlli che stanno nel workflow di GitHub (Supporto/controlli-locali.sh).
 # Uso, dalla cartella del progetto:
 #   bash Supporto/costruisci-mac.sh            → compila e crea Prisma.app
 #   bash Supporto/costruisci-mac.sh --prove    → in più esegue le prove principali
-#   bash Supporto/costruisci-mac.sh --installa → in più copia Prisma.app in Applicazioni
+#   bash Supporto/costruisci-mac.sh --installa → in più la installa come /Applications/Lucy.app (via la vecchia Prisma.app)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -17,9 +20,10 @@ for a in "$@"; do
   esac
 done
 
-echo "▸ Compilo (release, arm64)…"
-swift build -c release --arch arm64
-BIN_DIR="$(swift build -c release --arch arm64 --show-bin-path)"
+echo "▸ Compilo (release, arm64, file per file)…"
+OPZIONI=(-c release --arch arm64 -Xswiftc -no-whole-module-optimization)
+swift build "${OPZIONI[@]}"
+BIN_DIR="$(swift build "${OPZIONI[@]}" --show-bin-path)"
 
 APP=Prisma.app
 rm -rf "$APP"
@@ -70,7 +74,9 @@ if [ "$PROVE" = 1 ]; then
 fi
 
 if [ "$INSTALLA" = 1 ]; then
-  rm -rf "/Applications/$APP"
-  ditto "$APP" "/Applications/$APP"
-  echo "✓ Installata in /Applications/$APP"
+  # Lucy (dal 24 novembre 2026): il pacchetto si chiama Lucy.app in Applicazioni; la vecchia Prisma.app si toglie
+  rm -rf /Applications/Lucy.app
+  ditto "$APP" /Applications/Lucy.app
+  rm -rf /Applications/Prisma.app
+  echo "✓ Installata in /Applications/Lucy.app (commit $COMMIT)"
 fi
