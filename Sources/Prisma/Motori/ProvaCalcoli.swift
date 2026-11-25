@@ -1289,6 +1289,9 @@ enum ProvaCalcoli {
         ProvaCalcoliProdottoCliente.esegui(verificaEsterna)
         // La scheda dai documenti (12 novembre 2026): KID e DIP aggiuntivo di prova, scheda, scenari del KID nelle proiezioni
         ProvaCalcoliLettoreProdotto.esegui(verificaEsterna)
+        // Il catalogo dei prodotti delle compagnie (fase 2, motore di calcolo): risorsa con versione e data, esempi del
+        // Leggimi, una riga vera per foglio, dato mancante mai zero, schede di categoria fuori dai prodotti, abbina
+        ProvaCalcoliCatalogo.esegui(verificaEsterna)
         // «Luce», giro 3: le pratiche dopo la firma (passi riconosciuti dai dati, segno a mano, soglia, mese scorso, ordine,
         // dati di prova, sollecito, tempo lineare)
         ProvaCalcoliPratiche.esegui(verificaEsterna)
