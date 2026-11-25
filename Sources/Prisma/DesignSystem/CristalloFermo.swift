@@ -218,7 +218,7 @@ struct CristalloFermo: View {
         let r = ImageRenderer(content: CristalloFermo(esito: esito, anno: anno, esploso: esploso, fondo: .neutro, animato: false)
             .frame(width: lato, height: lato)
             .environment(\.colorScheme, .light)
-            .environment(\.prismaStatoFinale, true))
+            .environment(\.prismaCalmo, true))
         r.proposedSize = ProposedViewSize(width: lato, height: lato)
         r.scale = 1
         return r.immaginePrisma
