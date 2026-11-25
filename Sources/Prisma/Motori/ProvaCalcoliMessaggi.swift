@@ -219,9 +219,9 @@ enum ProvaCalcoliMessaggi {
                       && di("p3")?.priorita == .alta)
         verifica.vero("M2 Scadenza: oltre la soglia, già scaduta o chiusa niente",
                       di("p46") == nil && di("pieri") == nil && di("pchiusa") == nil && tutte.count == 3)
-        verifica.vero("M2 Scadenza: tra le cifre data, giorni, canale e premio",
+        verifica.vero("M2 Scadenza: tra le cifre data, giorni e premio, niente canale (un solo canale)",
                       di("p45")?.valore(.scadenza) == "19 dicembre 2026" && di("p45")?.valore(.giorniAllaScadenza) == "45"
-                      && di("p45")?.valore(.canale) == "Alleanza" && di("p45")?.valore(.premio)?.hasSuffix("· annuale") == true)
+                      && di("p45")?.valore(.canale) == nil && di("p45")?.valore(.premio)?.hasSuffix("· annuale") == true)
         var imp = Impostazioni()
         imp.messaggi.giorniScadenza = 30
         let corta = calcola(dati([marco], posizioni: [polizza("p45", scade: 45), polizza("p30", scade: 30)], impostazioni: imp)).tutte
@@ -395,7 +395,7 @@ enum ProvaCalcoliMessaggi {
                                                 canale: .alleanza, gruppo: .oggi, titolo: "Sollecito: «Infortuni famiglia»",
                                                 perche: "Fermo da 9 giorni", oggetto: "La pratica di «Infortuni famiglia»",
                                                 cifre: [CifraMessaggio(.posizione, "Infortuni famiglia"), CifraMessaggio(.passoPratica, passo),
-                                                        CifraMessaggio(.canale, "Alleanza"), CifraMessaggio(.giorniPratica, "9")],
+                                                        CifraMessaggio(.giorniPratica, "9")],
                                                 priorita: .alta, data: oggi, inRitardo: true))
         }
         // Un traguardo da festeggiare («Luce» giro 5): il fatto, mai una cifra in più né una proposta

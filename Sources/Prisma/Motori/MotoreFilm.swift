@@ -68,7 +68,7 @@ struct FineFilm: Equatable, Sendable {
     var valore: Double
 }
 
-/// La firma della chiusura secondo il canale (decisione 57): il nome, il colore del canale sul fondo scuro; mai il logo.
+/// La firma della chiusura (decisione 57): «Lucy · consulenza finanziaria» nel suo colore sul fondo scuro; mai il logo.
 struct FirmaFilm: Equatable, Sendable {
     var testo: String
     var colore: ColoreFilm?

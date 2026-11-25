@@ -365,6 +365,6 @@ enum TestiAzienda {
     /// L'avviso del collegamento verso Pratiche quando l'area è segnata «non pertinente» (il bisogno non si costruisce).
     static func avvisoProposta(_ area: AreaAzienda, nome: String) -> String {
         let bisogno = area == .personaChiave ? "la persona chiave (key man)" : "il welfare per i dipendenti"
-        return "Pratiche › Proposta per \(nome): scegli tu prodotto e canale per \(bisogno). Senza prodotti adatti in archivio la proposta non si costruisce."
+        return "Pratiche › Proposta per \(nome): scegli tu il prodotto per \(bisogno). Senza prodotti adatti in archivio la proposta non si costruisce."
     }
 }

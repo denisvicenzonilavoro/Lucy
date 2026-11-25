@@ -41,16 +41,12 @@ enum TestiFilm {
     /// «a 67 anni, in euro di oggi: 661.156 €».
     static func fine(eta: Int, valore: Double) -> String { "a \(eta) anni, in euro di oggi: \(Formati.euro(valore))" }
 
-    // MARK: Firma secondo il canale (decisione 57)
+    // MARK: Firma (decisione 57, un solo canale dal 25 novembre 2026)
 
-    /// Una firma per canale del cliente (nome e colore del canale sul fondo scuro, mai il logo); senza canali quella
-    /// indipendente.
+    /// Una sola firma per ogni cliente: «Lucy · consulenza finanziaria» (`CanaleLucy.nome`) nel colore della firma sul
+    /// fondo scuro, mai un logo. Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy.
     static func firme(cliente: Cliente) -> [FirmaFilm] {
-        let canali = Canale.allCases.filter { cliente.canali.contains($0) }
-        return (canali.isEmpty ? [.indipendente] : canali).map { c in
-            FirmaFilm(testo: c.nome, colore: c == .alleanza ? Tema.Apple.SalaRacconti.Film.canaleAlleanza
-                                                            : Tema.Apple.SalaRacconti.Film.canaleIndipendente)
-        }
+        [FirmaFilm(testo: CanaleLucy.nome, colore: Tema.Apple.SalaRacconti.Film.firmaLucy)]
     }
 
     // MARK: Il tempo e la tile

@@ -326,7 +326,7 @@ struct PannelloAdeguatezza: View {
                 EtichettaCanale(canale: posizione.canale, compatta: true)
             }
             if esito.documenti.isEmpty {
-                Text("Nessun documento per questo canale e questo tipo di prodotto: aggiungili in Impostazioni › Proposte.")
+                Text("Nessun documento per questo tipo di prodotto: aggiungili in Impostazioni › Proposte.")
                     .font(Tipo.kpiNota)
                     .foregroundColor(K.nota)
                     .fixedSize(horizontal: false, vertical: true)

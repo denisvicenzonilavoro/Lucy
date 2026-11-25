@@ -241,7 +241,8 @@ enum ClientelaVera {
         case .coniugeSenzaProtezione: return ["Coniuge o convivente in famiglia", "Nessuna polizza a suo nome"]
         case .polizzeInScadenzaEntro: return ["Polizze in essere", "Scadenza \(entro)"]
         case .posizioniInScadenzaEntro: return ["Posizioni in essere", "Scadenza \(entro)"]
-        case .canale: return [f.testo?.contains("all") == true ? "Canale Alleanza" : "Canale indipendente"]
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026): il filtro di prima vale «ha posizioni»
+        case .canale: return ["Con posizioni in essere"]
         case .consensoPrivacyMancante: return ["Consenso privacy mancante"]
         case .senzaConsensoMarketing: return ["Senza consenso commerciale"]
         case .senzaArea: return ["Nessuna posizione \(nomeArea(f.testo))"]
@@ -367,8 +368,7 @@ enum ClientelaVera {
             guard !elenco.isEmpty else { return nil }
             return .some(elenco.map { "\($0.nome) · \(Formati.giornoMese.string(from: $0.scadenza ?? oggi))" }.joined(separator: "; "))
         case .canale:
-            let voluto: Canale = f.testo?.contains("all") == true ? .alleanza : .indipendente
-            return canali(c, d).contains(voluto) ? .some(nil) : nil
+            return canali(c, d).isEmpty ? nil : .some(nil)
         case .consensoPrivacyMancante:
             return c.consensi.privacy ? nil : .some("manca")
         case .senzaConsensoMarketing:

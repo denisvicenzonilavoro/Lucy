@@ -722,7 +722,7 @@ enum ProvaProspetti {
     /// dall'utente (la compagnia di una polizza, il nome di un prodotto) restano come sono.
     static func senzaCanali(_ testo: String) -> Bool {
         let t = spazi(testo)
-        return !t.contains(spazi(Canale.indipendente.nome)) && !t.contains("Consulente Alleanza") && !t.contains("Prisma")
+        return !t.contains("Denis Vicenzoni · Consulenza finanziaria") && !t.contains("Consulente Alleanza") && !t.contains("Prisma")
     }
 
     static func spazi(_ s: String) -> String {

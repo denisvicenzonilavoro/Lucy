@@ -528,7 +528,7 @@ private struct FoglioCorsiStudio: View {
                         HStack(alignment: .firstTextBaseline, spacing: M.spazio) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(c.titolo).carattereApple(M.rigaForte).foregroundColor(M.coloreRiga)
-                                Text([TestiSpese.giorno(c.data), c.ente, c.canale?.nomeBreve ?? ""].filter { !$0.isEmpty }.joined(separator: " · "))
+                                Text([TestiSpese.giorno(c.data), c.ente].filter { !$0.isEmpty }.joined(separator: " · "))
                                     .carattereApple(M.rigaSotto).foregroundColor(M.coloreRigaSotto)
                             }
                             Spacer()

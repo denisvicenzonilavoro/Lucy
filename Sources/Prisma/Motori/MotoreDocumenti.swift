@@ -700,8 +700,8 @@ extension MotoreDocumenti {
 
     /// Note di sezione della tabella (sotto le righe).
     static let notaIdentita = "Per l'adeguata verifica serve un documento d'identità in corso di validità (D.Lgs. 231/2007, art. 19, c. 1, lett. a)."
-    static let notaQuestionario = "Ogni canale ha il suo questionario: Alleanza per i prodotti d'investimento assicurativi (art. 121-septies del Codice delle assicurazioni private), la consulenza indipendente per gli strumenti finanziari (art. 25, par. 2, Dir. 2014/65/UE; art. 54 Reg. delegato (UE) 2017/565). La validità la decidono le regole di «In regola»."
-    static let notaScegliCanale = "Scegli il canale del questionario."
+    static let notaQuestionario = "Il questionario di adeguatezza: per i prodotti d'investimento assicurativi art. 121-septies del Codice delle assicurazioni private, per gli strumenti finanziari art. 25, par. 2, Dir. 2014/65/UE e art. 54 Reg. delegato (UE) 2017/565. La validità la decidono le regole di «In regola»."
+    static let notaScegliCanale = "Scegli il tipo di questionario."
     static let notaIntestatario = "Il nome nel documento è diverso da quello del dossier: verifica."
     static let notaScaduto = "Documento scaduto: chiedine uno valido al cliente."
     static let notaDataIllegibile = "La data non si legge: correggila nella scheda «Dati»."

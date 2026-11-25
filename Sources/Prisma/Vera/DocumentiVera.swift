@@ -48,7 +48,7 @@ extension MotoreSintesi {
         if !differenze.isEmpty {
             parti.append("Non torna con il dossier:\n" + differenze.map { "• " + $0 }.joined(separator: "\n"))
         } else if let p = posizione(d, f) {
-            parti.append("I dati confermati coincidono con la posizione \(p.nome) (\(p.canale.nomeBreve)).")
+            parti.append("I dati confermati coincidono con la posizione \(p.nome).")
         }
 
         // Da confermare e da verificare
@@ -153,7 +153,7 @@ extension MotoreSintesi {
             guard let c = d.campo(k), let n = EstrattoreDocumento.numero(c.valore) else { return nil }
             return (n, c)
         }
-        let nomePos = "la posizione \(p.nome) (\(p.canale.nomeBreve))"
+        let nomePos = "la posizione \(p.nome)"
         if let x = numero(.capitaleAssicurato), let cap = p.capitaleAssicurato, abs(x.0 - cap) > 1 {
             diff.append("capitale assicurato \(CifreDoc.euro(x.0)) \(pagina(x.1)), \(nomePos) dice \(CifreDoc.euro(cap))")
         }

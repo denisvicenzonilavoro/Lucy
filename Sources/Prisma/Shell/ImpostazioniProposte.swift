@@ -25,7 +25,7 @@ struct ImpostazioniProposte: View {
             }
             GruppoImpostazioni(titolo: "Elenco di Lucy") {
                 RigaImpostazione(titolo: "Ripristina l'elenco di Lucy",
-                                 sottotitolo: "Torna ai documenti predefiniti dei due canali: le spunte già messe nelle schede restano.",
+                                 sottotitolo: "Torna ai documenti predefiniti: le spunte già messe nelle schede restano.",
                                  ultima: true) {
                     ValoreRiga(testo: "Ripristina") { confermaRipristino = true }
                 }
@@ -35,14 +35,14 @@ struct ImpostazioniProposte: View {
             Button("Annulla", role: .cancel) {}
             Button("Ripristina", role: .destructive) { stato.ripristinaDocumentiConsegna() }
         } message: {
-            Text("I documenti aggiunti o modificati tornano quelli predefiniti dei due canali. Le spunte già messe nelle schede di adeguatezza restano.")
+            Text("I documenti aggiunti o modificati tornano quelli predefiniti. Le spunte già messe nelle schede di adeguatezza restano.")
         }
     }
 
     private func gruppo(_ c: Canale) -> some View {
         let voci = stato.dati.impostazioni.consegna.voci(c)
         let attive = voci.filter(\.attiva).count
-        return GruppoImpostazioni(titolo: "Documenti da consegnare · \(c.nomeBreve)") {
+        return GruppoImpostazioni(titolo: "Documenti da consegnare · \(c.tipoProdotti)") {
             RigaImpostazione(titolo: attive == 1 ? "1 documento attivo su \(voci.count)" : "\(attive) documenti attivi su \(voci.count)",
                              sottotitolo: "Quelli spenti non compaiono nelle schede delle proposte") {
                 EtichettaCanale(canale: c)

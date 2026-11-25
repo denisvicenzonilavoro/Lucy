@@ -258,10 +258,10 @@ enum ProvaCalcoliConformita {
         verifica.vero("K12 Conformità: tutti nel tema «In regola»", punti.allSatisfy { $0.tema == .conformita })
         verifica.vero("K12 Conformità: il primo è del canale Alleanza", punti.first?.canale == .alleanza)
         verifica.vero("K12 Conformità: titolo del primo punto",
-                      punti.first?.titolo == "Questionario di adeguatezza Alleanza da rinnovare")
+                      punti.first?.titolo == "Questionario di adeguatezza da rinnovare")
         let domande = MotoreRiesame.domandeConformita(e12)
         verifica("K12b Conformità: 2 domande", Double(domande.count), 2, tolleranza: 0)
-        verifica.vero("K12b Conformità: la prima sul questionario", domande.first?.contains("questionario di adeguatezza (Alleanza)") == true)
+        verifica.vero("K12b Conformità: la prima sul questionario", domande.first?.hasPrefix("Aggiorniamo insieme il questionario di adeguatezza?") == true)
         verifica.vero("K12b Conformità: la seconda sul documento",
                       domande.dropFirst().first?.hasPrefix("Può portare un documento d'identità valido?") == true)
     }
@@ -333,7 +333,7 @@ enum ProvaCalcoliConformita {
         verifica.vero("K14 Conformità: «mancante» per il caso K5", MotoreConformita.rispetta(e5, .mancante))
         verifica.vero("K14 Conformità: «da sistemare» comprende le mancanti", MotoreConformita.rispetta(e5, .daSistemare))
         verifica.vero("K14 Conformità: estratto della ricerca",
-                      TestiConformita.estrattoRicerca(soloAlleanza, filtro: .scaduta, canale: nil)?.hasPrefix("Questionario Alleanza scaduto il") == true)
+                      TestiConformita.estrattoRicerca(soloAlleanza, filtro: .scaduta, canale: nil)?.hasPrefix("Questionario di adeguatezza scaduto il") == true)
     }
 
     /// Un cliente Alleanza con solo il questionario scaduto (privacy in regola, nessun consenso commerciale).

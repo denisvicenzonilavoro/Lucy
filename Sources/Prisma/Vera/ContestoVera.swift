@@ -43,7 +43,6 @@ enum ContestoVera {
         if let e = c.profilo.esperienza { profilo.append("esperienza \(e.nome.lowercased())") }
         if !c.profilo.obiettivi.isEmpty { profilo.append("obiettivi: \(c.profilo.obiettivi)") }
         if !profilo.isEmpty { righe.append("Profilo: \(profilo.joined(separator: ", ")).") }
-        if !c.canali.isEmpty { righe.append("Seguito sul canale: \(c.canali.map(\.nomeBreve).joined(separator: " e ")).") }
         #if os(macOS)
         // Migliorie d'uso 65: «Da ricordare» è la nota in evidenza (una del taccuino fissata, o la nota di sempre)
         if let e = Nota.inEvidenza(f.note, cliente: c) { righe.append("Da ricordare: \(ContestoVera.testoInEvidenza(e))") }
@@ -79,7 +78,7 @@ enum ContestoVera {
 
         // Quadro delle posizioni (calcolato dall'app)
         let r = RiepilogoPosizioni(f.posizioni)
-        righe.append("QUADRO (calcolato da Lucy): patrimonio netto \(Formati.euro(r.patrimonioNetto)) (attività \(Formati.euro(r.attivita)), debiti \(Formati.euro(r.debiti))); premi e versamenti \(Formati.euro(r.premiAnnui)) all'anno; capitale assicurato \(Formati.euro(r.capitaleAssicurato)); quota Alleanza \(Int((r.quota(.alleanza) * 100).rounded()))%, indipendente \(Int((r.quota(.indipendente) * 100).rounded()))%.")
+        righe.append("QUADRO (calcolato da Lucy): patrimonio netto \(Formati.euro(r.patrimonioNetto)) (attività \(Formati.euro(r.attivita)), debiti \(Formati.euro(r.debiti))); premi e versamenti \(Formati.euro(r.premiAnnui)) all'anno; capitale assicurato \(Formati.euro(r.capitaleAssicurato)).")
 
         let inEssere = f.posizioni.filter { $0.stato == .inEssere }
         if !inEssere.isEmpty {
@@ -174,7 +173,7 @@ enum ContestoVera {
     }
 
     static func riga(_ p: Posizione) -> String {
-        var parti = ["[\(p.canale.nomeBreve)] \(p.nome) (\(p.area.nome.lowercased()))"]
+        var parti = ["\(p.nome) (\(p.area.nome.lowercased()))"]
         if p.area == .protezione {
             if let c = p.capitaleAssicurato { parti.append("capitale \(Formati.euro(c))\(p.rischio.map { " \($0.nome.lowercased())" } ?? "")") }
         } else if p.stato == .proposta {

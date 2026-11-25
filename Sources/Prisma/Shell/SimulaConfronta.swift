@@ -506,15 +506,7 @@ private struct EditorIpotesiMia: View {
                                    valore: Binding(get: { l.costoAnnuo }, set: { v in stato.stradaLibera?.costoAnnuo = v }),
                                    unita: "%", intervallo: 0...5, passo: 0.05, decimali: 2)
                 .equatable()
-            VStack(alignment: .leading, spacing: S.spazioOcchiello) {
-                Text(T.canaleMia)
-                    .carattereApple(S.rigaIpotesi)
-                    .foregroundColor(S.coloreRigaIpotesi)
-                SegmentiAnalisiFermi(opzioni: [(Canale?.none, T.canaleNessuno), (Canale?.some(.alleanza), T.canaleAlleanza),
-                                               (Canale?.some(.indipendente), T.canaleIndipendente)],
-                                     selezione: Binding(get: { l.canale }, set: { v in stato.stradaLibera?.canale = v }))
-                    .equatable()
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente scelta del canale
         }
         .padding(S.paddingColonna)
         .frame(width: S.larghezzaEditor)

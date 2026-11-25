@@ -60,7 +60,7 @@ enum ProvaMiniVera {
         controlla(contesto?.nome == "Giulia Rossi" && contesto?.app == "Posizioni", "Mini Lucy: il contesto è il cliente e l'app aperti")
         let f = s.fonteVera("giulia")
         let passi = StatoMiniVera.passi(domanda: Istantanee.domandaMiniVera, fonte: f, modalita: .lavoro)
-        controlla(passi.first == "Apro il dossier di Giulia…" && passi.contains { $0.contains("Alleanza e indipendenti") },
+        controlla(passi.first == "Apro il dossier di Giulia…" && passi.contains { $0.hasSuffix("in essere…") } && !passi.contains { $0.contains("Alleanza") },
                   "Mini Lucy: i passi di «pensa» vengono dai dati del cliente")
 
         s.apriMiniVera(.scrivi)

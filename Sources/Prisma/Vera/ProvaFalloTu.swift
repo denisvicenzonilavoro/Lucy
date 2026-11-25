@@ -269,12 +269,13 @@ enum ProvaFalloTu {
         controlla(s.dati.appuntamenti.count == quanti + 1 && blocco?.tipo == .nonDisponibile && blocco?.clienteId == "" && blocco?.durataMinuti == 300,
                   "Scheda: «liberami venerdì pomeriggio» blocca le 14-19 come «Non disponibile»")
 
-        // La scadenza in Posizioni, con il canale nella riga
+        // La scadenza in Posizioni, con il nome della posizione nella riga (un solo canale: niente canale)
         if let p = s.dati.posizioni.first(where: { $0.clienteId == "sofia" && $0.stato == .inEssere }) {
             let prima = p.scadenza
             let m3 = s.rispondiFalloTu(risposta([(RegistroStrumenti.posizioniScadenza, ["cliente": "Sofia", "posizione": p.nome, "scadenza": "2027-01-15"])]),
                                        richiesta: "La \(p.nome) di Sofia scade il 15 gennaio", chiave: "giulia", motore: "Qwen")
-            controlla(m3.conferma?.azioni.first?.dettaglio.contains(p.canale.nomeBreve) == true, "Scheda: la riga della posizione dice il canale")
+            controlla(m3.conferma?.azioni.first?.dettaglio.contains(p.nome) == true && m3.conferma?.azioni.first?.dettaglio.contains("Alleanza") == false,
+                      "Scheda: la riga della posizione dice il nome, senza canale")
             s.confermaSchedaVera(messaggio: m3.id)
             controlla(s.dati.posizioni.first { $0.id == p.id }?.scadenza.map(iso) == "2027-01-15", "Scheda: la scadenza aggiornata in Posizioni")
             s.annullaSchedaVera(messaggio: m3.id)
@@ -507,7 +508,7 @@ enum ProvaFalloTu {
         var a = AzioneConferma(strumento: RegistroStrumenti.notaNuova, app: .note, titolo: "Prendo nota", dettaglio: "«x»", argomenti: ["cliente": "giulia"])
         a.esito = EsitoAzioneVera(fatta: true, messaggio: "Annotato.", oggetto: "nota-1")
         m.conferma = SchedaConfermaVera(richiesta: "Annota x", azioni: [a], origine: .qwen)
-        m.clientela = RisultatoClientela(domanda: "Chi?", filtri: [FiltroClientela(.canale, testo: "alleanza")], etichette: ["Canale Alleanza"],
+        m.clientela = RisultatoClientela(domanda: "Chi?", filtri: [FiltroClientela(.canale, testo: "alleanza")], etichette: ["Con posizioni in essere"],
                                          colonne: ["Cliente", "Canale"], righe: [RigaClientela(id: "giulia", nome: "Giulia Rossi", valori: [], canali: [.alleanza])], totale: 5)
         m.fonti = [FonteCifra(id: 1, testo: "20.800 €", trovata: true, origine: "Posizioni · Piano casa", dettaglio: "valore al 30 ottobre", app: .posizioni)]
         let e = JSONEncoder()

@@ -1,7 +1,8 @@
 import Foundation
 
 /// Migliorie d'uso 38 «I canali hanno il nome che scegli»: la pulizia del nome (18 caratteri, caratteri tolti, vuoto =
-/// quello di base), `Canale.nomeBreve`, `Canale.nome` e il logo con i nomi di base e con quelli scelti, il campo letto
+/// quello di base), `Canale.nomeBreve`, `Canale.nome` e il logo (dal 25 novembre 2026 un solo canale, quello di Lucy,
+/// con i nomi di base e con quelli scelti), il campo letto
 /// con tolleranza dall'archivio e le tre domande del primo avvio. Chiamata da `ProvaCalcoli.esegui()`.
 enum ProvaNomiCanali {
     static func esegui(_ verifica: VerificaCalcoli) {
@@ -15,20 +16,19 @@ enum ProvaNomiCanali {
 
         let prima = NomiCanaliCorrenti.valore
         NomiCanaliCorrenti.imposta(.base)
-        verifica.vero("Canali: con i nomi di base «Alleanza» e «Indipendente»",
-                      Canale.alleanza.nomeBreve == "Alleanza" && Canale.indipendente.nomeBreve == "Indipendente")
-        verifica.vero("Canali: con i nomi di base le scritte lunghe dei PDF",
-                      Canale.alleanza.nome == "Alleanza Assicurazioni"
-                      && Canale.indipendente.nome == "Denis Vicenzoni · Consulenza finanziaria")
-        verifica.vero("Canali: con i nomi di base il logo Alleanza e «indipendente» nelle frasi",
-                      Canale.alleanza.conLogo && !Canale.indipendente.conLogo && Canale.indipendente.nomeInFrase == "indipendente")
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: stesse scritte per i due valori
+        // salvati, con i nomi di base e con quelli scelti, e mai il logo di una compagnia
+        func unico() -> Bool {
+            Canale.allCases.allSatisfy { c in
+                c.nome == "Lucy · consulenza finanziaria" && c.nome == CanaleLucy.nome
+                    && c.nomeBreve == "Lucy" && c.nomeInFrase == "Lucy" && !c.conLogo
+            }
+        }
+        verifica.vero("Canali: un solo canale, «Lucy» e «Lucy · consulenza finanziaria» per i due valori salvati", unico())
         NomiCanaliCorrenti.imposta(NomiCanali(primo: "Agenzia", secondo: "Studio Rossi"))
-        verifica.vero("Canali: con i nomi scelti l'etichetta li porta",
-                      Canale.alleanza.nomeBreve == "Agenzia" && Canale.indipendente.nomeBreve == "Studio Rossi")
-        verifica.vero("Canali: con i nomi scelti anche la scritta lunga",
-                      Canale.alleanza.nome == "Agenzia" && Canale.indipendente.nome == "Studio Rossi")
-        verifica.vero("Canali: con un nome scelto niente logo Alleanza",
-                      !Canale.alleanza.conLogo && Canale.indipendente.nomeInFrase == "Studio Rossi")
+        verifica.vero("Canali: un solo canale anche con i nomi scelti di prima", unico())
+        verifica.vero("Canali: il tipo di prodotti dove una regola resta diversa, mai il nome di un canale",
+                      Canale.alleanza.tipoProdotti == "prodotti assicurativi" && Canale.indipendente.tipoProdotti == "strumenti finanziari")
         NomiCanaliCorrenti.imposta(prima)
 
         // L'archivio: senza il campo i nomi di base, con il campo i nomi tornano uguali

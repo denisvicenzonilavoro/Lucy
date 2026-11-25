@@ -91,6 +91,8 @@ extension Tema.Apple {
         /// I colori dei canali nel file (sempre chiaro: le varianti chiare di `Colore.canaleAlleanza/Indipendente`).
         static let canaleAlleanzaHex = "#2563EB"
         static let canaleIndipendenteHex = "#B06E12"
+        /// Un solo canale, quello di Lucy (25 novembre 2026): il colore della scritta «Lucy» sotto ogni posizione.
+        static let canaleLucyHex = canaleIndipendenteHex
 
         // MARK: La mini-app (dentro il telefono)
 

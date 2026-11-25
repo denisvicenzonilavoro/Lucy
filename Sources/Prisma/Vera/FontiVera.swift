@@ -131,12 +131,12 @@ enum FontiVera {
         for p in f.posizioni where p.stato != .chiusa {
             let origine = "Posizioni · \(p.nome)"
             let quando = p.dataValore.map { " · valore al \(Formati.giornoMese.string(from: $0))" } ?? ""
-            voci.append(VoceFonte(valore: p.valore, unita: .euro, origine: origine, dettaglio: "\(f.cliente.nome)\(quando) · \(p.canale.nomeBreve)", app: .posizioni))
+            voci.append(VoceFonte(valore: p.valore, unita: .euro, origine: origine, dettaglio: "\(f.cliente.nome)\(quando)", app: .posizioni))
             if p.premio > 0 {
-                voci.append(VoceFonte(valore: p.premio, unita: .euro, origine: origine, dettaglio: "\(f.cliente.nome) · premio · \(p.canale.nomeBreve)", app: .posizioni))
+                voci.append(VoceFonte(valore: p.premio, unita: .euro, origine: origine, dettaglio: "\(f.cliente.nome) · premio", app: .posizioni))
             }
             if let c = p.capitaleAssicurato, c > 0 {
-                voci.append(VoceFonte(valore: c, unita: .euro, origine: origine, dettaglio: "\(f.cliente.nome) · capitale assicurato · \(p.canale.nomeBreve)", app: .posizioni))
+                voci.append(VoceFonte(valore: c, unita: .euro, origine: origine, dettaglio: "\(f.cliente.nome) · capitale assicurato", app: .posizioni))
             }
         }
         for d in f.documenti {

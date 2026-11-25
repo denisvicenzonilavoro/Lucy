@@ -24,7 +24,7 @@ struct PaginaImpostazioniModuli: View {
                 GruppoImpostazioni(titolo: "I tuoi moduli") {
                     if modelli.isEmpty {
                         RigaImpostazione(titolo: "Moduli da preparare",
-                                         sottotitolo: "Carica i PDF veri che usi per il canale indipendente", ultima: true) {
+                                         sottotitolo: "Carica i PDF veri che usi con i clienti", ultima: true) {
                             Button("Apri Pratiche › Moduli") { stato.apriPratiche(.moduli) }
                                 .buttonStyle(.apple)
                         }
@@ -46,8 +46,8 @@ struct PaginaImpostazioniModuli: View {
                         }
                     }
                 }
-                NotaImpostazioni("Moduli Alleanza: non ancora. Finché la compagnia non conferma che i suoi moduli si possono "
-                                 + "compilare fuori dai suoi strumenti, le proposte Alleanza si fanno con quelli.")
+                NotaImpostazioni("Moduli delle compagnie: finché una compagnia non conferma che i suoi moduli si possono "
+                                 + "compilare fuori dai suoi strumenti, le sue proposte si fanno con quelli.")
             }
             .cascataImpostazioni(1)
             VStack(alignment: .leading, spacing: Riga.fraRighe) {

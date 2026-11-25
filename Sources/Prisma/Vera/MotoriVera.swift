@@ -15,7 +15,7 @@ enum IstruzioniVera {
 
     /// Istruzioni della chat; in sviluppo (`swift run`) ripiega su una versione minima.
     static let chat: String =
-        testo("chat") ?? "Sei Lucy, l'assistente di un consulente finanziario italiano (canali Alleanza Assicurazioni e indipendente). Rispondi in italiano usando solo i dati della scheda del cliente; non inventare numeri e distingui sempre il canale."
+        testo("chat") ?? "Sei Lucy, l'assistente di un consulente finanziario italiano (un solo canale, quello di Lucy). Rispondi in italiano usando solo i dati della scheda del cliente; non inventare numeri."
 
     /// La risposta breve della mini finestra di Vera.
     static let mini: String =

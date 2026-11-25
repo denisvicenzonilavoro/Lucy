@@ -173,7 +173,7 @@ enum LasciaCadereVera {
         }
         return AzioneConferma(strumento: strumentoPosizione, app: .posizioni, titolo: "Aggiungo «\(p.nome)» in Posizioni",
                               dettaglio: "\(areaProbabile(p.nome).nome) · \(valore) al \(Formati.dataEstesa.string(from: data))"
-                                + (p.isin.map { " · ISIN \($0)" } ?? "") + " · in essere, indipendente · letto a pag. \(p.pagina)",
+                                + (p.isin.map { " · ISIN \($0)" } ?? "") + " · in essere · letto a pag. \(p.pagina)",
                               argomenti: argomenti)
     }
 

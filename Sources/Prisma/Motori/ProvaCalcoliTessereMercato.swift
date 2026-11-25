@@ -177,7 +177,7 @@ enum ProvaCalcoliTessereMercato {
                               fonte: "Fonte: BCE", serieId: nil, isin: nil, posizioneId: nil, toccati: [t])
         let frase = TestiAppMercato.fraseToccati(e, tipoSerie: .indiceAzionario, nomi: ["marco": "Marco Bianchi"])
         verifica.vero("Mercato frasi: «il portafoglio di Marco perde circa 3.000 €»", frase.contains("il portafoglio di Marco perde circa 3.000"))
-        verifica.vero("Mercato frasi: i canali restano separati", frase.contains(Canale.alleanza.nomeBreve) && frase.contains(Canale.indipendente.nomeBreve))
+        verifica.vero("Mercato frasi: un solo canale, la frase non lo divide", !frase.contains(CanaleLucy.nomeBreve) && !frase.contains("Alleanza"))
         let btp = EventoMercato(id: "b", tipo: .variazioneSerie, titolo: "t", dettaglio: "d", valore: 0.15, soglia: 0.1, data: oggi,
                                 fonte: "Fonte: BCE", serieId: nil, isin: nil, posizioneId: nil,
                                 toccati: [ClienteToccato(clienteId: "sofia", posizioni: ["x"], impatto: nil, perCanale: [:], canali: [.alleanza])])

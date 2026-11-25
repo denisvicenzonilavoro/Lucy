@@ -46,7 +46,7 @@ enum TestiCopilota {
     /// Segnaposto «dati di prova» finché l'utente non dà il testo vero del consenso (§8.6, dato 67).
     static let testoConsenso = "Il cliente acconsente all’ascolto dell’incontro: Lucy trascrive la voce " + dispositivo
         + " solo come testo, l’audio non si registra e non lascia il dispositivo. (Testo di prova: va sostituito con quello approvato.)"
-    static let alleanza = "Verifica le regole di Alleanza sull’ascolto."
+    static let alleanza = "Verifica le regole della compagnia sull’ascolto."
     static let sulMac = "Da confermare sul Mac"
     static let nienteNelDossier = "Niente da aggiungere."
     static let nienteRiconosciuto = "Lucy non ha riconosciuto obiettivi, polizze, timori o eventi."

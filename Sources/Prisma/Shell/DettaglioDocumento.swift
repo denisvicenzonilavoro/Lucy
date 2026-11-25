@@ -1106,18 +1106,18 @@ struct ConfrontoClienteVista: View {
             if questionario {
                 if let c = canaleLetto {
                     HStack(spacing: m.spazioBarra) {
-                        Text("Canale del questionario")
+                        Text("Tipo di questionario")
                             .font(Tema.Apple.Carattere.secondario.fontLeggibile)
                             .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         EtichettaCanale(canale: c)
                     }
                 } else {
                     VStack(alignment: .leading, spacing: m.spazioStatoRiga) {
-                        Text("Canale del questionario")
+                        Text("Tipo di questionario")
                             .font(Tema.Apple.Carattere.secondario.fontLeggibile)
                             .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         HStack(spacing: m.spazioBarra) {
-                            SegmentiAnalisi(opzioni: [(Optional(Canale.alleanza), Canale.alleanza.nomeBreve), (Optional(Canale.indipendente), Canale.indipendente.nomeBreve)],
+                            SegmentiAnalisi(opzioni: [(Optional(Canale.alleanza), "Prodotti assicurativi"), (Optional(Canale.indipendente), "Strumenti finanziari")],
                                             selezione: $canaleScelto)
                                 .frame(maxWidth: m.menuArea)
                             if let c = canaleScelto { EtichettaCanale(canale: c) }

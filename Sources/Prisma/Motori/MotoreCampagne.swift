@@ -403,7 +403,7 @@ enum TestiCampagne {
     static let bozzaPronta = "✓ bozza pronta"
     static let riscriviVera = "Fai riscrivere a Lucy"
     static let fermaVera = "Ferma Lucy"
-    static let sceltaFirma = "Clienti di canali diversi: con quale firma?"
+    static let sceltaFirma = "Con quale firma?"
     static let veraNonPronta = "Lucy non è pronta: resta il testo di Lucy, già con le cifre di ogni cliente."
 
     static func pronti(_ n: Int) -> String { "✓ \(n) \(n == 1 ? "messaggio pronto" : "messaggi pronti") · li spedisci tu" }

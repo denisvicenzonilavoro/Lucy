@@ -57,10 +57,10 @@ extension ProvaVera {
         }
         if let q = QuadroVera.perPortafoglio(domanda: "Come si divide il portafoglio tra Alleanza e indipendente?", posizioni: s.posizioni),
            case .barre(let barre) = q.forma {
-            controlla(barre.allSatisfy { if case .canale(_) = $0.tinta { return true } else { return false } },
-                      "Quadro: il portafoglio per canale ha i colori dei canali")
+            controlla(barre.allSatisfy { if case .area(_) = $0.tinta { return true } else { return false } },
+                      "Quadro: un solo canale, il portafoglio si divide per area anche se si chiede dei canali di prima")
         } else {
-            controlla(false, "Quadro: il portafoglio per canale ha le barre")
+            controlla(false, "Quadro: il portafoglio per area ha le barre")
         }
         controlla(QuadroVera.perCliente(domanda: "Raccontami una barzelletta", posizioni: posizioni, obiettivi: []) == nil,
                   "Quadro: niente quadro se la domanda non parla di cifre")

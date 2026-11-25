@@ -269,7 +269,7 @@ extension CompositoreProspetti {
     }
 
     /// «Cronologia dei riesami»: la riga «Oggi» (non salvata, evidenziata) e le ultime fotografie salvate, con il
-    /// patrimonio sempre diviso per canale. Senza fotografie salvate un testo (la riga «Oggi» da sola non dice niente).
+    /// patrimonio in una colonna sola (un solo canale, quello di Lucy, dal 25 novembre 2026). Senza fotografie salvate un testo (la riga «Oggi» da sola non dice niente).
     private static func bloccoCronologia(_ m: MemoriaRiesame) -> [BloccoProspetto] {
         guard !m.cronologia.isEmpty else { return [.testo(TestiMemoria.nessunaFotografia)] }
         func riga(_ f: FotografiaRiesame, data: String, forte: Bool) -> [CellaProspetto] {

@@ -86,7 +86,7 @@ struct PaginaIpotesiStimate: View {
         }
     }
 
-    /// Una voce: il dato (con la posizione sotto), lo stato nel suo colore, l'ipotesi usata, il canale.
+    /// Una voce: il dato (con la posizione sotto), lo stato nel suo colore, l'ipotesi usata.
     private func riga(_ v: VoceCompletezza) -> RigaDoc {
         let parti = TestiIpotesiStimate.parti(v)
         var dato = CellaDoc(parti.dato, sotto: parti.posizione, font: T.pTabellaForte)

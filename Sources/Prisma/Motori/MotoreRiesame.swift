@@ -359,8 +359,8 @@ enum MotoreRiesame {
     static func domandeConformita(_ e: EsitoConformita) -> [String] {
         var domande: [String] = []
         for v in e.voci where v.tipo.questionario && (v.stato == .scaduta || v.stato == .entro30 || v.stato == .entro60) {
-            guard let c = v.canale else { continue }
-            domande.append("Aggiorniamo insieme il questionario di adeguatezza (\(c.nomeBreve))? Sono cambiati obiettivi, situazione finanziaria o esperienza?")
+            guard v.canale != nil else { continue }
+            domande.append("Aggiorniamo insieme il questionario di adeguatezza? Sono cambiati obiettivi, situazione finanziaria o esperienza?")
         }
         if let d = e.voce(.documento), d.stato == .scaduta || d.stato == .entro30 || d.stato == .entro60 || d.stato == .mancante {
             var testo = "Può portare un documento d'identità valido?"
@@ -377,14 +377,10 @@ enum MotoreRiesame {
         return domande
     }
 
-    /// «Questionario di adeguatezza Alleanza», «Documento d'identità»: il nome della voce con il canale, se ce l'ha.
+    /// «Questionario di adeguatezza», «Documento d'identità»: il nome della voce (un solo canale, quello di Lucy: niente
+    /// nome del canale).
     private static func nomeConformita(_ v: VoceConformita) -> String {
-        let nome = TestiConformita.nome(v.tipo)
-        switch v.canale {
-        case .alleanza?: return nome + " Alleanza"
-        case .indipendente?: return nome + " indipendente"
-        case nil: return nome
-        }
+        TestiConformita.nome(v.tipo)
     }
 
     /// Il dettaglio della voce come nella scheda «In regola», chiuso dal punto.
@@ -397,7 +393,7 @@ enum MotoreRiesame {
     /// Cosa fare per una voce scaduta (con lo spazio iniziale; vuoto per l'informativa privacy, che lo dice già).
     private static func azioneScaduta(_ t: VoceConformita.Tipo) -> String {
         switch t {
-        case .questionarioAlleanza, .questionarioIndipendente: return " Va compilato di nuovo prima di nuove proposte sul canale."
+        case .questionarioAlleanza, .questionarioIndipendente: return " Va compilato di nuovo prima di nuove proposte."
         case .verificaAlleanza, .verificaIndipendente: return " Aggiornare i dati e il profilo di rischio."
         case .documento: return " Chiedere una copia del documento nuovo."
         case .commerciale: return " Chiedere se lo conferma."

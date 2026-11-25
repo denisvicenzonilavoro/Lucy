@@ -328,8 +328,7 @@ enum MotorePratiche {
         guard let passo = s.mancante else { return nil }
         let nome = s.posizione.nome
         var cifre = [CifraMessaggio(.posizione, nome),
-                     CifraMessaggio(.passoPratica, TestiPratiche.cosa(passo, canale: s.canale)),
-                     CifraMessaggio(.canale, s.canale.nome)]
+                     CifraMessaggio(.passoPratica, TestiPratiche.cosa(passo, canale: s.canale))]
         if s.ferma { cifre.append(CifraMessaggio(.giorniPratica, "\(s.giorniFermo)")) }
         let perche = s.ferma ? TestiPratiche.fermoDa(s.giorniFermo) + ": " + TestiPratiche.manca(passo, canale: s.canale)
                              : TestiPratiche.adesso(passo, canale: s.canale)

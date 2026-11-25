@@ -743,10 +743,10 @@ extension MotoreNotifiche {
                     let titolo = scelte.nomiClienti ? o.titolo : TestiOccasioni.titoloAnonimo(o)
                     let corpo: String
                     if scelte.nomiClienti {
-                        corpo = [fra, nome(o.clienteId) ?? "", o.canale?.nomeBreve ?? "", Formati.dataEstesa.string(from: o.data)]
+                        corpo = [fra, nome(o.clienteId) ?? "", Formati.dataEstesa.string(from: o.data)]
                             .filter { !$0.isEmpty }.joined(separator: " · ")
                     } else {
-                        corpo = [fra, o.canale?.nomeBreve ?? "", dettagli].filter { !$0.isEmpty }.joined(separator: " · ")
+                        corpo = [fra, dettagli].filter { !$0.isEmpty }.joined(separator: " · ")
                     }
                     let destinazione = o.posizioneId.map { DestinazioneRicerca.posizione($0) } ?? DestinazioneRicerca.cliente(o.clienteId)
                     elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)occasione-\(o.id)-\(giorni)",
