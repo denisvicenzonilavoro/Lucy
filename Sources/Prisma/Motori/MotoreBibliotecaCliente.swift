@@ -46,12 +46,8 @@ enum TestiBiblioteca {
 
     /// «38 pagine · canale Alleanza», «… · canale indipendente», «… · vale per tutti i canali».
     static func pagineECanale(pagine n: Int, canale: Canale?) -> String {
-        let pagine = n == 1 ? "1 pagina" : "\(n) pagine"
-        switch canale {
-        case .alleanza?: return "\(pagine) · canale \(Canale.alleanza.nomeInFrase)"
-        case .indipendente?: return "\(pagine) · canale \(Canale.indipendente.nomeInFrase)"
-        case nil: return "\(pagine) · vale per tutti i canali"
-        }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: solo le pagine, niente canale
+        n == 1 ? "1 pagina" : "\(n) pagine"
     }
 }
 

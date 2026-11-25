@@ -961,29 +961,9 @@ private struct RigaProvaFuocoApple: View, Equatable {
     }
 
     /// Il canale delle posizioni in essere: l'etichetta compatta (nella riga stretta solo il pallino del colore).
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichette né pallini dei canali.
     @ViewBuilder private var canaliVista: some View {
-        let r = Tema.Apple.Posizioni.Fuoco.Riga.self
-        if !canali.isEmpty {
-            if stretta {
-                HStack(spacing: r.spazioCanali) {
-                    ForEach(canali) { c in
-                        Circle()
-                            .fill(r.coloreCanale(c))
-                            .frame(width: r.pallinoCanale, height: r.pallinoCanale)
-                    }
-                }
-                .accessibilityElement(children: .ignore)
-                .accessibilityLabel(Text(canali.map(\.nome).joined(separator: ", ")))
-                .help(canali.map(\.nome).joined(separator: " · "))
-            } else {
-                VStack(alignment: .leading, spacing: r.spazioCanali) {
-                    ForEach(canali) { c in
-                        EtichettaCanaleApple(canale: c, compatta: true)
-                    }
-                }
-                .fixedSize()
-            }
-        }
+        EmptyView()
     }
 
     @ViewBuilder private var barra: some View {

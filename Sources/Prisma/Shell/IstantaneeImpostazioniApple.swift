@@ -57,11 +57,7 @@ extension Istantanee {
             // Profilo con i due campi e «Rivedi», e una scheda di Posizioni con i nomi scelti (etichetta senza logo)
             ("1064-uso-primo-avvio-benvenuto", { s in s.apriPrimoAvvio(pagina: 0) }),
             ("1064-uso-primo-avvio-benvenuto-scuro", { s in s.apriPrimoAvvio(pagina: 0) }),
-            ("1065-uso-primo-avvio-canali", { s in
-                s.dati.impostazioni.nomiCanali = NomiCanali(primo: "Agenzia Rossi", secondo: "Indipendente")
-                s.apriPrimoAvvio(pagina: 1)
-            }),
-            ("1066-uso-primo-avvio-da-dove", { s in s.apriPrimoAvvio(pagina: 2) }),
+            ("1066-uso-primo-avvio-da-dove", { s in s.apriPrimoAvvio(pagina: 1) }),
             ("1067-uso-impostazioni-profilo", { s in preparaImpostazioniApple(s, sezione: .profilo) }),
             ("1067-uso-impostazioni-profilo-scuro", { s in preparaImpostazioniApple(s, sezione: .profilo) }),
             ("1068-uso-canale-rinominato", { s in

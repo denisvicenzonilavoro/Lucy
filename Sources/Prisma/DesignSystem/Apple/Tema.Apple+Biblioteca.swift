@@ -49,13 +49,8 @@ extension Tema.Apple {
 
         /// Il tassello del documento: blu Alleanza e cuoio dell'indipendente nella versione chiara fissa (il template
         /// non li cambia nello scuro); grigio (`Carta.etichetta`) per normativa e circolari, che non sono di un canale.
-        static func tassello(canale: Canale?) -> Color {
-            switch canale {
-            case .alleanza?: return Color(hex: "#2563EB")
-            case .indipendente?: return Color(hex: "#B06E12")
-            case nil: return Tema.Apple.Carta.etichetta
-            }
-        }
+        /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore per tutti.
+        static func tassello(canale: Canale?) -> Color { Tema.Apple.Carta.etichetta }
 
         // MARK: Domanda (§8.1.1.3)
 

@@ -198,13 +198,7 @@ struct RigaSpotlight: View {
             }
             .lineLimit(1)
             Spacer(minLength: 0)
-            // Nella riga stretta il canale resta il suo colore (versione compatta)
-            if let c = risultato.canale {
-                Circle()
-                    .fill(Tema.Apple.AltreApp.canale(c))
-                    .frame(width: Tema.Apple.Misura.Controllo.pallinoCanale, height: Tema.Apple.Misura.Controllo.pallinoCanale)
-                    .help(c.nome)
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente pallino del canale
         }
         .padding(m.rigaMargine)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -248,22 +242,32 @@ struct PillolaSpotlight: View {
     }
 }
 
-/// Il totale di un canale nei risultati filtrati: capsula in vetro del colore del canale (blu Alleanza con il
-/// simbolo, cuoio indipendente), numero di posizioni e valore.
+/// Il totale di un canale nei risultati filtrati. Dal 25 novembre 2026 (decisione dell'utente: un solo canale,
+/// quello di Lucy) è il totale unico di `TotaleRicercaSpotlight`.
 struct TotaleCanaleSpotlight: View {
     let totale: TotaleCanaleRicerca
 
     var body: some View {
-        let c = totale.canale
-        HStack(spacing: Misure.Spotlight.totaleSpazio) {
-            EtichettaCanale(canale: c, compatta: true)
-            Text("\(totale.numero) · \(Formati.euro(totale.valore))")
+        TotaleRicercaSpotlight(totali: [totale])
+    }
+}
+
+/// Il totale delle posizioni trovate, senza distinzione di canale (dal 25 novembre 2026 un solo canale, quello di
+/// Lucy): numero di posizioni e valore. Niente se non ci sono posizioni.
+struct TotaleRicercaSpotlight: View {
+    let totali: [TotaleCanaleRicerca]
+
+    var body: some View {
+        let numero = totali.reduce(0) { $0 + $1.numero }
+        let valore = totali.reduce(0) { $0 + $1.valore }
+        if numero > 0 {
+            Text("\(numero) · \(Formati.euro(valore))")
                 .font(Tipo.spotlightPillola)
-                .foregroundColor(Tema.Apple.AltreApp.canale(c))
+                .foregroundColor(Colori.Spotlight.pillolaTesto)
                 .monospacedDigit()
+                .lineLimit(1)
+                .fixedSize()
         }
-        .lineLimit(1)
-        .fixedSize()
     }
 }
 
@@ -293,16 +297,15 @@ struct CifraAnteprimaRicerca: View {
 #if os(macOS)
 // MARK: - I filtri da toccare (migliorie d'uso 61)
 
-/// Il pallino colorato del canale (Alleanza blu, indipendente cuoio), come nelle righe dei risultati.
+/// Il pallino colorato del canale. Dal 25 novembre 2026 (decisione dell'utente: un solo canale, quello di Lucy)
+/// non disegna nulla.
 struct PallinoCanale: View {
     let canale: Canale
     var lato: CGFloat = Tema.Apple.AltreApp.Ricerca.Mac.pallinoCanale
 
-    var body: some View {
-        Circle()
-            .fill(Tema.Apple.AltreApp.canale(canale))
-            .frame(width: lato, height: lato)
-    }
+    // Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy: il canale non si mostra
+    // più. Il campo `canale` resta nei dati solo per compatibilità; la firma resta perché i richiami compilino.
+    var body: some View { EmptyView() }
 }
 
 /// Un'etichetta della fila dei filtri del pannello di ricerca: accesa con il fondo accento al 14% e il testo accento,

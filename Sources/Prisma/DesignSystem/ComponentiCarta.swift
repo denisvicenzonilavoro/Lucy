@@ -318,7 +318,9 @@ struct BloccoCarta: View {
                     .overlay(RoundedRectangle(cornerRadius: M.raggio).strokeBorder(Colori.Carta.riquadroBordo, lineWidth: 0.8))
                 }
             }
-        case .voci(let voci):
+        case .voci(let tutte):
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente voce «Canale»
+            let voci = tutte.filter { !CampoVoce.eCanale($0) }
             VStack(spacing: 0) {
                 ForEach(Array(ImpaginatoreProspetto.righeVoci(voci).enumerated()), id: \.offset) { _, riga in
                     HStack(alignment: .top, spacing: M.colonnaVoci) {
@@ -330,7 +332,7 @@ struct BloccoCarta: View {
                 }
             }
         case .tabella(let t):
-            TabellaCarta(tabella: t)
+            TabellaCarta(tabella: t.senzaCanale)
         case .grafico(let serie):
             GraficoCarta(serie: serie)
         case .testo(let s):
@@ -451,6 +453,35 @@ struct TabellaCarta: View {
                 .truncationMode(.tail)
                 .fixedSize(horizontal: false, vertical: righe > 1)
         }
+    }
+}
+
+extension CampoVoce {
+    /// La voce che dice solo il canale («Canale: Alleanza»): Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy non si mostra.
+    static func eCanale(_ v: CampoVoce) -> Bool {
+        v.canale != nil && v.etichetta.lowercased() == "canale"
+    }
+}
+
+extension TabellaProspetto {
+    /// La tabella come si disegna sulla carta. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente colonne
+    /// «Canale» o «Canali» e niente righe che dicono solo il canale (prima cella «Canale»). I dati del prospetto
+    /// restano com'erano.
+    var senzaCanale: TabellaProspetto {
+        let tenute = colonne.indices.filter { !["canale", "canali"].contains(colonne[$0].titolo.lowercased()) }
+        let togliColonne = tenute.count < colonne.count && !tenute.isEmpty
+        func filtra(_ r: [CellaProspetto]) -> [CellaProspetto] {
+            togliColonne ? tenute.map { $0 < r.count ? r[$0] : .t("") } : r
+        }
+        var nuove: [[CellaProspetto]] = []
+        var evidenziate: Set<Int> = []
+        for (i, r) in righe.enumerated() {
+            if r.first?.testo.lowercased() == "canale", r.dropFirst().contains(where: { $0.canale != nil }) { continue }
+            if evidenzia.contains(i) { evidenziate.insert(nuove.count) }
+            nuove.append(filtra(r))
+        }
+        return TabellaProspetto(colonne: togliColonne ? tenute.map { colonne[$0] } : colonne, righe: nuove,
+                                totale: totale.map(filtra), evidenzia: evidenziate)
     }
 }
 

@@ -29,8 +29,9 @@ func coloreGiudizio(_ g: ProvaResistenza.Giudizio?, _ C: PaletteDocumento) -> Co
 /// Le voci di uno scenario divise per canale (blu Alleanza, cuoio indipendente).
 private func gruppi(_ s: ProvaResistenza.Scenario?, riga: (ProvaResistenza.Voce) -> RigaDoc) -> [GruppoCanale] {
     guard let s else { return [] }
-    return Canale.allCases.compactMap { c in
-        let mie = s.voci.filter { $0.posizione.canale == c }
+    return [GruppoCanale.canaleUnico].compactMap { c in
+        // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+        let mie = s.voci
         guard !mie.isEmpty else { return nil }
         let totale = mie.reduce(0) { $0 + $1.perdita }
         return GruppoCanale(canale: c, righe: mie.map(riga), nota: "\(mie.count == 1 ? "1 posizione" : "\(mie.count) posizioni") · \(CifreDoc.togli(totale))")
@@ -239,8 +240,9 @@ private struct PaginaCrisi: View {
 
     private var gruppi: [GruppoCanale] {
         let mostrate = Array(posizioni.prefix(Misure.Documento.righeTabellaFissa))
-        return Canale.allCases.compactMap { c -> GruppoCanale? in
-            let mie = mostrate.filter { $0.posizione.canale == c }
+        return [GruppoCanale.canaleUnico].compactMap { c -> GruppoCanale? in
+            // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+            let mie = mostrate
             guard !mie.isEmpty else { return nil }
             let righe = mie.map { v -> RigaDoc in
                 var celle = [CellaDoc(v.posizione.nome, sotto: composizioneDoc(v.composizione), font: T.pTabellaForte),

@@ -81,8 +81,8 @@ enum ProvaPromemoria {
                     && scadenze.allSatisfy { $0.destinazione == .posizione(inEssere.id) }
                     && scadenze.first?.titolo.hasSuffix("scade tra 7 giorni") == true
                     && scadenze.last?.titolo.hasSuffix("scade oggi") == true
-                    && scadenze.allSatisfy { $0.corpo.contains(inEssere.canale.nomeBreve) },
-                  "posizione che scade tra 10 giorni: a 7 giorni e il giorno stesso, con il canale; niente per le proposte")
+                    && scadenze.allSatisfy { !$0.corpo.contains(inEssere.canale.nomeBreve) },
+                  "posizione che scade tra 10 giorni: a 7 giorni e il giorno stesso, senza il canale (un solo canale dal 25 novembre 2026); niente per le proposte")
         controlla(compleanni.count == 1 && compleanni.first?.data == attesaCompleanno
                     && compleanni.first?.titolo == "Oggi \(cliente.nome) compie 46 anni"
                     && compleanni.first?.destinazione == .cliente(cliente.id),

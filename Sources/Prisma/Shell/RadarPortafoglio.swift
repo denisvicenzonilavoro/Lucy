@@ -1197,7 +1197,6 @@ private struct RigaClasseRadar: View {
                     BarraPiena(frazione: oggi / 100, colore: Tema.Apple.Posizioni.Radar.colore(classe), indice: indice,
                                altezza: D.binario, raggio: D.raggioBinario, binario: nil)
                         .frame(width: w)
-                        .overlay(alignment: .leading) { divisioneCanali(w) }
                     Rectangle()
                         .fill(D.coloreLinea)
                         .frame(width: D.lineaModello, height: D.binario + 2 * D.sporgenza)
@@ -1214,22 +1213,6 @@ private struct RigaClasseRadar: View {
         }
         .accessibilityElement(children: .ignore)
         .accessibilityLabel("\(TestiRadar.nomeClasse(classe)): oggi \(TestiRadar.punti(oggi)) per cento, modello \(TestiRadar.punti(modello)) per cento")
-    }
-
-    /// Canale sempre riconoscibile: il tratto di Alleanza nella barra di oggi ha un filo blu sotto, quello
-    /// indipendente un filo color cuoio.
-    @ViewBuilder private func divisioneCanali(_ w: CGFloat) -> some View {
-        let totale = canali.values.reduce(0, +)
-        if totale > 0, canali.count > 1 || canali.keys.first != nil {
-            let a = (canali[.alleanza] ?? 0) / totale * oggi / 100 * w
-            let i = (canali[.indipendente] ?? 0) / totale * oggi / 100 * w
-            HStack(spacing: 0) {
-                Rectangle().fill(Tema.Apple.Colore.canaleAlleanza).frame(width: a, height: 2)
-                Rectangle().fill(Tema.Apple.Colore.canaleIndipendente).frame(width: i, height: 2)
-            }
-            .frame(height: D.binario, alignment: .bottom)
-            .allowsHitTesting(false)
-        }
     }
 }
 

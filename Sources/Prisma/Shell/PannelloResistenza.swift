@@ -176,7 +176,6 @@ struct PannelloResistenza: View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
                 Text("Le più esposte ai mercati").frame(maxWidth: .infinity, alignment: .leading)
-                Text("Canale").frame(width: Misure.Analisi.colonnaCanale, alignment: .leading)
                 Text("Perdita stimata").frame(width: Misure.Analisi.colonnaPerdita, alignment: .trailing)
             }
             .font(Tipo.tabellaTesta)
@@ -192,8 +191,6 @@ struct PannelloResistenza: View {
                         Text(v.motivo).font(Tipo.chip).foregroundColor(Colori.Analisi.kpiNota).lineLimit(2)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    EtichettaCanale(canale: v.posizione.canale, compatta: true)
-                        .frame(width: Misure.Analisi.colonnaCanale, alignment: .leading)
                     VStack(alignment: .trailing, spacing: 1) {
                         Text(Formati.euro(-v.perdita)).font(Tipo.tabellaCellaForte).foregroundColor(Colori.Analisi.erroreTesto)
                         Text("su \(Formati.euro(v.posizione.valore))").font(Tipo.chip).foregroundColor(Colori.Analisi.kpiNota)

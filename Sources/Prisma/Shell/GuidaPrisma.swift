@@ -149,9 +149,9 @@ enum GuidaTesti {
                 parole: [.dossier, .riesame, .profiloRischio, .antiriciclaggio])
         case .posizioni:
             return AiutoApp(
-                aCosaServe: "Tutto quello che il cliente ha già (in essere) e quello che gli proponi (in proposta), diviso per canale: Alleanza o consulenza indipendente. È il cuore di Lucy.",
+                aCosaServe: "Tutto quello che il cliente ha già (in essere) e quello che gli proponi (in proposta), tutto insieme, in un solo canale. È il cuore di Lucy.",
                 inBreve: "Che cosa ha il cliente e che cosa gli proponi",
-                passi: ["Scegli il cliente e guarda il riepilogo: quanto ha, dove, con quale canale.",
+                passi: ["Scegli il cliente e guarda il riepilogo: quanto ha e dove.",
                         passoAggiungiPosizioni,
                         "Apri una posizione: valore, costi, riscatto e proiezione nel tempo."],
                 parole: [.inEssere, .canale, .riscatto, .penali, .sri])
@@ -320,7 +320,7 @@ enum GuidaTesti {
                 inBreve: "Trova clienti, posizioni, documenti (⌘K)",
                 passi: [passoApriRicerca,
                         "Scrivi una parte del nome o del prodotto.",
-                        "Invio per aprire il risultato; i filtri restringono (per esempio «canale:alleanza»)."],
+                        "Invio per aprire il risultato; i filtri restringono (per esempio «scade:2027»)."],
                 parole: [])
         case .impostazioni:
             return AiutoApp(
@@ -398,8 +398,8 @@ struct PaginaIntroduzione {
             testo: "Lucy è lo studio di lavoro di un consulente finanziario. Raccoglie le persone che segui, quello che hanno (polizze, investimenti, piani per la pensione) e ti aiuta a capire che cosa manca e che cosa conviene.",
             punti: ["I calcoli li fa Lucy: tu scegli e spieghi.",
                     "Tutto resta su questo Mac: niente internet, niente cloud.",
-                    "Ci sono due canali, sempre distinti: Alleanza (blu) e consulenza indipendente (cuoio)."],
-            app: [], conCanali: true),
+                    "Un solo canale, quello di Lucy: tutti i clienti si gestiscono e si analizzano insieme."],
+            app: [], conCanali: false),
         PaginaIntroduzione(
             titolo: "Si parte dalle persone",
             testo: "In **Clienti** c'è la scheda di ogni persona: famiglia, lavoro, entrate, spese, che cosa le preme. Più la scheda è completa, più le analisi sono precise.",

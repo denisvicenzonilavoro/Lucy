@@ -82,7 +82,7 @@ struct CorpoPortafoglio: View, Equatable {
                     AppPosizioni.ripartizione(r)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                PannelloAnalisi(titolo: "Per canale", nota: "Attività in essere") { EmptyView() } contenuto: {
+                PannelloAnalisi(titolo: "In scadenza", nota: "Entro \(RiepilogoPosizioni.giorniScadenza) giorni") { EmptyView() } contenuto: {
                     AppPosizioni.canali(r, massimo: Self.massimoInScadenza, apri: { stato.posizioneInDettaglio = $0.id })
                 }
                 .larghezzaAffiancata(330, alignment: .leading)

@@ -105,10 +105,8 @@ extension Tema.Apple {
         /// Collegamenti («Apri ↗», «Mostra tutto»).
         static let collegamento = Carattere.pulsante
 
-        /// Il colore del canale (testo e pallino delle versioni compatte): blu Alleanza, cuoio indipendente.
-        static func canale(_ c: Canale) -> Color {
-            c == .alleanza ? Colore.canaleAlleanza : Colore.canaleIndipendente
-        }
+        /// Il colore del canale. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore neutro per tutti.
+        static func canale(_ c: Canale) -> Color { Colore.inchiostro2 }
 
         // Colori
         static let testo = Colore.inchiostro

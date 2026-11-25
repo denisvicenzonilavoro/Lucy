@@ -560,18 +560,8 @@ private struct CorpoWidgetCliente: View, Equatable {
                     .font(Tema.Testo.Shell.temaCliente)
                     .foregroundColor(Tema.Colore.inchiostroWidgetSecondario)
                     .lineLimit(1)
-                if telefono {
-                    HStack(spacing: m.canaliSpazio) {
-                        ForEach(stato.clienteAttivo?.canali ?? []) { EtichettaCanale(canale: $0, compatta: true) }
-                    }
-                }
             }
             Spacer(minLength: 0)
-            if !telefono {
-                VStack(alignment: .trailing, spacing: m.canaliSpazio) {
-                    ForEach(stato.clienteAttivo?.canali ?? []) { CapsulaCanale(canale: $0) }
-                }
-            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
@@ -839,18 +829,7 @@ private struct CorpoWidgetPortafoglio: View, Equatable {
                     .foregroundColor(Tema.Colore.inchiostroWidgetSecondario)
             }
             .padding(.horizontal, m.rigaMargine)
-            if r.attivita > 0 {
-                barraCanali(r)
-                    .padding(.horizontal, m.rigaMargine)
-                if legenda {
-                    VStack(spacing: m.rigaMargine) {
-                        ForEach(Canale.allCases) { c in
-                            voceCanale(c, importo: r.perCanale[c] ?? 0, quota: r.quota(c))
-                        }
-                    }
-                    .padding(.horizontal, m.rigaMargine)
-                }
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente barra né legenda dei canali
             if proposte {
                 Spacer(minLength: 0)
                 HStack(alignment: .firstTextBaseline) {
@@ -868,47 +847,5 @@ private struct CorpoWidgetPortafoglio: View, Equatable {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-    }
-
-    /// La barra divisa per canale (.split): blu Alleanza, cuoio indipendente.
-    private func barraCanali(_ r: RiepilogoPosizioni) -> some View {
-        let m = Tema.Misura.Shell.self
-        return GeometryReader { geo in
-            let disponibile = max(0, geo.size.width - m.barraCanaliSpazio)
-            HStack(spacing: m.barraCanaliSpazio) {
-                ForEach(Canale.allCases) { c in
-                    let quota = CGFloat(min(max(r.quota(c), 0), 1))
-                    if quota > 0 {
-                        RoundedRectangle(cornerRadius: Tema.Raggio.barraCanali, style: .continuous)
-                            .fill(Tema.Colore.canale(c))
-                            .frame(width: max(m.barraCanali / 2, disponibile * quota))
-                            .help("\(c.nomeBreve): \(Formati.euro(r.perCanale[c] ?? 0))")
-                    }
-                }
-            }
-        }
-        .frame(height: m.barraCanali)
-    }
-
-    /// Una riga della legenda: quadratino del canale, nome, importo e quota.
-    private func voceCanale(_ c: Canale, importo: Double, quota: Double) -> some View {
-        let m = Tema.Misura.Shell.self
-        return HStack(spacing: m.rigaMargine) {
-            RoundedRectangle(cornerRadius: Tema.Raggio.quadratinoCanale, style: .continuous)
-                .fill(Tema.Colore.canale(c))
-                .frame(width: m.quadratinoCanale, height: m.quadratinoCanale)
-            Text(c.nomeBreve)
-                .font(Tema.Testo.Shell.corpoWidget)
-                .foregroundColor(Tema.Colore.inchiostro)
-            Spacer(minLength: 0)
-            Text(Formati.euro(importo))
-                .font(Tema.Testo.Shell.importoWidget)
-                .foregroundColor(Tema.Colore.inchiostro)
-            Text(Formati.percentuale((quota * 100).rounded()))
-                .font(Tema.Testo.Shell.corpoWidget.monospacedDigit())
-                .foregroundColor(Tema.Colore.inchiostroWidgetSecondario)
-                .frame(width: m.colonnaQuota, alignment: .trailing)
-        }
-        .lineLimit(1)
     }
 }

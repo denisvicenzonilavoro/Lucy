@@ -66,7 +66,6 @@ struct PannelloSuccessione: View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
                 Text("Posizione").frame(maxWidth: .infinity, alignment: .leading)
-                Text("Canale").frame(width: Misure.Analisi.colonnaCanale, alignment: .leading)
                 Text("Va a").frame(width: Misure.Analisi.colonnaDestino, alignment: .leading)
                 Text("Importo").frame(width: Misure.Analisi.colonnaCosto, alignment: .trailing)
             }
@@ -84,8 +83,6 @@ struct PannelloSuccessione: View {
                                 .font(Tipo.chip).foregroundColor(v.avviso == nil ? Colori.Analisi.kpiNota : Colori.Analisi.attenzioneTesto).lineLimit(1)
                         }
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        EtichettaCanale(canale: v.posizione.canale, compatta: true)
-                            .frame(width: Misure.Analisi.colonnaCanale, alignment: .leading)
                         Pillola(testo: v.destino == .beneficiari ? "Beneficiari" : "Eredi", tono: v.destino == .beneficiari ? .ok : .neutro)
                             .frame(width: Misure.Analisi.colonnaDestino, alignment: .leading)
                         Text(Formati.euro(v.importo)).font(Tipo.tabellaCellaForte)

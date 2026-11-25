@@ -76,20 +76,7 @@ private struct PaginaChiE: View {
                            return RigaDoc(celle: [CellaDoc(a.nome, font: T.pTabellaForte), CellaDoc((a.passivo ? "− " : "") + CifreDoc.euro(v), font: T.pTabella),
                                                   CellaDoc(quota, font: T.pTabella)], altezza: 14)
                        }, fontTesta: T.pTabellaTesta, altezzaTesta: 12, margine: 4)
-            HStack(spacing: 8) {
-                // Il titolo sulla stessa riga: le etichette non restano isolate e la pagina non si allunga
-                if Canale.allCases.contains(where: { (e.riepilogo.perCanale[$0] ?? 0) > 0.5 }) {
-                    Text(verbatim: "Per canale").font(T.pSottosezione).foregroundColor(C.titolo)
-                }
-                ForEach(Canale.allCases) { c in
-                    if let v = e.riepilogo.perCanale[c], v > 0.5 {
-                        HStack(spacing: 6) {
-                            EtichettaCanale(canale: c)
-                            Text(verbatim: CifreDoc.euro(v)).font(T.pCorpoForte).foregroundColor(C.titolo)
-                        }
-                    }
-                }
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente riga «Per canale»
             RiquadroBarra(titolo: "In sintesi") {
                 VStack(alignment: .leading, spacing: 4) {
                     ForEach(Array(t.sintesi.enumerated()), id: \.offset) { _, p in
@@ -151,7 +138,7 @@ private struct PaginaSemaforo: View {
                 SezioneProspetto(titolo: "Proposte già impostate")
                 VStack(alignment: .leading, spacing: 3) {
                     ForEach(e.proposte) { p in
-                        PuntoElenco(testo: Text(verbatim: p.nome).bold() + Text(verbatim: " · \(p.canale.nome) · \(p.area.nome.lowercased())" + (p.premioAnnuo > 0 ? " · \(CifreDoc.euro(p.premioAnnuo)) l'anno" : "")))
+                        PuntoElenco(testo: Text(verbatim: p.nome).bold() + Text(verbatim: " · \(p.area.nome.lowercased())" + (p.premioAnnuo > 0 ? " · \(CifreDoc.euro(p.premioAnnuo)) l'anno" : "")))
                     }
                 }
             }

@@ -400,9 +400,9 @@ struct MomentoNelTempo: View {
         let r = stato.riepilogoPosizioniCliente(cliente.id)
         testata(quando: "Oggi · \(TestiMemoria.data(storia.oggi))", valore: storia.nettoOggi, sotto: "patrimonio netto")
         VStack(alignment: .leading, spacing: Tema.Apple.Clienti.NelTempo.spazioRigheMomento) {
-            ForEach(Canale.allCases) { c in
-                if let v = r.perCanale[c], abs(v) >= 0.5 { rigaCanale(c, v) }
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: le attività in una riga sola
+            let attivita = Canale.allCases.reduce(0.0) { $0 + (r.perCanale[$1] ?? 0) }
+            if abs(attivita) >= 0.5 { riga("Attività", Formati.euro(attivita)) }
             if r.debiti >= 0.5 { riga("Debiti", Formati.euro(-r.debiti)) }
             riga("Proposte aperte", "\(r.proposteAperte)")
         }
@@ -438,9 +438,8 @@ struct MomentoNelTempo: View {
             if !stessoMese {
                 nota("A \(Formati.meseAnno.string(from: giorno)) non c'è un riesame: questo è il più vicino.")
             }
-            ForEach(Canale.allCases) { c in
-                if abs(foto.patrimonio(c)) >= 0.5 { rigaCanale(c, foto.patrimonio(c)) }
-            }
+            let attivita = Canale.allCases.reduce(0.0) { $0 + foto.patrimonio($1) }
+            if abs(attivita) >= 0.5 { riga("Attività", Formati.euro(attivita)) }
             if foto.debiti >= 0.5 { riga("Debiti", Formati.euro(-foto.debiti)) }
             riga("Patrimonio netto", Formati.euro(foto.patrimonioNetto))
             riga("Proposte aperte", "\(foto.proposteAperte)")
@@ -584,18 +583,6 @@ struct MomentoNelTempo: View {
             Text(sotto)
                 .carattereApple(n.sottoValore)
                 .foregroundColor(n.coloreSottoValore)
-        }
-    }
-
-    private func rigaCanale(_ c: Canale, _ v: Double) -> some View {
-        let n = Tema.Apple.Clienti.NelTempo.self
-        return HStack(spacing: n.spazioRiga) {
-            EtichettaCanaleApple(canale: c, compatta: true)
-            Spacer(minLength: n.minimoRiga)
-            Text(Formati.euro(v))
-                .carattereApple(n.valoreRiga)
-                .foregroundColor(n.coloreRiga)
-                .lineLimit(1)
         }
     }
 

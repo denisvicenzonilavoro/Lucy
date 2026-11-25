@@ -571,47 +571,16 @@ private struct AloneSfondo: ViewModifier {
 
 // MARK: - Etichetta del canale
 
-/// Capsula del canale in vetro: Alleanza blu con il simbolo Alleanza, indipendente color cuoio.
-/// `compatta`: pallino e una parola. `completa`: «Alleanza Assicurazioni» / «Denis Vicenzoni · Consulenza finanziaria».
-/// Solo per le schermate: nei PDF si usano i colori fissi (`Tema.Colore.canale…Stampa`).
+/// Capsula del canale in vetro. Dal 25 novembre 2026 (decisione dell'utente: un solo canale, quello di Lucy)
+/// non disegna nulla.
 struct CapsulaCanale: View {
     let canale: Canale
     var compatta = false
     var completa = false
 
-    var body: some View {
-        let _ = SegnaleNomiCanali.condiviso.nomi
-        let margini = compatta ? Tema.Misura.chipPiccoloMargini : Tema.Misura.chipMargini
-        HStack(spacing: Tema.Misura.spazioChip) {
-            if canale.conLogo, !compatta, let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
-                Image(piattaforma: simbolo)
-                    .renderingMode(.template)
-                    .resizable()
-                    .interpolation(.high)
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: Tema.Misura.simboloAlleanza)
-                    .foregroundColor(Tema.Colore.canaleAlleanza)
-            } else {
-                Circle()
-                    .fill(Tema.Colore.canale(canale))
-                    .frame(width: Tema.Misura.pallinoCanale, height: Tema.Misura.pallinoCanale)
-                    .overlay {
-                        Circle().inset(by: -Tema.Misura.filo / 2).stroke(Tema.Colore.bordoPallino, lineWidth: Tema.Misura.filo)
-                    }
-            }
-            Text(completa && !compatta ? canale.nome : canale.nomeBreve)
-                .font(compatta ? Tema.Testo.chipPiccolo : Tema.Testo.chip)
-                .foregroundColor(Tema.Colore.inchiostro)
-                .lineLimit(1)
-        }
-        .padding(.leading, margini.sinistro)
-        .padding(.trailing, margini.destro)
-        .frame(height: compatta ? Tema.Misura.chipPiccolo : Tema.Misura.chip)
-        .vetroCanale(canale)
-        .fixedSize()
-        // Niente aiuto al passaggio: la capsula dice già il canale, e un `.help` per capsula pesa negli
-        // elenchi lunghi (una in ogni riga del portafoglio, delle scadenze e delle tabelle delle posizioni)
-    }
+    // Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy: il canale non si mostra
+    // più. Il campo `canale` resta nei dati solo per compatibilità; la firma resta perché i richiami compilino.
+    var body: some View { EmptyView() }
 }
 
 extension View {

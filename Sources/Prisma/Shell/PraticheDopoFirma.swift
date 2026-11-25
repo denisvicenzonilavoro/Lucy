@@ -328,7 +328,7 @@ private struct CardPratica: View {
         .onTapGesture(perform: apri)
         .origineDettaglio(id: s.id)
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("\(cliente?.nome ?? ""), \(s.posizione.nome), \(s.canale.nome): \(s.testoStato). \(s.nota)")
+        .accessibilityLabel("\(cliente?.nome ?? ""), \(s.posizione.nome): \(s.testoStato). \(s.nota)")
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { apri() }
     }

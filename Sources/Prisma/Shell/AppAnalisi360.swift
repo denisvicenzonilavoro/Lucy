@@ -359,7 +359,6 @@ struct AppAnalisi360: View {
         } else {
             TabellaStrumento {
                 CellaTesta(testo: "Posizione")
-                CellaTesta(testo: "Canale", larghezza: 110)
                 CellaTesta(testo: "Stato", larghezza: 90)
                 CellaTesta(testo: area == .protezione ? "Capitale" : "Valore", larghezza: 110, destra: true)
                 CellaTesta(testo: "Premi annui", larghezza: 100, destra: true)
@@ -376,7 +375,6 @@ struct AppAnalisi360: View {
                             .lineLimit(1)
                             .padding(Misure.Analisi.cellaMargine)
                             .frame(maxWidth: .infinity, alignment: .leading)
-                            EtichettaCanale(canale: p.canale, compatta: true).frame(width: 110, alignment: .leading)
                             CellaTabella(testo: p.stato == .proposta ? "Proposta" : "In essere", larghezza: 90)
                             CellaTabella(testo: Formati.euro(area == .protezione ? (p.capitaleAssicurato ?? 0) : (p.stato == .proposta ? p.versamentoIniziale : p.valore)),
                                          larghezza: 110, destra: true)

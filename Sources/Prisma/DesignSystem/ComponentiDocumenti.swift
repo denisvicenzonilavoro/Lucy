@@ -124,13 +124,28 @@ struct TabellaDoc: View {
         colonne.contains(where: { !$0.sottotitolo.isEmpty }) ? max(altezzaTesta, Misure.Documento.altezzaTestaDoppia) : altezzaTesta
     }
 
-    private var larghezze: [CGFloat] {
+    /// Le colonne che si disegnano: Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy niente colonne «Canale» o
+    /// «Canali» (le righe perdono la cella corrispondente).
+    private var tenute: [Int] {
+        let t = colonne.indices.filter { !["canale", "canali"].contains(colonne[$0].titolo.lowercased()) }
+        return t.isEmpty ? Array(colonne.indices) : t
+    }
+
+    private func larghezze(_ colonne: [ColonnaDoc]) -> [CGFloat] {
         let somma = colonne.reduce(0) { $0 + $1.peso }
         return colonne.map { larghezza * $0.peso / max(somma, 0.01) }
     }
 
     var body: some View {
-        let w = larghezze
+        let tenute = self.tenute
+        let colonne = tenute.map { self.colonne[$0] }
+        let righe = self.righe.map { r -> RigaDoc in
+            var nuova = r
+            nuova.celle = tenute.map { $0 < r.celle.count ? r.celle[$0] : CellaDoc("") }
+            return nuova
+        }
+        let colonneEvidenziate = Set(tenute.indices.filter { self.colonneEvidenziate.contains(tenute[$0]) })
+        let w = larghezze(colonne)
         VStack(spacing: 0) {
             HStack(spacing: 0) {
                 ForEach(Array(colonne.enumerated()), id: \.offset) { i, c in

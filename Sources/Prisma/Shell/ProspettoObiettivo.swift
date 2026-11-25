@@ -69,8 +69,9 @@ private struct PaginaTraguardo: View {
                     ColonnaDoc(titolo: "Posizione", sottotitolo: "area", peso: 2.4, destra: false),
                     ColonnaDoc(titolo: "Oggi", peso: 1), ColonnaDoc(titolo: "Versamenti", sottotitolo: "al mese", peso: 0.9),
                     ColonnaDoc(titolo: "Rendimento", sottotitolo: "costi", peso: 0.9), ColonnaDoc(titolo: "Alla scadenza", sottotitolo: "netto", peso: 1.1),
-                ], gruppi: Canale.allCases.compactMap { c in
-                    let mie = e.contributi.filter { $0.posizione.canale == c }
+                ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                    // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                    let mie = e.contributi
                     guard !mie.isEmpty else { return nil }
                     return GruppoCanale(canale: c, righe: mie.map { x in
                         RigaDoc(celle: [CellaDoc(x.posizione.nome, sotto: x.posizione.area.nome, font: T.pTabellaForte),

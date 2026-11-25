@@ -288,17 +288,8 @@ struct DettaglioDocumento: View {
             }
             .buttonStyle(StileCollegamento())
             .help("Apri \(Self.genere(b).lowercased()) «\(n.nome)»")
-            EtichettaCanale(canale: n.canale, compatta: !conNome)
-        } else if d.genere != .prisma {
-            if let c = voce.canale {
-                EtichettaCanale(canale: c, compatta: true)
-            } else {
-                // Nella fila corta la pillola si accorcia, come collegamento e canale
-                Pillola(testo: conNome ? "Canale da indicare" : "Canale ?", tono: .neutro)
-                    .help("Collega il documento a una posizione o a una scheda prodotto: il canale viene da lì")
-                    .accessibilityLabel(Text("Canale da indicare"))
-            }
         }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichetta né «Canale da indicare»
     }
 
     static func tono(_ s: MotoreDocumenti.Stato) -> Pillola.Tono {
@@ -654,8 +645,7 @@ struct ModuloCreaDaDocumento: View {
             Text(titolo)
                 .font(Tema.Apple.AltreApp.titoloRiga.fontLeggibile)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
-            SegmentiAnalisi(opzioni: [(Canale.alleanza, Canale.alleanza.nomeBreve), (Canale.indipendente, Canale.indipendente.nomeBreve)], selezione: $canale)
-            EtichettaCanale(canale: canale)
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (resta quello proposto dal documento)
             MenuTendina(selezione: $area, opzioni: aree, larghezza: m.menuArea)
             Text(Self.testoDati(confermati: confermati, daControllare: daControllare))
                 .font(Tema.Apple.Carattere.secondario.fontLeggibile)

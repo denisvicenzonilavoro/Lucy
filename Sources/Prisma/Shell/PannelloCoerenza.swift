@@ -42,11 +42,8 @@ struct PannelloCoerenza: View {
                         .foregroundColor(Colori.Analisi.kpiNota)
                         .fixedSize(horizontal: false, vertical: true)
                 }
-                // iPad stretto: emittenti e canali uno sotto l'altro (sul Mac sempre affiancati)
-                Affiancati(soglia: SoglieAffiancati.pannello, spazio: M.spazioColonne) {
-                    emittenti(m).frame(maxWidth: .infinity, alignment: .leading)
-                    canali(m).frame(maxWidth: .infinity, alignment: .leading)
-                }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: solo la concentrazione per emittente, niente «Per canale»
+                emittenti(m).frame(maxWidth: .infinity, alignment: .leading)
                 elenco
                 esperienza
                 if esito.propensione == nil {
@@ -154,41 +151,12 @@ struct PannelloCoerenza: View {
         }
     }
 
-    private func canali(_ m: MisureCoerenza) -> some View {
-        return VStack(alignment: .leading, spacing: M.spazioElenco) {
-            Text("Per canale")
-                .font(Tema.Testo.MotoriPosizioni.sottotitolo)
-                .foregroundColor(Colori.Analisi.tabellaTesto)
-            ForEach(Canale.allCases) { c in
-                let q = m.perCanale[c] ?? 0
-                VStack(alignment: .leading, spacing: 3) {
-                    HStack(spacing: M.spazioElenco) {
-                        EtichettaCanale(canale: c, compatta: true)
-                        Spacer(minLength: 0)
-                        Text(Formati.euro(q * m.patrimonioFinanziario))
-                            .font(Tipo.numeroTabella).foregroundColor(Colori.Analisi.tabellaTesto)
-                            .frame(width: M.colonnaValore, alignment: .trailing)
-                        Text(CifreDoc.percento(q * 100, decimali: 0))
-                            .font(Tipo.chip)
-                            .foregroundColor(c == .alleanza && q * 100 > MotoreCoerenza.sogliaCanale ? Colori.Analisi.attenzioneTesto : Colori.Analisi.kpiNota)
-                            .frame(width: M.colonnaQuota, alignment: .trailing)
-                    }
-                    BarraQuotaPortafoglio(quota: q, colore: Colori.Analisi.canale(c))
-                }
-            }
-            Text(notaCanali(m))
-                .font(Tipo.chip)
-                .foregroundColor(Colori.Analisi.kpiNota)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
     // MARK: Punti da rivedere
 
     @ViewBuilder private var elenco: some View {
         if esito.incoerenze.isEmpty {
             Text(esito.propensione == nil
-                 ? "Nessuna concentrazione eccessiva su un emittente o sul canale Alleanza."
+                 ? "Nessuna concentrazione eccessiva su un emittente."
                  : "Nessun punto da rivedere: rischio, crisi del passato e concentrazione sono in linea con \(profilo).")
                 .font(Tipo.kpiNota)
                 .foregroundColor(Colori.Analisi.okTesto)
@@ -263,17 +231,6 @@ struct PannelloCoerenza: View {
             .font(Tipo.kpiNota)
             .foregroundColor(colore)
             .fixedSize(horizontal: false, vertical: true)
-    }
-
-    private func notaCanali(_ m: MisureCoerenza) -> String {
-        let investito: Double = Canale.allCases.reduce(0.0) { $0 + (m.perCanale[$1] ?? 0) }
-        var testo = "Investito per canale sul patrimonio finanziario"
-        if investito < 0.995 && m.patrimonioFinanziario > 0 {
-            testo += "; il resto, \(CifreDoc.percento((1 - investito) * 100, decimali: 0)), è sui conti."
-        } else {
-            testo += "."
-        }
-        return testo + " Alleanza colloca i prodotti di una sola compagnia: oltre l'\(CifreDoc.percento(MotoreCoerenza.sogliaCanale, decimali: 0)) lì è concentrazione."
     }
 
     private func fraseProposte(_ cp: MisureCoerenza) -> String {

@@ -314,14 +314,7 @@ extension SchedaTFR {
             HStack(alignment: .firstTextBaseline, spacing: SC.spazioStrada) {
                 occhielloMac(TestiTFR.occhielloRisposta(nome))
                 Spacer(minLength: SC.spazioStrada)
-                // Canale sempre riconoscibile
-                Button {
-                    b.wrappedValue.canale = i.canale == .alleanza ? .indipendente : .alleanza
-                } label: {
-                    EtichettaCanale(canale: i.canale, compatta: true)
-                }
-                .buttonStyle(.plain)
-                .help("Canale della consulenza: tocca per passare ad Alleanza o a indipendente")
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichetta del canale da toccare
             }
             TestiTFR.fraseRispostaParti(e, nome: nome)
                 .reduce(Text("")) { t, p in t + testoParte(p) }

@@ -247,20 +247,12 @@ struct IpotesiSimulatoreApple: View {
     }
 }
 
-/// Il canale della proposta che si salva: la pillola Alleanza / Indipendente e l'etichetta del canale scelto,
-/// così si riconosce sempre (blu Alleanza, cuoio indipendente).
+/// Il canale della proposta che si salva. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: non si sceglie più e non
+/// si mostra (la proposta si salva con il canale di sempre); la firma resta perché i richiami compilino.
 struct CanaleSimulatoreApple: View {
     @Binding var canale: Canale
 
-    var body: some View {
-        let s = Tema.Apple.SimulatoriAnalisi.self
-        return HStack(alignment: .center, spacing: s.spazioCanale) {
-            SegmentatoPillola(selezione: $canale, valori: Canale.allCases, titolo: { $0.nomeBreve })
-                .fixedSize()
-                .help("Il canale della proposta che si salva")
-            EtichettaCanaleApple(canale: canale, compatta: true)
-        }
-    }
+    var body: some View { EmptyView() }
 }
 
 // MARK: - Migliorie d'uso 45 (solo Mac): il segno «oggi» e la frase prima e dopo

@@ -226,10 +226,6 @@ struct SchedaRiesameAgenda: View {
                     .foregroundColor(Colori.Agenda.evento)
                     .lineLimit(1)
                 Spacer(minLength: 0)
-                // Con due canali tutte e due le etichette: il canale resta sempre riconoscibile
-                HStack(spacing: m.spazioCanali) {
-                    ForEach(voce.canali) { c in EtichettaCanale(canale: c, compatta: true) }
-                }
             }
             HStack(spacing: m.spazioScheda) {
                 Text(voce.stato)

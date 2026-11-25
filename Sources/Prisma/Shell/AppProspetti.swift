@@ -681,7 +681,7 @@ struct AppProspetti: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(titolo).font(SSP.etichetta).foregroundColor(SSP.coloreEtichetta)
             Picker("", selection: selezione) {
-                ForEach(elenco) { p in Text("\(p.nome) · \(p.stato == .proposta ? "proposta" : "in essere") · \(p.canale.nomeBreve)").tag(p.id) }
+                ForEach(elenco) { p in Text("\(p.nome) · \(p.stato == .proposta ? "proposta" : "in essere")").tag(p.id) }
             }
             .labelsHidden()
         }

@@ -138,15 +138,7 @@ struct AppDocumenti: View {
                 stato.vistaDocumenti.categoria = c
             }
         }
-        EtichettaRail(testo: "Canale")
-        ForEach(Canale.allCases) { c in
-            // Un secondo clic toglie il filtro
-            VoceNavigazione(titolo: c.nomeBreve,
-                            colore: c == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente,
-                            conteggio: conti.canali[c], attiva: vista.canale == c) {
-                stato.vistaDocumenti.canale = stato.vistaDocumenti.canale == c ? nil : c
-            }
-        }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente filtro di canale
         CollegatiRail(app: [.posizioni, .prodotti, .vera])
     }
 }

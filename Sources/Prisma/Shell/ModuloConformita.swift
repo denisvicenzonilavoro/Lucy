@@ -24,7 +24,7 @@ struct ModuloConformita: View {
         let m = Tema.Misura.Conformita.self
         CorniceModulo(titolo: "In regola · \(bozza.nome)") {
             VStack(alignment: .leading, spacing: m.spazioSezioniModulo) {
-                ForEach(Canale.allCases) { canale in
+                ForEach(canaliSezioni) { canale in
                     sezioneCanale(canale)
                 }
                 sezioneDocumento
@@ -49,6 +49,15 @@ struct ModuloConformita: View {
     }
 
     // MARK: - Sezioni
+
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: le sezioni dei soli canali che il
+    /// cliente usa o che hanno già dati (di solito una), senza etichetta; nessuno = la prima.
+    private var canaliSezioni: [Canale] {
+        let c = Canale.allCases.filter {
+            bozza.canali.contains($0) || conformita.questionario($0) != nil || conformita.verifica($0) != nil
+        }
+        return c.isEmpty ? Array(Canale.allCases.prefix(1)) : c
+    }
 
     /// Questionario e adeguata verifica di un canale, con l'etichetta del canale in testa.
     private func sezioneCanale(_ c: Canale) -> some View {

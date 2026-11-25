@@ -423,7 +423,7 @@ struct RicercaSpotlight: View {
                         PillolaSpotlight(testo: x, nota: "da completare", tono: .incompleto)
                     }
                 }
-                ForEach(e.totali) { t in TotaleCanaleSpotlight(totale: t) }
+                TotaleRicercaSpotlight(totali: e.totali)
             }
             .padding(M.strisciaMargine)
         }
@@ -454,7 +454,7 @@ struct RicercaSpotlight: View {
         } else if motore.suggerimenti.isEmpty {
             Text(motore.esito.interpretata.incompleti.isEmpty
                  ? "Nessun risultato. Prova con meno parole o con una parte del nome."
-                 : "Completa il filtro: per esempio scade:2027, sri>4, canale:alleanza, stato:proposta.")
+                 : "Completa il filtro: per esempio scade:2027, sri>4, stato:proposta.")
                 .font(Tipo.spotlightMessaggio)
                 .foregroundColor(Colori.Spotlight.messaggio)
                 .multilineTextAlignment(.center)
@@ -812,7 +812,7 @@ enum TestiRicercaMac {
     static func nessunRisultato(_ testo: String) -> String { "Nessun risultato per «\(testo)»." }
     static let nessunSotto = "Prova con una parte del nome, o togli un filtro."
     static let chiediVera = "Chiedilo a Lucy"
-    static let completaFiltro = "Completa il filtro: per esempio scade:2027, sri>4, canale:alleanza, stato:proposta."
+    static let completaFiltro = "Completa il filtro: per esempio scade:2027, sri>4, stato:proposta."
     static let soloMac = "Cerca solo su questo Mac"
     static let esc = "esc"
     static let scegli = "↑ ↓ per scegliere"
@@ -897,16 +897,7 @@ extension RicercaSpotlight {
                 }
                 .buttonStyle(StileSemplice())
             }
-            Rectangle()
-                .fill(RMac.coloreFiletto)
-                .frame(width: RMac.filettoFiltri.width, height: RMac.filettoFiltri.height)
-            ForEach(Canale.allCases) { c in
-                Button { motore.canale = motore.canale == c ? nil : c } label: {
-                    EtichettaFiltroRicerca(testo: c.nomeBreve, acceso: motore.canale == c, canale: c)
-                }
-                .buttonStyle(StileSemplice())
-                .help(motore.canale == c ? "Tocca di nuovo per spegnere il canale" : c.nome)
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente filtri dei canali
             Spacer(minLength: 0)
             if !motore.vuoto && !stato.solaLettura {
                 Button {
@@ -938,7 +929,7 @@ extension RicercaSpotlight {
                         PillolaSpotlight(testo: x, nota: "da completare", tono: .incompleto)
                     }
                 }
-                ForEach(e.totali) { t in TotaleCanaleSpotlight(totale: t) }
+                TotaleRicercaSpotlight(totali: e.totali)
             }
             .padding(MS.strisciaMargine)
         }
@@ -1232,9 +1223,7 @@ enum SchedeRicerca {
             let inEssere = suePosizioni.filter { $0.stato == .inEssere }
             let attive = inEssere.filter { !$0.area.passivo }
             aggiungi("In essere", inEssere.isEmpty ? "Nessuna posizione" : Formati.euro(attive.reduce(0) { $0 + $1.valore }))
-            for t in FiltriRicerca.totali(inEssere) where t.valore > 0 {
-                aggiungi(t.canale.nomeBreve, "\(Formati.euro(t.valore)) · \(t.numero) \(t.numero == 1 ? "posizione" : "posizioni")")
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente righe per canale
             let debiti = inEssere.filter { $0.area.passivo }.reduce(0) { $0 + $1.valore }
             if debiti > 0 { aggiungi("Debiti", Formati.euro(debiti)) }
             let proposte = suePosizioni.filter { $0.stato == .proposta && $0.esito != .rifiutata }.count
@@ -1445,7 +1434,6 @@ struct AnteprimaRicerca: View {
                         }
                         .fixedSize(horizontal: false, vertical: true)
                     }
-                    if let c = scheda.canale { EtichettaCanale(canale: c) }
                     if !scheda.cifre.isEmpty {
                         VStack(spacing: 0) {
                             ForEach(Array(scheda.cifre.enumerated()), id: \.element.id) { i, c in

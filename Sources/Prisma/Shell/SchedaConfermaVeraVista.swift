@@ -204,11 +204,7 @@ struct TabellaClientelaVista: View {
                         .lineLimit(1)
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                Text(risultato.colonne.last ?? "")
-                    .carattereApple(T.intestazione)
-                    .foregroundColor(T.coloreIntestazione)
-                    .lineLimit(1)
-                    .frame(width: T.colonnaCanale, alignment: .leading)
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: l'ultima colonna («Canale») non si mostra
             }
             .padding(T.cella)
             .background(T.fondoIntestazione)
@@ -227,10 +223,6 @@ struct TabellaClientelaVista: View {
                             .lineLimit(2)
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
-                    HStack(spacing: 4) {
-                        ForEach(r.canali, id: \.self) { EtichettaCanaleApple(canale: $0, compatta: true) }
-                    }
-                    .frame(width: T.colonnaCanale, alignment: .leading)
                 }
                 .foregroundColor(T.coloreVoce)
                 .padding(T.cella)

@@ -157,10 +157,10 @@ enum TestiStudio {
         "\(p.cliente.nome) · \(FormatoCifra.mesi.testo(p.ore)) ore · \(euro(p.ricavi))"
     }
 
-    /// Il fumetto di una colonna degli incassi: «dicembre · Alleanza 1.200 € · Indipendente 0 €».
+    /// Il fumetto di una colonna degli incassi: «dicembre · 1.200 €» (dal 25 novembre 2026 un solo canale, quello di
+    /// Lucy: solo il totale del mese).
     static func mese(_ m: CruscottoStudio.MeseIncasso) -> String {
-        let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
-        return "\(mese(m.inizio)) · \(Canale.alleanza.nomeBreve) \(alleanza) · \(Canale.indipendente.nomeBreve) \(euro(m.indipendente))"
+        "\(mese(m.inizio)) · \(euro(m.totale))"
     }
 
     // MARK: Migliorie d'uso 53 · Il cruscotto risponde a domande
@@ -233,9 +233,9 @@ enum TestiStudio {
     /// **7.400 €**». Senza aliquote la parte del primo canale dice «senza aliquote» e il totale è solo il secondo.
     static func meseIncasso(_ m: CruscottoStudio.MeseIncasso, nomeAlleanza: String, nomeIndipendente: String,
                             forte: Color) -> Text {
-        let alleanza = m.alleanza.map(euro) ?? "senza aliquote"
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: solo il totale del mese
         return Text(mese(m.inizio)).bold().foregroundColor(forte)
-            + Text(verbatim: ": \(nomeAlleanza) \(alleanza) + \(nomeIndipendente) \(euro(m.indipendente)) = ")
+            + Text(verbatim: ": ")
             + Text(euro(m.totale)).bold().foregroundColor(forte)
     }
 
@@ -367,7 +367,7 @@ struct AzioniStudio: View {
                     .buttonStyle(.applePrimario)
                     .fixedSize()
                     .disabled(stato.solaLettura || stato.clienti.isEmpty)
-                    .help("Una parcella della consulenza indipendente: il cliente, la consulenza e l’importo")
+                    .help("Una parcella della consulenza: il cliente, la consulenza e l’importo")
             }
             #endif
         }

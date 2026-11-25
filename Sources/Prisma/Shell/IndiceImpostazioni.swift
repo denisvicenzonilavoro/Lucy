@@ -228,23 +228,21 @@ enum IndiceImpostazioni {
 
     private static let profilo: [V] = [
         V(titolo: "Il tuo nome", spiegazione: "Come ti accoglie la scrivania.", pagina: .profilo, parole: ["nome"]),
-        // Migliorie d'uso 38: i nomi dei canali e le tre domande del primo avvio
-        V(titolo: "I tuoi canali", spiegazione: "I nomi scritti sulle due etichette.", pagina: .profilo,
-          ancora: "imp-profilo-canali", parole: ["canale", "Alleanza", "indipendente", "etichetta"]),
-        V(titolo: "Il primo avvio", spiegazione: "Le tre domande della prima volta.", pagina: .profilo,
+        // Migliorie d'uso 38: le domande del primo avvio (dal 25 novembre 2026 niente più nomi dei canali)
+        V(titolo: "Il primo avvio", spiegazione: "Le domande della prima volta.", pagina: .profilo,
           ancora: "imp-profilo-avvio", parole: ["benvenuto", "introduzione", "rivedi"]),
     ]
 
     private static let studio: [V] = [
-        V(titolo: "Le tue aliquote Alleanza", spiegazione: "Per tipo di prodotto: nuova produzione e rate successive.",
+        V(titolo: "Le tue aliquote", spiegazione: "Per tipo di prodotto: nuova produzione e rate successive.",
           pagina: .studio, parole: ["provvigioni", "percentuali"]),
         V(titolo: "Anno", spiegazione: "Gli obiettivi valgono per un anno solo", pagina: .studio, parole: ["obiettivi"]),
         V(titolo: VoceObiettivoStudio.produzioneAlleanza.nome,
-          spiegazione: "Versamenti iniziali e premi annui delle posizioni Alleanza con decorrenza nell’anno",
+          spiegazione: "Versamenti iniziali e premi annui delle posizioni con provvigioni con decorrenza nell’anno",
           pagina: .studio, parole: ["obiettivi"]),
         V(titolo: VoceObiettivoStudio.nuoviClienti.nome, spiegazione: "Clienti inseriti in Lucy nell’anno",
           pagina: .studio, parole: ["obiettivi"]),
-        V(titolo: VoceObiettivoStudio.ricaviConsulenza.nome, spiegazione: "Parcelle della consulenza indipendente dell’anno",
+        V(titolo: VoceObiettivoStudio.ricaviConsulenza.nome, spiegazione: "Parcelle della consulenza dell’anno",
           pagina: .studio, parole: ["obiettivi"]),
         V(titolo: "Da dove parti", spiegazione: "Una descrizione, per esempio «Studio di via Roma»: nessuna coordinata",
           pagina: .studio, ancora: TestiSpese.ancoraImpostazioni, parole: ["chilometri", "km", "spese"]),

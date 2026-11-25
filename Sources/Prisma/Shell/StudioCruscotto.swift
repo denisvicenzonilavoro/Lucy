@@ -260,7 +260,7 @@ private struct CardRicaviStudio: View {
             } else {
                 NotaStudio(nienteDaContare
                            ? "La linea dell’anno compare con i primi ricavi."
-                           : "Ancora nessun ricavo nel \(String(ricavi.anno)). Le provvigioni arrivano dalle posizioni Alleanza in essere, le parcelle da Parcelle e fatture.",
+                           : "Ancora nessun ricavo nel \(String(ricavi.anno)). Le provvigioni arrivano dalle posizioni in essere, le parcelle da Parcelle e fatture.",
                            righe: 2)
                     .padding(.top, r.graficoSopra)
             }
@@ -307,8 +307,9 @@ private struct TesseraCanaleStudio: View {
     var body: some View {
         let r = Tema.Apple.Studio.Ricavi.self
         let c = Tema.Apple.Studio.Card.self
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichetta del canale,
+        // la didascalia dice di che ricavo si tratta (provvigioni o parcelle)
         return VStack(alignment: .leading, spacing: r.spazioTessera) {
-            EtichettaCanaleApple(canale: canale, compatta: true)
             Group {
                 if let valore {
                     NumeroCheConta(valore, formato: .euro, indice: indice)
@@ -416,7 +417,7 @@ private struct CardObiettiviStudio: View {
             if obiettivi.nessunoImpostato {
                 // Niente anelli finti: il consulente dà i suoi traguardi in Impostazioni › Studio
                 NotaStudio("Nessun obiettivo per il \(String(obiettivi.anno)): Lucy non li inventa. Scrivi i tuoi "
-                           + "traguardi di produzione Alleanza, nuovi clienti e ricavi della consulenza.")
+                           + "traguardi di produzione, nuovi clienti e ricavi della consulenza.")
                     .padding(.top, c.vuotoSopra)
                 Button(TestiStudio.imposta + " ›", action: imposta)
                     .buttonStyle(.apple)
@@ -640,16 +641,14 @@ private struct CardIncassiStudio: View {
                 }
                 Spacer(minLength: 0)
             } else {
-                // I due canali, sempre riconoscibili: Alleanza sotto, indipendente sopra
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente legenda dei canali
+                #if os(macOS)
                 HStack(spacing: t.spazioLegenda) {
-                    EtichettaCanaleApple(canale: .alleanza, compatta: true)
-                    EtichettaCanaleApple(canale: .indipendente, compatta: true)
-                    #if os(macOS)
                     Spacer(minLength: t.spazioLegenda)
                     rigaMese
-                    #endif
                 }
                 .padding(.top, t.legendaSopra)
+                #endif
                 #if os(macOS)
                 ColonneIncassiStudio(mesi: incassi.mesi, sopra: $sopra)
                     .frame(maxHeight: t.altezza)
@@ -702,8 +701,8 @@ private struct CardIncassiStudio: View {
     #endif
 
     private var didascalia: String {
-        let base = "Rinnovi e premi ricorrenti Alleanza, parcelle già firmate."
-        if incassi.mancaAliquote { return base + " Senza le tue aliquote la parte Alleanza resta vuota." }
+        let base = "Rinnovi e premi ricorrenti, parcelle già firmate."
+        if incassi.mancaAliquote { return base + " Senza le tue aliquote le provvigioni restano vuote." }
         if incassi.posizioniSenzaAliquota > 0 {
             return base + " Stima con le tue aliquote · " + TestiStudio.senzaAliquota(incassi.posizioniSenzaAliquota) + "."
         }

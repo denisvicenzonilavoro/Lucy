@@ -80,14 +80,15 @@ enum TestiStorie {
         return "\(apertura): \(giorno) alle \(ora), \(cosa)."
     }
 
-    /// «Rinnovi Alleanza e due parcelle» (composta da ciò che c'è); senza aliquote lo dice.
+    /// «Rinnovi e due parcelle» (composta da ciò che c'è); senza aliquote lo dice.
     static func didascaliaInArrivo(tipi: Set<MotoreStudio.TipoProvvigione>, parcelle: Int, parziale: Bool) -> String {
         var parti: [String] = []
         for t in MotoreStudio.TipoProvvigione.allCases where tipi.contains(t) {
             switch t {
-            case .nuovaProduzione: parti.append("nuova produzione \(Canale.alleanza.nomeBreve)")
-            case .ricorrente: parti.append("ricorrenti \(Canale.alleanza.nomeBreve)")
-            case .rinnovo: parti.append("rinnovi \(Canale.alleanza.nomeBreve)")
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente nome del canale
+            case .nuovaProduzione: parti.append("nuova produzione")
+            case .ricorrente: parti.append("ricorrenti")
+            case .rinnovo: parti.append("rinnovi")
             }
         }
         if parcelle > 0 { parti.append(numeroParcelle(parcelle)) }

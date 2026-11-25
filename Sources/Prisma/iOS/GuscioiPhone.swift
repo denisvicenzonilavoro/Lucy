@@ -465,7 +465,6 @@ private struct RigaClienteTelefono: View {
     var body: some View {
         let _ = ContaCorpi.segna()
         let posizioni = stato.posizioni.filter { $0.clienteId == cliente.id && $0.stato != .chiusa }
-        let canali = Canale.allCases.filter { c in posizioni.contains { $0.canale == c } }
         // Il nome ha tutta la riga: i canali stanno sotto, mai al posto del nome (sul telefono c'è poco spazio)
         HStack(spacing: E.spazioRiga) {
             AvatarCliente(iniziali: cliente.iniziali, tinta: cliente.tinta.colori, lato: Tema.Apple.Misura.Avatar.medio)
@@ -478,12 +477,6 @@ private struct RigaClienteTelefono: View {
                     .carattereApple(E.dettaglio)
                     .foregroundColor(E.coloreDettaglio)
                     .lineLimit(1)
-                if !canali.isEmpty {
-                    HStack(spacing: E.spazioEtichette) {
-                        ForEach(canali) { canale in EtichettaCanaleApple(canale: canale, compatta: true) }
-                    }
-                    .padding(.top, E.spazioTesto)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             ChevronTelefono()
@@ -564,12 +557,6 @@ private struct SchedaClienteTelefono: View {
                         .carattereApple(C.dettaglio)
                         .foregroundColor(C.coloreDettaglio)
                         .fixedSize(horizontal: false, vertical: true)
-                }
-                if !c.canali.isEmpty {
-                    HStack(spacing: E.spazioEtichette) {
-                        ForEach(c.canali) { EtichettaCanaleApple(canale: $0, compatta: true) }
-                    }
-                    .padding(.top, C.spazioRighe)
                 }
             }
             Spacer(minLength: 0)
@@ -916,7 +903,8 @@ enum FiltroPosizioniTelefono: Hashable {
     }
 
     static func tutti(proposte: Int) -> [(FiltroPosizioniTelefono, String)] {
-        [(.tutte, "Tutte")] + Canale.allCases.map { (.canale($0), $0.nomeBreve) } + [(.proposte, "Proposte · \(proposte)")]
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente filtri per canale
+        [(.tutte, "Tutte"), (.proposte, "Proposte · \(proposte)")]
     }
 }
 
@@ -931,11 +919,6 @@ private struct GettoneFiltroTelefono: View {
 
     var body: some View {
         HStack(spacing: P.spazioPallino) {
-            if let canale {
-                Circle()
-                    .fill(canale == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente)
-                    .frame(width: P.pallino, height: P.pallino)
-            }
             Text(titolo)
                 .lineLimit(1)
         }
@@ -971,8 +954,8 @@ struct TotaleTelefono: View {
     private typealias P = Tema.Apple.Telefono.Posizioni
 
     var body: some View {
-        let alleanza = perCanale.first { $0.0 == .alleanza }?.1 ?? 0
-        let indipendente = perCanale.first { $0.0 == .indipendente }?.1 ?? 0
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente barra né righe per canale; con i debiti, attività e debiti
+        let attivita = perCanale.reduce(0.0) { $0 + $1.1 }
         VStack(alignment: .leading, spacing: 0) {
             Text(titolo)
                 .carattereApple(Tema.Apple.Telefono.Cliente.etichetta)
@@ -983,22 +966,17 @@ struct TotaleTelefono: View {
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .lineLimit(1)
                 .minimumScaleFactor(P.riduzioneTotale)
-            if !perCanale.isEmpty && (alleanza > 0 || indipendente > 0) {
-                BarraPienaSegmenti.canali(alleanza: max(alleanza, 0), indipendente: max(indipendente, 0))
-                    .padding(.top, P.barraSopra)
-                    .padding(.bottom, P.barraSotto)
-            }
-            if !perCanale.isEmpty {
+            if !perCanale.isEmpty && debiti > 0 {
                 VStack(alignment: .leading, spacing: P.spazioCanali) {
-                    ForEach(perCanale, id: \.0) { c, v in
-                        HStack(spacing: E.spazioRiga) {
-                            EtichettaCanaleApple(canale: c, compatta: true)
-                            Spacer(minLength: E.spazioRiga)
-                            Text(FormatoCifra.euro.testo(v))
-                                .carattereApple(E.valore)
-                                .foregroundColor(E.coloreNome)
-                                .lineLimit(1)
-                        }
+                    HStack(spacing: E.spazioRiga) {
+                        Text("Attività")
+                            .carattereApple(E.valore)
+                            .foregroundColor(E.coloreNome)
+                        Spacer(minLength: E.spazioRiga)
+                        Text(FormatoCifra.euro.testo(attivita))
+                            .carattereApple(E.valore)
+                            .foregroundColor(E.coloreNome)
+                            .lineLimit(1)
                     }
                     if debiti > 0 {
                         HStack(spacing: E.spazioRiga) {

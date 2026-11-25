@@ -82,11 +82,7 @@ private struct PaginaStradeTFR: View {
                 CampoProspetto(etichetta: "Cliente", valore: t.cliente)
                 CampoProspetto(etichetta: "Consulente", valore: TestiValutazione.consulente)
                 CampoProspetto(etichetta: "Data", valore: CifreDoc.dataBreve(t.data)).frame(width: DT.colonnaData)
-                HStack(alignment: .bottom, spacing: DT.spazioTesta) {
-                    Text(verbatim: "Canale").font(T.pTabellaNota).foregroundColor(C.tenue)
-                    EtichettaCanale(canale: i.canale, compatta: true)
-                }
-                .fixedSize()
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente campo «Canale»
                 CampoProspetto(etichetta: "Fondo", valore: t.nomeFondo)
             }
             FilaCifre(spazio: DT.spazioCifre) {

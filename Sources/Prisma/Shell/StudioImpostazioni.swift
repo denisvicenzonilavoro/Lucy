@@ -38,7 +38,7 @@ struct PaginaImpostazioniStudio: View {
             NotaImpostazioni("Studio misura il tuo lavoro con i numeri che scrivi qui: Lucy non li inventa. "
                              + "Un campo vuoto resta vuoto, e Studio dice che cosa manca.")
             VStack(alignment: .leading, spacing: Tema.Apple.Impostazioni.Riga.fraRighe) {
-                GruppoImpostazioni(titolo: "Le tue aliquote \(Canale.alleanza.nomeBreve)") {
+                GruppoImpostazioni(titolo: "Le tue aliquote") {
                     ForEach(Array(aree.enumerated()), id: \.element) { i, area in
                         let successiva = AliquoteProvvigione.voceSuccessiva(area: area)
                         RigaImpostazione(titolo: area.nome, sottotitolo: Self.spiegazione(area),
@@ -55,14 +55,14 @@ struct PaginaImpostazioniStudio: View {
                         }
                     }
                 }
-                NotaImpostazioni("Valgono per le posizioni Alleanza in essere con la data di decorrenza: la nuova produzione "
-                                 + "sul versamento iniziale e sui premi del primo anno, nel mese della decorrenza; ricorrenti e "
-                                 + "rinnovi su ogni rata dal secondo anno, fino alla scadenza. Le posizioni indipendenti non "
-                                 + "hanno provvigioni: la consulenza entra con le parcelle.")
+                NotaImpostazioni("Valgono per le posizioni in essere con provvigioni e con la data di decorrenza: la nuova "
+                                 + "produzione sul versamento iniziale e sui premi del primo anno, nel mese della decorrenza; "
+                                 + "ricorrenti e rinnovi su ogni rata dal secondo anno, fino alla scadenza. La consulenza a "
+                                 + "parcella non ha provvigioni: entra con le parcelle.")
                 if senzaDecorrenza > 0 {
                     NotaImpostazioni(senzaDecorrenza == 1
-                                     ? "1 posizione Alleanza in essere non ha la data di decorrenza: non entra nelle stime."
-                                     : "\(senzaDecorrenza) posizioni Alleanza in essere non hanno la data di decorrenza: non entrano nelle stime.",
+                                     ? "1 posizione in essere con provvigioni non ha la data di decorrenza: non entra nelle stime."
+                                     : "\(senzaDecorrenza) posizioni in essere con provvigioni non hanno la data di decorrenza: non entrano nelle stime.",
                                      colore: Tema.Apple.Impostazioni.Riga.coloreAvvertenza)
                 }
             }
@@ -74,8 +74,8 @@ struct PaginaImpostazioniStudio: View {
                             .fixedSize()
                     }
                     RigaImpostazione(titolo: VoceObiettivoStudio.produzioneAlleanza.nome,
-                                     sottotitolo: "Versamenti iniziali e premi annui delle posizioni Alleanza con decorrenza nell’anno",
-                                     aiuto: "Definizione provvisoria della produzione, da confermare: versamento iniziale più premio annuo delle posizioni Alleanza in essere che decorrono nell’anno.") {
+                                     sottotitolo: "Versamenti iniziali e premi annui delle posizioni con provvigioni con decorrenza nell’anno",
+                                     aiuto: "Definizione provvisoria della produzione, da confermare: versamento iniziale più premio annuo delle posizioni in essere con provvigioni che decorrono nell’anno.") {
                         CampoNumeroStudio(etichetta: nil, unita: "€", larghezza: f.campoImporto, decimali: 0,
                                           valore: legameObiettivo(.produzioneAlleanza))
                             .disabled(stato.solaLettura)
@@ -88,7 +88,7 @@ struct PaginaImpostazioniStudio: View {
                             .disabled(stato.solaLettura)
                     }
                     RigaImpostazione(titolo: VoceObiettivoStudio.ricaviConsulenza.nome,
-                                     sottotitolo: "Parcelle della consulenza indipendente dell’anno",
+                                     sottotitolo: "Parcelle della consulenza dell’anno",
                                      ultima: true) {
                         CampoNumeroStudio(etichetta: nil, unita: "€", larghezza: f.campoImporto, decimali: 0,
                                           valore: legameObiettivo(.ricaviConsulenza))
@@ -148,7 +148,7 @@ struct PaginaImpostazioniStudio: View {
     }
 
     private static func aiuto(_ area: AreaPosizione) -> String {
-        "Le percentuali che Alleanza ti riconosce sui prodotti di \(area.nome.lowercased()). Vuote: Studio non stima "
+        "Le percentuali che la compagnia ti riconosce sui prodotti di \(area.nome.lowercased()). Vuote: Studio non stima "
             + "le provvigioni di questo tipo e lo dice."
     }
 }

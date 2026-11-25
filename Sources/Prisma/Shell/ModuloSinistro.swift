@@ -63,7 +63,7 @@ struct ModuloSinistro: View {
             riga("Polizza") {
                 Picker("", selection: $bozza.posizioneId) {
                     Text(TestiSinistri.nessunaPolizza).tag(String?.none)
-                    ForEach(polizze) { p in Text("\(p.nome) · \(p.canale.nomeInFrase)").tag(Optional(p.id)) }
+                    ForEach(polizze) { p in Text(p.nome).tag(Optional(p.id)) }
                 }
                 .labelsHidden()
             }

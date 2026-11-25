@@ -217,9 +217,10 @@ enum ProvaCalcoliBiblioteca {
                                            documentoId: "r")
         verifica.vero("Biblioteca: le rubriche dalle intestazioni, senza doppioni (\(MotoreBiblioteca.rubriche(passi)))",
                       MotoreBiblioteca.rubriche(passi) == ["Oggetto", "Recesso"])
-        verifica.vero("Biblioteca: «38 pagine · canale …» e «vale per tutti i canali»",
-                      TestiBiblioteca.pagineECanale(pagine: 38, canale: nil) == "38 pagine · vale per tutti i canali"
-                        && TestiBiblioteca.pagineECanale(pagine: 1, canale: .alleanza).hasPrefix("1 pagina · canale "))
+        // Dal 25 novembre 2026 (un solo canale, quello di Lucy) la riga dice solo le pagine
+        verifica.vero("Biblioteca: «38 pagine» e «1 pagina», senza canale",
+                      TestiBiblioteca.pagineECanale(pagine: 38, canale: nil) == "38 pagine"
+                        && TestiBiblioteca.pagineECanale(pagine: 1, canale: .alleanza) == "1 pagina")
 
         // La ricerca dentro un documento: solo i suoi passi
         let indice = MotoreBiblioteca.indice(fonti())

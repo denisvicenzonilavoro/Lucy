@@ -205,24 +205,46 @@ struct GruppoCanale {
     var nota = ""
 }
 
-/// Una tabella divisa per canale: l'etichetta del canale, poi le sue righe.
+extension GruppoCanale {
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: i documenti fanno un gruppo solo
+    /// con tutte le righe, e questo è il canale (non mostrato) che lo tiene.
+    static let canaleUnico: Canale = .alleanza
+}
+
+/// Una tabella che era divisa per canale. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: una tabella sola con
+/// tutte le righe dei gruppi, senza etichetta del canale. Con più gruppi la nota del gruppo e i totali per canale
+/// («Totale alleanza») non si mostrano; con un gruppo solo restano (il totale diventa «Totale»).
 struct TabellaCanali: View {
     @Environment(\.paletteDocumento) private var C
     let colonne: [ColonnaDoc]
     let gruppi: [GruppoCanale]
 
+    /// Le righe di tutti i gruppi, una dopo l'altra.
+    private var righe: [RigaDoc] {
+        let unico = gruppi.count == 1
+        return gruppi.flatMap { g in
+            g.righe.compactMap { r -> RigaDoc? in
+                guard let prima = r.celle.first,
+                      prima.testo.lowercased() == "totale \(g.canale.nomeBreve.lowercased())" else { return r }
+                guard unico else { return nil }
+                var nuova = r
+                nuova.celle[0].testo = "Totale"
+                return nuova
+            }
+        }
+    }
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            ForEach(Array(gruppi.enumerated()), id: \.offset) { _, g in
-                VStack(alignment: .leading, spacing: 2) {
-                    HStack(alignment: .center) {
-                        EtichettaCanale(canale: g.canale)
-                        Spacer()
-                        Text(verbatim: g.nota).font(T.pTabellaNota).foregroundColor(C.tenue)
-                    }
-                    TabellaDoc(larghezza: FoglioProspetto<EmptyView>.larghezza, colonne: colonne, righe: g.righe, fontTesta: T.pTabellaTesta,
-                               fontTestaSotto: T.pTabellaNota, altezzaTesta: 12, margine: 4)
+        VStack(alignment: .leading, spacing: 2) {
+            if gruppi.count == 1, let nota = gruppi.first?.nota, !nota.isEmpty {
+                HStack(alignment: .center) {
+                    Spacer()
+                    Text(verbatim: nota).font(T.pTabellaNota).foregroundColor(C.tenue)
                 }
+            }
+            if !gruppi.isEmpty {
+                TabellaDoc(larghezza: FoglioProspetto<EmptyView>.larghezza, colonne: colonne, righe: righe, fontTesta: T.pTabellaTesta,
+                           fontTestaSotto: T.pTabellaNota, altezzaTesta: 12, margine: 4)
             }
         }
     }

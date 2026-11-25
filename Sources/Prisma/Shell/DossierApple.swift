@@ -950,16 +950,10 @@ final class BersaglioMenuAltro: NSObject {
 }
 #endif
 
-/// «Canale da scegliere»: l'etichetta grigia del cliente senza canale («Luce» giro 13, §9.1.6). La scheda della carta
-/// d'identità non sceglie il canale: lo indica l'utente nella scheda del cliente.
+/// «Canale da scegliere»: l'etichetta grigia del cliente senza canale («Luce» giro 13). Dal 25 novembre 2026
+/// (decisione dell'utente: un solo canale, quello di Lucy) non c'è più un canale da scegliere: non disegna nulla.
 struct EtichettaCanaleDaScegliere: View {
-    var body: some View {
-        let s = Tema.Apple.NuovoCliente.Scheda.self
-        Text("Canale da scegliere")
-            .carattereApple(s.canaleDaScegliere)
-            .foregroundColor(s.coloreCanaleDaScegliere)
-            .padding(s.paddingCanaleDaScegliere)
-            .background(Capsule().fill(s.fondoCanaleDaScegliere))
-            .help("Indica il canale (Alleanza, indipendente o entrambi) nella scheda del cliente")
-    }
+    // Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy: il canale non si mostra
+    // più. Il campo `canale` resta nei dati solo per compatibilità; la firma resta perché i richiami compilino.
+    var body: some View { EmptyView() }
 }

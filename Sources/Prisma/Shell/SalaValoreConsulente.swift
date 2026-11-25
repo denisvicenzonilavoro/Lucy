@@ -242,19 +242,7 @@ struct ValoreConsulenteVista: View {
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, V.sopraSpiegazione)
                 }
-                if perCanale.count > 1 || (perCanale.count == 1 && perCanale.keys.first != nil) {
-                    HStack(spacing: V.sopraSpiegazione * 2) {
-                        ForEach(Canale.allCases.filter { perCanale[$0] != nil }, id: \.self) { c in
-                            HStack(spacing: V.sopraSpiegazione) {
-                                EtichettaCanaleApple(canale: c, compatta: true)
-                                Text(Formati.euro(perCanale[c] ?? 0))
-                                    .carattereApple(V.canali)
-                                    .foregroundColor(Tema.Apple.Colore.inchiostro2)
-                            }
-                        }
-                    }
-                    .padding(.top, V.sopraCanali)
-                }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente cifre per canale
             } else {
                 Text(assente ?? "Nessun dato")
                     .carattereApple(V.assente)
@@ -294,7 +282,7 @@ struct ValoreConsulenteVista: View {
                 // Una sola barra del compenso, a due segmenti nei colori dei canali (§4.4.2)
                 barraCompenso(v, scala: scala)
                 if v.provvigioniNonStimate {
-                    Text("Provvigioni Alleanza non stimate: scrivi le aliquote in Impostazioni › Studio.")
+                    Text("Provvigioni non stimate: scrivi le aliquote in Impostazioni › Studio.")
                         .carattereApple(V.nota)
                         .foregroundColor(V.coloreNota)
                 }
@@ -303,7 +291,7 @@ struct ValoreConsulenteVista: View {
             Group {
                 if let r = v.rapporto {
                     Text(v.rapportoSoloParcelle
-                         ? "Per ogni euro di parcella, circa \(rapporto(r)) euro di valore\(r < 1 ? " misurabile" : "") sul canale indipendente."
+                         ? "Per ogni euro di parcella, circa \(rapporto(r)) euro di valore\(r < 1 ? " misurabile" : "")."
                          : "Per ogni euro di \(v.provvigioniStimate == nil ? "parcella" : "compenso"), circa \(rapporto(r)) euro di valore\(r < 1 ? " misurabile" : "").")
                         .carattereApple(V.rapporto)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
@@ -333,7 +321,8 @@ struct ValoreConsulenteVista: View {
                 .frame(width: V.larghezzaEtichetta, alignment: .leading)
             BarraPienaSegmenti(pezzi: [
                 PezzoBarraPiena(id: "alleanza", peso: provvigioni, colore: V.coloreAlleanza),
-                PezzoBarraPiena(id: "indipendente", peso: v.parcellePagate, colore: V.coloreIndipendente),
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: provvigioni e parcelle nello stesso colore
+                PezzoBarraPiena(id: "indipendente", peso: v.parcellePagate, colore: V.coloreAlleanza),
                 // Il resto fino alla scala del valore, vuoto: la barra è lunga quanto il compenso
                 PezzoBarraPiena(id: "resto", peso: max(0, scala - provvigioni - v.parcellePagate), colore: V.coloreResto),
             ], indice: 1, altezza: V.altezzaBarra, spazio: V.spazioSegmenti, raggioPezzo: V.raggioBarra, raggioContenitore: V.raggioBarra)
@@ -342,7 +331,7 @@ struct ValoreConsulenteVista: View {
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .frame(width: V.larghezzaCifra, alignment: .trailing)
         }
-        .help("\(Canale.alleanza.nomeBreve) (provvigioni stimate) \(Formati.euro(provvigioni)) · \(Canale.indipendente.nomeBreve) (parcelle) \(Formati.euro(v.parcellePagate))")
+        .help("Provvigioni stimate \(Formati.euro(provvigioni)) · parcelle \(Formati.euro(v.parcellePagate))")
     }
 
     private func barra(_ etichetta: String, valore: Double, frazione: Double, colore: Color, indice: Int) -> some View {

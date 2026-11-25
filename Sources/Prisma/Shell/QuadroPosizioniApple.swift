@@ -5,11 +5,11 @@ import SwiftUI
 // prima schermata della vista del cliente in Posizioni.
 //
 //   [Patrimonio netto] [Premi e versamenti] [Capitale assicurato] [Proposte aperte]
-//   ┌ Le posizioni  6 voci   (In essere|Proposte|Tutte) (● Alleanza) (● Indipendente) ┐  ┌ Ripartizione per area ┐
+//   ┌ Le posizioni  6 voci   (In essere|Proposte|Tutte) ┐                            ┌ Ripartizione per area ┐
 //   │ (■ Protezione ✕)                                                                 │  │ anello · legenda = filtro│
 //   │ ■ Nome                                     Scade tra 20 giorni  Alleanza  12.000 € › │  └───────────────────────┘
-//   │   Area · Tipologia                                                                │  ┌ Per canale ───────────┐
-//   │ ─────────────────────────────────────────────────────────────────────────────── │  │ barra · due righe      │
+//   │   Area · Tipologia                                                                │  ┌ Da fare ──────────────┐
+//   │ ─────────────────────────────────────────────────────────────────────────────── │  │                        │
 //   │ Tocca una riga per la scheda della posizione.                                    │  │ 3 da fare per Marco ›  │
 //   └────────────────────────────────────────────────────────────────────────────────┘  └───────────────────────┘
 //
@@ -62,9 +62,10 @@ struct QuadroPosizioniApple: View {
                                 area = area == a ? nil : a
                             })
                         }
-                        PannelloAnalisi(titolo: "Per canale", nota: "Attività in essere") { EmptyView() } contenuto: {
-                            VStack(alignment: .leading, spacing: k.spazio) {
-                                AppPosizioni.canali(r, scadenze: false, apri: apri)
+                        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: al posto della
+                        // card «Per canale» resta solo il «Da fare» del cliente
+                        if !stato.inModoCliente {
+                            PannelloAnalisi(titolo: "Da fare", nota: "Per questo cliente") { EmptyView() } contenuto: {
                                 daFare
                             }
                         }
@@ -177,43 +178,14 @@ struct QuadroPosizioniApple: View {
         .fixedSize()
     }
 
-    /// Il segmentato dello stato e le due capsule dei canali (un secondo clic toglie il filtro).
+    /// Il segmentato dello stato. Dal 25 novembre 2026 (decisione dell'utente: un solo canale, quello di Lucy)
+    /// niente più capsule dei canali.
     private var filtri: some View {
         let k = Tema.Apple.Posizioni.Quadro.self
         return HStack(spacing: k.spazioFiltri) {
             SegmentatoPillola(selezione: $filtroStato, voci: Self.opzioniStato)
                 .fixedSize()
-            ForEach(Canale.allCases) { c in
-                capsulaCanale(c)
-            }
         }
-    }
-
-    private func capsulaCanale(_ c: Canale) -> some View {
-        let k = Tema.Apple.Posizioni.Quadro.self
-        let attiva = filtroCanale == c
-        let colore = c == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente
-        let fondo = c == .alleanza ? Tema.Apple.Colore.fondoAlleanza : Tema.Apple.Colore.fondoIndipendente
-        let lato = Tema.Apple.Misura.Controllo.pallinoCanale
-        return Button {
-            filtroCanale = attiva ? nil : c
-        } label: {
-            HStack(spacing: k.spazioFiltro) {
-                Circle().fill(colore).frame(width: lato, height: lato)
-                Text(c.nomeBreve)
-                    .carattereApple(k.filtro)
-                    .foregroundColor(attiva ? colore : k.testoFiltro)
-                    .lineLimit(1)
-            }
-            .padding(k.paddingFiltro)
-            .background { Capsule(style: .continuous).fill(attiva ? fondo : k.fondoFiltro) }
-            .contentShape(Capsule(style: .continuous))
-            .fixedSize()
-        }
-        .buttonStyle(StileSemplice())
-        .help(AppPosizioni.aiutoCanale(c, attivo: attiva))
-        .accessibilityLabel(c.nome)
-        .accessibilityAddTraits(attiva ? AccessibilityTraits.isSelected : AccessibilityTraits())
     }
 
     /// Il filtro di area scelto dalla legenda, con «✕» per toglierlo.
@@ -270,7 +242,6 @@ struct QuadroPosizioniApple: View {
             let nome = StatoShell.nomeDiBattesimo(cliente)
             let n = stato.nastroDaFareCompleto(cliente: cliente.id).totale
             VStack(alignment: .leading, spacing: 0) {
-                Rectangle().fill(k.filo).frame(height: Tema.Misura.filo)
                 Group {
                     if n > 0 {
                         Button { stato.apriDaFare(soloCliente: true) } label: {
@@ -286,9 +257,7 @@ struct QuadroPosizioniApple: View {
                             .foregroundColor(k.coloreNienteDaFare)
                     }
                 }
-                .padding(.top, k.paddingPiede)
             }
-            .padding(.top, k.sopraDaFare)
         }
     }
 }

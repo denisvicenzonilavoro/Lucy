@@ -25,12 +25,7 @@ extension CompositoreProspetti {
                                 nota: "per \(euro(r.valoreProposte))" + (p.tassoAccettazione.map { " · accettate \(quota($0))" } ?? "")),
         ]))
 
-        sezione("Per canale")
-        b.append(.tabella(TabellaProspetto(
-            colonne: [ColonnaProspetto(titolo: "Canale", peso: 2), ColonnaProspetto(titolo: "Attività in essere", peso: 1.4, destra: true),
-                      ColonnaProspetto(titolo: "Quota", peso: 0.8, destra: true)],
-            righe: Canale.allCases.map { c in [.c(c), .t(euro(r.perCanale[c] ?? 0)), .t(quota(r.quota(c)))] },
-            totale: [.f("Totale"), .f(euro(r.attivita)), .f("100%")])))
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente sezione «Per canale»
 
         sezione("Per area")
         let aree = AreaPosizione.allCases.filter { (r.perArea[$0] ?? 0) > 0 }

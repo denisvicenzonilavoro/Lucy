@@ -126,96 +126,14 @@ private struct CorpoPulsanteApple: View {
 
 // MARK: - Etichetta del canale (§2.17)
 
-/// L'etichetta del canale nello stile del template (`.chA` / `.chI`): capsula 11,5 semibold con padding 3×9,
-/// spazio 5. Alleanza: fondo blu al 13% e testo `canaleAlleanza`, con il logo Alleanza (nella compatta il
-/// pallino 6). Indipendente: fondo cuoio al 14% e testo `canaleIndipendente`, pallino 6; nella versione
-/// estesa la scritta è «Denis Vicenzoni · Consulenza finanziaria», nella compatta «Indipendente».
-/// Sui documenti (`\.etichetteStampa`) è `EtichettaCanaleStampa`, come `EtichettaCanale`.
-///
-///     EtichettaCanaleApple(canale: .alleanza)
-///     EtichettaCanaleApple(canale: p.canale, compatta: true)
+/// L'etichetta del canale nello stile del template. Dal 25 novembre 2026 (decisione dell'utente: un solo canale,
+/// quello di Lucy) non disegna nulla; la firma resta (anche `nomeScelto`) perché i richiami compilino.
 struct EtichettaCanaleApple: View {
     let canale: Canale
     var compatta = false
-    /// Migliorie d'uso 38: il nome da mostrare al posto di quello in uso (la bozza del campo del nome, che cambia
-    /// l'etichetta mentre si scrive). nil = il nome in uso; vuoto = quello di base.
     var nomeScelto: String? = nil
-    @Environment(\.etichetteStampa) private var stampa
 
-    var body: some View {
-        // Osserva i nomi dei canali: l'etichetta cambia appena cambia il nome (Impostazioni › Profilo)
-        let _ = SegnaleNomiCanali.condiviso.nomi
-        if stampa {
-            EtichettaCanaleStampa(canale: canale, compatta: compatta)
-        } else {
-            capsula
-        }
-    }
-
-    private var alleanza: Bool { canale == .alleanza }
-
-    private var colore: Color {
-        alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente
-    }
-
-    /// Il nome scelto ripulito (vuoto = quello di base), o nil se l'etichetta mostra il nome in uso.
-    private var sceltoPulito: String? {
-        guard let n = nomeScelto else { return nil }
-        let p = NomiCanali.pulisci(n)
-        return p.isEmpty ? NomiCanali.base.nome(canale) : p
-    }
-
-    /// Con il nome scelto quello di base (o nessun nome scelto) vale il nome in uso.
-    private var nomeDiBase: Bool {
-        guard let p = sceltoPulito else { return NomiCanaliCorrenti.valore.diBase(canale) }
-        return p == NomiCanali.base.nome(canale)
-    }
-
-    /// Alleanza: sempre «Alleanza»; indipendente: la firma completa nella versione estesa. Con un nome scelto
-    /// dall'utente, il nome scelto (migliorie d'uso 38).
-    private var testo: String {
-        if let p = sceltoPulito, p != NomiCanali.base.nome(canale) { return p }
-        if sceltoPulito != nil {
-            // La bozza torna al nome di base: la scritta di base, anche se in uso c'è ancora l'altro nome
-            if alleanza || compatta { return NomiCanali.base.nome(canale) }
-            return "Denis Vicenzoni · Consulenza finanziaria"
-        }
-        return alleanza || compatta ? canale.nomeBreve : canale.nome
-    }
-
-    private var capsula: some View {
-        HStack(spacing: Tema.Apple.Misura.Spazio.etichettaCanale) {
-            segno
-            Text(testo)
-                .carattereApple(Tema.Apple.Carattere.canale)
-                .foregroundColor(colore)
-                .lineLimit(1)
-        }
-        .padding(Tema.Apple.Misura.Padding.etichettaCanale)
-        .background {
-            Capsule(style: .continuous)
-                .fill(alleanza ? Tema.Apple.Colore.fondoAlleanza : Tema.Apple.Colore.fondoIndipendente)
-        }
-        .fixedSize()
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(sceltoPulito ?? canale.nome))
-    }
-
-    /// Il logo Alleanza (estesa, solo con il nome di base) o il pallino nel colore del testo.
-    @ViewBuilder private var segno: some View {
-        if alleanza, !compatta, nomeDiBase, let simbolo = Risorse.immagine("Loghi/Alleanza_simbolo.png") {
-            Image(piattaforma: simbolo)
-                .renderingMode(.template)
-                .resizable()
-                .interpolation(.high)
-                .aspectRatio(contentMode: .fit)
-                .frame(height: Tema.Apple.Controlli.Etichetta.simboloAlleanza)
-                .foregroundColor(colore)
-        } else {
-            let lato = Tema.Apple.Misura.Controllo.pallinoCanale
-            Circle()
-                .fill(colore)
-                .frame(width: lato, height: lato)
-        }
-    }
+    // Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello di Lucy: il canale non si mostra
+    // più. Il campo `canale` resta nei dati solo per compatibilità; la firma resta perché i richiami compilino.
+    var body: some View { EmptyView() }
 }
