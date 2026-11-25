@@ -943,7 +943,7 @@ private struct RigaIncontroScrivania: View {
 
 // MARK: - Portafoglio clienti
 
-private struct RiquadroPortafoglioScrivania: View {
+struct RiquadroPortafoglioScrivania: View {
     @Environment(StatoShell.self) var stato
     let pronto: Bool
     let ritardoAnelli: Double
@@ -1433,7 +1433,7 @@ private struct CorpoDaFareScrivaniaMac: View, Equatable {
 
 // MARK: - In scadenza entro 90 giorni
 
-private struct RiquadroScadenzeScrivania: View {
+struct RiquadroScadenzeScrivania: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.prismaInVista) private var inVista
     /// Sotto una finestra ingrandita le scadenze restano le ultime calcolate (`UltimiValoriScrivania`).

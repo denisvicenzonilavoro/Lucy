@@ -79,8 +79,13 @@ private struct ColonnaSinistraCarta: View {
                 .foregroundColor(TemaCarta.Colore.inchiostro2D)
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, 14)
+            RigaPatrimonioCarta()
+                .padding(.top, 10)
             if !stato.inModoCliente {
                 PrimaPaginaWidget()
+                    // Un clic sul giornale lo apre a tutta pagina, come nel template
+                    .contentShape(Rectangle())
+                    .onTapGesture(perform: apriFoglio)
                     .overlay(alignment: .topTrailing) {
                         Button(action: apriFoglio) {
                             Label("A tutta pagina", systemImage: "arrow.up.left.and.arrow.down.right")
@@ -130,7 +135,7 @@ private struct ColonnaSinistraCarta: View {
 
 /// La striscia dei mercati sotto il Foglio: gli ultimi valori delle serie scaricate (BCE, Eurostat) o importate, con la
 /// variazione sul valore di prima. Senza dati di mercato, l'invito ad accenderli (nessuna cifra inventata).
-private struct MercatiCarta: View {
+struct MercatiCarta: View {
     @Environment(StatoShell.self) private var stato
 
     var body: some View {
@@ -247,26 +252,43 @@ private struct ColonnaDestraCarta: View {
 
     var body: some View {
         // .wgrid del template: tre colonne, 18 tra una scheda e l'altra; «Oggi» occupa la prima colonna in altezza
+        let alta: CGFloat = 300
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .top, spacing: 18) {
-                OggiCarta()
+                OggiCarta(altezzaMinima: alta)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
-                    .layoutPriority(1)
-                VStack(alignment: .leading, spacing: 18) {
-                    PatrimonioCarta()
-                    if !stato.inModoCliente {
-                        MossaCarta()
-                        TurnoNotteWidget()
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
-                .layoutPriority(2)
+                // Il portafoglio di prima, con il totale e gli anelli delle aree
+                RiquadroPortafoglioScrivania(pronto: true, ritardoAnelli: 0, altezza: alta)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: alta)
             }
+            if !stato.inModoCliente {
+                HStack(alignment: .top, spacing: 18) {
+                    MossaCarta()
+                    TurnoNotteWidget()
+                }
+            }
+            RiquadroScadenzeScrivania()
+                .frame(height: 168)
             ChiediLucyCarta()
             if !stato.inModoCliente {
                 LetteraPrismaAIWidget()
             }
         }
+    }
+}
+
+/// «In tutto segui … di patrimonio, per N clienti.» sotto la frase del giorno.
+private struct RigaPatrimonioCarta: View {
+    @Environment(StatoShell.self) private var stato
+
+    var body: some View {
+        let clienti = stato.clienti.count
+        Text(clienti == 0 ? "Ancora nessun cliente: il primo si aggiunge da Clienti."
+             : "In tutto stai seguendo \(Formati.euro(stato.riepilogoTuttePosizioni.attivita)) di patrimonio, per \(clienti) \(clienti == 1 ? "cliente" : "clienti").")
+            .fontCarta(14, weight: .medium)
+            .foregroundColor(TemaCarta.Colore.inchiostroD)
+            .fixedSize(horizontal: false, vertical: true)
     }
 }
 
@@ -284,39 +306,6 @@ private struct EtichettaScheda: View {
                 .lineLimit(1)
         }
         .foregroundColor(TemaCarta.Colore.matitaD)
-    }
-}
-
-/// «In tutto segui…»: il patrimonio dei clienti, grande come i numeri del template.
-private struct PatrimonioCarta: View {
-    @Environment(StatoShell.self) private var stato
-
-    var body: some View {
-        let clienti = stato.clienti.count
-        let totale = clienti == 0 ? 0 : stato.riepilogoTuttePosizioni.attivita
-        Button { stato.apri(.posizioni) } label: {
-            VStack(alignment: .leading, spacing: 0) {
-                EtichettaScheda(icona: "chart.pie", testo: "Il patrimonio che segui")
-                Text(Formati.euro(totale))
-                    .fontCarta(42, weight: .medium, design: .serif, cifre: true)
-                    .tracking(-1.2)
-                    .foregroundColor(TemaCarta.Colore.inchiostroD)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.6)
-                    .padding(.top, 12)
-                Text(clienti == 0 ? "Ancora nessun cliente: il primo si aggiunge da Clienti."
-                     : "In tutto, per \(clienti) \(clienti == 1 ? "cliente" : "clienti").")
-                    .fontCarta(14, design: .serif, corsivo: true)
-                    .foregroundColor(TemaCarta.Colore.inchiostro2D)
-                    .padding(.top, 4)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 18)
-            .padding(.vertical, 16)
-            .contentShape(Rectangle())
-        }
-        .buttonStyle(.plain)
-        .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
     }
 }
 
@@ -358,6 +347,7 @@ private struct MossaCarta: View {
 /// «Oggi»: la mossa del giorno, gli incontri e le cose da fare insieme (Agenda e attività unite, come nel template).
 private struct OggiCarta: View {
     @Environment(StatoShell.self) private var stato
+    var altezzaMinima: CGFloat = 0
 
     var body: some View {
         let incontri = stato.appuntamentiDiOggi
@@ -444,6 +434,7 @@ private struct OggiCarta: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
+        .frame(maxWidth: .infinity, minHeight: altezzaMinima, alignment: .topLeading)
         .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
     }
 
@@ -492,7 +483,8 @@ private struct ChiediLucyCarta: View {
     }
 }
 
-/// Il Foglio di Lucy a tutta pagina, sopra la scrivania: si chiude con la crocetta o con Esc.
+/// Il Foglio di Lucy a tutta pagina, sopra la scrivania (la pagina di giornale del template, section «a-prima»): si chiude
+/// con la crocetta o con Esc.
 private struct FoglioTuttaPagina: View {
     let chiudi: () -> Void
 
@@ -501,30 +493,453 @@ private struct FoglioTuttaPagina: View {
             SfondoCarta()
                 .ignoresSafeArea()
             ScrollView {
-                VStack(spacing: 18) {
-                    PrimaPaginaWidget()
-                        .frame(maxWidth: 760)
-                    TurnoNotteWidget()
-                        .frame(maxWidth: 760)
-                    LetteraPrismaAIWidget()
-                        .frame(maxWidth: 760)
+                VStack(spacing: 22) {
+                    FoglioIntero(chiudi: chiudi)
+                    HStack(alignment: .top, spacing: 18) {
+                        TurnoNotteWidget()
+                        LetteraPrismaAIWidget()
+                    }
+                    .frame(maxWidth: FoglioIntero.larghezza)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 60)
+                .padding(.vertical, 56)
                 .padding(.horizontal, 40)
             }
             Button(action: chiudi) {
                 Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .semibold))
+                    .fontCarta(14, weight: .semibold)
                     .foregroundColor(TemaCarta.Colore.inchiostroD)
                     .frame(width: 34, height: 34)
                     .background(Circle().fill(TemaCarta.Colore.schedaD))
+                    .overlay(Circle().stroke(TemaCarta.Colore.filoD, lineWidth: 1))
             }
             .buttonStyle(.plain)
             .keyboardShortcut(.cancelAction)
-            .help("Chiudi il Foglio")
+            .help("Chiudi il Foglio (Esc)")
             .padding(24)
         }
+    }
+}
+
+/// La pagina di giornale intera, come nel template: testata, «In prima» con il titolo grande e l'articolo, l'agenda,
+/// chi chiamare, il numero del giorno, i mercati, la nota di Lucy, le ricorrenze e le scadenze. Ogni frase la scrive il
+/// codice con le cifre di Lucy (nessuna cifra inventata).
+struct FoglioIntero: View {
+    @Environment(StatoShell.self) private var stato
+    var chiudi: () -> Void = {}
+
+    static let larghezza: CGFloat = 1120
+
+    var body: some View {
+        let p = stato.primaPagina()
+        let mono = TestoCarta(dimensione: 10, disegno: .monospaced)
+        VStack(alignment: .leading, spacing: 0) {
+            // Testata
+            HStack {
+                Text("Anno I · N. \(p.numero)")
+                Spacer()
+                Text("\(p.edizione.nome) · stampata da Lucy, sul tuo Mac")
+                Spacer()
+                Text(Self.dataLunga(p.data))
+            }
+            .fontCarta(mono).tracking(1.6)
+            .foregroundColor(TemaCarta.Colore.matitaD)
+            .textCase(.uppercase)
+            .lineLimit(1)
+            .padding(.bottom, 8)
+            .overlay(alignment: .bottom) { filo2 }
+
+            HStack(spacing: 0) {
+                Text("Il Foglio di ")
+                    .fontCarta(76, weight: .medium, design: .serif)
+                Text("Lucy")
+                    .fontCarta(76, design: .serif, corsivo: true)
+                    .segnoCarta(.sottolinea, chiave: "foglio-intero.titolo")
+            }
+            .tracking(-2.6)
+            .foregroundColor(TemaCarta.Colore.inchiostroD)
+            .frame(maxWidth: .infinity)
+            .padding(.top, 10)
+            .padding(.bottom, 6)
+            .accessibilityAddTraits(.isHeader)
+
+            VStack(spacing: 2) {
+                Rectangle().frame(height: 1)
+                Rectangle().frame(height: 1)
+            }
+            .foregroundColor(TemaCarta.Colore.inchiostroD.opacity(0.6))
+            .padding(.top, 8)
+
+            HStack(spacing: 26) {
+                ForEach(["I tuoi clienti", "L'agenda", "I mercati", "Le scadenze"], id: \.self) { t in
+                    Text(t.uppercased())
+                }
+            }
+            .fontCarta(10, design: .monospaced).tracking(2)
+            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 7)
+            .overlay(alignment: .bottom) { filo2 }
+
+            // Prima riga: «In prima» (8 colonne su 12) e l'agenda (4)
+            HStack(alignment: .top, spacing: 26) {
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave("In prima", rossa: true)
+                    Text(p.titolo)
+                        .fontCarta(42, weight: .medium, design: .serif)
+                        .tracking(-1.2)
+                        .foregroundColor(TemaCarta.Colore.inchiostroD)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .segnoCarta(.evidenzia, chiave: "foglio-intero.\(p.numero).\(p.edizione.rawValue)")
+                    Text(Self.occhiello(p))
+                        .fontCarta(18, design: .serif, corsivo: true)
+                        .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 12)
+                        .padding(.bottom, 14)
+                    let articolo = Self.articolo(p)
+                    HStack(alignment: .top, spacing: 26) {
+                        paragrafo(articolo.0)
+                        paragrafo(articolo.1)
+                    }
+                    if let primo = p.incontri.first {
+                        Button { stato.apri(.agenda) } label: {
+                            Text("Apri l'agenda delle \(Formati.ora.string(from: primo.ora)) →")
+                        }
+                        .buttonStyle(.plain)
+                        .fontCarta(13, weight: .medium)
+                        .foregroundColor(TemaCarta.Colore.pennaD)
+                        .padding(.top, 16)
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .layoutPriority(2)
+                .padding(.trailing, 26)
+                .overlay(alignment: .trailing) { filo }
+
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave(p.edizione == .sera ? "L'agenda di domani" : "L'agenda di oggi")
+                    if p.incontri.isEmpty {
+                        Text("Nessun incontro in agenda.")
+                            .fontCarta(14, design: .serif, corsivo: true)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                    }
+                    ForEach(Array(p.incontri.prefix(6).enumerated()), id: \.offset) { i, a in
+                        rigaAgenda(Formati.ora.string(from: a.ora), a.chi, a.cosa == a.chi ? "" : a.cosa,
+                                   ultima: i == min(p.incontri.count, 6) - 1)
+                    }
+                    if let libero = Self.tempoLibero(p) {
+                        Text("\(libero) — L.")
+                            .fontCarta(TemaCarta.Penna.testo)
+                            .foregroundColor(TemaCarta.Colore.pennaD)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .padding(.top, 8)
+                    }
+                }
+                .frame(width: 300, alignment: .topLeading)
+            }
+            .padding(.top, 20)
+
+            separatore
+
+            // Seconda riga: da chiamare, il numero del giorno, i mercati
+            HStack(alignment: .top, spacing: 26) {
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave("Da chiamare oggi")
+                    if p.daChiamare.isEmpty {
+                        Text("Nessuna telefonata in sospeso.")
+                            .fontCarta(14, design: .serif, corsivo: true)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                    }
+                    ForEach(Array(p.daChiamare.enumerated()), id: \.offset) { i, c in
+                        HStack(alignment: .center, spacing: 10) {
+                            Image(systemName: "phone")
+                                .fontCarta(12)
+                                .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                                .frame(width: 28, height: 28)
+                                .background(Circle().fill(TemaCarta.Colore.chipD))
+                            VStack(alignment: .leading, spacing: 1) {
+                                Text(c.chi.isEmpty ? "Senza cliente" : c.chi)
+                                    .fontCarta(13.5, weight: .medium)
+                                    .foregroundColor(TemaCarta.Colore.inchiostroD)
+                                Text(c.perche)
+                                    .fontCarta(12)
+                                    .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                                    .lineLimit(2)
+                            }
+                        }
+                        .padding(.vertical, 8)
+                        .overlay(alignment: .bottom) { if i < p.daChiamare.count - 1 { filo } }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(.trailing, 26)
+                .overlay(alignment: .trailing) { filo }
+
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave("Il numero del giorno")
+                    Text(p.numeroDelGiorno)
+                        .fontCarta(64, weight: .medium, design: .serif, cifre: true)
+                        .tracking(-2)
+                        .foregroundColor(TemaCarta.Colore.inchiostroD)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.5)
+                    Text("di patrimonio \(p.didascaliaNumero). È il lavoro che Lucy tiene in ordine con te.")
+                        .fontCarta(16, design: .serif, corsivo: true)
+                        .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.top, 10)
+                    Button {
+                        chiudi()
+                        stato.apri(.vera)
+                    } label: { Text("Chiedi a Lucy che cosa c'è dentro →") }
+                        .buttonStyle(.plain)
+                        .fontCarta(13, weight: .medium)
+                        .foregroundColor(TemaCarta.Colore.pennaD)
+                        .padding(.top, 12)
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .padding(.trailing, 26)
+                .overlay(alignment: .trailing) { filo }
+
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave("I mercati stanotte")
+                    let serie = MercatiCarta.scelte(stato.dati.mercato.serie)
+                    if serie.isEmpty {
+                        Text("Nessun dato di mercato: si accendono in Impostazioni › Mercato.")
+                            .fontCarta(14, design: .serif, corsivo: true)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    ForEach(Array(serie.enumerated()), id: \.element.id) { i, s in
+                        HStack(spacing: 10) {
+                            Text(MercatiCarta.nomeBreve(s.nome))
+                                .fontCarta(13)
+                                .foregroundColor(TemaCarta.Colore.inchiostroD)
+                            Spacer(minLength: 6)
+                            Text(MercatiCarta.valore(s.punti.last?.valore ?? 0, unita: s.unita))
+                                .fontCarta(12.5, design: .monospaced)
+                                .foregroundColor(TemaCarta.Colore.inchiostroD)
+                        }
+                        .padding(.vertical, 7)
+                        .overlay(alignment: .bottom) { if i < serie.count - 1 { filo } }
+                    }
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+
+            separatore
+
+            // Terza riga: la nota di Lucy, le ricorrenze, le scadenze
+            HStack(alignment: .top, spacing: 26) {
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave("La nota di Lucy")
+                    Text(p.notaVera ?? Self.notaDaScadenze(p))
+                        .fontCarta(19, design: .serif, corsivo: true)
+                        .foregroundColor(TemaCarta.Colore.pennaD)
+                        .lineSpacing(5)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("— L.")
+                        .fontCarta(17, design: .serif, corsivo: true)
+                        .foregroundColor(TemaCarta.Colore.pennaD)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .padding(.top, 8)
+                }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .layoutPriority(2)
+                .padding(.trailing, 26)
+                .overlay(alignment: .trailing) { filo }
+
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave("Ricorrenze")
+                    let ricorrenze = Self.ricorrenze(stato.dati.clienti, da: p.data)
+                    if ricorrenze.isEmpty {
+                        Text("Nessun compleanno nelle prossime settimane.")
+                            .fontCarta(14, design: .serif, corsivo: true)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    ForEach(Array(ricorrenze.enumerated()), id: \.offset) { i, r in
+                        rigaAgenda(r.0, r.1, r.2, ultima: i == ricorrenze.count - 1)
+                    }
+                }
+                .frame(width: 250, alignment: .topLeading)
+                .padding(.trailing, 26)
+                .overlay(alignment: .trailing) { filo }
+
+                VStack(alignment: .leading, spacing: 0) {
+                    chiave("Scadenze")
+                    if p.scadenze.isEmpty {
+                        Text("Niente in scadenza nei prossimi 45 giorni.")
+                            .fontCarta(14, design: .serif, corsivo: true)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
+                    ForEach(Array(p.scadenze.enumerated()), id: \.offset) { i, sc in
+                        rigaAgenda(Self.giornoMese(sc.data), sc.posizione,
+                                   sc.valore > 0 ? "\(sc.cliente) · circa \(Formati.euro(sc.valore))" : sc.cliente,
+                                   ultima: i == p.scadenze.count - 1)
+                    }
+                }
+                .frame(width: 250, alignment: .topLeading)
+            }
+
+            // Piede
+            HStack {
+                Text(p.edizione == .mattino ? "Prossima edizione alle 18:00" : "Prossima edizione domani alle 06:00")
+                Spacer()
+                Text("Scritta e stampata in locale sul tuo Mac")
+                Spacer()
+                Text("Cifre di Lucy")
+            }
+            .fontCarta(TestoCarta(dimensione: 9.5, disegno: .monospaced)).tracking(1.5)
+            .textCase(.uppercase)
+            .foregroundColor(TemaCarta.Colore.matitaD)
+            .lineLimit(1)
+            .padding(.top, 9)
+            .overlay(alignment: .top) { filo2 }
+            .padding(.top, 22)
+        }
+        .padding(EdgeInsets(top: 26, leading: 40, bottom: 30, trailing: 40))
+        .frame(maxWidth: Self.larghezza)
+        .background(TemaCarta.Colore.schedaD)
+        .shadow(color: .black.opacity(0.06), radius: 1, y: 1)
+        .shadow(color: .black.opacity(0.18), radius: 30, y: 24)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Il Foglio di Lucy")
+    }
+
+    // MARK: Pezzi
+
+    private var filo: some View { Rectangle().fill(TemaCarta.Colore.filoD).frame(width: 1) }
+    private var filo2: some View { Rectangle().fill(TemaCarta.Colore.filo2D).frame(height: 1) }
+    private var separatore: some View {
+        Rectangle().fill(TemaCarta.Colore.filo2D).frame(height: 1)
+            .padding(.top, 22).padding(.bottom, 18)
+    }
+
+    private func chiave(_ t: String, rossa: Bool = false) -> some View {
+        Text(t.uppercased())
+            .fontCarta(10, design: .monospaced).tracking(2)
+            .foregroundColor(rossa ? TemaCarta.Colore.rossoD : TemaCarta.Colore.matitaD)
+            .padding(.bottom, 8)
+    }
+
+    private func paragrafo(_ t: String) -> some View {
+        Text(t)
+            .fontCarta(13.5)
+            .lineSpacing(4)
+            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+            .fixedSize(horizontal: false, vertical: true)
+            .frame(maxWidth: .infinity, alignment: .topLeading)
+    }
+
+    private func rigaAgenda(_ t: String, _ titolo: String, _ sotto: String, ultima: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(t)
+                .fontCarta(12, design: .monospaced)
+                .foregroundColor(TemaCarta.Colore.matitaD)
+                .frame(width: 42, alignment: .leading)
+            VStack(alignment: .leading, spacing: 1) {
+                Text(titolo)
+                    .fontCarta(16, weight: .medium, design: .serif)
+                    .foregroundColor(TemaCarta.Colore.inchiostroD)
+                    .lineLimit(1)
+                if !sotto.isEmpty {
+                    Text(sotto)
+                        .fontCarta(11.5)
+                        .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        .lineLimit(1)
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .padding(.vertical, 9)
+        .overlay(alignment: .bottom) { if !ultima { Rectangle().fill(TemaCarta.Colore.filoD).frame(height: 1) } }
+    }
+
+    // MARK: Testi (scritti dal codice con le cifre di Lucy)
+
+    static func dataLunga(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "it_IT")
+        f.dateFormat = "EEEE d MMMM yyyy"
+        return f.string(from: d)
+    }
+
+    static func giornoMese(_ d: Date) -> String {
+        let f = DateFormatter()
+        f.locale = Locale(identifier: "it_IT")
+        f.dateFormat = "dd.MM"
+        return f.string(from: d)
+    }
+
+    static func occhiello(_ p: PrimaPagina) -> String {
+        if let s = p.scadenze.first {
+            return "La più vicina è «\(s.posizione)» di \(s.cliente), il \(Formati.dataBreve.string(from: s.data)): Lucy ha messo in fila tutte quelle dei prossimi 45 giorni."
+        }
+        if let a = p.incontri.first {
+            return "Il primo incontro è alle \(Formati.ora.string(from: a.ora)) con \(a.chi). Il resto della giornata è qui sotto."
+        }
+        return "Una giornata senza appuntamenti né scadenze vicine: il momento giusto per il lavoro di fondo."
+    }
+
+    /// I due paragrafi dell'articolo in prima.
+    static func articolo(_ p: PrimaPagina) -> (String, String) {
+        let primo: String
+        if p.scadenze.isEmpty {
+            primo = "Nei prossimi 45 giorni nessuna posizione dei tuoi clienti arriva a scadenza. È il momento per rivedere i portafogli con calma, senza l'urgenza di un rinnovo."
+        } else {
+            let totale = p.scadenze.reduce(0) { $0 + $1.valore }
+            let quante = p.scadenze.count == 1 ? "scade una posizione" : "scadono \(p.scadenze.count) posizioni"
+            let valore = totale > 0 ? ", per circa \(Formati.euro(totale)) in tutto" : ""
+            let elenco = p.scadenze.dropFirst().prefix(3)
+                .map { "\($0.cliente) (\(Formati.dataBreve.string(from: $0.data)))" }.joined(separator: ", ")
+            primo = "Nei prossimi 45 giorni \(quante)\(valore)." + (elenco.isEmpty ? "" : " Le altre sono di \(elenco).")
+        }
+        let secondo: String
+        if p.incontri.isEmpty {
+            secondo = "In agenda non ci sono incontri. Segui \(p.numeroDelGiorno) di patrimonio \(p.didascaliaNumero): chiama chi aspetta una risposta o prepara le prossime revisioni."
+        } else {
+            let n = p.incontri.count
+            let chi = p.incontri.prefix(3).map(\.chi).joined(separator: ", ")
+            secondo = "\(n == 1 ? "Un incontro" : "\(n) incontri") in agenda: \(chi)\(n > 3 ? " e altri" : ""). Per ognuno trovi nel dossier le posizioni, gli obiettivi e le cifre già calcolate da Lucy."
+        }
+        return (primo, secondo)
+    }
+
+    /// Il tempo libero tra il primo e l'ultimo incontro, se c'è uno spazio di almeno due ore.
+    static func tempoLibero(_ p: PrimaPagina) -> String? {
+        let ore = p.incontri.map(\.ora).sorted()
+        guard ore.count >= 2 else { return nil }
+        for (a, b) in zip(ore, ore.dropFirst()) where b.timeIntervalSince(a) >= 3 * 3600 {
+            let da = Formati.ora.string(from: a.addingTimeInterval(3600))
+            return "Tra le \(da) e le \(Formati.ora.string(from: b)) sei libero: un buon momento per le telefonate."
+        }
+        return nil
+    }
+
+    static func notaDaScadenze(_ p: PrimaPagina) -> String {
+        guard let s = p.scadenze.first else {
+            return "Oggi nessuna scadenza vicina. Se vuoi, chiedimi chi ha liquidità ferma da più di sei mesi: è il primo posto da cui partire."
+        }
+        return "«\(s.posizione)» di \(s.cliente) scade il \(Formati.dataBreve.string(from: s.data)). Prima di quella data conviene sentirsi: ho già le cifre pronte nel dossier."
+    }
+
+    /// I compleanni dei clienti nei prossimi 21 giorni (giorno, nome, «compie N anni»).
+    static func ricorrenze(_ clienti: [Cliente], da oggi: Date) -> [(String, String, String)] {
+        let cal = Calendar.current
+        let inizio = cal.startOfDay(for: oggi)
+        var esito: [(Date, String, String)] = []
+        for c in clienti {
+            guard let n = c.dataNascita else { continue }
+            let mg = cal.dateComponents([.month, .day], from: n)
+            guard let prossimo = cal.nextDate(after: inizio.addingTimeInterval(-1), matching: mg, matchingPolicy: .nextTime),
+                  prossimo.timeIntervalSince(inizio) <= 21 * 86_400 else { continue }
+            let anni = cal.dateComponents([.year], from: n, to: prossimo).year ?? 0
+            esito.append((prossimo, c.nome, "compie \(anni) anni"))
+        }
+        return esito.sorted { $0.0 < $1.0 }.prefix(3).map { (giornoMese($0.0), $0.1, $0.2) }
     }
 }
 #endif
