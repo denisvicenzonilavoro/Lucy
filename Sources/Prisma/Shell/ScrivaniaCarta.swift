@@ -27,18 +27,17 @@ struct ScrivaniaCarta: View {
         GeometryReader { geo in
             // Su schermi stretti la colonna sinistra si restringe, mai sotto 420
             let sinistra = min(M.sinistra, max(420, geo.size.width * 0.38))
-            ScrollView(.vertical, showsIndicators: false) {
-                HStack(alignment: .top, spacing: M.traColonne) {
-                    ColonnaSinistraCarta(apriFoglio: { foglioAperto = true })
-                        .frame(width: sinistra, alignment: .topLeading)
-                    ColonnaDestraCarta()
-                        .frame(maxWidth: .infinity, alignment: .topLeading)
-                }
-                .padding(.horizontal, M.lati)
-                .padding(.top, M.alto)
-                .padding(.bottom, 130)
-                .frame(minHeight: geo.size.height, alignment: .top)
+            HStack(alignment: .top, spacing: M.traColonne) {
+                ColonnaSinistraCarta(apriFoglio: { foglioAperto = true })
+                    .frame(width: sinistra, alignment: .topLeading)
+                ColonnaDestraCarta()
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
             }
+            .padding(.horizontal, M.lati)
+            .padding(.top, min(M.alto, max(24, geo.size.height * 0.07)))
+            // La scrivania non scorre: tutto sta sopra il dock
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .top)
+            .clipped()
         }
         .overlay {
             if foglioAperto {
@@ -252,29 +251,93 @@ private struct ColonnaDestraCarta: View {
 
     var body: some View {
         // .wgrid del template: tre colonne, 18 tra una scheda e l'altra; «Oggi» occupa la prima colonna in altezza
-        let alta: CGFloat = 300
         VStack(alignment: .leading, spacing: 18) {
+            // «Oggi» alto quanto la colonna accanto: niente buchi
             HStack(alignment: .top, spacing: 18) {
-                OggiCarta(altezzaMinima: alta)
-                    .frame(maxWidth: .infinity, alignment: .topLeading)
-                // Il portafoglio di prima, con il totale e gli anelli delle aree
-                RiquadroPortafoglioScrivania(pronto: true, ritardoAnelli: 0, altezza: alta)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: alta)
-            }
-            if !stato.inModoCliente {
-                HStack(alignment: .top, spacing: 18) {
-                    MossaCarta()
-                    TurnoNotteWidget()
+                OggiCarta()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                VStack(alignment: .leading, spacing: 14) {
+                    PortafoglioScontrino()
+                    if !stato.inModoCliente {
+                        MossaCarta()
+                    }
                 }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
-            RiquadroScadenzeScrivania()
-                .frame(height: 168)
-            ChiediLucyCarta()
+            .fixedSize(horizontal: false, vertical: true)
+            ParlaConLucyCarta()
             if !stato.inModoCliente {
                 LetteraPrismaAIWidget()
             }
         }
+    }
+}
+
+/// Il portafoglio che segui, come uno scontrino di Lucy: il totale a contachilometri, le aree, i clienti.
+private struct PortafoglioScontrino: View {
+    @Environment(StatoShell.self) private var stato
+
+    var body: some View {
+        let k = TemaCarta.Scontrino.self
+        let clienti = stato.clienti.count
+        let r = stato.riepilogoTuttePosizioni
+        let aree = AreaPosizione.allCases.filter { $0 != .debiti }
+            .compactMap { a -> (AreaPosizione, Double)? in
+                let v = r.perArea[a] ?? 0
+                return v > 0 ? (a, v) : nil
+            }
+            .sorted { $0.1 > $1.1 }
+        Button {
+            stato.posizioneInDettaglio = nil
+            stato.portafoglio = true
+            stato.apri(.posizioni)
+        } label: {
+            VStack(alignment: .leading, spacing: 0) {
+                HStack {
+                    Text("LUCY")
+                    Spacer()
+                    Text(Formati.dataBreve.string(from: Date()))
+                }
+                .fontCarta(k.testata)
+                .foregroundColor(TemaCarta.Colore.matitaD)
+                VStack(spacing: 4) {
+                    Text("IL PORTAFOGLIO CHE SEGUI")
+                        .fontCarta(k.titolo).tracking(2)
+                        .foregroundColor(TemaCarta.Colore.matitaD)
+                    ContachilometriCarta(testo: Formati.euro(clienti == 0 ? 0 : r.attivita))
+                        .fontCarta(TestoCarta(dimensione: 34, peso: .medium, disegno: .serif, cifre: true))
+                        .foregroundColor(TemaCarta.Colore.inchiostroD)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.6)
+                        .segnoCarta(.sottolinea, chiave: "scrivania.carta.portafoglio")
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.top, 10)
+                .padding(.bottom, 10)
+                LineaTratteggiata()
+                VStack(alignment: .leading, spacing: 6) {
+                    if aree.isEmpty {
+                        RigaScontrinoVista(etichetta: "Nessuna posizione in essere", importo: "—")
+                    }
+                    ForEach(Array(aree.prefix(4)), id: \.0) { a, v in
+                        RigaScontrinoVista(etichetta: a.nome, importo: Formati.euro(v))
+                    }
+                }
+                .padding(.vertical, 10)
+                LineaTratteggiata()
+                RigaScontrinoVista(etichetta: clienti == 1 ? "1 cliente" : "\(clienti) clienti",
+                                   importo: r.proposteAperte == 1 ? "1 proposta aperta" : "\(r.proposteAperte) proposte aperte",
+                                   forte: true)
+                    .padding(.top, 10)
+            }
+            .padding(EdgeInsets(top: 14, leading: 18, bottom: 20, trailing: 18))
+            .frame(maxWidth: .infinity)
+            .background { FormaScontrino().fill(TemaCarta.Colore.schedaD) }
+            .overlay { FormaScontrino().stroke(TemaCarta.Colore.filoD, lineWidth: 1) }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help("Apri il portafoglio in Posizioni")
     }
 }
 
@@ -324,18 +387,20 @@ private struct MossaCarta: View {
                 VStack(alignment: .leading, spacing: 0) {
                     EtichettaScheda(icona: "sparkle", testo: "La mossa del giorno")
                     Text("Chiama \(m.cliente.nome)")
-                        .fontCarta(20, weight: .medium, design: .serif)
+                        .fontCarta(16, weight: .medium, design: .serif)
                         .foregroundColor(TemaCarta.Colore.inchiostroD)
-                        .padding(.top, 12)
+                        .lineLimit(1)
+                        .padding(.top, 8)
                     Text(m.motivo)
-                        .fontCarta(12.5)
+                        .fontCarta(11.5)
                         .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                        .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
-                        .padding(.top, 6)
+                        .padding(.top, 3)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 18)
-                .padding(.vertical, 16)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -347,7 +412,6 @@ private struct MossaCarta: View {
 /// «Oggi»: la mossa del giorno, gli incontri e le cose da fare insieme (Agenda e attività unite, come nel template).
 private struct OggiCarta: View {
     @Environment(StatoShell.self) private var stato
-    var altezzaMinima: CGFloat = 0
 
     var body: some View {
         let incontri = stato.appuntamentiDiOggi
@@ -438,7 +502,7 @@ private struct OggiCarta: View {
         }
         .padding(.horizontal, 18)
         .padding(.vertical, 16)
-        .frame(maxWidth: .infinity, minHeight: altezzaMinima, alignment: .topLeading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
     }
 
@@ -454,48 +518,99 @@ private struct OggiCarta: View {
     }
 }
 
-/// «Chiedi a Lucy»: la barra veloce del template (apre l'assistente).
-private struct ChiediLucyCarta: View {
+/// «Parla con Lucy»: la barra del template per chattare con l'assistente, con tre domande pronte.
+private struct ParlaConLucyCarta: View {
     @Environment(StatoShell.self) private var stato
 
+    static let domande = ["Chi ha liquidità ferma da più di sei mesi?",
+                          "Quali polizze scadono entro Natale?",
+                          "Prepara il riepilogo per il prossimo incontro"]
+
     var body: some View {
-        Button { stato.apri(.vera) } label: {
-            HStack(spacing: 14) {
-                LogoLucy(colore: Color.dinamico(chiaro: Tema.Marca.avorio, scuro: Tema.Marca.inchiostro), oro: Tema.Marca.oro)
-                    .frame(width: 18, height: 18)
-                    .padding(9)
-                    .background(Circle().fill(TemaCarta.Colore.inchiostroD))
-                Text("Chiedi a Lucy: «chi ha liquidità ferma da più di sei mesi?»")
-                    .fontCarta(16, design: .serif, corsivo: true)
-                    .foregroundColor(TemaCarta.Colore.inchiostro2D)
-                    .lineLimit(1)
-                Spacer(minLength: 0)
-                Text("⌘K")
-                    .fontCarta(11, design: .monospaced)
-                    .foregroundColor(TemaCarta.Colore.matitaD)
-                    .padding(.horizontal, 7)
-                    .padding(.vertical, 3)
-                    .overlay(RoundedRectangle(cornerRadius: 5).stroke(TemaCarta.Colore.filo2D, lineWidth: 1))
+        VStack(alignment: .leading, spacing: 12) {
+            Button { stato.apri(.vera) } label: {
+                HStack(spacing: 14) {
+                    LogoLucy(colore: Color.dinamico(chiaro: Tema.Marca.avorio, scuro: Tema.Marca.inchiostro), oro: Tema.Marca.oro)
+                        .frame(width: 18, height: 18)
+                        .padding(10)
+                        .background(Circle().fill(TemaCarta.Colore.inchiostroD))
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("Parla con Lucy")
+                            .fontCarta(17, weight: .medium, design: .serif)
+                            .foregroundColor(TemaCarta.Colore.inchiostroD)
+                        Text("Chiedile dei tuoi clienti, dei prodotti, dei documenti: risponde con le cifre di Lucy.")
+                            .fontCarta(12)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                            .lineLimit(1)
+                    }
+                    Spacer(minLength: 0)
+                    Text("⌘K")
+                        .fontCarta(11, design: .monospaced)
+                        .foregroundColor(TemaCarta.Colore.matitaD)
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 3)
+                        .overlay(RoundedRectangle(cornerRadius: 5).stroke(TemaCarta.Colore.filo2D, lineWidth: 1))
+                }
+                .contentShape(Rectangle())
             }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .accessibilityLabel("Parla con Lucy")
+            HStack(spacing: 8) {
+                ForEach(Self.domande, id: \.self) { d in
+                    Button {
+                        stato.apri(.vera)
+                        stato.chiediVeraPortafoglio(d)
+                    } label: {
+                        Text("«\(d)»")
+                            .fontCarta(12.5, design: .serif, corsivo: true)
+                            .foregroundColor(TemaCarta.Colore.inchiostro2D)
+                            .lineLimit(1)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Capsule().fill(TemaCarta.Colore.chipD))
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
         }
-        .buttonStyle(.plain)
+        .padding(.horizontal, 18)
+        .padding(.vertical, 14)
         .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
-        .accessibilityLabel("Chiedi a Lucy")
     }
 }
 
-/// Il Foglio di Lucy a tutta pagina, sopra la scrivania (la pagina di giornale del template, section «a-prima»): si chiude
-/// con la crocetta o con Esc.
+/// Il Foglio di Lucy aperto: una finestra come quelle delle app (la chiusura a sinistra, l'icona e il titolo nella riga in
+/// testa), grande quanto la scrivania, con il giornale intero dentro. Si chiude con la chiusura o con Esc.
 private struct FoglioTuttaPagina: View {
+    @Environment(StatoShell.self) private var stato
     let chiudi: () -> Void
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            SfondoCarta()
-                .ignoresSafeArea()
+        let riga = Tema.Apple.RigaTesta.self
+        let forma = FormaVetro.arrotondata(Tema.Raggio.finestraIngrandita)
+        VStack(spacing: 0) {
+            HStack(spacing: riga.spazio) {
+                ChiusuraFinestra(chiudi: chiudi)
+                LogoLucy(colore: Tema.Marca.tratto, oro: Tema.Marca.oro)
+                    .frame(width: 18, height: 18)
+                    .padding(.leading, riga.margineIcona)
+                Text("Il Foglio di Lucy")
+                    .fontCarta(15, weight: .semibold)
+                    .foregroundColor(TemaCarta.Colore.inchiostroD)
+                Text(MotorePrimaPagina.edizione(Date()).nome)
+                    .fontCarta(12)
+                    .foregroundColor(TemaCarta.Colore.matitaD)
+                Spacer(minLength: 0)
+                Button { stato.ascoltaPrimaPagina(stato.primaPagina()) } label: {
+                    Label("Ascolta", systemImage: "speaker.wave.2")
+                }
+                .buttonStyle(StilePulsanteRigaImpostazioni())
+            }
+            .padding(riga.padding)
+            .frame(height: riga.altezza)
+            .frame(maxWidth: .infinity)
+            .background(Gradienti.intestazioneApp)
+            .overlay(alignment: .bottom) { Rectangle().fill(TemaCarta.Colore.filoD).frame(height: 1) }
             ScrollView {
                 VStack(spacing: 22) {
                     FoglioIntero(chiudi: chiudi)
@@ -506,21 +621,21 @@ private struct FoglioTuttaPagina: View {
                     .frame(maxWidth: FoglioIntero.larghezza)
                 }
                 .frame(maxWidth: .infinity)
-                .padding(.vertical, 56)
-                .padding(.horizontal, 40)
+                .padding(.vertical, 36)
+                .padding(.horizontal, 32)
             }
-            Button(action: chiudi) {
-                Image(systemName: "xmark")
-                    .fontCarta(14, weight: .semibold)
-                    .foregroundColor(TemaCarta.Colore.inchiostroD)
-                    .frame(width: 34, height: 34)
-                    .background(Circle().fill(TemaCarta.Colore.schedaD))
-                    .overlay(Circle().stroke(TemaCarta.Colore.filoD, lineWidth: 1))
-            }
-            .buttonStyle(.plain)
-            .keyboardShortcut(.cancelAction)
-            .help("Chiudi il Foglio (Esc)")
-            .padding(24)
+            .background(SfondoCarta())
+        }
+        .clipShape(forma)
+        .vetro(.finestra(attiva: true), forma: forma)
+        .padding(.horizontal, 14)
+        .padding(.top, 8)
+        .padding(.bottom, 96)
+        .background {
+            Button("", action: chiudi)
+                .keyboardShortcut(.cancelAction)
+                .opacity(0)
+                .accessibilityHidden(true)
         }
     }
 }

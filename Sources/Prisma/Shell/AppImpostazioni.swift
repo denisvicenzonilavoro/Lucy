@@ -106,7 +106,7 @@ struct AppImpostazioni: View {
                     TitoloPaginaImpostazioni(testo: scelta.titolo)
                     contenuto(scelta)
                 }
-                .frame(maxWidth: scelta == .rendimenti ? .infinity : M.larghezzaPagina, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(M.marginePagina)
             }

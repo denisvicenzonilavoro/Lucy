@@ -309,7 +309,7 @@ private struct TestaFinestra: View {
 
 /// La chiusura della finestra (`.wx`): cerchio da 28 con il ✕ da 12; al passaggio del puntatore rosso con il segno
 /// bianco, premuta si stringe a 0,9. I pulsanti veri della finestra del Mac (in alto a sinistra di Prisma) restano.
-private struct ChiusuraFinestra: View {
+struct ChiusuraFinestra: View {
     let chiudi: () -> Void
     @Environment(\.prismaCalmo) private var calmo
     @State private var sopra = false
