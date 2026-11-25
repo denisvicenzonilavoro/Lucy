@@ -248,6 +248,8 @@ struct MercatiCarta: View {
 
 private struct ColonnaDestraCarta: View {
     @Environment(StatoShell.self) private var stato
+    /// L'altezza della riga di «Oggi», del portafoglio e della mossa.
+    static let altezzaRiga: CGFloat = 400
 
     var body: some View {
         // .wgrid del template: tre colonne, 18 tra una scheda e l'altra; «Oggi» occupa la prima colonna in altezza
@@ -262,13 +264,13 @@ private struct ColonnaDestraCarta: View {
                         MossaCarta()
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .topLeading)
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
             }
-            .fixedSize(horizontal: false, vertical: true)
+            // Una riga di altezza fissa: «Oggi» e la colonna accanto finiscono alla stessa linea, con tante o poche
+            // cose da fare (quelle in più restano a un tocco, in Agenda)
+            .frame(height: Self.altezzaRiga)
             ParlaConLucyCarta()
-            if !stato.inModoCliente {
-                LetteraPrismaAIWidget()
-            }
+            // La lettera da Lucy AI sta nel Foglio: sulla scrivania finiva sotto il dock
         }
     }
 }
@@ -397,10 +399,15 @@ private struct MossaCarta: View {
                         .lineLimit(3)
                         .fixedSize(horizontal: false, vertical: true)
                         .padding(.top, 3)
+                    Spacer(minLength: 6)
+                    Text("Apri le sue posizioni →")
+                        .fontCarta(12, weight: .medium)
+                        .foregroundColor(TemaCarta.Colore.pennaD)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
+                // Riempie lo spazio sotto il portafoglio, fino alla linea di «Oggi»
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .contentShape(Rectangle())
             }
             .buttonStyle(.plain)
@@ -417,16 +424,21 @@ private struct OggiCarta: View {
         let incontri = stato.appuntamentiDiOggi
         let oggi = Calendar.current.startOfDay(for: Date())
         let domani = Calendar.current.date(byAdding: .day, value: 1, to: oggi) ?? oggi
-        let daFare = stato.attivitaAperte.filter { $0.scadenza < domani }.prefix(8)
+        let tutteDaFare = stato.attivitaAperte.filter { $0.scadenza < domani }
+        // Al più sei righe in tutto, così la scheda non si allunga: le altre a un tocco in Agenda
+        let righeMassime = 6
+        let incontriVisti = Array(incontri.prefix(righeMassime))
+        let daFare = tutteDaFare.prefix(max(0, righeMassime - incontriVisti.count))
+        let nascoste = (incontri.count - incontriVisti.count) + (tutteDaFare.count - daFare.count)
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 8) {
-                EtichettaScheda(icona: "calendar", testo: Self.titolo(incontri: incontri.count, daFare: daFare.count))
+                EtichettaScheda(icona: "calendar", testo: Self.titolo(incontri: incontri.count, daFare: tutteDaFare.count))
                 Spacer(minLength: 0)
             }
             .foregroundColor(TemaCarta.Colore.matitaD)
             .padding(.bottom, 10)
 
-            if incontri.isEmpty && daFare.isEmpty {
+            if incontri.isEmpty && tutteDaFare.isEmpty {
                 Text("Niente in agenda per oggi: un buon giorno per chiamare chi aspetta.")
                     .fontCarta(13, design: .serif, corsivo: true)
                     .fixedSize(horizontal: false, vertical: true)
@@ -434,7 +446,7 @@ private struct OggiCarta: View {
                     .padding(.vertical, 8)
             }
 
-            ForEach(incontri) { a in
+            ForEach(incontriVisti) { a in
                 Button {
                     if !a.clienteId.isEmpty { stato.clienteAttivoId = a.clienteId }
                     stato.apri(.agenda)
@@ -493,6 +505,11 @@ private struct OggiCarta: View {
             }
             Spacer(minLength: 8)
             HStack {
+                if nascoste > 0 {
+                    Text(nascoste == 1 ? "e un'altra cosa" : "e altre \(nascoste) cose")
+                        .fontCarta(12, design: .serif, corsivo: true)
+                        .foregroundColor(TemaCarta.Colore.matitaD)
+                }
                 Spacer(minLength: 0)
                 Button("Apri l'agenda →") { stato.apri(.agenda) }
                     .buttonStyle(.plain)
