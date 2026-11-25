@@ -96,6 +96,10 @@ struct ImpostazioniTerritorio: Codable, Equatable {
     var partenza: LuogoManuale?
     /// Il codice del comune della partenza scelto dall'elenco (alternativa a `partenza`).
     var comunePartenza: String?
+    /// «Usa Apple Mappe per il giro» (decisione dell'utente del 25 novembre 2026, spento di base): la mappa vera e i
+    /// percorsi in auto di Apple per il giro di domani (Shell/GiroMappeApple.swift). Ad Apple vanno solo le coordinate
+    /// delle tappe. Campo nuovo letto con tolleranza: gli archivi di prima lo leggono spento (versione dei dati invariata).
+    var usaMappeApple = false
 
     static let fattorePredefinito = 1.3
     static let velocitaCittaPredefinita = 40.0
@@ -114,7 +118,7 @@ struct ImpostazioniTerritorio: Codable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case fattoreStrada, velocitaCitta, velocitaFuori, minutiMinimiTratto, deviazioneMassima, durataVisitaBreve
-        case zone, attenzioniAlte, partenza, comunePartenza
+        case zone, attenzioniAlte, partenza, comunePartenza, usaMappeApple
     }
 
     /// Lettura tollerante: un numero illeggibile, non finito o fuori scala torna al predefinito; una zona illeggibile si
@@ -142,6 +146,7 @@ struct ImpostazioniTerritorio: Codable, Equatable {
         attenzioniAlte = tipi.filter { Attenzione.Tipo(rawValue: $0) != nil && visti.insert($0).inserted }
         partenza = (try? c.decodeIfPresent(LuogoManuale.self, forKey: .partenza)) ?? nil
         comunePartenza = ((try? c.decodeIfPresent(String.self, forKey: .comunePartenza)) ?? nil).flatMap { $0.isEmpty ? nil : $0 }
+        usaMappeApple = ((try? c.decodeIfPresent(Bool.self, forKey: .usaMappeApple)) ?? nil) ?? false
     }
 }
 

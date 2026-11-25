@@ -18,6 +18,19 @@ if grep -nE 'URLSession|URLRequest|NWConnection|CLGeocoder|MKDirections|import M
     Sources/Prisma/Shell/*Territorio*.swift Sources/Prisma/Dati/Territorio.swift; then
   errore "Il Territorio non deve usare la rete, servizi di mappe o la posizione del dispositivo"
 fi
+# Eccezione Apple Mappe (decisione dell'utente del 25 novembre 2026, spenta di base): MapKit e il calcolo dei percorsi
+# solo in Shell/GiroMappeApple.swift, in nessun altro file di Sources
+FUORI=$(grep -rlE 'import MapKit|MKDirections|MKMapItem|MKPlacemark|MKLocalSearch|MapPolyline' Sources \
+    | grep -vx 'Sources/Prisma/Shell/GiroMappeApple.swift' || true)
+if [ -n "$FUORI" ]; then
+  echo "$FUORI"
+  errore "MapKit e i percorsi di Apple Mappe sono ammessi solo in Sources/Prisma/Shell/GiroMappeApple.swift"
+fi
+# Ad Apple solo le coordinate delle tappe: niente geocodifica, ricerca di luoghi, rete propria, nomi o indirizzi
+if grep -nE 'URLSession|URLRequest|NWConnection|CLGeocoder|MKLocalSearch|import CoreLocation|addressDictionary|postalAddress|\.name *=|MKAddress' \
+    Sources/Prisma/Shell/GiroMappeApple.swift; then
+  errore "Ad Apple Mappe vanno solo le coordinate delle tappe, mai nomi, indirizzi o ricerche"
+fi
 
 # Privacy della notte («Luce» giro 14, decisioni 30, 31, 101)
 if grep -nE 'URLSession|URLRequest|NWConnection|ClienteMercato|aggiornaMercato|SMAppService|pmset|\bTimer\b' \

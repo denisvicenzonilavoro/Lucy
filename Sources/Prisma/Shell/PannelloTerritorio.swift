@@ -451,6 +451,7 @@ struct PannelloGiro: View {
     let partenza: PartenzaGiro?
 
     @Environment(StatoShell.self) private var stato
+    @Environment(\.modoIstantanea) private var istantanea
 
     private static let giornoNumero = Formati.formato("EEEE d")
 
@@ -460,10 +461,19 @@ struct PannelloGiro: View {
         #else
         let borsa: [String: [String]] = [:]
         #endif
+        let apple = percorsoApple
         VStack(alignment: .leading, spacing: P.spazio) {
             testata
             if giro.vuoto {
                 vuoto
+            } else if let apple {
+                // Apple Mappe (25 novembre 2026): km e tempi veri del percorso in auto
+                Text(titoloGiroApple(apple))
+                    .carattereApple(P.titoloGiro)
+                    .foregroundColor(P.coloreTesto)
+                Text(TestiTerritorio.durataApple(durata(apple.minuti)))
+                    .carattereApple(P.piccolo)
+                    .foregroundColor(P.coloreTesto2)
             } else {
                 Text(titoloGiro)
                     .carattereApple(P.titoloGiro)
@@ -471,6 +481,13 @@ struct PannelloGiro: View {
                 Text("circa \(durata(giro.minuti)) in auto · stima in linea d'aria")
                     .carattereApple(P.piccolo)
                     .foregroundColor(P.coloreTesto2)
+                if inCalcoloApple {
+                    Text(TestiTerritorio.percorsoInCalcolo)
+                        .carattereApple(P.piccolo)
+                        .foregroundColor(P.coloreTesto3)
+                }
+            }
+            if !giro.vuoto {
                 if let partenza {
                     Text(partenza.descrizione).carattereApple(P.piccolo).foregroundColor(P.coloreTesto3)
                 } else {
@@ -479,7 +496,7 @@ struct PannelloGiro: View {
                 ScrollView {
                     VStack(alignment: .leading, spacing: G.spazioRighe) {
                         ForEach(Array(giro.tappe.enumerated()), id: \.element.id) { i, t in
-                            riga(t, indice: i, borsa: borsa)
+                            riga(t, indice: i, borsa: borsa, apple: apple)
                         }
                         note
                     }
@@ -627,23 +644,23 @@ struct PannelloGiro: View {
     }
 
     /// L'ora della tappa: la visita ha la sua; la partenza è la prima visita meno il tratto; il rientro l'ultima più il tratto.
-    private func ora(_ t: TappaGiro, indice i: Int) -> Date? {
+    private func ora(_ t: TappaGiro, indice i: Int, apple: PercorsoApple?) -> Date? {
         switch t.genere {
         case .visita: return t.appuntamento?.inizio
         case .partenza:
             guard giro.tappe.indices.contains(i + 1), let a = giro.tappe[i + 1].appuntamento else { return nil }
-            return a.inizio.addingTimeInterval(-TimeInterval(giro.tappe[i + 1].minutiDaPrima * 60))
+            return a.inizio.addingTimeInterval(-TimeInterval(minutiDaPrima(i + 1, apple) * 60))
         case .rientro:
             guard i > 0, let a = giro.tappe[i - 1].appuntamento else { return nil }
-            return a.fine.addingTimeInterval(TimeInterval(t.minutiDaPrima * 60))
+            return a.fine.addingTimeInterval(TimeInterval(minutiDaPrima(i, apple) * 60))
         }
     }
 
-    @ViewBuilder private func riga(_ t: TappaGiro, indice i: Int, borsa: [String: [String]]) -> some View {
+    @ViewBuilder private func riga(_ t: TappaGiro, indice i: Int, borsa: [String: [String]], apple: PercorsoApple?) -> some View {
         let nuova = t.appuntamento.map { $0.id == stato.territorio.rigaNuovaId || $0.daConfermare == true } ?? false
         let cose = t.appuntamento.flatMap { borsa[$0.id] } ?? []
         let contenuto = HStack(alignment: .center, spacing: P.spazio) {
-            Text(ora(t, indice: i).map { Formati.ora.string(from: $0) } ?? "")
+            Text(ora(t, indice: i, apple: apple).map { Formati.ora.string(from: $0) } ?? "")
                 .carattereApple(G.ora)
                 .foregroundColor(P.coloreTesto2)
                 .frame(width: G.larghezzaOra, alignment: .leading)
@@ -698,7 +715,8 @@ struct PannelloGiro: View {
             }
             Spacer(minLength: 0)
             if giro.tappe.indices.contains(i + 1) {
-                Text("\(giro.tappe[i + 1].minutiDaPrima) min ›")
+                // Con Apple Mappe anche i km veri del tratto
+                Text(testoTratto(verso: i + 1, apple))
                     .carattereApple(G.tratto)
                     .foregroundColor(P.coloreTesto3)
             }
@@ -795,6 +813,44 @@ struct PannelloGiro: View {
     private var titoloGiro: String {
         let visite = giro.visite == 1 ? "1 visita" : "\(giro.visite) visite"
         return "\(visite) · circa \(km(giro.km))"
+    }
+
+    // MARK: Apple Mappe (decisione dell'utente del 25 novembre 2026, spento di base)
+
+    /// Vero se l'interruttore è acceso e il giro si può mostrare con Apple Mappe (mai nelle istantanee).
+    private var mappeAppleAccese: Bool {
+        !istantanea && !giro.vuoto && stato.dati.impostazioni.territorio.usaMappeApple
+    }
+
+    /// Il percorso vero di Apple Mappe, quando è pronto e ha un tratto per ogni coppia di tappe; nil = stime di sempre.
+    private var percorsoApple: PercorsoApple? {
+        guard mappeAppleAccese, case .pronto(let p)? = PercorsiApple.condiviso.esito(giro.puntiPercorso),
+              p.tratti.count == giro.tappe.count - 1 else { return nil }
+        return p
+    }
+
+    private var inCalcoloApple: Bool {
+        mappeAppleAccese && PercorsiApple.condiviso.esito(giro.puntiPercorso) == .inCalcolo
+    }
+
+    /// I minuti del tratto che arriva alla tappa `j`: quelli di Apple Mappe se ci sono, altrimenti la stima.
+    private func minutiDaPrima(_ j: Int, _ apple: PercorsoApple?) -> Int {
+        if let apple, j > 0, apple.tratti.indices.contains(j - 1) { return apple.tratti[j - 1].minuti }
+        return giro.tappe.indices.contains(j) ? giro.tappe[j].minutiDaPrima : 0
+    }
+
+    /// «12 min ›» con le stime; «12 min · 9 km ›» con i tempi e i km veri di Apple Mappe.
+    private func testoTratto(verso j: Int, _ apple: PercorsoApple?) -> String {
+        let minuti = minutiDaPrima(j, apple)
+        if let apple, j > 0, apple.tratti.indices.contains(j - 1) {
+            return "\(minuti) min · \(km(apple.tratti[j - 1].km)) ›"
+        }
+        return "\(minuti) min ›"
+    }
+
+    private func titoloGiroApple(_ p: PercorsoApple) -> String {
+        let visite = giro.visite == 1 ? "1 visita" : "\(giro.visite) visite"
+        return "\(visite) · \(km(p.km))"
     }
 
     private func km(_ v: Double) -> String { "\(Int(v.rounded())) km" }
