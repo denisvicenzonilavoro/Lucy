@@ -64,13 +64,6 @@ struct ModuloAppuntamento: View {
         .labelsHidden()
     }
 
-    private var sceltaCanali: some View {
-        HStack(spacing: 14) {
-            sceltaCanale(nil)
-            ForEach(Canale.allCases) { c in sceltaCanale(c) }
-        }
-    }
-
     private var dataEOra: some View {
         VStack(alignment: .leading, spacing: Misure.RiesamiAgenda.spazioRighe) {
             DatePicker("", selection: $bozza.inizio, displayedComponents: [.date, .hourAndMinute])
