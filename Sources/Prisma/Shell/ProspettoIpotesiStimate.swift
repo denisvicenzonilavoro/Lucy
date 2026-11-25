@@ -74,9 +74,8 @@ struct PaginaIpotesiStimate: View {
                 TabellaDoc(larghezza: FoglioProspetto<EmptyView>.larghezza,
                            colonne: [ColonnaDoc(titolo: TestiIpotesiStimate.colonnaDato, peso: 1.8, destra: false),
                                      ColonnaDoc(titolo: TestiIpotesiStimate.colonnaStato, peso: 0.8, destra: false),
-                                     ColonnaDoc(titolo: TestiIpotesiStimate.colonnaIpotesi, peso: 3.2, destra: false),
-                                     // Larga quanto l'etichetta compatta dell'indipendente
-                                     ColonnaDoc(titolo: TestiIpotesiStimate.colonnaCanale, peso: 1.2, destra: false)],
+                                     // Un solo canale, quello di Lucy (25 novembre 2026): niente colonna del canale
+                                     ColonnaDoc(titolo: TestiIpotesiStimate.colonnaIpotesi, peso: 4.4, destra: false)],
                            righe: mostrate.map { riga($0) }, fontTesta: T.pTabellaTesta, altezzaTesta: D.rigaTabellaProspetto)
                 if altre > 0 {
                     Text(verbatim: TestiIpotesiStimate.altre(altre, report: false)).font(T.pNotaLeggibile).foregroundColor(C.tenue)
@@ -87,7 +86,7 @@ struct PaginaIpotesiStimate: View {
         }
     }
 
-    /// Una voce: il dato (con la posizione sotto), lo stato nel suo colore, l'ipotesi usata, il canale.
+    /// Una voce: il dato (con la posizione sotto), lo stato nel suo colore, l'ipotesi usata.
     private func riga(_ v: VoceCompletezza) -> RigaDoc {
         let parti = TestiIpotesiStimate.parti(v)
         var dato = CellaDoc(parti.dato, sotto: parti.posizione, font: T.pTabellaForte)
@@ -95,16 +94,7 @@ struct PaginaIpotesiStimate: View {
         dato.righe = 2
         var ipotesi = CellaDoc(v.ipotesi.isEmpty ? TestiIpotesiStimate.vuoto : v.ipotesi, font: T.pTabella)
         ipotesi.righe = 2
-        // Il canale come etichetta compatta da stampa (blu Alleanza, cuoio indipendente), come nelle altre tabelle
-        let canale: CellaDoc
-        if let c = v.canale {
-            var cella = CellaDoc(c.nomeBreve, font: T.pTabellaForte)
-            cella.canale = c
-            canale = cella
-        } else {
-            canale = CellaDoc(TestiIpotesiStimate.vuoto, colore: C.tenue, font: T.pTabella)
-        }
-        return RigaDoc(celle: [dato, CellaDoc(v.stato.nome, colore: C.statoDato(v.stato), font: T.pTabellaForte), ipotesi, canale],
+        return RigaDoc(celle: [dato, CellaDoc(v.stato.nome, colore: C.statoDato(v.stato), font: T.pTabellaForte), ipotesi],
                        altezza: D.rigaTabellaProspetto * 2)
     }
 }

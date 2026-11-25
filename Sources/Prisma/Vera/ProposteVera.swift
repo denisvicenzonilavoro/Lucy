@@ -15,8 +15,8 @@ extension MotoreSintesi {
         let righe = elenco.enumerated().map { "\($0.offset + 1). \($0.element.titolo) — \($0.element.perche)" }
         let gia = f.posizioni.filter { $0.stato == .proposta && $0.esito != .rifiutata && $0.esito != .accettata }
         var testo = righe.joined(separator: "\n")
-        if !gia.isEmpty { testo += "\n\nGià in proposta: \(gia.map { "\($0.nome) (\($0.canale.nomeBreve))" }.joined(separator: ", "))." }
-        testo += "\n\nOgni azione diventa un'attività o una bozza di proposta da completare in Posizioni: prodotto, canale e cifre li scegli tu."
+        if !gia.isEmpty { testo += "\n\nGià in proposta: \(gia.map { "\($0.nome)" }.joined(separator: ", "))." }
+        testo += "\n\nOgni azione diventa un'attività o una bozza di proposta da completare in Posizioni: prodotto e cifre li scegli tu."
         return RispostaVera(titolo: "Cosa proporre a \(f.cliente.nome)", testo: testo, proposte: elenco)
     }
 
@@ -85,7 +85,7 @@ extension MotoreSintesi {
         // 7. I capitali in scadenza
         for s in liq.scadenze {
             elenco.append(PropostaVera(id: "scadenza-\(s.posizione.id)", titolo: "Decidere il reinvestimento di \(s.posizione.nome)",
-                                      perche: "\(s.scaduto ? "è scaduta il" : "scade il") \(CifreDoc.data(s.data)) e libera \(CifreDoc.euroCentesimi(s.netto)) netti (\(s.posizione.canale.nomeBreve))."))
+                                      perche: "\(s.scaduto ? "è scaduta il" : "scade il") \(CifreDoc.data(s.data)) e libera \(CifreDoc.euroCentesimi(s.netto)) netti."))
         }
         // Niente doppioni delle bozze già preparate con Vera
         return Array(elenco.filter { p in !aperte.contains { $0.nome == p.titolo } }.prefix(massimoProposte))

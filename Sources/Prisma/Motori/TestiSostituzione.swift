@@ -27,10 +27,8 @@ struct TestiSostituzione {
     static let avvertenza = "Simulazione illustrativa con rendimenti ipotetici: non sostituisce il KID e la documentazione dei prodotti."
 
     var ruoloConsulente: String {
-        let canali = Set([a.canale, b.canale])
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026)
+        CanaleLucy.nome
     }
 
     var periodo: String { e.anni == 1 ? "1 anno" : "\(e.anni) anni" }

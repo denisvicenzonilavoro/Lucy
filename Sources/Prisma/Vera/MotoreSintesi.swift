@@ -66,8 +66,7 @@ struct MotoreSintesi: MotoreVera {
         if let eta = c.eta { chi += ", \(eta) anni" }
         if !c.professione.isEmpty { chi += ", \(c.professione.lowercased())" }
         parti.append(chi + (c.tema.isEmpty ? "." : ". Il suo progetto: «\(c.tema)»"))
-        parti.append("Patrimonio netto \(Formati.euro(r.patrimonioNetto)): \(Formati.euro(r.attivita)) di attività e \(Formati.euro(r.debiti)) di debiti. "
-            + "Sul canale Alleanza c'è il \(percento(r.quota(.alleanza))) delle attività, sull'indipendente il \(percento(r.quota(.indipendente))).")
+        parti.append("Patrimonio netto \(Formati.euro(r.patrimonioNetto)): \(Formati.euro(r.attivita)) di attività e \(Formati.euro(r.debiti)) di debiti.")
         let inEssere = f.posizioni.filter { $0.stato == .inEssere && !$0.area.passivo }
         if !inEssere.isEmpty {
             let aree = Dictionary(grouping: inEssere, by: \.area)
@@ -114,7 +113,7 @@ struct MotoreSintesi: MotoreVera {
             punti.append("costruire la ruota dei bisogni (scheda Bisogni del cliente): due tocchi per area")
         }
         if let id = e.posizioneId, let p = f.posizioni.first(where: { $0.id == id }) {
-            punti.append("si parla di \(p.nome) (\(p.canale.nomeBreve), \(p.stato == .proposta ? "proposta" : "in essere")): porta il KID o il set informativo")
+            punti.append("si parla di \(p.nome) (\(p.stato == .proposta ? "proposta" : "in essere")): porta il KID o il set informativo")
         }
         for p in f.posizioni where p.scadeEntro(RiepilogoPosizioni.giorniScadenza) {
             punti.append("\(p.nome) scade il \(Formati.dataEstesa.string(from: p.scadenza ?? f.oggi)): decidere rinnovo o alternativa")
@@ -154,10 +153,10 @@ struct MotoreSintesi: MotoreVera {
             passi.append("\(t.titolo) — entro \(Formati.giornoMese.string(from: t.scadenza))\(t.priorita == .alta ? ", priorità alta" : "")")
         }
         for p in f.posizioni where p.scadeEntro(RiepilogoPosizioni.giorniScadenza) || p.scaduta {
-            passi.append("Rivedere \(p.nome) (\(p.canale.nomeBreve)) prima della scadenza del \(Formati.dataEstesa.string(from: p.scadenza ?? f.oggi))")
+            passi.append("Rivedere \(p.nome) prima della scadenza del \(Formati.dataEstesa.string(from: p.scadenza ?? f.oggi))")
         }
         for p in f.posizioni where p.stato == .proposta && (p.esito ?? .bozza) == .bozza {
-            passi.append("Completare e presentare la proposta \(p.nome) (\(p.canale.nomeBreve))")
+            passi.append("Completare e presentare la proposta \(p.nome)")
         }
         let prot = MotoreAnalisi.protezione(f.analisi.protezione, posizioni: f.posizioni)
         if prot.divario > 0 { passi.append("Ragionare sulla copertura caso morte: mancano \(Formati.euro(prot.divario))") }
@@ -179,7 +178,7 @@ struct MotoreSintesi: MotoreVera {
         let righe = elenco.map { p -> String in
             let giorni = Calendar.current.dateComponents([.day], from: Calendar.current.startOfDay(for: f.oggi), to: p.scadenza ?? f.oggi).day ?? 0
             let quando = giorni < 0 ? "scaduta da \(-giorni) giorni" : giorni == 0 ? "scade oggi" : "scade tra \(giorni) giorni"
-            return "• \(p.nome) (\(p.canale.nomeBreve), \(p.area.nome.lowercased())): \(quando), il \(Formati.dataEstesa.string(from: p.scadenza ?? f.oggi))."
+            return "• \(p.nome) (\(p.area.nome.lowercased())): \(quando), il \(Formati.dataEstesa.string(from: p.scadenza ?? f.oggi))."
         }
         return RispostaVera(titolo: "Le scadenze di \(f.cliente.nome)",
                            testo: righe.joined(separator: "\n") + "\n\nOgni scadenza è l'occasione per rivedere la posizione: la trovi anche nella giornata dell'Agenda.")

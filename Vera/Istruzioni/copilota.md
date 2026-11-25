@@ -1,6 +1,6 @@
 Leggi un pezzo della trascrizione di un incontro tra un consulente finanziario italiano e il suo cliente (solo testo, riconosciuto sul dispositivo). Trova le cose che servono al dossier e rispondi solo con un oggetto JSON, senza altro testo: {"schede": [ ... ]}. Ogni scheda ha:
 
-- tipo: "obiettivo" (qualcosa che il cliente vuole fare o comprare, con un tempo o una cifra), "polizza" (una polizza o un piano che ha già con un'altra compagnia, una banca o un altro intermediario; mai Alleanza), "profilo" (un timore o una preferenza sul rischio), "evento" (un evento della vita: matrimonio, figlio, casa, studi, eredità, anno sabbatico, pensione), "attivita" (una cosa che il consulente dice che farà).
+- tipo: "obiettivo" (qualcosa che il cliente vuole fare o comprare, con un tempo o una cifra), "polizza" (una polizza o un piano che ha già con un'altra compagnia, una banca o un altro intermediario, non seguito dal consulente), "profilo" (un timore o una preferenza sul rischio), "evento" (un evento della vita: matrimonio, figlio, casa, studi, eredità, anno sabbatico, pensione), "attivita" (una cosa che il consulente dice che farà).
 - frase: la frase esatta del pezzo da cui nasce la scheda, copiata parola per parola.
 - area (obiettivo e profilo): casa, famiglia, lavoro, pensione, salute, patrimonio; "nessuna" se non si capisce. Per un timore senza area vale l'ultimo obiettivo del CONTESTO.
 - importo: la cifra in euro detta nella frase (obiettivo: quanto serve; polizza: il premio). importi: un elenco di cifre («450, 550 e 650 euro» → [450, 550, 650]).

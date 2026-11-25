@@ -39,9 +39,9 @@ enum ProvaAnnoInsieme {
             verifica("\(nome): avvertenze a piè di ogni pagina", senzaAvvertenze.isEmpty,
                      senzaAvvertenze.isEmpty ? "" : "mancano a pagina \(senzaAvvertenze.joined(separator: ", "))")
             let prima = (pagine.first ?? "").lowercased()
-            let canaliMancanti = a.canali.filter { !prima.contains($0.nome.lowercased()) }.map(\.nomeBreve)
-            verifica("\(nome): il canale in testa alla prima pagina", canaliMancanti.isEmpty,
-                     a.canali.map(\.nomeBreve).joined(separator: " e "))
+            // Un solo canale, quello di Lucy (25 novembre 2026): in testa il nome del consulente, senza canale
+            verifica("\(nome): il consulente in testa alla prima pagina",
+                     prima.contains(TestiValutazione.consulente.lowercased()), "")
 
             // «Cosa ci aspetta» si chiama col periodo vero (da oggi a 12 mesi), non «Nel» anno successivo:
             // a fine anno le scadenze cadono anche nell'anno in corso

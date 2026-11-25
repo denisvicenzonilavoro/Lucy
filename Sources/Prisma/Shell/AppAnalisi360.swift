@@ -351,7 +351,7 @@ struct AppAnalisi360: View {
         }
         let elenco = contratti(area)
         TitoloStrumento(occhiello: "Dalle posizioni", titolo: area == .protezione ? "Le coperture del nucleo" : "I contratti dell'area",
-                        testo: "In essere e proposte aperte, sui due canali. Un clic apre la posizione.")
+                        testo: "In essere e proposte aperte. Un clic apre la posizione.")
         if elenco.isEmpty {
             Text("Nessuna posizione in quest'area. Aggiungila in Posizioni per vederla qui.")
                 .font(Tipo.strumentoTesto)

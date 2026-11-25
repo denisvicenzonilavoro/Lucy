@@ -12,7 +12,7 @@ extension MotoreSintesi {
         var parti = ["Semaforo: \(e.verdi.count) in ordine, \(e.gialli.count) da migliorare, \(e.rossi.count) da affrontare" + daRaccogliere]
         let ordinati = e.indicatori.sorted { $0.semaforo.urgenza < $1.semaforo.urgenza }
         parti.append(ordinati.map { "• \($0.titolo) — \($0.semaforo.nome.lowercased()): \($0.valore). \($0.azione)" }.joined(separator: "\n"))
-        if !e.proposte.isEmpty { parti.append("Proposte già aperte: \(e.proposte.prefix(3).map { "\($0.nome) (\($0.canale.nomeBreve))" }.joined(separator: ", ")).") }
+        if !e.proposte.isEmpty { parti.append("Proposte già aperte: \(e.proposte.prefix(3).map { "\($0.nome)" }.joined(separator: ", ")).") }
         parti.append(documento("Check-up"))
         return RispostaVera(titolo: "Check-up di \(f.cliente.nome)", testo: parti.joined(separator: "\n\n"))
     }
@@ -35,7 +35,7 @@ extension MotoreSintesi {
         if e.costoBollo > 0 { costi += ", \(CifreDoc.euroCentesimi(e.costoBollo)) di bollo" }
         parti.append(costi + (e.rendimentoNettoAnnuo.map { ". Rendimento annuo al netto dei costi: \(CifreDoc.variazione($0))." } ?? "."))
         let voci = e.finanziarie.sorted { $0.valore > $1.valore }.prefix(5).map { v -> String in
-            var r = "• \(v.posizione.nome) (\(v.posizione.canale.nomeBreve)): \(CifreDoc.euro(v.valore))"
+            var r = "• \(v.posizione.nome): \(CifreDoc.euro(v.valore))"
             if v.risultato != nil { r += ", \(TestiResoconto.risultato(v.risultato, v.risultatoPercento))" }
             r += ", netto oggi \(CifreDoc.euroCentesimi(v.fisco.netto))"
             return r
@@ -102,7 +102,7 @@ extension MotoreSintesi {
         let punti = MotoreResistenza.sintesi(r).map { "• " + $0 }
         var parti: [String] = punti.isEmpty ? [] : [punti.joined(separator: "\n")]
         if let m = r.scenario(.mercati), !m.voci.isEmpty {
-            parti.append("Le più esposte ai mercati:\n" + m.voci.prefix(3).map { "• \($0.posizione.nome) (\($0.posizione.canale.nomeBreve)): \(Formati.meno + Formati.euro(abs($0.perdita))), \($0.motivo.hasPrefix("SRI") ? $0.motivo : $0.motivo.prefix(1).lowercased() + $0.motivo.dropFirst())" }.joined(separator: "\n"))
+            parti.append("Le più esposte ai mercati:\n" + m.voci.prefix(3).map { "• \($0.posizione.nome): \(Formati.meno + Formati.euro(abs($0.perdita))), \($0.motivo.hasPrefix("SRI") ? $0.motivo : $0.motivo.prefix(1).lowercased() + $0.motivo.dropFirst())" }.joined(separator: "\n"))
         }
         switch r.giudizio {
         case .oltre?:
@@ -175,7 +175,7 @@ extension MotoreSintesi {
         // Aliquote sulle uscite, causa per causa, al centesimo (D.Lgs. 252/2005)
         for p in f.posizioni where p.stato == .inEssere && p.regime == .previdenza {
             let fisco = MotoreFiscale.calcola(p, prodotto: prodotto(p, f), data: f.oggi)
-            var righe = ["\(p.nome) (\(p.canale.nomeBreve)), \(fisco.anniPartecipazione ?? 0) anni di partecipazione, valore \(CifreDoc.euroCentesimi(fisco.valore)):"]
+            var righe = ["\(p.nome), \(fisco.anniPartecipazione ?? 0) anni di partecipazione, valore \(CifreDoc.euroCentesimi(fisco.valore)):"]
             for u in fisco.uscite {
                 righe.append(u.possibile
                     ? "• \(u.causa.nomeBreve): fino a \(CifreDoc.euroCentesimi(u.importo)), aliquota \(CifreDoc.percento(u.aliquota, decimali: 2)), imposta \(CifreDoc.euroCentesimi(u.imposta)), netto \(CifreDoc.euroCentesimi(u.netto))"
@@ -216,7 +216,7 @@ extension MotoreSintesi {
         let e = MotoreLiquidita.calcola(f.posizioni, obiettivi: f.obiettivi, analisi: f.analisi.protezione, prodotti: f.prodotti, data: f.oggi)
         var parti = ["Liquidità oggi \(CifreDoc.euro(e.liquiditaAttuale))" + (e.scadenze.isEmpty ? "; nessun capitale in scadenza nei prossimi \(IpotesiLiquidita.finestraMesi) mesi." : ".")]
         for s in e.scadenze {
-            parti.append("\(s.posizione.nome) (\(s.posizione.canale.nomeBreve)) \(s.scaduto ? "è scaduta il" : "scade il") \(CifreDoc.data(s.data)): incassa \(CifreDoc.euroCentesimi(s.netto)) netti (imposte \(CifreDoc.euroCentesimi(s.fisco.imposta + s.fisco.bolloMaturato))).")
+            parti.append("\(s.posizione.nome) \(s.scaduto ? "è scaduta il" : "scade il") \(CifreDoc.data(s.data)): incassa \(CifreDoc.euroCentesimi(s.netto)) netti (imposte \(CifreDoc.euroCentesimi(s.fisco.imposta + s.fisco.bolloMaturato))).")
         }
         parti.append("Riserva da tenere: \(CifreDoc.euro(e.riservaNecessaria)) (\(e.mesiRiserva) mesi di spese da \(CifreDoc.euro(e.fabbisognoMensile))). "
             + (e.eccedenza > 0 ? "Restano \(CifreDoc.euro(e.eccedenza)) da destinare." : "Il totale non supera la riserva."))
@@ -260,8 +260,8 @@ extension MotoreSintesi {
         let e = MotoreSostituzione.calcola(attuale: pa, alternativa: pb, prodotti: f.prodotti, anni: f.anniConfronto, orizzonteCliente: f.cliente.profilo.orizzonteAnni, data: f.oggi)
         let periodo = e.anni == 1 ? "1 anno" : "\(e.anni) anni"
         var parti = [e.sostituzione
-            ? "Restare in \(pa.nome) (\(pa.canale.nomeBreve)) o passare a \(pb.nome) (\(pb.canale.nomeBreve)), su \(periodo)."
-            : "Confronto tra \(pa.nome) (\(pa.canale.nomeBreve)) e \(pb.nome) (\(pb.canale.nomeBreve)), su \(periodo)."]
+            ? "Restare in \(pa.nome) o passare a \(pb.nome), su \(periodo)."
+            : "Confronto tra \(pa.nome) e \(pb.nome), su \(periodo)."]
         if e.sostituzione, e.costoUscita > 0 {
             var uscita = "Uscire oggi costa \(CifreDoc.euroCentesimi(e.costoUscita))"
             var voci: [String] = []

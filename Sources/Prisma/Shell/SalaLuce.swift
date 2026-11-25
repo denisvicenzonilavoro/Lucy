@@ -268,7 +268,8 @@ private struct CorpoLuce: View {
     }
 
     private var segmentato: some View {
-        SegmentatoNotte(selezione: $vista, voci: VistaLuce.allCases.map { v in
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente vista «Per canale»
+        SegmentatoNotte(selezione: $vista, voci: VistaLuce.allCases.filter { $0 != .canale }.map { v in
             let spenta = v == .obiettivo && esito.obiettivo.isEmpty
             return (v, v.titolo, spenta, spenta ? "Nessun obiettivo nel dossier" : nil)
         })

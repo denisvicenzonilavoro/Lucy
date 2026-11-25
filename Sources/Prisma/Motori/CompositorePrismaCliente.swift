@@ -78,9 +78,9 @@ enum CompositorePrismaCliente {
             let elenco = mie.filter { $0.stato == .inEssere }
                 .sorted { $0.valore > $1.valore }
                 .map { p in
+                    // Un solo canale, quello di Lucy (25 novembre 2026): stessa scritta e stesso colore per tutte
                     PosizioneMini(nome: p.nome, canale: p.canale.nomeBreve,
-                                  coloreCanaleHex: p.canale == .alleanza ? Tema.Apple.PrismaCliente.canaleAlleanzaHex
-                                      : Tema.Apple.PrismaCliente.canaleIndipendenteHex,
+                                  coloreCanaleHex: Tema.Apple.PrismaCliente.canaleLucyHex,
                                   valore: p.valore, data: secondi(p.dataValore ?? creato))
                 }
             miniPosizioni = elenco.isEmpty ? nil : elenco

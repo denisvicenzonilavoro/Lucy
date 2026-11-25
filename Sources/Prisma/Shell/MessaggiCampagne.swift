@@ -342,7 +342,8 @@ struct PannelloCampagna: View {
         let inclusi = g.membri.filter { incluso($0, canale: canale) }
         let spazi = stato.spaziCampagna()
         let orari = spazi.map(\.inizio).filter { !c.chipTolti.contains($0) }
-        let misti = inclusi.contains { $0.canaleLavoro == nil }
+        // Un solo canale, quello di Lucy (25 novembre 2026): niente scelta della firma per i «canali misti»
+        let misti = false
         let fittizi = g.membri.contains { $0.clienteId.hasPrefix(ClientiFittizi.prefisso) || StatoShell.clientiDiProva.contains($0.clienteId) }
         #if os(macOS)
         // Migliorie d'uso 49: la campagna in tre passi, con il pulsante sempre in vista sotto

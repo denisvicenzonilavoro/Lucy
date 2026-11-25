@@ -431,11 +431,10 @@ struct DomandaMiniVera: Equatable {
         guard let f else { return ["Apro il portafoglio…", "Leggo i clienti e le scadenze…", "Preparo le cifre di Lucy…"] }
         let nome = f.cliente.nome.split(separator: " ").first.map(String.init) ?? f.cliente.nome
         let inEssere = f.posizioni.filter { $0.stato == .inEssere }
-        let canali = Set(inEssere.map(\.canale))
-        let quali = canali.count > 1 ? ", Alleanza e indipendenti" : (canali.first.map { $0 == .alleanza ? ", Alleanza" : ", indipendenti" } ?? "")
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026): niente canale nei passi
         let posizioni = inEssere.count == 1 ? "1 posizione" : "\(inEssere.count) posizioni"
         let t = NucleoVera.semplice(domanda)
         let incrocio = t.contains("scad") ? "Incrocio scadenze e obiettivi…" : "Preparo le cifre di Lucy…"
-        return ["Apro il dossier di \(nome)…", "Leggo \(posizioni)\(quali)…", incrocio]
+        return ["Apro il dossier di \(nome)…", "Leggo \(posizioni) in essere…", incrocio]
     }
 }

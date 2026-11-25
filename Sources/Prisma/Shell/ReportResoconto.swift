@@ -238,7 +238,7 @@ private struct SlideAtteso: View {
         return VStack(alignment: .leading, spacing: 14) {
             TestaReport(occhiello: "Rispetto alle attese", titolo: t.titoloAtteso(tutte.map(\.andamento)), sottotitolo: TestiResoconto.sottotitoloAtteso)
             HStack(spacing: 14) {
-                HStack(spacing: 5) { Rectangle().fill(C.titolo).frame(width: 14, height: 7); Text(verbatim: "come è andata, nel colore del canale") }
+                HStack(spacing: 5) { Rectangle().fill(C.titolo).frame(width: 14, height: 7); Text(verbatim: "come è andata") }
                 HStack(spacing: 5) { Rectangle().fill(C.premio).frame(width: 14, height: 4); Text(verbatim: "quello che ci aspettavamo, al netto dei costi") }
             }
             .font(T.minimo).foregroundColor(C.tenue)

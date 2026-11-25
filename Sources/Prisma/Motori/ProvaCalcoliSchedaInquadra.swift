@@ -16,7 +16,7 @@ enum ProvaCalcoliSchedaInquadra {
         verifica.vero("IQ7 Capitale «50.000 €»", righe[2].valore == Formati.euro(50_000))
         verifica.vero("IQ7 Decorrenza «marzo 2021»", righe[3].valore == "marzo 2021")
         verifica.vero("IQ7 Tipo con la compagnia letta", righe[4].valore == "Vita intera a premio ricorrente · Esempio Vita S.p.A.")
-        verifica.vero("IQ7 Tipo con il canale Alleanza", MotoreInquadra.righe(d, canale: .alleanza)[4].valore == "Vita intera a premio ricorrente · Alleanza")
+        verifica.vero("IQ7 Tipo uguale con ogni valore del canale (un solo canale)", MotoreInquadra.righe(d, canale: .alleanza)[4].valore == "Vita intera a premio ricorrente · Esempio Vita S.p.A.")
         let senzaCompagnia = MotoreInquadra.leggi(Array(FoglioInquadraDiProva.righe().prefix(7)))
         verifica.vero("IQ7 Tipo senza compagnia: «altra compagnia»",
                       MotoreInquadra.tipo(senzaCompagnia, canale: .indipendente) == "Vita intera a premio ricorrente · altra compagnia")
@@ -95,10 +95,10 @@ enum ProvaCalcoliSchedaInquadra {
 
         // IQ14. Le regole: nessuna riga in dubbio per posizione, solo per quello che i dati dicono
         verifica.vero("IQ14 Foglio intero: niente da controllare", MotoreInquadra.daControllare(d, canale: .indipendente, oggi: oggi).isEmpty)
-        verifica.vero("IQ14 Senza compagnia, indipendente: il «Tipo» da controllare",
+        verifica.vero("IQ14 Senza compagnia: il «Tipo» da controllare",
                       MotoreInquadra.daControllare(senzaCompagnia, canale: .indipendente, oggi: oggi) == ["tipo"])
-        verifica.vero("IQ14 Senza compagnia, Alleanza: niente da controllare",
-                      MotoreInquadra.daControllare(senzaCompagnia, canale: .alleanza, oggi: oggi).isEmpty)
+        verifica.vero("IQ14 Senza compagnia, con l'altro valore del canale: lo stesso (un solo canale)",
+                      MotoreInquadra.daControllare(senzaCompagnia, canale: .alleanza, oggi: oggi) == ["tipo"])
         var senzaFrequenza = d
         senzaFrequenza.frequenza = nil
         verifica.vero("IQ14 Frequenza non scritta: il premio da controllare",

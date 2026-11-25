@@ -226,19 +226,18 @@ extension CompositoreProspetti {
             IndicatoreProspetto(etichetta: "Valore stimato", valore: (v.parziale ? "almeno " : "") + Formati.euro(totale),
                                 nota: "dal \(Formati.dataBreve.string(from: v.dal))"),
             IndicatoreProspetto(etichetta: "Compenso", valore: Formati.euro(v.compenso),
-                                nota: v.provvigioniNonStimate ? "provvigioni Alleanza non stimate" : "parcelle e provvigioni stimate"),
+                                nota: v.provvigioniNonStimate ? "provvigioni non stimate" : "parcelle e provvigioni stimate"),
             IndicatoreProspetto(etichetta: v.rapportoSoloParcelle ? "Per euro di parcella" : "Per euro di compenso",
                                 valore: v.rapporto.map { String(format: "%.1f", $0).replacingOccurrences(of: ".", with: ",") } ?? "—",
-                                nota: v.rapportoSoloParcelle ? "valore del canale indipendente" : "euro di valore"),
+                                nota: v.rapportoSoloParcelle ? "euro di valore per le parcelle" : "euro di valore"),
             IndicatoreProspetto(etichetta: "Protetto (caso morte)", valore: v.protetto.map(Formati.euro) ?? "—", nota: "non entra nel totale"),
         ]))
         b.append(.tabella(TabellaProspetto(
+            // Un solo canale, quello di Lucy (25 novembre 2026): niente colonne per canale
             colonne: [ColonnaProspetto(titolo: "Voce", peso: 1.6), ColonnaProspetto(titolo: "Cifra", peso: 1, destra: true),
-                      ColonnaProspetto(titolo: Canale.alleanza.nomeBreve, peso: 1, destra: true), ColonnaProspetto(titolo: Canale.indipendente.nomeBreve, peso: 1, destra: true),
                       ColonnaProspetto(titolo: "Nota", peso: 2.6)],
             righe: v.voci.map { x -> [CellaProspetto] in
                 [.f(x.tipo.titolo), .t(x.totale.map(Formati.euro) ?? "—"),
-                 .t(x.perCanale[.alleanza].map(Formati.euro) ?? "—"), .t(x.perCanale[.indipendente].map(Formati.euro) ?? "—"),
                  .t(x.motivoAssente ?? (x.stima ? "stima" : "—"))]
             })))
         b.append(.nota("Contano solo le posizioni nate da raccomandazioni accettate dopo l'inizio del rapporto. Tasse con il reddito di oggi (stima); costi tagliati sul valore di oggi della nuova posizione; alternativa dal track record (stima). Documento ad uso del consulente: non è una comunicazione al cliente."))
@@ -276,7 +275,7 @@ extension CompositoreProspetti {
     }
 
     /// «Cronologia dei riesami»: la riga «Oggi» (non salvata, evidenziata) e le ultime fotografie salvate, con il
-    /// patrimonio sempre diviso per canale. Senza fotografie salvate un testo (la riga «Oggi» da sola non dice niente).
+    /// patrimonio in una colonna sola (un solo canale, quello di Lucy, dal 25 novembre 2026). Senza fotografie salvate un testo (la riga «Oggi» da sola non dice niente).
     private static func bloccoCronologia(_ m: MemoriaRiesame) -> [BloccoProspetto] {
         guard !m.cronologia.isEmpty else { return [.testo(TestiMemoria.nessunaFotografia)] }
         func riga(_ f: FotografiaRiesame, data: String, forte: Bool) -> [CellaProspetto] {
@@ -285,8 +284,7 @@ extension CompositoreProspetti {
                     cella(TestiMemoria.propensioneBreve(f.propensione)),
                     cella(TestiMemoria.euroAlMese(f.divarioPensione)),
                     cella(TestiMemoria.euro(f.scopertoCasoMorte)),
-                    cella(TestiMemoria.euro(f.patrimonioAlleanza)),
-                    cella(TestiMemoria.euro(f.patrimonioIndipendente)),
+                    cella(TestiMemoria.euro(f.patrimonioAlleanza + f.patrimonioIndipendente)),
                     cella(TestiMemoria.semafori(f: f)),
                     cella(f.completezza.map { "\($0)%" } ?? TestiMemoria.vuoto)]
         }
@@ -297,8 +295,7 @@ extension CompositoreProspetti {
             colonne: [ColonnaProspetto(titolo: "Data", peso: 1), ColonnaProspetto(titolo: "Propensione", peso: 1),
                       ColonnaProspetto(titolo: "Divario pensione", peso: 1.1, destra: true),
                       ColonnaProspetto(titolo: "Scoperto caso morte", peso: 1.2, destra: true),
-                      ColonnaProspetto(titolo: Canale.alleanza.nomeBreve, peso: 1.1, destra: true),
-                      ColonnaProspetto(titolo: Canale.indipendente.nomeBreve, peso: 1.1, destra: true),
+                      ColonnaProspetto(titolo: "Patrimonio", peso: 1.2, destra: true),
                       ColonnaProspetto(titolo: "Semafori", peso: 1.3), ColonnaProspetto(titolo: "Dati", peso: 0.7, destra: true)],
             righe: righe,
             evidenzia: [0]))]

@@ -166,9 +166,9 @@ struct PropostaCostruita {
 
 enum MotoreProposta {
     /// La tappa 5 senza modelli caricati per il canale o il prodotto: neutra, non ferma la proposta.
-    static let moduliSenzaModelli = "Nessun modulo per questo canale: caricali in Pratiche › Moduli e si compileranno da soli."
+    static let moduliSenzaModelli = "Nessun modulo per questo prodotto: caricali in Pratiche › Moduli e si compileranno da soli."
     /// I moduli Alleanza non si compilano in Prisma (decisione 60): si fanno con gli strumenti della compagnia.
-    static let moduliAlleanza = "I moduli Alleanza si compilano con gli strumenti della compagnia."
+    static let moduliAlleanza = "I moduli di questa compagnia si compilano con i suoi strumenti."
     static let premioDaChiedere = "premio: da chiedere alla compagnia"
     static let riepilogoPronta = "prodotto, importo, prospetto e adeguatezza pronti. Controlla e firma."
     static let prefissoSostituzione = "sostituzione-"

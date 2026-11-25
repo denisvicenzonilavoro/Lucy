@@ -49,7 +49,6 @@ enum MessaggiVera {
         if tono == .breve {
             righe.append("Lunghezza: al massimo \(max(0, RegoleMessaggi.caratteriBreve - bozza.chiusura.count)) caratteri, su una riga")
         }
-        if let c = o.canale { righe.append("Canale di lavoro: \(c.nomeBreve)") }
         righe.append("Occasione: \(o.tipo.nome) · \(o.titolo)")
         righe.append("Perché adesso: \(o.perche)")
         righe.append("FATTI")

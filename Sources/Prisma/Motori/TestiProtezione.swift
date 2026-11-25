@@ -17,9 +17,8 @@ struct TestiProtezione {
     static let avvertenza = "Stime basate sulle ipotesi indicate: fanno fede le condizioni di assicurazione delle singole polizze."
 
     var ruoloConsulente: String {
-        if e.canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if e.canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026)
+        CanaleLucy.nome
     }
 
     /// "Luca (convivente), Anna (figlia, 9 anni)".

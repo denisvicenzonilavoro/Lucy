@@ -223,9 +223,10 @@ enum TestiCompletezza {
         static let redditoDesiderato = "Il reddito che il cliente vuole in pensione: con la pensione pubblica dà il divario da colmare."
         static let pensionePubblica = "La pensione pubblica netta attesa si legge nell'estratto conto contributivo INPS o si stima con il metodo contributivo (L. 335/1995)."
         static let lavoro = "Tipo di lavoratore, reddito e contributi stimano la pensione pubblica con il metodo contributivo (L. 335/1995); con contributi prima del 1996 il sistema è misto. Il montante si legge nell'estratto conto contributivo INPS."
-        static let alleanza = "Canale Alleanza: adeguatezza dei prodotti d'investimento assicurativi (Direttiva (UE) 2016/97, IDD, art. 30, recepito nell'art. 121-septies del Codice delle assicurazioni private, D.Lgs. 209/2005, introdotto dal D.Lgs. 68/2018) e richieste ed esigenze (IDD art. 20, recepito nell'art. 119-ter dello stesso Codice); Regolamento delegato (UE) 2017/2359, art. 9; Regolamento IVASS n. 40/2018."
-        static let indipendente = "Canale indipendente: art. 21 TUF (D.Lgs. 58/1998) e artt. 54–55 del Regolamento delegato (UE) 2017/565 (MiFID II: obiettivi, orizzonte, capacità di sostenere perdite)."
-        /// Profilo di rischio e orizzonte: le norme dei canali delle posizioni finanziarie del cliente.
+        static let alleanza = "Prodotti d'investimento assicurativi: adeguatezza dei prodotti d'investimento assicurativi (Direttiva (UE) 2016/97, IDD, art. 30, recepito nell'art. 121-septies del Codice delle assicurazioni private, D.Lgs. 209/2005, introdotto dal D.Lgs. 68/2018) e richieste ed esigenze (IDD art. 20, recepito nell'art. 119-ter dello stesso Codice); Regolamento delegato (UE) 2017/2359, art. 9; Regolamento IVASS n. 40/2018."
+        static let indipendente = "Strumenti finanziari: art. 21 TUF (D.Lgs. 58/1998) e artt. 54–55 del Regolamento delegato (UE) 2017/565 (MiFID II: obiettivi, orizzonte, capacità di sostenere perdite)."
+        /// Profilo di rischio e orizzonte: le norme dei prodotti delle posizioni finanziarie del cliente (il campo canale
+        /// distingue ancora i prodotti assicurativi dagli strumenti finanziari, ma non si scrive).
         static func profilo(canali: Set<Canale>) -> String {
             let norme = Canale.allCases.filter { canali.isEmpty || canali.contains($0) }
                 .map { $0 == .alleanza ? alleanza : indipendente }

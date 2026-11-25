@@ -97,7 +97,7 @@ enum TipoProspetto: String, CaseIterable, Identifiable {
         switch self {
         case .sostituzione: return "Restare o cambiare: l'uscita di oggi con penali e imposte, il netto anno per anno delle due strade, il pareggio, tre scenari, costi e caratteristiche. Anche tra due proposte. Prospetto per te, report per il cliente."
         case .previdenza: return "Divario tra reddito desiderato e pensione pubblica, piani portati alla pensione con l'aliquota di allora, risparmio IRPEF dei versamenti, uscite anticipate, versamento che manca. Prospetto per te, report per il cliente."
-        case .protezione: return "Fabbisogno caso morte e divario, invalidità e riserva, mappa dei rischi coperti e scoperti, coperture per canale, premi e detrazione del 19%. Prospetto per te, report per il cliente."
+        case .protezione: return "Fabbisogno caso morte e divario, invalidità e riserva, mappa dei rischi coperti e scoperti, coperture, premi e detrazione del 19%. Prospetto per te, report per il cliente."
         case .obiettivo: return "Un obiettivo del cliente: importo rivalutato alla scadenza, posizioni collegate portate a quella data, quota raggiunta, quattro strade per arrivarci, scenari, quadro di tutti gli obiettivi. Prospetto per te, report per il cliente."
         case .liquidita: return "Capitali in scadenza nei prossimi 12 mesi al netto delle imposte, liquidità, riserva di emergenza, quattro salvadanai per orizzonte legati agli obiettivi, costo di lasciare fermi i soldi. Prospetto per te, report per il cliente."
         case .checkUp: return "Chi è il cliente, la fotografia del patrimonio, il semaforo di sette aree (riserva, famiglia, invalidità, pensione, risparmi, debiti, obiettivi), i bisogni rilevati e da dove partire. Prospetto per te, report per il cliente."
@@ -110,7 +110,7 @@ enum TipoProspetto: String, CaseIterable, Identifiable {
         case .posizione: return "Contratto, costi, proiezione anno per anno nei tre scenari, fonti e pagine dei documenti."
         case .confronto: return "Ipotesi ed esiti a fronte, differenze anno per anno, peso dei costi."
         case .valutazione: return "Il cliente valuta un investimento: incassi netti anno per anno in tre scenari, penali, costi, imposte, confronto con il KID. Prospetto per te, report per il cliente."
-        case .portafoglio: return "Tutti i clienti insieme: patrimonio seguito per canale e per area, clienti dal più seguito, scadenze dei prossimi 12 mesi, concentrazione per emittente, proposte per esito. Solo per te."
+        case .portafoglio: return "Tutti i clienti insieme: patrimonio seguito per area, clienti dal più seguito, scadenze dei prossimi 12 mesi, concentrazione per emittente, proposte per esito. Solo per te."
         case .riesame: return "Per preparare l'incontro di revisione: ordine del giorno, com'è andata ogni posizione rispetto all'atteso, scadenze, obiettivi, aree del check-up, proposte aperte e domande da fare. Per te, con l'incontro da fissare."
         case .annoInsieme: return "Il racconto dell'anno per il cliente: cosa è successo (versamenti, valori di inizio e fine anno, scelte, incontri), gli obiettivi avvicinati, la protezione, i mercati attraversati e cosa ci aspetta. Report per il cliente, su carta bianca."
         }

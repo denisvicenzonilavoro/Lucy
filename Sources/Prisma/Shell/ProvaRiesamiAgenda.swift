@@ -87,7 +87,7 @@ enum ProvaRiesamiAgenda {
                 controlla(a.canale == .alleanza, "S3 Marco: canale Alleanza")
                 controlla(a.posizioneId == "pos-marco-infortuni-famiglia",
                           "S3 Marco: si parla di «Infortuni famiglia», che scade tra 45 giorni (\(a.posizioneId ?? "nessuna"))")
-                controlla(a.note.contains("Canale: Alleanza Assicurazioni."), "S3 Marco: canale nelle note")
+                controlla(!a.note.contains("Canale:"), "S3 Marco: un solo canale, niente canale nelle note")
             } else {
                 controlla(false, "S3 Marco: nessuna bozza del riesame")
             }
@@ -98,7 +98,7 @@ enum ProvaRiesamiAgenda {
             let s = nuovo()
             if let a = s.pianificaRiesame("sofia", oggi: adesso)?.appuntamento {
                 controlla(a.canale == nil, "S4 Sofia: canale entrambi (nessuno indicato)")
-                controlla(a.note.contains("Canale: Alleanza e indipendente"), "S4 Sofia: tutti e due i canali nelle note")
+                controlla(!a.note.contains("Canale:"), "S4 Sofia: un solo canale, niente canale nelle note")
                 controlla(a.note.contains("Nessun incontro registrato in Lucy"), "S4 Sofia: primo riesame nelle note")
             } else {
                 controlla(false, "S4 Sofia: nessuna bozza del riesame")

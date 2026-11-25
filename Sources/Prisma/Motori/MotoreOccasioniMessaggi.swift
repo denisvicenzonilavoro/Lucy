@@ -72,7 +72,7 @@ struct OccasioneMessaggio: Identifiable, Hashable {
     let id: String
     let origine: OrigineMessaggio
     let clienteId: String
-    /// Il canale di lavoro (Alleanza o indipendente) quando l'occasione ne ha uno; nil = etichetta neutra.
+    /// Il valore salvato del canale quando l'occasione ne ha uno (solo per compatibilità: un solo canale, quello di Lucy).
     let canale: Canale?
     let gruppo: GruppoMessaggio
     /// «"Infortuni famiglia" scade il 17 dicembre».
@@ -278,7 +278,7 @@ enum MotoreOccasioniMessaggi {
             default: perche = "Scadenza tra \(g) giorni"
             }
             var cifre = [CifraMessaggio(.posizione, nome), CifraMessaggio(.scadenza, Formati.dataEstesa.string(from: s)),
-                         CifraMessaggio(.giorniAllaScadenza, "\(g)"), CifraMessaggio(.canale, p.canale.nomeBreve)]
+                         CifraMessaggio(.giorniAllaScadenza, "\(g)")]   // un solo canale, quello di Lucy: niente cifra del canale
             if let k = p.capitaleAssicurato, k > 0 { cifre.append(CifraMessaggio(.capitaleAssicurato, Formati.euro(k))) }
             if p.premio > 0 {
                 let ritmo = p.frequenza == .unica ? "premio unico" : p.frequenza.nome.lowercased()
@@ -387,7 +387,6 @@ enum MotoreOccasioniMessaggi {
             }
             var cifre = [CifraMessaggio(.occasione, o.titolo), CifraMessaggio(.dataOccasione, Formati.dataEstesa.string(from: o.data)),
                          CifraMessaggio(.cosaCambia, o.dettaglio)]
-            if let k = o.canale { cifre.append(CifraMessaggio(.canale, k.nomeBreve)) }
             return OccasioneMessaggio(origine: OrigineMessaggio(tipo: .occasioneAgenda, riferimento: o.id), clienteId: o.clienteId,
                                       canale: o.canale, gruppo: g == 0 ? .oggi : .settimana, titolo: o.titolo, perche: perche,
                                       oggetto: o.titolo, cifre: cifre, priorita: .media, data: o.data)
@@ -442,7 +441,6 @@ enum MotoreOccasioniMessaggi {
             if a.posizioni.count == 1, let p = (posizioni[a.clienteId] ?? []).first(where: { $0.id == a.posizioni[0] }) {
                 cifre.append(CifraMessaggio(.posizione, p.nome))
             }
-            if let k = a.canale { cifre.append(CifraMessaggio(.canale, k.nomeBreve)) }
             return OccasioneMessaggio(origine: OrigineMessaggio(tipo: .avvisoMercato, riferimento: a.id), clienteId: a.clienteId,
                                       canale: a.canale, gruppo: g <= 1 ? .oggi : .settimana, titolo: a.titolo,
                                       perche: a.tipo.nome, oggetto: TestiMercato.oggettoMessaggio(a.tipo), cifre: cifre,

@@ -45,10 +45,10 @@ enum ProvaCalcoliMemoria {
                                    "Obiettivo «Casa» dal 40% al 77%",
                                    "Nuovo obiettivo «Università di Sofia»: 30.000 €, raggiunto al 10%",
                                    "Obiettivo «Auto» tolto (era al 70%)",
-                                   "Patrimonio Alleanza da 42.000 a 51.500 €",
+                                   "Patrimonio da 42.000 a 51.500 €",
                                    "Debiti da 96.000 a 90.000 €",
                                    "Completezza dei dati dal 62% al 77%",
-                                   "Questionario di adeguatezza Alleanza: da scadenza superata a in regola"])
+                                   "Questionario di adeguatezza: da scadenza superata a in regola"])
 
         // MV4 versi
         verifica.vero("MV4 Memoria: semaforo della riserva in peggio", una("semaforo.riserva")?.verso == .peggio)

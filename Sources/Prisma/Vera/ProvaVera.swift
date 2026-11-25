@@ -15,8 +15,9 @@ enum ProvaVera {
 
         let istruzioni = IstruzioniVera.testo("chat")
         controlla(istruzioni != nil, "Istruzioni della chat nel pacchetto (\(IstruzioniVera.cartella)/chat.md)")
-        controlla((istruzioni ?? "").contains("Alleanza"), "Le istruzioni distinguono i canali")
-        controlla((istruzioni ?? "").contains("Ti chiami Lucy") && (istruzioni ?? "").contains("ancora Ruby o Eve") && IstruzioniVera.conversazione.contains("Ti chiami Lucy"),
+        controlla(!(istruzioni ?? "").contains("Alleanza") && (istruzioni ?? "").contains("un solo canale, quello di Lucy"),
+                  "Le istruzioni parlano di un solo canale, quello di Lucy (niente Alleanza / indipendente)")
+        controlla((istruzioni ?? "").contains("Ti chiami Lucy") && (istruzioni ?? "").contains("ancora Vera, Ruby o Eve") && IstruzioniVera.conversazione.contains("Ti chiami Lucy"),
                   "Le istruzioni chiamano l'assistente Lucy (e lei si riconosce anche come Ruby ed Eve, i nomi di prima)")
 
         let stato = StatoShell(persistente: false)

@@ -11,7 +11,7 @@ I tipi di filtro:
 - coniuge_senza_protezione: ha un coniuge o un convivente senza una polizza a suo nome.
 - polizze_in_scadenza_entro: ha polizze di protezione in essere che scadono entro la «data».
 - posizioni_in_scadenza_entro: ha posizioni di qualsiasi tipo che scadono entro la «data».
-- canale: ha posizioni del canale «testo» (alleanza o indipendente).
+- canale: ha posizioni in essere (c'è un solo canale, quello di Lucy: usalo solo se la domanda chiede chi ha posizioni in essere).
 - consenso_privacy_mancante, senza_consenso_marketing: i consensi.
 - senza_area, con_area: non ha / ha posizioni nell'area «testo» (previdenza, protezione, investimento, risparmio, liquidità, immobili, debiti).
 - patrimonio_minimo: il patrimonio supera «numero» euro.

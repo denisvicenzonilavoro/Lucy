@@ -55,12 +55,10 @@ enum TestiAdeguatezza {
         return parti.isEmpty ? "Nessun controllo" : parti.joined(separator: " · ")
     }
 
-    /// «Denis Vicenzoni · Consulente Alleanza Assicurazioni» o «Denis Vicenzoni · Consulenza finanziaria».
+    /// «Denis Vicenzoni · Lucy · consulenza finanziaria», lo stesso per ogni valore salvato del canale (un solo canale,
+    /// quello di Lucy, dal 25 novembre 2026).
     static func consulente(_ c: Canale) -> String {
-        switch c {
-        case .alleanza: return "Denis Vicenzoni · Consulente Alleanza Assicurazioni"
-        case .indipendente: return "Denis Vicenzoni · Consulenza finanziaria"
-        }
+        CanaleLucy.consulente + " · " + CanaleLucy.nome
     }
 
     /// Un collegamento in parole, per i menu e i suggerimenti.
@@ -259,7 +257,7 @@ enum TestiAdeguatezza {
     }
 
     static func canaleAlleanza(_ quota: Double) -> String {
-        "Nel canale Alleanza il \(CifreDoc.percento(quota, decimali: 0)) del patrimonio finanziario, oltre l'\(CifreDoc.percento(MotoreCoerenza.sogliaCanale, decimali: 0)): Alleanza colloca i prodotti di una sola compagnia."
+        "Il \(CifreDoc.percento(quota, decimali: 0)) del patrimonio finanziario in prodotti di una sola compagnia, oltre l'\(CifreDoc.percento(MotoreCoerenza.sogliaCanale, decimali: 0))."
     }
 
     // MARK: - 7 · Sostituzione
@@ -312,7 +310,7 @@ enum TestiAdeguatezza {
     }
 
     static func cambioCanale(_ sostituita: Posizione, _ p: Posizione) -> String {
-        "Cambio di canale: «\(sostituita.nome)» è \(sostituita.canale.nomeBreve), la proposta è \(p.canale.nomeBreve). Motiva per iscritto perché il cambio conviene al cliente: lo stesso consulente opera nei due canali (conflitto d'interessi: MiFID II art. 23, IDD art. 28)."
+        "Cambio di compagnia: «\(sostituita.nome)» e la proposta non sono della stessa compagnia. Motiva per iscritto perché il cambio conviene al cliente (conflitto d'interessi: MiFID II art. 23, IDD art. 28)."
     }
 
     // Garanzie perse
@@ -360,9 +358,9 @@ enum TestiAdeguatezza {
             let base = "Situazione finanziaria: Reg. delegato UE 2017/565, art. 54, par. 4; Reg. delegato UE 2017/2359, art. 9. Soglie di Lucy: metà della riserva, versamenti oltre il 20% e il 35% del reddito netto."
             return ambito == .previdenza ? base + " D.Lgs. 252/2005, artt. 8, 11 e 14; TUIR art. 10, c. 1, lett. e-bis." : base
         case .concentrazione:
-            return "Portafoglio nel suo insieme: Orientamenti ESMA sull'adeguatezza (2022). Soglie di Lucy: 50% e 75% per emittente, 80% nel canale Alleanza."
+            return "Portafoglio nel suo insieme: Orientamenti ESMA sull'adeguatezza (2022). Soglie di Lucy: 50% e 75% per emittente, 80% in prodotti di una sola compagnia."
         case .sostituzione:
-            return "Cambio di investimento: Reg. delegato UE 2017/565, art. 54, par. 11 (benefici superiori ai costi). Polizze: Regolamento IVASS n. 40/2018. Cambio di canale: conflitti d'interessi, MiFID II art. 23 e IDD art. 28. Soglie di Lucy: 1% e 3% del valore."
+            return "Cambio di investimento: Reg. delegato UE 2017/565, art. 54, par. 11 (benefici superiori ai costi). Polizze: Regolamento IVASS n. 40/2018. Cambio di compagnia: conflitti d'interessi, MiFID II art. 23 e IDD art. 28. Soglie di Lucy: 1% e 3% del valore."
         }
     }
 
@@ -384,8 +382,8 @@ enum TestiAdeguatezza {
             "Esperienza: la griglia per tipo di prodotto (non conosce = da rivedere, da spiegare = da motivare) e la perdita nella crisi peggiore del passato contro la capacità di sostenere perdite.",
             "Bisogno: il bisogno confermato, l'area della mappa o l'obiettivo a cui risponde, compatibile con l'area della proposta; un suggerimento di Lucy resta da confermare, un bisogno scartato con il cliente è da rivedere.",
             "Liquidità: dopo il versamento dalla liquidità devono restare la riserva di emergenza (fabbisogno mensile per i mesi di riserva) e gli obiettivi dei prossimi \(MotoreAdeguatezza.mesiObiettiviVicini) mesi; sotto metà della riserva è da rivedere, anche con il riscatto bloccato. Versamenti oltre il \(CifreDoc.percento(MotoreAdeguatezza.premioAttenzione, decimali: 0)) del reddito netto da motivare, oltre il \(CifreDoc.percento(MotoreAdeguatezza.premioEccessivo, decimali: 0)) da rivedere.",
-            "Concentrazione: il peso dell'emittente sul patrimonio finanziario dopo la firma, oltre il \(CifreDoc.percento(MotoreCoerenza.sogliaEmittente, decimali: 0)) da motivare, oltre il \(CifreDoc.percento(MotoreAdeguatezza.sogliaEmittenteAlta, decimali: 0)) con almeno \(Int(MotoreAdeguatezza.aumentoRilevante)) punti in più da rivedere (da \(CifreDoc.euro(MotoreCoerenza.minimoConcentrazione)) in su); oltre l'\(CifreDoc.percento(MotoreCoerenza.sogliaCanale, decimali: 0)) nel canale Alleanza da motivare.",
-            "Sostituzione: costi dell'uscita (penale, bollo maturato, ingresso) oltre l'1% del valore da motivare, oltre il 3% da rivedere; da rivedere anche se il cambio non recupera i costi nel periodo o se si riscatta la previdenza; garanzie perse, recupero oltre metà del periodo e cambio di canale da motivare.",
+            "Concentrazione: il peso dell'emittente sul patrimonio finanziario dopo la firma, oltre il \(CifreDoc.percento(MotoreCoerenza.sogliaEmittente, decimali: 0)) da motivare, oltre il \(CifreDoc.percento(MotoreAdeguatezza.sogliaEmittenteAlta, decimali: 0)) con almeno \(Int(MotoreAdeguatezza.aumentoRilevante)) punti in più da rivedere (da \(CifreDoc.euro(MotoreCoerenza.minimoConcentrazione)) in su); oltre l'\(CifreDoc.percento(MotoreCoerenza.sogliaCanale, decimali: 0)) in prodotti di una sola compagnia da motivare.",
+            "Sostituzione: costi dell'uscita (penale, bollo maturato, ingresso) oltre l'1% del valore da motivare, oltre il 3% da rivedere; da rivedere anche se il cambio non recupera i costi nel periodo o se si riscatta la previdenza; garanzie perse, recupero oltre metà del periodo e cambio di compagnia da motivare.",
             "Complessivo: rosso se un controllo è da rivedere; poi da completare; poi da motivare; altrimenti coerente. La scheda è pronta per la firma senza rossi né grigi e con tutti i documenti spuntati o non pertinenti.",
         ]
     }

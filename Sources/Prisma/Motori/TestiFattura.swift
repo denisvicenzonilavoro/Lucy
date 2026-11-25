@@ -54,14 +54,14 @@ struct TestiFattura: Equatable {
     let pagamento: [Campo]
     /// Il piede: i dati fiscali del consulente, la dicitura scritta da lui e «Documento di prova».
     let piede: [Campo]
-    /// Il canale è sempre l'indipendente: «Denis Vicenzoni · Consulenza finanziaria».
+    /// Un solo canale, quello di Lucy (25 novembre 2026): «Lucy · consulenza finanziaria» (`CanaleLucy.nome`).
     let intestazione: String
     /// Il nome del cliente (per il titolo del documento e il nome del file).
     let nomeCliente: String
     /// Mancano dati per il file XML (il foglio è di prova).
     let diProva: Bool
 
-    static let sottotitoloRiga = "Consulenza finanziaria indipendente"
+    static let sottotitoloRiga = "Consulenza finanziaria"
     static let daCompletare = "da completare"
     static let documentoDiProva = "Documento di prova"
     static let etichettaNetto = "Netto a pagare"
@@ -123,7 +123,7 @@ struct TestiFattura: Equatable {
         }
         numero = p.numero.map { "N. \($0)" } ?? "Senza numero"
         data = "del " + Self.data(p.data)
-        intestazione = Canale.indipendente.nome
+        intestazione = CanaleLucy.nome
 
         // Il cliente
         let mancaCliente = Set(mancanti.filter { $0.dove == .cliente }.map(\.codice))

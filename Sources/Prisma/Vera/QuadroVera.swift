@@ -92,9 +92,9 @@ struct QuadroVera: Equatable {
 
     // MARK: - Pezzi
 
-    private static func suCanali(_ t: String) -> Bool {
-        ["canal", "alleanza", "indipendent"].contains { t.contains($0) }
-    }
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente quadro per canale, anche
+    /// quando la domanda nomina i canali di prima (resta il quadro per area).
+    private static func suCanali(_ t: String) -> Bool { false }
 
     /// Una barra per area, dalla più grande (le aree vuote non ci sono).
     static func aree(_ posizioni: [Posizione], titolo: String) -> QuadroVera? {

@@ -189,7 +189,7 @@ extension AppImpostazioni {
         let regole = stato.dati.impostazioni.conformita
         return VStack(alignment: .leading, spacing: M.spazioGruppi) {
             GruppoImpostazioni(titolo: "Questionari di adeguatezza") {
-                RigaImpostazione(titolo: "Validità", sottotitolo: "Poi il profilo va aggiornato") {
+                RigaImpostazione(titolo: "Validità · prodotti assicurativi", sottotitolo: "Poi il profilo va aggiornato") {
                     HStack(spacing: M.spazioGriglia) {
                         EtichettaCanale(canale: .alleanza, compatta: true)
                         MenuTendina(selezione: Bindable(stato.dati).impostazioni.conformita.mesiQuestionarioAlleanza,
@@ -197,7 +197,7 @@ extension AppImpostazioni {
                                     larghezza: M.menuGriglia)
                     }
                 }
-                RigaImpostazione(titolo: "Validità", sottotitolo: "Ogni quanto si aggiorna il profilo", ultima: true) {
+                RigaImpostazione(titolo: "Validità · strumenti finanziari", sottotitolo: "Ogni quanto si aggiorna il profilo", ultima: true) {
                     HStack(spacing: M.spazioGriglia) {
                         EtichettaCanale(canale: .indipendente, compatta: true)
                         MenuTendina(selezione: Bindable(stato.dati).impostazioni.conformita.mesiQuestionarioIndipendente,
@@ -218,7 +218,7 @@ extension AppImpostazioni {
                                 AppImpostazioni.opzioniMesi(AppImpostazioni.mesiVerificaBasso, con: regole.mesiVerificaBasso))
                     }
                 }
-                RigaImpostazione(titolo: "Anche sul canale indipendente", sottotitolo: "Se sei tenuto all'antiriciclaggio",
+                RigaImpostazione(titolo: "Anche per gli strumenti finanziari", sottotitolo: "Se sei tenuto all'antiriciclaggio",
                                  ultima: true) {
                     interruttore(Bindable(stato.dati).impostazioni.conformita.verificaIndipendente)
                 }

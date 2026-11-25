@@ -327,13 +327,13 @@ enum IndiceImpostazioni {
     ]
 
     private static let conformita: [V] = [
-        V(titolo: "Validità", spiegazione: "Poi il profilo va aggiornato", pagina: .conformita,
-          parole: ["questionario", "adeguatezza", "Alleanza"]),
-        V(titolo: "Validità", spiegazione: "Ogni quanto si aggiorna il profilo", pagina: .conformita,
-          parole: ["questionario", "adeguatezza", "indipendente"]),
+        V(titolo: "Validità · prodotti assicurativi", spiegazione: "Poi il profilo va aggiornato", pagina: .conformita,
+          parole: ["questionario", "adeguatezza", "prodotti assicurativi"]),
+        V(titolo: "Validità · strumenti finanziari", spiegazione: "Ogni quanto si aggiorna il profilo", pagina: .conformita,
+          parole: ["questionario", "adeguatezza", "strumenti finanziari"]),
         V(titolo: "Rinnovo per rischio", spiegazione: "Antiriciclaggio", pagina: .conformita,
           ancora: "impostazioni-conformita", parole: ["AML"]),
-        V(titolo: "Anche sul canale indipendente", spiegazione: "Se sei tenuto all'antiriciclaggio", pagina: .conformita,
+        V(titolo: "Anche per gli strumenti finanziari", spiegazione: "Se sei tenuto all'antiriciclaggio", pagina: .conformita,
           ancora: "impostazioni-conformita"),
         V(titolo: "Consenso commerciale", spiegazione: "Ogni quanto riconfermarlo", pagina: .conformita,
           ancora: "impostazioni-conformita", parole: ["privacy", "consensi"]),
@@ -342,12 +342,12 @@ enum IndiceImpostazioni {
     ]
 
     private static let proposte: [V] = [
-        V(titolo: "Documenti da consegnare", spiegazione: "Per canale: quelli spenti non compaiono nelle schede delle proposte.",
-          pagina: .proposte, parole: ["proposte", "Alleanza", "indipendente"]),
+        V(titolo: "Documenti da consegnare", spiegazione: "Quelli spenti non compaiono nelle schede delle proposte.",
+          pagina: .proposte, parole: ["proposte", "prodotti assicurativi", "strumenti finanziari"]),
         V(titolo: "Aggiungi un documento", spiegazione: "Un documento in più da consegnare con le proposte.",
           pagina: .proposte),
         V(titolo: "Ripristina l'elenco di Lucy",
-          spiegazione: "Torna ai documenti predefiniti dei due canali: le spunte già messe nelle schede restano.",
+          spiegazione: "Torna ai documenti predefiniti: le spunte già messe nelle schede restano.",
           pagina: .proposte),
         V(titolo: "Proponi la password", spiegazione: "Protezione già attiva al salvataggio", pagina: .proposte,
           ancora: "impostazioni-pdf", parole: ["PDF", "protezione"]),
@@ -356,7 +356,7 @@ enum IndiceImpostazioni {
     ]
 
     private static let moduli: [V] = [
-        V(titolo: "Moduli da preparare", spiegazione: "Carica i PDF veri che usi per il canale indipendente",
+        V(titolo: "Moduli da preparare", spiegazione: "Carica i PDF veri che usi con i clienti",
           pagina: .moduli, parole: ["compila da solo", "PDF"]),
         V(titolo: "Conserva l'IBAN nel dossier", spiegazione: "Spento: l'IBAN si scrive solo sul modulo, ogni volta",
           pagina: .moduli, parole: ["conto", "banca"]),

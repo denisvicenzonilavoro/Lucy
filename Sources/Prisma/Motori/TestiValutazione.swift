@@ -94,7 +94,7 @@ struct TestiValutazione {
     static let consulente = "Denis Vicenzoni"
 
     var ruoloConsulente: String {
-        prodotto.canale == .alleanza ? "Consulente Alleanza Assicurazioni" : "Consulenza finanziaria"
+        CanaleLucy.nome
     }
 
     // MARK: - Riferimenti

@@ -17,10 +17,8 @@ struct TestiPrevidenza {
     static let avvertenza = "Stime illustrative in euro di oggi: la pensione pubblica va verificata sull'estratto conto INPS, la rendita sui coefficienti del piano."
 
     var ruoloConsulente: String {
-        let canali = Set(e.piani.map(\.posizione.canale))
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026)
+        CanaleLucy.nome
     }
 
     var canali: [Canale] { Canale.allCases.filter { c in e.piani.contains { $0.posizione.canale == c } } }

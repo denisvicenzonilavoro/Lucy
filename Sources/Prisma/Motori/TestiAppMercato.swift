@@ -93,14 +93,7 @@ enum TestiAppMercato {
             let verbo = impatto < 0 ? "perde" : "guadagna"
             var frase = clienti(n) + " con questa esposizione: il portafoglio di " + nome + " " + verbo + " circa "
                 + Formati.euro(abs(MotoreMercato.circa(impatto)))
-            let canali = Canale.allCases.filter { primo.perCanale[$0] != nil }
-            if canali.count > 1 {
-                let parti = canali.compactMap { k -> String? in
-                    guard let v = primo.perCanale[k] else { return nil }
-                    return "\(k.nomeBreve) " + Formati.euro(abs(MotoreMercato.circa(v)))
-                }
-                frase += " (" + parti.joined(separator: ", ") + ")"
-            }
+            // Un solo canale, quello di Lucy (25 novembre 2026): niente parti per canale
             if tipoSerie == .indiceAzionario, let quota = primo.quotaAzioni, quota > 0 {
                 frase += ": " + quotaInAzioni(quota)
             }
@@ -184,7 +177,7 @@ enum TestiAppMercato {
     static let importaTitolo = "Importa i dati del mercato"
     static let importaSpiegazione = "Un file CSV con «data;valore» per una serie (un indice, un tasso) oppure «data;isin;valore» per le quote dei fondi. Il formato è descritto in Design/mercato-csv.md."
     static let fonteFile = "Da dove viene il file"
-    static let fonteFileAiuto = "Per esempio «Estratto della piattaforma Alleanza», «Borsa Italiana», «SGR»: Lucy la cita accanto a ogni valore."
+    static let fonteFileAiuto = "Per esempio «Estratto della piattaforma della compagnia», «Borsa Italiana», «SGR»: Lucy la cita accanto a ogni valore."
     static let nomeSerie = "Nome della serie"
     static let tipoSerie = "Che cosa misura"
     static let unitaSerie = "Unità"
@@ -355,14 +348,7 @@ extension TestiAppMercato {
         if let impatto = toccato.impatto, abs(impatto) >= 1 {
             let verbo = impatto < 0 ? "perde" : "guadagna"
             var frase = "Il portafoglio di " + n + " " + verbo + " circa " + Formati.euro(abs(MotoreMercato.circa(impatto)))
-            let canali = Canale.allCases.filter { toccato.perCanale[$0] != nil }
-            if canali.count > 1 {
-                let parti = canali.compactMap { k -> String? in
-                    guard let v = toccato.perCanale[k] else { return nil }
-                    return "\(k.nomeBreve) " + Formati.euro(abs(MotoreMercato.circa(v)))
-                }
-                frase += " (" + parti.joined(separator: ", ") + ")"
-            }
+            // Un solo canale, quello di Lucy (25 novembre 2026): niente parti per canale
             if tipoSerie == .indiceAzionario, let quota = toccato.quotaAzioni, quota > 0 {
                 frase += ": " + quotaInAzioni(quota)
             }

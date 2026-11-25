@@ -1,41 +1,26 @@
 import Foundation
 
-/// Canale con cui il consulente lavora una posizione o una proposta.
+/// Canale con cui il consulente lavora una posizione o una proposta. Dal 25 novembre 2026 (decisione dell'utente) c'è
+/// un solo canale, quello di Lucy: il campo resta nei dati solo per compatibilità (i `rawValue` non cambiano) e non si
+/// mostra più come distinzione.
 enum Canale: String, Codable, CaseIterable, Identifiable {
     case alleanza
     case indipendente
 
     var id: String { rawValue }
 
-    /// La scritta lunga (PDF, etichetta estesa). Con i nomi di base «Alleanza Assicurazioni» e «Denis Vicenzoni ·
-    /// Consulenza finanziaria»; con un nome scelto dall'utente (migliorie d'uso 38) il nome scelto.
-    var nome: String {
-        let nomi = NomiCanaliCorrenti.valore
-        guard nomi.diBase(self) else { return nomi.nome(self) }
-        switch self {
-        case .alleanza: return "Alleanza Assicurazioni"
-        case .indipendente: return "Denis Vicenzoni · Consulenza finanziaria"
-        }
-    }
+    /// La scritta lunga (PDF, etichetta estesa). Dal 25 novembre 2026 (decisione dell'utente) c'è un solo canale, quello
+    /// di Lucy: entrambi i valori salvati danno la stessa scritta (`CanaleLucy.nome`).
+    var nome: String { CanaleLucy.nome }
 
-    /// Il nome scritto sull'etichetta: «Alleanza» e «Indipendente», o quelli scelti in Impostazioni › Profilo
-    /// (migliorie d'uso 38, `NomiCanaliCorrenti`).
-    var nomeBreve: String {
-        NomiCanaliCorrenti.valore.nome(self)
-    }
+    /// Il nome breve: lo stesso per entrambi i valori salvati (`CanaleLucy.nomeBreve`).
+    var nomeBreve: String { CanaleLucy.nomeBreve }
 
-    /// Il nome dentro una frase («Solo le posizioni indipendenti», «· indipendente»): con il nome di base il secondo
-    /// canale resta in minuscolo come prima; altrimenti il nome scelto, com'è scritto.
-    var nomeInFrase: String {
-        if self == .indipendente, NomiCanaliCorrenti.valore.diBase(.indipendente) { return "indipendente" }
-        return nomeBreve
-    }
+    /// Il nome dentro una frase: lo stesso per entrambi i valori salvati.
+    var nomeInFrase: String { CanaleLucy.nomeBreve }
 
-    /// L'etichetta porta il logo Alleanza: solo il primo canale e solo con il suo nome di base (con un nome scelto
-    /// c'è il pallino blu, come nella versione compatta). I colori non cambiano mai.
-    var conLogo: Bool {
-        self == .alleanza && NomiCanaliCorrenti.valore.diBase(.alleanza)
-    }
+    /// Nessun logo di compagnia sulle etichette: c'è un solo canale, quello di Lucy.
+    var conLogo: Bool { false }
 }
 
 /// Tinta dell'avatar del cliente (come le classi .os-avatar del template).

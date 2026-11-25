@@ -257,8 +257,8 @@ struct AppProdotti: View {
 
     /// L'aiuto di una voce del canale: il secondo clic sulla voce scelta toglie il filtro.
     static func aiutoCanale(_ c: Canale, attivo: Bool) -> String {
-        if attivo { return "Clic di nuovo per vedere tutti i canali" }
-        return c == .alleanza ? "Solo le schede \(c.nomeBreve)" : "Solo le schede \(c.nomeInFrase == "indipendente" ? "indipendenti" : c.nomeInFrase)"
+        // Un solo canale, quello di Lucy (25 novembre 2026): niente nomi dei canali
+        attivo ? "Clic di nuovo per vedere tutte le schede" : "Solo queste schede"
     }
 
     // MARK: - Elenco

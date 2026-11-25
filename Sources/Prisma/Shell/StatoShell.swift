@@ -3220,7 +3220,7 @@ enum VoceConfronto: Hashable {
             nuova.frequenza = .mensile
         }
         if let i = p.importo, p.versamentoMensile == nil { nuova.versamentoIniziale = i }
-        nuova.note = "Preparata con Lucy: \(p.perche) Scegli prodotto e canale e completa i dati."
+        nuova.note = "Preparata con Lucy: \(p.perche) Scegli il prodotto e completa i dati."
         salvaPosizione(nuova)
         aggiornaProposta(p.id, messaggio: messaggio) { $0.posizioneId = nuova.id }
         apriPosizione(nuova)

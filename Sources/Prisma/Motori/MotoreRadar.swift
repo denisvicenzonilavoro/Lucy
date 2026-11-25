@@ -322,9 +322,10 @@ enum TestiRadar {
 
     static func nomeBozza(_ m: PortafoglioModello) -> String { "Riequilibrio verso il modello \(m.nome)" }
 
-    /// Una riga per spostamento: «circa 20.000 € dalle azioni alle obbligazioni (Alleanza)».
+    /// Una riga per spostamento: «circa 20.000 € dalle azioni alle obbligazioni». Un solo canale, quello di Lucy
+    /// (25 novembre 2026): il canale non si scrive più, `conCanale` resta per chi chiama.
     static func spostamento(_ s: SpostamentoRadar, conCanale: Bool) -> String {
-        "circa \(circa(s.importo)) \(dalla(s.da)) \(alla(s.a))" + (conCanale ? " (\(s.canale.nomeBreve))" : "")
+        "circa \(circa(s.importo)) \(dalla(s.da)) \(alla(s.a))"
     }
 
     /// La frase del riequilibrio nel dettaglio: spostamenti, costi dai motori, ingresso che dipende dal prodotto.
@@ -334,7 +335,7 @@ enum TestiRadar {
         let elenco = v.spostamenti.prefix(3).map { spostamento($0, conCanale: canali) }
         var frase = "Spostare " + elenco.joined(separator: "; ")
         if v.spostamenti.count > 3 { frase += " e altri \(v.spostamenti.count - 3) spostamenti" }
-        frase += ", dentro il canale di ogni posizione."
+        frase += "."
         var costi: [String] = []
         if v.costo.penali > 0 { costi.append("penali d'uscita \(Formati.euro(v.costo.penali))") }
         if v.costo.imposte > 0 { costi.append("tasse sulle plusvalenze \(Formati.euro(v.costo.imposte))") }

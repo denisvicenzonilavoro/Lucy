@@ -43,9 +43,8 @@ struct TestiPatrimonio {
     }
 
     var ruoloConsulente: String {
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026)
+        CanaleLucy.nome
     }
 
     var titoloPercorso: String {

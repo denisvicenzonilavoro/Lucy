@@ -80,7 +80,7 @@ enum GuidaTesti {
                           "A sinistra hai l’indice del suo dossier: tutte le sezioni in vista, in tre gruppi.",
                           "Il dossier si apre sul suo quadro: le quattro aree in una riga ciascuna."])
         case .posizioni:
-            return guida("Tutto quello che i clienti hanno già e quello che proponi, diviso per canale. È il cuore di Lucy.",
+            return guida("Tutto quello che i clienti hanno già e quello che proponi. È il cuore di Lucy.",
                          ["Con «Tutti i clienti» vedi il portafoglio intero, il radar, la prova del fuoco e lo smontaggio.",
                           "Scegli un cliente in alto: l’elenco delle sue posizioni è nella prima schermata, le analisi nell’indice a sinistra.",
                           "Tocca una posizione per la sua scheda; con «Aggiungi» ne inserisci una nuova."])
@@ -189,7 +189,7 @@ enum GuidaTesti {
                 parole: [.riy, .rendimentoNetto, .penali])
         case .prodotti:
             return AiutoApp(
-                aCosaServe: "L'archivio dei prodotti che proponi, Alleanza e non solo: condizioni, costi, rischio e la fonte da cui vengono.",
+                aCosaServe: "L'archivio dei prodotti che proponi: condizioni, costi, rischio e la fonte da cui vengono.",
                 inBreve: "Le schede dei prodotti, con costi e fonti",
                 passi: ["Scegli una scheda o «Nuova scheda».",
                         "Controlla condizioni e costi, poi «Segna verificata oggi».",
@@ -245,7 +245,7 @@ enum GuidaTesti {
                 parole: [.prospettoReport, .riy, .sri])
         case .studio:
             return AiutoApp(
-                aCosaServe: "Il cruscotto del tuo lavoro: quanto hai guadagnato quest'anno, a che punto sono gli obiettivi, le proposte ferme e gli incassi dei prossimi mesi. Le cifre le calcola Lucy dalle posizioni Alleanza e dalle tue aliquote.",
+                aCosaServe: "Il cruscotto del tuo lavoro: quanto hai guadagnato quest'anno, a che punto sono gli obiettivi, le proposte ferme e gli incassi dei prossimi mesi. Le cifre le calcola Lucy dalle posizioni e dalle tue aliquote.",
                 inBreve: "Ricavi, obiettivi, proposte e incassi",
                 passi: ["In Impostazioni › Studio inserisci le tue aliquote e gli obiettivi dell'anno.",
                         "Apri Studio: il cruscotto somma ricavi e obiettivi dalle posizioni in essere.",
@@ -409,7 +409,7 @@ struct PaginaIntroduzione {
             app: [.clienti, .agenda, .incontri]),
         PaginaIntroduzione(
             titolo: "Che cosa ha, che cosa gli proponi",
-            testo: "In **Posizioni**, il cuore di Lucy, c'è tutto quello che il cliente ha già (*in essere*) e quello che gli stai proponendo (*in proposta*). Ogni posizione dice da quale canale viene.",
+            testo: "In **Posizioni**, il cuore di Lucy, c'è tutto quello che il cliente ha già (*in essere*) e quello che gli stai proponendo (*in proposta*).",
             punti: ["«Posizione» per ciò che ha già, «Proposta» per ciò che consigli.",
                     "Puoi leggerle dai documenti (KID, polizze, estratti conto) nella scheda del cliente.",
                     "Ogni parola tecnica ha la sua «i»: un clic e te la spiega."],

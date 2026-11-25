@@ -1032,7 +1032,7 @@ extension RoutineVera {
         var parti: [String] = []
         parti.append(pagate.isEmpty ? "nessuna parcella incassata" : "parcelle incassate \(Formati.euro(incassato))")
         if eventi.isEmpty {
-            parti.append("nessuna provvigione Alleanza")
+            parti.append("nessuna provvigione")
         } else {
             parti.append("provvigioni stimate \(Formati.euro(provvigioni))" + (senzaAliquota ? " (mancano alcune aliquote)" : ""))
         }
@@ -1194,7 +1194,7 @@ extension RoutineVera {
         let mese = formato("MMMM", cal).string(from: decorrenza)
         let dettaglio = "\(nomePosizione(p)): \(importoTesto(p)) da \(mese)"
         l.azioni.append(AzioneConferma(strumento: strumentoPosizioneFirmata, app: .posizioni, titolo: "Segno in essere «\(nomePosizione(p))» di \(c.nome)",
-                                       dettaglio: "\(importoTesto(p)) da \(mese) · \(p.canale.nomeBreve)",
+                                       dettaglio: "\(importoTesto(p)) da \(mese)",
                                        argomenti: ["cliente": c.id, "posizione": p.id, "decorrenza": RegistroStrumenti.isoData(decorrenza),
                                                    "stato_prima": p.stato.rawValue, "esito_prima": p.esito?.rawValue ?? ""]))
         l.righe.append("«\(nomePosizione(p))» da segnare in essere (da confermare)")

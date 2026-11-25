@@ -23,10 +23,7 @@ struct TestiTFR {
     static let avvertenza = "Stime con rendimenti e inflazione costanti e con le regole fiscali di oggi: non sono una previsione né un consiglio."
 
     var ruoloConsulente: String {
-        switch e.ipotesi.canale {
-        case .alleanza: return "Consulente Alleanza Assicurazioni"
-        case .indipendente: return "Consulenza finanziaria"
-        }
+        CanaleLucy.nome
     }
 
     var canali: [Canale] { [e.ipotesi.canale] }

@@ -273,7 +273,7 @@ struct SchedaTFR: View {
                     Label("Riparti dai dati del cliente", systemImage: "arrow.counterclockwise")
                 }
                 .buttonStyle(.appleSobrio)
-                .help("Toglie tutte le ipotesi salvate: retribuzione, anni, contributi, fondo, canale e aliquota ripartono dal dossier")
+                .help("Toglie tutte le ipotesi salvate: retribuzione, anni, contributi, fondo e aliquota ripartono dal dossier")
             }
             .padding(M.margineConsole)
         }

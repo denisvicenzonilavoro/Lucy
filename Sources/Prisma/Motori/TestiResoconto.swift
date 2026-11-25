@@ -22,10 +22,8 @@ struct TestiResoconto {
     static let avvertenza = "Valori dichiarati nelle posizioni alla data indicata: non sostituiscono gli estratti conto e le comunicazioni delle compagnie."
 
     var ruoloConsulente: String {
-        let canali = e.canaliPresenti
-        if canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026)
+        CanaleLucy.nome
     }
 
     /// "1 posizione", "8 posizioni".
@@ -187,6 +185,6 @@ struct TestiResoconto {
         ("Costi stimati", "costo annuo di gestione, trattenuto sul rendimento della gestione separata e imposta di bollo (0,20% del valore; 34,20 € per i conti correnti), sul valore attuale."),
         ("Imposte e netto", "polizze vita, fondi ed ETF: 26% sul guadagno al netto della penale, 12,5% sulla parte in titoli di Stato; nelle polizze il bollo maturato si paga al riscatto. Conti e depositi: interessi già tassati all'accredito."),
         ("Previdenza", "si tassano solo i contributi dedotti: 15% fino al 15° anno di partecipazione, poi 0,30 punti in meno ogni anno fino al 9%, per pensionamento, riscatti agevolati e spese sanitarie; 23% per anticipazioni casa e ulteriori esigenze e per i riscatti per altre cause."),
-        ("Quote", "per area e per canale calcolate sulle attività in essere, debiti esclusi."),
+        ("Quote", "per area calcolate sulle attività in essere, debiti esclusi."),
     ] + Semplificazioni.resoconto
 }

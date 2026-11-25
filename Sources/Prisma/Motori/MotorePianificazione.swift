@@ -236,34 +236,24 @@ enum MotorePianificazione {
     // MARK: - Note dell'appuntamento: l'ordine del giorno
 
     /// Le note del riesame: l'ordine del giorno (stesso formato di `MotoreRiesame.agenda`, la prima riga è
-    /// «Ordine del giorno:»), con il canale accanto ai punti quando il cliente segue tutti e due i canali,
-    /// poi il canale dell'incontro e l'ultimo contatto.
+    /// «Ordine del giorno:»), senza canale (un solo canale, quello di Lucy, dal 25 novembre 2026),
+    /// poi l'ultimo contatto.
     static func noteRiesame(punti: [Riesame.Punto], canali: [Canale], canale: Canale?,
                             ultimoContatto: Date?, dovutoDal: Date?, oggi: Date, massimo: Int = 8) -> String {
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichette né riga del
+        // canale nelle note (i parametri restano per chi chiama)
         var righe = ["Ordine del giorno:"]
-        let dueCanali = canale == nil && canali.count == 2
         if punti.isEmpty {
             righe.append("1. Fare il punto su posizioni, obiettivi e famiglia")
         } else {
             for (i, p) in punti.prefix(max(0, massimo)).enumerated() {
-                let etichetta = dueCanali ? p.canale.map { " (\($0.nomeBreve))" } ?? "" : ""
-                righe.append("\(i + 1). \(p.titolo)\(etichetta)")
+                righe.append("\(i + 1). \(p.titolo)")
             }
             if punti.count > massimo {
                 righe.append("…e altri \(punti.count - massimo) punti nel prospetto del riesame.")
             }
         }
         righe.append("")
-        switch canale {
-        case .alleanza?:
-            righe.append("Canale: Alleanza Assicurazioni.")
-        case .indipendente?:
-            righe.append("Canale: Denis Vicenzoni · Consulenza finanziaria.")
-        case nil:
-            if canali.count == 2 {
-                righe.append("Canale: Alleanza e indipendente. Proposte, documenti e firme restano distinti per canale.")
-            }
-        }
         let data: (Date) -> String = { Formati.dataEstesa.string(from: $0) }
         if let u = ultimoContatto {
             if let d = dovutoDal {

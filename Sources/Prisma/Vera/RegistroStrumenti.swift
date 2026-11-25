@@ -695,7 +695,7 @@ enum RegistroStrumenti {
         guard let nuova = giorno(a.testo("scadenza"), oggi: x.oggi, cal: x.calendario) else { return .domanda("Qual è la nuova scadenza?") }
         let prima = p.scadenza.map { " · prima: \(Formati.dataEstesa.string(from: $0))" } ?? " · prima non c'era"
         return .azione(AzioneConferma(strumento: posizioniScadenza, app: .posizioni, titolo: "Aggiorno la scadenza in Posizioni",
-                                      dettaglio: "«\(p.nome)» di \(c.nome) · \(p.canale.nomeBreve) · \(Formati.dataEstesa.string(from: nuova))\(prima)",
+                                      dettaglio: "«\(p.nome)» di \(c.nome) · \(Formati.dataEstesa.string(from: nuova))\(prima)",
                                       argomenti: ["posizione": p.id, "cliente": c.id, "scadenza": isoData(nuova)]))
     }
 
@@ -707,7 +707,7 @@ enum RegistroStrumenti {
         var dettaglio = "Con le ipotesi di \(c.nome)"
         if a.testo("posizione") != nil, case .trovato(let p) = posizione(a.testo("posizione"), di: c, x) {
             argomenti["posizione"] = p.id
-            dettaglio = "«\(p.nome)» di \(c.nome) · \(p.canale.nomeBreve)"
+            dettaglio = "«\(p.nome)» di \(c.nome)"
         }
         return .azione(AzioneConferma(strumento: simulatoreApri, app: .simulazioni, titolo: "Apro il simulatore", dettaglio: dettaglio, argomenti: argomenti))
     }

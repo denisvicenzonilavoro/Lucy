@@ -225,7 +225,7 @@ extension StatoShell {
     func copertinaFascicolo(_ c: Cliente, voci: [(String, Int)], pagine: Int, indiceInCopertina: Bool) -> CopertinaReport {
         let canali = Canale.allCases.filter { k in posizioniCliente(c.id).contains { $0.canale == k && $0.stato != .chiusa } }
         // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso ruolo per tutti
-        let ruolo = "Consulenza finanziaria"
+        let ruolo = CanaleLucy.nome
         // Per un appuntamento: la data e il tipo d'incontro
         let incontro = incontroDelFascicolo(c)
         let data = incontro?.inizio ?? Date()

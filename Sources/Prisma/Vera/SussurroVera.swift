@@ -415,7 +415,7 @@ enum SussurroVera {
         if altre == 1 { testo += ". Ne scade anche un'altra" } else if altre > 1 { testo += ". Ne scadono anche altre \(altre)" }
         return [VoceSussurro(chiave: "scadenza-\(p.id)-\(MotoreOccasioniMessaggi.timbro(s, cal: cal))", clienteId: f.cliente.id,
                              categoria: .scadenza, tono: rossa ? .rosso : .arancio, testo: testo + ".", azione: azione,
-                             fonte: "Posizioni, \(p.canale.nomeBreve)", rango: rossa ? 3 : 11, data: s)]
+                             fonte: "Posizioni", rango: rossa ? 3 : 11, data: s)]
     }
 
     /// Il riesame saltato (MotoreRiesame.dovuti, già scaduto): rosso.

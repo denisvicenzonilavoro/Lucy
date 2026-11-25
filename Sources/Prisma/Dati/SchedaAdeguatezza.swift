@@ -275,7 +275,7 @@ struct ImpostazioniConsegna: Codable, Equatable {
                       dettaglio: "Da conservare con la proposta", soloSostituzione: true),
         // Indipendente
         VoceDocumento(id: "ind-informativa", canale: .indipendente,
-                      titolo: "Informativa sul servizio di consulenza: natura indipendente, compensi, conflitti d'interesse",
+                      titolo: "Informativa sul servizio di consulenza: natura del servizio, compensi, conflitti d'interesse",
                       dettaglio: "MiFID II (Dir. 2014/65/UE), art. 24"),
         VoceDocumento(id: "ind-contratto", canale: .indipendente,
                       titolo: "Contratto di consulenza firmato"),

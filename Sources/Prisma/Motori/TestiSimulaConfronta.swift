@@ -43,8 +43,9 @@ enum TestiSimulaConfronta {
     static let costoAnnuoMia = "Costo annuo"
     static let canaleMia = "Canale"
     static let canaleNessuno = "Nessuno"
-    static let canaleAlleanza = "Alleanza"
-    static let canaleIndipendente = "Indip."
+    // Un solo canale, quello di Lucy (25 novembre 2026): la scelta del canale non si mostra più
+    static let canaleAlleanza = CanaleLucy.nomeBreve
+    static let canaleIndipendente = CanaleLucy.nomeBreve
 
     static func salvata(_ data: Date) -> String { "salvata il \(Formati.giornoMese.string(from: data))" }
 

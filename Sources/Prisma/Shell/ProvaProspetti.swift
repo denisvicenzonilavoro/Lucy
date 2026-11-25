@@ -130,8 +130,8 @@ enum ProvaProspetti {
                 let pf = MotorePortafoglio.calcola(dati.posizioni, clienti: dati.clienti)
                 let totale = spazi(Formati.euro(pf.riepilogo.attivita))
                 verifica("\(nome): patrimonio seguito \(totale) nel PDF", testo.contains(totale))
-                verifica("\(nome): tutti i clienti e i due canali nel PDF",
-                         dati.clienti.allSatisfy { testo.contains($0.nome) } && Canale.allCases.allSatisfy { testo.contains($0.nomeBreve) })
+                // Un solo canale, quello di Lucy (25 novembre 2026): niente etichette dei canali da cercare
+                verifica("\(nome): tutti i clienti nel PDF", dati.clienti.allSatisfy { testo.contains($0.nome) })
             case .riesame:
                 verifica("\(nome): ordine del giorno e domande nel PDF", testo.contains("Ordine del giorno") && testo.contains("Domande da fare"))
             case .valutazione, .resoconto, .sostituzione, .previdenza, .protezione, .obiettivo, .liquidita, .checkUp, .resistenza, .costi, .successione, .patrimonio, .fascicolo, .annoInsieme:
@@ -216,9 +216,6 @@ enum ProvaProspetti {
                 // Nel report l'occhiello spaziato non si legge come testo: si cerca il sottotitolo
                 if !t.andamenti.isEmpty {
                     verifica("\(nome): andamento rispetto all'atteso (\(t.andamenti.count) posizioni)", testo.lowercased().contains(report ? "ci aspettavamo" : "rispetto all"))
-                }
-                for c in t.e.canaliPresenti {
-                    verifica("\(nome): etichetta \(c.nomeBreve) nel PDF", testo.contains(c.nome))
                 }
                 if !report {
                     // Ogni posizione in essere compare nel prospetto
@@ -608,9 +605,6 @@ enum ProvaProspetti {
                 }
                 verifica("\(nome): le due posizioni, il cliente e il consulente",
                          testo.contains(spazi(pa.nome)) && testo.contains(spazi(pb.nome)) && testo.contains(cliente.nome) && testo.contains(TestiValutazione.consulente))
-                for c in Set([pa.canale, pb.canale]) {
-                    verifica("\(nome): etichetta \(c.nomeBreve) nel PDF", testo.contains(c.nome))
-                }
                 if let cartella { try? pdf.write(to: cartella.appendingPathComponent("\(nome).pdf")) }
             }
         }

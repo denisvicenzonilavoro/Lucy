@@ -65,7 +65,7 @@ enum ProvaAdeguatezza {
                 let s7 = e.controllo(.sostituzione)
                 controlla(s7?.semaforo == .giallo, "Sofia: sostituzione della polizza da motivare (\(s7?.semaforo.rawValue ?? "assente"))")
                 controlla(s7?.dettagli.contains { $0.contains("scade il") } == true, "Sofia: la polizza scade presto, valuta se attendere")
-                controlla(s7?.dettagli.contains { $0.contains("Cambio di canale") } == true, "Sofia: cambio di canale da Alleanza a indipendente")
+                controlla(s7?.dettagli.contains { $0.contains("Cambio di compagnia") } == true, "Sofia: cambio di compagnia da motivare")
                 controlla(e.consegnati == 4 && e.daConsegnare == 7, "Sofia: 4 documenti consegnati su 7 (\(e.consegnati) su \(e.daConsegnare))")
             } else {
                 controlla(false, "Sofia: scheda calcolata")
@@ -214,14 +214,14 @@ enum ProvaAdeguatezza {
     }
 
     /// Dentro `Prisma --prova-prospetti`: la scheda di Sofia (indipendente, con le scelte) e quella di Andrea
-    /// (Alleanza, senza scheda): due pagine A4 verticali, canale riconoscibile, firme e avvertenza prudente.
+    /// (senza scheda): due pagine A4 verticali, con la firma di Lucy, firme e avvertenza prudente.
     static func provaProspetti(_ verifica: (String, Bool, String) -> Void, cartella: URL?) {
         let statoScheda = StatoShell(persistente: false)
         prepara(statoScheda)
         let casi: [(nome: String, cliente: String, id: String, canale: String, esito: String)] = [
-            ("adeguatezza-sofia", "Sofia Romano", sofia, "Denis Vicenzoni · Consulenza finanziaria",
+            ("adeguatezza-sofia", "Sofia Romano", sofia, CanaleLucy.nome,
              TestiAdeguatezza.complessivo(.giallo)),
-            ("adeguatezza-andrea", "Andrea Conti", andrea, "Alleanza", TestiAdeguatezza.complessivo(.rosso)),
+            ("adeguatezza-andrea", "Andrea Conti", andrea, CanaleLucy.nome, TestiAdeguatezza.complessivo(.rosso)),
         ]
         for caso in casi {
             guard let p = posizione(statoScheda, caso.id), let d = statoScheda.documentoAdeguatezza(p) else {
