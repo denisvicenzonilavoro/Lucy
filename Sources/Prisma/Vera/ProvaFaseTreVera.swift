@@ -145,10 +145,10 @@ enum ProvaFaseTreVera {
                   && s.conversazione("marco").last?.lettura?.avvisi.contains { $0.tipo == .parola } == true,
                   "Seconda lettura: «Rileggi: …» in chat (un testo scritto a mano)")
         controlla(!s.chiediSecondaLettura("Rileggi il messaggio di ieri", chiave: "marco"), "Seconda lettura: senza i due punti non è un testo da rileggere")
-        controlla(s.chiediSecondaLettura("Vera, rileggi questo testo: Le confermo l'appuntamento di lunedì, senza rischi per lei.", chiave: "marco")
+        controlla(s.chiediSecondaLettura("Lucy, rileggi questo testo: Le confermo l'appuntamento di lunedì, senza rischi per lei.", chiave: "marco")
                   && s.smistaVera("Rileggi: Gentile Marco, le confermo gli appuntamenti di lunedì con un guadagno sicuro.", chiave: "marco")
                   && s.conversazione("marco").last?.lettura != nil,
-                  "Seconda lettura: «Vera, rileggi questo testo:» e un testo con giorni e appuntamenti arrivano alla seconda lettura")
+                  "Seconda lettura: «Lucy, rileggi questo testo:» e un testo con giorni e appuntamenti arrivano alla seconda lettura")
         // La scheda di adeguatezza di una proposta
         if let p = s.dati.posizioni.first(where: { s.esitoAdeguatezza($0) != nil }), let l = s.secondaLetturaAdeguatezza(p) {
             controlla(l.avvisi.contains { $0.tipo == .profilo }, "Seconda lettura: la scheda di adeguatezza porta i controlli del profilo")
@@ -210,7 +210,7 @@ enum ProvaFaseTreVera {
         s.dati.documenti.append(scansione)
         s.memorizzaTesto(scansione.id, [""])
         controlla(s.chiediCopertura("Cosa non copre la polizza di Andrea?", chiave: "giulia")
-                  && s.conversazione("giulia").last?.testo.contains("non ha testo") == true, "Cosa non copre: una scansione senza testo, Vera lo dice")
+                  && s.conversazione("giulia").last?.testo.contains("non ha testo") == true, "Cosa non copre: una scansione senza testo, Lucy lo dice")
     }
 
     // MARK: - 11 · Trova le differenze
@@ -249,7 +249,7 @@ enum ProvaFaseTreVera {
         s.eliminaDocumento(a.id)
         controlla(s.dati.confrontiDocumenti.isEmpty && s.copertura(a.id) == nil, "Differenze: eliminato il documento, vanno via anche confronto e coperture")
         controlla(s.chiediDifferenze("Confronta i KID di Andrea", chiave: "giulia")
-                  && s.conversazione("giulia").last?.testo.contains("servono due documenti") == true, "Differenze: senza due documenti Vera lo dice")
+                  && s.conversazione("giulia").last?.testo.contains("servono due documenti") == true, "Differenze: senza due documenti Lucy lo dice")
     }
 
     // MARK: - 16 · Il resoconto dell'incontro
@@ -366,7 +366,7 @@ enum ProvaFaseTreVera {
         m.resoconto = "i1"
         let mm = (try? e.encode(m)).flatMap { try? dec.decode(MessaggioVera.self, from: $0) }
         controlla(mm?.lettura == m.lettura && mm?.promesse == ["p1"] && mm?.confronto == "c1" && mm?.copertura == "d1" && mm?.resoconto == "i1",
-                  "Archivio: gli allegati della fase 3 nei messaggi di Vera")
+                  "Archivio: gli allegati della fase 3 nei messaggi di Lucy")
         // Un archivio vecchio senza i campi nuovi si legge
         let vecchio = #"{"versione":27}"#.data(using: .utf8)!
         let v = try? dec.decode(DatiPrisma.self, from: vecchio)

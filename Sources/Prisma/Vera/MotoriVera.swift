@@ -15,7 +15,7 @@ enum IstruzioniVera {
 
     /// Istruzioni della chat; in sviluppo (`swift run`) ripiega su una versione minima.
     static let chat: String =
-        testo("chat") ?? "Sei Vera, l'assistente di un consulente finanziario italiano (canali Alleanza Assicurazioni e indipendente). Rispondi in italiano usando solo i dati della scheda del cliente; non inventare numeri e distingui sempre il canale."
+        testo("chat") ?? "Sei Lucy, l'assistente di un consulente finanziario italiano (un solo canale, quello di Lucy). Rispondi in italiano usando solo i dati della scheda del cliente; non inventare numeri."
 
     /// La risposta breve della mini finestra di Vera.
     static let mini: String =
@@ -23,7 +23,7 @@ enum IstruzioniVera {
 
     /// Istruzioni della modalità conversazione (uso generale).
     static let conversazione: String =
-        testo("conversazione") ?? "Sei Vera, l'assistente di un consulente finanziario italiano. Rispondi in italiano, in modo naturale e utile, a domande di ogni tipo. Non inventare dati dei clienti."
+        testo("conversazione") ?? "Sei Lucy, l'assistente di un consulente finanziario italiano. Rispondi in italiano, in modo naturale e utile, a domande di ogni tipo. Non inventare dati dei clienti."
 }
 
 /// Un motore che scrive testo libero (Qwen sul Mac): lo usano chat, commenti e spiegazioni dei documenti.
@@ -59,6 +59,8 @@ enum MotoriVera {
         #if os(iOS)
         return generativo(vera, locale: locale)
         #else
+        // Mistral in cloud: un solo modello, quello delle impostazioni (niente scelta tra i modelli locali)
+        if vera.fornitore == .mistral { return generativo(vera, locale: locale) }
         if scelta.dove == .computerIA {
             // Senza lo stato del computer dell'IA (appena scollegato) risponde il modello del Mac
             guard let ia = computerIA else { return generativo(vera, locale: locale) }

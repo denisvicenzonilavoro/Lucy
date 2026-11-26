@@ -280,7 +280,7 @@ struct SchedaNotaVocaleArrivo: View {
                 CollegamentoConfermaApple(testo: TestiNotaVocale.scartaTutta) { stato.scartaNota(nota.id) }
                     .padding(.top, K.spazioPiede)
             }
-            Text(nota.conQwen ? TestiStatoVera.inVista(mac: "Capito da Vera", altrove: "Capito con Qwen") : "Capito con le regole di Lucy")
+            Text(nota.conQwen ? TestiStatoVera.inVista(mac: "Capito da Lucy", altrove: "Capito con Qwen") : "Capito con le regole di Lucy")
                 .carattereApple(S.piede)
                 .foregroundColor(S.colorePiede)
                 .padding(.top, S.piedeSopra)

@@ -196,7 +196,7 @@ extension AppProdotti {
                         Image(systemName: "chevron.down")
                     }
                 }
-                .help("Filtra per canale e per area")
+                .help("Filtra per area")
             }
             HStack {
                 Text(cliente.map { TestiCatalogo.perCliente(StatoShell.nomeBreve($0)) } ?? TestiCatalogo.iProdotti)
@@ -228,21 +228,14 @@ extension AppProdotti {
 
     /// «Filtra», o i filtri accesi («Alleanza · Previdenza»).
     var etichettaFiltro: String {
-        let parti = [stato.filtroCanaleProdotti?.nomeBreve, stato.filtroAreaProdotti?.nome].compactMap { $0 }
+        let parti = [stato.filtroAreaProdotti?.nome].compactMap { $0 }
         return parti.isEmpty ? TestiCatalogo.filtra : parti.joined(separator: " · ")
     }
 
     var vociFiltro: [VoceMenuAzioni] {
         let s = stato
-        var voci: [VoceMenuAzioni] = [
-            .sezione("Canale"),
-            .azione("Tutti i canali", spuntata: s.filtroCanaleProdotti == nil) { s.filtroCanaleProdotti = nil },
-        ]
-        for c in Canale.allCases {
-            voci.append(.azione(c.nomeBreve, spuntata: s.filtroCanaleProdotti == c) { s.filtroCanaleProdotti = c })
-        }
-        voci.append(.separatore)
-        voci.append(.sezione("Area"))
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente filtro di canale
+        var voci: [VoceMenuAzioni] = [.sezione("Area")]
         voci.append(.azione("Tutte le aree", spuntata: s.filtroAreaProdotti == nil) { s.filtroAreaProdotti = nil })
         for a in [AreaPosizione.investimento, .risparmio, .previdenza, .protezione] {
             voci.append(.azione(a.nome, spuntata: s.filtroAreaProdotti == a) { s.filtroAreaProdotti = a })
@@ -345,11 +338,8 @@ extension AppProdotti {
                     .carattereApple(KC.titoloScheda)
                     .foregroundColor(KC.testo)
                     .fixedSize(horizontal: false, vertical: true)
-                HStack(spacing: KC.spazioFiltri) {
-                    EtichettaCanale(canale: p.canale)
-                    if let esito, let nome {
-                        Pillola(testo: TestiCatalogo.esito(esito, nome: nome), tono: Self.tono(esito))
-                    }
+                if let esito, let nome {
+                    Pillola(testo: TestiCatalogo.esito(esito, nome: nome), tono: Self.tono(esito))
                 }
             }
             .layoutPriority(1)

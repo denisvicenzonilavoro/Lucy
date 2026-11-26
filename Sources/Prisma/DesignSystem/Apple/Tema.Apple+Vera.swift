@@ -40,7 +40,7 @@ extension Tema.Apple {
             static let superficie = Superficie.pannello
             static let raggio: CGFloat = Raggio.pannello
             /// Padding della barra laterale 14×12, in alto 30.
-            static let padding = EdgeInsets(top: Misura.Padding.barraLateraleVeraAlto, leading: 12, bottom: 14, trailing: 12)
+            static let padding = EdgeInsets(top: Misura.Padding.barraLateraleVeraAlto, leading: 20, bottom: 14, trailing: 20)
             /// La chat comincia a 316 da sinistra.
             static let spazioChat: CGFloat = 16
             /// In fondo alla colonna le card sfumano invece di finire tagliate.

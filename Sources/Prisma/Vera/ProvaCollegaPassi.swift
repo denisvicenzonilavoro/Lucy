@@ -17,7 +17,7 @@ enum ProvaCollegaPassi {
         let m = s.conversazione("marco").last
         controlla(m?.autore == .vera && m?.titolo == StatoShell.titoloPassi && m?.pianoPassi?.consigliata != nil
                   && m?.pianoPassi?.passi.allSatisfy { $0.stato == .fatto } == true,
-                  "Ragiona a passi in chat: il messaggio di Vera ha il piano eseguito e la scelta")
+                  "Ragiona a passi in chat: il messaggio di Lucy ha il piano eseguito e la scelta")
         controlla(m?.testo.hasPrefix(m?.pianoPassi?.spiegazione ?? "§") == true, "Ragiona a passi in chat: il testo della risposta è la spiegazione")
         controlla(m?.conferma?.stato == .daConfermare && m?.conferma?.azioni.first?.strumento == RegistroStrumenti.notaNuova
                   && s.dati.note.count == note && s.dati.attivita.count == attivita,
@@ -33,7 +33,7 @@ enum ProvaCollegaPassi {
         controlla(s.chiediPassi("Ha 400 € al mese: vuole proteggere la famiglia e gli studi. Come li divido?", chiave: VeraPortafoglio.chiave)
                   && s.conversazione(VeraPortafoglio.chiave).last?.pianoPassi == nil
                   && s.conversazione(VeraPortafoglio.chiave).last?.testo.hasPrefix("Di quale cliente") == true,
-                  "Ragiona a passi in chat: nel portafoglio senza un nome Vera chiede di quale cliente, non sceglie a caso")
+                  "Ragiona a passi in chat: nel portafoglio senza un nome Lucy chiede di quale cliente, non sceglie a caso")
         s.veraPortafoglio = false
         let rifatto = s.conversazione("marco").count
         if let p = m?.pianoPassi { s.rifaiPassi(p, chiave: "marco") }

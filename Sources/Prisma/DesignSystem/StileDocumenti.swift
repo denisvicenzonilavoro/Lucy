@@ -5,13 +5,13 @@ import UIKit
 #endif
 import SwiftUI
 
-// Stile dei documenti per i clienti (report A4 orizzontale e prospetto A4 verticale).
-// È lo stile scelto da Denis con i suoi esempi (Orizzonte Valore, ottobre 2026): pulito e moderno.
-// Testi in SF del sistema, verde, blu e rosso per i tre scenari, ardesia e viola per Gestione separata
-// e Fondo Interno. I documenti restano su carta chiara con colori fissi e opachi, anche con l'app in scuro.
+// Stile dei documenti per i clienti (report A4 orizzontale e prospetto A4 verticale), nello stile Lucy su carta
+// (Design/template-carta.html, `.a4`, dal 25 novembre 2026): New York per titoli e cifre grandi, SF Mono per occhielli
+// ed etichette, SF Pro per il testo; inchiostro, matita e la sottolineatura d'oro; verde, blu stilografica e rosso per i
+// tre scenari. I documenti restano su carta bianca con colori fissi e opachi, anche con l'app in scuro.
 
-/// I colori di un documento per i clienti. Due tavolozze: "moderna" per il prospetto (lo stile degli
-/// esempi di Denis) e "Prisma" per il report (carta avorio, copertina blu notte con il logo bianco).
+/// I colori di un documento per i clienti. Due tavolozze con la stessa veste Lucy: "moderna" per il prospetto (carta
+/// bianca) e "prisma" per il report (carta appena più calda, copertina di carta con lo scontrino delle cifre).
 /// I componenti comuni la leggono dall'ambiente.
 struct PaletteDocumento {
     // Foglio (sfumatura radiale dall'alto a sinistra)
@@ -68,10 +68,13 @@ struct PaletteDocumento {
     /// Canali nei grafici: blu Alleanza e ambra/cuoio dell'indipendente, come le etichette da stampa.
     var alleanza: Color
     var indipendente: Color
+    /// La sottolineatura dorata dello stile Lucy (titoli, cifre in evidenza, barra dei riquadri).
+    var oro: Color
 
     func area(_ a: AreaPosizione) -> Color { aree[a.ordine % aree.count] }
 
-    func canale(_ c: Canale) -> Color { c == .alleanza ? alleanza : indipendente }
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore per tutti.
+    func canale(_ c: Canale) -> Color { alleanza }
 
     func scenario(_ t: TipoScenario) -> Color {
         switch t {
@@ -96,72 +99,73 @@ struct PaletteDocumento {
 
 extension Colori {
     enum Documento {
-        /// Prospetto: pulito e moderno, come gli esempi di Denis (Orizzonte Valore, ottobre 2026).
-        static let moderna = PaletteDocumento(
-            foglio: .white, foglioFine: .white,
-            copertina: Color(hex: "#0F2433"), copertinaFine: Color(hex: "#1E3A4F"), copertinaRiquadro: .white,
-            copertinaEtichetta: Color(hex: "#5f6b7a"), copertinaTesto: Color(hex: "#c9d6e1"), copertinaFilo: Color(hex: "#ffffff29"),
-            ombraCartellino: Color(hex: "#00000040"),
-            titolo: Color(hex: "#1d2737"), testo: Color(hex: "#2b3342"), tenue: Color(hex: "#5f6b7a"),
-            occhiello: Color(hex: "#5f6b7a"), marchio: Color(hex: "#1d2737"),
-            riquadro: Color(hex: "#f2f4f7"), riquadroBordo: .clear, riquadroLuce: .clear,
-            filetto: Color(hex: "#e3e6ea"), filettoForte: Color(hex: "#1d2737"),
-            evidenza: Color(hex: "#e7ecf4"), evidenzaTitolo: Color(hex: "#2f5ea8"), barraLaterale: Color(hex: "#1f3a5f"),
-            bloccato: Color(hex: "#eef0f3"), griglia: Color(hex: "#e6e8ec"), premio: Color(hex: "#7d8796"),
-            favorevole: Color(hex: "#2e7d5b"), intermedio: Color(hex: "#2f5ea8"), sfavorevole: Color(hex: "#c0553a"),
-            favorevoleFondo: Color(hex: "#e6efe9"), intermedioFondo: Color(hex: "#e5ebf3"), sfavorevoleFondo: Color(hex: "#f6e7e4"),
-            gestioneSeparata: Color(hex: "#6f86a6"), fondoInterno: Color(hex: "#c4913f"), fondi: Color(hex: "#7a6fb0"),
-            negativo: Color(hex: "#c0553a"), positivo: Color(hex: "#2e7d5b"),
-            penaleForte: Color(hex: "#b5513a"), penaleMedia: Color(hex: "#c9806f"), penaleLieve: Color(hex: "#e0b5ab"),
-            cascataTotale: Color(hex: "#8e98a8"), cascataPiu: Color(hex: "#7fb093"), cascataMeno: Color(hex: "#d3897a"),
-            // Liquidità in verde acqua: l'ocra di prima sembrava il cuoio dell'indipendente
-            aree: [Color(hex: "#2f5ea8"), Color(hex: "#2e7d5b"), Color(hex: "#6f86a6"), Color(hex: "#8a6fb0"),
-                   Color(hex: "#3a9e9a"), Color(hex: "#9aa3ad"), Color(hex: "#c0553a")],
-            alleanza: Tema.Colore.canaleAlleanzaStampa, indipendente: Tema.Colore.canaleIndipendenteStampa
-        )
+        /// Lo stile Lucy su carta (Design/template-carta.html, `.a4`): carta bianca, inchiostro #15181F, matita
+        /// #6F685B, sottolineature d'oro #DDA918, rosso #AE3D2B e verde #2C6A4D. Colori fissi e opachi: il documento
+        /// resta chiaro anche con l'app in scuro. Prospetto (A4 verticale) su carta bianca.
+        static let moderna = lucy(foglio: .white, foglioFine: .white)
 
-        /// Report: l'identità di Prisma. Carta avorio con la sfumatura delle slide, inchiostro blu ardesia,
-        /// copertina blu notte del tema (#0F2433 → #1E3A4F) con il logo bianco e i cartellini bianchi;
-        /// scenari nei toni dell'app (salvia, blu Prisma, terracotta), Gestione separata e Fondo
-        /// Interno in ardesia e viola.
-        static let prisma = PaletteDocumento(
-            foglio: Color(hex: "#fffef8"), foglioFine: Color(hex: "#f1eee4"),
-            copertina: Color(hex: "#0F2433"), copertinaFine: Color(hex: "#1E3A4F"), copertinaRiquadro: .white,
-            copertinaEtichetta: Color(hex: "#6a7f8c"), copertinaTesto: Color(hex: "#c9d6e1"), copertinaFilo: Color(hex: "#ffffff29"),
-            ombraCartellino: Color(hex: "#00000040"),
-            titolo: Color(hex: "#253f4b"), testo: Color(hex: "#4f605d"), tenue: Color(hex: "#748a8a"),
-            occhiello: Color(hex: "#7e9996"), marchio: Color(hex: "#3d626a"),
-            riquadro: Color(hex: "#fbf9f1"), riquadroBordo: Color(hex: "#d8d6ca"), riquadroLuce: .white,
-            filetto: Color(hex: "#d6dcd5"), filettoForte: Color(hex: "#3d626a"),
-            evidenza: Color(hex: "#eef2ec"), evidenzaTitolo: Color(hex: "#3d626a"), barraLaterale: Color(hex: "#3d626a"),
-            bloccato: Color(hex: "#ece9df"), griglia: Color(hex: "#e2e0d6"), premio: Color(hex: "#8d9a93"),
-            favorevole: Color(hex: "#4d7f5b"), intermedio: Color(hex: "#2f6e9b"), sfavorevole: Color(hex: "#a65a3c"),
-            favorevoleFondo: Color(hex: "#eaf0e6"), intermedioFondo: Color(hex: "#e6eef2"), sfavorevoleFondo: Color(hex: "#f5e9e1"),
-            gestioneSeparata: Color(hex: "#6d8a96"), fondoInterno: Color(hex: "#b98a4e"), fondi: Color(hex: "#7a6fb0"),
-            negativo: Color(hex: "#a65a3c"), positivo: Color(hex: "#4d7f5b"),
-            penaleForte: Color(hex: "#a65a3c"), penaleMedia: Color(hex: "#c28b6c"), penaleLieve: Color(hex: "#dfc0a8"),
-            cascataTotale: Color(hex: "#9aa6a2"), cascataPiu: Color(hex: "#8fb194"), cascataMeno: Color(hex: "#cf9c84"),
-            aree: [Color(hex: "#2f6e9b"), Color(hex: "#4d7f5b"), Color(hex: "#6d8a96"), Color(hex: "#8b6f93"),
-                   Color(hex: "#4a9590"), Color(hex: "#a89f8c"), Color(hex: "#a65a3c")],
-            alleanza: Tema.Colore.canaleAlleanzaStampa, indipendente: Tema.Colore.canaleIndipendenteStampa
-        )
+        /// Report (A4 orizzontale): la stessa veste, su una carta appena più calda (resta chiara come il bianco).
+        static let prisma = lucy(foglio: Color(hex: "#FFFEFB"), foglioFine: Color(hex: "#FCF9F1"))
+
+        /// La tavolozza Lucy su carta, con il foglio dato. Un solo canale, Lucy: i due colori dei canali sono lo
+        /// stesso inchiostro blu della stilografica.
+        private static func lucy(foglio: Color, foglioFine: Color) -> PaletteDocumento {
+            PaletteDocumento(
+                foglio: foglio, foglioFine: foglioFine,
+                copertina: Color(hex: "#FFFEFB"), copertinaFine: Color(hex: "#F8F4EA"), copertinaRiquadro: .white,
+                copertinaEtichetta: Carta.matita, copertinaTesto: Carta.inchiostro2, copertinaFilo: Color(hex: "#D9D4C7"),
+                ombraCartellino: Color(hex: "#15181F14"),
+                titolo: Carta.inchiostro, testo: Color(hex: "#2E323B"), tenue: Carta.matita,
+                occhiello: Carta.matita, marchio: Carta.inchiostro,
+                riquadro: Color(hex: "#FAF7EF"), riquadroBordo: Color(hex: "#E4DFD2"), riquadroLuce: .clear,
+                filetto: Color(hex: "#E4E0D6"), filettoForte: Carta.inchiostro,
+                evidenza: Color(hex: "#FBF4DA"), evidenzaTitolo: Color(hex: "#8A6A0A"), barraLaterale: Carta.oro,
+                bloccato: Color(hex: "#F1EEE6"), griglia: Color(hex: "#ECE8DF"), premio: Color(hex: "#8C8578"),
+                favorevole: Carta.verde, intermedio: Carta.stilografica, sfavorevole: Carta.rosso,
+                favorevoleFondo: Color(hex: "#E6EFE9"), intermedioFondo: Color(hex: "#E7EBF2"), sfavorevoleFondo: Color(hex: "#F5E7E3"),
+                gestioneSeparata: Color(hex: "#6D7F94"), fondoInterno: Color(hex: "#C7961A"), fondi: Color(hex: "#7A6FB0"),
+                negativo: Carta.rosso, positivo: Carta.verde,
+                penaleForte: Carta.rosso, penaleMedia: Color(hex: "#C98473"), penaleLieve: Color(hex: "#E3BDB3"),
+                cascataTotale: Color(hex: "#9C978C"), cascataPiu: Color(hex: "#86AE95"), cascataMeno: Color(hex: "#D49A8A"),
+                aree: [Carta.stilografica, Carta.verde, Color(hex: "#6D7F94"), Color(hex: "#7A6FB0"),
+                       Color(hex: "#3A8C86"), Color(hex: "#A49C8A"), Carta.rosso],
+                alleanza: Carta.stilografica, indipendente: Carta.stilografica,
+                oro: Carta.oro
+            )
+        }
+
+        /// I colori di base dello stile Lucy su carta (`.a4` del template), fissi.
+        enum Carta {
+            static let inchiostro = Color(hex: "#15181F")
+            static let inchiostro2 = Color(hex: "#4E5462")
+            static let matita = Color(hex: "#6F685B")
+            static let oro = Color(hex: "#DDA918")
+            static let rosso = Color(hex: "#AE3D2B")
+            static let verde = Color(hex: "#2C6A4D")
+            /// Le note e la linea di mezzo: il blu della stilografica.
+            static let stilografica = Color(hex: "#2B4C7E")
+            /// Lo scontrino della copertina: carta del cartoncino, filo tratteggiato.
+            static let scontrino = Color(hex: "#FFFDF8")
+            static let filoScontrino = Color(hex: "#15181F40")
+        }
     }
 }
 
 extension Colori.Documento {
-    /// Il logo di Prisma su carta (sempre scuro) e sulla copertina blu notte (bianco). Colori fissi.
+    /// Il marchio Lucy su carta: sempre a inchiostro, anche sulla copertina (che è di carta, non più blu notte).
     static let logo = Tema.Colore.logoStampa
-    static let logoCopertina = Color.white
+    static let logoCopertina = Tema.Colore.logoStampa
     /// Trasparenza del logo in filigrana nelle pagine del report e sulla copertina.
-    static let filigrana: Double = 0.06
-    static let filigranaCopertina: Double = 0.05
+    static let filigrana: Double = 0.04
+    static let filigranaCopertina: Double = 0.035
 
-    /// Toni della carta delle pagine del report (.slide-tone-0…3 del template): avorio, crema, salvia, cielo.
+    /// Toni della carta delle pagine del report: carta chiara, appena calda, senza le tinte salvia e cielo di prima
+    /// (i PDF restano su carta bianca).
     static let toniReport: [(Color, Color)] = [
-        (Color(hex: "#fffef8"), Color(hex: "#f1eee4")),
-        (Color(hex: "#fffefa"), Color(hex: "#f1ede0")),
-        (Color(hex: "#fdfefb"), Color(hex: "#eaf0e9")),
-        (Color(hex: "#fdfcf6"), Color(hex: "#e9eef0")),
+        (Color(hex: "#FFFEFB"), Color(hex: "#FCF9F1")),
+        (Color(hex: "#FFFEFB"), Color(hex: "#FBF8EF")),
+        (Color(hex: "#FFFFFD"), Color(hex: "#FAF8F2")),
+        (Color(hex: "#FFFEFB"), Color(hex: "#FBF9F3")),
     ]
 }
 
@@ -192,30 +196,40 @@ extension Tipo {
             FontPiattaforma.systemFont(ofSize: dimensione)
         }
 
+        /// Lo stile Lucy (Design/template-carta.html, `.a4`): New York per titoli e cifre grandi, SF Mono per
+        /// occhielli, etichette e piede, SF Pro per il testo. Dimensioni fisse.
+        static func serif(_ dimensione: CGFloat, _ peso: Font.Weight = .medium) -> Font {
+            Font.system(size: dimensione, weight: peso, design: .serif)
+        }
+
+        static func mono(_ dimensione: CGFloat, _ peso: Font.Weight = .medium) -> Font {
+            Font.system(size: dimensione, weight: peso, design: .monospaced)
+        }
+
         // Comuni (valori predefiniti dei componenti)
-        static let occhiello = sf(7.5, grassetto: true)
+        static let occhiello = mono(7)
         static let corpo = sf(10.5)
         static let corpoForte = sf(10.5, grassetto: true)
         static let piccolo = sf(8.5)
         static let minimo = sf(7)
 
         // Prospetto (A4 verticale)
-        static let pOcchiello = sf(6.5, grassetto: true)
-        static let pTitolo = sf(20, .medium)
+        static let pOcchiello = mono(6.3)
+        static let pTitolo = serif(22)
         static let pSottotitolo = sf(8.5)
-        static let pSezione = sf(12.5, .medium)
-        static let pSottosezione = sf(10, .medium)
+        static let pSezione = serif(13)
+        static let pSottosezione = serif(10.5)
         static let pCorpo = sf(7.8)
         static let pCorpoForte = sf(7.8, grassetto: true)
         static let pTabella = sf(7.2)
         static let pTabellaForte = sf(7.2, grassetto: true)
-        static let pTabellaTesta = sf(6.5, grassetto: true)
+        static let pTabellaTesta = sf(6.4, .semibold)
         static let pTabellaNota = sf(5.8)
-        static let pKpiEtichetta = sf(6.6)
-        static let pKpiValore = sf(15, .medium)
+        static let pKpiEtichetta = mono(5.9)
+        static let pKpiValore = serif(16)
         static let pKpiNota = sf(6)
-        static let pValoreScenario = sf(11.5, .medium)
-        static let pPiede = sf(6)
+        static let pValoreScenario = serif(12)
+        static let pPiede = mono(5.4, .regular)
         static let pAssi = sf(6)
 
         static let nsCorpo = nsSF(10.5)
@@ -229,37 +243,39 @@ extension Tipo {
             Documento.sf(dimensione, grassetto: grassetto)
         }
 
-        static let testata = Documento.sf(6.5)
-        static let capitolo = Documento.sf(7, grassetto: true)
-        static let piede = Documento.sf(5.8)
-        static let copertinaOcchiello = Documento.sf(7.5, grassetto: true)
-        static let copertinaTitolo = sf(32)
-        static let copertinaSottotitolo = sf(13)
-        static let copertinaNomi = sf(15)
+        static let testata = Documento.mono(6.3)
+        static let capitolo = Documento.mono(7)
+        static let piede = Documento.mono(5.6, .regular)
+        static let copertinaOcchiello = Documento.mono(8)
+        static let copertinaTitolo = Documento.serif(40)
+        static let copertinaSottotitolo = Documento.serif(14, .regular)
+        static let copertinaNomi = Documento.serif(21)
         static let copertinaConsulente = Documento.sf(10.5, grassetto: true)
         static let copertinaRuolo = Documento.sf(9)
-        static let copertinaEtichetta = Documento.sf(7.5, grassetto: true)
-        static let copertinaValore = sf(14)
+        static let copertinaEtichetta = Documento.mono(7.2)
+        static let copertinaValore = Documento.serif(17)
+        /// Le righe minori dello scontrino della copertina (dopo la cifra grande).
+        static let copertinaValoreMinore = Documento.sf(9.5)
         /// L'indice sulla copertina del fascicolo (migliorie d'uso 70): il titolo del report e la sua pagina.
-        static let indiceCopertina = sf(10.5)
-        static let paginaIndiceCopertina = Documento.sf(9)
-        static let occhiello = Documento.sf(7, grassetto: true)
-        static let titoloSlide = sf(23)
+        static let indiceCopertina = Documento.serif(11.5, .regular)
+        static let paginaIndiceCopertina = Documento.mono(9, .regular)
+        static let occhiello = Documento.mono(7)
+        static let titoloSlide = Documento.serif(24)
         static let sottotitoloSlide = Documento.sf(10)
         static let corpo = sf(10.5)
         static let corpoForte = sf(10.5, grassetto: true)
         static let piccolo = Documento.sf(8)
         static let minimo = Documento.sf(6.8)
-        static let numeroGrande = sf(22)
-        static let numeroMedio = sf(17)
-        static let numeroPiccolo = sf(13)
-        static let titoloRiquadro = sf(12.5, grassetto: true)
-        static let scenarioTitolo = sf(13, grassetto: true)
-        static let scenarioRendimento = sf(25)
-        static let sintesiNumero = sf(30)
+        static let numeroGrande = Documento.serif(24)
+        static let numeroMedio = Documento.serif(18)
+        static let numeroPiccolo = Documento.serif(13.5)
+        static let titoloRiquadro = Documento.serif(13, .semibold)
+        static let scenarioTitolo = Documento.serif(13, .semibold)
+        static let scenarioRendimento = Documento.serif(26)
+        static let sintesiNumero = Documento.serif(32)
         /// La lettera del consulente dopo la copertina.
-        static let lettera = sf(11.5)
-        static let letteraFirma = Font.system(size: 19, weight: .light).italic()
+        static let lettera = Documento.serif(12, .regular)
+        static let letteraFirma = Font.system(size: 19, weight: .light, design: .serif).italic()
     }
 }
 
@@ -309,5 +325,54 @@ extension Misure {
         static let larghezzaIndiceCopertina: CGFloat = 280
         static let rigaIndiceCopertina: CGFloat = 20
         static let puntiReport = 5
+    }
+}
+
+// MARK: - Lucy su carta: un solo canale, la sottolineatura d'oro
+
+private struct ChiaveCanaleUnicoLucy: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// true nei prospetti e nei report di Prospetti: c'è un solo canale, Lucy. Le etichette dei canali da stampa non
+    /// si disegnano e le tabelle divise per canale diventano una tabella sola (i tipi interni restano).
+    var canaleUnicoLucy: Bool {
+        get { self[ChiaveCanaleUnicoLucy.self] }
+        set { self[ChiaveCanaleUnicoLucy.self] = newValue }
+    }
+}
+
+extension Misure.Documento {
+    /// La sottolineatura d'oro sotto i titoli (stile Lucy): spessore e lunghezza nei prospetti e nei report.
+    static let spessoreOro: CGFloat = 1.6
+    static let lunghezzaOroProspetto: CGFloat = 34
+    static let lunghezzaOroReport: CGFloat = 46
+    static let lunghezzaOroCopertina: CGFloat = 120
+    /// Lo scontrino della copertina del report: larghezza, margini, raggio e trattino del filo.
+    static let larghezzaScontrino: CGFloat = 268
+    static let margineScontrino: CGFloat = 18
+    static let raggioScontrino: CGFloat = 3
+    static let trattinoScontrino: CGFloat = 3
+}
+
+/// La sottolineatura d'oro disegnata a mano dello stile Lucy, ferma (sulla carta stampata niente movimento): una
+/// curva appena ondulata, con le punte arrotondate.
+struct SottolineaturaOro: View {
+    @Environment(\.paletteDocumento) private var p
+    var lunghezza: CGFloat = Misure.Documento.lunghezzaOroProspetto
+    var spessore: CGFloat = Misure.Documento.spessoreOro
+
+    var body: some View {
+        let h = spessore * 2.4
+        let l = lunghezza
+        Path { q in
+            q.move(to: CGPoint(x: 0, y: h * 0.62))
+            q.addCurve(to: CGPoint(x: l, y: h * 0.38),
+                       control1: CGPoint(x: l * 0.32, y: h * 0.18),
+                       control2: CGPoint(x: l * 0.66, y: h * 0.92))
+        }
+        .stroke(p.oro, style: StrokeStyle(lineWidth: spessore, lineCap: .round))
+        .frame(width: l, height: h)
     }
 }

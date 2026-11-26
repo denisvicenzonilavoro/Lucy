@@ -212,9 +212,9 @@ private struct CorpoSimulatoreProtezioneApple: View {
                 .buttonStyle(.applePrimarioGrande)
                 .disabled(!salvabile)
                 .help(salvabile
-                      ? "Crea in Posizioni una proposta di temporanea caso morte da \(Formati.euro(aggiunta)), sul canale scelto"
+                      ? "Crea in Posizioni una proposta di temporanea caso morte da \(Formati.euro(aggiunta))"
                       : "Sposta il cursore per scegliere il capitale da aggiungere")
-            Button("Chiedi a Vera di spiegarlo", action: chiediVera)
+            Button("Chiedi a Lucy di spiegarlo", action: chiediVera)
                 .buttonStyle(.appleGrande)
                 .disabled(stato.veraInCorso)
             #if os(macOS)

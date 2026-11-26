@@ -78,7 +78,7 @@ enum ProvaPalestraVera {
                               analisi: s.analisi360(scarno.id), analisiSalvata: false, simulazioni: [])
         let povera = PalestraVera.scheda(fonte)
         controlla(povera.scarna && povera.testo.contains("Lucy sa poco") && povera.cifre.isEmpty,
-                  "Palestra: profilo scarno, Vera lo sa e non inventa (nessuna cifra)")
+                  "Palestra: profilo scarno, Lucy lo sa e non inventa (nessuna cifra)")
         var inventato = ProfiloInventatoPalestra()
         inventato.eta = "45"
         inventato.lavoro = "Commerciante"
@@ -141,12 +141,12 @@ enum ProvaPalestraVera {
             controlla(false, "Palestra: risposta valida letta")
         }
         controlla(PalestraVera.leggi("Certo! Ecco la mia obiezione: ho paura.", ammesse: ammesse, primo: true, ultimo: false)
-                    == .scartata("La risposta di Vera non era un JSON leggibile.")
+                    == .scartata("La risposta di Lucy non era un JSON leggibile.")
                   && { if case .scartata = PalestraVera.leggi("{\"replica\": \"ok\", ", ammesse: ammesse, primo: false, ultimo: false) { return true }; return false }(),
                   "Palestra: un JSON non valido si scarta")
         let inventata = turno(giudizio: "buona", replica: "Ma la banca mi dà il 4,5% senza rischi.", convinta: 45,
                               prossima: "E i costi?", suggerite: suggeriteBuone)
-        controlla(PalestraVera.leggi(inventata, ammesse: ammesse, primo: false, ultimo: false) == .scartata("Vera ha scritto una cifra che non viene da Lucy."),
+        controlla(PalestraVera.leggi(inventata, ammesse: ammesse, primo: false, ultimo: false) == .scartata("Lucy ha scritto una cifra che non viene da Lucy."),
                   "Palestra: una replica con una cifra che non viene dai motori si rifiuta")
         // Una cifra con i decimali: un intero piccolo come «8» può stare nella scheda di oggi (la data, un'età, i mesi)
         let obiezioneInventata = primoTurno(obiezione: "Ho letto che rende il 7,3% l'anno, è vero?", suggerite: suggeriteBuone)
@@ -275,7 +275,7 @@ enum ProvaPalestraVera {
             }
         }
         controlla(errore?.contains("cifra che non viene da Lucy") == true,
-                  "Palestra, Qwen finto: due risposte con cifre inventate, il turno non passa e Vera lo dice")
+                  "Palestra, Qwen finto: due risposte con cifre inventate, il turno non passa e Lucy lo dice")
     }
 
     #if os(macOS)
@@ -434,9 +434,9 @@ enum ProvaPalestraVera {
         var ignoto = scheda
         ignoto.femminile = nil
         let inventato = PalestraVera.scheda(inventato: ProfiloInventatoPalestra(eta: "45", lavoro: "", timori: ""))
-        controlla(maschio.femminile == false && TestiPalestra.recitata(maschio).hasSuffix("recitato da Vera")
-                  && TestiPalestra.recitata(ignoto).hasSuffix("recitata da Vera")
-                  && TestiPalestra.recitata(inventato).hasSuffix("recitata da Vera"),
+        controlla(maschio.femminile == false && TestiPalestra.recitata(maschio).hasSuffix("recitato da Lucy")
+                  && TestiPalestra.recitata(ignoto).hasSuffix("recitata da Lucy")
+                  && TestiPalestra.recitata(inventato).hasSuffix("recitata da Lucy"),
                   "Palestra 56: «recitato» per un cliente uomo, «recitata» con il genere sconosciuto e il profilo inventato")
         // Il cliente della barra e «Cambia»
         let barra = StatoShell(persistente: false)

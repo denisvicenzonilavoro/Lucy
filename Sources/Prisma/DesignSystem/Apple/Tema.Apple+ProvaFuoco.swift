@@ -188,9 +188,8 @@ extension Tema.Apple.Posizioni {
             static let spazioCanali: CGFloat = 5
             /// Nella riga stretta il canale è il solo pallino nel suo colore.
             static let pallinoCanale: CGFloat = Tema.Apple.Misura.Controllo.pallinoCanale + 2
-            static func coloreCanale(_ c: Canale) -> Color {
-                c == .alleanza ? K.canaleAlleanza : K.canaleIndipendente
-            }
+            /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore per tutti.
+            static func coloreCanale(_ c: Canale) -> Color { K.inchiostro2 }
             /// «≈» accanto a «dopo» quando la composizione è stimata.
             static let stima = C(dimensione: 13, peso: .semibold)
             static let coloreStima = K.inchiostro2

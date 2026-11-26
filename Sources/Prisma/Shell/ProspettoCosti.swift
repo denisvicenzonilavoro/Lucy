@@ -62,8 +62,9 @@ private struct PaginaCostiOggi: View {
                 ColonnaDoc(titolo: "Posizione", sottotitolo: "tipologia", peso: 2.3, destra: false), ColonnaDoc(titolo: "Valore", peso: 0.9),
                 ColonnaDoc(titolo: "Ingresso", peso: 0.7), ColonnaDoc(titolo: "Annuo", sottotitolo: "giudizio", peso: 0.9),
                 ColonnaDoc(titolo: "Quest'anno", peso: 0.9), ColonnaDoc(titolo: "10 anni", peso: 0.9), ColonnaDoc(titolo: "20 anni", sottotitolo: "o scadenza", peso: 0.9),
-            ], gruppi: Canale.allCases.compactMap { c in
-                let mie = a.voci.prefix(Misure.Documento.righeTabellaFissa).filter { $0.posizione.canale == c }
+            ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                let mie = Array(a.voci.prefix(Misure.Documento.righeTabellaFissa))
                 guard !mie.isEmpty else { return nil }
                 return GruppoCanale(canale: c, righe: mie.map { v in
                     RigaDoc(celle: [CellaDoc(v.posizione.nome, sotto: v.posizione.tipologia, font: T.pTabellaForte),
@@ -111,8 +112,9 @@ private struct PaginaIncidenzaKID: View {
                 ColonnaDoc(titolo: "Alla fine", sottotitolo: "del periodo", peso: 0.9),
                 ColonnaDoc(titolo: "Nel KID", sottotitolo: "dichiarato", peso: 0.9),
                 ColonnaDoc(titolo: "Differenza", sottotitolo: "calcolo − KID", peso: 0.95),
-            ], gruppi: Canale.allCases.compactMap { c -> GruppoCanale? in
-                let mie = incidenze.prefix(Misure.Documento.righeTabellaFissa).filter { $0.posizione.canale == c }
+            ], gruppi: [GruppoCanale.canaleUnico].compactMap { c -> GruppoCanale? in
+                // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                let mie = Array(incidenze.prefix(Misure.Documento.righeTabellaFissa))
                 guard !mie.isEmpty else { return nil }
                 return GruppoCanale(canale: c, righe: mie.map { riga($0) }, nota: mie.count == 1 ? "1 posizione" : "\(mie.count) posizioni")
             })
@@ -197,15 +199,16 @@ private struct PaginaCostiTempo: View {
                     .font(T.pCorpo).foregroundColor(C.tenue).fixedSize(horizontal: false, vertical: true)
             } else {
                 TabellaCanali(colonne: [
-                    ColonnaDoc(titolo: "Oggi", sottotitolo: "costo annuo", peso: 2, destra: false), ColonnaDoc(titolo: "Alternativa", sottotitolo: "canale · costo", peso: 2.2, destra: false),
+                    ColonnaDoc(titolo: "Oggi", sottotitolo: "costo annuo", peso: 2, destra: false), ColonnaDoc(titolo: "Alternativa", sottotitolo: "costo annuo", peso: 2.2, destra: false),
                     ColonnaDoc(titolo: "Uscita oggi", sottotitolo: "penali, imposte, ingresso", peso: 1.1), ColonnaDoc(titolo: "In più", sottotitolo: "netto, uscita compresa", peso: 1.1),
-                ], gruppi: Canale.allCases.compactMap { c in
-                    let mie = a.conAlternativa.prefix(Misure.Documento.puntiReport).filter { $0.posizione.canale == c }
+                ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                    // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                    let mie = Array(a.conAlternativa.prefix(Misure.Documento.puntiReport))
                     guard !mie.isEmpty else { return nil }
                     return GruppoCanale(canale: c, righe: mie.compactMap { v in
                         guard let x = v.alternativa else { return nil }
                         return RigaDoc(celle: [CellaDoc(v.posizione.nome, sotto: CifreDoc.percento(v.annuo, decimali: 2), font: T.pTabellaForte),
-                                               CellaDoc(x.prodotto.nome, sotto: "\(x.prodotto.canale.nomeBreve) · \(CifreDoc.percento(x.costoAnnuo, decimali: 2))", font: T.pTabellaForte),
+                                               CellaDoc(x.prodotto.nome, sotto: CifreDoc.percento(x.costoAnnuo, decimali: 2), font: T.pTabellaForte),
                                                CellaDoc(x.costoUscita >= 0.5 ? CifreDoc.togli(x.costoUscita) : "—", font: T.pTabella),
                                                CellaDoc("+ \(CifreDoc.euro(x.guadagno))", sotto: "in \(x.anni) anni", colore: C.positivo, font: T.pTabellaForte)], altezza: 22)
                     }, nota: "")

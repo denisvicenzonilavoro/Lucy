@@ -80,7 +80,7 @@ enum GuidaTesti {
                           "A sinistra hai l’indice del suo dossier: tutte le sezioni in vista, in tre gruppi.",
                           "Il dossier si apre sul suo quadro: le quattro aree in una riga ciascuna."])
         case .posizioni:
-            return guida("Tutto quello che i clienti hanno già e quello che proponi, diviso per canale. È il cuore di Lucy.",
+            return guida("Tutto quello che i clienti hanno già e quello che proponi. È il cuore di Lucy.",
                          ["Con «Tutti i clienti» vedi il portafoglio intero, il radar, la prova del fuoco e lo smontaggio.",
                           "Scegli un cliente in alto: l’elenco delle sue posizioni è nella prima schermata, le analisi nell’indice a sinistra.",
                           "Tocca una posizione per la sua scheda; con «Aggiungi» ne inserisci una nuova."])
@@ -101,7 +101,7 @@ enum GuidaTesti {
                           "Tocca un impegno: prima dell’ora lo prepari, dopo dici com’è andato.",
                           "Con un cliente scelto in alto vedi solo i suoi impegni."])
         case .messaggi:
-            return guida("Vera prepara i messaggi ai clienti, li spedisci tu.",
+            return guida("Lucy prepara i messaggi ai clienti, li spedisci tu.",
                          ["Scegli il messaggio a sinistra: con un cliente scelto vedi solo i suoi.",
                           "Rileggi, cambia il tono, scegli se inviarlo con Mail o con Messaggi.",
                           "Dopo averlo aperto, di’ a Lucy se l’hai spedito: resta tra i «Mandati oggi»."])
@@ -123,7 +123,7 @@ enum GuidaTesti {
         case .vera:
             return guida("L’assistente di Lucy: legge i dati e li racconta. Tutto resta su questo Mac.",
                          ["Scrivi, o scegli una delle domande d’esempio.",
-                          "I numeri li calcola Lucy, Vera li spiega.",
+                          "I numeri li calcola Lucy, Lucy li spiega.",
                           "Con un cliente scelto in alto parla di lui."])
         case .impostazioni:
             return guida("Il tuo modo di lavorare: aspetto, dispositivi, backup e le regole del lavoro.",
@@ -149,9 +149,9 @@ enum GuidaTesti {
                 parole: [.dossier, .riesame, .profiloRischio, .antiriciclaggio])
         case .posizioni:
             return AiutoApp(
-                aCosaServe: "Tutto quello che il cliente ha già (in essere) e quello che gli proponi (in proposta), diviso per canale: Alleanza o consulenza indipendente. È il cuore di Lucy.",
+                aCosaServe: "Tutto quello che il cliente ha già (in essere) e quello che gli proponi (in proposta), tutto insieme, in un solo canale. È il cuore di Lucy.",
                 inBreve: "Che cosa ha il cliente e che cosa gli proponi",
-                passi: ["Scegli il cliente e guarda il riepilogo: quanto ha, dove, con quale canale.",
+                passi: ["Scegli il cliente e guarda il riepilogo: quanto ha e dove.",
                         passoAggiungiPosizioni,
                         "Apri una posizione: valore, costi, riscatto e proiezione nel tempo."],
                 parole: [.inEssere, .canale, .riscatto, .penali, .sri])
@@ -189,7 +189,7 @@ enum GuidaTesti {
                 parole: [.riy, .rendimentoNetto, .penali])
         case .prodotti:
             return AiutoApp(
-                aCosaServe: "L'archivio dei prodotti che proponi, Alleanza e non solo: condizioni, costi, rischio e la fonte da cui vengono.",
+                aCosaServe: "L'archivio dei prodotti che proponi: condizioni, costi, rischio e la fonte da cui vengono.",
                 inBreve: "Le schede dei prodotti, con costi e fonti",
                 passi: ["Scegli una scheda o «Nuova scheda».",
                         "Controlla condizioni e costi, poi «Segna verificata oggi».",
@@ -221,7 +221,7 @@ enum GuidaTesti {
                 parole: [])
         case .note:
             return AiutoApp(
-                aCosaServe: "Il taccuino: appunti liberi, collegati a una persona se vuoi. Vera li legge per rispondere meglio.",
+                aCosaServe: "Il taccuino: appunti liberi, collegati a una persona se vuoi. Lucy li legge per rispondere meglio.",
                 inBreve: "Gli appunti, collegati ai clienti",
                 passi: ["«Nuova nota».",
                         "Scrivi, e scegli il cliente se riguarda lui.",
@@ -245,7 +245,7 @@ enum GuidaTesti {
                 parole: [.prospettoReport, .riy, .sri])
         case .studio:
             return AiutoApp(
-                aCosaServe: "Il cruscotto del tuo lavoro: quanto hai guadagnato quest'anno, a che punto sono gli obiettivi, le proposte ferme e gli incassi dei prossimi mesi. Le cifre le calcola Lucy dalle posizioni Alleanza e dalle tue aliquote.",
+                aCosaServe: "Il cruscotto del tuo lavoro: quanto hai guadagnato quest'anno, a che punto sono gli obiettivi, le proposte ferme e gli incassi dei prossimi mesi. Le cifre le calcola Lucy dalle posizioni e dalle tue aliquote.",
                 inBreve: "Ricavi, obiettivi, proposte e incassi",
                 passi: ["In Impostazioni › Studio inserisci le tue aliquote e gli obiettivi dell'anno.",
                         "Apri Studio: il cruscotto somma ricavi e obiettivi dalle posizioni in essere.",
@@ -253,10 +253,10 @@ enum GuidaTesti {
                 parole: [.canale, .inEssere])
         case .messaggi:
             return AiutoApp(
-                aCosaServe: "Lucy trova le occasioni per scrivere ai clienti (il riepilogo di un incontro, una scadenza, un compleanno, un consenso da rinnovare, un riesame) e Vera prepara il messaggio con le cifre esatte di Lucy, sul Mac. Lo controlli, lo correggi e lo spedisci tu: niente parte da solo.",
-                inBreve: "Vera prepara i messaggi, tu li spedisci",
+                aCosaServe: "Lucy trova le occasioni per scrivere ai clienti (il riepilogo di un incontro, una scadenza, un compleanno, un consenso da rinnovare, un riesame) e Lucy prepara il messaggio con le cifre esatte di Lucy, sul Mac. Lo controlli, lo correggi e lo spedisci tu: niente parte da solo.",
+                inBreve: "Lucy prepara i messaggi, tu li spedisci",
                 passi: ["A sinistra scegli un'occasione: «Da mandare oggi» o «Questa settimana», con il perché adesso.",
-                        "Scegli il tono (Cordiale, Formale, Breve) e il canale (Mail o Messaggi): Vera scrive, tu correggi il testo se serve.",
+                        "Scegli il tono (Cordiale, Formale, Breve) e il canale (Mail o Messaggi): Lucy scrive, tu correggi il testo se serve.",
                         "«Apri in Mail» o «Apri in Messaggi» lo apre già compilato; in «Campagne» Lucy prepara una bozza per ogni cliente con lo stesso bisogno, e le apri tu una alla volta."],
                 parole: [.canale])
         case .mercato:
@@ -269,7 +269,7 @@ enum GuidaTesti {
                 parole: [.canale])
         case .vera:
             return AiutoApp(
-                aCosaServe: "Vera risponde alle tue domande sui clienti, le posizioni e i documenti. Le cifre le calcola Lucy, Vera le spiega. Funziona sul Mac, senza internet.",
+                aCosaServe: "Lucy risponde alle tue domande sui clienti, le posizioni e i documenti. Le cifre le calcola Lucy, Lucy le spiega. Funziona sul Mac, senza internet.",
                 inBreve: "L'assistente: domande in chat o a voce",
                 passi: ["Scegli il cliente di cui parlare.",
                         "Scrivi la domanda (o premi il microfono).",
@@ -300,7 +300,7 @@ enum GuidaTesti {
             let presenta = "«Presenta» la mostra a tutto schermo, in modalità cliente."
 #endif
             return AiutoApp(
-                aCosaServe: "Le esperienze da vivere con il cliente davanti allo schermo: la sua Lucy, il prisma di luce, la lettera dal futuro e le altre. Le cifre le calcola Lucy dal suo dossier.",
+                aCosaServe: "Le esperienze da vivere con il cliente davanti allo schermo: la sua Lucy, il sole del piano, la lettera dal futuro e le altre. Le cifre le calcola Lucy dal suo dossier.",
                 inBreve: "Le esperienze da vivere con il cliente",
                 passi: ["Scegli il cliente nelle pillole in alto.",
                         "Tocca un'esperienza: si apre sul palco; «‹ Sala» o Esc tornano alla griglia.",
@@ -320,7 +320,7 @@ enum GuidaTesti {
                 inBreve: "Trova clienti, posizioni, documenti (⌘K)",
                 passi: [passoApriRicerca,
                         "Scrivi una parte del nome o del prodotto.",
-                        "Invio per aprire il risultato; i filtri restringono (per esempio «canale:alleanza»)."],
+                        "Invio per aprire il risultato; i filtri restringono (per esempio «scade:2027»)."],
                 parole: [])
         case .impostazioni:
             return AiutoApp(
@@ -398,8 +398,8 @@ struct PaginaIntroduzione {
             testo: "Lucy è lo studio di lavoro di un consulente finanziario. Raccoglie le persone che segui, quello che hanno (polizze, investimenti, piani per la pensione) e ti aiuta a capire che cosa manca e che cosa conviene.",
             punti: ["I calcoli li fa Lucy: tu scegli e spieghi.",
                     "Tutto resta su questo Mac: niente internet, niente cloud.",
-                    "Ci sono due canali, sempre distinti: Alleanza (blu) e consulenza indipendente (cuoio)."],
-            app: [], conCanali: true),
+                    "Un solo canale, quello di Lucy: tutti i clienti si gestiscono e si analizzano insieme."],
+            app: [], conCanali: false),
         PaginaIntroduzione(
             titolo: "Si parte dalle persone",
             testo: "In **Clienti** c'è la scheda di ogni persona: famiglia, lavoro, entrate, spese, che cosa le preme. Più la scheda è completa, più le analisi sono precise.",
@@ -409,7 +409,7 @@ struct PaginaIntroduzione {
             app: [.clienti, .agenda, .incontri]),
         PaginaIntroduzione(
             titolo: "Che cosa ha, che cosa gli proponi",
-            testo: "In **Posizioni**, il cuore di Lucy, c'è tutto quello che il cliente ha già (*in essere*) e quello che gli stai proponendo (*in proposta*). Ogni posizione dice da quale canale viene.",
+            testo: "In **Posizioni**, il cuore di Lucy, c'è tutto quello che il cliente ha già (*in essere*) e quello che gli stai proponendo (*in proposta*).",
             punti: ["«Posizione» per ciò che ha già, «Proposta» per ciò che consigli.",
                     "Puoi leggerle dai documenti (KID, polizze, estratti conto) nella scheda del cliente.",
                     "Ogni parola tecnica ha la sua «i»: un clic e te la spiega."],
@@ -423,7 +423,7 @@ struct PaginaIntroduzione {
             app: [.analisi360, .clienti]),
         PaginaIntroduzione(
             titolo: "Spiegarlo in modo chiaro",
-            testo: "Da **Prospetti e report** esce il documento in PDF: il *prospetto* dettagliato per te, il *report* essenziale da lasciare al cliente. **Vera** risponde alle tue domande e spiega i documenti, con le cifre di Lucy.",
+            testo: "Da **Prospetti e report** esce il documento in PDF: il *prospetto* dettagliato per te, il *report* essenziale da lasciare al cliente. **Lucy** risponde alle tue domande e spiega i documenti, con le cifre di Lucy.",
             punti: [puntoComeSiUsa,
                     "Menu Aiuto › Guida di Lucy (⌘?) per rivedere tutto, quando vuoi."],
             app: [.presentazioni, .vera], conPercorso: true),

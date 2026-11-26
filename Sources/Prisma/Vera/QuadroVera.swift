@@ -92,9 +92,9 @@ struct QuadroVera: Equatable {
 
     // MARK: - Pezzi
 
-    private static func suCanali(_ t: String) -> Bool {
-        ["canal", "alleanza", "indipendent"].contains { t.contains($0) }
-    }
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente quadro per canale, anche
+    /// quando la domanda nomina i canali di prima (resta il quadro per area).
+    private static func suCanali(_ t: String) -> Bool { false }
 
     /// Una barra per area, dalla più grande (le aree vuote non ci sono).
     static func aree(_ posizioni: [Posizione], titolo: String) -> QuadroVera? {
@@ -126,7 +126,7 @@ struct QuadroVera: Equatable {
         // Fase 4: routine, agenda che si organizza, tagliando, mercato per i clienti, stile, tre livelli e piano a passi
         guard m.esitoRoutine == nil, m.agendaOrari == nil, m.agendaSpostamento == nil, m.tagliando == nil, m.mercatoClienti == nil,
               m.stileVera == nil, m.treLivelli == nil, m.pianoPassi == nil else { return false }
-        if TestiStatoVera.eTitoloNonPronta(m.titolo) || m.titolo == "Vera non ha potuto rispondere" { return false }
+        if TestiStatoVera.eTitoloNonPronta(m.titolo) || TestiStatoVera.nonHaPotuto(m.titolo) { return false }
         return m.motore != StatoShell.motoreAzioni
     }
 }

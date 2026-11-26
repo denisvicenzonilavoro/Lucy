@@ -188,7 +188,7 @@ final class MisuraVelocita: ObservableObject {
             ("5 clienti", "avvio (stato, dati e primo disegno)", 200, 180),
             ("5 clienti", "apri Posizioni", 120, 260),
             ("5 clienti", "modifica una nota (un tasto)", 60, 70),
-            ("5 clienti", "Luce · apri il prisma di luce", 90, 140),
+            ("5 clienti", "Luce · apri il sole del piano", 90, 140),
             ("200 clienti", "apri Posizioni", 300, 420),
             ("200 clienti", "Luce · apri il radar", 150, 210),
         ]
@@ -245,10 +245,10 @@ private struct CorpoGruppoVelocita: View {
                     }
                     .buttonStyle(StilePulsanteRigaImpostazioni())
                 }
-                RigaImpostazione(titolo: "Misura Vera",
+                RigaImpostazione(titolo: "Misura Lucy",
                                  sottotitolo: misura.avanzamentoVera ?? "Caricamento di Qwen, prima parola, parole al secondo",
                                  icona: IconaVetroImpostazioni(.app(.vera)),
-                                 aiuto: "Libera e ricarica il modello di Vera sul Mac, poi le fa due volte la stessa domanda generica (nessun dato dei clienti): quanto ci mette a caricarsi, a dire la prima parola e quante parole scrive al secondo.",
+                                 aiuto: "Libera e ricarica il modello di Lucy sul Mac, poi le fa due volte la stessa domanda generica (nessun dato dei clienti): quanto ci mette a caricarsi, a dire la prima parola e quante parole scrive al secondo.",
                                  ultima: true) {
                     Button { misura.misuraVera(stato.dati.impostazioni.vera) } label: {
                         Label("Misura", systemImage: "stopwatch")
@@ -266,7 +266,7 @@ private struct CorpoGruppoVelocita: View {
             if let esito = misura.esitoVera {
                 switch esito {
                 case .nonDisponibile(let motivo):
-                    NotaImpostazioni("Vera non si può misurare: \(motivo)")
+                    NotaImpostazioni("Lucy non si può misurare: \(motivo)")
                 case .misurato(let tempi):
                     TabellaTempiVera(tempi: tempi)
                 }
@@ -319,7 +319,7 @@ private struct TabellaTempiVera: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            IntestazioneTabellaVelocita(titolo: "Tempi di Vera · \(tempi.modello)", markdown: MisuraVera.markdown(tempi))
+            IntestazioneTabellaVelocita(titolo: "Tempi di Lucy · \(tempi.modello)", markdown: MisuraVera.markdown(tempi))
             ForEach(MisuraVera.righe(tempi), id: \.voce) { r in
                 RigaTabellaVelocita(voce: r.voce, valore: r.valore, secondo: nil)
             }

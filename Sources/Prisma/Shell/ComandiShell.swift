@@ -167,7 +167,7 @@ extension StatoShell {
             a.titolo = Self.titoloAppuntamento(b.tipo, cliente: c.nome)
             a.durataMinuti = b.tipo == .telefonata ? 20 : 60
             if b.tipo == .telefonata { a.luogo = "Telefonata" }
-            a.note = "Fissato con Vera."
+            a.note = "Fissato con Lucy."
             let fine = inizio.addingTimeInterval(TimeInterval(a.durataMinuti * 60))
             let sovrapposto = dati.appuntamenti.first {
                 $0.stato == .pianificato && $0.inizio < fine && $0.inizio.addingTimeInterval(TimeInterval($0.durataMinuti * 60)) > inizio
@@ -184,7 +184,7 @@ extension StatoShell {
             guard let id, let c = cliente(id) else { return ("Per quale cliente lo segno?", nil) }
             var t = Attivita.nuova(clienteId: id, scadenza: scadenza)
             t.titolo = titolo
-            t.note = "Chiesta a Vera."
+            t.note = "Chiesta a Lucy."
             dati.attivita.append(t)
             return ("Va bene, te lo ricordo \(DateItaliane.descrivi(scadenza, conOra: false, oggi: oggi)): «\(titolo)», tra le attività di \(c.nome).",
                     AzioneVera(tipo: .attivita, id: t.id))

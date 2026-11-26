@@ -321,11 +321,11 @@ enum MotoreCosti {
             righe.append("Quanto tolgono al netto finale: \(Formati.euro(a.perso10)) in 10 anni, \(Formati.euro(a.perso20)) in 20 (o fino alla scadenza), rendimenti persi compresi.")
         }
         if let v = a.voci.first, a.voci.count > 1 {
-            righe.append("La più costosa: \(v.posizione.nome) (\(v.posizione.canale.nomeBreve)), \(CifreDoc.percento(v.annuo, decimali: 2)) l'anno, \(Formati.euro(v.perso20)) in \(v.anni20) anni.")
+            righe.append("La più costosa: \(v.posizione.nome), \(CifreDoc.percento(v.annuo, decimali: 2)) l'anno, \(Formati.euro(v.perso20)) in \(v.anni20) anni.")
         }
         for v in a.conAlternativa.prefix(2) {
             guard let x = v.alternativa else { continue }
-            righe.append("Alternativa a parità di rischio per \(v.posizione.nome): \(x.prodotto.nome) (\(x.prodotto.canale.nomeBreve), \(CifreDoc.percento(x.costoAnnuo, decimali: 2)) l'anno): circa \(Formati.euro(x.guadagno)) netti in più in \(x.anni) anni, uscita compresa.")
+            righe.append("Alternativa a parità di rischio per \(v.posizione.nome): \(x.prodotto.nome) (\(CifreDoc.percento(x.costoAnnuo, decimali: 2)) l'anno): circa \(Formati.euro(x.guadagno)) netti in più in \(x.anni) anni, uscita compresa.")
         }
         if !a.senzaDati.isEmpty {
             righe.append("Senza costi indicati: \(a.senzaDati.map(\.nome).joined(separator: ", ")). Si completano dal KID.")

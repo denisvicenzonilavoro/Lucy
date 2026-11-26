@@ -44,7 +44,9 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
 
     static func nome(_ modello: String) -> String {
         // «Vera su misura» (fase 5): il modello addestrato sui tuoi esempi
-        if SuMisuraVera.eSuMisura(modello) { return "Vera su misura sul Mac" }
+        if SuMisuraVera.eSuMisura(modello) { return "Lucy su misura sul Mac" }
+        // Mistral in cloud (gli alias dell'API finiscono con «-latest»)
+        if modello.hasSuffix("-latest") { return "Mistral" }
         let famiglia = modello.split(separator: ":").first.map(String.init) ?? modello
         let lettere = famiglia.prefix { $0.isLetter }
         return lettere.isEmpty ? "Modello sul Mac" : String(lettere.prefix(1)).uppercased() + String(lettere.dropFirst()) + " sul Mac"
@@ -53,7 +55,11 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
     #if os(iOS)
     var descrizione: String { "\(modello) sul Mac, in Wi‑Fi e cifrato: nessun dato esce dai tuoi dispositivi." }
     #else
-    var descrizione: String { "\(modello) con \(fornitore.nome), sul Mac: nessun dato esce dal computer." }
+    var descrizione: String {
+        fornitore is FornitoreMistral
+            ? "\(modello) con Mistral in cloud (Unione Europea): le domande escono dal Mac con la tua chiave."
+            : "\(modello) con \(fornitore.nome), sul Mac: nessun dato esce dal computer."
+    }
     #endif
 
     // MARK: - Disponibilità
@@ -61,6 +67,8 @@ struct MotoreLocale: MotoreVera, MotoreGenerativo {
     /// Pronto se il fornitore risponde e ha il modello scelto.
     static func verifica(_ vera: ImpostazioniVera) async -> DisponibilitaVera {
         let f = FornitoriVera.crea(vera)
+        // Mistral in cloud: l'unico indirizzo fuori dal Mac ammesso, con la chiave dell'utente
+        if vera.fornitore == .mistral { return await f.verifica() }
         guard IndirizzoLocale.url(f.indirizzo) != nil else {
             return .nonDisponibile("L'indirizzo di \(f.nome) deve essere sul Mac (127.0.0.1): un altro computer riceverebbe i dati dei clienti.")
         }

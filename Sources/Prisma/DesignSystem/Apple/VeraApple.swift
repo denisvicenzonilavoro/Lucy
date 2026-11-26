@@ -13,6 +13,24 @@ import SwiftUI
 //   `uscita` da y +10): la sequenza di una domanda (§4.7).
 // Gettoni in Tema.Apple+Vera.swift e TemaAppleMoto.swift (`Moto.Sfera`, `Moto.Puntini`, `Moto.Testo`, …).
 
+// MARK: - Il simbolo dell'assistente nello stile Carta
+
+/// L'assistente Lucy nello stile Carta: la L avorio e il disco d'oro su un tondo d'inchiostro (di notte i colori si
+/// scambiano), fermo. Prende il posto della sfera luminosa.
+struct SimboloAssistenteLucy: View {
+    let misura: CGFloat
+
+    var body: some View {
+        ZStack {
+            Circle().fill(TemaCarta.Colore.inchiostroD)
+            LogoLucy(colore: Color.dinamico(chiaro: Tema.Marca.avorio, scuro: Tema.Marca.inchiostro), oro: Tema.Marca.oro)
+                .frame(width: misura * 0.5, height: misura * 0.5)
+        }
+        .frame(width: misura, height: misura)
+        .accessibilityHidden(true)
+    }
+}
+
 // MARK: - Sfera di Vera (§2.18)
 
 /// La sfera di Vera: 24 nella barra, 46 nel riquadro della scrivania, 120 nell'app.
@@ -43,6 +61,16 @@ struct SferaVera: View {
     }
 
     var body: some View {
+        if Tema.Stile.usaCarta {
+            // Stile Carta (25 novembre 2026, richiesta dell'utente): l'assistente si chiama Lucy e il suo simbolo è la L
+            // di Lucy sul tondo d'inchiostro, fermo; niente più sfera luminosa che gira
+            SimboloAssistenteLucy(misura: misura)
+        } else {
+            corpoSfera
+        }
+    }
+
+    @ViewBuilder private var corpoSfera: some View {
         let muove = !fermo && visibile && (viva || pensa)
         // Fuori vista la sfera resta sull'ultimo fotogramma (niente salto a riposo) e riparte quando torna davanti:
         // trenta fotogrammi al secondo che nessuno vede sono lavoro tolto alle finestre e all'acqua
@@ -160,7 +188,7 @@ struct PuntiniScrittura: View {
         }
         .padding(.vertical, e.paddingVerticale)
         .fixedSize()
-        .accessibilityLabel(Text("Vera sta scrivendo"))
+        .accessibilityLabel(Text("Lucy sta scrivendo"))
     }
 
     /// Salita (0…1) e luce (0…1) di un puntino: la salita va da 0 al 30% e torna a 100%; la luce torna giù al 60%.

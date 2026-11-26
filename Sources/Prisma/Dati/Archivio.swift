@@ -18,7 +18,8 @@ enum Archivio {
     /// l'archivio dell'utente nemmeno per sbaglio, e alla fine controlla che sia rimasta vuota. nil nell'app vera.
     static var cartellaDiProva: URL?
 
-    static var cartella: URL { supportoApplicazioni.appendingPathComponent("Prisma", isDirectory: true) }
+    /// «Prisma» per Lucy, «Prisma Demo» per Lucy Demo (`EdizioneLucy`): la demo non tocca mai i dati veri.
+    static var cartella: URL { supportoApplicazioni.appendingPathComponent("Prisma" + EdizioneLucy.suffissoCartella, isDirectory: true) }
     /// Il file unico dell'archivio di prima (archivio.json): si legge ancora e si converte da solo.
     static var file: URL { cartella.appendingPathComponent(nomeFileVecchio) }
     /// La cartella a pezzi dell'archivio (dal giro 0, tappa 3).
@@ -56,7 +57,7 @@ enum Archivio {
 
     /// Cartella dei backup finché l'utente non ne sceglie una (stesso Mac: va cambiata).
     static var cartellaBackupPredefinita: URL {
-        supportoApplicazioni.appendingPathComponent("Prisma Backup", isDirectory: true)
+        supportoApplicazioni.appendingPathComponent("Prisma Backup" + EdizioneLucy.suffissoCartella, isDirectory: true)
     }
 
     static func preparaCartelle(in cartella: URL = Archivio.cartella) throws {
@@ -307,10 +308,21 @@ enum Archivio {
     /// iPhone e iPad, finché non si fa il loro giro, i dati di prova come prima.
     static var archivioIniziale: DatiPrisma {
         #if os(macOS)
+        // Lucy Demo (25 novembre 2026) nasce già piena: i 35 clienti di prova con il loro storico e il giro del Territorio
+        if EdizioneLucy.demo { return datiDemo }
         return ArchivioPezzi.vuoto
         #else
         return DatiPrisma.demo()
         #endif
+    }
+
+    /// I dati con cui nasce Lucy Demo: i clienti di prova completi (template e fittizi, con posizioni, pratiche,
+    /// passaparola, partite e storico che partono da oggi) e il giro di prova del Territorio. Scritti nella cartella della
+    /// demo, poi si usano come un archivio vero.
+    static var datiDemo: DatiPrisma {
+        var d = ClientiFittizi.completi()
+        TerritorioDiProva.applica(&d, giorno: TerritorioDiProva.giorno(da: Date(), orari: d.impostazioni.orari), conPartenza: true)
+        return d
     }
 
     static func copieNonLeggibili(in cartella: URL) -> [URL] {

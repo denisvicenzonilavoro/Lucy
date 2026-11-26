@@ -68,7 +68,7 @@ extension Istantanee {
         coppia("587-copilota-microfono-negato") { s in
             DialogoProvaCopilota.prepara(s, righe: 0)
             s.copilota.mostraPerIstantanea(fase: .pronto, sessione: nil, secondi: 0, qwenPronto: true,
-                                           problema: "Vera non ha il permesso di usare il microfono: concedilo in Impostazioni di Sistema › Privacy e sicurezza › Microfono.")
+                                           problema: "Lucy non ha il permesso di usare il microfono: concedilo in Impostazioni di Sistema › Privacy e sicurezza › Microfono.")
             s.apri(.incontri)
         }
         coppia("588-copilota-nessun-incontro") { s in

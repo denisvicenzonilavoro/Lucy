@@ -36,8 +36,8 @@ enum TestiPalestra {
     static let difficolta = "Difficoltà"
     static let allenatiCon = "Allenati con…"
     static let inventato = "Profilo inventato…"
-    static let nota = "Vera recita il cliente con il suo profilo vero. Le risposte suggerite sono esempi: puoi anche scrivere le tue."
-    static let notaInventato = "Vera recita il profilo che hai scritto. Le risposte suggerite sono esempi: puoi anche scrivere le tue."
+    static let nota = "Lucy recita il cliente con il suo profilo vero. Le risposte suggerite sono esempi: puoi anche scrivere le tue."
+    static let notaInventato = "Lucy recita il profilo che hai scritto. Le risposte suggerite sono esempi: puoi anche scrivere le tue."
     static let rispondi = "Rispondi"
     static let campo = "Oppure rispondi a parole tue…"
     static let chiE = "Chi è:"
@@ -52,13 +52,13 @@ enum TestiPalestra {
     static let rifai = "↻ Rifai l’allenamento"
     #if os(macOS)
     /// Migliorie d'uso 9: niente nomi tecnici in vista.
-    static let nonProntaTitolo = "Vera non è pronta: la palestra ha bisogno di lei."
+    static let nonProntaTitolo = "Lucy non è pronta: la palestra ha bisogno di lei."
     #else
-    static let nonProntaTitolo = "Vera non è pronta: la palestra ha bisogno di Qwen sul Mac."
+    static let nonProntaTitolo = "Lucy non è pronta: la palestra ha bisogno di Qwen sul Mac."
     #endif
-    static let apriImpostazioni = "Impostazioni › Vera"
+    static let apriImpostazioni = "Impostazioni › Lucy"
     static let riprova = "Riprova"
-    static let lenta = "Vera ci sta mettendo un po’…"
+    static let lenta = "Lucy ci sta mettendo un po’…"
     static let annulla = "Annulla"
     static let indicativo = "punteggio indicativo"
     static let haFunzionato = "Cosa ha funzionato:"
@@ -68,13 +68,13 @@ enum TestiPalestra {
     static let film = "Il film del piano"
     static let bloccata = "La difficoltà si sceglie prima di cominciare: per cambiarla, rifai l’allenamento."
 
-    static func panni(_ s: SchedaRecita) -> String { "Vera nei panni di \(s.nomeBreve)" }
+    static func panni(_ s: SchedaRecita) -> String { "Lucy nei panni di \(s.nomeBreve)" }
     static func recitata(_ s: SchedaRecita) -> String {
         #if os(macOS)
         // Migliorie d'uso 56: «recitato» per un cliente uomo (dal codice fiscale); con il genere sconosciuto «recitata»
-        return "\(s.nomeBreve) · \(s.femminile == false ? "recitato" : "recitata") da Vera"
+        return "\(s.nomeBreve) · \(s.femminile == false ? "recitato" : "recitata") da Lucy"
         #else
-        return "\(s.nomeBreve) · recitata da Vera"
+        return "\(s.nomeBreve) · recitata da Lucy"
         #endif
     }
     static func scarno(_ s: SchedaRecita) -> String { "Di \(s.nomeBreve) Lucy sa poco: l’allenamento sarà generico." }
@@ -82,7 +82,7 @@ enum TestiPalestra {
 
     static func invito(_ s: SchedaRecita) -> (titolo: String, testo: String) {
         ("Pronto ad allenarti con \(s.nomeBreve)?",
-         "Vera recita \(s.nomeBreve) con il profilo che ha Lucy: tre obiezioni, una alla volta. Scegli la difficoltà e comincia.")
+         "Lucy recita \(s.nomeBreve) con il profilo che ha Lucy: tre obiezioni, una alla volta. Scegli la difficoltà e comincia.")
     }
 
     /// «2 risposte che hanno fatto vedere i numeri».

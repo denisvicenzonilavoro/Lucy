@@ -190,7 +190,7 @@ private struct CorpoImpostazioniOvunque: View {
                 }
             }
             NotaImpostazioni(suMac
-                ? "In iCloud Drive c’è solo un file cifrato con la tua passphrase: nessun server, nessun contenitore di Lucy in iCloud. Documenti, conversazioni con Vera e trascrizioni restano sul Mac."
+                ? "In iCloud Drive c’è solo un file cifrato con la tua passphrase: nessun server, nessun contenitore di Lucy in iCloud. Documenti, conversazioni con Lucy e trascrizioni restano sul Mac."
                 : "La copia arriva dal Mac in un file cifrato. Le modifiche di qui tornano al Mac nel giornale cifrato di questo dispositivo.")
                 .padding(.top, P.fraRighe)
                 .entrataCascata(8, base: base)

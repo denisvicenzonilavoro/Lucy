@@ -132,7 +132,7 @@ struct LetteraDalFuturo: View {
                     .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, L.sopraNota)
             }
-            Text("Vera scrive la lettera con le cifre dei motori di Lucy: pensione, obiettivi, versamenti.")
+            Text("Lucy scrive la lettera con le cifre dei motori di Lucy: pensione, obiettivi, versamenti.")
                 .carattereApple(L.spiegazione)
                 .foregroundColor(L.coloreSpiegazione)
                 .fixedSize(horizontal: false, vertical: true)
@@ -156,7 +156,7 @@ struct LetteraDalFuturo: View {
                     .buttonStyle(.appleGrande)
                     .keyboardShortcut("r", modifiers: .command)
                     .disabled(!pronta || istantanea)
-                    .help(pronta ? "Vera scrive una nuova stesura di questa versione (⌘R)" : "Vera non è pronta: la lettera è quella di Lucy")
+                    .help(pronta ? "Lucy scrive una nuova stesura di questa versione (⌘R)" : "Lucy non è pronta: la lettera è quella di Lucy")
                     .padding(.top, L.sopraPulsante)
             }
         }
@@ -193,7 +193,7 @@ struct LetteraDalFuturo: View {
         }
         if s.mancanti.contains(.obiettivo) { r.append(("Aggiungi un obiettivo per raccontarlo.", false)) }
         if let avviso = avvisoVera { r.append((avviso, true)) }
-        if inArrivo != nil && calmo { r.append(("Vera sta scrivendo…", false)) }
+        if inArrivo != nil && calmo { r.append(("Lucy sta scrivendo…", false)) }
         return r
     }
 

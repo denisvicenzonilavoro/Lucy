@@ -12,7 +12,8 @@ import Security
 ///   sincronizzano), su iPhone e iPad `kSecAttrAccessibleWhenUnlockedThisDeviceOnly` e non sincronizzabile.
 /// - Le prove non lo usano mai: le chiavi si passano direttamente (o con gli hook del backup impostati dalla prova).
 enum PortachiaviCapsule {
-    static let servizio = "Prisma capsule"
+    /// Con « demo» in coda in Lucy Demo (`EdizioneLucy`): la demo non legge mai le chiavi vere.
+    static var servizio: String { "Prisma capsule" + EdizioneLucy.suffissoPortachiavi }
     static let etichetta = "Prisma – chiave delle capsule del tempo"
     static let lunghezza = 32
 

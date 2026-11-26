@@ -4,7 +4,7 @@ import Foundation
 /// La prova del riconoscimento senza microfono: la voce di Vera pronuncia una frase, l'audio va al
 /// riconoscimento e si vede cosa ne esce. Finisce sempre con un esito, qualunque fase si inceppi.
 final class ProvaRiconoscimento: NSObject {
-    static let frase = "Ciao Vera, che appuntamenti ho domani?"
+    static let frase = "Ciao Lucy, che appuntamenti ho domani?"
     /// La frase dura ~3 s: se la voce non chiude entro questo tempo si va avanti con l'audio raccolto.
     static let attesaVoce: TimeInterval = 15
     /// Qualunque fase si inceppi (voce, preparazione, riconoscimento), la prova finisce.
@@ -18,7 +18,7 @@ final class ProvaRiconoscimento: NSObject {
     private var esito: ((String) -> Void)?
     private var scelta = SceltaRiconoscimento.automatico
     private var passato = false
-    private var fase = "voce di Vera"
+    private var fase = "voce di Lucy"
     private var capito = ""
     private var errore: String?
     private var finito = false
@@ -33,7 +33,7 @@ final class ProvaRiconoscimento: NSObject {
         self.esito = esito
         self.scelta = scelta
         passato = false
-        fase = "voce di Vera"
+        fase = "voce di Lucy"
         coda.sync { audio = [] }
         DiagnosticaVoce.annota("Prova del riconoscimento: inizio (scelta \(scelta.rawValue))")
         let frase = AVSpeechUtterance(string: Self.frase)
@@ -82,7 +82,7 @@ final class ProvaRiconoscimento: NSObject {
                 case .success(let t):
                     guard self.esito != nil, !pezzi.isEmpty else {   // la prova è già scaduta, o non c'è audio
                         t.annulla()
-                        self.chiudi("La voce di Vera non ha prodotto audio da provare: in «Voce di Vera» premi «Ascolta» e, se non si sente, scegli un'altra voce.")
+                        self.chiudi("La voce di Lucy non ha prodotto audio da provare: in «Voce di Lucy» premi «Ascolta» e, se non si sente, scegli un'altra voce.")
                         return
                     }
                     self.fase = "riconoscimento"
@@ -122,9 +122,9 @@ final class ProvaRiconoscimento: NSObject {
 
     static func racconta(_ nome: String, capito: String, errore: String?) -> String {
         if !capito.isEmpty {
-            return "Con \(nome) Vera ha capito: «\(capito)» (detto: «\(frase)»). Il riconoscimento funziona: se dal vivo non ti sente, guarda la prova del microfono."
+            return "Con \(nome) Lucy ha capito: «\(capito)» (detto: «\(frase)»). Il riconoscimento funziona: se dal vivo non ti sente, guarda la prova del microfono."
         }
-        return "Con \(nome) Vera non ha capito nessuna parola\(errore.map { ": \($0)" } ?? ""). Il problema è nel riconoscimento, non nel microfono."
+        return "Con \(nome) Lucy non ha capito nessuna parola\(errore.map { ": \($0)" } ?? ""). Il problema è nel riconoscimento, non nel microfono."
     }
 
     /// Una sola chiusura, qualunque strada l'abbia raggiunta.

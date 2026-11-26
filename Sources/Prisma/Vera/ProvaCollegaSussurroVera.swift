@@ -47,7 +47,7 @@ enum ProvaCollegaSussurroVera {
         // Una preferenza chiusa: nell'archivio solo l'impronta, e la voce resta chiusa
         let pref = VoceSussurro(chiave: "preferenza-decide sempre insieme a paolo", clienteId: "sofia", categoria: .preferenza, tono: .blu,
                                 testo: "Decide sempre insieme a Paolo.", azione: AzioneSussurro(.tieniAMente, "Tienilo a mente"),
-                                fonte: "La memoria di Vera", rango: 22, data: nil)
+                                fonte: "La memoria di Lucy", rango: 22, data: nil)
         s.chiudiSussurro(pref, oggi: oggi)
         controlla(s.dati.sussurriChiusi.allSatisfy { !$0.chiave.contains("paolo") }, "Sussurro nell'app: nell'archivio la preferenza chiusa è solo un'impronta")
         s.riapriSussurro(pref)
@@ -69,7 +69,7 @@ enum ProvaCollegaSussurroVera {
         s.modoCliente = nil
         // Spento in Impostazioni › Vera
         s.dati.impostazioni.vera.sussurroNelDossier = false
-        controlla(s.vociSussurro(clienteId: "sofia", oggi: oggi).isEmpty, "Sussurro nell'app: spento in Impostazioni › Vera la card non c'è")
+        controlla(s.vociSussurro(clienteId: "sofia", oggi: oggi).isEmpty, "Sussurro nell'app: spento in Impostazioni › Lucy la card non c'è")
         s.dati.impostazioni.vera.sussurroNelDossier = true
         // Il cliente tolto porta via le sue voci chiuse
         s.chiudiSussurro(v, oggi: oggi)

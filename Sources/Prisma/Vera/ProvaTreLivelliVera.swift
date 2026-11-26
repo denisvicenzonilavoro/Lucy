@@ -94,8 +94,8 @@ enum ProvaTreLivelliVera {
                   && cifra("riduzione")?.testo == "0,3 punti" && cifra("rendimenti")?.valore == RegoleFiscali.previdenzaRendimenti,
                   "Tre livelli: prestazione dal 15% al 9% (0,3 punti l'anno) e rendimenti al 20%, dalle regole di Lucy")
         if let piano = e.inEssere.first {
-            controlla(cifra("aliquotaPiano")?.valore == piano.aliquota && s.tecnico.joined().contains(piano.posizione.nome) && s.tecnico.joined().contains("(Alleanza)"),
-                      "Tre livelli: l'aliquota del piano di Marco alla pensione, con il nome e il canale")
+            controlla(cifra("aliquotaPiano")?.valore == piano.aliquota && s.tecnico.joined().contains(piano.posizione.nome) && !s.tecnico.joined().contains("(Alleanza)"),
+                      "Tre livelli: l'aliquota del piano di Marco alla pensione, con il nome e senza canale")
         }
         let v = TreLivelliVera.verifica(s)
         controlla(TreLivelliVera.stessiNumeri(s), "Tre livelli: la bozza di Marco usa gli stessi numeri nelle tre versioni: \(v)")
@@ -293,7 +293,7 @@ enum ProvaTreLivelliVera {
         let a = TreLivelliVera.azioneManda(s, cliente: c)
         controlla(a.strumento == RegistroStrumenti.messaggiPrepara && a.app == .messaggi && a.argomenti["cliente"] == "marco"
                   && a.argomenti["testo"] == s.cliente && a.esito == nil && a.avviso == nil,
-                  "Tre livelli: «Manda a Marco» è una bozza da confermare, con il testo semplice (Vera non invia)")
+                  "Tre livelli: «Manda a Marco» è una bozza da confermare, con il testo semplice (Lucy non invia)")
         var rotta = s
         rotta.cliente += " Ti costerà 7.777 €."
         controlla(TreLivelliVera.azioneManda(rotta, cliente: c).avviso != nil, "Tre livelli: se le cifre non tornano la scheda di conferma avvisa")

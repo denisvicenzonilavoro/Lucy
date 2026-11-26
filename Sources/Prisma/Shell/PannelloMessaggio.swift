@@ -646,7 +646,7 @@ struct PannelloMessaggio: View {
         }
         .buttonStyle(.appleGrande)
         .disabled(scrive || scrittoIstantanea != nil)
-        .help("Vera scrive di nuovo lo stesso messaggio, con le stesse cifre")
+        .help("Lucy scrive di nuovo lo stesso messaggio, con le stesse cifre")
     }
 
     // MARK: Fare

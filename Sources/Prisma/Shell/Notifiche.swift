@@ -698,11 +698,12 @@ extension MotoreNotifiche {
                     let corpo: String
                     if scelte.nomiClienti {
                         titolo = "\(cosa.isEmpty ? "Una posizione" : cosa) \(fra)"
-                        corpo = [nome(p.clienteId) ?? "", p.canale.nomeBreve, Formati.dataEstesa.string(from: scadenza)]
+                        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente nome del canale
+                        corpo = [nome(p.clienteId) ?? "", Formati.dataEstesa.string(from: scadenza)]
                             .filter { !$0.isEmpty }.joined(separator: " · ")
                     } else {
                         titolo = "Una posizione \(fra)"
-                        corpo = "\(p.canale.nomeBreve) · \(dettagli)"
+                        corpo = dettagli
                     }
                     elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)scadenza-\(p.id)-\(giorni)-\(epoca(scadenza))",
                                                         titolo: titolo, corpo: corpo, gruppo: "posizioni",
@@ -742,10 +743,10 @@ extension MotoreNotifiche {
                     let titolo = scelte.nomiClienti ? o.titolo : TestiOccasioni.titoloAnonimo(o)
                     let corpo: String
                     if scelte.nomiClienti {
-                        corpo = [fra, nome(o.clienteId) ?? "", o.canale?.nomeBreve ?? "", Formati.dataEstesa.string(from: o.data)]
+                        corpo = [fra, nome(o.clienteId) ?? "", Formati.dataEstesa.string(from: o.data)]
                             .filter { !$0.isEmpty }.joined(separator: " · ")
                     } else {
-                        corpo = [fra, o.canale?.nomeBreve ?? "", dettagli].filter { !$0.isEmpty }.joined(separator: " · ")
+                        corpo = [fra, dettagli].filter { !$0.isEmpty }.joined(separator: " · ")
                     }
                     let destinazione = o.posizioneId.map { DestinazioneRicerca.posizione($0) } ?? DestinazioneRicerca.cliente(o.clienteId)
                     elenco.append(PromemoriaPianificato(id: "\(prefissoPromemoria)occasione-\(o.id)-\(giorni)",

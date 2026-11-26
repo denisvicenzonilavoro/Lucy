@@ -142,7 +142,7 @@ enum ScritturaStileVera {
             return fisso("Riscrittura interrotta: resta il testo di Lucy.")
         } catch {
             let m = (error as? ErroreVera)?.messaggio ?? error.localizedDescription
-            return fisso("Vera non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
+            return fisso("Lucy non ha potuto scrivere il messaggio (\(m)). Resta il testo di Lucy.")
         }
     }
 
@@ -484,7 +484,7 @@ extension StatoShell {
             && DateItaliane.cerca(richiestaScritturaStile, t) == nil
     }
     static let richiestaImparaStile = #"^(?:impara|reimpara|aggiorna|rileggi|ricalcola)\b.{0,40}\b(?:stile|modo di scrivere)\b"#
-    static let richiestaRiscriviStile = #"^\s*(?:(?:ehi|ok|senti|ciao|vera|ruby|eve|per favore)[,\s]+)*(?:mi\s+)?(?:riscrivi(?:lo|la|mi)?|scrivi(?:lo|la)?|rifai|sistema|metti)\b[^:\n]{0,80}?(?:nel mio stile|con il mio stile|come (?:lo |la )?(?:scrivo|scriverei|scriveresti) io|come (?:lo |la )?scriverei|come me)\b[^:\n]{0,60}:\s*"#
+    static let richiestaRiscriviStile = #"^\s*(?:(?:ehi|ok|senti|ciao|lucy|vera|ruby|eve|per favore)[,\s]+)*(?:mi\s+)?(?:riscrivi(?:lo|la|mi)?|scrivi(?:lo|la)?|rifai|sistema|metti)\b[^:\n]{0,80}?(?:nel mio stile|con il mio stile|come (?:lo |la )?(?:scrivo|scriverei|scriveresti) io|come (?:lo |la )?scriverei|come me)\b[^:\n]{0,60}:\s*"#
     static let prefissoDaOra = #"(?:da ora|d'ora in (?:poi|avanti)|da adesso|da oggi)(?: in poi)?[,:]?\s+"#
 
     /// Le richieste di «Scrive come te»: il profilo, imparare di nuovo, riscrivere un testo nello stile e cambiare una
@@ -564,7 +564,7 @@ extension StatoShell {
     func riscriviNelloStile(_ testo: String, clienteId: String?, chiave: String, oggi: Date = Date()) {
         let p = dati.impostazioni.stileVera
         guard !p.vuoto else {
-            rispostaStile("Non ho ancora regole di stile: le imparo dai messaggi che apri da Lucy in Mail o in Messaggi, oppure le scrivi tu in Impostazioni › Vera › Il tuo stile.",
+            rispostaStile("Non ho ancora regole di stile: le imparo dai messaggi che apri da Lucy in Mail o in Messaggi, oppure le scrivi tu in Impostazioni › Lucy › Il tuo stile.",
                           chiave: chiave, scheda: SchedaStileVera(tipo: .profilo))
             return
         }
@@ -575,7 +575,7 @@ extension StatoShell {
             if s.modifiche.isEmpty && !s.conQwen {
                 detto = "Il testo segue già la forma del tuo stile."
             } else {
-                detto = s.conQwen ? TestiStatoVera.inVista(mac: "Ecco il testo come lo scrivi tu: l'ha riscritto Vera con le stesse cifre.",
+                detto = s.conQwen ? TestiStatoVera.inVista(mac: "Ecco il testo come lo scrivi tu: l'ha riscritto Lucy con le stesse cifre.",
                                                   altrove: "Ecco il testo come lo scrivi tu: l'ha riscritto Qwen con le stesse cifre.") :
                     (s.modifiche.count == 1 ? "Ecco il testo come lo scrivi tu: un ritocco." : "Ecco il testo come lo scrivi tu: \(s.modifiche.count) ritocchi.")
             }
@@ -652,7 +652,7 @@ extension StatoShell {
     /// Una richiesta di cambiare il profilo, già pronta per la scheda; nil se la frase non è per lo stile.
     func cambioStile(_ testo: String, chiave: String) -> PreparazioneAzione? {
         // Senza saluti e richiami davanti («Vera, da ora firma…»), con le maiuscole della frase (la firma le tiene)
-        let s = testo.replacingOccurrences(of: #"^\s*(?:(?:ehi|ok|senti|ciao|vera|ruby|eve|per favore|allora)[,\s]+)*"#, with: "",
+        let s = testo.replacingOccurrences(of: #"^\s*(?:(?:ehi|ok|senti|ciao|lucy|vera|ruby|eve|per favore|allora)[,\s]+)*"#, with: "",
                                            options: [.regularExpression, .caseInsensitive])
             .replacingOccurrences(of: "’", with: "'")
             .trimmingCharacters(in: .whitespacesAndNewlines)

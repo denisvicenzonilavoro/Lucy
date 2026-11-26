@@ -11,11 +11,16 @@ enum ReportSuccessione {
     }
 
     private static func copertina(_ t: TestiSuccessione) -> CopertinaReport {
-        CopertinaReport(occhiello: "Passaggio generazionale", titolo: "Il passaggio ai tuoi cari",
+        // Lo scontrino della copertina: il totale, i due momenti e chi eredita (cifre del motore della successione)
+        var cartellini: [(String, [String])] = [("Alla tua famiglia", [CifreDoc.euro(t.s.totale)]),
+                                                ("Subito, ai beneficiari", [CifreDoc.euro(t.s.fuoriAsse)]),
+                                                ("Dopo la successione", [CifreDoc.euro(t.s.asseNetto)])]
+        if !t.s.eredi.isEmpty { cartellini.append(("Chi eredita", t.s.eredi.prefix(3).map(\.nome))) }
+        return CopertinaReport(occhiello: "Passaggio generazionale", titolo: "Il passaggio ai tuoi cari",
                         sottotitolo: "Cosa riceverebbe la tua famiglia, quando e come, e cosa conviene sistemare oggi",
                         nomi: t.cliente, ruolo: t.ruoloConsulente, data: t.data,
                         canali: t.canali.isEmpty ? [.indipendente] : t.canali,
-                        cartellini: [("Subito, ai beneficiari", [CifreDoc.euro(t.s.fuoriAsse)]), ("Dopo la successione", [CifreDoc.euro(t.s.asseNetto)])])
+                        cartellini: cartellini)
     }
 }
 

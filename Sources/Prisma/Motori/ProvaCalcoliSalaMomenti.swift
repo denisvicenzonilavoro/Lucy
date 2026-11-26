@@ -14,7 +14,7 @@ enum ProvaCalcoliSalaMomenti {
                       EsperienzaSala.allCases.allSatisfy { ($0.minuti != nil) == ($0 != .prismaCliente) })
         verifica.vero("Sala momenti: i titoli dei momenti del template",
                       MomentoSala.allCases.map(\.titolo) == ["Per aprire", "Per spiegare", "Per chiudere", "Dopo l’incontro"])
-        verifica.vero("Sala momenti: «Per aprire · 2 min» sul prisma di luce",
+        verifica.vero("Sala momenti: «Per aprire · 2 min» sul sole del piano",
                       TestiSala.momento(.prismaLuce) == "Per aprire · 2 min")
         verifica.vero("Sala momenti: «Dopo l’incontro» senza durata sulla Lucy del cliente",
                       TestiSala.momento(.prismaCliente) == "Dopo l’incontro")

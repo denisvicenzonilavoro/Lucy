@@ -515,8 +515,8 @@ extension StatoShell {
         let (canale, area) = MotoreDocumenti.canaleEArea(doc, posizione: nil, prodotto: nil)
         creaDaDocumento(doc.id, cosa: .posizione, canale: canale, area: area, confermaPrima: true)
         inquadra.chiudi()
-        let provenienza = canale == .alleanza ? "Alleanza" : "indipendente" + (d.compagnia.map { ", \($0)" } ?? ", altra compagnia")
-        mostraAvviso("Aggiunta alle posizioni di \(Self.nomeBreveInquadra(c)), canale \(provenienza)")
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: l'avviso non dice il canale
+        mostraAvviso("Aggiunta alle posizioni di \(Self.nomeBreveInquadra(c))" + (d.compagnia.map { ", \($0)" } ?? ""))
     }
 
     /// «Aggiorna la posizione»: la polizza c'è già; il documento (dati da confermare) collegato alla posizione si apre

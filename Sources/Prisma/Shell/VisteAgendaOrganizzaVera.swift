@@ -263,7 +263,7 @@ struct AgendaOrganizzaOrariVista: View {
                 .superficieApple(Tema.Apple.Vera.SchedaCalcoli.superficie, raggio: Tema.Apple.Raggio.tile)
             HStack(spacing: G.spazio) {
                 PillolaFaseTre(testo: "Tratteggiati", colore: Tema.Apple.agendaProposta)
-                Text(scelto == nil ? "gli orari che Vera propone · tocca per scegliere" : "l'orario scelto è pieno · tocca un altro orario per cambiare")
+                Text(scelto == nil ? "gli orari che Lucy propone · tocca per scegliere" : "l'orario scelto è pieno · tocca un altro orario per cambiare")
                     .carattereApple(F.nota)
                     .foregroundColor(F.coloreDettaglio)
                     .lineLimit(2)

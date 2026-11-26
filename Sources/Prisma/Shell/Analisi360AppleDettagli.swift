@@ -77,7 +77,8 @@ struct DettaglioInvestimentiApple: View {
     private func tile(_ p: ComposizioneInvestimenti360.Pezzo, indice: Int) -> some View {
         let d = Tema.Apple.Aree360.Dettaglio.self
         let c = Tema.Apple.Aree360.Composizione.self
-        let canali = Canale.allCases.filter { (p.perCanale[$0] ?? 0) >= 0.5 }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: gli euro della classe in una riga sola, senza canale
+        let euro = Canale.allCases.reduce(0.0) { $0 + (p.perCanale[$1] ?? 0) }
         return VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: c.spazioPallino) {
                 Circle()
@@ -95,15 +96,14 @@ struct DettaglioInvestimentiApple: View {
                 .lineLimit(1)
                 .padding(.top, c.quotaSopra)
             VStack(alignment: .leading, spacing: c.spazioCanali) {
-                if canali.isEmpty {
+                if euro < 0.5 {
                     Text("Nessuna posizione")
                         .carattereApple(c.canale)
                         .foregroundColor(c.coloreNessuno)
-                }
-                ForEach(canali) { k in
-                    Text("\(k.nomeBreve) \(Formati.euro(p.perCanale[k] ?? 0))")
+                } else {
+                    Text(Formati.euro(euro))
                         .carattereApple(c.canale)
-                        .foregroundColor(coloreCanale360(k))
+                        .foregroundColor(d.coloreCifra)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
@@ -148,11 +148,6 @@ struct DettaglioInvestimentiApple: View {
 
     private func ipotesi(_ k: ComposizioneInvestimenti360) -> String {
         var t = "Posizioni finanziarie in essere per \(Formati.euro(k.totale))"
-        let canali = Canale.allCases.compactMap { c -> String? in
-            guard let v = k.perCanale[c], v >= 0.5 else { return nil }
-            return "\(c.nomeBreve) \(Formati.euro(v))"
-        }
-        if !canali.isEmpty { t += " (" + canali.joined(separator: ", ") + ")" }
         t += ": quote indicate nelle posizioni"
         t += k.stimata ? " o, dove mancano, stimate dalla tipologia e dall'SRI." : "."
         t += " Coerenza: capitale di investimento con SRI entro il massimo del profilo (prudente 2, moderata 3, dinamica 5, aggressiva 7)."
@@ -230,20 +225,14 @@ struct DettaglioLiquiditaApple: View {
         }
     }
 
-    /// Mesi di spese da parte, spese mensili e liquidità sui conti, con i canali dei conti a destra.
+    /// Mesi di spese da parte, spese mensili e liquidità sui conti.
     private func cifre(_ l: Liquidita360) -> some View {
         let d = Tema.Apple.Aree360.Dettaglio.self
-        let canali = Canale.allCases.filter { (l.perCanale[$0] ?? 0) >= 0.5 }
         return HStack(alignment: .bottom, spacing: d.spazioCifre) {
             CifraDettaglioArea360(titolo: "Mesi di spese da parte", valore: l.mesi, formato: .mesi, indice: 0)
             CifraDettaglioArea360(titolo: "Spese mensili", valore: l.speseMensili, formato: .euro, indice: 1)
             CifraDettaglioArea360(titolo: "Liquidità sui conti", valore: l.liquidita, formato: .euro, indice: 2)
             Spacer(minLength: 0)
-            HStack(spacing: Tema.Apple.Misura.Spazio.etichettaCanale) {
-                ForEach(canali) { c in
-                    EtichettaCanaleApple(canale: c, compatta: true)
-                }
-            }
         }
     }
 
@@ -263,11 +252,6 @@ struct DettaglioLiquiditaApple: View {
 /// Il canale con cui nasce la proposta: Alleanza se il cliente ce l'ha (o non ne ha nessuno), altrimenti il suo.
 private func canaleProposta360(_ c: Cliente) -> Canale {
     c.canali.contains(.alleanza) || c.canali.isEmpty ? .alleanza : c.canali[0]
-}
-
-/// Il colore del testo di un canale (blu Alleanza, cuoio indipendente).
-private func coloreCanale360(_ c: Canale) -> Color {
-    c == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente
 }
 
 /// `.lbl` «AREA · Nome Cognome» nel colore dell'area, titolo 28 bold e, a destra, «Apri l'analisi completa ›».
@@ -436,7 +420,7 @@ private struct PiedeDettaglioArea360: View {
             .disabled(stato.solaLettura)
             .help("Le proposte che le analisi di Lucy suggeriscono per l'area diventano una bozza in Posizioni")
             Button(action: chiediVera) {
-                Text("Chiedi a Vera di spiegarlo")
+                Text("Chiedi a Lucy di spiegarlo")
             }
             .buttonStyle(.appleGrande)
             Spacer(minLength: 0)

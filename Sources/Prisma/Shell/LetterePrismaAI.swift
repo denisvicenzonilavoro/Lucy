@@ -68,7 +68,7 @@ struct LetteraPrismaAIWidget: View {
                 HStack(spacing: 18) {
                     BustaCeralacca()
                     VStack(alignment: .leading, spacing: 2) {
-                        Text("DA PRISMA AI · \(Formati.ora.string(from: l.arrivata))")
+                        Text("DA LUCY AI · \(Formati.ora.string(from: l.arrivata))")
                             .fontCarta(11, design: .monospaced).tracking(2)
                             .foregroundColor(TemaCarta.Colore.matitaD)
                         Text("\(l.nome) chiede una consulenza")

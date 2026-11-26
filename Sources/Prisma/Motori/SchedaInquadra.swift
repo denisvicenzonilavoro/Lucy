@@ -86,11 +86,11 @@ extension MotoreInquadra {
         abs(v - v.rounded()) < 0.005 ? Formati.euro(v) : Formati.euroDecimali(v)
     }
 
-    /// La riga «Tipo»: tipologia (o «Polizza») · provenienza: «Alleanza» con il canale Alleanza, altrimenti la compagnia
-    /// letta, «altra compagnia» se non c'è. nil se il foglio non dice né il tipo né la compagnia.
+    /// La riga «Tipo»: tipologia (o «Polizza») · la compagnia letta, «altra compagnia» se non c'è. nil se il foglio non
+    /// dice né il tipo né la compagnia. Un solo canale, quello di Lucy (25 novembre 2026): il canale non conta più.
     static func tipo(_ d: DatiInquadrati, canale: Canale) -> String? {
-        guard d.tipo != nil || d.compagnia != nil || canale == .alleanza else { return nil }
-        let provenienza = canale == .alleanza ? "Alleanza" : (d.compagnia ?? "altra compagnia")
+        guard d.tipo != nil || d.compagnia != nil else { return nil }
+        let provenienza = d.compagnia ?? "altra compagnia"
         return (d.tipo ?? "Polizza") + " · " + provenienza
     }
 
@@ -198,7 +198,7 @@ extension MotoreInquadra {
     /// Solo le righe con un valore: quelle «non lette» restano grigie, non sono dubbi.
     static func daControllare(_ d: DatiInquadrati, canale: Canale, oggi: Date = Date()) -> Set<String> {
         var s: Set<String> = []
-        if tipo(d, canale: canale) != nil, (d.compagnia == nil && canale == .indipendente) || d.tipo == nil {
+        if tipo(d, canale: canale) != nil, d.compagnia == nil || d.tipo == nil {
             s.insert("tipo")
         }
         if d.premio != nil {

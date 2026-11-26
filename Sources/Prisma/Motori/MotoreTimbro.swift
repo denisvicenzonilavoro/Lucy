@@ -41,7 +41,7 @@ struct EsitoTimbro: Hashable {
 
 enum MotoreTimbro {
     /// La frase che accompagna sempre il timbro.
-    static let avvertenza = "Un aiuto di Vera: non sostituisce la valutazione di adeguatezza prevista dalle procedure."
+    static let avvertenza = "Un aiuto di Lucy: non sostituisce la valutazione di adeguatezza prevista dalle procedure."
 
     /// L'importo che la proposta chiede oggi: il versamento iniziale o, se non c'è, un anno di premi.
     static func importo(_ p: Posizione) -> Double {

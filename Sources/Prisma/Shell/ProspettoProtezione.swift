@@ -246,7 +246,7 @@ private struct PaginaMappa: View {
                                        CellaDoc(r.premioAnnuo > 0 ? CifreDoc.euro(r.premioAnnuo) : "—", font: T.pTabella),
                                        perche], altezza: 20)
             }, fontTesta: T.pTabellaTesta, fontTestaSotto: T.pTabellaNota, altezzaTesta: 18, margine: 4)
-            SezioneProspetto(titolo: "Le coperture, per canale",
+            SezioneProspetto(titolo: "Le coperture",
                              testo: Text(verbatim: "In essere e proposte; costo per 1.000 € assicurati = premio annuo diviso per il capitale, per mille."))
             if e.coperture.isEmpty && e.proposte.isEmpty {
                 Text(verbatim: "Nessuna copertura in essere né proposta.").font(T.pCorpo).foregroundColor(C.tenue)
@@ -256,8 +256,9 @@ private struct PaginaMappa: View {
                     ColonnaDoc(titolo: "Rischio", sottotitolo: "stato", peso: 1.4, destra: false),
                     ColonnaDoc(titolo: "Capitale", peso: 1), ColonnaDoc(titolo: "Premio", sottotitolo: "l'anno", peso: 0.85),
                     ColonnaDoc(titolo: "Per 1.000 €", peso: 0.8), ColonnaDoc(titolo: "Scadenza", sottotitolo: "beneficiari", peso: 1.3),
-                ], gruppi: Canale.allCases.compactMap { c in
-                    let mie = (e.coperture + e.proposte).filter { $0.canale == c }
+                ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                    // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                    let mie = (e.coperture + e.proposte)
                     guard !mie.isEmpty else { return nil }
                     return GruppoCanale(canale: c, righe: mie.map { p in
                         let mille = (p.capitaleAssicurato ?? 0) > 0 ? p.premioAnnuo / (p.capitaleAssicurato ?? 1) * 1000 : nil

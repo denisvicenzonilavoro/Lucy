@@ -132,7 +132,7 @@ enum ProvaStileVera {
                   && conSoprannome.aperture?.valore.contains("Ciao ‹nome›,") == true,
                   "Stile: il saluto con un soprannome non entra nel profilo: \(conSoprannome.aperture?.valore ?? [])")
         controlla(!StileVera.istruzioni(conSoprannome, cliente: perId["marco"], oggi: oggi, clienteNuovo: false).contains("Giuly"),
-                  "Stile: a Marco Vera non propone il soprannome di Giulia")
+                  "Stile: a Marco Lucy non propone il soprannome di Giulia")
 
         // MARK: Le scelte del consulente restano
         var mio = p

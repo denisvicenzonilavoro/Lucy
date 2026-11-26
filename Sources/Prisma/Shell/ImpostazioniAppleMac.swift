@@ -359,61 +359,21 @@ extension AppImpostazioni {
                         .popover(isPresented: $modificaNome, arrowEdge: .leading) { campoNomeApple }
                 }
                 .cascataImpostazioni(2)
-                #if !os(macOS)
-                RigaImpostazione(titolo: "Canale Alleanza", sottotitolo: "Etichetta in vetro blu con il logo Alleanza. Solo prodotti Alleanza.") {
-                    EtichettaCanaleApple(canale: .alleanza)
-                }
-                .cascataImpostazioni(3)
-                RigaImpostazione(titolo: "Canale indipendente",
-                                 sottotitolo: "«Denis Vicenzoni · Consulenza finanziaria». Investimenti, risparmio, previdenza, protezione.") {
-                    EtichettaCanaleApple(canale: .indipendente)
-                }
-                .cascataImpostazioni(4)
-                #endif
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente righe dei canali
             }
             #if os(macOS)
             canaliProfiloMac
-            #else
-            NotaImpostazioni("Ogni posizione e ogni proposta porta l'etichetta del suo canale.")
-                .padding(.top, Tema.Apple.Impostazioni.Riga.fraRighe)
-                .cascataImpostazioni(5)
             #endif
         }
     }
 
     #if os(macOS)
-    /// Migliorie d'uso 38, solo sul Mac: «I tuoi canali» con i due campi del nome (l'etichetta accanto cambia mentre si
-    /// scrive, l'archivio a fine scrittura) e «Il primo avvio» con «Rivedi», che riapre le tre domande dalla prima.
+    /// Solo sul Mac: «Il primo avvio» con «Rivedi», che riapre le domande dalla prima. Dal 25 novembre 2026 (decisione
+    /// dell'utente: un solo canale, quello di Lucy) niente più «I tuoi canali» con i due campi del nome.
     private var canaliProfiloMac: some View {
         let c = Tema.Apple.Impostazioni.ProfiloCanali.self
         let g = Tema.Apple.Impostazioni.Gruppo.self
-        let nomi = stato.dati.impostazioni.nomiCanali ?? .base
         return VStack(alignment: .leading, spacing: 0) {
-            Text(TestiPrimoAvvio.canali)
-                .carattereApple(g.etichetta)
-                .foregroundColor(g.coloreEtichetta)
-                .padding(.leading, c.rientro)
-                .padding(.top, c.sopraOcchiello)
-                .padding(.bottom, c.sottoOcchiello)
-                .cascataImpostazioni(3)
-            Text(TestiPrimoAvvio.profiloCanaliNota)
-                .carattereApple(c.nota)
-                .foregroundColor(c.coloreNota)
-                .fixedSize(horizontal: false, vertical: true)
-                .padding(.horizontal, c.rientro)
-                .padding(.bottom, c.sottoNota)
-                .cascataImpostazioni(3)
-            GruppoImpostazioni {
-                RigaImpostazione(titolo: TestiPrimoAvvio.primoCanale, sottotitolo: TestiPrimoAvvio.primoCanaleSotto) {
-                    CampoNomeCanale(canale: .alleanza, nome: nomi.primo) { stato.impostaNomeCanale(.alleanza, $0) }
-                }
-                .cascataImpostazioni(4)
-                RigaImpostazione(titolo: TestiPrimoAvvio.secondoCanale, sottotitolo: TestiPrimoAvvio.secondoCanaleSotto) {
-                    CampoNomeCanale(canale: .indipendente, nome: nomi.secondo) { stato.impostaNomeCanale(.indipendente, $0) }
-                }
-                .cascataImpostazioni(5)
-            }
-            .id("imp-profilo-canali")
             Text(TestiPrimoAvvio.gruppoAvvio)
                 .carattereApple(g.etichetta)
                 .foregroundColor(g.coloreEtichetta)

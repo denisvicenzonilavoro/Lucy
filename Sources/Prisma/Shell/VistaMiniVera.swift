@@ -49,7 +49,7 @@ struct VistaMiniVera: View {
             .scaleEffect(mostrata || movimentoRidotto ? 1 : m.scalaUscita, anchor: .topTrailing)
             .offset(y: mostrata || movimentoRidotto ? 0 : m.salitaUscita)
             .accessibilityElement(children: .contain)
-            .accessibilityLabel("Vera")
+            .accessibilityLabel("Lucy")
     }
 
     @ViewBuilder
@@ -168,7 +168,7 @@ private struct CapsulaNonPronta: View {
                 Text("Mi sto svegliando…")
                     .font(Tema.Testo.MiniVera.fraseSveglia)
                     .foregroundColor(c.testo)
-                Text(mini.motivoNonPronta ?? "Vera si avvia sul Mac, qualche secondo e ci sono. Non invento nulla nel frattempo.")
+                Text(mini.motivoNonPronta ?? "Lucy si avvia sul Mac, qualche secondo e ci sono. Non invento nulla nel frattempo.")
                     .font(Tema.Testo.MiniVera.sotto)
                     .foregroundColor(c.testoTerziario)
                     .fixedSize(horizontal: false, vertical: true)
@@ -200,7 +200,7 @@ private struct SchedaRisposta: View {
                 SferaAcquaVera(lato: m.sferaScheda, velocita: mini.inArrivo ? Tema.Moto.MiniVera.velocitaPensiero : 1)
                 VStack(alignment: .leading, spacing: m.spazioDomanda) {
                     HStack(spacing: m.spazioFonte) {
-                        Text(mini.inArrivo ? "Vera" : "Vera · ora")
+                        Text(mini.inArrivo ? "Lucy" : "Lucy · ora")
                         if mini.inArrivo { ParlaMiniVera() }
                     }
                     .font(Tema.Testo.MiniVera.autore)
@@ -212,14 +212,14 @@ private struct SchedaRisposta: View {
                         .truncationMode(.tail)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                TastoTondoMiniVera(simbolo: "arrow.up.forward", aiuto: "Continua nell'app Vera") { stato.apriInVeraDaMiniVera() }
+                TastoTondoMiniVera(simbolo: "arrow.up.forward", aiuto: "Continua nell'app Lucy") { stato.apriInVeraDaMiniVera() }
                 TastoTondoMiniVera(simbolo: "xmark", aiuto: "Chiudi · Esc") { stato.chiudiMiniVera() }
             }
             .padding(m.margineTesta)
             // Il corpo scorre se la risposta è lunga: la scheda non supera l'altezza massima
             ScrollView(.vertical) { corpo }
                 .frame(maxHeight: corpoMassimo)
-            CampoMiniVera(segnaposto: "Chiedi altro a Vera…")
+            CampoMiniVera(segnaposto: "Chiedi altro a Lucy…")
             PiedeMiniVera()
         }
     }
@@ -233,7 +233,7 @@ private struct SchedaRisposta: View {
         let cifre = mini.cifre
         let mostra = !mini.inArrivo
         return VStack(alignment: .leading, spacing: 0) {
-            if let t = mini.titolo, t == "Vera non ha potuto rispondere" || TestiStatoVera.eTitoloNonPronta(t) {
+            if let t = mini.titolo, TestiStatoVera.nonHaPotuto(t) || TestiStatoVera.eTitoloNonPronta(t) {
                 Text(t)
                     .font(Tema.Testo.MiniVera.rispostaForte)
                     .foregroundColor(Tema.Colore.MiniVera.testo)
@@ -312,7 +312,7 @@ private struct SchedaScrivi: View {
                 TastoTondoMiniVera(simbolo: "xmark", aiuto: "Chiudi · Esc") { stato.chiudiMiniVera() }
             }
             .padding(m.margineTesta)
-            CampoMiniVera(segnaposto: "Chiedi a Vera, o tieni premuto ⌥ Spazio e parla…", fuoco: true)
+            CampoMiniVera(segnaposto: "Chiedi a Lucy, o tieni premuto ⌥ Spazio e parla…", fuoco: true)
             VStack(alignment: .leading, spacing: 0) {
                 if let n = mini.nota {
                     Text(n)
@@ -575,7 +575,7 @@ private struct GettoneContestoMiniVera: View {
                         .background(Circle().fill(c.pozzetto))
                 }
                 .buttonStyle(StileSemplice())
-                .help("Togli il contesto: Vera parla di tutto il portafoglio")
+                .help("Togli il contesto: Lucy parla di tutto il portafoglio")
             }
         }
         .padding(.horizontal, m.margineGettone)
@@ -583,7 +583,7 @@ private struct GettoneContestoMiniVera: View {
         .background(Capsule(style: .continuous).fill(c.chip))
         .overlay(Capsule(style: .continuous).strokeBorder(c.bordoChip, lineWidth: Tema.Misura.filo))
         .fixedSize()
-        .help("Vera parte da ciò che hai aperto")
+        .help("Lucy parte da ciò che hai aperto")
     }
 }
 
@@ -952,8 +952,8 @@ struct PulsanteSferaVera: View {
         }
         .buttonStyle(StileSemplice())
         .onHover { s in withAnimation(Tema.Moto.passaggio) { sopra = s } }
-        .help("Vera · ⌥ Spazio (tieni premuto per parlare)")
-        .accessibilityLabel("Chiama Vera")
+        .help("Lucy · ⌥ Spazio (tieni premuto per parlare)")
+        .accessibilityLabel("Chiama Lucy")
     }
 }
 #endif

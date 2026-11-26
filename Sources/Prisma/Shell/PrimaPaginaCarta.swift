@@ -105,7 +105,7 @@ struct PrimaPaginaWidget: View {
                 colonna("Da chiamare", p.daChiamare.first.map { "\($0.chi): \($0.perche)" }
                         ?? (p.incontri.first.map { "Alle \(Formati.ora.string(from: $0.ora)): \($0.chi)" } ?? "Nessuno oggi."),
                         penna: false)
-                colonna("La nota di Vera", p.notaVera ?? notaDaScadenze(p), penna: true)
+                colonna("La nota di Lucy", p.notaVera ?? notaDaScadenze(p), penna: true)
             }
             .padding(.top, 10)
 
@@ -129,7 +129,7 @@ struct PrimaPaginaWidget: View {
         }
         .foregroundColor(TemaCarta.Colore.inchiostroD)
         .padding(EdgeInsets(top: 20, leading: 24, bottom: 18, trailing: 24))
-        .frame(maxWidth: 500, alignment: .leading)
+        .frame(maxWidth: 520, alignment: .leading)
         .vetro(.spesso, forma: .arrotondata(TemaCarta.Raggio.riquadro))
         .opacity(statoFinale || visibile ? 1 : 0)
         .offset(y: statoFinale || visibile ? 0 : 10)

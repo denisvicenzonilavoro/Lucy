@@ -356,23 +356,22 @@ enum ProvaCalcoliAgenda {
                                                    ultimoContatto: g(2025, 10, 3), dovutoDal: g(2026, 10, 3), oggi: oggi)
         let r = due.components(separatedBy: "\n")
         func riga(_ righe: [String], _ i: Int) -> String { i < righe.count ? righe[i] : "" }
-        verifica("A30 Agenda: righe delle note", Double(r.count), 13)
+        verifica("A30 Agenda: righe delle note", Double(r.count), 12)
         verifica.vero("A30 Agenda: prima riga", riga(r, 0) == "Ordine del giorno:")
         verifica.vero("A30 Agenda: punto senza canale", riga(r, 1) == "1. Indicare i beneficiari")
-        verifica.vero("A30 Agenda: punto Alleanza con l'etichetta", riga(r, 2) == "2. Rinnovo di «Infortuni famiglia» (Alleanza)")
-        verifica.vero("A30 Agenda: punto indipendente con l'etichetta", riga(r, 3) == "3. Rivedere «ETF azionario globale» (Indipendente)")
+        verifica.vero("A30 Agenda: un solo canale, punto senza etichetta", riga(r, 2) == "2. Rinnovo di «Infortuni famiglia»")
+        verifica.vero("A30 Agenda: un solo canale, anche il terzo senza etichetta", riga(r, 3) == "3. Rivedere «ETF azionario globale»")
         verifica.vero("A30 Agenda: i punti oltre gli otto", riga(r, 9) == "…e altri 2 punti nel prospetto del riesame.")
-        verifica.vero("A30 Agenda: riga vuota prima del canale", r.count > 10 && riga(r, 10).isEmpty)
-        verifica.vero("A30 Agenda: tutti e due i canali",
-                      riga(r, 11) == "Canale: Alleanza e indipendente. Proposte, documenti e firme restano distinti per canale.")
-        verifica.vero("A30 Agenda: riesame scaduto «\(riga(r, 12))»",
-                      riga(r, 12) == "Ultimo contatto il 3 ottobre 2025: riesame scaduto dal 3 ottobre 2026.")
+        verifica.vero("A30 Agenda: riga vuota prima dell'ultimo contatto", r.count > 10 && riga(r, 10).isEmpty)
+        verifica.vero("A30 Agenda: un solo canale, nessuna riga del canale", !due.contains("Canale:"))
+        verifica.vero("A30 Agenda: riesame scaduto «\(riga(r, 11))»",
+                      riga(r, 11) == "Ultimo contatto il 3 ottobre 2025: riesame scaduto dal 3 ottobre 2026.")
 
         let una = MotorePianificazione.noteRiesame(punti: punti, canali: [.alleanza], canale: .alleanza,
                                                    ultimoContatto: g(2025, 10, 3), dovutoDal: g(2026, 11, 18), oggi: oggi)
         let u = una.components(separatedBy: "\n")
         verifica.vero("A31 Agenda: un canale solo, punto senza etichetta", riga(u, 2) == "2. Rinnovo di «Infortuni famiglia»")
-        verifica.vero("A31 Agenda: canale Alleanza", una.contains("Canale: Alleanza Assicurazioni."))
+        verifica.vero("A31 Agenda: nessuna riga del canale", !una.contains("Canale:") && !una.contains("Alleanza Assicurazioni"))
         verifica.vero("A31 Agenda: riesame dovuto", una.hasSuffix("riesame dovuto dal 18 novembre 2026."))
 
         let vuote = MotorePianificazione.noteRiesame(punti: [], canali: [], canale: nil, ultimoContatto: nil, dovutoDal: nil, oggi: oggi)

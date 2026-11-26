@@ -215,8 +215,9 @@ struct PaginaCarta: View {
         .frame(width: M.pagina.width, height: M.pagina.height)
         // Carta bianca, come i prospetti di `FoglioProspetto`: le due famiglie di prospetti hanno la stessa veste
         .background(Colori.Carta.foglioProspetto)
-        // Su carta le etichette dei canali sono quelle opache da stampa, e tutto resta chiaro
+        // Su carta le etichette dei canali sono quelle opache da stampa, e tutto resta chiaro; un solo canale, Lucy
         .environment(\.etichetteStampa, true)
+        .environment(\.canaleUnicoLucy, true)
         .environment(\.colorScheme, .light)
     }
 
@@ -231,13 +232,17 @@ struct PaginaCarta: View {
             }
             .frame(height: M.rigaLogoPrima)
             .padding(.bottom, 9)
-            Rectangle().fill(Colori.Carta.filettoForte).frame(height: 2)
+            Rectangle().fill(Colori.Carta.filettoForte).frame(height: 1.2)
             Text(verbatim: contenuto.occhiello.uppercased())
-                .font(Tipo.Carta.occhiello).tracking(1.2).foregroundColor(Colori.Carta.numeroSezione)
+                .font(Tipo.Carta.occhiello).tracking(1.4).foregroundColor(Colori.Carta.numeroSezione)
                 .padding(.top, 14)
             Text(verbatim: contenuto.titolo)
                 .font(Tipo.Carta.titolo).foregroundColor(Colori.Carta.titolo)
                 .lineLimit(1).minimumScaleFactor(0.6)
+                // La sottolineatura d'oro nello spazio sotto il titolo: l'altezza della testata non cambia
+                .overlay(alignment: .bottomLeading) {
+                    SottolineaturaOro(lunghezza: Misure.Documento.lunghezzaOroReport).offset(y: Misure.Documento.spessoreOro * 2.2)
+                }
                 .padding(.top, 4)
             Text(verbatim: contenuto.sottotitolo)
                 .font(Tipo.Carta.sottotitolo).foregroundColor(Colori.Carta.testoTenue)
@@ -299,7 +304,11 @@ struct BloccoCarta: View {
                     Text(verbatim: numero).font(Tipo.Carta.numeroSezione).foregroundColor(Colori.Carta.numeroSezione)
                     Text(verbatim: titolo).font(Tipo.Carta.sezione).foregroundColor(Colori.Carta.titolo)
                 }
+                // Il filo sottile con il tratto d'oro all'inizio (stile Lucy)
                 Rectangle().fill(Colori.Carta.filetto).frame(height: 1)
+                    .overlay(alignment: .leading) {
+                        Rectangle().fill(Colori.Documento.Carta.oro).frame(width: Misure.Documento.lunghezzaOroProspetto, height: Misure.Documento.spessoreOro)
+                    }
             }
         case .indicatori(let elenco):
             HStack(spacing: 8) {
@@ -318,7 +327,9 @@ struct BloccoCarta: View {
                     .overlay(RoundedRectangle(cornerRadius: M.raggio).strokeBorder(Colori.Carta.riquadroBordo, lineWidth: 0.8))
                 }
             }
-        case .voci(let voci):
+        case .voci(let tutte):
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente voce «Canale»
+            let voci = tutte.filter { !CampoVoce.eCanale($0) }
             VStack(spacing: 0) {
                 ForEach(Array(ImpaginatoreProspetto.righeVoci(voci).enumerated()), id: \.offset) { _, riga in
                     HStack(alignment: .top, spacing: M.colonnaVoci) {
@@ -330,7 +341,7 @@ struct BloccoCarta: View {
                 }
             }
         case .tabella(let t):
-            TabellaCarta(tabella: t)
+            TabellaCarta(tabella: t.senzaCanale)
         case .grafico(let serie):
             GraficoCarta(serie: serie)
         case .testo(let s):
@@ -451,6 +462,35 @@ struct TabellaCarta: View {
                 .truncationMode(.tail)
                 .fixedSize(horizontal: false, vertical: righe > 1)
         }
+    }
+}
+
+extension CampoVoce {
+    /// La voce che dice solo il canale («Canale: Alleanza»): Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy non si mostra.
+    static func eCanale(_ v: CampoVoce) -> Bool {
+        v.canale != nil && v.etichetta.lowercased() == "canale"
+    }
+}
+
+extension TabellaProspetto {
+    /// La tabella come si disegna sulla carta. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente colonne
+    /// «Canale» o «Canali» e niente righe che dicono solo il canale (prima cella «Canale»). I dati del prospetto
+    /// restano com'erano.
+    var senzaCanale: TabellaProspetto {
+        let tenute = colonne.indices.filter { !["canale", "canali"].contains(colonne[$0].titolo.lowercased()) }
+        let togliColonne = tenute.count < colonne.count && !tenute.isEmpty
+        func filtra(_ r: [CellaProspetto]) -> [CellaProspetto] {
+            togliColonne ? tenute.map { $0 < r.count ? r[$0] : .t("") } : r
+        }
+        var nuove: [[CellaProspetto]] = []
+        var evidenziate: Set<Int> = []
+        for (i, r) in righe.enumerated() {
+            if r.first?.testo.lowercased() == "canale", r.dropFirst().contains(where: { $0.canale != nil }) { continue }
+            if evidenzia.contains(i) { evidenziate.insert(nuove.count) }
+            nuove.append(filtra(r))
+        }
+        return TabellaProspetto(colonne: togliColonne ? tenute.map { colonne[$0] } : colonne, righe: nuove,
+                                totale: totale.map(filtra), evidenzia: evidenziate)
     }
 }
 

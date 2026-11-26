@@ -41,20 +41,7 @@ struct ModuloPosizione: View {
                                         opzioni: EsitoProposta.allCases.map { ($0, $0.nome) }, larghezza: 220)
                         }
                     }
-                    CampoModulo(etichetta: "Canale") {
-                        HStack(spacing: 14) {
-                            ForEach(Canale.allCases) { c in
-                                Button { bozza.canale = c } label: {
-                                    HStack(spacing: 6) {
-                                        Image(systemName: bozza.canale == c ? "largecircle.fill.circle" : "circle")
-                                            .foregroundColor(Colori.Analisi.navBasso)
-                                        EtichettaCanale(canale: c, compatta: true)
-                                    }
-                                }
-                                .buttonStyle(StileSemplice())
-                            }
-                        }
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                     CampoModulo(etichetta: "Area") {
                         MenuTendina(selezione: $bozza.area,
                                     opzioni: AreaPosizione.allCases.map { ($0, $0.nome) }, larghezza: 220)
@@ -276,8 +263,8 @@ struct ModuloPosizione: View {
     /// Le voci della tendina "Dalla scheda prodotto": prima la compilazione a mano.
     private var opzioniSchede: [(String?, String)] {
         let voci: [(String?, String)] = schede.map { s in
-            let fonte = s.canale == .alleanza ? "Alleanza" : (s.emittente.isEmpty ? "indipendente" : s.emittente)
-            return (Optional(s.id), "\(s.nome) · \(fonte)")
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la compagnia, non il canale
+            return (Optional(s.id), s.emittente.isEmpty ? s.nome : "\(s.nome) · \(s.emittente)")
         }
         return [(nil, "Nessuna scheda · compilo a mano")] + voci
     }

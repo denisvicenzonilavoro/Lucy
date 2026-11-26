@@ -53,7 +53,7 @@ enum ProvaMessaggiVera {
         controlla(!utente.contains("marco.prova@example.com") && !utente.contains("333"),
                   "Messaggi, Qwen finto: nella scheda il nome del cliente, mai email e telefono")
         controlla(MessaggiVera.piano(o, cliente: marco, tono: .cordiale, canale: .mail, bozza: bozza, vera: vera).scelta.modalita == .lavoro,
-                  "Messaggi: Vera scrive in modalità lavoro (numeri solo da Lucy)")
+                  "Messaggi: Lucy scrive in modalità lavoro (numeri solo da Lucy)")
         controlla(primo.autore == .vera && primo.modello == motore.modello && primo.avviso == nil
                   && primo.testo.hasPrefix("Ciao Marco,\n\nla tua «Infortuni famiglia» scade il 19 dicembre 2026")
                   && primo.testo.hasSuffix("Ti va di vederci nei prossimi giorni?\n\nUn saluto,\nDenis")
@@ -75,8 +75,8 @@ enum ProvaMessaggiVera {
         }
         let bozzaBreve = ModelliMessaggi.testo(o, tono: .breve, canale: .messaggi, cliente: marco, firma: firma)
         controlla(terzo.autore == .modelloFisso && terzo.testo == bozzaBreve.completo && terzo.oggetto == nil
-                  && (terzo.avviso ?? "").hasPrefix("Vera non è pronta") && (terzo.avviso ?? "").contains("Ollama non risponde"),
-                  "Messaggi: se Qwen non è pronto resta il modello fisso e Vera lo dice («\(terzo.avviso ?? "")»)")
+                  && (terzo.avviso ?? "").hasPrefix("Lucy non è pronta") && (terzo.avviso ?? "").contains("Ollama non risponde"),
+                  "Messaggi: se Qwen non è pronto resta il modello fisso e Lucy lo dice («\(terzo.avviso ?? "")»)")
         let senzaMotore = aspetta {
             await MessaggiVera.scrivi(o, cliente: marco, tono: .formale, canale: .mail, firma: firma, motore: nil, vera: vera)
         }

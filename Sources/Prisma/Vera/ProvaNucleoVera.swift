@@ -34,11 +34,11 @@ enum ProvaNucleoVera {
         let locali: [Bool] = ["http://127.0.0.1:11434", "http://localhost:11434", "http://[::1]:8080", "http://192.168.1.20:11434",
                               "https://ollama.example.com", "ftp://127.0.0.1:11434", "http://127.0.0.1.example.com"]
             .map { IndirizzoLocale.url($0) != nil }
-        controlla(locali == [true, true, true, false, false, false, false], "Vera: solo indirizzi del Mac stesso (127.0.0.1, localhost, ::1)")
+        controlla(locali == [true, true, true, false, false, false, false], "Lucy: solo indirizzi del Mac stesso (127.0.0.1, localhost, ::1)")
         let messaggi = [MessaggioModello(ruolo: .utente, testo: "ciao")]
         let ollamaFuori = (try? FornitoreOllama(indirizzo: "http://10.0.0.5:11434", modello: "qwen3.5:4b").richiesta(messaggi, opzioni: OpzioniModello())) == nil
         let openAIFuori = (try? FornitoreCompatibileOpenAI(indirizzo: "https://api.example.com", modello: "x").richiesta(messaggi, opzioni: OpzioniModello())) == nil
-        controlla(ollamaFuori && openAIFuori, "Vera: nessuna richiesta verso un altro computer, con entrambi i fornitori")
+        controlla(ollamaFuori && openAIFuori, "Lucy: nessuna richiesta verso un altro computer, con entrambi i fornitori")
         var lontano = ImpostazioniVera()
         lontano.indirizzoLocale = "http://10.0.0.5:11434"
         var lontanoOpenAI = ImpostazioniVera()
@@ -47,7 +47,7 @@ enum ProvaNucleoVera {
         let (fuori1, fuori2) = (lontano, lontanoOpenAI)
         let (d1, d2) = aspetta { (await MotoreLocale.verifica(fuori1), await MotoreLocale.verifica(fuori2)) }
         controlla(!d1.pronto && (d1.motivo ?? "").contains("127.0.0.1") && !d2.pronto && (d2.motivo ?? "").contains("127.0.0.1"),
-                  "Vera: un indirizzo di un altro computer è rifiutato senza collegarsi")
+                  "Lucy: un indirizzo di un altro computer è rifiutato senza collegarsi")
         let qui = aspetta { await MotoreLocale.verifica(ImpostazioniVera()) }
         print("INFO Modello sul Mac (Ollama) su questo server: \(qui.motivo ?? "pronto")")
     }
@@ -147,15 +147,15 @@ enum ProvaNucleoVera {
             nascosto += r.ragionamento
         }
         visibile += f.filtra("").testo
-        controlla(visibile == "\nEcco la risposta <b>" && nascosto == "ragiono a lungo", "Vera: il ragionamento non entra nel testo visibile")
-        controlla(NucleoVera.pulisci("<think>x</think>\n**Ciao**, tutto bene.") == "Ciao, tutto bene.", "Vera: risposta senza ragionamento e senza grassetti")
+        controlla(visibile == "\nEcco la risposta <b>" && nascosto == "ragiono a lungo", "Lucy: il ragionamento non entra nel testo visibile")
+        controlla(NucleoVera.pulisci("<think>x</think>\n**Ciao**, tutto bene.") == "Ciao, tutto bene.", "Lucy: risposta senza ragionamento e senza grassetti")
     }
 
     // MARK: - Modalità
 
     private static func modalita(_ controlla: (Bool, String) -> Void) {
         let stato = StatoShell(persistente: false)
-        guard let f = stato.fonteVera("giulia") else { return controlla(false, "Vera: fonte di Giulia") }
+        guard let f = stato.fonteVera("giulia") else { return controlla(false, "Lucy: fonte di Giulia") }
         let nome = f.cliente.nome.split(separator: " ").first.map(String.init) ?? f.cliente.nome
         func m(_ domanda: String, spunto: SpuntoVera? = nil, storia: [MessaggioVera] = []) -> ModalitaVera {
             NucleoVera.modalita(domanda: domanda, spunto: spunto, cliente: f.cliente, storia: storia)
@@ -173,26 +173,26 @@ enum ProvaNucleoVera {
             ("Scrivi una mail a \(nome) per ricordarle l'incontro", .lavoro),
         ]
         let sbagliati = casi.filter { m($0.0) != $0.1 }.map { $0.0 }
-        controlla(sbagliati.isEmpty, "Vera: modalità scelta dalla domanda (\(casi.count) casi\(sbagliati.isEmpty ? "" : ", sbagliati: " + sbagliati.joined(separator: " | ")))")
-        controlla(m("Ciao!", spunto: .riepilogo) == .lavoro, "Vera: uno spunto è sempre lavoro")
+        controlla(sbagliati.isEmpty, "Lucy: modalità scelta dalla domanda (\(casi.count) casi\(sbagliati.isEmpty ? "" : ", sbagliati: " + sbagliati.joined(separator: " | ")))")
+        controlla(m("Ciao!", spunto: .riepilogo) == .lavoro, "Lucy: uno spunto è sempre lavoro")
         var risposta = MessaggioVera(autore: .vera, testo: "La protezione è scoperta.")
         risposta.modalita = .lavoro
         controlla(m("E per i figli?", storia: [MessaggioVera(autore: .utente, testo: "Dove è scoperta la protezione?"), risposta]) == .lavoro
-                  && m("E per i figli?") == .conversazione, "Vera: una domanda breve di seguito resta nella modalità di prima")
+                  && m("E per i figli?") == .conversazione, "Lucy: una domanda breve di seguito resta nella modalità di prima")
         controlla(NucleoVera.vuolePensare("Pensaci bene: conviene riscattare?") && NucleoVera.vuolePensare("Quali sono i pro e contro del TFR in azienda?")
-                  && !NucleoVera.vuolePensare("Quanto pesano i costi?") && !NucleoVera.vuolePensare("Ciao Vera"),
-                  "Vera: ragiona sulle domande difficili o se le dici «pensaci bene»")
+                  && !NucleoVera.vuolePensare("Quanto pesano i costi?") && !NucleoVera.vuolePensare("Ciao Lucy"),
+                  "Lucy: ragiona sulle domande difficili o se le dici «pensaci bene»")
         let r = RichiestaVera(domanda: "Quanto pesano i costi?", spunto: nil, fonte: f, storia: [])
         controlla(NucleoVera.scegli(r, ragionamento: .sempre).pensa && !NucleoVera.scegli(RichiestaVera(domanda: "pensaci bene", spunto: nil, fonte: f, storia: []), ragionamento: .mai).pensa,
-                  "Vera: il ragionamento si può forzare dalle impostazioni")
+                  "Lucy: il ragionamento si può forzare dalle impostazioni")
     }
 
     // MARK: - Contesto a strati e storia
 
     private static func contesto(_ controlla: (Bool, String) -> Void) {
         let stato = StatoShell(persistente: false)
-        guard let f = stato.fonteVera("giulia") else { return controlla(false, "Vera: fonte di Giulia") }
-        let ambiente = AmbienteVera(oggi: Date(), appAperte: ["Clienti", "Vera"], cliente: f.cliente.nome)
+        guard let f = stato.fonteVera("giulia") else { return controlla(false, "Lucy: fonte di Giulia") }
+        let ambiente = AmbienteVera(oggi: Date(), appAperte: ["Clienti", "Lucy"], cliente: f.cliente.nome)
         let vera = ImpostazioniVera()
         let lavoro = NucleoVera.piano(RichiestaVera(domanda: "Quanto pesano i costi?", spunto: nil, fonte: f, storia: []), impostazioni: vera, ambiente: ambiente)
         let chiacchiera = NucleoVera.piano(RichiestaVera(domanda: "Cos'è l'inflazione?", spunto: nil, fonte: f, storia: []), impostazioni: vera, ambiente: ambiente)
@@ -200,17 +200,17 @@ enum ProvaNucleoVera {
         let ultimoChiacchiera = chiacchiera.messaggi.last?.testo ?? ""
         controlla(lavoro.messaggi.first?.ruolo == .sistema && lavoro.messaggi.first?.testo == IstruzioniVera.chat
                   && chiacchiera.messaggi.first?.testo == IstruzioniVera.conversazione,
-                  "Vera: istruzioni fisse in testa, per modalità (Ollama le tiene in cache)")
-        controlla(ultimoLavoro.hasPrefix("CONTESTO: ") && ultimoLavoro.contains("cliente attivo: \(f.cliente.nome)") && ultimoLavoro.contains("app aperte in Lucy: Clienti, Vera")
+                  "Lucy: istruzioni fisse in testa, per modalità (Ollama le tiene in cache)")
+        controlla(ultimoLavoro.hasPrefix("CONTESTO: ") && ultimoLavoro.contains("cliente attivo: \(f.cliente.nome)") && ultimoLavoro.contains("app aperte in Lucy: Clienti, Lucy")
                   && ultimoLavoro.contains("SCHEDA DEL CLIENTE") && ultimoLavoro.contains("CALCOLI DI PRISMA PERTINENTI"),
-                  "Vera: in lavoro la riga di contesto, la scheda e i calcoli di Lucy")
+                  "Lucy: in lavoro la riga di contesto, la scheda e i calcoli di Lucy")
         controlla(ultimoChiacchiera.hasPrefix("CONTESTO: ") && !ultimoChiacchiera.contains("SCHEDA DEL CLIENTE") && ultimoChiacchiera.hasSuffix("Cos'è l'inflazione?"),
-                  "Vera: in conversazione niente scheda del cliente")
+                  "Lucy: in conversazione niente scheda del cliente")
         controlla(lavoro.opzioni.temperatura == 0.3 && chiacchiera.opzioni.temperatura == 0.7 && !chiacchiera.opzioni.pensa
                   && chiacchiera.opzioni.restaInMemoria == MotoreLocale.restaInMemoria,
-                  "Vera: temperatura 0,3 in lavoro e 0,7 in conversazione")
+                  "Lucy: temperatura 0,3 in lavoro e 0,7 in conversazione")
         let spunto = NucleoVera.piano(RichiestaVera(domanda: SpuntoVera.riepilogo.domanda, spunto: .riepilogo, fonte: f, storia: []), impostazioni: vera, ambiente: ambiente)
-        controlla((spunto.messaggi.last?.testo ?? "").contains("BOZZA PREPARATA DA PRISMA"), "Vera: gli spunti portano la bozza di Lucy")
+        controlla((spunto.messaggi.last?.testo ?? "").contains("BOZZA PREPARATA DA PRISMA"), "Lucy: gli spunti portano la bozza di Lucy")
         // La modalità scelta nella testata di Vera vince su quella letta dalla domanda
         var inConversazione = ambiente
         inConversazione.modalita = .conversazione
@@ -220,10 +220,10 @@ enum ProvaNucleoVera {
         let forzataLavoro = NucleoVera.piano(RichiestaVera(domanda: "Cos'è l'inflazione?", spunto: nil, fonte: f, storia: []), impostazioni: vera, ambiente: inLavoro)
         controlla(forzata.scelta.modalita == .conversazione && !(forzata.messaggi.last?.testo ?? "").contains("SCHEDA DEL CLIENTE")
                   && forzataLavoro.scelta.modalita == .lavoro && (forzataLavoro.messaggi.last?.testo ?? "").contains("SCHEDA DEL CLIENTE"),
-                  "Vera: «Lavoro / Conversazione» della testata decide la modalità")
+                  "Lucy: «Lavoro / Conversazione» della testata decide la modalità")
         let spuntoForzato = NucleoVera.piano(RichiestaVera(domanda: SpuntoVera.riepilogo.domanda, spunto: .riepilogo, fonte: f, storia: []), impostazioni: vera, ambiente: inConversazione)
         controlla(spuntoForzato.scelta.modalita == .lavoro && (spuntoForzato.messaggi.last?.testo ?? "").contains("BOZZA PREPARATA DA PRISMA"),
-                  "Vera: gli spunti restano in lavoro con le cifre di Lucy anche in «Conversazione»")
+                  "Lucy: gli spunti restano in lavoro con le cifre di Lucy anche in «Conversazione»")
 
         // Storia: molte battute brevi entrano tutte (oggi più di 4), quelle lunghe si fermano al budget
         var brevi: [MessaggioVera] = []
@@ -233,7 +233,7 @@ enum ProvaNucleoVera {
         }
         let s1 = NucleoVera.storia(brevi, budget: 6_000)
         controlla(s1.count == 24 && s1.first?.ruolo == .utente && s1.last?.testo.hasPrefix("Risposta 11") == true,
-                  "Vera: la storia tiene molte battute, in ordine (\(s1.count))")
+                  "Lucy: la storia tiene molte battute, in ordine (\(s1.count))")
         var lunghe: [MessaggioVera] = []
         for i in 0..<40 {
             lunghe.append(MessaggioVera(autore: i % 2 == 0 ? .utente : .vera, testo: "Battuta \(i) " + String(repeating: "x", count: 3_000)))
@@ -242,14 +242,14 @@ enum ProvaNucleoVera {
         let s2 = NucleoVera.storia(lunghe, budget: budget)
         let usati = s2.reduce(0) { $0 + NucleoVera.token($1.testo) + 4 }
         controlla(!s2.isEmpty && usati <= budget && s2.first?.ruolo == .utente && s2.last?.testo.hasPrefix("Battuta 39") == true,
-                  "Vera: la storia resta nel budget di token (\(usati) su \(budget)) e comincia con una domanda")
+                  "Lucy: la storia resta nel budget di token (\(usati) su \(budget)) e comincia con una domanda")
         var avviso = MessaggioVera(autore: .vera, testo: "Ollama non è aperto.", titolo: "Qwen non è pronto", motore: "Prisma")
         avviso.modalita = nil
         let s3 = NucleoVera.storia([MessaggioVera(autore: .utente, testo: "Ciao"), avviso], budget: 1_000)
-        controlla(s3.count == 1, "Vera: gli avvisi di Lucy restano fuori dalla storia")
+        controlla(s3.count == 1, "Lucy: gli avvisi di Lucy restano fuori dalla storia")
         let pieno = NucleoVera.piano(RichiestaVera(domanda: "E quindi?", spunto: nil, fonte: f, storia: lunghe), impostazioni: vera, ambiente: ambiente)
         let totale = pieno.messaggi.reduce(0) { $0 + NucleoVera.token($1.testo) + 4 }
-        controlla(totale <= NucleoVera.finestra - NucleoVera.riservaRisposta, "Vera: istruzioni, storia e domanda stanno nella finestra (\(totale) token su \(NucleoVera.finestra))")
+        controlla(totale <= NucleoVera.finestra - NucleoVera.riservaRisposta, "Lucy: istruzioni, storia e domanda stanno nella finestra (\(totale) token su \(NucleoVera.finestra))")
     }
 
     // MARK: - Impostazioni
@@ -259,10 +259,10 @@ enum ProvaNucleoVera {
         controlla(vecchie.modelloLocale == MotoreLocale.modelloPredefinito && vecchie.indirizzoLocale == "http://127.0.0.1:11434"
                   && vecchie.fornitore == .ollama && vecchie.ragionamento == .automatico && vecchie.prontaAllAvvio
                   && vecchie.restaInMemoria == MotoreLocale.restaInMemoria,
-                  "Vera: impostazioni di prima lette con i valori nuovi (qwen3:4b → \(MotoreLocale.modelloPredefinito))")
+                  "Lucy: impostazioni di prima lette con i valori nuovi (qwen3:4b → \(MotoreLocale.modelloPredefinito))")
         let scelto = (try? JSONDecoder().decode(ImpostazioniVera.self, from: Data(#"{"modelloLocale":"gemma4:e4b","fornitore":"sconosciuto","ragionamento":9}"#.utf8))) ?? ImpostazioniVera()
         controlla(scelto.modelloLocale == "gemma4:e4b" && scelto.fornitore == .ollama && scelto.ragionamento == .automatico,
-                  "Vera: un modello scelto a mano resta; valori sconosciuti tornano ai predefiniti")
+                  "Lucy: un modello scelto a mano resta; valori sconosciuti tornano ai predefiniti")
         var nuove = ImpostazioniVera()
         nuove.fornitore = .compatibileOpenAI
         nuove.modello = "qwen3.5-4b-mlx"
@@ -270,13 +270,13 @@ enum ProvaNucleoVera {
         nuove.ragionamento = .sempre
         let riletti = (try? JSONEncoder().encode(nuove)).flatMap { try? JSONDecoder().decode(ImpostazioniVera.self, from: $0) }
         controlla(riletti == nuove && riletti?.modelloCompatibile == "qwen3.5-4b-mlx" && riletti?.modelloLocale == MotoreLocale.modelloPredefinito,
-                  "Vera: fornitore, indirizzo, modello e ragionamento salvati e riletti")
-        controlla(MotoreLocale.nome("qwen3.5:4b") == "Qwen sul Mac" && MotoreLocale.nome("ministral-3:3b") == "Ministral sul Mac" && MotoreLocale.nome("gemma4:e4b") == "Gemma sul Mac", "Vera: il nome del motore dal modello")
+                  "Lucy: fornitore, indirizzo, modello e ragionamento salvati e riletti")
+        controlla(MotoreLocale.nome("qwen3.5:4b") == "Qwen sul Mac" && MotoreLocale.nome("ministral-3:3b") == "Ministral sul Mac" && MotoreLocale.nome("gemma4:e4b") == "Gemma sul Mac", "Lucy: il nome del motore dal modello")
         controlla(ConfrontoModelli.elenco(" qwen3.5:4b, qwen3:8b;gemma4:e4b, QWEN3:8B ,") == ["qwen3.5:4b", "qwen3:8b", "gemma4:e4b"],
                   "Confronto: i modelli scritti nelle impostazioni")
         let sceltoPronto = MotoriVera.generativo(ImpostazioniVera(), locale: .pronto)?.nome ?? ""
         controlla(sceltoPronto == "Ministral sul Mac" && MotoriVera.generativo(ImpostazioniVera(), locale: .nonDisponibile("no")) == nil,
-                  "Vera: il modello sul Mac è l'unico motore, se è pronto")
+                  "Lucy: il modello sul Mac è l'unico motore, se è pronto")
         // Senza il modello Vera non risponde con i calcoli: dice che non è pronto
         let spento = StatoShell(persistente: false)
         spento.disponibilitaLocale = .nonDisponibile("Ollama non è aperto.")
@@ -286,24 +286,24 @@ enum ProvaNucleoVera {
         // Migliorie d'uso 9: sul Mac niente nomi tecnici nel messaggio; il motivo sta in Impostazioni › Vera
         controlla(avviso?.titolo == TestiStatoVera.titoloNonPronta && (avviso?.testo ?? "").hasPrefix(TestiStatoVera.spiegazione)
                   && !(avviso?.testo ?? "").contains("Qwen") && !(avviso?.testo ?? "").contains("Ollama"),
-                  "Vera: modello spento, Vera lo dice senza nomi tecnici e rimanda a Impostazioni › Vera")
+                  "Lucy: modello spento, Lucy lo dice senza nomi tecnici e rimanda a Impostazioni › Lucy")
         controlla(TestiStatoVera.eTitoloNonPronta(TestiStatoVera.titoloDiPrima) && TestiStatoVera.eTitoloNonPronta(TestiStatoVera.titoloNonPronta)
-                  && !TestiStatoVera.eTitoloNonPronta("Vera non ha potuto rispondere") && !TestiStatoVera.eTitoloNonPronta(nil),
-                  "Vera: il titolo «non pronta» di oggi e quello salvato prima si riconoscono entrambi")
+                  && !TestiStatoVera.eTitoloNonPronta("Lucy non ha potuto rispondere") && !TestiStatoVera.eTitoloNonPronta(nil),
+                  "Lucy: il titolo «non pronta» di oggi e quello salvato prima si riconoscono entrambi")
         let testiStato = [TestiStatoVera.pronta, TestiStatoVera.nonPronta, TestiStatoVera.veraPronta, TestiStatoVera.veraNonPronta,
                           TestiStatoVera.titoloNonPronta, TestiStatoVera.spiegazione, TestiStatoVera.aiutoVerifica,
                           TestiMessaggi.autore(TestoScrittoMessaggio(testo: "", autore: .vera, modello: "qwen3.5:4b"))]
         controlla(!testiStato.contains { $0.contains("Qwen") || $0.contains("qwen") || $0.contains("Ollama") },
-                  "Vera: lo stato e la firma dei messaggi non mostrano nomi tecnici (Migliorie d'uso 9)")
+                  "Lucy: lo stato e la firma dei messaggi non mostrano nomi tecnici (Migliorie d'uso 9)")
         #else
-        controlla(avviso?.titolo == TestiStatoVera.titoloNonPronta && (avviso?.testo ?? "").hasPrefix("Ollama non è aperto."), "Vera: modello spento, Vera lo dice con il motivo")
+        controlla(avviso?.titolo == TestiStatoVera.titoloNonPronta && (avviso?.testo ?? "").hasPrefix("Ollama non è aperto."), "Lucy: modello spento, Lucy lo dice con il motivo")
         #endif
         // Un messaggio con la modalità si salva e si rilegge; uno di prima si legge senza
         var m = MessaggioVera(autore: .vera, testo: "ok")
         m.modalita = .conversazione
         let mRiletto = (try? JSONEncoder().encode(m)).flatMap { try? JSONDecoder().decode(MessaggioVera.self, from: $0) }
         let mVecchio = try? JSONDecoder().decode(MessaggioVera.self, from: Data(#"{"id":"msg-1","autore":"eve","testo":"ciao"}"#.utf8))
-        controlla(mRiletto?.modalita == .conversazione && mVecchio != nil && mVecchio?.modalita == nil, "Vera: la modalità dei messaggi nell'archivio")
+        controlla(mRiletto?.modalita == .conversazione && mVecchio != nil && mVecchio?.modalita == nil, "Lucy: la modalità dei messaggi nell'archivio")
     }
 
     // MARK: - Server finto
@@ -321,14 +321,14 @@ enum ProvaNucleoVera {
              (try? await ollama.modelli()) ?? [])
         }
         controlla(pronto.pronto && modelli == ServerFinto.installati, "Server finto: Ollama pronto con il modello scelto")
-        controlla(!manca.pronto && (manca.motivo ?? "").contains("ollama pull qwen3:8b"), "Server finto: manca il modello, Vera dice come scaricarlo")
+        controlla(!manca.pronto && (manca.motivo ?? "").contains("ollama pull qwen3:8b"), "Server finto: manca il modello, Lucy dice come scaricarlo")
 
         // Una risposta vera in streaming, a pezzi spezzati a metà riga
         let stato = StatoShell(persistente: false)
         guard let f = stato.fonteVera("giulia") else { return controlla(false, "Server finto: fonte di Giulia") }
         let motore = MotoreLocale(vera, disponibilita: .pronto, sessione: sessione)
         let piano = NucleoVera.piano(RichiestaVera(domanda: "Pensaci bene: cos'è l'inflazione?", spunto: nil, fonte: f, storia: []),
-                                    impostazioni: vera, ambiente: AmbienteVera(appAperte: ["Vera"], cliente: f.cliente.nome))
+                                    impostazioni: vera, ambiente: AmbienteVera(appAperte: ["Lucy"], cliente: f.cliente.nome))
         final class Parziali: @unchecked Sendable { var elenco: [ParzialeVera] = [] }
         let parziali = Parziali()
         let risposta: (testo: String?, errore: String?) = aspetta {
@@ -342,7 +342,7 @@ enum ProvaNucleoVera {
         controlla(risposta.testo == ServerFinto.risposta, "Server finto: risposta in streaming ricomposta («\(risposta.testo ?? risposta.errore ?? "")»)")
         controlla(parziali.elenco.contains { $0.pensa && $0.testo.isEmpty } && parziali.elenco.count >= 2
                   && !(parziali.elenco.last?.testo ?? "").contains("ragiono"),
-                  "Server finto: il testo arriva a pezzi mentre Vera lo scrive, senza il ragionamento (\(parziali.elenco.count) aggiornamenti)")
+                  "Server finto: il testo arriva a pezzi mentre Lucy lo scrive, senza il ragionamento (\(parziali.elenco.count) aggiornamenti)")
         let ricevuto = ServerFinto.ricevuto("/api/chat")
         let messaggiRicevuti = ricevuto?["messages"] as? [[String: String]] ?? []
         // Il modello è quello del Mac nelle impostazioni (dalla tappa 1 dei motori Mistral, Ministral 3, non più qwen3.5:4b)

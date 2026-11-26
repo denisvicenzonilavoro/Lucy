@@ -10,7 +10,12 @@ import UIKit
 #endif
 #endif
 
-// Il cristallo della realtà aumentata in RealityKit («Luce» giro 16, §2.3.2-bis): un solo codice per il palco del Mac
+// Il sole del piano della realtà aumentata in RealityKit («Luce» giro 16, §2.3.2-bis; dal 25 novembre 2026, decisione
+// dell'utente, il disco d'oro di Lucy al posto del cristallo): gli strati del patrimonio sono dischi d'oro sottili
+// impilati, velati dal colore della classe; sopra, il disco del sole con un leggero bagliore e un raggio sottile per
+// obiettivo, lungo e intenso quanto l'obiettivo è coperto (`MotoreSole`). Il bagliore si accende quando il cliente muove
+// le leve (il cursore degli anni: il patrimonio dell'anno rispetto al più alto). Solo geometrie semplici: dischi
+// (`MotoreRealtaAumentata.magliaDisco`), piani e scatole sottili. Un solo codice per il palco del Mac
 // (anteprima virtuale), l'iPad e l'iPhone (con la fotocamera o sul tavolo virtuale del ripiego). Framework di sistema,
 // nessuna dipendenza esterna (decisione 28); solo API presenti su macOS 14 e iOS 17 (niente RealityView né
 // GroundingShadowComponent, che sono di iOS 18). Le maglie le costruisce `MotoreRealtaAumentata.maglia` (valori puri);
@@ -85,8 +90,9 @@ typealias ColoreRealta = NSColor
 typealias ColoreRealta = UIColor
 #endif
 
-/// Il cristallo in RealityKit (Mac, iPad, iPhone): uno strato di vetro per classe, il logo sulla faccia alta,
-/// l'ombra colorata dipinta sul tavolo, i puntini del piano trovato e l'anello della posa.
+/// Il sole del piano in RealityKit (Mac, iPad, iPhone): un disco d'oro sottile per classe, il sole con il bagliore e i
+/// raggi sopra l'ultimo, l'ombra calda dipinta sul tavolo, i puntini del piano trovato e l'anello della posa. Il nome del
+/// tipo resta per non cambiare le chiamate.
 @MainActor
 final class CristalloRealta {
     private typealias T = Tema.Apple.RealtaAumentata
@@ -94,7 +100,10 @@ final class CristalloRealta {
     /// Il cristallo, figlio dell'ancora: `ModelEntity` perché ha la collisione (i gesti di iOS la vogliono).
     let radice = ModelEntity()
     private(set) var strati: [ModelEntity] = []
-    private let logo = ModelEntity()
+    /// Il disco del sole, con il bagliore e i raggi come figli.
+    private let sole = ModelEntity()
+    private let bagliore = ModelEntity()
+    private var raggi: [ModelEntity] = []
     private let ombra = ModelEntity()
     private let puntini = Entity()
     private let anello = ModelEntity()
@@ -104,14 +113,16 @@ final class CristalloRealta {
     private var sceltoFatto: String??
     private var ombraFatta: (anno: Int?, esploso: Bool)?
     private var altezzaAttuale: Float = 0
+    private var accensioneFatta: Double?
 
     /// `scala`: metri per unità (`Tema.Apple.RealtaAumentata.metriPerUnita` sul tavolo vero, 1 nella scena virtuale).
     init(esito: EsitoRealta, scala: Float) throws {
         self.esito = esito
         radice.name = "cristallo"
         radice.scale = SIMD3(repeating: scala)
+        let oro = ColoriLuce.srgb(Tema.Sole.oroFisso)
         for s in esito.strati {
-            colori[s.id] = T.Vetro.mescola(ColoriLuce.srgb(T.Strati.colore(s.classe)))
+            colori[s.id] = Self.dorato(ColoriLuce.srgb(T.Strati.colore(s.classe)), oro: oro)
         }
         for s in esito.strati {
             let e = ModelEntity()
@@ -119,11 +130,11 @@ final class CristalloRealta {
             strati.append(e)
             radice.addChild(e)
         }
-        radice.addChild(logo)
+        radice.addChild(sole)
         radice.addChild(ombra)
         radice.addChild(puntini)
         radice.addChild(anello)
-        try preparaLogo()
+        try preparaSole()
         preparaPuntini()
         preparaAnello()
         try aggiorna(anno: esito.annoOggi, esploso: 0, crescita: 1, scelto: nil)
@@ -132,7 +143,8 @@ final class CristalloRealta {
     /// Anno, esploso (0…1), crescita (0…1), strato scelto: ricostruisce le maglie solo se cambiano gli estremi.
     func aggiorna(anno: Int?, esploso: Double, crescita: Double, scelto: String?) throws {
         let bordi = esito.bordi
-        let altezza = esito.altezza(anno: anno)
+        // La pila di dischi è sottile: l'altezza del patrimonio dell'anno, ridotta
+        let altezza = MotoreRealtaAumentata.spessoreDisco(esito, anno: anno)
         let nuovi = esito.strati.indices.map {
             MotoreRealtaAumentata.estremi(strato: $0, bordi: bordi, altezza: altezza, esploso: esploso, crescita: crescita)
         }
@@ -144,7 +156,7 @@ final class CristalloRealta {
                 let opacita: Float = scelto == nil ? T.Vetro.opacita : (scelto == s.id ? T.Vetro.opacitaScelto : T.Vetro.opacitaAltri)
                 let materiale = Self.vetro(colori[s.id] ?? SIMD3(1, 1, 1), opacita: opacita)
                 if cambiati {
-                    let m = MotoreRealtaAumentata.maglia(basso: nuovi[i].basso, alto: nuovi[i].alto)
+                    let m = MotoreRealtaAumentata.magliaDisco(basso: nuovi[i].basso, alto: nuovi[i].alto)
                     strati[i].model = ModelComponent(mesh: try Self.risorsa(m, nome: s.id), materials: [materiale])
                 } else {
                     strati[i].model?.materials = [materiale]
@@ -153,16 +165,22 @@ final class CristalloRealta {
             if cambiati {
                 estremiFatti = nuovi
                 let alto = nuovi.last?.alto ?? 0
-                logo.position = SIMD3(0, alto + T.Vetro.sopraLogo, 0)
+                sole.position = SIMD3(0, alto + T.Vetro.sopraLogo, 0)
                 altezzaAttuale = alto
                 // Le forme degli strati (tocco) e la scatola della radice (gesti), solo quando cambiano le maglie
                 for e in strati { e.generateCollisionShapes(recursive: false) }
-                let lato = MotoreRealtaAumentata.raggio * 2
+                let lato = MotoreRealtaAumentata.raggioDisco * 2
                 radice.collision = CollisionComponent(shapes: [
                     ShapeResource.generateBox(size: SIMD3(lato, max(0.01, alto), lato)).offsetBy(translation: SIMD3(0, alto / 2, 0))
                 ])
             }
             sceltoFatto = .some(scelto)
+        }
+        // Il bagliore del sole si accende con le leve (l'anno del cursore): si rifà solo quando cambia
+        let accensione = esito.massimo > 0 ? min(1, max(0, esito.totale(anno: anno) / esito.massimo)) : 1
+        if accensioneFatta == nil || abs(accensioneFatta! - accensione) > 0.005 {
+            accendi(accensione)
+            accensioneFatta = accensione
         }
         // L'ombra dipinta si rifà solo al cambio di anno o di esploso, non a ogni fotogramma
         let chiaveOmbra = (anno: anno, esploso: esploso > 0.5)
@@ -202,7 +220,7 @@ final class CristalloRealta {
         var punti: [String: SIMD3<Float>] = [:]
         for (i, s) in esito.strati.enumerated() where i < estremiFatti.count {
             let y = (estremiFatti[i].basso + estremiFatti[i].alto) / 2
-            punti[s.id] = radice.convert(position: SIMD3(MotoreRealtaAumentata.raggio * T.Fermo.quotaPillole, y, 0), to: nil)
+            punti[s.id] = radice.convert(position: SIMD3(MotoreRealtaAumentata.raggioDisco * T.Fermo.quotaPillole, y, 0), to: nil)
         }
         return punti
     }
@@ -219,18 +237,60 @@ final class CristalloRealta {
 
     // MARK: - Le parti
 
-    private func preparaLogo() throws {
-        let lato = T.Vetro.latoLogo
-        guard let immagine = Self.immagineLogo() else { return }
-        let tex = try TextureResource.generate(from: immagine, options: .init(semantic: .color))
-        var m = UnlitMaterial()
-        m.color = .init(tint: .white, texture: .init(tex))
-        m.blending = .transparent(opacity: .init(floatLiteral: T.Vetro.opacitaLogo))
-        logo.model = ModelComponent(mesh: .generatePlane(width: lato, depth: lato), materials: [m])
+    /// Il disco del sole: oro metallico che brilla un poco da sé, il bagliore (un piano con la luce che sfuma) e un raggio
+    /// sottile per obiettivo, disteso sul disco verso fuori.
+    private func preparaSole() throws {
+        let k = Tema.Sole.Realta.self
+        let r = MotoreRealtaAumentata.raggioDisco * k.quotaDisco
+        let disco = MotoreRealtaAumentata.magliaDisco(basso: 0, alto: k.spessore, raggio: r)
+        sole.name = "sole"
+        sole.model = ModelComponent(mesh: try Self.risorsa(disco, nome: "sole"), materials: [Self.oroSole(luce: esito.sole.luce, accensione: 1)])
+        // Il bagliore
+        let latoBagliore = r * 2 * k.bagliore
+        if let immagine = Self.immagineBagliore(),
+           let tex = try? TextureResource.generate(from: immagine, options: .init(semantic: .color)) {
+            var m = UnlitMaterial()
+            m.color = .init(tint: .white, texture: .init(tex))
+            m.blending = .transparent(opacity: .init(floatLiteral: k.opacitaBagliore))
+            bagliore.model = ModelComponent(mesh: .generatePlane(width: latoBagliore, depth: latoBagliore), materials: [m])
+            bagliore.position = SIMD3(0, k.spessore + k.sopra, 0)
+            sole.addChild(bagliore)
+        }
+        // I raggi: uno per obiettivo, lunghezza e intensità dalla copertura
+        let oro = ColoriLuce.srgb(Tema.Sole.oroFisso)
+        let n = esito.sole.raggi.count
+        for (i, raggio) in esito.sole.raggi.enumerated() {
+            let angolo = Float(MotoreSole.angolo(i, di: n))
+            let lunghezza = Float(MotoreSole.lunghezza(raggio.copertura)) * MotoreRealtaAumentata.raggioDisco * k.quotaRaggi
+            let inizio = r + MotoreRealtaAumentata.raggioDisco * k.stacco
+            var m = UnlitMaterial(color: ColoreRealta(red: CGFloat(oro.x), green: CGFloat(oro.y), blue: CGFloat(oro.z), alpha: 1))
+            m.blending = .transparent(opacity: .init(floatLiteral: Float(MotoreSole.intensita(raggio.copertura))))
+            let e = ModelEntity()
+            e.name = raggio.id
+            e.model = ModelComponent(mesh: .generateBox(size: SIMD3(max(0.001, lunghezza), k.spessoreRaggio, k.larghezzaRaggio)),
+                                     materials: [m])
+            let centro = inizio + lunghezza / 2
+            e.position = SIMD3(cos(angolo) * centro, k.spessore / 2, sin(angolo) * centro)
+            e.orientation = simd_quatf(angle: -angolo, axis: SIMD3<Float>(0, 1, 0))
+            sole.addChild(e)
+            raggi.append(e)
+        }
+    }
+
+    /// Il bagliore e la luce del disco con le leve (0…1): mai spenti del tutto.
+    private func accendi(_ accensione: Double) {
+        let k = Tema.Sole.Realta.self
+        let peso = Tema.Sole.pesoAccensione
+        let f = Float(1 - peso + peso * accensione)
+        sole.model?.materials = [Self.oroSole(luce: esito.sole.luce, accensione: accensione)]
+        if var m = bagliore.model?.materials.first as? UnlitMaterial {
+            m.blending = .transparent(opacity: .init(floatLiteral: k.opacitaBagliore * f * Float(0.35 + 0.65 * esito.sole.luce)))
+            bagliore.model?.materials = [m]
+        }
     }
 
     private func preparaOmbra() throws {
-        let lato = MotoreRealtaAumentata.raggio * 2 * T.Ombra.allargamento * T.Ombra.margine
+        let lato = MotoreRealtaAumentata.raggioDisco * 2 * T.Ombra.allargamento * T.Ombra.margine
         guard let immagine = Self.immagineOmbra(esito.strati.map { colori[$0.id] ?? SIMD3(1, 1, 1) }) else { return }
         let tex = try TextureResource.generate(from: immagine, options: .init(semantic: .color))
         var m = UnlitMaterial()
@@ -277,6 +337,28 @@ final class CristalloRealta {
         return try MeshResource.generate(from: [d])
     }
 
+    /// Il colore di uno strato: l'oro velato dal colore della classe (sRGB 0…1).
+    static func dorato(_ classe: SIMD3<Float>, oro: SIMD3<Float>) -> SIMD3<Float> {
+        let v = Float(Tema.Sole.velaturaClasse)
+        return oro + (classe - oro) * v
+    }
+
+    /// L'oro del disco del sole: metallico, con la luce propria che cresce con gli obiettivi coperti e con le leve.
+    static func oroSole(luce: Double, accensione: Double) -> PhysicallyBasedMaterial {
+        let k = Tema.Sole.Realta.self
+        let c = ColoriLuce.srgb(Tema.Sole.oroFisso)
+        let colore = ColoreRealta(red: CGFloat(c.x), green: CGFloat(c.y), blue: CGFloat(c.z), alpha: 1)
+        var m = PhysicallyBasedMaterial()
+        m.baseColor = .init(tint: colore)
+        m.metallic = .init(floatLiteral: k.metallico)
+        m.roughness = .init(floatLiteral: k.ruvidita)
+        m.emissiveColor = .init(color: colore)
+        let peso = Tema.Sole.pesoAccensione
+        let leve = 1 - peso + peso * min(1, max(0, accensione))
+        m.emissiveIntensity = k.lucePropriaMinima + k.lucePropria * Float(min(1, max(0, luce)) * leve)
+        return m
+    }
+
     static func vetro(_ c: SIMD3<Float>, opacita: Float) -> PhysicallyBasedMaterial {
         var m = PhysicallyBasedMaterial()
         m.baseColor = .init(tint: ColoreRealta(red: CGFloat(c.x), green: CGFloat(c.y), blue: CGFloat(c.z), alpha: 1))
@@ -299,23 +381,30 @@ final class CristalloRealta {
         return c.makeImage()
     }
 
-    /// Il logo di Prisma per la faccia alta.
-    static func immagineLogo() -> CGImage? {
-        let lato = CGFloat(T.Ombra.lato)
-        let r = ImageRenderer(content: LogoLucy(colore: T.Fermo.coloreLogo).frame(width: lato, height: lato))
-        r.proposedSize = ProposedViewSize(width: lato, height: lato)
-        r.scale = 1
-        return r.immaginePrisma
+    /// Il bagliore del sole: l'oro che sfuma a trasparente dal bordo del disco.
+    static func immagineBagliore() -> CGImage? {
+        let lato = T.Ombra.lato
+        let c = ColoriLuce.srgb(Tema.Sole.oroFisso)
+        let k = Tema.Sole.Realta.self
+        return immagine(lato: lato) { ctx in
+            guard let spazio = CGColorSpace(name: CGColorSpace.sRGB) else { return }
+            let colori = [CGColor(srgbRed: CGFloat(c.x), green: CGFloat(c.y), blue: CGFloat(c.z), alpha: 0.85),
+                          CGColor(srgbRed: CGFloat(c.x), green: CGFloat(c.y), blue: CGFloat(c.z), alpha: 0)] as CFArray
+            guard let g = CGGradient(colorsSpace: spazio, colors: colori, locations: [0, 1]) else { return }
+            let m = CGFloat(lato) / 2
+            ctx.drawRadialGradient(g, startCenter: CGPoint(x: m, y: m), startRadius: m / CGFloat(k.bagliore),
+                                   endCenter: CGPoint(x: m, y: m), endRadius: m, options: [])
+        }
     }
 
-    /// L'ombra colorata: la pianta del cristallo, allargata e sfumata, a fasce nei colori degli strati.
+    /// L'ombra calda: il cerchio del disco, allargato e sfumato, a fasce nei colori degli strati.
     static func immagineOmbra(_ colori: [SIMD3<Float>]) -> CGImage? {
         let lato = T.Ombra.lato
-        let pianta = MotoreRealtaAumentata.pianta()
+        let pianta = MotoreRealtaAumentata.piantaDisco().map(\.punto)
         return immagine(lato: lato) { c in
             let mezzo = CGFloat(lato) / 2
             // La pianta occupa 1/1,4 dell'immagine (vedi `preparaOmbra`)
-            let scala = mezzo / CGFloat(MotoreRealtaAumentata.raggio * T.Ombra.allargamento * T.Ombra.margine)
+            let scala = mezzo / CGFloat(MotoreRealtaAumentata.raggioDisco * T.Ombra.allargamento * T.Ombra.margine)
             let passi = T.Ombra.passi
             for k in 0..<passi {
                 let f = 1 - CGFloat(k) / CGFloat(passi)
@@ -409,7 +498,8 @@ final class ScenaVirtualeRealta {
         luce.look(at: .zero, from: -l.direzione * l.distanza, relativeTo: nil)
         ancora.addChild(luce)
         arView.scene.addAnchor(ancora)
-        orbita(azimut: K.azimutIniziale, elevazione: K.elevazione, altezza: Float(cristallo.esito.altezza(anno: nil)), esploso: 0)
+        orbita(azimut: K.azimutIniziale, elevazione: K.elevazione,
+               altezza: Float(MotoreRealtaAumentata.spessoreDisco(cristallo.esito, anno: nil)), esploso: 0)
     }
 
     /// La camera sull'orbita: D = 2,9 + 0,75·H + 1,6·e, guarda a metà altezza.
@@ -505,7 +595,8 @@ final class CoordinatoreScenaRealta {
         bersaglio += c.azimutTrascinato + orbita
         azimut = Float(MotoreRealtaAumentata.insegui(Double(azimut), verso: Double(bersaglio), velocita: M.inseguimentoCamera, dt: dt))
         elevazione = Float(MotoreRealtaAumentata.insegui(Double(elevazione), verso: Double(c.elevazione), velocita: M.inseguimentoCamera, dt: dt))
-        s.orbita(azimut: azimut, elevazione: elevazione, altezza: Float(e.altezza(anno: c.anno)), esploso: Float(esploso))
+        s.orbita(azimut: azimut, elevazione: elevazione, altezza: Float(MotoreRealtaAumentata.spessoreDisco(e, anno: c.anno)),
+                 esploso: Float(esploso))
         etichette(cr, c.etichette)
     }
 

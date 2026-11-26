@@ -248,8 +248,8 @@ struct PuntiPagineVera: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(StileSemplice())
-        .help(pagina < 0.5 ? "Vera: scorri con due dita verso sinistra" : "Torna ai widget: scorri verso destra o premi Esc")
-        .accessibilityLabel(pagina < 0.5 ? "Apri Vera sulla scrivania" : "Torna ai widget")
+        .help(pagina < 0.5 ? "Lucy: scorri con due dita verso sinistra" : "Torna ai widget: scorri verso destra o premi Esc")
+        .accessibilityLabel(pagina < 0.5 ? "Apri Lucy sulla scrivania" : "Torna ai widget")
         .foregroundColor(c.puntoAttivo)
     }
 
@@ -318,7 +318,7 @@ struct VeraScrivania: View {
             .animation(moto, value: grande)
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Vera")
+        .accessibilityLabel("Lucy")
         .onAppear { if attiva && !modoIstantanea { campoAttivo = true } }
         .onChange(of: attiva) { a in if !modoIstantanea { campoAttivo = a } }
     }
@@ -334,7 +334,7 @@ struct VeraScrivania: View {
                 .puntoAcqua(.sferaVera)
                 .padding(.top, m.spazioPiccolo)
             VStack(spacing: m.spazioPiccolo) {
-                Text("Ciao, sono Vera.")
+                Text("Ciao, sono Lucy.")
                     .font(Tema.Testo.VeraScrivania.saluto)
                     .tracking(Tema.Testo.VeraScrivania.spaziaturaSaluto)
                     .foregroundColor(c.testo)
@@ -385,7 +385,7 @@ struct VeraScrivania: View {
             SferaVera(misura: m.sferaPiccola, viva: true, pensa: stato.veraInCorso)
                 .puntoAcqua(.sferaVera)
             VStack(alignment: .leading, spacing: Tema.Misura.VeraChat.righeStrette) {
-                Text("Vera")
+                Text("Lucy")
                     .font(Tema.Testo.VeraScrivania.titolo)
                     .foregroundColor(c.testo)
                 Text(stato.veraInCorso ? "Sto pensando…" : statoMotore)
@@ -398,10 +398,10 @@ struct VeraScrivania: View {
             PulsanteIcona(simbolo: "square.and.pencil", aiuto: "Nuova conversazione") { stato.nuovaConversazione() }
                 .disabled(messaggi.isEmpty || stato.veraInCorso)
                 .fixedSize()
-            Button { stato.apri(.vera) } label: { Label("Apri in Vera", systemImage: "arrow.up.forward") }
+            Button { stato.apri(.vera) } label: { Label("Apri in Lucy", systemImage: "arrow.up.forward") }
                 .buttonStyle(StileVetro())
                 .fixedSize()
-                .help("La stessa conversazione nell'app Vera")
+                .help("La stessa conversazione nell'app Lucy")
         }
     }
 
@@ -499,7 +499,7 @@ struct VeraScrivania: View {
             })
         return MenuTendina(selezione: scelta, opzioni: opzioni, stile: .vetro, larghezza: Tema.Misura.VeraScrivania.larghezzaAmbito)
             .disabled(stato.veraInCorso)
-            .help("Vera parla di un cliente o di tutto il tuo portafoglio")
+            .help("Lucy parla di un cliente o di tutto il tuo portafoglio")
     }
 
     /// Qwen non è pronto: Vera lo dice e non risponde (come nell'app Vera), con «Verifica».

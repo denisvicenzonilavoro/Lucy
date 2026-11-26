@@ -12,7 +12,7 @@ enum ErroreImporta: LocalizedError, Equatable {
     var errorDescription: String? {
         switch self {
         case .nonGGUF: return "Il file non è un modello GGUF: scegli lo zip scaricato dall'addestramento o il file .gguf."
-        case .troppoGrande: return "Il file è più grande di 6 GB: non è il modello addestrato per Vera."
+        case .troppoGrande: return "Il file è più grande di 6 GB: non è il modello addestrato per Lucy."
         case .nonLocale: return "Lucy parla solo con Ollama sul Mac (127.0.0.1): l'indirizzo non è locale."
         case .nonTrovato: return "Nello zip non c'è nessun file .gguf."
         case .ollama(let m): return "Ollama non ha accettato il modello: \(m)"
@@ -126,7 +126,7 @@ enum ImportaSuMisura {
         var show: [String: Any] = [:]
         let (datiShow, rispostaShow) = try await s.data(for: try richiesta(try indirizzo(fornitore, "api/show"), metodo: "POST", corpo: ["model": partenza]))
         if codice(rispostaShow) == 200, let j = try? JSONSerialization.jsonObject(with: datiShow) as? [String: Any] { show = j }
-        avanzamento("Creo la Vera su misura…")
+        avanzamento("Creo la Lucy su misura…")
         let (datiCrea, rispostaCrea) = try await s.data(for: try richiesta(try indirizzo(fornitore, "api/create"), metodo: "POST",
                                                                           corpo: corpoCreazione(nome: nome, impronta: h, show: show), attesa: attesaCopia))
         guard codice(rispostaCrea) == 200 else {

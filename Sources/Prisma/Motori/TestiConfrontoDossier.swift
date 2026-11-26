@@ -125,7 +125,7 @@ enum TestiConfrontoDossier {
     }
 
     /// L'etichetta di una candidata nel menu: «nome · Alleanza».
-    static func etichettaCandidata(nome: String, canale: Canale) -> String { "\(nome) · \(canale.nomeBreve)" }
+    static func etichettaCandidata(nome: String, canale: Canale) -> String { nome }
 
     static func nessunaCandidata(kid: Bool) -> String {
         kid ? "Nessuna scheda prodotto da confrontare: creala con «Crea… › Scheda prodotto» in alto."

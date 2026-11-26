@@ -356,15 +356,15 @@ struct ImpostazioniTelefono: View {
             }
             .schedaTelefono()
 
-            SezioneTelefono(titolo: "Vera")
+            SezioneTelefono(titolo: "Lucy")
             VStack(alignment: .leading, spacing: E.spazioRiga) {
                 VStack(alignment: .leading, spacing: E.spazioEtichette) {
                     Text("Codice del Mac")
                         .carattereApple(E.nome)
                         .foregroundColor(E.coloreNome)
                     Text(stato.dati.impostazioni.vera.ponte.abbinato
-                         ? (stato.disponibilitaLocale.motivo ?? "Collegata: Vera risponde con Qwen del tuo Mac, in Wi‑Fi e cifrato")
-                         : "Sul Mac apri Impostazioni › Vera, attiva «iPhone e iPad» e scrivi qui il codice che compare (arriva anche aprendo un backup del Mac)")
+                         ? (stato.disponibilitaLocale.motivo ?? "Collegata: Lucy risponde con Qwen del tuo Mac, in Wi‑Fi e cifrato")
+                         : "Sul Mac apri Impostazioni › Lucy, attiva «iPhone e iPad» e scrivi qui il codice che compare (arriva anche aprendo un backup del Mac)")
                         .carattereApple(E.dettaglio)
                         .foregroundColor(stato.disponibilitaLocale.pronto ? Tema.Apple.Colore.verde : E.coloreDettaglio)
                         .fixedSize(horizontal: false, vertical: true)

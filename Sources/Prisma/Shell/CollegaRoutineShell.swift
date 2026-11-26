@@ -426,8 +426,8 @@ extension StatoShell {
                                        chiave: VeraPortafoglio.chiave, oggi: adesso, parla: false))
         }
         if let primo = esiti.first {
-            mostraAvviso(esiti.count == 1 ? "Vera ha preparato «\(primo.titolo)»: lo trovi in Vera, nel portafoglio"
-                                          : "Vera ha preparato \(SchedaConfermaVera.numero(esiti.count)) routine: le trovi in Vera, nel portafoglio",
+            mostraAvviso(esiti.count == 1 ? "Lucy ha preparato «\(primo.titolo)»: lo trovi in Lucy, nel portafoglio"
+                                          : "Lucy ha preparato \(SchedaConfermaVera.numero(esiti.count)) routine: le trovi in Lucy, nel portafoglio",
                          daVera: true, riservato: true)
         }
         return esiti
@@ -447,7 +447,7 @@ extension StatoShell {
                           chiave: p.clienteId, oggi: oggi, parla: false)
         }
         if let primo = esiti.first, let c = cliente(p.clienteId) {
-            mostraAvviso("Firmato: Vera ha preparato «\(primo.titolo)» nella conversazione di \(c.nome)", daVera: true, riservato: true)
+            mostraAvviso("Firmato: Lucy ha preparato «\(primo.titolo)» nella conversazione di \(c.nome)", daVera: true, riservato: true)
         }
         return esiti
     }
@@ -762,7 +762,7 @@ enum ProvaCorrezioniRoutineVera {
         s.clienteAttivoId = "sofia"
         s.veraPortafoglio = false
         let primaSofia = s.conversazione("sofia").count
-        _ = s.smistaVera("Vera, com'è la settimana?", chiave: "sofia")
+        _ = s.smistaVera("Lucy, com'è la settimana?", chiave: "sofia")
         let nelPortafoglio = s.conversazione(VeraPortafoglio.chiave).contains { $0.esitoRoutine?.routineId == RoutineVera.idLunedi }
         let inSofia = s.conversazione("sofia").dropFirst(primaSofia).contains { $0.esitoRoutine != nil }
         controlla(nelPortafoglio && !inSofia,

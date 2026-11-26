@@ -373,8 +373,9 @@ enum ProvaCalcoliAdeguatezza {
         let c38 = esito(ingresso(piano, posizioni: [contoPiccolo, polizzaGrande])).controllo(.concentrazione)
         verifica.vero("AD38 Concentrazione: già al 90%, la proposta aggiunge poco: da motivare", c38?.semaforo == .giallo)
         verifica("AD38 Concentrazione: 91.200 su 101.200", c38?.valore ?? -1, 91_200.0 / 101_200 * 100)
-        verifica.vero("AD38 Concentrazione: un dettaglio sul canale Alleanza",
-                      c38?.dettagli.contains { $0.contains("canale Alleanza") } == true)
+        verifica.vero("AD38 Concentrazione: un dettaglio sui prodotti di una sola compagnia, senza canale",
+                      c38?.dettagli.contains { $0.contains("una sola compagnia") } == true
+                        && c38?.dettagli.contains { $0.contains("Alleanza") } == false)
 
         let e39 = esito(ingresso(protezione()))
         verifica.vero("AD39 Concentrazione: non pertinente per una copertura",
@@ -405,8 +406,8 @@ enum ProvaCalcoliAdeguatezza {
         verifica("AD41 Sostituzione: 2% del valore", e41.uscita?.percentuale ?? -1, 2)
         verifica.vero("AD41 Sostituzione: da motivare", s41?.semaforo == .giallo)
         verifica.vero("AD41 Sostituzione: il cambio recupera nel periodo", e41.uscita?.pareggio != nil)
-        verifica.vero("AD41 Sostituzione: un dettaglio sul cambio di canale",
-                      s41?.dettagli.contains { $0.contains("Cambio di canale") } == true)
+        verifica.vero("AD41 Sostituzione: un dettaglio sul cambio di compagnia",
+                      s41?.dettagli.contains { $0.contains("Cambio di compagnia") } == true)
 
         let s42 = esito(ingresso(fondoB(ingresso: nil, rendimento: 1, costo: 2.5), scheda: sostituisce)).controllo(.sostituzione)
         verifica.vero("AD42 Sostituzione: il cambio non recupera, da rivedere",

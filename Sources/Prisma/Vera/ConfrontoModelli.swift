@@ -75,7 +75,7 @@ enum ConfrontoModelli {
             for (i, d) in rapporto.domande.enumerated() {
                 avanzamento("\(nome): domanda \(i + 1) di \(rapporto.domande.count)")
                 let richiesta = RichiestaVera(domanda: d.testo, spunto: d.spunto, fonte: fonte, storia: [])
-                let piano = NucleoVera.piano(richiesta, impostazioni: impostazioni, ambiente: AmbienteVera(appAperte: ["Vera"], cliente: fonte.cliente.nome))
+                let piano = NucleoVera.piano(richiesta, impostazioni: impostazioni, ambiente: AmbienteVera(appAperte: ["Lucy"], cliente: fonte.cliente.nome))
                 var esito = Esito(modello: nome, domanda: d.titolo, modalita: piano.scelta.modalita, pensa: piano.scelta.pensa)
                 let inizio = Date()
                 var prima: Double?
@@ -111,7 +111,7 @@ enum ConfrontoModelli {
 
     /// Il rapporto in testo (per il Terminale).
     static func testo(_ r: Rapporto) -> String {
-        var righe = ["# Confronto tra modelli di Vera", "", "\(Formati.dataEstesa.string(from: r.data)) · domande sui dati di prova", ""]
+        var righe = ["# Confronto tra modelli di Lucy", "", "\(Formati.dataEstesa.string(from: r.data)) · domande sui dati di prova", ""]
         righe.append("| Domanda | " + r.modelli.joined(separator: " | ") + " |")
         righe.append("|---|" + r.modelli.map { _ in "---|" }.joined())
         righe.append("| Caricamento | " + r.modelli.map { secondi(r.caricamento[$0]) }.joined(separator: " | ") + " |")
@@ -145,8 +145,8 @@ enum ConfrontoModelli {
         func h(_ s: String) -> String {
             s.replacingOccurrences(of: "&", with: "&amp;").replacingOccurrences(of: "<", with: "&lt;").replacingOccurrences(of: ">", with: "&gt;")
         }
-        var p = ["<!doctype html><html lang=\"it\"><head><meta charset=\"utf-8\"><title>Confronto tra modelli di Vera</title><style>\(StileConfronto.css)</style></head><body>"]
-        p.append("<h1>Confronto tra modelli di Vera</h1><div class=\"nota\">\(h(Formati.dataEstesa.string(from: r.data))) · domande sui dati di prova di Lucy · tempi: prima parola / risposta completa</div>")
+        var p = ["<!doctype html><html lang=\"it\"><head><meta charset=\"utf-8\"><title>Confronto tra modelli di Lucy</title><style>\(StileConfronto.css)</style></head><body>"]
+        p.append("<h1>Confronto tra modelli di Lucy</h1><div class=\"nota\">\(h(Formati.dataEstesa.string(from: r.data))) · domande sui dati di prova di Lucy · tempi: prima parola / risposta completa</div>")
         p.append("<table><tr><th>Domanda</th>" + r.modelli.map { "<th>\(h($0))</th>" }.joined() + "</tr>")
         p.append("<tr><td>Caricamento</td>" + r.modelli.map { "<td>\(secondi(r.caricamento[$0]))</td>" }.joined() + "</tr>")
         for d in r.domande {

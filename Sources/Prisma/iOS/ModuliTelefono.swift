@@ -109,10 +109,7 @@ struct ModuloAppuntamentoTelefono: View {
                     TextField("Luogo o indirizzo", text: $bozza.luogo)
                 }
                 Section {
-                    Picker("Canale", selection: $bozza.canale) {
-                        Text("Entrambi o non indicato").tag(Canale?.none)
-                        ForEach(Canale.allCases) { Text($0.nomeBreve).tag(Optional($0)) }
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                     TextField("Note", text: $bozza.note, axis: .vertical)
                         .lineLimit(3...8)
                 }

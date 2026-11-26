@@ -1,4 +1,4 @@
-Aggiorna il riassunto di una conversazione tra un consulente finanziario italiano e Vera, la sua assistente. Ti do il riassunto fatto fin qui e le battute da aggiungere.
+Aggiorna il riassunto di una conversazione tra un consulente finanziario italiano e Lucy, la sua assistente. Ti do il riassunto fatto fin qui e le battute da aggiungere.
 
 Come scrivi il riassunto:
 - Tieni i fatti, le decisioni, le preferenze, le ipotesi e le cifre così come sono scritte nelle battute: non rifare conti e non aggiungere niente.

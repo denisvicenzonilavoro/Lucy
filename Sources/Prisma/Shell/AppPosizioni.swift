@@ -36,8 +36,8 @@ struct AppPosizioni: View {
 
     /// L'aiuto di una voce del canale: il secondo clic sulla voce scelta toglie il filtro.
     static func aiutoCanale(_ c: Canale, attivo: Bool) -> String {
-        if attivo { return "Clic di nuovo per vedere tutti i canali" }
-        return c == .alleanza ? "Solo le posizioni \(c.nomeBreve)" : "Solo le posizioni \(c.nomeInFrase == "indipendente" ? "indipendenti" : c.nomeInFrase)"
+        // Un solo canale, quello di Lucy (25 novembre 2026): niente nomi dei canali
+        attivo ? "Clic di nuovo per vedere tutte le posizioni" : "Solo queste posizioni"
     }
 
     /// Le posizioni del cliente attivo, o di tutti i clienti nella vista Portafoglio.
@@ -153,6 +153,13 @@ struct AppPosizioni: View {
                                      tuttiICampi: { p in dopoCatalogo = p })
                 .environment(stato)
         }
+        #if os(macOS)
+        // Il catalogo delle compagnie: l'elenco e la scheda del prodotto (CatalogoCompagnie.swift)
+        .sheet(item: Bindable(stato).richiestaCatalogoCompagnie) { r in
+            FoglioCatalogoCompagnie(richiesta: r)
+                .environment(stato)
+        }
+        #endif
         .sheet(item: $modulo, onDismiss: { fuocoPosizione = nil }) { p in
             ModuloPosizione(bozza: p, nuova: !stato.posizioni.contains { $0.id == p.id }) { stato.salvaPosizione($0) }
                 .environment(\.fuocoModulo, fuocoPosizione)
@@ -178,9 +185,11 @@ struct AppPosizioni: View {
             controllaRichiesta(stato.richiestaNuovaPosizione)
             controllaCompletamento(stato.richiestaCompletamento)
             #if os(macOS)
-            // Istantanee: il filtro di canale già acceso (le tessere non cambiano)
-            if let c = RichiestaIstantaneaPosizioni.per(stato)?.canale { filtroCanale = c }
+            // Il catalogo delle compagnie (circa 600 KB) si legge fuori dal thread principale, prima del primo uso
+            CatalogoProdotti.precarica()
             #endif
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: nessun filtro di canale,
+            // nemmeno nelle istantanee
         }
         .onChange(of: stato.richiestaNuovaPosizione) { controllaRichiesta($0) }
         .onChange(of: stato.richiestaDalCatalogo, initial: true) { _, r in
@@ -363,16 +372,7 @@ struct AppPosizioni: View {
 
                     EtichettaRail(testo: "Stato")
                     SegmentiAnalisi(opzioni: Self.opzioniStato, selezione: $filtroStato)
-                    // Il canale come in Documenti: una voce per canale con il suo colore, un secondo clic toglie il filtro
-                    EtichettaRail(testo: "Canale")
-                    VStack(spacing: 0) {
-                        ForEach(Canale.allCases) { c in
-                            VoceNavigazione(titolo: c.nomeBreve, colore: Tema.Colore.canale(c), attiva: filtroCanale == c) {
-                                filtroCanale = filtroCanale == c ? nil : c
-                            }
-                            .help(Self.aiutoCanale(c, attivo: filtroCanale == c))
-                        }
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente filtro di canale
                     EtichettaRail(testo: "Aree")
                     VStack(spacing: 0) {
                         VoceNavigazione(titolo: "Tutte le aree", conteggio: conti.totale, attiva: area == nil) { area = nil }
@@ -467,7 +467,7 @@ struct AppPosizioni: View {
             passi: [
                 ("Aggiungi ciò che ha", "Con «Posizione», in alto a destra."),
                 ("Oppure leggilo da un documento", "Trascina il KID o la polizza in Documenti."),
-                ("Proponi", "Con «Proposta», sempre con il suo canale."),
+                ("Proponi", "Con «Proposta»."),
             ],
             pulsante: "Posizione",
             azione: { stato.richiestaNuovaPosizione = .inEssere },
@@ -504,16 +504,18 @@ struct AppPosizioni: View {
                     }
 
                     // Sull'iPad stretto i due pannelli vanno uno sotto l'altro (sul Mac sempre affiancati)
+                    // Le due card alte uguali (25 novembre 2026, scelta dell'utente), senza buchi sotto la più bassa
                     Affiancati(soglia: SoglieAffiancati.posizioni, spazio: 24) {
-                        PannelloAnalisi(titolo: "Ripartizione per area", nota: "Posizioni in essere, debiti a parte") { EmptyView() } contenuto: {
+                        PannelloAnalisi(titolo: "Ripartizione per area", nota: "Posizioni in essere, debiti a parte", pieno: true) { EmptyView() } contenuto: {
                             Self.ripartizione(r)
                         }
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                        PannelloAnalisi(titolo: "Per canale", nota: "Attività in essere") { EmptyView() } contenuto: {
+                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                        PannelloAnalisi(titolo: "In scadenza", nota: "Entro \(RiepilogoPosizioni.giorniScadenza) giorni", pieno: true) { EmptyView() } contenuto: {
                             Self.canali(r, apri: { stato.posizioneInDettaglio = $0.id })
                         }
-                        .larghezzaAffiancata(330, alignment: .leading)
+                        .larghezzaAffiancata(330, alignment: .topLeading)
                     }
+                    .stessaAltezza()
 
                     // Calcolate una volta e riusate finché i dati non cambiano (DerivatiDati)
                     let analisi = stato.analisiDossier(stato.clienteAttivoId)
@@ -627,7 +629,8 @@ struct AppPosizioni: View {
         }
     }
 
-    /// Le attività per canale e le posizioni in scadenza entro 90 giorni (dossier e Portafoglio).
+    /// Le posizioni in scadenza entro 90 giorni (dossier e Portafoglio). Dal 25 novembre 2026 (decisione dell'utente:
+    /// un solo canale, quello di Lucy) niente più barra e righe per canale; il nome resta per i richiami.
     /// `massimo`: le righe in scadenza al massimo, poi «…e altre N» (nil = tutte); `apri`: il tocco su una riga.
     /// `scadenze: false`: niente righe in scadenza (il quadro del cliente sul Mac le mostra già nell'elenco).
     static func canali(_ r: RiepilogoPosizioni, massimo: Int? = nil, scadenze mostraScadenze: Bool = true,
@@ -635,21 +638,13 @@ struct AppPosizioni: View {
         let scadenze = massimo.map { Array(r.inScadenza.prefix($0)) } ?? r.inScadenza
         let nascoste = r.inScadenza.count - scadenze.count
         return VStack(alignment: .leading, spacing: 10) {
-            BarraCanali(quotaAlleanza: r.quota(.alleanza))
-            ForEach(Canale.allCases) { c in
-                HStack {
-                    EtichettaCanale(canale: c, compatta: true)
-                    Spacer()
-                    Text(Formati.euro(r.perCanale[c] ?? 0)).font(Tipo.numeroTabella).foregroundColor(Colori.Analisi.tabellaTesto)
-                    Text(Formati.percentuale((r.quota(c) * 100).rounded()))
-                        .font(Tipo.chip).foregroundColor(Colori.Analisi.kpiNota).frame(width: 34, alignment: .trailing)
-                }
+            if mostraScadenze, r.inScadenza.isEmpty {
+                Text("Nessuna posizione in scadenza.").font(Tipo.kpiNota).foregroundColor(Colori.Analisi.kpiNota)
             }
             if mostraScadenze, !r.inScadenza.isEmpty {
                 Text("IN SCADENZA ENTRO \(RiepilogoPosizioni.giorniScadenza) GIORNI")
                     .font(Tipo.railEtichetta)
                     .foregroundColor(Colori.Analisi.attenzioneTesto)
-                    .padding(.top, 6)
                 ForEach(scadenze) { p in
                     Button { apri(p) } label: {
                         HStack {
@@ -697,7 +692,6 @@ struct TabellaPosizioni: View {
         VStack(spacing: 0) {
             riga(testa: true) {
                 cella("Posizione", larghezza: nil)
-                cella("Canale", larghezza: 130)
                 cella("Area", larghezza: 116)
                 cella("Stato", larghezza: 130)
                 cella("Valore", larghezza: 110, destra: true)
@@ -723,9 +717,6 @@ struct TabellaPosizioni: View {
                         .lineLimit(1)
                         .padding(Misure.Analisi.cellaMargine)
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        EtichettaCanale(canale: p.canale, compatta: true)
-                            .padding(Misure.Analisi.cellaMargine)
-                            .frame(width: 130, alignment: .leading)
                         HStack(spacing: 6) {
                             RoundedRectangle(cornerRadius: Tema.Raggio.Dossier.quadratinoArea).fill(Colori.Analisi.area(p.area)).frame(width: 8, height: 8)
                             Text(p.area.nome).font(Tipo.tabellaCella).foregroundColor(Colori.Analisi.tabellaTesto)

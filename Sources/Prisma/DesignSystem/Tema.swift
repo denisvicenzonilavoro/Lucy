@@ -99,13 +99,11 @@ enum Tema {
         static let canaleAlleanzaStampa = Color(hex: "#2563EB")
         static let canaleIndipendenteStampa = Color(hex: "#B06E12")
 
-        static func canale(_ canale: Canale) -> Color {
-            canale == .alleanza ? canaleAlleanza : canaleIndipendente
-        }
+        /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore neutro per tutti.
+        static func canale(_ canale: Canale) -> Color { inchiostroSecondario }
 
-        static func fondoCanale(_ canale: Canale) -> Color {
-            canale == .alleanza ? fondoCanaleAlleanza : fondoCanaleIndipendente
-        }
+        /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore neutro per tutti.
+        static func fondoCanale(_ canale: Canale) -> Color { rigaSopra }
 
         // Testo direttamente sullo sfondo (saluto, barra, piede)
         static let inchiostroSfondo = t(K.ink, Color(r: 8, g: 26, b: 38, a: 0.88), .white)

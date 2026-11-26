@@ -398,7 +398,7 @@ enum PalestraVera {
         guard let inizio = testo.firstIndex(of: "{"), let fine = testo.lastIndex(of: "}"), inizio < fine,
               let d = String(testo[inizio...fine]).data(using: .utf8),
               let j = (try? JSONSerialization.jsonObject(with: d)) as? [String: Any] else {
-            return .scartata("La risposta di Vera non era un JSON leggibile.")
+            return .scartata("La risposta di Lucy non era un JSON leggibile.")
         }
         func stringa(_ k: String) -> String { ((j[k] as? String) ?? "").trimmingCharacters(in: .whitespacesAndNewlines) }
         let replica = stringa("replica")
@@ -407,7 +407,7 @@ enum PalestraVera {
         if !ultimo && obiezione.isEmpty { return .scartata("Manca l'obiezione del cliente.") }
         for t in [replica, ultimo ? "" : obiezione] where !t.isEmpty {
             if !CommentoVera.numeriConservati(bozza: ammesse, testo: t) {
-                return .scartata("Vera ha scritto una cifra che non viene da Lucy.")
+                return .scartata("Lucy ha scritto una cifra che non viene da Lucy.")
             }
         }
         var suggerite: [String] = []
@@ -462,7 +462,7 @@ enum PalestraVera {
                 }
             }
         }
-        throw ErroreVera(messaggio: motivo + " Vera non è riuscita a recitare il turno: riprova.")
+        throw ErroreVera(messaggio: motivo + " Lucy non è riuscita a recitare il turno: riprova.")
     }
 
     /// Il valore di una chiave di testo del JSON mentre arriva (`"replica":"Ah, quindi…` → «Ah, quindi…»).

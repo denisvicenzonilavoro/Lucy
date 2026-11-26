@@ -53,7 +53,7 @@ struct BibliotecaApple: View {
                 IconaApp(app: .biblioteca, lato: F.iconaCitazione)
                 Text("La biblioteca delle norme").carattereApple(F.titoloColonna)
             }
-            Text("Testi ufficiali caricati da te, sul Mac. Vera risponde citando l'articolo.")
+            Text("Testi ufficiali caricati da te, sul Mac. Lucy risponde citando l'articolo.")
                 .carattereApple(F.siglaTesto).foregroundColor(F.coloreFonte)
             ScrollView {
                 VStack(alignment: .leading, spacing: 6) {

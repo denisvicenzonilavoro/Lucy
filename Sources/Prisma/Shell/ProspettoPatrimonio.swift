@@ -94,8 +94,9 @@ private struct PaginaComposizione: View {
                 TabellaCanali(colonne: [ColonnaDoc(titolo: "Proposta", sottotitolo: "area", peso: 2.2, destra: false),
                                         ColonnaDoc(titolo: "Versamento iniziale", peso: 1.1), ColonnaDoc(titolo: "Versamenti", sottotitolo: "all'anno", peso: 1),
                                         ColonnaDoc(titolo: "Tra \(p.anni) anni", sottotitolo: "valore stimato", peso: 1.1)],
-                              gruppi: Canale.allCases.compactMap { c in
-                                  let mie = p.proposte.prefix(Misure.Documento.schedeReport).filter { $0.canale == c }
+                              gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                                  // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                                  let mie = Array(p.proposte.prefix(Misure.Documento.schedeReport))
                                   guard !mie.isEmpty else { return nil }
                                   return GruppoCanale(canale: c, righe: mie.map { x in
                                       let fine = MotorePatrimonio.andamento(x, anni: p.anni).last?.valore ?? 0

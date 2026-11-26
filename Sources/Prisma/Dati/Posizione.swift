@@ -314,6 +314,11 @@ struct Posizione: Identifiable, Codable, Hashable {
     /// Per una copertura: quanto la polizza pagherebbe per un evento (malattia, infortunio…), scritto dal consulente
     /// dalle condizioni. nil = non scritto: la carta di Lancia l'anno dice «dipende dalle condizioni», senza cifra.
     var indennizzoStimato: Double?
+    // Catalogo dei prodotti delle compagnie (25 novembre 2026), facoltativo, nessun cambio di versione: un archivio di
+    // prima si apre senza (Codable sintetizzato, decodeIfPresent)
+    /// La riga del catalogo delle compagnie abbinata dal consulente («investimento-2»…; `CatalogoProdotti.voce(id:)`).
+    /// Solo l'id: costi e condizioni restano nel catalogo, che si aggiorna da sé.
+    var catalogoId: String?
 
     /// Premi o versamenti dell'anno.
     var premioAnnuo: Double { premio * Double(frequenza.volteAllAnno) }

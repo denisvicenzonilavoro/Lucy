@@ -324,9 +324,6 @@ enum TreLivelliVera {
         return canali.count == 1 ? canali.first : nil
     }
 
-    private static func canali(_ elenco: [Posizione]) -> String {
-        Canale.allCases.filter { c in elenco.contains { $0.canale == c } }.map(\.nomeBreve).joined(separator: " e ")
-    }
 
     // MARK: Previdenza (MotorePrevidenza, RegoleFiscali)
 
@@ -381,7 +378,7 @@ enum TreLivelliVera {
         if let piano = e.inEssere.first {
             p.cifre.anni("anniPiano", "Anni di partecipazione alla pensione", piano.anniAllaPensione)
             p.cifre.percento("aliquotaPiano", "Imposta del piano alla pensione", piano.aliquota)
-            prestazione += " Con «\(piano.posizione.nome)» (\(piano.posizione.canale.nomeBreve)) arriva alla pensione con \(p.cifre["anniPiano"]) di partecipazione: aliquota del \(p.cifre["aliquotaPiano"])."
+            prestazione += " Con «\(piano.posizione.nome)» arriva alla pensione con \(p.cifre["anniPiano"]) di partecipazione: aliquota del \(p.cifre["aliquotaPiano"])."
         }
         tec.append(prestazione)
         let tra = e.anniAccumulo > 0 ? ", tra \(p.cifre["anniAccumulo"])" : ""
@@ -394,7 +391,7 @@ enum TreLivelliVera {
         if conPiani {
             p.cifre.euro("renditaInEssere", "Rendita dei piani in essere, al mese", e.renditaInEssere)
             p.cifre.euro("divarioResiduo", "Divario che resta, al mese", e.divarioResiduo)
-            tec.append("I piani in essere (\(canali(e.inEssere.map(\.posizione)))) aggiungono circa \(p.cifre["renditaInEssere"]) al mese; restano \(p.cifre["divarioResiduo"]).")
+            tec.append("I piani in essere aggiungono circa \(p.cifre["renditaInEssere"]) al mese; restano \(p.cifre["divarioResiduo"]).")
         }
         var conVersamento = false
         if let v = e.versamentoMancante, v >= 1, e.divarioConProposte >= 1 {
@@ -466,9 +463,7 @@ enum TreLivelliVera {
         let meno = i.capitaleDisponibile >= 1 ? ", meno \(p.cifre["disponibile"]) già disponibili" : ""
         tec.append("Fabbisogno caso morte: \(p.cifre["fabbisogno"]) (\(parti.joined(separator: ", "))\(meno)).")
         if conCoperto {
-            let vita = e.coperture.filter { ($0.capitaleAssicurato ?? 0) > 0 }
-            let dove = vita.isEmpty ? "" : " (\(canali(vita)))"
-            tec.append("Capitali caso morte in essere\(dove): \(p.cifre["coperto"])" + (conDivario ? "; divario \(p.cifre["divario"])." : ", che coprono il fabbisogno stimato."))
+            tec.append("Capitali caso morte in essere: \(p.cifre["coperto"])" + (conDivario ? "; divario \(p.cifre["divario"])." : ", che coprono il fabbisogno stimato."))
         } else if conDivario {
             tec.append("Nessun capitale caso morte in essere: il divario è tutto il fabbisogno, \(p.cifre["divario"]).")
         }
@@ -852,7 +847,7 @@ enum TreLivelliVera {
             blocchi.append(.sezione(numero: String(format: "%02d", n + 1), titolo: sezione.titolo))
             blocchi.append(.testo(sezione.righe.map { "• \($0)" }.joined(separator: "\n")))
         }
-        blocchi.append(.nota(avvertenza + " I numeri sono calcolati da Lucy (\(s.argomento.motore)), le parole sono di Vera."))
+        blocchi.append(.nota(avvertenza + " I numeri sono calcolati da Lucy (\(s.argomento.motore)), le parole sono di Lucy."))
         return ContenutoProspetto(occhiello: "Per \(s.nomeCliente)", titolo: s.pagina.titolo, sottotitolo: s.argomento.nome,
                                   cliente: s.nomeCliente, data: s.creataIl, canale: s.canale, blocchi: blocchi)
     }

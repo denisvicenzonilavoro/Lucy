@@ -42,7 +42,8 @@ enum VoceObiettivoStudio: String, CaseIterable, Identifiable {
 
     var nome: String {
         switch self {
-        case .produzioneAlleanza: return "Produzione \(Canale.alleanza.nomeBreve)"
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente nome del canale
+        case .produzioneAlleanza: return "Produzione"
         case .nuoviClienti: return "Nuovi clienti"
         case .ricaviConsulenza: return "Ricavi consulenza"
         }

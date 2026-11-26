@@ -193,7 +193,7 @@ extension TestiTFR {
         "La scelta del fondo non si può disfare. Lasciarlo in azienda sì: può cambiare idea quando vuole.",
     ]
     static func prospettoPer(_ nome: String) -> String { nome.isEmpty ? "Fanne un prospetto" : "Fanne un prospetto per \(nome)" }
-    static let chiediVera = "Chiedi a Vera di spiegarlo"
+    static let chiediVera = "Chiedi a Lucy di spiegarlo"
     static let nonPromesse = "Stime con le ipotesi qui a sinistra: non sono promesse."
     static let altro = "Altro"
     static let dettaglio = "Dettaglio"

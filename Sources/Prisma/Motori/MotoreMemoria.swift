@@ -368,11 +368,11 @@ enum MotoreMemoria {
         return d >= sogliaPatrimonio && (prima == 0 || d / abs(prima) >= sogliaPatrimonioQuota)
     }
 
-    /// Regole 15–16: patrimonio per canale (non si giudica) e debiti (sceso → meglio).
+    /// Regole 15–16: patrimonio per valore salvato del canale, scritto solo «Patrimonio» (non si giudica) e debiti (sceso → meglio).
     private static func variazioniPatrimonio(_ p: FotografiaRiesame, _ o: FotografiaRiesame) -> [VariazioneRiesame] {
         var v: [VariazioneRiesame] = []
         for c in Canale.allCases where patrimonioCambiato(da: p.patrimonio(c), a: o.patrimonio(c)) {
-            v.append(importo(.patrimonio, "patrimonio.\(c.rawValue)", "Patrimonio \(c.nomeBreve)", p.patrimonio(c), o.patrimonio(c),
+            v.append(importo(.patrimonio, "patrimonio.\(c.rawValue)", "Patrimonio", p.patrimonio(c), o.patrimonio(c),
                              unita: T.euroUnita, scesoMeglio: nil, canale: c))
         }
         if patrimonioCambiato(da: p.debiti, a: o.debiti) {
@@ -429,9 +429,8 @@ enum MotoreMemoria {
             }
             let titolo = x.titolo.isEmpty ? (y.titolo.isEmpty ? x.tipo : y.titolo) : x.titolo
             let canale = x.canale ?? y.canale
-            let suffisso = canale.map { $0 == .alleanza ? " Alleanza" : " indipendente" } ?? ""
             v.append(VariazioneRiesame(tema: .conformita, chiave: "conformita.\(x.tipo)",
-                                       testo: "\(titolo)\(suffisso): da \(a) a \(b)",
+                                       testo: "\(titolo): da \(a) a \(b)",
                                        prima: a, oggi: b, differenza: nil, verso: verso, aumento: nil, canale: canale))
         }
         return v

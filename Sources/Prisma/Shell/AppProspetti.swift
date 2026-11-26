@@ -345,12 +345,12 @@ struct AppProspetti: View {
 
     private func sceltaResoconto(report: Bool) -> some View {
         let voci = report
-            ? ["Copertina con il patrimonio netto", "Il quadro: aree e canali in una pagina",
+            ? ["Copertina con il patrimonio netto", "Il quadro: le aree in una pagina",
                "Come sta andando: versato, valore, risultato", "Quanto incasseresti oggi, dopo le imposte",
                "Posizione per posizione, in schede",
                "Le tutele, i prossimi 12 mesi, i costi", "In sintesi e prossimi passi"]
-            : ["Cifre chiave: patrimonio, versato, risultato, rendimento", "Ogni posizione finanziaria, divisa per canale",
-               "Ripartizione per area e per canale", "Tutele, liquidità e debiti, impegni dell'anno",
+            : ["Cifre chiave: patrimonio, versato, risultato, rendimento", "Ogni posizione finanziaria, con il totale",
+               "Ripartizione per area", "Tutele, liquidità e debiti, impegni dell'anno",
                "Imposte e netto incassabile al centesimo, costi voce per voce", "Previdenza: netto e aliquota per ogni causa",
                "Scadenze dei prossimi 12 mesi e proposte aperte", "Storico dei valori, metodo e firme"]
         return VStack(alignment: .leading, spacing: 10) {
@@ -447,7 +447,7 @@ struct AppProspetti: View {
         VStack(alignment: .leading, spacing: 10) {
             selettoreVersioneColonna(report) { stato.prospetto = .checkUp(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: chi sei, la fotografia, il semaforo, da dove partire, la sintesi."
-                        : "Prospetto per te: anagrafica e profilo, fotografia per area e canale, semaforo di sette aree, bisogni rilevati, prossimi passi e firme.")
+                        : "Prospetto per te: anagrafica e profilo, fotografia per area, semaforo di sette aree, bisogni rilevati, prossimi passi e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             Text("Dopo il primo incontro: anagrafica e famiglia dal dossier, patrimonio dalle Posizioni, ipotesi dall'Analisi 360, bisogni dal profilo dei bisogni. Più dati si raccolgono, meno semafori restano grigi.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -479,7 +479,7 @@ struct AppProspetti: View {
         VStack(alignment: .leading, spacing: 10) {
             selettoreVersioneColonna(report) { stato.prospetto = .patrimonio(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: il percorso con il grafico, area per area, proposte e traguardi, la sintesi."
-                        : "Prospetto per te: grafico e tabella anno per anno con e senza le proposte, per area, proposte per canale, obiettivi, metodo e firme.")
+                        : "Prospetto per te: grafico e tabella anno per anno con e senza le proposte, per area, proposte, obiettivi, metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             Text("Posizioni e proposte dalle Posizioni, obiettivi con una data dagli Obiettivi del cliente. Lo stesso calcolo del pannello in Posizioni.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -491,7 +491,7 @@ struct AppProspetti: View {
         VStack(alignment: .leading, spacing: 10) {
             selettoreVersioneColonna(report) { stato.prospetto = .successione(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: cosa passerebbe e quando, chi eredita, perché una polizza è diversa, cosa sistemare, la sintesi."
-                        : "Prospetto per te: ogni posizione con destino, beneficiari e avvisi, divisa per canale; eredi con quote e imposte; cosa sistemare; metodo e firme.")
+                        : "Prospetto per te: ogni posizione con destino, beneficiari e avvisi; eredi con quote e imposte; cosa sistemare; metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             Text("Posizioni e beneficiari dalle Posizioni; famiglia e stato civile dal dossier del cliente. Lo stesso calcolo del pannello in Posizioni.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -503,7 +503,7 @@ struct AppProspetti: View {
         VStack(alignment: .leading, spacing: 10) {
             selettoreVersioneColonna(report) { stato.prospetto = .costi(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: quanto paga, il peso nel tempo con e senza costi, cosa riceve in cambio e dove risparmiare, la sintesi."
-                        : "Prospetto per te: ogni posizione per canale con costi, euro dell'anno, 10 e 20 anni; il grafico; le alternative con l'uscita; metodo e firme.")
+                        : "Prospetto per te: ogni posizione con costi, euro dell'anno, 10 e 20 anni; il grafico; le alternative con l'uscita; metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             Text("Costi dalle Posizioni (e dai KID letti in Documenti); alternative dal catalogo Prodotti, con la stessa area e lo stesso indicatore di rischio. Lo stesso calcolo del pannello in Posizioni.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -515,7 +515,7 @@ struct AppProspetti: View {
         VStack(alignment: .leading, spacing: 10) {
             selettoreVersioneColonna(report) { stato.prospetto = .resistenza(report: $0); archiviato = nil }
             Text(report ? "Report per il cliente: i tre scenari, il confronto con il suo profilo e la parte al riparo, la sintesi."
-                        : "Prospetto per te: ogni posizione con SRI, quota esposta e perdita, divisa per canale; inflazione e immobili; metodo e firme.")
+                        : "Prospetto per te: ogni posizione con SRI, quota esposta e perdita; inflazione e immobili; metodo e firme.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             Text("Posizioni in essere e loro indicatore di rischio (SRI) dalle Posizioni; propensione al rischio dal profilo del cliente. Lo stesso calcolo del pannello in Posizioni.")
                 .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
@@ -585,7 +585,7 @@ struct AppProspetti: View {
             ? ["Copertina: famiglia, fabbisogno, tutele", "La tua famiglia e ciò che le serve", "Se ti succedesse qualcosa",
                "Se non potessi lavorare", "La mappa delle tutele", "Quanto costa proteggersi, in sintesi"]
             : ["Famiglia, fabbisogno caso morte e divario", "Invalidità, malattia e riserva", "Mappa dei rischi coperti e scoperti",
-               "Coperture per canale, costo per 1.000 €", "Scadenze da verificare", "Premi, detrazione del 19%, metodo e firme"]
+               "Coperture e costo per 1.000 €", "Scadenze da verificare", "Premi, detrazione del 19%, metodo e firme"]
         return VStack(alignment: .leading, spacing: 10) {
             selettoreVersioneColonna(report) { stato.prospetto = .protezione(report: $0); archiviato = nil }
             VStack(alignment: .leading, spacing: 7) {
@@ -681,7 +681,7 @@ struct AppProspetti: View {
         VStack(alignment: .leading, spacing: 4) {
             Text(titolo).font(SSP.etichetta).foregroundColor(SSP.coloreEtichetta)
             Picker("", selection: selezione) {
-                ForEach(elenco) { p in Text("\(p.nome) · \(p.stato == .proposta ? "proposta" : "in essere") · \(p.canale.nomeBreve)").tag(p.id) }
+                ForEach(elenco) { p in Text("\(p.nome) · \(p.stato == .proposta ? "proposta" : "in essere")").tag(p.id) }
             }
             .labelsHidden()
         }
@@ -740,8 +740,8 @@ struct AppProspetti: View {
                 Text("\(Formati.euro(v.premio)) · \(v.intestatari) · \(Formati.dataBreve.string(from: v.data))")
                     .font(SSP.piccolo).foregroundColor(SSP.coloreNota).lineLimit(1)
             }
+            // Un solo canale, Lucy: niente etichetta del canale
             Spacer(minLength: 4)
-            if let p { EtichettaCanale(canale: p.canale, compatta: true) }
         }
         .padding(EdgeInsets(top: 7, leading: 10, bottom: 7, trailing: 10))
         .voceSceltaProspetto(attiva: attiva)
@@ -775,8 +775,8 @@ struct AppProspetti: View {
                 Text("\(p.area.nome) · \(Formati.euro(p.stato == .inEssere ? p.valore : p.versamentoIniziale + p.premioAnnuo))")
                     .font(SSP.piccolo).foregroundColor(SSP.coloreNota)
             }
+            // Un solo canale, Lucy: niente etichetta del canale
             Spacer(minLength: 4)
-            EtichettaCanale(canale: p.canale, compatta: true)
         }
         .padding(EdgeInsets(top: 7, leading: 10, bottom: 7, trailing: 10))
         .voceSceltaProspetto(attiva: attiva)
@@ -861,11 +861,11 @@ struct AppProspetti: View {
                 .fixedSize()
             }
             if scelta.spuntoVera != nil {
-                Button { stato.chiediVeraDelDocumento(scelta) } label: { Label("Chiedi a Vera", systemImage: "sparkles") }
+                Button { stato.chiediVeraDelDocumento(scelta) } label: { Label("Chiedi a Lucy", systemImage: "sparkles") }
                     .buttonStyle(StileVetro())
                     .fixedSize()
                     .disabled(stato.veraInCorso)
-                    .help("Chiedi a Vera: spiega le cifre di questo documento, per te")
+                    .help("Chiedi a Lucy: spiega le cifre di questo documento, per te")
             }
             // Il portafoglio parla di tutti i clienti: non si mostra a un cliente
             if scelta.tipo != .portafoglio {
@@ -1098,7 +1098,7 @@ private struct PannelloCommento: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("IL COMMENTO DEL CONSULENTE").font(SSP.etichetta).foregroundColor(SSP.coloreEtichetta)
             if salvato == nil && testo.isEmpty {
-                Text("Una lettera breve al cliente, nella pagina dopo la copertina. Vera la scrive con le cifre del report; tu la rileggi e la cambi come vuoi.")
+                Text("Una lettera breve al cliente, nella pagina dopo la copertina. Lucy la scrive con le cifre del report; tu la rileggi e la cambi come vuoi.")
                     .font(SSP.nota).foregroundColor(SSP.coloreNota).fixedSize(horizontal: false, vertical: true)
             } else {
                 TextEditor(text: $testo)
@@ -1129,7 +1129,7 @@ private struct PannelloCommento: View {
                     // Il commento salvato o le modifiche in corso non si perdono senza chiedere
                     if salvato != nil || !testo.isEmpty { confermaRiscrivi = true } else { stato.scriviCommentoConVera(scelta) }
                 } label: {
-                    Label(stato.veraInCorso ? "Vera scrive…" : (salvato == nil ? "Scrivi con Vera" : "Riscrivi"), systemImage: "sparkles")
+                    Label(stato.veraInCorso ? "Lucy scrive…" : (salvato == nil ? "Scrivi con Lucy" : "Riscrivi"), systemImage: "sparkles")
                 }
                 .buttonStyle(StileAzioneSceltaProspetto(taglia: .compatta))
                 .fixedSize()
@@ -1152,11 +1152,11 @@ private struct PannelloCommento: View {
             }
         }
         .padding(12)
-        .confirmationDialog("Vera riscrive il commento", isPresented: $confermaRiscrivi) {
-            Button("Riscrivi con Vera", role: .destructive) { stato.scriviCommentoConVera(scelta) }
+        .confirmationDialog("Lucy riscrive il commento", isPresented: $confermaRiscrivi) {
+            Button("Riscrivi con Lucy", role: .destructive) { stato.scriviCommentoConVera(scelta) }
             Button("Annulla", role: .cancel) {}
         } message: {
-            Text("Il testo attuale del commento viene sostituito dalla nuova stesura di Vera.")
+            Text("Il testo attuale del commento viene sostituito dalla nuova stesura di Lucy.")
         }
         .onAppear { if !caricato { testo = salvato?.testo ?? ""; caricato = true } }
         .onChange(of: salvato?.aggiornatoIl) { _ in testo = stato.commento(scelta)?.testo ?? "" }

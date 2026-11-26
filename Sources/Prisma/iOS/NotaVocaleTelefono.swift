@@ -305,7 +305,7 @@ extension StatoShell {
         let vera = dati.impostazioni.vera
         guard vera.ponte.abbinato else {
             if nota != nil {
-                notaTelefono.esito(.rifiutata("Collega il dispositivo al Mac: sul Mac, in Impostazioni › Vera, attiva «iPhone e iPad» e scrivi qui il codice che compare."), inCoda: true)
+                notaTelefono.esito(.rifiutata("Collega il dispositivo al Mac: sul Mac, in Impostazioni › Lucy, attiva «iPhone e iPad» e scrivi qui il codice che compare."), inCoda: true)
             }
             return
         }

@@ -57,8 +57,8 @@ enum ConfermaSuMisura: Identifiable, Equatable {
     var titolo: String {
         switch self {
         case .esporta(let n): return "Esportare questi \(n) esempi?"
-        case .usa: return "Usare la Vera su misura?"
-        case .tornaIndietro: return "Tornare alla Vera di prima?"
+        case .usa: return "Usare la Lucy su misura?"
+        case .tornaIndietro: return "Tornare alla Lucy di prima?"
         case .elimina: return "Eliminare il modello?"
         }
     }
@@ -66,8 +66,8 @@ enum ConfermaSuMisura: Identifiable, Equatable {
     var pulsante: String {
         switch self {
         case .esporta: return "Esporta"
-        case .usa: return "Usa la Vera su misura"
-        case .tornaIndietro: return "Torna alla Vera di prima"
+        case .usa: return "Usa la Lucy su misura"
+        case .tornaIndietro: return "Torna alla Lucy di prima"
         case .elimina: return "Elimina il modello"
         }
     }
@@ -83,9 +83,9 @@ enum ConfermaSuMisura: Identifiable, Equatable {
         case .esporta:
             return "Lucy salva uno zip dove scegli tu, con i soli esempi resi anonimi che hai visto nell'anteprima. Non lo invia a nessuno: lo porti tu all'addestramento. Le domande dell'esame restano sul Mac."
         case .usa:
-            return "Da adesso risponde la Vera su misura, sul Mac. Puoi tornare alla Vera di prima quando vuoi."
+            return "Da adesso risponde la Lucy su misura, sul Mac. Puoi tornare alla Lucy di prima quando vuoi."
         case .tornaIndietro:
-            return "Torna a rispondere la Vera di prima. La versione su misura resta in Ollama e si può riprovare."
+            return "Torna a rispondere la Lucy di prima. La versione su misura resta in Ollama e si può riprovare."
         case .elimina:
             return "Libera circa 3 GB sul Mac. Per riaverlo serve un nuovo addestramento."
         }
@@ -116,7 +116,7 @@ struct PaginaSuMisuraVista: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
             #else
-            Text("Vera su misura si fa da Lucy sul Mac.")
+            Text("Lucy su misura si fa da Lucy sul Mac.")
                 .carattereApple(G.testo).foregroundColor(C.inchiostro2)
             #endif
         }
@@ -180,11 +180,11 @@ struct PaginaSuMisuraVista: View {
     @ViewBuilder
     private func avvisi(_ fase: FaseSuMisura) -> some View {
         if fase == .soloOllama {
-            RigaAvvisoSuMisura(colore: G.avviso, testo: "Vera su misura funziona solo con Ollama: in Impostazioni › Vera il fornitore è «Compatibile OpenAI».")
+            RigaAvvisoSuMisura(colore: G.avviso, testo: "Lucy su misura funziona solo con Ollama: in Impostazioni › Lucy il fornitore è «Compatibile OpenAI».")
         } else if fase == .memoriaBloccata {
-            RigaAvvisoSuMisura(colore: G.avviso, testo: "La memoria di Vera è bloccata (ripristino su un altro Mac): aprila dalla pagina dei ricordi con la password dei backup.")
+            RigaAvvisoSuMisura(colore: G.avviso, testo: "La memoria di Lucy è bloccata (ripristino su un altro Mac): aprila dalla pagina dei ricordi con la password dei backup.")
         } else if stato.suMisuraMancaInOllama {
-            RigaAvvisoSuMisura(colore: G.errore, testo: "La Vera su misura non è in Ollama su questo Mac (dopo un ripristino il modello non viaggia con il backup): torna a \(stato.dati.impostazioni.vera.suMisura.modelloPrecedente ?? MotoreLocale.modelloPredefinito).")
+            RigaAvvisoSuMisura(colore: G.errore, testo: "La Lucy su misura non è in Ollama su questo Mac (dopo un ripristino il modello non viaggia con il backup): torna a \(stato.dati.impostazioni.vera.suMisura.modelloPrecedente ?? MotoreLocale.modelloPredefinito).")
         } else if !stato.disponibilitaLocale.pronto {
             // Ollama spento o non pronto: gli esempi e l'anteprima si guardano lo stesso, importazione ed esame aspettano
             RigaAvvisoSuMisura(colore: G.avviso, testo: "Ollama non risponde: importazione ed esame aspettano Ollama aperto sul Mac. Esempi e anteprima si guardano lo stesso.")
@@ -314,11 +314,11 @@ struct PaginaSuMisuraVista: View {
             .fixedSize(horizontal: false, vertical: true)
         if stato.esameSuMisuraInCorso, case .lavoro(let l) = fase {
             Text(l).carattereApple(G.percentuale).foregroundColor(G.rubino)
-            Text("Un modello alla volta: intanto la chat di Vera aspetta.").carattereApple(G.testo).foregroundColor(C.inchiostro2)
+            Text("Un modello alla volta: intanto la chat di Lucy aspetta.").carattereApple(G.testo).foregroundColor(C.inchiostro2)
             Button("Ferma l'esame") { stato.fermaSuMisura() }.buttonStyle(.appleSobrio).fixedSize()
         } else if let e {
-            RigaEsameSuMisura(nome: "Vera di oggi", percentuale: e.percentualeAttuale, colore: G.barraOggi, indice: 0)
-            RigaEsameSuMisura(nome: "Vera su misura", percentuale: e.percentualeNuova, colore: G.rubino, indice: 1)
+            RigaEsameSuMisura(nome: "Lucy di oggi", percentuale: e.percentualeAttuale, colore: G.barraOggi, indice: 0)
+            RigaEsameSuMisura(nome: "Lucy su misura", percentuale: e.percentualeNuova, colore: G.rubino, indice: 1)
             if e.cifreInventateNuova > 0 || e.cifreInventateAttuale > 0 {
                 Text("Cifre inventate: \(e.cifreInventateAttuale) oggi, \(e.cifreInventateNuova) su misura.")
                     .carattereApple(G.testo).foregroundColor(C.inchiostro2)
@@ -336,7 +336,7 @@ struct PaginaSuMisuraVista: View {
 
     @ViewBuilder
     private func installazione(_ fase: FaseSuMisura) -> some View {
-        Text("La nuova Vera prende il posto di quella di oggi solo se supera l'esame.")
+        Text("La nuova Lucy prende il posto di quella di oggi solo se supera l'esame.")
             .carattereApple(G.testo).foregroundColor(C.inchiostro2)
             .fixedSize(horizontal: false, vertical: true)
         if let v = versione {
@@ -353,18 +353,18 @@ struct PaginaSuMisuraVista: View {
         }
         switch fase {
         case .superata(let v):
-            Button("Usa la Vera su misura") { conferma = .usa(v.id) }
+            Button("Usa la Lucy su misura") { conferma = .usa(v.id) }
                 .buttonStyle(.applePrimario).fixedSize()
         case .inUso:
-            Button("Torna alla Vera di prima") { conferma = .tornaIndietro }
+            Button("Torna alla Lucy di prima") { conferma = .tornaIndietro }
                 .buttonStyle(.apple).fixedSize()
         case .nonSuperata(let v):
-            Text("Resta la Vera di oggi: la sostituzione è bloccata.").carattereApple(G.testo).foregroundColor(G.errore)
+            Text("Resta la Lucy di oggi: la sostituzione è bloccata.").carattereApple(G.testo).foregroundColor(G.errore)
             Button("Elimina il modello") { conferma = .elimina(v.id) }
                 .buttonStyle(.apple).fixedSize()
         case .ritirata(let v):
             if v.esame?.superato == true {
-                Button("Usa di nuovo la Vera su misura") { conferma = .usa(v.id) }
+                Button("Usa di nuovo la Lucy su misura") { conferma = .usa(v.id) }
                     .buttonStyle(.apple).fixedSize()
             }
             Button("Elimina il modello") { conferma = .elimina(v.id) }

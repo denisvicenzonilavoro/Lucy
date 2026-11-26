@@ -309,6 +309,9 @@ enum VoceConfronto: Hashable {
     var richiestaNuovaPosizione: StatoPosizione?
     /// «Dal catalogo» nell'intestazione di Posizioni: il prodotto sul cliente in due passi (in essere o proposta).
     var richiestaDalCatalogo: StatoPosizione?
+    /// «Dal catalogo delle compagnie» (Posizioni e dettaglio della posizione, solo Mac): il foglio con l'elenco e la
+    /// scheda del prodotto del catalogo delle compagnie (CatalogoCompagnie.swift). Solo in memoria.
+    var richiestaCatalogoCompagnie: RichiestaCatalogoCompagnie?
     /// Il pulsante "Nuovo cliente" dell'intestazione chiede alla rubrica di aprire il modulo.
     var richiestaNuovoCliente = false
     /// «Modifica» nella riga in testa del dossier (migliorie d'uso 12, Mac): l'id del cliente di cui aprire il modulo,
@@ -2713,7 +2716,7 @@ enum VoceConfronto: Hashable {
         // Migliorie d'uso 9: niente nomi tecnici in vista; il motivo (Ollama, modello) sta in Impostazioni › Vera
         let testo = TestiStatoVera.spiegazione + " Quando è pronta, rifai la domanda."
         #else
-        let testo = (disponibilitaLocale.motivo ?? "Qwen non risponde.") + " Vera risponde solo con Qwen: quando è pronto, rifai la domanda."
+        let testo = (disponibilitaLocale.motivo ?? "Qwen non risponde.") + " Lucy risponde solo con Qwen: quando è pronto, rifai la domanda."
         #endif
         aggiungiMessaggio(MessaggioVera(autore: .vera, testo: testo,
                                        titolo: TestiStatoVera.titoloNonPronta, motore: "Prisma"), cliente: id)
@@ -2850,7 +2853,7 @@ enum VoceConfronto: Hashable {
                     self.aggiungiMessaggio(m, cliente: id)
                 } catch {
                     self.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: error.localizedDescription,
-                                                        titolo: "Vera non ha potuto rispondere", motore: modello.nome), cliente: id)
+                                                        titolo: "Lucy non ha potuto rispondere", motore: modello.nome), cliente: id)
                 }
                 self.veraInCorso = false
             }
@@ -2907,7 +2910,7 @@ enum VoceConfronto: Hashable {
                                                         motore: fedele ? modello.nome : MotoriVera.sintesi.nome), cliente: id)
                 } catch {
                     self.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: error.localizedDescription,
-                                                        titolo: "Vera non ha potuto rispondere", motore: modello.nome), cliente: id)
+                                                        titolo: "Lucy non ha potuto rispondere", motore: modello.nome), cliente: id)
                 }
                 self.veraInCorso = false
             }
@@ -2998,9 +3001,9 @@ enum VoceConfronto: Hashable {
             verificaMotoreLocale()
             #if os(macOS)
             // Migliorie d'uso 9: niente nomi tecnici in vista; il motivo sta in Impostazioni › Vera
-            mostraAvviso(TestiStatoVera.spiegazione + " Il commento lo scrive Vera: quando è pronta, riprova.")
+            mostraAvviso(TestiStatoVera.spiegazione + " Il commento lo scrive Lucy: quando è pronta, riprova.")
             #else
-            mostraAvviso((disponibilitaLocale.motivo ?? "Qwen non risponde.") + " Il commento lo scrive Vera con Qwen: quando è pronto, riprova.")
+            mostraAvviso((disponibilitaLocale.motivo ?? "Qwen non risponde.") + " Il commento lo scrive Lucy con Qwen: quando è pronto, riprova.")
             #endif
             return
         }
@@ -3123,7 +3126,7 @@ enum VoceConfronto: Hashable {
                     // Nuova conversazione: la risposta interrotta non resta
                 } catch {
                     self.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: error.localizedDescription,
-                                                        titolo: "Vera non ha potuto rispondere", motore: motore.nome, proposte: proposte), cliente: id)
+                                                        titolo: "Lucy non ha potuto rispondere", motore: motore.nome, proposte: proposte), cliente: id)
                 }
                 self.flussoVera.chiudi()
                 self.veraInCorso = false
@@ -3196,7 +3199,7 @@ enum VoceConfronto: Hashable {
         var t = Attivita.nuova(clienteId: clienteAttivoId,
                                scadenza: Calendar.current.date(byAdding: .day, value: 7, to: Date()) ?? Date())
         t.titolo = p.titolo
-        t.note = "Proposta da Vera: \(p.perche)"
+        t.note = "Proposta da Lucy: \(p.perche)"
         dati.attivita.append(t)
         aggiornaProposta(p.id, messaggio: messaggio) { $0.attivitaId = t.id }
         mostraAvviso("Attività aggiunta: \(t.titolo)")
@@ -3220,7 +3223,7 @@ enum VoceConfronto: Hashable {
             nuova.frequenza = .mensile
         }
         if let i = p.importo, p.versamentoMensile == nil { nuova.versamentoIniziale = i }
-        nuova.note = "Preparata con Vera: \(p.perche) Scegli prodotto e canale e completa i dati."
+        nuova.note = "Preparata con Lucy: \(p.perche) Scegli il prodotto e completa i dati."
         salvaPosizione(nuova)
         aggiornaProposta(p.id, messaggio: messaggio) { $0.posizioneId = nuova.id }
         apriPosizione(nuova)
@@ -4373,7 +4376,7 @@ enum SchedaImpostazioni: String, CaseIterable, Hashable, Identifiable {
         case .conformita: return "Conformità"
         case .proposte: return "Proposte e PDF"
         case .rendimenti: return "Rendimenti di confronto"
-        case .vera: return "Vera"
+        case .vera: return "Lucy"
         case .archivio: return "Archivio e backup"
         case .scorciatoie: return "Scorciatoie"
         case .studio: return "Studio"

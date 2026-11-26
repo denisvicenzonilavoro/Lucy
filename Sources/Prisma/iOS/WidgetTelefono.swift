@@ -130,7 +130,7 @@ struct RiquadroMossaTelefono: View {
                     stato.clienteAttivoId = m.cliente.id
                     mobile.apri(.vera, da: origineVera.punto)
                 } label: {
-                    Text("Prepara con Vera")
+                    Text("Prepara con Lucy")
                         .lineLimit(1)
                         .minimumScaleFactor(Tema.Apple.Telefono.Mossa.riduzionePulsanti)
                         .frame(maxWidth: .infinity, minHeight: Tema.Apple.Telefono.tocco)
@@ -295,21 +295,11 @@ struct IncontroMossaTelefono: View {
     }
 }
 
-/// I puntini dei canali del cliente (versione compatta: resta il colore del canale, blu Alleanza e cuoio).
+/// I puntini dei canali del cliente. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: non disegna nulla.
 struct PuntiniCanaliTelefono: View {
     let canali: [Canale]
 
-    var body: some View {
-        let lato = Tema.Apple.Misura.Controllo.pallinoCanale
-        HStack(spacing: Tema.Apple.Telefono.Elenco.spazioTesto) {
-            ForEach(canali) { c in
-                Circle()
-                    .fill(c == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente)
-                    .frame(width: lato, height: lato)
-            }
-        }
-        .accessibilityLabel(canali.map(\.nome).joined(separator: " e "))
-    }
+    var body: some View { EmptyView() }
 }
 
 // MARK: - Richiede attenzione
@@ -483,7 +473,7 @@ struct RiquadroVeraTelefono: View {
                 .puntoAcqua(.sferaVera)
                 .misuraOrigine(origine)
             VStack(alignment: .leading, spacing: Tema.Apple.Telefono.Elenco.spazioTesto) {
-                Text("Ritrova il filo con Vera.")
+                Text("Ritrova il filo con Lucy.")
                     .carattereApple(R.nome)
                     .foregroundColor(Tema.Apple.Colore.inchiostro)
                     .fixedSize(horizontal: false, vertical: true)
@@ -540,10 +530,7 @@ struct RiquadroPortafoglioTelefono: View {
                 Spacer(minLength: 0)
             }
             .padding(.top, P.anelliSopra)
-            if r.attivita > 0 {
-                canali(r)
-                    .padding(.top, P.canaliSopra)
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente barra dei canali
         }
         .riquadroTelefono { apri(da: nil) }
     }
@@ -584,25 +571,6 @@ struct RiquadroPortafoglioTelefono: View {
             testo
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
                 .lineLimit(1)
-        }
-    }
-
-    /// La barra dei canali (Alleanza blu, indipendente cuoio) e, sotto, le due etichette con l'importo.
-    private func canali(_ r: RiepilogoPosizioni) -> some View {
-        let alleanza = r.perCanale[.alleanza] ?? 0
-        let indipendente = r.perCanale[.indipendente] ?? 0
-        return VStack(alignment: .leading, spacing: P.spazioCanali) {
-            BarraPienaSegmenti.canali(alleanza: max(alleanza, 0), indipendente: max(indipendente, 0), indice: 2)
-            ForEach(Canale.allCases) { c in
-                HStack(spacing: P.spazioCanali) {
-                    EtichettaCanaleApple(canale: c, compatta: true)
-                    Spacer(minLength: 0)
-                    Text(FormatoCifra.euro.testo(r.perCanale[c] ?? 0))
-                        .carattereApple(P.canale)
-                        .foregroundColor(Tema.Apple.Colore.inchiostro)
-                        .lineLimit(1)
-                }
-            }
         }
     }
 }

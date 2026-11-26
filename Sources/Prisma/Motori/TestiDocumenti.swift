@@ -9,7 +9,7 @@ enum TestiDocumenti {
 
     // MARK: Il perché dei dati da controllare
 
-    static let lettoConQwen = TestiStatoVera.inVista(mac: "L’ha letto Vera: controlla.", altrove: "L’ho letto con Qwen: controlla.")
+    static let lettoConQwen = TestiStatoVera.inVista(mac: "L’ha letto Lucy: controlla.", altrove: "L’ho letto con Qwen: controlla.")
     static let senzaRiga = "Nel testo non trovo la riga da cui viene: controlla."
     static let importoIlleggibile = "Il numero non ha la forma di un importo."
     static let percentualeIlleggibile = "Il numero non ha la forma di una percentuale."
@@ -93,8 +93,8 @@ enum TestiDocumenti {
     }
     static let fatto = "Fatto: salva nel dossier"
     static let chiudi = "Chiudi"
-    static let chiediAVera = "Chiedi a Vera"
-    static let aiutoVera = "Vera risponde solo con il testo di questo documento, citando la pagina"
+    static let chiediAVera = "Chiedi a Lucy"
+    static let aiutoVera = "Lucy risponde solo con il testo di questo documento, citando la pagina"
     static let soloQuandoLoDici = "I dati entrano nel dossier solo quando lo dici tu"
     static let giaSalvato = "Già salvato nel dossier"
     static let primaControlla = "Prima controlla i dati in arancione"

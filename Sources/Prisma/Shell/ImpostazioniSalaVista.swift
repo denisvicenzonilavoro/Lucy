@@ -90,11 +90,11 @@ struct PaginaImpostazioniSala: View {
                 }
             }
             .cascataImpostazioni(3)
-            NotaImpostazioni("Le avvertenze e il titolo sono comunicazioni al cliente: scrivile o approvale tu (OCF per "
-                             + "l’indipendente, Alleanza per l’agenzia). Finché restano vuote si vede il segnaposto dichiarato.")
+            NotaImpostazioni("Le avvertenze e il titolo sono comunicazioni al cliente: scrivile o approvale tu (per esempio "
+                             + "con l’OCF o con la compagnia). Finché restano vuote si vede il segnaposto dichiarato.")
             GruppoImpostazioni(titolo: "La realtà aumentata") {
                 RigaImpostazione(titolo: TestiRealta.scattoConStanzaTitolo,
-                                 sottotitolo: "Di base lo scatto è solo il cristallo su fondo neutro",
+                                 sottotitolo: "Di base lo scatto è solo il sole del piano su fondo neutro",
                                  aiuto: TestiRealta.scattoConStanzaAiuto, ultima: true) {
                     Toggle(isOn: Binding(get: { sala.scattoConStanza },
                                          set: { v in modifica { $0.scattoConStanza = v } })) { EmptyView() }

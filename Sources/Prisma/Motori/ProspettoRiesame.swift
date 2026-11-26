@@ -45,16 +45,14 @@ extension CompositoreProspetti {
             b.append(.testo("Nessun punto da trattare: posizioni in linea, niente in scadenza, dati aggiornati."))
         } else {
             b.append(.tabella(TabellaProspetto(
-                // Il tema e il canale in due colonne: il canale come etichetta, «—» se il punto riguarda il cliente.
-                // Punto e Da sapere vanno a capo (righe ad altezza variabile, misurate dall'impaginatore)
-                colonne: [ColonnaProspetto(titolo: "#", peso: 0.35), ColonnaProspetto(titolo: "Tema", peso: 1.05),
-                          ColonnaProspetto(titolo: "Canale", peso: 0.95),
-                          ColonnaProspetto(titolo: "Punto", peso: 2.1), ColonnaProspetto(titolo: "Da sapere", peso: 2.9),
+                // Un solo canale, Lucy: il tema, il punto e cosa sapere (vanno a capo: righe ad altezza variabile,
+                // misurate dall'impaginatore)
+                colonne: [ColonnaProspetto(titolo: "#", peso: 0.35), ColonnaProspetto(titolo: "Tema", peso: 1.2),
+                          ColonnaProspetto(titolo: "Punto", peso: 2.5), ColonnaProspetto(titolo: "Da sapere", peso: 3.3),
                           ColonnaProspetto(titolo: "Priorità", peso: 0.75)],
                 righe: r.punti.enumerated().map { i, p -> [CellaProspetto] in
-                    let canale: CellaProspetto = p.canale.map { CellaProspetto.c($0) } ?? CellaProspetto.n("—")
                     let priorita: CellaProspetto = p.priorita == .alta ? CellaProspetto.f(p.priorita.nome) : CellaProspetto.n(p.priorita.nome)
-                    return [CellaProspetto.n("\(i + 1)"), CellaProspetto.t(p.tema.nome), canale,
+                    return [CellaProspetto.n("\(i + 1)"), CellaProspetto.t(p.tema.nome),
                             CellaProspetto.f(p.titolo), CellaProspetto.t(p.dettaglio), priorita]
                 })))
         }
@@ -64,11 +62,11 @@ extension CompositoreProspetti {
             b.append(.testo("Nessuna posizione ha ancora due valori rilevati: l'andamento si misura dallo storico. Aggiungi i valori passati dagli estratti conto (Documenti → «Registra il valore»)."))
         } else {
             b.append(.tabella(TabellaProspetto(
-                colonne: [ColonnaProspetto(titolo: "Posizione", peso: 2.2), ColonnaProspetto(titolo: "Canale", peso: 1),
+                colonne: [ColonnaProspetto(titolo: "Posizione", peso: 3.2),
                           ColonnaProspetto(titolo: "Dal", peso: 0.9), ColonnaProspetto(titolo: "Rendimento", peso: 1.2, destra: true),
                           ColonnaProspetto(titolo: "Atteso netto", peso: 1, destra: true), ColonnaProspetto(titolo: "Giudizio", peso: 1.3)],
                 righe: r.andamenti.map { p, a in
-                    [.f(p.nome), .c(p.canale), .t(data(a.dal)), .t(TestiResoconto.rendimento(a)),
+                    [.f(p.nome), .t(data(a.dal)), .t(TestiResoconto.rendimento(a)),
                      .t(a.attesoConfrontabile.map { CifreDoc.percento($0) } ?? "—"),
                      a.giudizio == .sotto ? .f(a.giudizio?.etichetta ?? "—") : .t(a.giudizio?.etichetta ?? "—")]
                 })))
@@ -82,10 +80,10 @@ extension CompositoreProspetti {
             b.append(.testo("Nessuna posizione in essere scade nei prossimi 12 mesi."))
         } else {
             b.append(.tabella(TabellaProspetto(
-                colonne: [ColonnaProspetto(titolo: "Scadenza", peso: 1), ColonnaProspetto(titolo: "Posizione", peso: 2.3),
-                          ColonnaProspetto(titolo: "Canale", peso: 1), ColonnaProspetto(titolo: "Valore", peso: 1.2, destra: true)],
+                colonne: [ColonnaProspetto(titolo: "Scadenza", peso: 1), ColonnaProspetto(titolo: "Posizione", peso: 3.3),
+                          ColonnaProspetto(titolo: "Valore", peso: 1.2, destra: true)],
                 righe: r.scadenze.map { p in
-                    [.t(p.scadenza.map(data) ?? "—"), .f(p.nome), .c(p.canale), p.area == .protezione ? .n("copertura da rinnovare") : .t(Formati.euro(p.valore))]
+                    [.t(p.scadenza.map(data) ?? "—"), .f(p.nome), p.area == .protezione ? .n("copertura da rinnovare") : .t(Formati.euro(p.valore))]
                 })))
         }
 
@@ -94,11 +92,10 @@ extension CompositoreProspetti {
         if !occasioniAnno.isEmpty {
             sezione("Le occasioni dei prossimi 12 mesi")
             b.append(.tabella(TabellaProspetto(
-                colonne: [ColonnaProspetto(titolo: "Data", peso: 0.9), ColonnaProspetto(titolo: "Occasione", peso: 2.2),
-                          ColonnaProspetto(titolo: "Canale", peso: 1), ColonnaProspetto(titolo: "Cosa cambia", peso: 3.9)],
+                colonne: [ColonnaProspetto(titolo: "Data", peso: 0.9), ColonnaProspetto(titolo: "Occasione", peso: 2.6),
+                          ColonnaProspetto(titolo: "Cosa cambia", peso: 4.5)],
                 righe: occasioniAnno.map { o -> [CellaProspetto] in
-                    let canale: CellaProspetto = o.canale.map { CellaProspetto.c($0) } ?? CellaProspetto.n("—")
-                    return [CellaProspetto.t(data(o.data)), CellaProspetto.f(o.titolo), canale, CellaProspetto.t(o.dettaglio)]
+                    [CellaProspetto.t(data(o.data)), CellaProspetto.f(o.titolo), CellaProspetto.t(o.dettaglio)]
                 })))
             b.append(.nota(TestiOccasioni.avvertenza))
         }
@@ -128,10 +125,10 @@ extension CompositoreProspetti {
             sezione("Proposte e attività aperte")
             if !r.proposte.isEmpty {
                 b.append(.tabella(TabellaProspetto(
-                    colonne: [ColonnaProspetto(titolo: "Proposta", peso: 2.4), ColonnaProspetto(titolo: "Canale", peso: 1),
+                    colonne: [ColonnaProspetto(titolo: "Proposta", peso: 3.4),
                               ColonnaProspetto(titolo: "Esito", peso: 1), ColonnaProspetto(titolo: "Importo", peso: 1.1, destra: true)],
                     righe: r.proposte.map { p in
-                        [.f(p.nome), .c(p.canale), .t((p.esito ?? .bozza).nome),
+                        [.f(p.nome), .t((p.esito ?? .bozza).nome),
                          .t(p.versamentoIniziale > 0 ? Formati.euro(p.versamentoIniziale) : p.premioAnnuo > 0 ? "\(Formati.euro(p.premioAnnuo))/anno" : "—")]
                     })))
             }
@@ -160,13 +157,12 @@ extension CompositoreProspetti {
             b.append(.avviso("Completi al \(k.percentuale)%: " + TestiCompletezza.riepilogo(k) + "."))
             let mostrate = daCompletare.prefix(MotoreCompletezza.massimoProspetto)
             b.append(.tabella(TabellaProspetto(
-                colonne: [ColonnaProspetto(titolo: "Dato", peso: 2), ColonnaProspetto(titolo: "Stato", peso: 0.9),
-                          ColonnaProspetto(titolo: "Cosa usa l'analisi", peso: 3.9), ColonnaProspetto(titolo: "Canale", peso: 0.9)],
+                colonne: [ColonnaProspetto(titolo: "Dato", peso: 2.2), ColonnaProspetto(titolo: "Stato", peso: 0.9),
+                          ColonnaProspetto(titolo: "Cosa usa l'analisi", peso: 4.6)],
                 righe: mostrate.map { v -> [CellaProspetto] in
                     let stato: CellaProspetto = v.stato == .mancante ? CellaProspetto.f(v.stato.nome) : CellaProspetto.t(v.stato.nome)
                     let ipotesi: String = v.ipotesi.isEmpty ? "—" : v.ipotesi
-                    let canale: CellaProspetto = v.canale.map { CellaProspetto.c($0) } ?? CellaProspetto.n("—")
-                    return [CellaProspetto.f(v.titolo), stato, CellaProspetto.t(ipotesi), canale]
+                    return [CellaProspetto.f(v.titolo), stato, CellaProspetto.t(ipotesi)]
                 })))
             if daCompletare.count > mostrate.count {
                 b.append(.testo("…e altre \(daCompletare.count - mostrate.count): l'elenco completo è nella Panoramica del cliente."))
@@ -177,14 +173,13 @@ extension CompositoreProspetti {
         if let e = r.conformita, !e.dovute.isEmpty {
             sezione("In regola: scadenze di conformità")
             b.append(.tabella(TabellaProspetto(
-                colonne: [ColonnaProspetto(titolo: "Voce", peso: 2.2), ColonnaProspetto(titolo: "Canale", peso: 1.1),
+                colonne: [ColonnaProspetto(titolo: "Voce", peso: 3.3),
                           ColonnaProspetto(titolo: "Registrata il", peso: 1), ColonnaProspetto(titolo: "Valida fino al", peso: 1),
                           ColonnaProspetto(titolo: "Stato", peso: 1.1)],
                 righe: e.dovute.map { v -> [CellaProspetto] in
-                    let canale: CellaProspetto = v.canale.map { CellaProspetto.c($0) } ?? CellaProspetto.n("Tutti")
                     let stato: CellaProspetto = v.stato <= .mancante
                         ? CellaProspetto.f(TestiConformita.etichetta(v)) : CellaProspetto.t(TestiConformita.etichetta(v))
-                    return [CellaProspetto.f(TestiConformita.nome(v.tipo)), canale,
+                    return [CellaProspetto.f(TestiConformita.nome(v.tipo)),
                             CellaProspetto.t(v.data.map(data) ?? "—"), CellaProspetto.t(v.scadenza.map(data) ?? "—"), stato]
                 })))
             b.append(.nota(TestiConformita.avvertenza))
@@ -226,19 +221,18 @@ extension CompositoreProspetti {
             IndicatoreProspetto(etichetta: "Valore stimato", valore: (v.parziale ? "almeno " : "") + Formati.euro(totale),
                                 nota: "dal \(Formati.dataBreve.string(from: v.dal))"),
             IndicatoreProspetto(etichetta: "Compenso", valore: Formati.euro(v.compenso),
-                                nota: v.provvigioniNonStimate ? "provvigioni Alleanza non stimate" : "parcelle e provvigioni stimate"),
+                                nota: v.provvigioniNonStimate ? "provvigioni non stimate" : "parcelle e provvigioni stimate"),
             IndicatoreProspetto(etichetta: v.rapportoSoloParcelle ? "Per euro di parcella" : "Per euro di compenso",
                                 valore: v.rapporto.map { String(format: "%.1f", $0).replacingOccurrences(of: ".", with: ",") } ?? "—",
-                                nota: v.rapportoSoloParcelle ? "valore del canale indipendente" : "euro di valore"),
+                                nota: v.rapportoSoloParcelle ? "valore per euro di parcella" : "euro di valore"),
             IndicatoreProspetto(etichetta: "Protetto (caso morte)", valore: v.protetto.map(Formati.euro) ?? "—", nota: "non entra nel totale"),
         ]))
         b.append(.tabella(TabellaProspetto(
-            colonne: [ColonnaProspetto(titolo: "Voce", peso: 1.6), ColonnaProspetto(titolo: "Cifra", peso: 1, destra: true),
-                      ColonnaProspetto(titolo: Canale.alleanza.nomeBreve, peso: 1, destra: true), ColonnaProspetto(titolo: Canale.indipendente.nomeBreve, peso: 1, destra: true),
-                      ColonnaProspetto(titolo: "Nota", peso: 2.6)],
+            // Un solo canale, Lucy: la cifra di ogni voce, senza la divisione per canale
+            colonne: [ColonnaProspetto(titolo: "Voce", peso: 2), ColonnaProspetto(titolo: "Cifra", peso: 1.2, destra: true),
+                      ColonnaProspetto(titolo: "Nota", peso: 4)],
             righe: v.voci.map { x -> [CellaProspetto] in
                 [.f(x.tipo.titolo), .t(x.totale.map(Formati.euro) ?? "—"),
-                 .t(x.perCanale[.alleanza].map(Formati.euro) ?? "—"), .t(x.perCanale[.indipendente].map(Formati.euro) ?? "—"),
                  .t(x.motivoAssente ?? (x.stima ? "stima" : "—"))]
             })))
         b.append(.nota("Contano solo le posizioni nate da raccomandazioni accettate dopo l'inizio del rapporto. Tasse con il reddito di oggi (stima); costi tagliati sul valore di oggi della nuova posizione; alternativa dal track record (stima). Documento ad uso del consulente: non è una comunicazione al cliente."))
@@ -254,7 +248,6 @@ extension CompositoreProspetti {
         }
         let righe: [[CellaProspetto]] = m.variazioni.map { v in
             let tema = CellaProspetto.t(v.tema.nome)
-            let canale: CellaProspetto = v.canale.map { CellaProspetto.c($0) } ?? CellaProspetto.n(TestiMemoria.vuoto)
             let frase: CellaProspetto = v.verso == .peggio ? CellaProspetto.f(v.testo) : CellaProspetto.t(v.testo)
             let verso: CellaProspetto
             switch v.verso {
@@ -262,13 +255,13 @@ extension CompositoreProspetti {
             case .peggio: verso = CellaProspetto.f("peggio")
             case .neutro: verso = CellaProspetto.n(TestiMemoria.vuoto)
             }
-            return [tema, canale, frase, CellaProspetto.n(v.prima), CellaProspetto.t(v.oggi), verso]
+            return [tema, frase, CellaProspetto.n(v.prima), CellaProspetto.t(v.oggi), verso]
         }
         return [
             .testo(testo),
             .tabella(TabellaProspetto(
-                colonne: [ColonnaProspetto(titolo: "Tema", peso: 1.1), ColonnaProspetto(titolo: "Canale", peso: 0.95),
-                          ColonnaProspetto(titolo: "Cosa è cambiato", peso: 2.25),
+                colonne: [ColonnaProspetto(titolo: "Tema", peso: 1.1),
+                          ColonnaProspetto(titolo: "Cosa è cambiato", peso: 3.2),
                           ColonnaProspetto(titolo: "Prima", peso: 1.3), ColonnaProspetto(titolo: "Oggi", peso: 1.3),
                           ColonnaProspetto(titolo: "Verso", peso: 0.8)],
                 righe: righe)),
@@ -276,7 +269,7 @@ extension CompositoreProspetti {
     }
 
     /// «Cronologia dei riesami»: la riga «Oggi» (non salvata, evidenziata) e le ultime fotografie salvate, con il
-    /// patrimonio sempre diviso per canale. Senza fotografie salvate un testo (la riga «Oggi» da sola non dice niente).
+    /// patrimonio in una colonna sola (un solo canale, quello di Lucy, dal 25 novembre 2026). Senza fotografie salvate un testo (la riga «Oggi» da sola non dice niente).
     private static func bloccoCronologia(_ m: MemoriaRiesame) -> [BloccoProspetto] {
         guard !m.cronologia.isEmpty else { return [.testo(TestiMemoria.nessunaFotografia)] }
         func riga(_ f: FotografiaRiesame, data: String, forte: Bool) -> [CellaProspetto] {
@@ -285,8 +278,8 @@ extension CompositoreProspetti {
                     cella(TestiMemoria.propensioneBreve(f.propensione)),
                     cella(TestiMemoria.euroAlMese(f.divarioPensione)),
                     cella(TestiMemoria.euro(f.scopertoCasoMorte)),
-                    cella(TestiMemoria.euro(f.patrimonioAlleanza)),
-                    cella(TestiMemoria.euro(f.patrimonioIndipendente)),
+                    // Un solo canale, Lucy: il patrimonio tutto insieme
+                    cella(TestiMemoria.euro(f.patrimonioAlleanza + f.patrimonioIndipendente)),
                     cella(TestiMemoria.semafori(f: f)),
                     cella(f.completezza.map { "\($0)%" } ?? TestiMemoria.vuoto)]
         }
@@ -297,8 +290,7 @@ extension CompositoreProspetti {
             colonne: [ColonnaProspetto(titolo: "Data", peso: 1), ColonnaProspetto(titolo: "Propensione", peso: 1),
                       ColonnaProspetto(titolo: "Divario pensione", peso: 1.1, destra: true),
                       ColonnaProspetto(titolo: "Scoperto caso morte", peso: 1.2, destra: true),
-                      ColonnaProspetto(titolo: Canale.alleanza.nomeBreve, peso: 1.1, destra: true),
-                      ColonnaProspetto(titolo: Canale.indipendente.nomeBreve, peso: 1.1, destra: true),
+                      ColonnaProspetto(titolo: "Patrimonio", peso: 1.3, destra: true),
                       ColonnaProspetto(titolo: "Semafori", peso: 1.3), ColonnaProspetto(titolo: "Dati", peso: 0.7, destra: true)],
             righe: righe,
             evidenzia: [0]))]

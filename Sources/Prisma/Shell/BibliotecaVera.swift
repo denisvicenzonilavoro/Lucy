@@ -153,7 +153,7 @@ import Observation
                     }
                     let t = self.aggiungi(titolo: nome, sigla: "", edizione: "importato il \(Formati.dataEstesa.string(from: Date()))", file: file, pagine: pagine)
                     let perPagina = t.articoli.first?.numero.hasPrefix("pag.") == true
-                    avviso(perPagina ? "«\(nome)»: non ho trovato articoli («Art. 1…»): Vera lo cercherà pagina per pagina."
+                    avviso(perPagina ? "«\(nome)»: non ho trovato articoli («Art. 1…»): Lucy lo cercherà pagina per pagina."
                                      : "«\(nome)» è nella Biblioteca: \(t.articoli.count) articoli.")
                 }
             }

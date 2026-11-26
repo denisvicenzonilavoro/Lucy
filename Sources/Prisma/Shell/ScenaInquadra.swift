@@ -494,7 +494,7 @@ private struct SchedaInquadraMac: View {
         let c = stato.clienteInquadra
         let area = stato.canaleEAreaInquadra.area
         let nome = c.map { StatoShell.nomeBreveInquadra($0) } ?? "cliente"
-        let frase = "Aggiungo a Posizioni di \(nome) una polizza in essere, canale \(canale.nomeBreve.lowercased()), area \(area.nome.lowercased()), con i dati qui sopra: entrano nel dossier come confermati. Il documento resta in Documenti, senza la foto."
+        let frase = "Aggiungo a Posizioni di \(nome) una polizza in essere, area \(area.nome.lowercased()), con i dati qui sopra: entrano nel dossier come confermati. Il documento resta in Documenti, senza la foto."
         return VStack(alignment: .leading, spacing: S.spazioPulsanti) {
             Text(frase)
                 .carattereApple(S.fraseConferma)

@@ -33,7 +33,7 @@ enum GruppoProva: String, CaseIterable, Identifiable {
     var spiegazione: String {
         switch self {
         case .cinque: return "Pochi, per spiegare con calma."
-        case .trentacinque: return "Lucy piena: Vera, il territorio, lo Studio."
+        case .trentacinque: return "Lucy piena: Lucy, il territorio, lo Studio."
         }
     }
 }

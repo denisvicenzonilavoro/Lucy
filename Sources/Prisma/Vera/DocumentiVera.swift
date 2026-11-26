@@ -9,7 +9,7 @@ extension MotoreSintesi {
         var parti: [String] = []
         let campi = d.campi
         guard !d.tipo.creatoDaPrisma else {
-            return RispostaVera(titolo: d.titolo, testo: "È un documento impaginato da Lucy con i dati del dossier: le cifre sono quelle dei calcoli dell'app. Lo trovi in Prospetti e report, dove posso spiegarlo con «Chiedi a Vera».")
+            return RispostaVera(titolo: d.titolo, testo: "È un documento impaginato da Lucy con i dati del dossier: le cifre sono quelle dei calcoli dell'app. Lo trovi in Prospetti e report, dove posso spiegarlo con «Chiedi a Lucy».")
         }
         guard !campi.isEmpty else {
             return RispostaVera(titolo: d.titolo, testo: d.lettura == .illeggibile
@@ -48,7 +48,7 @@ extension MotoreSintesi {
         if !differenze.isEmpty {
             parti.append("Non torna con il dossier:\n" + differenze.map { "• " + $0 }.joined(separator: "\n"))
         } else if let p = posizione(d, f) {
-            parti.append("I dati confermati coincidono con la posizione \(p.nome) (\(p.canale.nomeBreve)).")
+            parti.append("I dati confermati coincidono con la posizione \(p.nome).")
         }
 
         // Da confermare e da verificare
@@ -90,7 +90,7 @@ extension MotoreSintesi {
         }
         var testo = righe.joined(separator: "\n")
         if !avvisi.isEmpty { testo += "\n\nNon torna con il dossier:\n" + avvisi.map { "• " + $0 }.joined(separator: "\n") }
-        testo += "\n\nPer la spiegazione di un documento: apri la scheda Documenti del cliente e usa «Chiedi a Vera»."
+        testo += "\n\nPer la spiegazione di un documento: apri la scheda Documenti del cliente e usa «Chiedi a Lucy»."
         return RispostaVera(titolo: "I documenti di \(f.cliente.nome)", testo: testo)
     }
 
@@ -153,7 +153,7 @@ extension MotoreSintesi {
             guard let c = d.campo(k), let n = EstrattoreDocumento.numero(c.valore) else { return nil }
             return (n, c)
         }
-        let nomePos = "la posizione \(p.nome) (\(p.canale.nomeBreve))"
+        let nomePos = "la posizione \(p.nome)"
         if let x = numero(.capitaleAssicurato), let cap = p.capitaleAssicurato, abs(x.0 - cap) > 1 {
             diff.append("capitale assicurato \(CifreDoc.euro(x.0)) \(pagina(x.1)), \(nomePos) dice \(CifreDoc.euro(cap))")
         }

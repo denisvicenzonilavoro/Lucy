@@ -315,13 +315,7 @@ struct AppSegnaposto: View {
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: 380)
-            if mostraCanali {
-                HStack(spacing: 10) {
-                    EtichettaCanale(canale: .alleanza)
-                    EtichettaCanale(canale: .indipendente)
-                }
-                .padding(.top, 6)
-            }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichette dei canali
         }
         .padding(28)
         .vetro(.sottile, forma: .arrotondata(Tema.Raggio.scheda))
@@ -380,7 +374,7 @@ struct AzioniPosizioni: View {
             }
             .buttonStyle(StileVetro())
             .disabled(stato.solaLettura)
-            .help("Un prodotto del catalogo (Alleanza o indipendente) sul cliente: scrivi solo importi e durata, il resto viene dalla scheda")
+            .help("Un prodotto del catalogo sul cliente: scrivi solo importi e durata, il resto viene dalla scheda")
             Button { stato.richiestaNuovaPosizione = .proposta } label: {
                 Label("Proposta", systemImage: "plus")
             }
@@ -413,8 +407,11 @@ struct AzioniPosizioni: View {
                 s.richiestaNuovaPosizione = .proposta
             },
             .azione("Dal catalogo", attiva: modifica,
-                    aiuto: "Un prodotto del catalogo (Alleanza o indipendente) sul cliente: scrivi solo importi e durata, il resto viene dalla scheda") {
+                    aiuto: "Un prodotto del catalogo sul cliente: scrivi solo importi e durata, il resto viene dalla scheda") {
                 s.richiestaDalCatalogo = .proposta
+            },
+            .azione(TestiCatalogoCompagnie.titolo, aiuto: TestiCatalogoCompagnie.aiutoIngresso) {
+                s.richiestaCatalogoCompagnie = RichiestaCatalogoCompagnie()
             },
             .separatore,
             .azione("Importa…", attiva: modifica,

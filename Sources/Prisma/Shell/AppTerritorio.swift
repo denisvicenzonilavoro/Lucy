@@ -3,7 +3,9 @@ import SwiftUI
 // Territorio · «Il tuo territorio» («Luce» giro 11, §5.1.1): una card raggio 22 che riempie l'area con la mappa e, sopra
 // a sinistra, il pannello opaco largo 340 a 16 dai bordi. La mappa non rimonta al cambio di vista (niente lampo); il
 // pannello sì (0,13 s). Nell'iPad stretto il pannello passa sotto la mappa. La tabella dei comuni si carica all'apertura e
-// si libera alla chiusura (Mac da 8 GB, §5.4). Nessuna richiesta di rete (decisione 20).
+// si libera alla chiusura (Mac da 8 GB, §5.4). Nessuna richiesta di rete (decisione 20), con un'unica eccezione decisa
+// dall'utente il 25 novembre 2026: con «Usa Apple Mappe per il giro» acceso il giro usa Apple Mappe (GiroMappeApple.swift),
+// che riceve solo le coordinate delle tappe.
 
 struct AppTerritorio: View {
     @Environment(StatoShell.self) var stato
@@ -25,7 +27,7 @@ struct AppTerritorio: View {
             if stretto {
                 ScrollView {
                     VStack(spacing: P.margine) {
-                        MappaTerritorio(contenuto: contenuto(oggi, vista, anno, giro, coperto: 0))
+                        mappa(oggi, vista, anno, giro, coperto: 0)
                             .frame(height: P.altezzaMappaStretta)
                             .clipShape(RoundedRectangle(cornerRadius: P.raggio, style: .continuous))
                         pannello(vista, oggi: oggi, crescita: crescita, giro: giro)
@@ -33,7 +35,7 @@ struct AppTerritorio: View {
                 }
             } else {
                 ZStack(alignment: .topLeading) {
-                    MappaTerritorio(contenuto: contenuto(oggi, vista, anno, giro, coperto: P.larghezza + 2 * P.margine))
+                    mappa(oggi, vista, anno, giro, coperto: P.larghezza + 2 * P.margine)
                     pannello(vista, oggi: oggi, crescita: crescita, giro: giro)
                         .frame(width: P.larghezza)
                         .frame(maxHeight: .infinity, alignment: .top)
@@ -43,7 +45,11 @@ struct AppTerritorio: View {
             }
         }
         .onAppear { stato.apriTabellaTerritorio() }
-        .onDisappear { stato.territorio.chiudi() }
+        .onDisappear {
+            stato.territorio.chiudi()
+            // Il percorso di Apple Mappe vive solo in memoria: si libera con il Territorio
+            PercorsiApple.condiviso.svuota()
+        }
         .onChange(of: vista) { _ in
             let t = stato.territorio
             t.fermaCrescita()
@@ -66,6 +72,30 @@ struct AppTerritorio: View {
             if t.luceScelta != nil { t.luceScelta = nil }
         }
         #endif
+    }
+
+    /// La mappa: nel giro, con «Usa Apple Mappe per il giro» acceso (decisione dell'utente del 25 novembre 2026), la
+    /// mappa vera di Apple con il percorso in auto (Shell/GiroMappeApple.swift, l'unico file che parla con Apple, solo con
+    /// le coordinate delle tappe); altrimenti, senza rete, se Apple non risponde e nelle istantanee, la mappa disegnata
+    /// di sempre con le stime in linea d'aria.
+    @ViewBuilder private func mappa(_ oggi: TerritorioOggi, _ vista: VistaTerritorio, _ anno: Int?, _ giro: GiroGiorno?,
+                                    coperto: CGFloat) -> some View {
+        #if canImport(MapKit)
+        if let giro, Self.mappeApple(giro, stato: stato, istantanea: istantanea) {
+            MappaGiroApple(giro: giro, coperto: coperto)
+        } else {
+            MappaTerritorio(contenuto: contenuto(oggi, vista, anno, giro, coperto: coperto))
+        }
+        #else
+        MappaTerritorio(contenuto: contenuto(oggi, vista, anno, giro, coperto: coperto))
+        #endif
+    }
+
+    /// Vero quando il giro si mostra con Apple Mappe: interruttore acceso, giro con visite, fuori dalle istantanee e
+    /// percorso non (ancora) dichiarato «non disponibile».
+    static func mappeApple(_ giro: GiroGiorno, stato: StatoShell, istantanea: Bool) -> Bool {
+        guard stato.dati.impostazioni.territorio.usaMappeApple, !istantanea, !giro.vuoto, giro.tappe.count >= 2 else { return false }
+        return PercorsiApple.condiviso.esito(giro.puntiPercorso) != .nonDisponibile
     }
 
     /// Ciò che la mappa disegna: le luci di oggi, l'anno della crescita, il giro, i confini caricati e i nomi da scrivere

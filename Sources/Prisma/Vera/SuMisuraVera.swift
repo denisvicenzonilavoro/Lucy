@@ -151,7 +151,7 @@ extension SuMisuraVera {
         let f = DateFormatter()
         f.locale = Locale(identifier: "it_IT")
         f.dateFormat = "LLLL"
-        return "Vera su misura · " + f.string(from: v.creataIl)
+        return "Lucy su misura · " + f.string(from: v.creataIl)
     }
 }
 

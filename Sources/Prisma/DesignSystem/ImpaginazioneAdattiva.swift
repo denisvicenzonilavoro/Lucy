@@ -120,6 +120,12 @@ private struct ScorreSeStretto: ViewModifier {
 #endif
 
 extension View {
+    /// Blocchi affiancati alti uguali: la riga prende l'altezza del blocco più alto e i blocchi che si allungano
+    /// (`PannelloAnalisi(pieno: true)`, `.frame(maxHeight: .infinity)`) la riempiono, senza buchi sotto il più basso.
+    func stessaAltezza() -> some View {
+        fixedSize(horizontal: false, vertical: true)
+    }
+
     /// Un blocco a larghezza fissa dentro `Affiancati`: sul Mac `.frame(width:alignment:)`, come prima;
     /// su iOS a tutta larghezza quando i blocchi sono impilati.
     @ViewBuilder

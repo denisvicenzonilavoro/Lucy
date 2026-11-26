@@ -79,12 +79,8 @@ enum TrentaSecondiVera {
         let eta = anni(c.dataNascita, oggi: oggi)
         let lavoro = c.professione.trimmingCharacters(in: .whitespaces)
         if let eta { chi.append(lavoro.isEmpty ? "\(eta) anni" : "\(eta) anni, \(lavoro.lowercased())") } else if !lavoro.isEmpty { chi.append(lavoro) }
-        switch canali {
-        case [.alleanza, .indipendente]: chi.append("È cliente sia per Alleanza sia come indipendente")
-        case [.alleanza]: chi.append("È cliente Alleanza")
-        case [.indipendente]: chi.append("È cliente come indipendente")
-        default: chi.append("Non ha ancora posizioni in essere")
-        }
+        // Un solo canale, quello di Lucy (decisione dell'utente del 25 novembre 2026)
+        chi.append(inEssere.isEmpty ? "Non ha ancora posizioni in essere" : "Ha posizioni in essere")
         let testoChi = chi.joined(separator: ". ") + "."
 
         // La famiglia

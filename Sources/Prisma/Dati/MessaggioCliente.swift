@@ -58,7 +58,7 @@ enum TipoOccasioneMessaggio: String, Codable, CaseIterable, Identifiable {
         case .parcella: return "Parcella"
         case .avvisoMercato: return "Avviso di mercato"
         case .provaFuoco: return "Prova del fuoco"
-        case .richiestaVera: return "Chiesto a Vera"
+        case .richiestaVera: return "Chiesto a Lucy"
         case .pratica: return "Pratica"
         case .traguardo: return "Traguardo"
         case .datiMancanti: return "Dati da completare"
@@ -224,7 +224,7 @@ enum AutoreMessaggio: String, Codable, CaseIterable {
 
     var nome: String {
         switch self {
-        case .vera: return "Vera"
+        case .vera: return "Lucy"
         case .modelloFisso: return "Testo di Lucy"
         }
     }

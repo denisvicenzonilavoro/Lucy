@@ -27,6 +27,10 @@ import UniformTypeIdentifiers
 // - Movimento: cifra che si conta (0,9 s ai cambi), barra che si allarga, solo la scena il cui esito cambia gira su sé
 //   stessa (0,62 s, passo 0,08 da sinistra) e si spegne. «Riduci movimento»: dissolvenza di 0,15 s. Istantanee: stato
 //   finale della modalità scelta.
+// - Dal 25 novembre 2026 la testata è nello stile del sole del piano: occhiello in SF Mono, il nome in New York con la
+//   sottolineatura dorata, la pensione in cifre serif; a destra il sole (`SoleDelPiano`) con un raggio per scena, pieno
+//   se la scena ci sta, e il disco che si riempie con le scene che ci stanno (gli esiti di `MotoreGiornataPensione`).
+//   «Con il piano» lo accende di più quando le proposte fanno stare più scene.
 
 /// Il contenuto del palco per una giornata della pensione.
 struct GiornataPensioneVista: View {
@@ -59,7 +63,7 @@ struct GiornataPensioneVista: View {
         let voci = giornata.voci.sorted { $0.priorita < $1.priorita }
 
         VStack(alignment: .leading, spacing: 0) {
-            testa(nome: nome, calcolo: calcolo, cifre: cifre, pensione: pensione, giornata: giornata)
+            testa(nome: nome, calcolo: calcolo, cifre: cifre, pensione: pensione, giornata: giornata, esito: esito)
                 .entrataCascata(0, base: Tema.Apple.Moto.Cascata.baseDentroApp)
             HStack(alignment: .top, spacing: G.spazioScene) {
                 ForEach(Array(voci.enumerated()), id: \.element.id) { i, v in
@@ -87,6 +91,7 @@ struct GiornataPensioneVista: View {
             Spacer(minLength: 0)
         }
         .padding(G.padding)
+        .padding(.horizontal, Tema.Sole.margineLato)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .onChange(of: conPiano) { stato.sala.giornataConPiano = $0 }
     }
@@ -95,13 +100,16 @@ struct GiornataPensioneVista: View {
 
     @ViewBuilder
     private func testa(nome: String, calcolo: PensioneEsperienze.Esito, cifre: CifrePensioneEsperienze?, pensione: Double?,
-                       giornata: GiornataPensione) -> some View {
-        HStack(alignment: .bottom, spacing: G.spazioTesta) {
+                       giornata: GiornataPensione, esito: EsitoGiornata?) -> some View {
+        let sole = esito.map { MotoreSole.giornata($0) } ?? .spento
+        HStack(alignment: .center, spacing: G.spazioTesta) {
             VStack(alignment: .leading, spacing: 0) {
+                TestataSole(occhiello: "Una giornata della pensione",
+                            titolo: cifre.map { "\(nome), a \($0.etaPensione) anni" } ?? nome)
                 HStack(spacing: Tema.Apple.Studio.Card.spazioProva) {
-                    Text(cifre.map { "\(nome), a \($0.etaPensione) anni · la pensione al mese" } ?? "\(nome) · la pensione al mese")
-                        .carattereApple(G.frase)
-                        .foregroundColor(G.coloreFrase)
+                    Text("La pensione al mese")
+                        .fontCarta(Tema.Sole.testo)
+                        .foregroundColor(Tema.Sole.inchiostro2)
                     // Migliorie d'uso 37: in dimostrazione basta l'etichetta della barra
                     if giornata.diProva == true && !stato.inDimostrazione {
                         Text("dati di prova")
@@ -110,21 +118,44 @@ struct GiornataPensioneVista: View {
                     }
                 }
                 .lineLimit(1)
+                .padding(.top, Tema.Sole.spazioBlocchi * 0.6)
                 if let pensione {
                     NumeroCheConta(pensione, da: 0, durata: Tema.Apple.Moto.NumeroCambio.durata)
-                        .carattereApple(G.pensione)
-                        .foregroundColor(G.colorePensione)
+                        .fontCarta(Tema.Sole.cifra)
+                        .foregroundColor(Tema.Sole.inchiostro)
                         .lineLimit(1)
                 } else {
                     statoSenzaCifra(nome: nome, calcolo: calcolo)
                 }
             }
             Spacer(minLength: G.spazioTesta)
-            SegmentatoPillola(selezione: $conPiano, voci: [(false, "Senza piano"), (true, "Con il piano")])
-                .fixedSize()
-                .padding(.bottom, G.sottoSegmentato)
-                .help("Senza piano: la pensione pubblica e i piani che ha già. Con il piano: anche le proposte di previdenza in Posizioni")
+            HStack(alignment: .center, spacing: Tema.Sole.spazioBlocchi) {
+                VStack(alignment: .trailing, spacing: Tema.Sole.spazioTestata) {
+                    Text(fraseSole(sole, esito: esito))
+                        .fontCarta(Tema.Sole.nota)
+                        .foregroundColor(Tema.Sole.inchiostro2)
+                        .multilineTextAlignment(.trailing)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: Tema.Sole.larghezzaFrase, alignment: .trailing)
+                    SegmentatoPillola(selezione: $conPiano, voci: [(false, "Senza piano"), (true, "Con il piano")])
+                        .fixedSize()
+                        .padding(.top, Tema.Sole.spazioTestata)
+                        .help("Senza piano: la pensione pubblica e i piani che ha già. Con il piano: anche le proposte di previdenza in Posizioni")
+                }
+                SoleDelPiano(sole: sole)
+                    .frame(width: Tema.Sole.latoTestata, height: Tema.Sole.latoTestata)
+            }
         }
+    }
+
+    /// La frase accanto al sole: quante scene ci stanno, contate dagli esiti (nessuna cifra nuova).
+    private func fraseSole(_ sole: SolePiano, esito: EsitoGiornata?) -> String {
+        guard let esito, !sole.senzaObiettivi else { return "Il sole si accende quando le scene hanno il loro costo." }
+        let conImporto = esito.scene.filter { !$0.senzaImporto }
+        let ciStanno = conImporto.filter(\.ciSta).count
+        return ciStanno == conImporto.count
+            ? "Ci stanno tutte le scene della giornata."
+            : "Ci stanno \(ciStanno) scene su \(conImporto.count): un raggio per scena."
     }
 
     /// Al posto della cifra grande: perché non c'è (dati mancanti, ipotesi da confermare, nessun piano in proposta).

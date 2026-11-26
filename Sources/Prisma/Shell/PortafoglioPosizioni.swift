@@ -76,17 +76,19 @@ struct CorpoPortafoglio: View, Equatable {
                 }
             }
 
-            // iPad stretto: i blocchi affiancati vanno uno sotto l'altro (sul Mac sempre affiancati)
+            // iPad stretto: i blocchi affiancati vanno uno sotto l'altro (sul Mac sempre affiancati). Le due card sono
+            // alte uguali (25 novembre 2026, scelta dell'utente): niente spazio vuoto sotto la più bassa prima di «Per cliente»
             Affiancati(soglia: SoglieAffiancati.posizioni, spazio: 24) {
-                PannelloAnalisi(titolo: "Ripartizione per area", nota: "Tutti i clienti, posizioni in essere") { EmptyView() } contenuto: {
+                PannelloAnalisi(titolo: "Ripartizione per area", nota: "Tutti i clienti, posizioni in essere", pieno: true) { EmptyView() } contenuto: {
                     AppPosizioni.ripartizione(r)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                PannelloAnalisi(titolo: "Per canale", nota: "Attività in essere") { EmptyView() } contenuto: {
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                PannelloAnalisi(titolo: "In scadenza", nota: "Entro \(RiepilogoPosizioni.giorniScadenza) giorni", pieno: true) { EmptyView() } contenuto: {
                     AppPosizioni.canali(r, massimo: Self.massimoInScadenza, apri: { stato.posizioneInDettaglio = $0.id })
                 }
-                .larghezzaAffiancata(330, alignment: .leading)
+                .larghezzaAffiancata(330, alignment: .topLeading)
             }
+            .stessaAltezza()
 
             PannelloAnalisi(titolo: "Per cliente", nota: "Dal più seguito · tocca una riga per aprire le sue posizioni") { EmptyView() } contenuto: {
                 tabellaClienti(p.clienti)

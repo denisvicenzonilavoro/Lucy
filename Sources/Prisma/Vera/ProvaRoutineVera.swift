@@ -81,9 +81,9 @@ enum ProvaRoutineVera {
     private static func riconosci(_ controlla: (Bool, String) -> Void) {
         let d = DatiPrisma.demo()
         let tutte = RoutineVera.pronte()
-        let a = RoutineVera.riconosci("Vera, prepara l'incontro con Marco", routine: tutte, clienti: noti(d), attivo: nil)
+        let a = RoutineVera.riconosci("Lucy, prepara l'incontro con Marco", routine: tutte, clienti: noti(d), attivo: nil)
         controlla(a?.routine.id == RoutineVera.idPrepara && a?.clienteId == "marco", "Routine: «prepara l'incontro con Marco» → Prepara l'incontro, Marco")
-        let b = RoutineVera.riconosci("Vera, com'è la settimana?", routine: tutte, clienti: noti(d), attivo: "giulia")
+        let b = RoutineVera.riconosci("Lucy, com'è la settimana?", routine: tutte, clienti: noti(d), attivo: "giulia")
         controlla(b?.routine.id == RoutineVera.idLunedi && b?.clienteId == nil, "Routine: «com'è la settimana?» → Il mio lunedì, senza cliente")
         let c = RoutineVera.riconosci("Ruby, chiudiamo il mese", routine: tutte, clienti: noti(d), attivo: nil)
         controlla(c?.routine.id == RoutineVera.idFineMese, "Routine: «chiudiamo il mese» → Fine mese (anche con il nome di prima)")
@@ -95,7 +95,7 @@ enum ProvaRoutineVera {
         let ignoto = RoutineVera.riconosci("Ho firmato con Fumagalli", routine: tutte, clienti: noti(d), attivo: "marco")
         controlla(ignoto?.routine.id == RoutineVera.idDopoFirma && ignoto?.clienteId == nil,
                   "Routine: «ho firmato con Fumagalli» (non cliente) non parte sul cliente aperto: \(ignoto?.clienteId ?? "nil")")
-        let conVera = RoutineVera.riconosci("ho firmato, Vera, dopo la firma con Alleanza", routine: tutte, clienti: noti(d), attivo: "marco")
+        let conVera = RoutineVera.riconosci("ho firmato, Lucy, dopo la firma con Alleanza", routine: tutte, clienti: noti(d), attivo: "marco")
         controlla(conVera?.clienteId == "marco", "Routine: «con Alleanza» non è un nome di cliente, vale il cliente aperto")
         controlla(RoutineVera.riconosci("che tempo fa domani?", routine: tutte, clienti: noti(d), attivo: nil) == nil, "Routine: una frase qualsiasi non lancia niente")
         var spenta = tutte
@@ -109,7 +109,7 @@ enum ProvaRoutineVera {
         let d = DatiPrisma.demo()
         let oggi = oggiDemo
         let r = routine(RoutineVera.idPrepara)
-        let e = RoutineVera.esegui(r, richiesta: "Vera, prepara l'incontro con Marco", contesto: ContestoRoutine(dati: d, oggi: oggi, clienteId: "marco"))
+        let e = RoutineVera.esegui(r, richiesta: "Lucy, prepara l'incontro con Marco", contesto: ContestoRoutine(dati: d, oggi: oggi, clienteId: "marco"))
         controlla(e.domanda == nil && e.passi.count == 5 && e.passi.allSatisfy { $0.stato != .impossibile },
                   "Prepara l'incontro: cinque passi eseguiti: \(e.passi.map(\.stato.rawValue))")
         guard e.passi.count == 5 else { return }
@@ -155,7 +155,7 @@ enum ProvaRoutineVera {
                                priorita: .normale, completata: false)]
         d.promesse = [PromessaCliente(clienteId: "sofia", testo: "Mandare a Sofia il riepilogo della rivalutabile", frase: "Le mando il riepilogo della rivalutabile.",
                                       fonte: .nota, fonteId: "nota-sofia", fonteEtichetta: "dalla nota di prova", scadenza: giorno(2026, 10, 30))]
-        let e = RoutineVera.esegui(routine(RoutineVera.idLunedi), richiesta: "Vera, com'è la settimana?", contesto: ContestoRoutine(dati: d, oggi: oggi))
+        let e = RoutineVera.esegui(routine(RoutineVera.idLunedi), richiesta: "Lucy, com'è la settimana?", contesto: ContestoRoutine(dati: d, oggi: oggi))
         controlla(e.passi.count == 4 && e.domanda == nil, "Il mio lunedì: quattro passi, senza cliente")
         guard e.passi.count == 4 else { return }
         controlla(e.passi.first?.dettaglio == "9 impegni da lunedì 2 a venerdì 6", "Il mio lunedì: l'agenda della settimana: \(e.passi.first?.dettaglio ?? "")")
@@ -175,7 +175,7 @@ enum ProvaRoutineVera {
                               appuntamento("f-2", "marco", "Pomeriggio pieno", giorno(2026, 12, 7, 14, 30), 240, .analisi)]
         festa.attivita = []
         festa.promesse = []
-        let ef = RoutineVera.esegui(routine(RoutineVera.idLunedi), richiesta: "Vera, com'è la settimana?",
+        let ef = RoutineVera.esegui(routine(RoutineVera.idLunedi), richiesta: "Lucy, com'è la settimana?",
                                     contesto: ContestoRoutine(dati: festa, oggi: giorno(2026, 12, 7, 8, 30)))
         controlla(ef.passi.count == 4 && ef.passi[1].dettaglio.hasPrefix("Mercoledì mattina è libero"),
                   "Il mio lunedì: la festività non è un buco, il primo è mercoledì mattina: \(ef.passi.count == 4 ? ef.passi[1].dettaglio : "")")
@@ -209,7 +209,7 @@ enum ProvaRoutineVera {
         d.posizioni = [infortuni, tcm, mutuo]
         d.appuntamenti = [appuntamento("r-rinnovo", "marco", "Rinnovo della copertura infortuni", giorno(2026, 12, 1, 16, 30), 30, .revisione, posizione: "r-infortuni")]
         d.attivita = []
-        let e = RoutineVera.esegui(routine(RoutineVera.idFineMese), richiesta: "Vera, chiudiamo il mese", contesto: ContestoRoutine(dati: d, oggi: giorno(2026, 11, 30, 18)))
+        let e = RoutineVera.esegui(routine(RoutineVera.idFineMese), richiesta: "Lucy, chiudiamo il mese", contesto: ContestoRoutine(dati: d, oggi: giorno(2026, 11, 30, 18)))
         controlla(e.passi.count == 4, "Fine mese: quattro passi")
         guard e.passi.count == 4 else { return }
         controlla(e.passi[0].dettaglio.contains(Formati.euro(1_000)) && e.passi[0].dettaglio.contains("novembre"),
@@ -228,7 +228,7 @@ enum ProvaRoutineVera {
         let d = DatiPrisma.demo()
         let oggi = oggiDemo
         let r = routine(RoutineVera.idDopoFirma)
-        let e = RoutineVera.esegui(r, richiesta: "Vera, ho firmato con Giulia", contesto: ContestoRoutine(dati: d, oggi: oggi, clienteId: "giulia"))
+        let e = RoutineVera.esegui(r, richiesta: "Lucy, ho firmato con Giulia", contesto: ContestoRoutine(dati: d, oggi: oggi, clienteId: "giulia"))
         controlla(e.passi.count == 4 && e.passi.first?.stato == .inAttesa, "Dopo la firma: senza il PDF il contratto aspetta di essere trascinato")
         controlla(e.azioni.map(\.strumento) == [RoutineVera.strumentoPosizioneFirmata, RegistroStrumenti.agendaNuovo, RegistroStrumenti.messaggiPrepara],
                   "Dopo la firma: posizione, controllo e messaggio, tutti da confermare: \(e.azioni.map(\.strumento))")
@@ -353,11 +353,11 @@ enum ProvaRoutineVera {
     private static func nuoveConQwen(_ controlla: (Bool, String) -> Void) {
         let oggi = oggiDemo
         let richiesta = "quando firmo archivia tutto e metti un controllo fra tre mesi"
-        let r = RoutineVera.leggi(#"{"titolo":"Dopo ogni firma","frase":"Vera, ho firmato","passi":[{"tipo":"archiviaContratto"},{"tipo":"cancellaCliente"},{"tipo":"fissaControllo"},{"tipo":"archiviaContratto"}]}"#,
+        let r = RoutineVera.leggi(#"{"titolo":"Dopo ogni firma","frase":"Lucy, ho firmato","passi":[{"tipo":"archiviaContratto"},{"tipo":"cancellaCliente"},{"tipo":"fissaControllo"},{"tipo":"archiviaContratto"}]}"#,
                                   richiesta: richiesta, oggi: oggi)
         controlla(r?.passi.map(\.tipo) == [.archiviaContratto, .fissaControllo] && r?.passi.last?.mesi == 3,
                   "Routine con Qwen: solo i passi del catalogo, senza doppioni; i mesi dalla frase")
-        controlla(r?.programmazione?.tipo == .dopoFirma && r?.titolo == "Dopo ogni firma" && r?.frase == "Vera, ho firmato", "Routine con Qwen: titolo e frase controllati, la programmazione dalle regole")
+        controlla(r?.programmazione?.tipo == .dopoFirma && r?.titolo == "Dopo ogni firma" && r?.frase == "Lucy, ho firmato", "Routine con Qwen: titolo e frase controllati, la programmazione dalle regole")
         controlla(RoutineVera.leggi(#"{"titolo":"Pulizia","passi":[{"tipo":"cancellaTutto"}]}"#, richiesta: "cancella tutto", oggi: oggi) == nil,
                   "Routine con Qwen: senza passi del catalogo la risposta si scarta")
         controlla(RoutineVera.leggi("Ecco la tua routine!", richiesta: richiesta, oggi: oggi) == nil, "Routine con Qwen: l'output non valido si scarta")
@@ -427,8 +427,8 @@ enum ProvaRoutineVera {
             let r = RoutineVera.riconosci(frase, routine: tutte, clienti: noti(d), attivo: nil)
             controlla(r == nil, "Revisione: «\(frase)» non lancia routine: \(r?.routine.id ?? "nil")")
         }
-        let firma = RoutineVera.riconosci("Vera, ho firmato con Giulia", routine: tutte, clienti: noti(d), attivo: nil)
-        controlla(firma?.routine.id == RoutineVera.idDopoFirma, "Revisione: «Vera, ho firmato con Giulia» lancia ancora Dopo la firma")
+        let firma = RoutineVera.riconosci("Lucy, ho firmato con Giulia", routine: tutte, clienti: noti(d), attivo: nil)
+        controlla(firma?.routine.id == RoutineVera.idDopoFirma, "Revisione: «Lucy, ho firmato con Giulia» lancia ancora Dopo la firma")
         let mese = RoutineVera.riconosci("la fine del mese", routine: tutte, clienti: noti(d), attivo: nil)
         controlla(mese?.routine.id == RoutineVera.idFineMese, "Revisione: «la fine del mese» lancia ancora Fine mese")
         // «Dopo la firma» ricorda la posizione (per il contratto trascinato dopo)

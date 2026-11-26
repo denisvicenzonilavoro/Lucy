@@ -565,24 +565,8 @@ struct ModuloCliente: View {
                         TextField("Sigla di 2 lettere, per esempio IT", text: fiscale(\.sede.nazione)).textFieldStyle(.roundedBorder)
                     }
                 }
-                sezione("Canali e preferenze") {
-                    CampoModulo(etichetta: "Seguito come") {
-                        HStack(spacing: 16) {
-                            ForEach(Canale.allCases) { canale in
-                                Toggle(isOn: Binding(
-                                    get: { bozza.canali.contains(canale) },
-                                    set: { attivo in
-                                        bozza.canali.removeAll { $0 == canale }
-                                        if attivo { bozza.canali.append(canale) }
-                                        bozza.canali.sort { $0.rawValue < $1.rawValue }
-                                    }
-                                )) {
-                                    EtichettaCanale(canale: canale, compatta: true)
-                                }
-                                .stileCasella()
-                            }
-                        }
-                    }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente «Seguito come» (i canali salvati restano)
+                sezione("Preferenze") {
                     CampoModulo(etichetta: "Preferito") {
                         Toggle("Mostra tra i preferiti", isOn: $bozza.preferito).stileCasella()
                     }

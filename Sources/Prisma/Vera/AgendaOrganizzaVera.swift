@@ -673,7 +673,7 @@ enum AgendaOrganizzaVera {
 
     /// Il nome detto dopo «di», «con», «per», «a» con la maiuscola («il riesame di Federico» → Federico).
     private static func nomeDetto(_ frase: String) -> String? {
-        let esclusi: Set<String> = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica", "Alleanza", "Prisma", "Vera"]
+        let esclusi: Set<String> = ["Lunedì", "Martedì", "Mercoledì", "Giovedì", "Venerdì", "Sabato", "Domenica", "Alleanza", "Prisma", "Lucy"]
         // Qui le maiuscole contano (DateItaliane.cerca non le distingue): la prima parola con la maiuscola dopo la preposizione
         guard let re = try? NSRegularExpression(pattern: #"\b(?:di|con|per|a|al)\s+([A-ZÀ-Ý][a-zà-ÿ]{2,})"#) else { return nil }
         let ns = frase as NSString

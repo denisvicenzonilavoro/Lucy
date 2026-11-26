@@ -886,6 +886,8 @@ struct ImpostazioniVera: Codable, Equatable {
     /// Server compatibile OpenAI: anche qui solo indirizzi del Mac.
     var indirizzoCompatibile = FornitoreCompatibileOpenAI.indirizzoPredefinito
     var modelloCompatibile = ""
+    /// Mistral in cloud (25 novembre 2026): il modello; la chiave sta solo nel Portachiavi (PortachiaviMistral).
+    var modelloMistral = FornitoreMistral.modelloPredefinito
     /// Quando Vera ragiona prima di rispondere.
     var ragionamento = SceltaRagionamento.automatico
     /// All'avvio di Prisma Vera apre Ollama (se serve) e carica il modello: è già pronta alla prima domanda.
@@ -920,14 +922,38 @@ struct ImpostazioniVera: Codable, Equatable {
 
     /// Il modello del fornitore scelto.
     var modello: String {
-        get { fornitore == .ollama ? modelloLocale : modelloCompatibile }
-        set { if fornitore == .ollama { modelloLocale = newValue } else { modelloCompatibile = newValue } }
+        get {
+            switch fornitore {
+            case .ollama: return modelloLocale
+            case .compatibileOpenAI: return modelloCompatibile
+            case .mistral: return modelloMistral
+            }
+        }
+        set {
+            switch fornitore {
+            case .ollama: modelloLocale = newValue
+            case .compatibileOpenAI: modelloCompatibile = newValue
+            case .mistral: modelloMistral = newValue
+            }
+        }
     }
 
     /// L'indirizzo del fornitore scelto.
     var indirizzo: String {
-        get { fornitore == .ollama ? indirizzoLocale : indirizzoCompatibile }
-        set { if fornitore == .ollama { indirizzoLocale = newValue } else { indirizzoCompatibile = newValue } }
+        get {
+            switch fornitore {
+            case .ollama: return indirizzoLocale
+            case .compatibileOpenAI: return indirizzoCompatibile
+            case .mistral: return FornitoreMistral.indirizzoUfficiale
+            }
+        }
+        set {
+            switch fornitore {
+            case .ollama: indirizzoLocale = newValue
+            case .compatibileOpenAI: indirizzoCompatibile = newValue
+            case .mistral: break
+            }
+        }
     }
 
     init() {}
@@ -939,6 +965,7 @@ struct ImpostazioniVera: Codable, Equatable {
         case sussurroNelDossier, passi
         case suMisura, motoreEsterno
         case motori, computerIA
+        case modelloMistral
     }
 
     init(from decoder: Decoder) throws {
@@ -978,6 +1005,8 @@ struct ImpostazioniVera: Codable, Equatable {
         // I motori Mistral: automatico e i modelli di base se mancano o sono illeggibili
         motori = ((try? c.decodeIfPresent(ImpostazioniMotori.self, forKey: .motori)) ?? nil) ?? ImpostazioniMotori()
         computerIA = ((try? c.decodeIfPresent(ImpostazioniComputerIA.self, forKey: .computerIA)) ?? nil) ?? ImpostazioniComputerIA()
+        let mistral = (try? c.decodeIfPresent(String.self, forKey: .modelloMistral)) ?? ""
+        modelloMistral = mistral.isEmpty ? FornitoreMistral.modelloPredefinito : mistral
     }
 }
 

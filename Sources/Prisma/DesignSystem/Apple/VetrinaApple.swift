@@ -98,7 +98,7 @@ struct VetrinaApple: View {
             CifraVetrinaApple(etichetta: "Patrimonio") {
                 NumeroCheConta(318_400, indice: 0).carattereApple(Tema.Apple.Carattere.valore)
             }
-            CifraVetrinaApple(etichetta: "Quota Alleanza") {
+            CifraVetrinaApple(etichetta: "Quota investita") {
                 NumeroCheConta(48, formato: .percentuale, indice: 1).carattereApple(Tema.Apple.Carattere.valore)
             }
             CifraVetrinaApple(etichetta: "Mesi di riserva") {

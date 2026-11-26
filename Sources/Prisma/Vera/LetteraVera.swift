@@ -83,31 +83,31 @@ enum LetteraVera {
     /// nil se la lettera di Qwen va bene; altrimenti il motivo per cui resta quella di Prisma.
     static func controlla(_ testo: String, scheda s: SchedaLettera, versione v: VersioneLettera, vietati: [String]) -> String? {
         let t = testo.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !t.isEmpty else { return "la lettera di Vera è vuota" }
+        guard !t.isEmpty else { return "la lettera di Lucy è vuota" }
         if t.contains("[") || t.contains("]") || t.contains("{") || t.contains("}") || t.contains("<") || t.contains(">") {
-            return "la lettera di Vera ha dei segnaposto da completare"
+            return "la lettera di Lucy ha dei segnaposto da completare"
         }
         guard CommentoVera.numeriConservati(bozza: MotoreLettera.ammessi(s, v), testo: t) else {
             return "una cifra non era nelle stime di Lucy"
         }
         if t.range(of: MessaggiVera.promesse, options: [.regularExpression, .caseInsensitive]) != nil
             || t.range(of: #"garantit|sicuramente|di sicuro|certamente avr"#, options: [.regularExpression, .caseInsensitive]) != nil {
-            return "la lettera di Vera prometteva un risultato"
+            return "la lettera di Lucy prometteva un risultato"
         }
         let minuscolo = t.lowercased()
         if let nome = vietati.first(where: { minuscolo.contains($0.lowercased()) }) {
-            return "la lettera di Vera nominava «\(nome)»"
+            return "la lettera di Lucy nominava «\(nome)»"
         }
         if v == .senzaPiano, t.range(of: scenariNegativi, options: [.regularExpression, .caseInsensitive]) != nil {
-            return "la lettera di Vera raccontava rinunce o paure oltre le cifre"
+            return "la lettera di Lucy raccontava rinunce o paure oltre le cifre"
         }
         // Prima persona: chi scrive parla di sé («ho», «sono», «ti scrivo»)
         guard t.range(of: #"\b(ho|sono|ti scrivo|abbiamo)\b"#, options: [.regularExpression, .caseInsensitive]) != nil else {
-            return "la lettera di Vera non era scritta in prima persona"
+            return "la lettera di Lucy non era scritta in prima persona"
         }
         let parole = t.split(whereSeparator: { $0.isWhitespace }).count
-        if parole > paroleMassime { return "la lettera di Vera era troppo lunga" }
-        if parole < paroleMinime { return "la lettera di Vera era troppo corta" }
+        if parole > paroleMassime { return "la lettera di Lucy era troppo lunga" }
+        if parole < paroleMinime { return "la lettera di Lucy era troppo corta" }
         return nil
     }
 
@@ -151,7 +151,7 @@ enum LetteraVera {
     static func avvisoNonPronta(_ motivo: String?) -> String {
         let m = (motivo ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
             .trimmingCharacters(in: CharacterSet(charactersIn: ".").union(.whitespaces))
-        return "Vera non è pronta" + (m.isEmpty ? "" : " (\(m))") + ": la lettera è quella di Lucy."
+        return "Lucy non è pronta" + (m.isEmpty ? "" : " (\(m))") + ": la lettera è quella di Lucy."
     }
 
     /// Scrive la lettera con Qwen in streaming (`aggiorna` riceve il testo fin qui, senza firma, da qualunque thread).
@@ -188,7 +188,7 @@ enum LetteraVera {
             return fissa(s, v, avviso: "Scrittura interrotta: la lettera è quella di Lucy.")
         } catch {
             let m = (error as? ErroreVera)?.messaggio ?? error.localizedDescription
-            return fissa(s, v, avviso: "Vera non ha potuto scrivere la lettera (\(m)): la lettera è quella di Lucy.")
+            return fissa(s, v, avviso: "Lucy non ha potuto scrivere la lettera (\(m)): la lettera è quella di Lucy.")
         }
     }
 

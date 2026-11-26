@@ -72,14 +72,16 @@ struct IconaCarta: View {
     }
 }
 
-/// La Scrivania nel dock: il simbolo di Lucy (la L e il disco d'oro).
+/// La Scrivania nel dock: una casetta a inchiostro (25 novembre 2026, richiesta dell'utente: il simbolo di Lucy sta
+/// solo sull'assistente, due loghi uguali nel dock stonavano).
 struct IconaScrivaniaCarta: View {
     let lato: CGFloat
 
     var body: some View {
         TesseraCarta(lato: lato) {
-            LogoLucy()
-                .frame(width: lato * 0.5, height: lato * 0.5)
+            Image(systemName: "house")
+                .font(.system(size: lato * 0.42, weight: .regular))
+                .foregroundColor(TemaCarta.Colore.inchiostroD)
         }
     }
 }
@@ -108,34 +110,18 @@ struct IconaAgendaCarta: View {
     }
 }
 
-/// Vera: tessera d'inchiostro (di notte di carta), la «V» corsiva in serif e la curva dorata sotto.
+/// L'assistente (Lucy, prima Vera): tessera d'inchiostro (di notte di carta) con il simbolo di Lucy.
 struct IconaVeraCarta: View {
     let lato: CGFloat
 
     var body: some View {
+        // L'assistente si chiama Lucy (25 novembre 2026): sulla tessera scura il simbolo di Lucy, avorio e oro, come
+        // l'icona di iPhone e iPad (Design/Logo/LucyByLogic); prima la «V» di Vera
         TesseraCarta(lato: lato, alto: TemaCarta.Colore.veraAltoD, basso: TemaCarta.Colore.veraBassoD) {
-            ZStack {
-                Text("V")
-                    .font(.system(size: lato * 31 / 56, weight: .medium, design: .serif).italic())
-                    .foregroundColor(TemaCarta.Colore.veraLetteraD)
-                    .offset(y: -lato * 4 / 56)
-                CurvaVeraCarta()
-                    .stroke(TemaCarta.Colore.oro.0, style: StrokeStyle(lineWidth: lato * 2.4 / 56, lineCap: .round))
-                    .frame(width: lato * 28 / 56, height: lato * 6 / 56)
-                    .offset(y: lato * 17 / 56)
-            }
+            // La L avorio sulla tessera d'inchiostro di giorno, d'inchiostro sulla tessera di carta di notte
+            LogoLucy(colore: Color.dinamico(chiaro: Tema.Marca.avorio, scuro: Tema.Marca.inchiostro), oro: Tema.Marca.oro)
+                .frame(width: lato * 0.5, height: lato * 0.5)
         }
     }
 }
 
-/// La curva dorata sotto la «V» di Vera.
-private struct CurvaVeraCarta: Shape {
-    func path(in r: CGRect) -> Path {
-        var p = Path()
-        p.move(to: CGPoint(x: r.minX, y: r.midY + r.height * 0.2))
-        p.addCurve(to: CGPoint(x: r.maxX, y: r.midY),
-                   control1: CGPoint(x: r.minX + r.width * 0.33, y: r.minY),
-                   control2: CGPoint(x: r.minX + r.width * 0.66, y: r.maxY))
-        return p
-    }
-}

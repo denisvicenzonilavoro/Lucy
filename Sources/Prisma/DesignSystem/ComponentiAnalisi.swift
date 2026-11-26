@@ -348,6 +348,9 @@ struct PannelloAnalisi<Destra: View, Contenuto: View>: View {
     var nota: String? = nil
     /// Migliorie d'uso 66: le parole da segnare nella nota (l'insieme di `stato.paroleSchermata`); nil: nota semplice.
     var paroleNota: Set<VoceGlossario.Chiave>? = nil
+    /// Il pannello prende tutta l'altezza che gli si offre, con il contenuto in alto: due pannelli affiancati dentro
+    /// `.stessaAltezza()` diventano alti uguali (Posizioni, «Ripartizione per area» e il pannello accanto).
+    var pieno: Bool = false
     @ViewBuilder let destra: () -> Destra
     @ViewBuilder let contenuto: () -> Contenuto
     @Environment(\.superficiApple) private var apple
@@ -387,7 +390,7 @@ struct PannelloAnalisi<Destra: View, Contenuto: View>: View {
                 .environment(\.superficiApple, false)
         }
         .padding(a.paddingPannello)
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: pieno ? .infinity : nil, alignment: pieno ? .topLeading : .leading)
         .superficieApple(a.pannello, raggio: a.raggioPannello)
     }
 
@@ -410,6 +413,7 @@ struct PannelloAnalisi<Destra: View, Contenuto: View>: View {
             }
             contenuto()
         }
+        .frame(maxHeight: pieno ? .infinity : nil, alignment: .top)
     }
 }
 

@@ -3,7 +3,7 @@ import Foundation
 import CoreGraphics
 
 /// Le istantanee della realtà aumentata e del tavolo a doppio senso, giro 16 di «Luce» (Design/template-luce-specifica.md
-/// §2.3.7 e §1.3.7), tutte nello stato finale (`\.modoIstantanea`): il cristallo con `CristalloFermo` (niente RealityKit).
+/// §2.3.7 e §1.3.7), tutte nello stato finale (`\.modoIstantanea`): il sole del piano con `CristalloFermo` (niente RealityKit).
 /// - 630: Giulia, oggi, cristallo chiuso, targhetta, «✓ Tavolo trovato» (chiaro e scuro: il palco resta chiaro);
 /// - 631: esploso con le pillole degli strati (chiaro e scuro); 632: cliente senza posizioni in essere;
 /// - 633: il gioco del rischio con «Il cliente risponde sull'iPad» (chiaro e scuro); 634: Lancia l'anno al tavolo;

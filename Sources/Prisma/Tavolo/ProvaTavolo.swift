@@ -49,7 +49,7 @@ enum ProvaTavolo {
         controlla(lunghezza == scatola.count, "Tavolo: la cornice dice la lunghezza della scatola (\(lunghezza) byte)")
         controlla(ProtocolloTavolo.apri(scatola, chiave: k)?.messaggio == m, "Tavolo: il messaggio si apre con lo stesso codice")
         controlla(ProtocolloTavolo.apri(scatola, chiave: altra) == nil, "Tavolo: con un altro codice il messaggio non si apre")
-        controlla(PonteVera.apri(scatola, vera) == nil, "Tavolo: la chiave del tavolo non è quella del ponte di Vera (sale proprio)")
+        controlla(PonteVera.apri(scatola, vera) == nil, "Tavolo: la chiave del tavolo non è quella del ponte di Lucy (sale proprio)")
         controlla(!String(decoding: scatola, as: UTF8.self).contains("sessione-di-prova"), "Tavolo: il contenuto non si legge in chiaro")
 
         // Un contenuto di una versione più nuova non rompe il messaggio: si ignora

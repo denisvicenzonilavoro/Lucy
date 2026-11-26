@@ -275,7 +275,7 @@ extension SchedaTFR {
                 Label("Riparti dai dati del cliente", systemImage: "arrow.counterclockwise")
             }
             .buttonStyle(.appleSobrio)
-            .help("Toglie tutte le ipotesi salvate: retribuzione, anni, contributi, fondo, canale e aliquota ripartono dal dossier")
+            .help("Toglie tutte le ipotesi salvate: retribuzione, anni, contributi, fondo e aliquota ripartono dal dossier")
         }
         .padding(.top, SC.spazioOcchiello)
     }
@@ -314,14 +314,7 @@ extension SchedaTFR {
             HStack(alignment: .firstTextBaseline, spacing: SC.spazioStrada) {
                 occhielloMac(TestiTFR.occhielloRisposta(nome))
                 Spacer(minLength: SC.spazioStrada)
-                // Canale sempre riconoscibile
-                Button {
-                    b.wrappedValue.canale = i.canale == .alleanza ? .indipendente : .alleanza
-                } label: {
-                    EtichettaCanale(canale: i.canale, compatta: true)
-                }
-                .buttonStyle(.plain)
-                .help("Canale della consulenza: tocca per passare ad Alleanza o a indipendente")
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichetta del canale da toccare
             }
             TestiTFR.fraseRispostaParti(e, nome: nome)
                 .reduce(Text("")) { t, p in t + testoParte(p) }

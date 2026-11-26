@@ -52,6 +52,8 @@ extension Tema.Apple.SalaRacconti {
         /// Colori dei canali sul fondo scuro (decisione 118): Alleanza #6B95FF, indipendente #D0954A, più la parola.
         static let canaleAlleanza = ColoreFilm.hex("#6B95FF")
         static let canaleIndipendente = ColoreFilm.hex("#D0954A")
+        /// Un solo canale, quello di Lucy (25 novembre 2026): il colore della firma «Lucy · consulenza finanziaria».
+        static let firmaLucy = canaleIndipendente
 
         // MARK: Scena 0 · il titolo
 

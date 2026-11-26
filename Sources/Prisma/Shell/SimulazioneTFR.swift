@@ -273,7 +273,7 @@ struct SchedaTFR: View {
                     Label("Riparti dai dati del cliente", systemImage: "arrow.counterclockwise")
                 }
                 .buttonStyle(.appleSobrio)
-                .help("Toglie tutte le ipotesi salvate: retribuzione, anni, contributi, fondo, canale e aliquota ripartono dal dossier")
+                .help("Toglie tutte le ipotesi salvate: retribuzione, anni, contributi, fondo e aliquota ripartono dal dossier")
             }
             .padding(M.margineConsole)
         }
@@ -465,14 +465,7 @@ struct SchedaTFR: View {
         let nome = i.nomeFondo.trimmingCharacters(in: .whitespacesAndNewlines)
         let b = legame
         let identita = HStack(spacing: M.spazioTestata) {
-            // Il canale si cambia toccando l'etichetta
-            Button {
-                b.wrappedValue.canale = i.canale == .alleanza ? .indipendente : .alleanza
-            } label: {
-                EtichettaCanale(canale: i.canale, compatta: false)
-            }
-            .buttonStyle(.plain)
-            .help("Canale della consulenza: tocca per passare ad Alleanza o a indipendente")
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichetta del canale da toccare
             Text(nome.isEmpty ? "Fondo pensione" : nome)
                 .carattereApple(A.fondo)
                 .foregroundColor(A.coloreNota)

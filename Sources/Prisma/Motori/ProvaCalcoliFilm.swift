@@ -3,7 +3,7 @@ import Foundation
 // Prova del film del piano («Luce» giro 15, §3.2 e §5 del piano): scene saltate senza obiettivi e senza data di nascita;
 // nil con solo titolo e chiusura; quote fra 0 e 1 (già da parte, decisione 81); curva in euro di oggi tagliata all'età di
 // pensione; etichetta dell'arrivo dentro l'area; pensione solo con proposte previdenziali e area Previdenza confermata;
-// firma Alleanza senza logo e con la parola; durata 20,2 s con tutte le scene, meno senza le scene vuote; la scena e il
+// una sola firma, «Lucy · consulenza finanziaria», senza logo (un solo canale dal 25 novembre 2026); durata 20,2 s con tutte le scene, meno senza le scene vuote; la scena e il
 // tempo all'istante; il tempo «0:05 / 0:20»; l'impronta che cambia con un obiettivo e non con il mese. Cliente, posizioni
 // e cifre inventati per la prova (cifre non tonde, date fisse).
 enum ProvaCalcoliFilm {
@@ -127,17 +127,20 @@ enum ProvaCalcoliFilm {
         }
         verifica.vero("Film: con solo titolo e chiusura niente film", film(senzaNascita, [conto], [], nil, oggi: oggi) == nil)
 
-        // Firma secondo il canale (decisione 57)
+        // Firma (decisione 57): un solo canale, quello di Lucy, dal 25 novembre 2026
+        let unica = [FirmaFilm(testo: CanaleLucy.nome, colore: Tema.Apple.SalaRacconti.Film.firmaLucy)]
         var soloAlleanza = c
         soloAlleanza.canali = [.alleanza]
         let firmaAlleanza = TestiFilm.firme(cliente: soloAlleanza)
-        verifica.vero("Film: firma Alleanza con la parola e il colore del canale, senza logo",
-                      firmaAlleanza == [FirmaFilm(testo: Canale.alleanza.nome, colore: Tema.Apple.SalaRacconti.Film.canaleAlleanza)]
-                        && firmaAlleanza[0].testo.contains("Alleanza"))
-        verifica.vero("Film: firma indipendente per un cliente indipendente", firme.count == 1 && firme[0].testo == Canale.indipendente.nome)
+        verifica.vero("Film: con il primo valore salvato del canale la firma di Lucy, senza Alleanza né logo",
+                      firmaAlleanza == unica && !firmaAlleanza[0].testo.contains("Alleanza"))
+        verifica.vero("Film: con l'altro valore salvato la stessa firma di Lucy", firme == unica && firme[0].testo == "Lucy · consulenza finanziaria")
+        var entrambi = c
+        entrambi.canali = [.alleanza, .indipendente]
+        verifica.vero("Film: con tutti e due i valori salvati una firma sola", TestiFilm.firme(cliente: entrambi) == unica)
         var senzaCanali = c
         senzaCanali.canali = []
-        verifica.vero("Film: senza canali la firma indipendente", TestiFilm.firme(cliente: senzaCanali).map(\.testo) == [Canale.indipendente.nome])
+        verifica.vero("Film: senza canali la firma di Lucy", TestiFilm.firme(cliente: senzaCanali) == unica)
 
         // Il tempo
         let t0 = MotoreFilm.scena(al: 0, d)

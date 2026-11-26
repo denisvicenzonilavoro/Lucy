@@ -24,7 +24,7 @@ struct InRegolaCliente: View {
                     bloccoCanale(e, canale)
                 }
                 VStack(alignment: .leading, spacing: m.spazioIntestazione) {
-                    OcchielloSezione(titolo: "Per tutti i canali")
+                    OcchielloSezione(titolo: "Per tutte le posizioni")
                     VStack(spacing: 0) {
                         ForEach([VoceConformita.Tipo.documento, .privacy, .commerciale], id: \.self) { t in
                             if let v = e.voce(t) { riga(v, e) }
@@ -52,7 +52,8 @@ struct InRegolaCliente: View {
     /// e le righe del questionario e dell'adeguata verifica.
     private func bloccoCanale(_ e: EsitoConformita, _ c: Canale) -> some View {
         VStack(alignment: .leading, spacing: Tema.Misura.Conformita.spazioIntestazione) {
-            EtichettaCanale(canale: c)
+            // Un solo canale, quello di Lucy (25 novembre 2026): il blocco dice il tipo di prodotti, mai il canale
+            OcchielloSezione(titolo: c.titoloProdotti)
             VStack(spacing: 0) {
                 ForEach([VoceConformita.Tipo.questionarioDi(c), .verificaDi(c)], id: \.self) { t in
                     if let v = e.voce(t) { riga(v, e) }

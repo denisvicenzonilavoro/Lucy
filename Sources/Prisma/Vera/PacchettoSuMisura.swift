@@ -84,7 +84,7 @@ enum PacchettoSuMisura {
     /// Le istruzioni in chiaro dentro il pacchetto.
     static func leggimi(_ m: ManifestoSuMisura) -> String {
         """
-        Vera su misura · pacchetto di addestramento
+        Lucy su misura · pacchetto di addestramento
         ===========================================
 
         Esempi: \(m.esempi) (resi anonimi e approvati da te in Lucy) · lezioni: \(m.lezioni)
@@ -104,8 +104,8 @@ enum PacchettoSuMisura {
         1. Apri il notebook su Google Colab o Kaggle con una GPU gratuita e carica questa cartella.
         2. Esegui le celle in ordine (circa due ore).
         3. Scarica lo zip finale (il file .gguf e \(SuMisuraVera.nomeFileRapporto)).
-        4. In Lucy: Vera › Vera su misura › «Importa il modello addestrato».
-        La nuova Vera prende il posto di quella di oggi solo se supera l'esame sul Mac.
+        4. In Lucy: Lucy › Lucy su misura › «Importa il modello addestrato».
+        La nuova Lucy prende il posto di quella di oggi solo se supera l'esame sul Mac.
         """
     }
 }

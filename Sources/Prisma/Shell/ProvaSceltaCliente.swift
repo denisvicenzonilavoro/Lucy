@@ -13,13 +13,13 @@ enum ProvaSceltaCliente {
                   "Scelta del cliente: un cliente scelto, niente portafoglio, e il cliente nei recenti")
         s.portafoglio = true
         controlla(s.tuttiIClienti && s.clienteAttivoId.isEmpty && s.veraPortafoglio,
-                  "Scelta del cliente: il portafoglio di Posizioni è «Tutti i clienti», e Vera lo segue")
+                  "Scelta del cliente: il portafoglio di Posizioni è «Tutti i clienti», e Lucy lo segue")
         s.portafoglio = false
         controlla(s.clienteAttivoId == "marco" && !s.veraPortafoglio,
                   "Scelta del cliente: lasciato il portafoglio si torna al cliente di prima")
         s.veraPortafoglio = true
         s.veraPortafoglio = false
-        controlla(s.clienteAttivoId == "marco", "Scelta del cliente: Vera torna al cliente di prima")
+        controlla(s.clienteAttivoId == "marco", "Scelta del cliente: Lucy torna al cliente di prima")
         s.scegliCliente("laura")
         s.scegliCliente("giulia")
         s.clienteAttivoId = "sofia"

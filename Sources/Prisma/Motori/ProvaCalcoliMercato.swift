@@ -36,14 +36,14 @@ enum ProvaCalcoliMercato {
                           soglia: 1, data: oggi, fonte: "Fonte: dati di prova", serieId: nil, isin: nil, posizioneId: nil,
                           toccati: toccati)
         }
-        // Con la cifra: «Il portafoglio di Marco perde circa …», con i canali separati se sono due
+        // Con la cifra: «Il portafoglio di Marco perde circa …», senza parti per canale (un solo canale, quello di Lucy)
         let conCifra = ClienteToccato(clienteId: "marco", posizioni: ["p1", "p2"], impatto: -1_150,
                                       perCanale: [.alleanza: -400, .indipendente: -750], canali: [.alleanza, .indipendente])
         let frase = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: -1.8, toccati: [conCifra]), toccato: conCifra,
                                                  tipoSerie: .indiceAzionario, nome: "Marco Bianchi")
         verifica.vero("Mercato uso: la frase del cliente con la cifra parla di lui",
-                      frase.hasPrefix("Il portafoglio di Marco perde circa ") && frase.hasSuffix(").") && !frase.contains("Bianchi"))
-        verifica.vero("Mercato uso: la frase del cliente separa i canali", frase.contains(Canale.alleanza.nomeBreve) && frase.contains(Canale.indipendente.nomeBreve))
+                      frase.hasPrefix("Il portafoglio di Marco perde circa ") && frase.hasSuffix("€.") && !frase.contains("Bianchi"))
+        verifica.vero("Mercato uso: un solo canale, la frase del cliente non lo divide", !frase.contains("(") && !frase.contains(CanaleLucy.nomeBreve))
         let guadagna = ClienteToccato(clienteId: "marco", posizioni: ["p1"], impatto: 300, perCanale: [.indipendente: 300],
                                       canali: [.indipendente])
         let fraseSu = TestiAppMercato.fraseToccato(evento(.variazioneSerie, valore: 1.2, toccati: [guadagna]), toccato: guadagna,

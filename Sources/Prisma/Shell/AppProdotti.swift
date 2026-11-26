@@ -239,18 +239,7 @@ struct AppProdotti: View {
 
     @ViewBuilder func rail(_ conti: Conteggi) -> some View {
         DossierRail()
-        // Il canale come in Documenti e in Posizioni: una voce per canale, un secondo clic toglie il filtro
-        EtichettaRail(testo: "Canale")
-        VStack(spacing: 0) {
-            ForEach(Canale.allCases) { c in
-                VoceNavigazione(titolo: c.nomeBreve, colore: Tema.Apple.AltreApp.canale(c),
-                                conteggio: conti.perCanale[c] ?? 0,
-                                attiva: stato.filtroCanaleProdotti == c) {
-                    stato.filtroCanaleProdotti = stato.filtroCanaleProdotti == c ? nil : c
-                }
-                .help(Self.aiutoCanale(c, attivo: stato.filtroCanaleProdotti == c))
-            }
-        }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente filtro di canale
         EtichettaRail(testo: "Aree")
         VStack(spacing: 0) {
             VoceNavigazione(titolo: "Tutte le aree", conteggio: conti.totale, attiva: stato.filtroAreaProdotti == nil) {
@@ -268,8 +257,8 @@ struct AppProdotti: View {
 
     /// L'aiuto di una voce del canale: il secondo clic sulla voce scelta toglie il filtro.
     static func aiutoCanale(_ c: Canale, attivo: Bool) -> String {
-        if attivo { return "Clic di nuovo per vedere tutti i canali" }
-        return c == .alleanza ? "Solo le schede \(c.nomeBreve)" : "Solo le schede \(c.nomeInFrase == "indipendente" ? "indipendenti" : c.nomeInFrase)"
+        // Un solo canale, quello di Lucy (25 novembre 2026): niente nomi dei canali
+        attivo ? "Clic di nuovo per vedere tutte le schede" : "Solo queste schede"
     }
 
     // MARK: - Elenco
@@ -606,10 +595,7 @@ struct ModuloProdotto: View {
         CorniceModulo(titolo: nuovo ? "Nuova scheda prodotto" : "Modifica la scheda") {
             VStack(alignment: .leading, spacing: 14) {
                 CampoModulo(etichetta: "Nome del prodotto") { TextField("", text: $bozza.nome).textFieldStyle(.roundedBorder) }
-                CampoModulo(etichetta: "Canale") {
-                    SegmentatoPillola(selezione: $bozza.canale, valori: Canale.allCases, titolo: { $0.nomeBreve })
-                        .frame(width: 240, alignment: .leading)
-                }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                 CampoModulo(etichetta: "Area") {
                     MenuTendina(selezione: $bozza.area,
                                 opzioni: [AreaPosizione.investimento, .risparmio, .previdenza, .protezione].map { ($0, $0.nome) },

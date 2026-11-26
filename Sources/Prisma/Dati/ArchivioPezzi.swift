@@ -568,15 +568,15 @@ extension ArchivioPezzi {
         switch nome {
         case "agenda": return "l'agenda"
         case "attivita": return "le attività"
-        case "conversazioni": return "le conversazioni con Vera"
+        case "conversazioni": return "le conversazioni con Lucy"
         case "prodotti": return "le schede prodotto"
         case "spazi": return "gli spazi di lavoro"
         case "pratiche": return "le pratiche"
         case "mercato": return "i dati di Mercato"
         case "ovunque": return "Lucy ovunque e le note arrivate dall’iPhone"
         case "studio": return "lo studio (portafogli modello, famiglie, esame OCF)"
-        case "routine": return "le routine di Vera"
-        case "vera": return "i dati di Vera (il tagliando dei dati)"
+        case "routine": return "le routine di Lucy"
+        case "vera": return "i dati di Lucy (il tagliando dei dati)"
         case "relazione": return "i potenziali clienti, le campagne e il lavoro della notte"
         default: return "la sezione «\(nome)»"
         }

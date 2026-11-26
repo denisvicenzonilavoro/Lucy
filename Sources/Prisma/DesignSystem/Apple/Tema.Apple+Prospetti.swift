@@ -10,9 +10,12 @@ extension Tema.Apple {
         // MARK: Disposizione
 
         enum Disposizione {
-            /// Barra laterale 290 (`.side`), l'anteprima comincia a 306 da sinistra.
-            static let larghezzaLaterale: CGFloat = Misura.Laterale.prospetti
-            static let spazioLaterale: CGFloat = 16
+            /// Barra laterale 310 (`.side` del template era 290: con i margini interni dello stile Carta la riga più
+            /// lunga, «Alessia Santoro · primo incontro», resta lontana dai bordi), 20 fino all'anteprima.
+            static let larghezzaLaterale: CGFloat = Misura.Laterale.prospetti + 20
+            static let spazioLaterale: CGFloat = 20
+            /// Il margine fra il bordo della finestra e la barra laterale: la colonna non sta schiacciata a sinistra.
+            static let margineEsterno = EdgeInsets(top: 4, leading: 8, bottom: 4, trailing: 0)
             /// Fra la barra delle azioni e l'anteprima.
             static let spazioBarra: CGFloat = 12
         }
@@ -22,7 +25,9 @@ extension Tema.Apple {
         enum Laterale {
             static let superficie = Superficie.pannello
             static let raggio = Raggio.pannello
-            static let padding = Misura.Padding.barraLaterale
+            /// Margini interni della colonna (stile Carta, come le altre app: 18 sopra e sotto, 20 ai lati); il testo
+            /// delle voci ha in più il suo `paddingVoce`, così nessuna scritta tocca il bordo.
+            static let padding = Misura.padding(18, 20)
             /// Riga del cliente: avatar 30, nome 14 bold, 12 sotto; la freccia della tendina 9 bold.
             static let avatar: CGFloat = Misura.Avatar.piccolo
             static let spazioCliente: CGFloat = 10
@@ -37,7 +42,7 @@ extension Tema.Apple {
             static let sottoEtichetta: CGFloat = 8
             static let sopraGruppo: CGFloat = 14
             /// Voce `.rub` con padding 11×12, raggio 14, 2 fra le voci: titolo 14 bold, sottotitolo 12 `inchiostro2`.
-            static let paddingVoce = Misura.padding(11, 12)
+            static let paddingVoce = Misura.padding(11, 14)
             static let raggioVoce: CGFloat = Raggio.voce
             static let fraVoci: CGFloat = 2
             static let titoloVoce = Carattere(dimensione: 14, peso: .bold)

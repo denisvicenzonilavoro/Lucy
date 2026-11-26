@@ -71,6 +71,8 @@ struct CorpoShell: View {
     @State private var salaCoprente = false
     /// Conta le aperture e le chiusure della sala coprente di «Luce»: un'attesa vale solo per il giro in cui è nata.
     @State private var giroSala = 0
+    /// Lo splash del marchio all'apertura dell'app (una volta per avvio, sopra tutto: SplashLucy).
+    @State private var splashAvvio = true
 
     /// La scrivania sotto la sala non si vede: barra, contrassegno della modalità cliente, finestre e comandi del
     /// visore non traspaiono dal velo. Nell'app a dissolvenza finita; nelle istantanee (niente dissolvenza) subito.
@@ -173,6 +175,14 @@ struct CorpoShell: View {
                     SchermataBenvenuto()
                         .frame(width: geo.size.width, height: geo.size.height)
                         .transition(modoIstantanea ? AnyTransition.identity : SchermataBenvenuto.transizione)
+                }
+
+                // All'apertura dell'app il marchio si disegna a tutto schermo per circa 3 s, poi l'app (come in Lucy AI)
+                if splashAvvio && !modoIstantanea && stato.persistente {
+                    SplashLucy { splashAvvio = false }
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .transition(.opacity.animation(.easeInOut(duration: 0.35)))
+                        .zIndex(100)
                 }
 
                 if fileSopra {

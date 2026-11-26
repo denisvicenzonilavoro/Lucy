@@ -1,10 +1,11 @@
 import SwiftUI
 
-// Il fermo-immagine del prisma di luce (Design/template-luce-specifica.md §2.2.5 punto 3, «Luce» giro 4): la stessa
-// scena dello shader disegnata in SwiftUI, senza Metal e senza `Canvas`, per le istantanee, per Prisma senza Metal o con
-// lo shader che non si compila, e sotto la tela Metal finché il primo fotogramma non c'è. Gli aloni sono tratti larghi a
-// opacità bassa e gradienti che sfumano a trasparente (nelle istantanee i filtri come `blur` possono non uscire).
-// Sempre notte: nessun colore cambia con l'aspetto chiaro o scuro.
+// La scena del palco della Sala (Design/template-luce-specifica.md §2.2.5 punto 3, «Luce» giro 4) disegnata in SwiftUI,
+// senza Metal e senza `Canvas`. Dal 25 novembre 2026 (decisione dell'utente) al posto del prisma di vetro c'è il sole del
+// piano (`SoleDelPiano`): il disco d'oro di Lucy che si riempie di luce con gli obiettivi coperti, un raggio per
+// obiettivo; dal suo bordo il ventaglio delle parti del patrimonio. Il nome del tipo resta per non cambiare le
+// chiamate (palco, immagine del file dato al cliente). Gli aloni sono gradienti che sfumano a trasparente (nelle
+// istantanee i filtri come `blur` possono non uscire). Sempre notte: nessun colore cambia con l'aspetto chiaro o scuro.
 
 /// Una fascia del ventaglio come la disegna il fermo-immagine.
 struct FasciaLuceFermo: Equatable {
@@ -20,8 +21,12 @@ struct PrismaDiLuceFermo: View {
     var rotazione: Double = 0
     /// 0…1 rispetto al patrimonio più alto del cursore.
     var frazione: Double = 1
-    /// Cristallo spento: solo il vetro (nessuna posizione in essere).
+    /// Spento: solo il disco, senza ventaglio (nessuna posizione in essere).
     var spento = false
+    /// Il sole del piano: i raggi degli obiettivi e la luce del disco.
+    var sole: SolePiano = .spento
+    /// Sul palco il sole si accende con le animazioni di SwiftUI; nelle immagini ferme (file del cliente) no.
+    var animato = false
 
     private typealias F = Tema.Apple.Luce.Fermo
 
@@ -81,38 +86,18 @@ struct PrismaDiLuceFermo: View {
     // MARK: La scena (disegnata due volte: dritta e riflessa)
 
     private func scena(_ geo: GeometriaLuce) -> some View {
-        let v = geo.vertici(rotazione)
-        let e = geo.entrata(rotazione)
         let x = geo.uscita(rotazione)
         let lunghezza = geo.lunghezza(rot: rotazione, frazione: frazione)
+        let disco = geo.raggio * Tema.Sole.quotaDiscoPalco
+        let lato = disco / Tema.Sole.quotaDisco
         return ZStack(alignment: .topLeading) {
             if !spento {
-                raggioEntrata(e)
                 ventaglio(x, direzione: geo.direzione(rotazione), lunghezza: lunghezza, misura: geo.misura)
             }
-            vetro(v, raggioAngoli: Tema.Apple.Luce.Scena.rientroAngoli)
+            SoleDelPiano(sole: sole, accensione: frazione, animato: animato)
+                .frame(width: lato, height: lato)
+                .position(geo.centro)
                 .opacity(spento ? F.opacitaVetroSpento : 1)
-            if !spento {
-                luceInterna(e, x)
-                punto(x, colore: F.biancoUscita)
-                punto(e, colore: .white)
-            }
-        }
-    }
-
-    /// Il raggio bianco caldo da sinistra fino al punto d'entrata: nucleo sottile e due aloni.
-    private func raggioEntrata(_ e: CGPoint) -> some View {
-        let dx: CGFloat = 1500
-        let inizio = CGPoint(x: e.x - dx, y: e.y - dx * Tema.Apple.Luce.Scena.pendenzaRaggio)
-        let linea = Path { p in
-            p.move(to: inizio)
-            p.addLine(to: e)
-        }
-        return ZStack {
-            linea.stroke(F.raggio.opacity(0.05), style: StrokeStyle(lineWidth: F.aloneRaggio * 2.4, lineCap: .round))
-            linea.stroke(F.raggio.opacity(F.opacitaAlone), style: StrokeStyle(lineWidth: F.aloneRaggio * 0.6, lineCap: .round))
-            linea.stroke(F.raggio.opacity(0.5), style: StrokeStyle(lineWidth: F.nucleoRaggio * 2.5, lineCap: .round))
-            linea.stroke(F.raggio, style: StrokeStyle(lineWidth: F.nucleoRaggio, lineCap: .round))
         }
     }
 
@@ -125,7 +110,7 @@ struct PrismaDiLuceFermo: View {
         return ZStack(alignment: .topLeading) {
             // L'alone intorno al ventaglio
             spicchio(x, da: inizio - 0.04, a: inizio + apertura + 0.04, raggio: lunghezza * 1.02)
-                .fill(RadialGradient(colors: [Color(red: 0.75, green: 0.8, blue: 1).opacity(0.10), .clear],
+                .fill(RadialGradient(colors: [Tema.Sole.oro.opacity(0.10), .clear],
                                      center: centro, startRadius: 0, endRadius: lunghezza))
             ForEach(Array(fasce.enumerated()), id: \.offset) { i, f in
                 if i + 1 < bordi.count, bordi[i + 1] - bordi[i] > 0.0005 {
@@ -134,7 +119,7 @@ struct PrismaDiLuceFermo: View {
                     let k = min(1, F.sfumaturaColore / max(1, lunghezza))
                     spicchio(x, da: a0, a: a1, raggio: lunghezza)
                         .fill(RadialGradient(stops: [
-                            .init(color: F.biancoUscita, location: 0),
+                            .init(color: Tema.Sole.oro, location: 0),
                             .init(color: f.colore, location: k),
                             .init(color: f.colore.opacity(0.75), location: 0.78),
                             .init(color: f.colore.opacity(0), location: 1),
@@ -159,57 +144,6 @@ struct PrismaDiLuceFermo: View {
     private func spicchio(_ c: CGPoint, da: Double, a: Double, raggio: CGFloat) -> Path {
         SpicchioLuce(da: da, a: a)
             .path(in: CGRect(x: c.x - raggio, y: c.y - raggio, width: raggio * 2, height: raggio * 2))
-    }
-
-    /// Il vetro: il triangolo con gli angoli arrotondati, le tre facce con luminosità diverse, i tre fili interni del
-    /// logo e il bordo luminoso.
-    private func vetro(_ v: (p0: CGPoint, p1: CGPoint, p2: CGPoint, q: CGPoint), raggioAngoli r: CGFloat) -> some View {
-        let contorno = Self.triangoloArrotondato(v.p0, v.p1, v.p2, raggio: r)
-        let facce = [(v.q, v.p0, v.p1), (v.q, v.p0, v.p2), (v.q, v.p1, v.p2)]
-        return ZStack {
-            ForEach(0..<3, id: \.self) { i in
-                Path { p in
-                    p.move(to: facce[i].0)
-                    p.addLine(to: facce[i].1)
-                    p.addLine(to: facce[i].2)
-                    p.closeSubpath()
-                }
-                .fill(F.tintaVetro.opacity(F.facce[i]))
-            }
-            .clipShape(contorno)
-            Path { p in
-                for punto in [v.p0, v.p1, v.p2] {
-                    p.move(to: v.q)
-                    p.addLine(to: punto)
-                }
-            }
-            .stroke(F.bordoVetro.opacity(F.opacitaFili), lineWidth: F.spessoreFili)
-            .clipShape(contorno)
-            contorno.stroke(F.bordoVetro.opacity(0.18), lineWidth: 10)
-            contorno.stroke(F.bordoVetro, lineWidth: F.spessoreBordo)
-        }
-    }
-
-    /// La luce dentro il vetro, da E (bianca) a X (il colore medio delle fasce).
-    private func luceInterna(_ e: CGPoint, _ x: CGPoint) -> some View {
-        let linea = Path { p in
-            p.move(to: e)
-            p.addLine(to: x)
-        }
-        let medio = fasce.first?.colore ?? .white
-        let sfumatura = LinearGradient(colors: [.white, medio], startPoint: UnitPoint(x: 0, y: 0.5), endPoint: UnitPoint(x: 1, y: 0.5))
-        return ZStack {
-            linea.stroke(Color.white.opacity(0.12), style: StrokeStyle(lineWidth: 14, lineCap: .round))
-            linea.stroke(sfumatura, style: StrokeStyle(lineWidth: 3, lineCap: .round))
-        }
-    }
-
-    /// Un punto caldo: un gradiente radiale che sfuma a trasparente.
-    private func punto(_ c: CGPoint, colore: Color) -> some View {
-        Circle()
-            .fill(RadialGradient(colors: [colore, colore.opacity(0)], center: .center, startRadius: 0, endRadius: F.punto))
-            .frame(width: F.punto * 2, height: F.punto * 2)
-            .position(c)
     }
 
     /// Il triangolo con gli angoli arrotondati come nello shader: vertici rientrati di 2·r verso il baricentro, poi il

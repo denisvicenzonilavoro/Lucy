@@ -131,7 +131,7 @@ private struct BarraModuli: View {
 
     private func piede(vuota: Bool) -> some View {
         VStack(alignment: .leading, spacing: M.spazioPiede) {
-            Text("Moduli Alleanza: non ancora. Si compilano con gli strumenti della compagnia finché Alleanza non conferma che si possono usare qui.")
+            Text("Moduli delle compagnie: si compilano con gli strumenti della compagnia finché non conferma che si possono usare qui.")
                 .carattereApple(M.notaAlleanza)
                 .foregroundColor(Tema.Apple.Colore.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)
@@ -158,7 +158,7 @@ private struct ZonaRilascio: View {
     var body: some View {
         let forma = RoundedRectangle(cornerRadius: M.raggioPiano, style: .continuous)
         VuotoPratiche(glifo: .modulo, frase: "Trascina qui il PDF di un modulo",
-                      nota: "Proposta, privacy, mandato, questionario, adeguata verifica: i moduli veri che usi per il canale indipendente. Lucy riconosce i campi, tu controlli la mappa una volta.",
+                      nota: "Proposta, privacy, mandato, questionario, adeguata verifica: i moduli veri che usi con i clienti. Lucy riconosce i campi, tu controlli la mappa una volta.",
                       pulsante: "Aggiungi un modulo") { importa = true }
             .padding(M.marginePiano)
             .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -565,7 +565,7 @@ private struct ColonnaCompila: View {
         let proposte = stato.proposteModulo(c, modello)
         if !modello.tipo.risposteDelCliente {
             if proposte.isEmpty {
-                Text("Nessuna proposta aperta del canale indipendente: premio, decorrenza e beneficiari resteranno da scrivere.")
+                Text("Nessuna proposta aperta: premio, decorrenza e beneficiari resteranno da scrivere.")
                     .carattereApple(Tema.Apple.Carattere.secondario)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -590,7 +590,7 @@ private struct ColonnaCompila: View {
     @ViewBuilder private func pulsante(_ c: Cliente?) -> some View {
         Group {
             if !modello.compilabile {
-                Text("I moduli Alleanza non si compilano in Lucy finché la compagnia non lo approva.")
+                Text("I moduli di questa compagnia non si compilano in Lucy finché la compagnia non lo approva.")
                     .carattereApple(M.notaAlleanza)
                     .foregroundColor(Tema.Apple.Colore.inchiostro2)
                     .fixedSize(horizontal: false, vertical: true)
@@ -699,7 +699,7 @@ private struct TileFinali: View {
             if vera {
                 HStack(spacing: Tema.Apple.Pratiche.Moduli.spazioMedio) {
                     SferaVera(misura: M.sferaVera, viva: true)
-                    Text("Vera")
+                    Text("Lucy")
                         .carattereApple(M.nomeVera)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
                 }

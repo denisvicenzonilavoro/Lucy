@@ -20,6 +20,9 @@ import AppKit
 // il giorno della pensione, versamento = quanto serve in più al mese): niente si salva in silenzio (decisione 88).
 // Le cifre vengono da `MotoreDisegno` sulla linea della vita del cliente. «Riduci movimento»: la curva del piano
 // compare subito con la dissolvenza; istantanee: il tratto di prova (`StatoSala.provaDisegno`) già trasformato.
+// Dal 25 novembre 2026 la colonna è nello stile del sole del piano: occhiello, titolo serif con la sottolineatura
+// dorata, e al centro il sole (`SoleDelPiano`) con un raggio per obiettivo del dossier; dopo il disegno il disco si
+// riempie quanto il piano di oggi arriva al disegno (le due cifre di `MotoreDisegno`, nessuna nuova).
 
 struct DisegnaIlFuturo: View {
     @Environment(StatoShell.self) var stato
@@ -32,8 +35,11 @@ struct DisegnaIlFuturo: View {
         let prep = CacheLineaVita.preparazione(cliente: attuale, posizioni: stato.posizioniCliente(id),
                                                obiettivi: stato.dati.obiettivi.filter { $0.clienteId == id },
                                                eventi: stato.eventiVitaCliente(id), analisi: stato.dati.analisi[id])
+        let sole = stato.ricavato("sole-del-piano-\(id)") {
+            MotoreSole.calcola(obiettivi: stato.obiettiviCliente(id), posizioni: stato.posizioniCliente(id))
+        }
         CorpoDisegno(cliente: attuale, preparazione: prep, prova: stato.sala.provaDisegno,
-                     obiettivi: stato.obiettiviCliente(id),
+                     obiettivi: stato.obiettiviCliente(id), sole: sole,
                      salva: {
                          stato.salvaObiettivo($0)
                          // Migliorie d'uso 60: l'obiettivo salvato dal disegno è una fine chiara
@@ -55,6 +61,8 @@ private struct CorpoDisegno: View {
     let preparazione: PreparazioneLineaVita
     let prova: [CGPoint]?
     let obiettivi: [Obiettivo]
+    /// Il sole del piano del cliente (un raggio per obiettivo).
+    var sole: SolePiano = .spento
     let salva: (Obiettivo) -> Void
     let completaAnagrafica: () -> Void
     /// Il tavolo a doppio senso (giro 16, decisione 113): il cliente disegna sull'iPad, il Mac calcola e rimanda.
@@ -364,15 +372,15 @@ private struct CorpoDisegno: View {
 
     private func colonna(_ ingresso: IngressoLineaVita) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("Disegna come vorresti che crescesse il tuo patrimonio.")
-                .carattereApple(D.titolo)
-                .foregroundColor(Tema.Apple.Colore.inchiostro)
-                .fixedSize(horizontal: false, vertical: true)
+            TestataSole(occhiello: "Disegna il tuo futuro", titolo: "Disegna come vorresti che crescesse il tuo patrimonio.",
+                        titoloGrande: false)
             Text("Con il dito sull’iPad, o con il mouse qui, da sinistra a destra. Lucy lo trasforma nel piano che si può fare davvero.")
-                .carattereApple(D.spiegazione)
-                .foregroundColor(Tema.Apple.Colore.inchiostro2)
+                .fontCarta(Tema.Sole.testo)
+                .foregroundColor(Tema.Sole.inchiostro2)
                 .fixedSize(horizontal: false, vertical: true)
-                .padding(.top, D.sottoTitolo)
+                .padding(.top, Tema.Sole.spazioBlocchi * 0.6)
+            soleColonna
+                .padding(.top, Tema.Sole.spazioBlocchi)
             if ingresso.patrimonioIniziale <= 0 {
                 Text("Il punto di partenza è 0 €: \(nome) non ha ancora posizioni in essere.")
                     .carattereApple(D.nota)
@@ -398,6 +406,36 @@ private struct CorpoDisegno: View {
                     .help("Apre il modulo dell'obiettivo già compilato (⏎): niente si salva da solo")
             }
         }
+    }
+
+    /// Il sole del piano: prima del disegno la luce degli obiettivi coperti; dopo, quanto il piano di oggi arriva al
+    /// disegno alla pensione (le due cifre del risultato). I raggi restano gli obiettivi del dossier.
+    private var soleMostrato: SolePiano {
+        guard risultatoVisibile, let e = esito else { return sole }
+        let parte = e.alDisegno > 0 ? MotoreSole.limita(e.alPiano / e.alDisegno) : 1
+        return SolePiano(raggi: sole.raggi, luce: parte)
+    }
+
+    private var fraseSole: String {
+        if risultatoVisibile, let e = esito {
+            let p = Int((soleMostrato.luce * 100).rounded())
+            return e.alDisegno > 0 ? "Il piano di oggi arriva al \(p)% del tuo disegno, a \(e.etaPensione) anni." : "Il tuo disegno è già alla portata del piano di oggi."
+        }
+        if sole.senzaObiettivi { return "Il sole si riempie di luce con gli obiettivi: nel dossier di \(nome) non ce ne sono ancora." }
+        let p = Int((MotoreSole.limita(sole.luce) * 100).rounded())
+        return "Gli obiettivi di \(nome) oggi sono coperti al \(p)%: un raggio per obiettivo."
+    }
+
+    private var soleColonna: some View {
+        HStack(alignment: .center, spacing: Tema.Sole.spazioBlocchi) {
+            SoleDelPiano(sole: soleMostrato, animato: !fermo)
+                .frame(width: Tema.Sole.latoColonna, height: Tema.Sole.latoColonna)
+            Text(fraseSole)
+                .fontCarta(Tema.Sole.nota)
+                .foregroundColor(Tema.Sole.inchiostro2)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .accessibilityElement(children: .combine)
     }
 
     /// Un obiettivo con lo stesso titolo proposto: si propone di aggiornarlo.
@@ -443,8 +481,8 @@ private struct RisultatoDisegno: View {
                     Text("Il tuo disegno è già alla portata del piano di oggi.")
                 }
             }
-            .carattereApple(D.frase)
-            .foregroundColor(Tema.Apple.Colore.inchiostro)
+            .fontCarta(Tema.Sole.frase)
+            .foregroundColor(Tema.Sole.inchiostro)
             .fixedSize(horizontal: false, vertical: true)
             .padding(.top, D.sopraFrase)
             .entrataCascata(2, base: Tema.Apple.Moto.Cascata.baseDentroApp)
@@ -469,13 +507,15 @@ private struct RisultatoDisegno: View {
 
     private func riquadro(_ titolo: String, valore: Double, colore: Color, indice: Int) -> some View {
         VStack(alignment: .leading, spacing: 2) {
-            Text(titolo)
-                .carattereApple(D.etichettaTile)
-                .foregroundColor(Tema.Apple.Colore.inchiostro2)
+            Text(titolo.uppercased())
+                .fontCarta(Tema.Sole.etichetta)
+                .tracking(Tema.Sole.tracciaOcchiello)
+                .foregroundColor(Tema.Sole.matita)
             NumeroCheConta(valore, indice: indice)
-                .carattereApple(D.cifraTile)
+                .fontCarta(Tema.Sole.cifraMedia)
                 .foregroundColor(colore)
                 .lineLimit(1)
+                .minimumScaleFactor(0.7)
         }
         .padding(D.paddingTile)
         .frame(maxWidth: .infinity, alignment: .leading)

@@ -142,28 +142,28 @@ enum ProvaEsempiVera {
         var casi: [(String, [EsempioDomandaVera], Bool)] = profili.map { ("cliente \($0.0)", EsempiVera.per(cliente: $0.1, portafoglio: false), false) }
         casi.append(("tutti i clienti", EsempiVera.per(cliente: nil, portafoglio: true), true))
         for (nome, esempi, portafoglio) in casi {
-            controlla((1...4).contains(esempi.count), "Esempi di Vera (\(nome)): da uno a quattro (\(esempi.count))")
-            controlla(Set(esempi.map(\.tipo)).count == esempi.count, "Esempi di Vera (\(nome)): mai due dello stesso tipo")
+            controlla((1...4).contains(esempi.count), "Esempi di Lucy (\(nome)): da uno a quattro (\(esempi.count))")
+            controlla(Set(esempi.map(\.tipo)).count == esempi.count, "Esempi di Lucy (\(nome)): mai due dello stesso tipo")
             let riconosciuti = esempi.allSatisfy { e in
                 if let s = e.spuntoPortafoglio { return e.spunto == nil && SpuntoPortafoglio.da(e.domanda) == s }
                 if let s = e.spunto { return SpuntoVera.da(e.domanda) == s }
                 return false
             }
-            controlla(riconosciuti, "Esempi di Vera (\(nome)): ogni domanda porta allo spunto che Vera riconosce")
+            controlla(riconosciuti, "Esempi di Lucy (\(nome)): ogni domanda porta allo spunto che Lucy riconosce")
             if portafoglio {
-                controlla(esempi.allSatisfy(\.delPortafoglio), "Esempi di Vera (tutti i clienti): tutti nella conversazione del portafoglio")
+                controlla(esempi.allSatisfy(\.delPortafoglio), "Esempi di Lucy (tutti i clienti): tutti nella conversazione del portafoglio")
             } else {
-                controlla(!esempi.contains(where: \.delPortafoglio), "Esempi di Vera (\(nome)): nessuno nella conversazione del portafoglio")
+                controlla(!esempi.contains(where: \.delPortafoglio), "Esempi di Lucy (\(nome)): nessuno nella conversazione del portafoglio")
             }
             controlla(esempi.allSatisfy { !TestiVera.tipoEsempio($0.tipo).tipo.isEmpty && !$0.domanda.isEmpty },
-                      "Esempi di Vera (\(nome)): ogni riquadro ha tipo e domanda")
+                      "Esempi di Lucy (\(nome)): ogni riquadro ha tipo e domanda")
         }
         let lavoro = EsempiVera.fonti(nomeCliente: "Giulia Rossi", conversazione: false)
-        controlla(lavoro == ["Il dossier di Giulia Rossi", "I calcoli di Lucy", "La tua agenda"], "Fonti di Vera in lavoro: dossier, calcoli e agenda")
+        controlla(lavoro == ["Il dossier di Giulia Rossi", "I calcoli di Lucy", "La tua agenda"], "Fonti di Lucy in lavoro: dossier, calcoli e agenda")
         controlla(EsempiVera.fonti(nomeCliente: nil, conversazione: false).first == "I dossier dei tuoi clienti",
-                  "Fonti di Vera con tutti i clienti: i dossier dei tuoi clienti")
+                  "Fonti di Lucy con tutti i clienti: i dossier dei tuoi clienti")
         let chiacchiera = EsempiVera.fonti(nomeCliente: "Giulia Rossi", conversazione: true)
         controlla(!chiacchiera.contains { $0.contains("dossier") || $0.contains("calcoli") },
-                  "Fonti di Vera in conversazione: niente dati dei clienti")
+                  "Fonti di Lucy in conversazione: niente dati dei clienti")
     }
 }

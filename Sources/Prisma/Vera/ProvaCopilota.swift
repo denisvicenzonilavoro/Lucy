@@ -354,7 +354,7 @@ enum ProvaCopilota {
             let pid = s.sessioneCopilota(sid)?.trascrizione.last?.id ?? ""
             s.riconosciConQwenCopilota(pezzo: pid, sessione: sid)
             controlla(schede.count == 2 && s.sessioneCopilota(sid)?.schede.count == 2 && !s.veraInCorso,
-                      "Copilota: Vera non è pronta, Lucy riconosce con le sue regole")
+                      "Copilota: Lucy non è pronta, Lucy riconosce con le sue regole")
         } else {
             controlla(false, "Copilota: sessione senza Qwen")
         }
@@ -382,7 +382,7 @@ enum ProvaCopilota {
         controlla(tornato == p && tornato?.collegato == true, "Ponte, filtri: vanno e tornano dall'archivio")
         controlla(p.rifiuto(percorso: "api/chat") != nil && p.rifiuto(percorso: "v1/chat/completions") != nil
                     && p.rifiuto(percorso: BustaPonte.copilota) != nil && p.rifiuto(percorso: BustaPonte.precarica) != nil,
-                  "Ponte, filtri: con «Vera» spento il Mac rifiuta il modello e il copilota")
+                  "Ponte, filtri: con «Lucy» spento il Mac rifiuta il modello e il copilota")
         controlla(p.rifiuto(percorso: BustaPonte.inquadra) != nil && p.rifiuto(percorso: BustaPonte.carta) != nil
                     && p.rifiuto(percorso: BustaPonte.nota) != nil && p.rifiuto(percorso: BustaPonte.stato) == nil,
                   "Ponte, filtri: con Inquadra e Nota spente il Mac rifiuta testi, carta e note; lo stato passa sempre")
@@ -558,13 +558,13 @@ enum ProvaCopilota {
             (await ipad.manda(.inquadratura(inquadratura)), await ipad.manda(.notaVocale(nota)), await ipad.manda(arrivo))
         }
         controlla(!fotoNo.accettato && !notaNo.accettato && schedeSi.accettato && raccolta.elenco.count == 5,
-                  "Ponte, filtri: con Inquadra e Nota a voce spente il Mac le rifiuta e riceve ancora le schede di Vera")
+                  "Ponte, filtri: con Inquadra e Nota a voce spente il Mac le rifiuta e riceve ancora le schede di Lucy")
         var senzaVera = vera
         senzaVera.ponte.modello = false
         server.aggiorna(senzaVera, sessione: finta, porta: 0, annuncia: false)
         let (schedeNo, notaSi) = aspetta { (await ipad.manda(arrivo), await ipad.manda(.notaVocale(nota))) }
         controlla(!schedeNo.accettato && notaSi.accettato && raccolta.elenco.count == 6,
-                  "Ponte, filtri: con «Vera» spento il Mac rifiuta le schede del copilota e accetta le note")
+                  "Ponte, filtri: con «Lucy» spento il Mac rifiuta le schede del copilota e accetta le note")
         server.consegnaArrivi(nil)
     }
     #endif

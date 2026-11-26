@@ -132,7 +132,7 @@ extension ProvaBackup {
     static func aggiungiRoutineVeraDiProva(_ d: inout DatiPrisma) {
         guard let c = d.clienti.first else { return }
         let t = Date(timeIntervalSinceReferenceDate: 800_000_000)
-        var r = RoutineVera(id: "routine-backup-1", titolo: "Quando firmo", frase: "Vera, ho firmato con…", inneschi: [#"\bho firmato\b"#],
+        var r = RoutineVera(id: "routine-backup-1", titolo: "Quando firmo", frase: "Lucy, ho firmato con…", inneschi: [#"\bho firmato\b"#],
                             passi: [PassoRoutine(.archiviaContratto), PassoRoutine(.fissaControllo, mesi: 3)],
                             programmazione: ProgrammazioneRoutine(tipo: .dopoFirma), creataIl: t)
         r.usata = 2
@@ -140,9 +140,9 @@ extension ProvaBackup {
         // «Il mio lunedì» spenta: la copia salvata tiene lo stato della pronta
         var spenta = RoutineVera.pronte()[1]
         spenta.attiva = false
-        var e = EsitoRoutine(routineId: r.id, titolo: r.titolo, richiesta: "Vera, ho firmato con \(c.nome)", clienteId: c.id, data: t)
+        var e = EsitoRoutine(routineId: r.id, titolo: r.titolo, richiesta: "Lucy, ho firmato con \(c.nome)", clienteId: c.id, data: t)
         e.id = "esito-routine-backup"
-        e.passi = [EsitoPassoRoutine(tipo: .archiviaContratto, titolo: "Archivio il contratto firmato", dettaglio: "Trascina su Vera il PDF firmato",
+        e.passi = [EsitoPassoRoutine(tipo: .archiviaContratto, titolo: "Archivio il contratto firmato", dettaglio: "Trascina su Lucy il PDF firmato",
                                      stato: .inAttesa, fonte: "Documenti")]
         e.risultato = RisultatoRoutine(titolo: "Tutto in ordine dopo la firma", righe: ["Primo controllo a febbraio (da confermare)"],
                                        pulsanti: [PulsanteRoutine(titolo: "Apri la scheda", app: .clienti, clienteId: c.id)])
@@ -155,10 +155,10 @@ extension ProvaBackup {
     /// Restituisce il motivo dell'errore (nil = tutto bene).
     static func verificaRoutineVera(originale: DatiPrisma, estratto: DatiPrisma) throws -> String? {
         guard originale.routine.routine.count == 2, originale.routine.esiti.count == 1 else {
-            return "l'archivio di prova non ha le routine di Vera"
+            return "l'archivio di prova non ha le routine di Lucy"
         }
         guard estratto.routine == originale.routine else {
-            return "le routine di Vera e i loro lanci non tornano uguali dal backup"
+            return "le routine di Lucy e i loro lanci non tornano uguali dal backup"
         }
         guard estratto.routine.tutte.count == 5, estratto.routine.tutte.first(where: { $0.id == RoutineVera.idLunedi })?.attiva == false else {
             return "dal backup le routine pronte non tengono il loro stato (spenta) o manca quella del consulente"
@@ -236,14 +236,14 @@ extension ProvaBackup {
         for chiave in ["agendaOrari", "agendaOrariScelto", "agendaSpostamento"] { j.removeValue(forKey: chiave) }
         let senza = try Archivio.decodificatore.decode(MessaggioVera.self, from: JSONSerialization.data(withJSONObject: j))
         guard senza.agendaOrari == nil, senza.agendaOrariScelto == nil, senza.agendaSpostamento == nil, senza.testo == m.testo else {
-            return "un messaggio di Vera senza i campi dell'agenda che si organizza non si apre"
+            return "un messaggio di Lucy senza i campi dell'agenda che si organizza non si apre"
         }
         // Orari rovinati: si perdono solo gli orari, il messaggio resta
         j["agendaOrari"] = ["richiesta": "rovinata", "proposte": 3] as [String: Any]
         j["agendaSpostamento"] = "rovinato"
         let rovinato = try Archivio.decodificatore.decode(MessaggioVera.self, from: JSONSerialization.data(withJSONObject: j))
         guard rovinato.agendaOrari == nil, rovinato.agendaSpostamento == nil, rovinato.id == m.id, rovinato.testo == m.testo else {
-            return "orari rovinati fanno perdere il messaggio di Vera"
+            return "orari rovinati fanno perdere il messaggio di Lucy"
         }
         // Le conversazioni (con gli orari e gli spostamenti) non entrano nell'istantanea di Prisma ovunque
         guard SpazioOvunque.datiIstantanea(originale).conversazioni.isEmpty else {
@@ -345,7 +345,7 @@ extension ProvaBackup {
             return "le voci chiuse del sussurro non tornano uguali dal backup"
         }
         guard estratto.impostazioni.vera.sussurroNelDossier == false else {
-            return "l'interruttore del sussurro (Impostazioni › Vera) non torna uguale dal backup"
+            return "l'interruttore del sussurro (Impostazioni › Lucy) non torna uguale dal backup"
         }
         // Nel formato a pezzi le voci chiuse stanno nel file del cliente
         guard ArchivioPezzi.pezzo(.sussurriChiusi) == .cliente, ArchivioPezzi.campiCliente.contains(where: { $0.chiave == .sussurriChiusi }) else {
@@ -396,7 +396,7 @@ extension ProvaBackup {
     static func esitoMercatoClientiDiProva(cliente c: Cliente) -> EsitoMercatoVera {
         let t = Date(timeIntervalSinceReferenceDate: 800_000_000)
         let cal = Calendar(identifier: .gregorian)
-        let e = EventoMercatoVera(tipo: .borse, misura: -8, verso: -1, periodo: "in una settimana", origine: .aParole, fonte: "Detto a Vera",
+        let e = EventoMercatoVera(tipo: .borse, misura: -8, verso: -1, periodo: "in una settimana", origine: .aParole, fonte: "Detto a Lucy",
                                   data: t, frase: "Le borse hanno perso l'8% in una settimana", cal: cal)
         let motivo = MotivoMercatoVera(regola: .azioniCalo,
                                        testo: "Il 52% del suo investito è in azioni (36.400 €): con un calo dell'8% sono circa 2.912 € in meno.",
@@ -445,7 +445,7 @@ extension ProvaBackup {
         let senza = try Archivio.decodifica(JSONSerialization.data(withJSONObject: radice))
         guard let s = senza.conversazioni[VeraPortafoglio.chiave]?.first(where: { $0.id == id }), s.mercatoClienti == nil, s.mercatoBozze == nil,
               s.testo == o.testo, senza.clienti.count == originale.clienti.count else {
-            return "un messaggio di Vera senza l'elenco del mercato non si apre"
+            return "un messaggio di Lucy senza l'elenco del mercato non si apre"
         }
         portafoglio[i]["mercatoClienti"] = ["evento": "rovinato", "toccati": 3] as [String: Any]
         conversazioni[VeraPortafoglio.chiave] = portafoglio
@@ -489,7 +489,7 @@ extension ProvaBackup {
     static func verificaStileVera(originale: DatiPrisma, estratto: DatiPrisma) throws -> String? {
         let p = originale.impostazioni.stileVera
         guard p.firma?.valore == "Denis", p.emoji?.attiva == false, p.messaggiLetti == 214 else {
-            return "l'archivio di prova non ha il profilo di stile di Vera"
+            return "l'archivio di prova non ha il profilo di stile di Lucy"
         }
         guard estratto.impostazioni.stileVera == p else {
             return "il profilo di stile (Scrive come te) non torna uguale dal backup"
@@ -745,7 +745,7 @@ extension ProvaBackup {
         // Prisma ovunque: i piani (nelle conversazioni) e le impostazioni di Vera restano sul Mac
         let ist = SpazioOvunque.datiIstantanea(originale)
         guard ist.conversazioni.isEmpty, ist.impostazioni.vera.passi == ImpostazioniPassiVera() else {
-            return "il ragionamento a passi (piani nelle conversazioni, impostazioni di Vera) non deve entrare nell'istantanea di Lucy ovunque"
+            return "il ragionamento a passi (piani nelle conversazioni, impostazioni di Lucy) non deve entrare nell'istantanea di Lucy ovunque"
         }
         return nil
     }
@@ -787,11 +787,11 @@ extension ProvaBackup {
               let r = originale.conversazioni[c.id]?.first(where: { $0.id == idMessaggioRoutineTagliandoDiProva }),
               let s = originale.conversazioni[c.id]?.first(where: { $0.id == idMessaggioStileTreLivelliDiProva }),
               r.esitoRoutine != nil, r.tagliando == "", s.stileVera != nil, s.treLivelli != nil, s.treLivelliLivello == .cliente, s.tagliando == c.id else {
-            return "l'archivio di prova non ha i messaggi di Vera con routine, tagliando, stile e tre livelli"
+            return "l'archivio di prova non ha i messaggi di Lucy con routine, tagliando, stile e tre livelli"
         }
         let tornati = estratto.conversazioni[c.id] ?? []
         guard tornati.first(where: { $0.id == r.id }) == r, tornati.first(where: { $0.id == s.id }) == s else {
-            return "il lancio della routine, il tagliando, lo stile o i tre livelli dei messaggi di Vera non tornano uguali dal backup"
+            return "il lancio della routine, il tagliando, lo stile o i tre livelli dei messaggi di Lucy non tornano uguali dal backup"
         }
         for m in [r, s] {
             guard var j = try JSONSerialization.jsonObject(with: Archivio.codificatore.encode(m)) as? [String: Any] else {
@@ -803,7 +803,7 @@ extension ProvaBackup {
             let senza = try Archivio.decodificatore.decode(MessaggioVera.self, from: JSONSerialization.data(withJSONObject: senzaCampi))
             guard senza.esitoRoutine == nil, senza.tagliando == nil, senza.stileVera == nil, senza.treLivelli == nil,
                   senza.treLivelliLivello == nil, senza.id == m.id, senza.testo == m.testo, senza.titolo == m.titolo else {
-                return "un messaggio di Vera senza routine, tagliando, stile e tre livelli non si apre intero"
+                return "un messaggio di Lucy senza routine, tagliando, stile e tre livelli non si apre intero"
             }
             // Campi rovinati (un tipo di passo o un livello che non esistono, un numero al posto del testo o della scheda):
             // si perde solo il campo, il messaggio resta
@@ -816,7 +816,7 @@ extension ProvaBackup {
             let rovinato = try Archivio.decodificatore.decode(MessaggioVera.self, from: JSONSerialization.data(withJSONObject: j))
             guard rovinato.esitoRoutine == nil, rovinato.tagliando == nil, rovinato.stileVera == nil, rovinato.treLivelli == nil,
                   rovinato.treLivelliLivello == nil, rovinato.id == m.id, rovinato.testo == m.testo, rovinato.titolo == m.titolo else {
-                return "un campo rovinato (routine, tagliando, stile o tre livelli) fa perdere il messaggio di Vera"
+                return "un campo rovinato (routine, tagliando, stile o tre livelli) fa perdere il messaggio di Lucy"
             }
         }
         // Le conversazioni (con queste schede) restano sul Mac

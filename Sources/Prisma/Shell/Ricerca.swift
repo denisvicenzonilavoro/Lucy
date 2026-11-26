@@ -605,7 +605,7 @@ enum MotoreRicerca {
                                               dettaglio: "\(nome(p.clienteId)) · \(p.stato.nome)", canale: p.canale),
                              campi: [("Cliente", nome(p.clienteId)), ("Tipologia", p.tipologia), ("Emittente", p.emittente),
                                      ("Contratto", p.numeroContratto), ("Contraente", p.contraente), ("Assicurato", p.assicurato),
-                                     ("Beneficiari", p.beneficiari), ("Canale", p.canale.nomeBreve), ("Note", p.note)])
+                                     ("Beneficiari", p.beneficiari), ("Note", p.note)])
         }
         // Il testo delle pagine si legge solo quando serve (parole non trovate nel titolo e nei dati), poi resta piegato
         candidati[.documenti] = dati.documenti.map { d in
@@ -644,7 +644,7 @@ enum MotoreRicerca {
         candidati[.prodotti] = dati.prodotti.map { p in
             CandidatoRicerca(RisultatoRicerca(destinazione: .prodotto(p.id), gruppo: .prodotti, titolo: p.nome,
                                               dettaglio: [p.emittente, p.tipologia].filter { !$0.isEmpty }.joined(separator: " · "), canale: p.canale),
-                             campi: [("Emittente", p.emittente), ("Tipologia", p.tipologia), ("Canale", p.canale.nomeBreve),
+                             campi: [("Emittente", p.emittente), ("Tipologia", p.tipologia),
                                      ("Garanzie", p.garanzie), ("Liquidabilità", p.liquidabilita), ("Fonte", p.fonte), ("Note", p.note)])
         }
         #if os(macOS)

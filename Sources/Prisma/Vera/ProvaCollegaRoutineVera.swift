@@ -9,7 +9,7 @@ enum ProvaCollegaRoutineVera {
         s.clienteAttivoId = "marco"
         s.veraPortafoglio = false
         let prima = s.dati.istantanea
-        controlla(s.smistaVera("Vera, prepara l'incontro con Marco", chiave: "marco"), "Routine in chat: «prepara l'incontro con Marco» è gestita")
+        controlla(s.smistaVera("Lucy, prepara l'incontro con Marco", chiave: "marco"), "Routine in chat: «prepara l'incontro con Marco» è gestita")
         let m = s.conversazione("marco").last
         controlla(m?.esitoRoutine?.routineId == RoutineVera.idPrepara && m?.esitoRoutine?.passi.count == 5, "Routine in chat: i cinque passi di «Prepara l'incontro»")
         controlla(s.dati.appuntamenti == prima.appuntamenti && s.dati.messaggi == prima.messaggi, "Routine in chat: niente cambia prima di «Conferma»")
@@ -19,7 +19,7 @@ enum ProvaCollegaRoutineVera {
         guard let aperta = s.dati.posizioni.first(where: { $0.stato == .proposta && $0.esito != .rifiutata }), let c = s.cliente(aperta.clienteId),
               let p = RoutineVera.posizioneFirmata(cliente: c, posizioneId: nil, posizioni: s.dati.posizioni) else { return }
         s.clienteAttivoId = c.id
-        _ = s.smistaVera("Vera, ho firmato con \(c.nome)", chiave: c.id)
+        _ = s.smistaVera("Lucy, ho firmato con \(c.nome)", chiave: c.id)
         guard let firma = s.conversazione(c.id).last, firma.conferma?.azioni.contains(where: { $0.strumento == RoutineVera.strumentoPosizioneFirmata }) == true else {
             return controlla(false, "Routine in chat: «Dopo la firma» propone di segnare in essere la proposta")
         }
@@ -41,7 +41,7 @@ enum ProvaCollegaRoutineVera {
         }
         s.clienteAttivoId = c.id
         s.veraPortafoglio = false
-        _ = s.smistaVera("Vera, ho firmato con \(c.nome)", chiave: c.id)
+        _ = s.smistaVera("Lucy, ho firmato con \(c.nome)", chiave: c.id)
         guard let firma = s.conversazione(c.id).last, let az = firma.conferma?.azioni.first(where: { $0.strumento == RoutineVera.strumentoPosizioneFirmata }),
               let pid = az.argomenti["posizione"] else {
             return controlla(false, "Routine, revisione: «Dopo la firma» propone di segnare in essere la proposta")
@@ -66,7 +66,7 @@ enum ProvaCollegaRoutineVera {
         let t = StatoShell(persistente: false)
         t.rispostePreparate = true
         t.veraPortafoglio = true
-        _ = t.smistaVera("Vera, prepara l'incontro", chiave: VeraPortafoglio.chiave)
+        _ = t.smistaVera("Lucy, prepara l'incontro", chiave: VeraPortafoglio.chiave)
         let domanda = t.conversazione(VeraPortafoglio.chiave).last?.esitoRoutine?.domanda
         let usataPrima = t.routineVera(RoutineVera.idPrepara)?.usata ?? 0
         _ = t.smistaVera("fissa un incontro con Marco giovedì alle 15", chiave: VeraPortafoglio.chiave)
@@ -81,7 +81,7 @@ enum ProvaCollegaRoutineVera {
         u.veraPortafoglio = false
         u.modoCliente = "marco"
         let lunedi = u.routineVera(RoutineVera.idLunedi)?.usata ?? 0
-        _ = u.smistaVera("Vera, com'è la settimana?", chiave: "marco")
+        _ = u.smistaVera("Lucy, com'è la settimana?", chiave: "marco")
         let lanciata = u.conversazione("marco").contains { ($0.esitoRoutine?.passi.isEmpty == false) }
         controlla(!lanciata && (u.routineVera(RoutineVera.idLunedi)?.usata ?? 0) == lunedi,
                   "Routine, revisione: in modalità cliente «Il mio lunedì» (agenda di tutti) non parte")

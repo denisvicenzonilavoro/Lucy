@@ -95,7 +95,7 @@ struct ModuloAzienda: View {
                                     : "Spunta le posizioni che coprono la persona chiave: il loro capitale assicurato conta nella copertura.")
                     ForEach(coperturePossibili) { p in
                         Toggle(isOn: collegata(p.id)) {
-                            Text("\(p.nome) · \(p.canale.nomeBreve)\(p.capitaleAssicurato.map { " · " + Formati.euro($0) } ?? "")")
+                            Text("\(p.nome)\(p.capitaleAssicurato.map { " · " + Formati.euro($0) } ?? "")")
                         }
                         .stileCasella()
                     }

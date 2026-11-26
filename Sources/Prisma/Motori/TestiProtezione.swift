@@ -16,11 +16,8 @@ struct TestiProtezione {
     var piede: String { "\(Self.titolo) · \(cliente) · \(CifreDoc.data(data)) · \(TestiValutazione.consulente)" }
     static let avvertenza = "Stime basate sulle ipotesi indicate: fanno fede le condizioni di assicurazione delle singole polizze."
 
-    var ruoloConsulente: String {
-        if e.canali == [.alleanza] { return "Consulente Alleanza Assicurazioni" }
-        if e.canali == [.indipendente] { return "Consulenza finanziaria" }
-        return "Alleanza Assicurazioni · consulenza finanziaria"
-    }
+    /// Un solo canale, Lucy: la stessa firma per ogni cliente.
+    var ruoloConsulente: String { TestiValutazione.ruoloLucy }
 
     /// "Luca (convivente), Anna (figlia, 9 anni)".
     var chiEFamiglia: String {

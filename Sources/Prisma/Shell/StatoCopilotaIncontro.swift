@@ -39,23 +39,23 @@ enum TestiCopilota {
     static let vuotoTrascrizione = "Avvia il copilota: le parole compaiono qui, solo come testo."
     static let ascoltoSenzaParole = "Parla pure: le parole compaiono qui."
     static let vuotoSchede = "Le schede compaiono qui, mentre Lucy capisce."
-    static let veraNonPronta = "Vera non è pronta: Lucy riconosce con le sue regole."
+    static let veraNonPronta = "Lucy non è pronta: Lucy riconosce con le sue regole."
     static let comeFunziona = "Mentre parlate, Lucy riconosce obiettivi, polizze, timori ed eventi. Alla fine conferma tu cosa entra nel dossier."
     static let nessunIncontro = "Nessun incontro in agenda oggi."
     static let senzaAppuntamento = "Ascolta un incontro senza appuntamento"
     /// Segnaposto «dati di prova» finché l'utente non dà il testo vero del consenso (§8.6, dato 67).
     static let testoConsenso = "Il cliente acconsente all’ascolto dell’incontro: Lucy trascrive la voce " + dispositivo
         + " solo come testo, l’audio non si registra e non lascia il dispositivo. (Testo di prova: va sostituito con quello approvato.)"
-    static let alleanza = "Verifica le regole di Alleanza sull’ascolto."
+    static let alleanza = "Verifica le regole della compagnia sull’ascolto."
     static let sulMac = "Da confermare sul Mac"
     static let nienteNelDossier = "Niente da aggiungere."
     static let nienteRiconosciuto = "Lucy non ha riconosciuto obiettivi, polizze, timori o eventi."
     static let nessunaAttivita = "Nessuna attività."
     #if os(macOS)
     /// Migliorie d'uso 9: niente nome del motore in vista.
-    static let firmaVera = "Scritto da Vera, con le cifre delle schede"
+    static let firmaVera = "Scritto da Lucy, con le cifre delle schede"
     #else
-    static let firmaVera = "Scritto da Vera con Qwen, con le cifre delle schede"
+    static let firmaVera = "Scritto da Lucy con Qwen, con le cifre delle schede"
     #endif
     static let firmaPrisma = "Composto da Lucy dalle schede"
     static let conservaTrascrizione = "Conserva la trascrizione"

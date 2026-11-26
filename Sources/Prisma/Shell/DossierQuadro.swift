@@ -5,14 +5,15 @@ import SwiftUI
 // del dossier apre sulle quattro aree del cliente (le stesse cifre e gli stessi testi delle card di Analisi 360, da
 // `stato.aree360`, in cache) e tiene i dati da completare in una riga in fondo alla card:
 //
-//   ┌ IL QUADRO DI GIULIA ─── Il cliente in 30 secondi ›  Apri Analisi 360 › ┐┌ DA FARE PER GIULIA ③ ── Apri tutto › ┐
-//   │ ┌ ◎ 72%  PREVIDENZA ─────────┐ ┌ ◎ 64%  PROTEZIONE ─────────┐         ││ ○ ● Rinnovo polizza casa              │
-//   │ │  72% del divario coperto   │ │  64% della famiglia protetta│         │└───────────────────────────────────────┘
-//   │ └────────────────────────────┘ └─────────────────────────────┘         │┌ PROSSIMO INCONTRO ────────────────────┐
-//   │ ┌ ◎ 92%  INVESTIMENTI ───────┐ ┌ ◎ 3,5 mesi  RISPARMIO ──────┐         │└───────────────────────────────────────┘
-//   │ └────────────────────────────┘ └─────────────────────────────┘         │┌ DA RICORDARE ─────────────────────────┐
-//   │ DATI PER L'ANALISI ▬▬▬▬▬▬▭▭ 84%                    3 da completare ›   │└───────────────────────────────────────┘
-//   └─────────────────────────────────────────────────────────────────────────┘
+//   ┌ IL QUADRO DI GIULIA ──────────────────── Il cliente in 30 secondi ›  Apri Analisi 360 › ┐
+//   │ ┌ ◎ 72%        ┐  ┌ ◎ 64%        ┐  ┌ ◎ 92%        ┐  ┌ ◎ 3,5 mesi   ┐                 │
+//   │ │ PREVIDENZA   │  │ PROTEZIONE   │  │ INVESTIMENTI │  │ RISPARMIO    │  (quadrati      │
+//   │ │ 72% coperto  │  │ 64% protetta │  │ …            │  │ …            │   uguali)       │
+//   │ └──────────────┘  └──────────────┘  └──────────────┘  └──────────────┘                 │
+//   │ DATI PER L'ANALISI ▬▬▬▬▬▬▭▭ 84%                                     3 da completare ›  │
+//   └─────────────────────────────────────────────────────────────────────────────────────────┘
+//   ┌ DA FARE PER GIULIA ③ ── Apri tutto › ┐  ┌ PROSSIMO INCONTRO ────────────┐
+//   └──────────────────────────────────────┘  └ DA RICORDARE … ───────────────┘
 //
 // - Un clic su un riquadro apre Analisi 360 con il dettaglio di quell'area già aperto (`dettaglioArea360DaAprire`,
 //   consumato da PresentatoreAree360); «Apri Analisi 360 ›» apre la griglia delle aree.
@@ -40,7 +41,7 @@ enum TestiQuadroDossier {
     static func titolo(_ nome: String) -> String { "Il quadro di \(nome)" }
     static let apriAnalisi = "Apri Analisi 360 ›"
     static let trentaSecondi = "Il cliente in 30 secondi ›"
-    static func aiutoTrentaSecondi(_ nome: String) -> String { "Apre Vera e ti racconta \(nome) a voce in 30 secondi" }
+    static func aiutoTrentaSecondi(_ nome: String) -> String { "Apre Lucy e ti racconta \(nome) a voce in 30 secondi" }
     static func aiutoArea(_ area: String) -> String { "Apri \(area) in Analisi 360" }
     static func daCompletare(_ n: Int) -> String { "\(n) da completare ›" }
     static let datiCompleti = "Dati completi"
@@ -76,8 +77,8 @@ struct QuadroDossierApple: View {
     private typealias Q = Tema.Apple.Clienti.Panoramica.Quadro
     private typealias P = Tema.Apple.Clienti.Panoramica
 
-    /// Le aree in due righe, nell'ordine di Analisi 360.
-    private static let righe: [[AreaAnalisi]] = [[.previdenza, .protezione], [.investimenti, .risparmio]]
+    /// Le quattro aree in una riga, nell'ordine di Analisi 360.
+    private static let aree: [AreaAnalisi] = [.previdenza, .protezione, .investimenti, .risparmio]
 
     var body: some View {
         let _ = ContaCorpi.segna()
@@ -86,18 +87,17 @@ struct QuadroDossierApple: View {
         let nome = TestiTraguardi.primoNome(cliente.nome)
         return VStack(alignment: .leading, spacing: 0) {
             testata(nome)
-            VStack(spacing: Q.spazioGriglia) {
-                ForEach(0..<Self.righe.count, id: \.self) { r in
-                    HStack(spacing: Q.spazioGriglia) {
-                        ForEach(Self.righe[r], id: \.self) { a in
-                            TesseraAreaDossier(area: a, sintesi: aree.sintesi(a),
-                                               indice: r * 2 + (Self.righe[r].firstIndex(of: a) ?? 0),
-                                               apri: { stato.apriAnalisi360DalQuadro(area: a) })
-                        }
-                    }
+            // Quattro riquadri quadrati uguali in una riga (25 novembre 2026): ogni posto è un quarto della riga e il
+            // riquadro, quadrato, ne prende la larghezza fino a `latoMassimoTessera`, centrato nel suo posto.
+            HStack(alignment: .top, spacing: Q.spazioGriglia) {
+                ForEach(Array(Self.aree.enumerated()), id: \.element) { i, a in
+                    TesseraAreaDossier(area: a, sintesi: aree.sintesi(a), indice: i,
+                                       apri: { stato.apriAnalisi360DalQuadro(area: a) })
+                        .aspectRatio(1, contentMode: .fit)
+                        .frame(maxWidth: Q.latoMassimoTessera)
+                        .frame(maxWidth: .infinity)
                 }
             }
-            .frame(maxHeight: .infinity)
             .padding(.top, Q.sopraGriglia)
             if let k = completezza {
                 RigaDatiAnalisi(completezza: k) {
@@ -108,7 +108,7 @@ struct QuadroDossierApple: View {
             }
         }
         .padding(Q.padding)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .superficieApple(P.superficie)
     }
 
@@ -146,8 +146,9 @@ struct QuadroDossierApple: View {
 
 // MARK: - Un riquadro
 
-/// Un riquadro delle aree: l'anello 76/9 con la cifra al centro (i mesi su due righe), l'occhiello nel colore
-/// dell'area, la riga della cifra e il testo breve delle card di Analisi 360. Si inclina di 4° e un clic apre l'area.
+/// Un riquadro quadrato delle aree: l'anello 64/8 in alto con la cifra al centro (i mesi su due righe), sotto
+/// l'occhiello nel colore dell'area, la riga della cifra e il testo breve delle card di Analisi 360. Si inclina di 4°
+/// e un clic apre l'area.
 private struct TesseraAreaDossier: View {
     let area: AreaAnalisi
     let sintesi: SintesiArea360?
@@ -160,36 +161,41 @@ private struct TesseraAreaDossier: View {
         let colore = Tema.Apple.Aree360.colore(area)
         let forma = RoundedRectangle(cornerRadius: Q.raggioTessera, style: .continuous)
         let nomeArea = TestiAree360.nomeArea(area)
-        return HStack(alignment: .center, spacing: Q.spazioTessera) {
+        // Riquadro quadrato (25 novembre 2026): l'anello in alto, sotto l'occhiello, la riga e il testo breve; se il
+        // lato è corto il testo si accorcia per primo, poi la riga (l'anello e l'occhiello restano interi).
+        return VStack(alignment: .leading, spacing: Q.spazioTessera) {
             Anello(frazione: sintesi?.frazione ?? 0, colore: colore, misura: Q.anello, spessore: Q.spessoreAnello,
                    ritardo: Tema.Apple.Clienti.Moto.ritardoAnelli) {
                 centro
                     .frame(maxWidth: max(0, Q.anello - 2 * Q.spessoreAnello))
             }
+            .layoutPriority(3)
             VStack(alignment: .leading, spacing: 0) {
                 Text(nomeArea)
                     .carattereApple(Q.occhiello)
                     .foregroundColor(colore)
                     .lineLimit(1)
+                    .layoutPriority(2)
                 Text(sintesi?.titolo ?? nomeArea)
                     .carattereApple(Q.riga)
                     .foregroundColor(Q.coloreRiga)
                     .lineLimit(2)
-                    .fixedSize(horizontal: false, vertical: true)
                     .padding(.top, Q.sopraRiga)
                     .padding(.bottom, Q.sottoRiga)
+                    .layoutPriority(1)
                 if let testo = sintesi?.testo, !testo.isEmpty {
                     Text(testo)
                         .carattereApple(Q.testo)
                         .foregroundColor(Q.coloreTesto)
                         .lineLimit(Q.righeTesto)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
+            Spacer(minLength: 0)
         }
         .padding(Q.paddingTessera)
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .clipped()
         .contentShape(forma)
         .onTapGesture(perform: apri)
         .superficieApple(Q.superficieTessera, raggio: Q.raggioTessera)

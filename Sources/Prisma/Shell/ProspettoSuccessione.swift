@@ -15,8 +15,9 @@ enum ProspettoSuccessione {
 
 /// Le voci divise per canale, con il destino o l'avviso sotto il nome.
 private func gruppiSuccessione(_ voci: [Successione.Voce], _ C: PaletteDocumento) -> [GruppoCanale] {
-    Canale.allCases.compactMap { c in
-        let mie = voci.filter { $0.posizione.canale == c }
+    [GruppoCanale.canaleUnico].compactMap { c in
+        // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+        let mie = voci
         guard !mie.isEmpty else { return nil }
         return GruppoCanale(canale: c, righe: mie.map { v in
             let chi = v.destino == .beneficiari ? (v.posizione.senzaBeneficiari ? "da indicare" : v.posizione.beneficiari) : "eredi"

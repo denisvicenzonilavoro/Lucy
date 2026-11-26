@@ -25,13 +25,7 @@ extension CompositoreProspetti {
                                 nota: "per \(euro(r.valoreProposte))" + (p.tassoAccettazione.map { " · accettate \(quota($0))" } ?? "")),
         ]))
 
-        sezione("Per canale")
-        b.append(.tabella(TabellaProspetto(
-            colonne: [ColonnaProspetto(titolo: "Canale", peso: 2), ColonnaProspetto(titolo: "Attività in essere", peso: 1.4, destra: true),
-                      ColonnaProspetto(titolo: "Quota", peso: 0.8, destra: true)],
-            righe: Canale.allCases.map { c in [.c(c), .t(euro(r.perCanale[c] ?? 0)), .t(quota(r.quota(c)))] },
-            totale: [.f("Totale"), .f(euro(r.attivita)), .f("100%")])))
-
+        // Un solo canale, Lucy: niente tabella per canale (il patrimonio seguito è nelle cifre qui sopra)
         sezione("Per area")
         let aree = AreaPosizione.allCases.filter { (r.perArea[$0] ?? 0) > 0 }
         b.append(.tabella(TabellaProspetto(
@@ -65,24 +59,24 @@ extension CompositoreProspetti {
             let nomi = Dictionary(dati.clienti.map { ($0.id, $0.nome) }, uniquingKeysWith: { primo, _ in primo })
             b.append(.tabella(TabellaProspetto(
                 colonne: [ColonnaProspetto(titolo: "Scadenza", peso: 1), ColonnaProspetto(titolo: "Posizione", peso: 2.2),
-                          ColonnaProspetto(titolo: "Cliente", peso: 1.6), ColonnaProspetto(titolo: "Canale", peso: 1.1),
+                          ColonnaProspetto(titolo: "Cliente", peso: 2.7),
                           ColonnaProspetto(titolo: "Valore", peso: 1.1, destra: true)],
                 righe: scadenze.map { _, pos in
                     [.t(pos.scadenza.map { Formati.dataBreve.string(from: $0) } ?? "—"), .f(pos.nome),
-                     .t(nomi[pos.clienteId] ?? ""), .c(pos.canale),
+                     .t(nomi[pos.clienteId] ?? ""),
                      pos.area == .protezione ? .n("copertura") : .t(euro(pos.valore))]
                 },
-                totale: [.f("Da reinvestire"), .t(""), .t(""), .t(""), .f(euro(p.scadenze.reduce(0) { $0 + $1.capitale }))])))
+                totale: [.f("Da reinvestire"), .t(""), .t(""), .f(euro(p.scadenze.reduce(0) { $0 + $1.capitale }))])))
         }
 
         sezione("Concentrazione per emittente")
         b.append(.testo("Quota delle attività finanziarie in essere (immobili e debiti esclusi): \(euro(p.attivitaFinanziarie)) in tutto."))
         b.append(.tabella(TabellaProspetto(
-            colonne: [ColonnaProspetto(titolo: "Emittente", peso: 2.2), ColonnaProspetto(titolo: "Canale", peso: 1.1),
+            colonne: [ColonnaProspetto(titolo: "Emittente", peso: 3.3),
                       ColonnaProspetto(titolo: "Posizioni", peso: 0.8, destra: true), ColonnaProspetto(titolo: "Valore", peso: 1.2, destra: true),
                       ColonnaProspetto(titolo: "Quota", peso: 0.8, destra: true)],
             righe: p.emittenti.map { e in
-                [.f(e.nome), e.canale.map { CellaProspetto.c($0) } ?? .n("entrambi"), .t("\(e.posizioni)"), .t(euro(e.valore)), .t(quota(e.quota))]
+                [.f(e.nome), .t("\(e.posizioni)"), .t(euro(e.valore)), .t(quota(e.quota))]
             })))
 
         sezione("Da ricontattare")
@@ -135,12 +129,12 @@ extension CompositoreProspetti {
             b.append(.testo(TestiSeguito.prospettoVuoto(giorni: giorniSeguito)))
         } else {
             b.append(.tabella(TabellaProspetto(
-                colonne: [ColonnaProspetto(titolo: "Cliente", peso: 1.6), ColonnaProspetto(titolo: "Proposta", peso: 1.8),
-                          ColonnaProspetto(titolo: "Canale", peso: 1.1), ColonnaProspetto(titolo: "Da quando", peso: 1),
+                colonne: [ColonnaProspetto(titolo: "Cliente", peso: 1.8), ColonnaProspetto(titolo: "Proposta", peso: 2.7),
+                          ColonnaProspetto(titolo: "Da quando", peso: 1),
                           ColonnaProspetto(titolo: "Giorni", peso: 0.7, destra: true)],
                 righe: ferme.map { s -> [CellaProspetto] in
                     let giorni: CellaProspetto = s.urgente ? CellaProspetto.f("\(s.giorni)") : CellaProspetto.t("\(s.giorni)")
-                    return [CellaProspetto.f(s.cliente.nome), CellaProspetto.t(s.posizione.nome), CellaProspetto.c(s.posizione.canale),
+                    return [CellaProspetto.f(s.cliente.nome), CellaProspetto.t(s.posizione.nome),
                             CellaProspetto.t(Formati.dataBreve.string(from: s.dal)), giorni]
                 })))
         }
@@ -149,7 +143,7 @@ extension CompositoreProspetti {
         b.append(.voci(EsitoProposta.allCases.map { CampoVoce(etichetta: $0.nome, valore: "\(p.esiti[$0] ?? 0)") }
                        + [CampoVoce(etichetta: "Tasso di accettazione", valore: p.tassoAccettazione.map { "\(quota($0)) delle proposte decise" } ?? "nessuna proposta decisa")]))
 
-        b.append(.nota("Metodo: valori delle posizioni in essere come registrati in Posizioni (controvalore o, se manca, versato). Le quote per canale e per cliente sono sulle attività in essere, debiti esclusi; la concentrazione per emittente esclude anche gli immobili. Le scadenze comprendono le posizioni in essere che scadono entro \(Portafoglio.mesiScadenze) mesi: il valore è quello di oggi, prima delle imposte. Il tasso di accettazione conta solo le proposte già decise (accettate o rifiutate). Da ricontattare: clienti con posizioni, senza incontri o appuntamenti negli ultimi \(Portafoglio.mesiSenzaContatto) mesi e senza appuntamenti in agenda. \(TestiSeguito.metodo(giorni: giorniSeguito)) Documento ad uso del consulente, non da consegnare ai clienti."))
+        b.append(.nota("Metodo: valori delle posizioni in essere come registrati in Posizioni (controvalore o, se manca, versato). Le quote per area e per cliente sono sulle attività in essere, debiti esclusi; la concentrazione per emittente esclude anche gli immobili. Le scadenze comprendono le posizioni in essere che scadono entro \(Portafoglio.mesiScadenze) mesi: il valore è quello di oggi, prima delle imposte. Il tasso di accettazione conta solo le proposte già decise (accettate o rifiutate). Da ricontattare: clienti con posizioni, senza incontri o appuntamenti negli ultimi \(Portafoglio.mesiSenzaContatto) mesi e senza appuntamenti in agenda. \(TestiSeguito.metodo(giorni: giorniSeguito)) Documento ad uso del consulente, non da consegnare ai clienti."))
 
         return ContenutoProspetto(occhiello: "Prospetto di dettaglio · Portafoglio del consulente", titolo: titoloPortafoglio,
                                   sottotitolo: "Tutti i clienti · \(dati.impostazioni.nomeUtente) · situazione al \(Formati.dataEstesa.string(from: data))",

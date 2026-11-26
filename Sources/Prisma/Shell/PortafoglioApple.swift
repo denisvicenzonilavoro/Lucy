@@ -301,13 +301,7 @@ private struct CardPortafoglioApple: View {
             }
             totale
                 .padding(.top, c.totaleSopra)
-            BarraPienaSegmenti.canali(alleanza: riepilogo.quota(.alleanza) * 100,
-                                      indipendente: riepilogo.quota(.indipendente) * 100, indice: c.indiceBarra)
-                .frame(maxWidth: c.larghezzaBarra)
-                .frame(height: Tema.Apple.Grafico.Barra.altezza)
-                .padding(.top, c.barraSopra)
-                .padding(.bottom, c.barraSotto)
-            canali
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente barra né cifre per canale
             Spacer(minLength: 0)
         }
         .padding(c.padding)
@@ -353,20 +347,6 @@ private struct CardPortafoglioApple: View {
         }
     }
 
-    /// I due canali, sempre riconoscibili: l'etichetta e il valore in essere che si conta.
-    private var canali: some View {
-        let c = Tema.Apple.Posizioni.Card.self
-        return HStack(spacing: c.spazioCanale) {
-            ForEach(Array(Canale.allCases.enumerated()), id: \.element) { i, canale in
-                if i > 0 { Spacer().frame(width: c.spazioFraCanali) }
-                EtichettaCanaleApple(canale: canale)
-                NumeroCheConta(riepilogo.perCanale[canale] ?? 0, formato: .euro, indice: c.indiceCanali + i)
-                    .carattereApple(c.cifraCanale)
-                    .foregroundColor(Tema.Apple.Colore.inchiostro)
-                    .lineLimit(1)
-            }
-        }
-    }
 
     /// I dati del grafico: storia, stima, fascia e mesi dell'asse (uno per punto), con i limiti in euro.
     static func dati(_ a: AndamentoPortafoglio) -> DatiGraficoPortafoglio {
@@ -702,14 +682,6 @@ private struct SchedaDaFareApple: View {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.top, s.percheSopra)
             Spacer(minLength: 0)
-            if !voce.canali.isEmpty {
-                HStack(spacing: s.spazioCanali) {
-                    ForEach(voce.canali, id: \.self) { c in
-                        EtichettaCanaleApple(canale: c, compatta: true)
-                    }
-                }
-                .padding(.top, s.canaliSopra)
-            }
             HStack(spacing: s.spazioCliente) {
                 AvatarCliente(iniziali: voce.cliente.iniziali, tinta: voce.cliente.tinta.colori, lato: s.avatar)
                 VStack(alignment: .leading, spacing: s.spazioNomePatrimonio) {
@@ -800,12 +772,8 @@ struct DettaglioDaFareApple: View {
                     .lineLimit(1)
             }
             Spacer(minLength: 0)
-            HStack(spacing: d.spazioCanali) {
-                ForEach(voce.canali, id: \.self) { c in
-                    EtichettaCanaleApple(canale: c)
-                }
-            }
-            .padding(.trailing, margine)
+            // Lo spazio del pulsante di chiusura (al posto delle etichette dei canali, tolte il 25 novembre 2026)
+            Color.clear.frame(width: margine, height: 0)
         }
     }
 

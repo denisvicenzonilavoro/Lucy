@@ -8,8 +8,8 @@ enum TestiConformita {
 
     // MARK: - Nomi
 
-    /// «Questionario di adeguatezza», «Adeguata verifica antiriciclaggio»… (i due canali hanno lo stesso nome:
-    /// il canale lo dice l'etichetta).
+    /// «Questionario di adeguatezza», «Adeguata verifica antiriciclaggio»… (un solo canale, quello di Lucy: i due
+    /// valori salvati hanno lo stesso nome).
     static func nome(_ t: Tipo) -> String {
         switch t {
         case .questionarioAlleanza, .questionarioIndipendente: return "Questionario di adeguatezza"
@@ -20,20 +20,19 @@ enum TestiConformita {
         }
     }
 
-    /// «questionario Alleanza», «adeguata verifica indipendente», «documento d'identità»…
+    /// «questionario di adeguatezza», «adeguata verifica», «documento d'identità»… (dal 25 novembre 2026 un solo
+    /// canale: niente nome del canale).
     static func nomeBreve(_ t: Tipo) -> String {
         switch t {
-        case .questionarioAlleanza: return "questionario Alleanza"
-        case .verificaAlleanza: return "adeguata verifica Alleanza"
-        case .questionarioIndipendente: return "questionario indipendente"
-        case .verificaIndipendente: return "adeguata verifica indipendente"
+        case .questionarioAlleanza, .questionarioIndipendente: return "questionario di adeguatezza"
+        case .verificaAlleanza, .verificaIndipendente: return "adeguata verifica"
         case .documento: return "documento d'identità"
         case .privacy: return "informativa privacy"
         case .commerciale: return "consenso commerciale"
         }
     }
 
-    /// Il nome breve con la prima lettera maiuscola («Questionario Alleanza»).
+    /// Il nome breve con la prima lettera maiuscola («Questionario di adeguatezza»).
     static func nomeBreveMaiuscolo(_ v: VoceConformita) -> String { maiuscola(nomeBreve(v.tipo)) }
 
     /// Vero per le verifiche e l'informativa (per «scaduto/scaduta»).
@@ -121,7 +120,7 @@ enum TestiConformita {
     }
 
     private static func nonSeguito(_ c: Canale?) -> String {
-        c == .alleanza ? "Il cliente non è seguito con Alleanza." : "Il cliente non è seguito con la consulenza indipendente."
+        "Non richiesto per le posizioni del cliente."
     }
 
     private static func dettaglioQuestionario(_ v: VoceConformita, cliente: Cliente) -> String {
@@ -141,7 +140,7 @@ enum TestiConformita {
 
     private static func dettaglioVerifica(_ v: VoceConformita, cliente: Cliente) -> String {
         switch v.motivo {
-        case .impostazioni?: return "Non tenuta sul canale indipendente (Impostazioni)."
+        case .impostazioni?: return "Non tenuta (Impostazioni)."
         case .canaleNonSeguito?: return nonSeguito(v.canale)
         default: break
         }
@@ -161,7 +160,7 @@ enum TestiConformita {
 
     private static func dettaglioDocumento(_ v: VoceConformita, cliente: Cliente) -> String {
         if v.motivo == .clienteNonSeguito {
-            return "Nessun canale e nessuna posizione aperta: l'identificazione servirà al primo contratto."
+            return "Nessuna posizione aperta: l'identificazione servirà al primo contratto."
         }
         guard let d = cliente.conformita?.documento, d != DocumentoIdentita() else {
             return "Non registrato: serve per l'identificazione (antiriciclaggio)."
@@ -208,9 +207,8 @@ enum TestiConformita {
     static func bloccante(_ v: VoceConformita) -> String {
         switch v.tipo {
         case .questionarioAlleanza, .questionarioIndipendente:
-            let canale = v.canale == .alleanza ? "Alleanza" : "indipendente"
             let stato = v.stato == .scaduta ? "scaduto" : "da raccogliere"
-            return "Questionario di adeguatezza \(canale) \(stato): va compilato prima di firmare."
+            return "Questionario di adeguatezza \(stato): va compilato prima di firmare."
         case .documento:
             let stato = v.stato == .scaduta ? "scaduto" : "non registrato"
             return "Documento d'identità \(stato): serve una copia valida per l'identificazione."
@@ -221,12 +219,12 @@ enum TestiConformita {
         }
     }
 
-    /// «Questionario Alleanza scade il 15 novembre 2026, prima della firma prevista.»
+    /// «Questionario di adeguatezza scade il 15 novembre 2026, prima della firma prevista.»
     static func primaDellaFirma(_ v: VoceConformita) -> String {
         "\(nomeBreveMaiuscolo(v)) scade il \(v.scadenza.map(data) ?? "—"), prima della firma prevista."
     }
 
-    /// «Questionario Alleanza scade il 15 novembre 2026: conviene rinnovarlo alla firma.»
+    /// «Questionario di adeguatezza scade il 15 novembre 2026: conviene rinnovarlo alla firma.»
     static func rinnovoAllaFirma(_ v: VoceConformita) -> String {
         "\(nomeBreveMaiuscolo(v)) scade il \(v.scadenza.map(data) ?? "—"): conviene rinnovarl\(femminile(v.tipo) ? "a" : "o") alla firma."
     }
@@ -234,7 +232,7 @@ enum TestiConformita {
     // MARK: - Ricerca
 
     /// Le prime due voci che rispettano il filtro, per l'estratto del cliente nella ricerca
-    /// («Questionario Alleanza scaduto il 18 settembre · Adeguata verifica Alleanza scaduta il 2 settembre»).
+    /// («Questionario di adeguatezza scaduto il 18 settembre · Adeguata verifica scaduta il 2 settembre»).
     static func estrattoRicerca(_ e: EsitoConformita, filtro: FiltroConformita, canale: Canale?) -> String? {
         let voci = MotoreConformita.vociFiltro(e, filtro, canale: canale)
         guard !voci.isEmpty else { return nil }
@@ -264,8 +262,8 @@ enum TestiConformita {
     /// Le sei fonti della sezione «Come si calcola e fonti», con il loro titolo.
     static var fonti: [(titolo: String, testo: String)] {
         [
-            ("Questionario Alleanza", fonte(.questionarioAlleanza)),
-            ("Questionario indipendente", fonte(.questionarioIndipendente)),
+            ("Questionario di adeguatezza: prodotti assicurativi", fonte(.questionarioAlleanza)),
+            ("Questionario di adeguatezza: consulenza finanziaria", fonte(.questionarioIndipendente)),
             ("Adeguata verifica", fonte(.verificaAlleanza)),
             ("Documento d'identità", fonte(.documento)),
             ("Informativa privacy", fonte(.privacy)),
@@ -278,7 +276,7 @@ enum TestiConformita {
 
     /// Come si calcola, in tre righe.
     static let metodo: [String] = [
-        "Questionario e adeguata verifica valgono per canale: si chiedono se il cliente è seguito con quel canale (scheda) o ha posizioni d'investimento, risparmio o previdenza non chiuse del canale.",
+        "Questionario e adeguata verifica valgono per tipo di prodotti (assicurativi o strumenti finanziari): si chiedono se il cliente ha posizioni d'investimento, risparmio o previdenza non chiuse di quel tipo, o se la scheda lo dice.",
         "La scadenza è la data registrata più la validità (Impostazioni o quella del questionario); per l'adeguata verifica dipende dal rischio: alto 12, medio 24, basso 36 mesi se non cambi i valori. Senza rischio indicato si usa il medio.",
         "In scadenza: entro 30 giorni (arancio) ed entro 60 giorni; scaduta il giorno dopo la scadenza. Il documento d'identità vale fino alla data stampata.",
     ]

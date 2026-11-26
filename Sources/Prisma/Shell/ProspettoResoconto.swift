@@ -48,10 +48,11 @@ enum ProspettoResoconto {
 
 private var larghezza: CGFloat { FoglioProspetto<EmptyView>.larghezza }
 
-/// Le righe delle posizioni finanziarie, per canale, con il totale del canale.
+/// Le righe delle posizioni finanziarie, con il totale (un solo canale, Lucy).
 private func gruppiFinanziari(_ voci: [VoceResoconto], C: PaletteDocumento, totali: Bool) -> [GruppoCanale] {
-    Canale.allCases.compactMap { canale in
-        let mie = voci.filter { $0.posizione.canale == canale }
+    // Un solo canale, Lucy: un gruppo solo con tutte le posizioni e il totale di tutte (il canale del gruppo non si mostra)
+    voci.prefix(1).map(\.posizione.canale).compactMap { canale in
+        let mie = voci
         guard !mie.isEmpty else { return nil }
         var righe = mie.map { v -> RigaDoc in
             let p = v.posizione
@@ -82,7 +83,7 @@ private func gruppiFinanziari(_ voci: [VoceResoconto], C: PaletteDocumento, tota
             let versato = mie.reduce(0) { $0 + ($1.versato ?? 0) }
             let valore = mie.reduce(0) { $0 + $1.valore }
             let costo = mie.reduce(0) { $0 + ($1.costoAnnuo ?? 0) }
-            righe.append(RigaDoc(celle: [CellaDoc("Totale \(canale.nomeBreve.lowercased())", font: T.pTabellaForte), CellaDoc(""),
+            righe.append(RigaDoc(celle: [CellaDoc("Totale", font: T.pTabellaForte), CellaDoc(""),
                                          CellaDoc(CifreDoc.euro(versato), font: T.pTabellaForte), CellaDoc(CifreDoc.euro(valore), font: T.pTabellaForte),
                                          CellaDoc(CifreDoc.euroSegno(valore - versato), font: T.pTabellaForte), CellaDoc(""), CellaDoc(""),
                                          CellaDoc(costo > 0 ? CifreDoc.euro(costo) : "—", font: T.pTabellaForte)],
@@ -171,15 +172,17 @@ private struct PaginaQuadro: View {
                     }
                 }
                 .frame(width: (larghezza - 18) * 0.56, alignment: .topLeading)
+                // Un solo canale, Lucy: le posizioni tutte insieme, con il risultato delle finanziarie
+                let numero: Int = e.canali.reduce(0) { $0 + $1.posizioni }
+                let valore: Double = e.canali.reduce(0.0) { $0 + $1.valore }
+                let versato: Double = e.canali.reduce(0.0) { $0 + $1.versato }
+                let risultato: Double = e.canali.reduce(0.0) { $0 + $1.risultato }
                 VStack(alignment: .leading, spacing: 5) {
-                    Text(verbatim: "Per canale").font(T.pSottosezione).foregroundColor(C.titolo)
-                    ForEach(e.canali.filter { $0.posizioni > 0 }) { c in
-                        VStack(alignment: .leading, spacing: 3) {
-                            EtichettaCanale(canale: c.canale)
-                            BarraQuota(etichetta: TestiResoconto.posizioni(c.posizioni), nota: c.versato > 0 ? "risultato \(CifreDoc.euroSegno(c.risultato))" : "",
-                                       valore: c.valore, quota: e.riepilogo.attivita > 0 ? c.valore / e.riepilogo.attivita : 0,
-                                       colore: C.canale(c.canale), passivo: false)
-                        }
+                    Text(verbatim: "Tutto insieme").font(T.pSottosezione).foregroundColor(C.titolo)
+                    if numero > 0 {
+                        BarraQuota(etichetta: TestiResoconto.posizioni(numero), nota: versato > 0 ? "risultato \(CifreDoc.euroSegno(risultato))" : "",
+                                   valore: valore, quota: e.riepilogo.attivita > 0 ? valore / e.riepilogo.attivita : 0,
+                                   colore: C.oro, passivo: false)
                     }
                 }
                 .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -297,8 +300,9 @@ private struct PaginaTutele: View {
                 TabellaCanali(colonne: [
                     ColonnaDoc(titolo: "Data", peso: 0.9, destra: false), ColonnaDoc(titolo: "Posizione", peso: 2.4, destra: false),
                     ColonnaDoc(titolo: "Che cosa", peso: 2, destra: false), ColonnaDoc(titolo: "Valore o premio", peso: 1.1),
-                ], gruppi: Canale.allCases.compactMap { c in
-                    let mie = e.scadenze.filter { $0.posizione.canale == c }
+                ], gruppi: [GruppoCanale.canaleUnico].compactMap { c in
+                    // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+                    let mie = e.scadenze
                     guard !mie.isEmpty else { return nil }
                     return GruppoCanale(canale: c, righe: mie.map { s in
                         let p = s.posizione
@@ -322,15 +326,16 @@ private struct PaginaTutele: View {
     }
 
     private func dettaglioProposta(_ p: Posizione) -> String {
-        var parti = [p.canale.nome, p.area.nome.lowercased(), p.esito?.nome.lowercased() ?? "bozza"]
+        var parti = [p.area.nome.lowercased(), p.esito?.nome.lowercased() ?? "bozza"]
         if p.premioAnnuo > 0 { parti.append("\(CifreDoc.euro(p.premioAnnuo))/anno") }
         if p.versamentoIniziale > 0 { parti.append("iniziale \(CifreDoc.euro(p.versamentoIniziale))") }
         return " · " + parti.joined(separator: " · ")
     }
 
     private func gruppi(_ voci: [VoceResoconto], _ celle: (VoceResoconto) -> [CellaDoc]) -> [GruppoCanale] {
-        Canale.allCases.compactMap { c in
-            let mie = voci.filter { $0.posizione.canale == c }
+        [GruppoCanale.canaleUnico].compactMap { c in
+            // Dal 25 novembre 2026 un solo canale, quello di Lucy: un gruppo solo con tutte le righe
+            let mie = voci
             guard !mie.isEmpty else { return nil }
             return GruppoCanale(canale: c, righe: mie.map { RigaDoc(celle: celle($0), altezza: 21) }, nota: TestiResoconto.posizioni(mie.count))
         }
@@ -364,16 +369,11 @@ private struct PaginaStorico: View {
                              testo: Text(verbatim: conStorico.isEmpty
                                          ? "Nessuna posizione ha ancora valori rilevati in date diverse: lo storico si forma da solo ogni volta che aggiorni il controvalore in Posizioni."
                                          : "I valori rilevati nel tempo. La variazione è al netto dei versamenti fatti tra una rilevazione e l'altra; lo storico si arricchisce ogni volta che aggiorni il controvalore in Posizioni."))
-            ForEach(Canale.allCases) { c in
-                let mie = conStorico.filter { $0.posizione.canale == c }
-                if !mie.isEmpty {
-                    EtichettaCanale(canale: c)
-                    ForEach(Array(stride(from: 0, to: mie.count, by: 2)), id: \.self) { i in
-                        HStack(alignment: .top, spacing: 18) {
-                            storico(mie[i])
-                            if i + 1 < mie.count { storico(mie[i + 1]) } else { Spacer(minLength: 0) }
-                        }
-                    }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: tutte le posizioni insieme, senza dividerle per canale
+            ForEach(Array(stride(from: 0, to: conStorico.count, by: 2)), id: \.self) { i in
+                HStack(alignment: .top, spacing: 18) {
+                    storico(conStorico[i])
+                    if i + 1 < conStorico.count { storico(conStorico[i + 1]) } else { Spacer(minLength: 0) }
                 }
             }
             SezioneProspetto(titolo: "Come sono calcolate le cifre")
@@ -445,7 +445,7 @@ private struct PaginaAndamento: View {
         let tutte = t.andamenti
         let righe = tutte.map { v, a -> RigaDoc in
             let p = v.posizione
-            var nome = CellaDoc(p.nome, sotto: "\(p.canale.nomeBreve) · \(p.area.nome)", font: T.pTabellaForte)
+            var nome = CellaDoc(p.nome, sotto: p.area.nome, font: T.pTabellaForte)
             nome.coloreSotto = C.tenue
             let colore: Color? = a.giudizio == .sotto ? C.negativo : a.giudizio == .sopra ? C.positivo : nil
             return RigaDoc(celle: [
@@ -553,8 +553,9 @@ private struct PaginaFisco: View {
                 ColonnaDoc(titolo: "Aliquota", sottotitolo: "effettiva", peso: 0.75),
                 ColonnaDoc(titolo: "Imposta", peso: 1),
                 ColonnaDoc(titolo: "Netto oggi", sottotitolo: "rend. netto annuo", peso: 1.25),
-            ], gruppi: Canale.allCases.compactMap { c in
-                let mie = e.finanziarie.filter { $0.posizione.canale == c }
+            ], gruppi: e.finanziarie.prefix(1).map(\.posizione.canale).compactMap { c in
+                // Un solo canale, Lucy: un gruppo solo con tutte le posizioni e il totale di tutte
+                let mie = e.finanziarie
                 guard !mie.isEmpty else { return nil }
                 var righe = mie.map { v -> RigaDoc in
                     let f = v.fisco
@@ -574,7 +575,7 @@ private struct PaginaFisco: View {
                 }
                 if mie.count > 1 {
                     let netto = mie.reduce(0) { $0 + $1.fisco.netto }, imposta = mie.reduce(0) { $0 + $1.fisco.imposta }
-                    righe.append(RigaDoc(celle: [CellaDoc("Totale \(c.nomeBreve.lowercased())", font: T.pTabellaForte),
+                    righe.append(RigaDoc(celle: [CellaDoc("Totale", font: T.pTabellaForte),
                                                  CellaDoc(CifreDoc.euroCentesimi(mie.reduce(0) { $0 + $1.fisco.valore }), font: T.pTabellaForte),
                                                  CellaDoc(""), CellaDoc(""), CellaDoc(""),
                                                  CellaDoc(imposta > 0.005 ? "\(CifreDoc.meno) " + CifreDoc.euroCentesimi(imposta) : "—", font: T.pTabellaForte),
@@ -587,7 +588,7 @@ private struct PaginaFisco: View {
                 SezioneProspetto(titolo: "I costi di un anno, voce per voce",
                                  testo: Text(verbatim: "Gestione (costo annuo del prodotto), trattenuto sul rendimento della gestione separata e imposta di bollo, sul valore di oggi. Sono già compresi nel valore: non si pagano a parte, tranne il bollo di fondi e conti."))
                 TabellaDoc(larghezza: larghezza, colonne: [
-                    ColonnaDoc(titolo: "Posizione", peso: 2.6, destra: false), ColonnaDoc(titolo: "Canale", peso: 0.9, destra: false),
+                    ColonnaDoc(titolo: "Posizione", peso: 2.6, destra: false), ColonnaDoc(titolo: "Area", peso: 0.9, destra: false),
                     ColonnaDoc(titolo: "Gestione", sottotitolo: "costo annuo"), ColonnaDoc(titolo: "Trattenuto", sottotitolo: "sul rendimento"),
                     ColonnaDoc(titolo: "Bollo", sottotitolo: "0,20% o fisso"), ColonnaDoc(titolo: "Totale", sottotitolo: "in un anno"),
                 ], righe: conCosti.map { v in
@@ -601,7 +602,7 @@ private struct PaginaFisco: View {
                         ? "\(TestiMultiramo.punti(p.trattenutoGestione)) punti \(TestiMultiramo.sullaGestione(p))"
                         : (p.trattenuto.map { "\(CifreDoc.condizione($0)) punti" } ?? "")
                     return RigaDoc(celle: [CellaDoc(p.nome, font: T.pTabellaForte),
-                                           CellaDoc(p.canale.nomeBreve, colore: C.canale(p.canale), font: T.pTabellaForte),
+                                           CellaDoc(p.area.nome, font: T.pTabella),
                                            cella(f.costoGestione, sottoGestione),
                                            cella(f.costoTrattenuto, sottoTrattenuto),
                                            cella(f.costoBollo, ""),

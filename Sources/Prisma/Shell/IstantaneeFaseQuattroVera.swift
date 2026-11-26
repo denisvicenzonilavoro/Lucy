@@ -50,7 +50,7 @@ extension Istantanee {
     }
 
     nonisolated private static func lanciaPreparaMarco(_ s: StatoShell) {
-        let frase = "Vera, prepara l'incontro con Marco"
+        let frase = "Lucy, prepara l'incontro con Marco"
         s.aggiungiMessaggio(MessaggioVera(autore: .utente, testo: frase), cliente: "marco", parla: false)
         if let r = s.routineVera(RoutineVera.idPrepara) {
             s.lanciaRoutine(r, richiesta: frase, clienteId: "marco", chiave: "marco", oggi: oggiRoutine, parla: false)
@@ -68,7 +68,7 @@ extension Istantanee {
         lanciaPreparaMarco(s)
         // «Il mio lunedì» già lanciato sul portafoglio: nell'elenco «Usata una volta» accanto alla programmazione
         if let r = s.routineVera(RoutineVera.idLunedi) {
-            s.lanciaRoutine(r, richiesta: "Vera, com'è la settimana?", clienteId: nil, chiave: VeraPortafoglio.chiave, oggi: oggiRoutine, parla: false)
+            s.lanciaRoutine(r, richiesta: "Lucy, com'è la settimana?", clienteId: nil, chiave: VeraPortafoglio.chiave, oggi: oggiRoutine, parla: false)
         }
         s.apriPaginaRoutine(RoutineVera.idPrepara)
     }

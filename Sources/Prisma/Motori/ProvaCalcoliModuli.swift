@@ -285,15 +285,15 @@ enum ProvaCalcoliModuli {
         let etichette = ["Recapito telefonico", "Codice IBAN", "Titolare effettivo"]
         let messaggi = ModuliVera.messaggi(etichette)
         let inviato = messaggi.map(\.testo).joined(separator: "\n")
-        verifica.vero("Moduli: a Vera vanno solo le etichette del modulo vuoto, nessun dato del cliente",
+        verifica.vero("Moduli: a Lucy vanno solo le etichette del modulo vuoto, nessun dato del cliente",
                       etichette.allSatisfy { inviato.contains($0) } && !inviato.contains("Rossi") && !inviato.contains("RSSGLU"))
         let json = #"{"campi":[{"etichetta":"Recapito telefonico","dato":"telefono"},{"etichetta":"Codice IBAN","dato":"iban"},{"etichetta":"Titolare effettivo","dato":"professione"},{"etichetta":"Inventata","dato":"email"},{"etichetta":"Codice IBAN","dato":"risposteQuestionario"}]}"#
         let p = ModuliVera.leggi(json, etichette: etichette) ?? [:]
-        verifica.vero("Moduli: Vera propone solo dati ammessi, per etichette date, mai per le risposte del cliente (\(p))",
+        verifica.vero("Moduli: Lucy propone solo dati ammessi, per etichette date, mai per le risposte del cliente (\(p))",
                       p == ["Recapito telefonico": .telefono, "Codice IBAN": .iban])
         var c = ModelloModulo.Campo(pagina: 0, riquadro: .zero, etichetta: "Recapito telefonico", origine: .acroForm)
         ModuliVera.applica(p, a: &c)
-        verifica.vero("Moduli: la proposta di Vera resta da confermare", c.dato == .telefono && c.daConfermare && c.origine == .vera)
+        verifica.vero("Moduli: la proposta di Lucy resta da confermare", c.dato == .telefono && c.daConfermare && c.origine == .vera)
     }
 
     /// Le caselle da spuntare (consensi, scelte) non si spuntano mai da sole, anche se il nome ricorda un dato.

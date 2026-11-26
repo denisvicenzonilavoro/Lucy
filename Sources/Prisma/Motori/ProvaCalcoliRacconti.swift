@@ -114,7 +114,7 @@ enum ProvaCalcoliRacconti {
         verifica.vero("Lettera: «senza il piano» senza scenari negativi oltre le cifre (decisione 80)",
                       senza.range(of: LetteraVera.scenariNegativi, options: [.regularExpression, .caseInsensitive]) == nil
                         && MotoreLettera.fissa(s3, .senzaPiano).range(of: LetteraVera.scenariNegativi, options: [.regularExpression, .caseInsensitive]) == nil)
-        verifica.vero("Lettera: la lettera fissa passa i controlli di Vera (cifre, prima persona, niente promesse)",
+        verifica.vero("Lettera: la lettera fissa passa i controlli di Lucy (cifre, prima persona, niente promesse)",
                       LetteraVera.controlla(MotoreLettera.fissa(s3, .conPiano), scheda: s3, versione: .conPiano, vietati: []) == nil)
         // Senza data di nascita: niente lettera
         verifica.vero("Lettera: senza data di nascita nessuna scheda",

@@ -100,8 +100,8 @@ enum CompositoreProspetti {
 
         // Dati del contratto
         sezione("Dati del contratto")
+        // Un solo canale, Lucy: niente voce «Canale»
         var voci: [CampoVoce] = [
-            CampoVoce(etichetta: "Canale", valore: p.canale.nome, canale: p.canale),
             CampoVoce(etichetta: "Stato", valore: p.stato.nome + (p.stato == .proposta ? " · \((p.esito ?? .bozza).nome.lowercased())" : "")),
             CampoVoce(etichetta: "Area", valore: p.area.nome),
         ]
@@ -407,7 +407,6 @@ enum CompositoreProspetti {
         bl.append(.tabella(TabellaProspetto(
             colonne: colonneAB,
             righe: [
-                [.t("Canale"), a.canale.map { CellaProspetto.c($0) } ?? .n("—"), b.canale.map { CellaProspetto.c($0) } ?? .n("—")],
                 [.t("Che cos'è"), .n(a.sottotitolo), .n(b.sottotitolo)],
                 [.t("Capitale di partenza"), .t(euro(pa.capitaleIniziale)), .t(euro(pb.capitaleIniziale))],
                 [.t("Versamento periodico"), versamento(pa), versamento(pb)],

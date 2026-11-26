@@ -237,7 +237,7 @@ enum InterpreteComandi {
 /// con lei).
 enum NomeVera {
     /// I nomi riconosciuti, in minuscolo.
-    static let nomi = ["vera", "ruby", "rubi", "rubì", "rubby", "eve"]
+    static let nomi = ["lucy", "lusi", "vera", "ruby", "rubi", "rubì", "rubby", "eve"]
     /// I nomi come alternativa di un'espressione regolare: `(?:vera|rubi|…)`.
     static let parole = "(?:" + nomi.joined(separator: "|") + ")"
 }

@@ -146,6 +146,10 @@ extension AppImpostazioni {
                     .cascataImpostazioni(8)
             }
 
+            // Ingresso con Touch ID o PIN (25 novembre 2026, richiesta dell'utente; SbloccoLucy.swift)
+            GruppoIngressoImpostazioni()
+                .cascataImpostazioni(8)
+
             GruppoImpostazioni(titolo: "Archivio di Lucy") {
                 RigaImpostazione(titolo: "Sul Mac", sottotitolo: Archivio.percorsoBreve(Archivio.cartella),
                                  stato: Pillola(testo: "Versione \(DatiPrisma.versioneAttuale)", tono: .neutro), ultima: true) {
@@ -160,6 +164,17 @@ extension AppImpostazioni {
                 }
             }
             .id("imp-archivio-mac")
+            .cascataImpostazioni(9)
+            // Il catalogo dei prodotti delle compagnie (25 novembre 2026): è una risorsa dell'app, non archivio, e
+            // si aggiorna con una nuova versione di Lucy (Supporto/catalogo)
+            GruppoImpostazioni(titolo: "Catalogo dei prodotti") {
+                RigaImpostazione(titolo: "Catalogo dei prodotti", sottotitolo: TestiCatalogoCompagnie.versioneInstallata,
+                                 aiuto: "Costi e condizioni dei prodotti delle compagnie dai documenti pubblici, dentro Lucy: non è nei backup e nessun dato esce dal Mac. Fanno fede i documenti contrattuali.",
+                                 ultima: true) {
+                    EmptyView()
+                }
+            }
+            .id("imp-archivio-catalogo")
             .cascataImpostazioni(9)
             HStack(spacing: Tema.Apple.Impostazioni.Backup.fraNumeri) {
                 numero(stato.clienti.count, "clienti")
@@ -198,7 +213,7 @@ extension AppImpostazioni {
                 .fixedSize()
                 .disabled(stato.backupInCorso || stato.inDimostrazione)
                 .help(stato.inDimostrazione ? TestiDimostrazione.backupFermo
-                                            : "Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Vera")
+                                            : "Copia completa di clienti, agenda, posizioni, documenti e impostazioni di Lucy")
         }
         .padding(k.padding)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -220,7 +235,7 @@ extension AppImpostazioni {
         let b = stato.dati.impostazioni.backup
         if let e = b.ultimoErrore, !stato.backupInCorso { return e }
         if b.ultimo == nil && !stato.backupInCorso { return "Il primo backup protegge tutto il lavoro fatto finora." }
-        let contenuto = "Clienti, agenda, posizioni, documenti e impostazioni di Vera"
+        let contenuto = "Clienti, agenda, posizioni, documenti e impostazioni di Lucy"
         return b.cifrato ? contenuto + " · cifrato" : contenuto
     }
 

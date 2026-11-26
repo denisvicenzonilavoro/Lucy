@@ -63,14 +63,8 @@ private struct LarghezzaQuota: Layout {
 }
 
 extension Colori.Analisi {
-    /// Il colore di un canale nelle barre: blu Alleanza e cuoio indipendente del tema (grigio se misto).
-    static func canale(_ c: Canale?) -> Color {
-        switch c {
-        case .alleanza: return Tema.Colore.canaleAlleanza
-        case .indipendente: return Tema.Colore.canaleIndipendente
-        case nil: return Colori.Portafoglio.misto
-        }
-    }
+    /// Il colore di un canale nelle barre. Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: lo stesso colore neutro per tutti.
+    static func canale(_ c: Canale?) -> Color { Colori.Portafoglio.misto }
 }
 
 // MARK: - Presentazione all'incontro

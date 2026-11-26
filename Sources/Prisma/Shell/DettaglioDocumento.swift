@@ -288,17 +288,8 @@ struct DettaglioDocumento: View {
             }
             .buttonStyle(StileCollegamento())
             .help("Apri \(Self.genere(b).lowercased()) «\(n.nome)»")
-            EtichettaCanale(canale: n.canale, compatta: !conNome)
-        } else if d.genere != .prisma {
-            if let c = voce.canale {
-                EtichettaCanale(canale: c, compatta: true)
-            } else {
-                // Nella fila corta la pillola si accorcia, come collegamento e canale
-                Pillola(testo: conNome ? "Canale da indicare" : "Canale ?", tono: .neutro)
-                    .help("Collega il documento a una posizione o a una scheda prodotto: il canale viene da lì")
-                    .accessibilityLabel(Text("Canale da indicare"))
-            }
         }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichetta né «Canale da indicare»
     }
 
     static func tono(_ s: MotoreDocumenti.Stato) -> Pillola.Tono {
@@ -335,7 +326,7 @@ struct DettaglioDocumento: View {
         return HStack(spacing: m.spazioBarra) {
             azionePrincipaleVista(compatta: compatta)
             if d.genere != .prisma {
-                PulsanteIcona(simbolo: "sparkles", aiuto: "Apri con Vera: spiega il documento e lo confronta con il dossier") {
+                PulsanteIcona(simbolo: "sparkles", aiuto: "Apri con Lucy: spiega il documento e lo confronta con il dossier") {
                     TestiRinviati.scriviOra()
                     stato.spiegaDocumentoConVera(d.id)
                 }
@@ -385,7 +376,7 @@ struct DettaglioDocumento: View {
         var voci: [VoceMenuAzioni] = []
         if d.genere != .prisma {
             let id = d.id
-            voci.append(VoceMenuAzioni.azione("Apri con Vera", attiva: !stato.veraInCorso && !inLettura) {
+            voci.append(VoceMenuAzioni.azione("Apri con Lucy", attiva: !stato.veraInCorso && !inLettura) {
                 TestiRinviati.scriviOra()
                 stato.spiegaDocumentoConVera(id)
             })
@@ -654,8 +645,7 @@ struct ModuloCreaDaDocumento: View {
             Text(titolo)
                 .font(Tema.Apple.AltreApp.titoloRiga.fontLeggibile)
                 .foregroundColor(Tema.Apple.Colore.inchiostro)
-            SegmentiAnalisi(opzioni: [(Canale.alleanza, Canale.alleanza.nomeBreve), (Canale.indipendente, Canale.indipendente.nomeBreve)], selezione: $canale)
-            EtichettaCanale(canale: canale)
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (resta quello proposto dal documento)
             MenuTendina(selezione: $area, opzioni: aree, larghezza: m.menuArea)
             Text(Self.testoDati(confermati: confermati, daControllare: daControllare))
                 .font(Tema.Apple.Carattere.secondario.fontLeggibile)
@@ -1116,18 +1106,18 @@ struct ConfrontoClienteVista: View {
             if questionario {
                 if let c = canaleLetto {
                     HStack(spacing: m.spazioBarra) {
-                        Text("Canale del questionario")
+                        Text("Tipo di questionario")
                             .font(Tema.Apple.Carattere.secondario.fontLeggibile)
                             .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         EtichettaCanale(canale: c)
                     }
                 } else {
                     VStack(alignment: .leading, spacing: m.spazioStatoRiga) {
-                        Text("Canale del questionario")
+                        Text("Tipo di questionario")
                             .font(Tema.Apple.Carattere.secondario.fontLeggibile)
                             .foregroundColor(Tema.Apple.Colore.inchiostro2)
                         HStack(spacing: m.spazioBarra) {
-                            SegmentiAnalisi(opzioni: [(Optional(Canale.alleanza), Canale.alleanza.nomeBreve), (Optional(Canale.indipendente), Canale.indipendente.nomeBreve)],
+                            SegmentiAnalisi(opzioni: [(Optional(Canale.alleanza), "Prodotti assicurativi"), (Optional(Canale.indipendente), "Strumenti finanziari")],
                                             selezione: $canaleScelto)
                                 .frame(maxWidth: m.menuArea)
                             if let c = canaleScelto { EtichettaCanale(canale: c) }

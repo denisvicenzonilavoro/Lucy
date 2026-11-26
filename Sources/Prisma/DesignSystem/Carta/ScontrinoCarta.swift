@@ -117,7 +117,7 @@ struct ScontrinoCarta<Righe: View>: View {
         let k = TemaCarta.Scontrino.self
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text("PRISMA")
+                Text("LUCY")
                 Spacer()
                 Text(Formati.dataBreve.string(from: data))
             }

@@ -1,0 +1,881 @@
+﻿Foglio;Riga;Colonna;Campo;Testo originale
+Investimento e risparmio;4;O;penali;"2ª annualità 2%; 3ª 1,5%; 4ª 1%; 5ª 0,5%; poi 0"
+Investimento e risparmio;5;I;costo_gestione_separata;Nessun costo sulla gestione separata
+Investimento e risparmio;5;O;penali;2% del valore fino a fine 6° anno
+Investimento e risparmio;6;H;costi_fissi;10 € per riscatto
+Investimento e risparmio;6;I;costo_gestione_separata;1,75% trattenuto (+0,03% ogni 0,1% oltre il 4%)
+Investimento e risparmio;6;O;penali;"Solo su Gesav: 2° anno 2%; 3° 1,5%; 4° 1%; 5° 0,5%"
+Investimento e risparmio;7;E;premio_minimo;Rata minima 75 € (900 €/anno)
+Investimento e risparmio;7;I;costo_gestione_separata;1,35% trattenuto (+0,03% ogni 0,1% oltre il 3%)
+Investimento e risparmio;7;O;penali;"Con 2 annualità versate 30%; 3 = 25%; 4 = 20%; 5 = 15%; 6 = 10%; da 7 = 0"
+Investimento e risparmio;7;P;riscattabile_da;Dopo 2 annualità
+Investimento e risparmio;7;T;eta;Max 80 anni e 6 mesi alla firma
+Investimento e risparmio;8;E;premio_minimo;1.000 €/anno (rata mensile da 100 €)
+Investimento e risparmio;8;H;costi_fissi;Maggiorazione frazionamento 1,7% - 2,5% (solo Proteggo Plus)
+Investimento e risparmio;8;I;costo_gestione_separata;1,75% trattenuto (+0,03% ogni 0,1% oltre il 4%)
+Investimento e risparmio;8;O;penali;"Meno di 5 annualità 50%; 5-6 = 25%; 7 = 10,5%; 8 = 9,5%; 9 = 8,5%; da 10 = 0. Aggiuntivi 1% nei primi 5 anni"
+Investimento e risparmio;8;P;riscattabile_da;Dopo 2 annualità
+Investimento e risparmio;9;K;incidenza_primo_anno;KID/DIP non pubblicato online: chiedere in agenzia
+Investimento e risparmio;9;O;penali;In genere non riscattabile
+Investimento e risparmio;10;J;costo_fondi;Costi di gestione 1,71% - 5,76% annuo
+Investimento e risparmio;10;O;penali;"Penali decrescenti 3,5%, 2,5%, 1% nei primi 4 anni; nessuna dal 5°"
+Investimento e risparmio;11;G;costo_ingresso;0,50% (0% da 1 milione)
+Investimento e risparmio;11;J;costo_fondi;"Fondi Eurizon 1,50% - 1,70% + 20% di performance; fondi terzi 0,30% - 1,70%"
+Investimento e risparmio;11;O;penali;"Prima del 1° anno 2% (min 30 €); 1°-3° anno 1% (min 30 €); 3°-10° anno 30 €; poi 0"
+Investimento e risparmio;12;J;costo_fondi;0,35% - 1,75% + incentivo 15-20% su alcuni fondi + costi dei fondi sottostanti
+Investimento e risparmio;12;O;penali;"Dal 2,50% a scendere fino a 0 entro il 3° anno; parziale dopo 3 anni 20 €"
+Investimento e risparmio;12;U;bollo;Polizza estera (Irlanda): bollo/adempimenti diversi, verificare
+Investimento e risparmio;13;O;penali;"91° giorno - 1° anno 2% (min 30 €); 1°-3° anno 1% (min 30 €); 3°-10° anno 30 €; poi 0"
+Investimento e risparmio;14;O;penali;Dal 2% a scendere fino a 0 nei primi 3 anni
+Investimento e risparmio;14;U;bollo;Polizza estera (Irlanda): verificare
+Investimento e risparmio;15;O;penali;"91° giorno - 1° anno 2% (min 30 €); 1°-5° anno 1%; 5°-10° anno 30 €; poi 0"
+Investimento e risparmio;16;O;penali;"91° giorno - 1° anno 2% (min 30 €); 1°-5° anno 1%; poi 30 €"
+Investimento e risparmio;17;G;costo_ingresso;0,50% (0,25% oltre 500.000 €)
+Investimento e risparmio;17;O;penali;"Fino al 1° anno 2% (min 30 €); 1°-5° anno 1%; poi 30 €. Riscatto parziale non ammesso"
+Investimento e risparmio;17;T;eta;Beneficiario 18-35 anni alla scadenza
+Investimento e risparmio;18;G;costo_ingresso;Dall'1% a scendere fino a 0 (premi ricorrenti 1% fino al 10° anno)
+Investimento e risparmio;18;O;penali;Nessuna penale, ma il riscatto totale anticipato è ridotto delle commissioni del periodo
+Investimento e risparmio;19;G;costo_ingresso;"Dal 2% allo 0,90% in base al cumulo; ricorrenti 1,50%"
+Investimento e risparmio;19;T;eta;Max 80 anni
+Investimento e risparmio;20;G;costo_ingresso;"Dall'1,60% allo 0,80%; ricorrenti 1,35%"
+Investimento e risparmio;21;I;costo_gestione_separata;"0,70% primi 3 anni; 1,40% dopo"
+Investimento e risparmio;21;O;penali;Nessuna (riscatto ridotto delle commissioni)
+Investimento e risparmio;22;E;premio_minimo;1.000 € per fondo esterno
+Investimento e risparmio;22;T;eta;Max 80 anni
+Investimento e risparmio;23;O;penali;Nessuna dopo 30 giorni
+Investimento e risparmio;25;I;costo_gestione_separata;1,30% (0,85% a certe condizioni fino al 2028)
+Investimento e risparmio;25;O;penali;"1° anno 1,50%; 2° 1%; poi 0; + 5 €"
+Investimento e risparmio;26;G;costo_ingresso;"2% sul premio (2,5% sotto 10.000 €; 1,5% da 20.000; 1% da 100.000) + 100 € di emissione"
+Investimento e risparmio;26;J;costo_fondi;1,60% (performance fino a 2,10%)
+Investimento e risparmio;26;O;penali;"1° anno 2%; 2° 1,5%; 3° 1%; poi 0; + 5 €"
+Investimento e risparmio;27;G;costo_ingresso;2% (scala dal 2,5% all'1%) + 100 € di emissione
+Investimento e risparmio;27;I;costo_gestione_separata;0,75% il 1° anno, poi 1,30% + 20% del rendimento oltre il 3,25%
+Investimento e risparmio;27;O;penali;"1° anno 2%; 2° 1,5%; 3° 1%; 4° 0,5%; 5° 0,25%; + 5 €"
+Investimento e risparmio;28;E;premio_minimo;1.200 €/anno (100 €/mese)
+Investimento e risparmio;28;H;costi_fissi;3 € di costi fissi
+Investimento e risparmio;28;O;penali;"Dal 2,25% (1 anno) allo 0,25% (5 anni), poi 0; + 5 €"
+Investimento e risparmio;29;E;premio_minimo;1.200 €/anno (100 €/mese)
+Investimento e risparmio;29;O;penali;"1° anno 3%; 2° 2%; 3° 1,5%; 4° 1%; 5° 0,5%; + 5 €"
+Investimento e risparmio;30;E;premio_minimo;1.000 €/anno
+Investimento e risparmio;30;H;costi_fissi;50 € (recesso)
+Investimento e risparmio;30;O;penali;"Sconto 1-2% annuo sul capitale; non riscattabile prima di 3 anni"
+Investimento e risparmio;30;P;riscattabile_da;3 anni e 3 annualità
+Investimento e risparmio;30;T;eta;Max 75 anni a scadenza
+Investimento e risparmio;31;E;premio_minimo;1.440 €/anno (120 €/mese)
+Investimento e risparmio;31;I;costo_gestione_separata;1,50% (1,40% da 75.000 €) + 25% del rendimento oltre il 2,5%
+Investimento e risparmio;31;O;penali;"1° anno 2,5%; 2° 2%; 3° 1,5%; 4° 1%; 5° 0,5%; + 5 €"
+Investimento e risparmio;32;L;incidenza_periodo_raccomandato;2,2% a 10 anni (2,4% a 5 anni)
+Investimento e risparmio;32;O;penali;"1° anno 3%; 2° 2%; 3° 1%; dal 4° 50 €; gratis tra 5° e 6° anno e poi ogni 5 anni"
+Investimento e risparmio;33;H;costi_fissi;50 € a riscatto
+Investimento e risparmio;33;L;incidenza_periodo_raccomandato;"0,81% - 4,69% (a 10 anni); 1,17% - 5,54% a 5 anni"
+Investimento e risparmio;33;O;penali;"3% decrescente all'1% al 3° anno, poi 1% fino al 9° + 50 €; nessuna dopo il 10°"
+Investimento e risparmio;34;O;penali;Riscatto totale senza penali dopo 6 mesi
+Investimento e risparmio;35;E;premio_minimo;5.000 € (Cedola 100.000 €)
+Investimento e risparmio;35;L;incidenza_periodo_raccomandato;1,2% a 10 anni (1,3% a 5 anni)
+Investimento e risparmio;35;O;penali;"1° anno 3%; 2° 2%; 3° 1%; dal 4° 50 €; nessun costo al 5°, 10°, 15° anno"
+Investimento e risparmio;36;L;incidenza_periodo_raccomandato;2,9% - 3,6% a 26 anni (3,2% - 3,7% a 13 anni)
+Investimento e risparmio;36;O;penali;Senza penali dopo 6 mesi
+Investimento e risparmio;36;T;eta;Da 45 anni
+Investimento e risparmio;36;U;bollo;Polizza estera (Irlanda): verificare
+Investimento e risparmio;37;E;premio_minimo;5.000 € unico o 1.200 €/anno
+Investimento e risparmio;37;U;bollo;Polizza estera (Irlanda): verificare
+Investimento e risparmio;38;O;penali;Senza penali dopo 30 giorni
+Investimento e risparmio;38;U;bollo;Polizza estera (Irlanda): verificare
+Investimento e risparmio;39;G;costo_ingresso;Caricamento 2,0% + costi di ingresso 0,19% annuo
+Investimento e risparmio;39;J;costo_fondi;1,24% annuo + 0,05% transazione
+Investimento e risparmio;39;L;incidenza_periodo_raccomandato;1,48% a 12 anni (2,11% a 6 anni)
+Investimento e risparmio;39;M;periodo_raccomandato;Fino a fine differimento (KID: 12)
+Investimento e risparmio;39;O;penali;"Anni 1-2: 5%; 3-4: 4%; 5-6: 3%; 7-8: 2%; dal 9°: 1%; 0% l'ultimo anno"
+Investimento e risparmio;39;U;bollo;Polizza estera (Germania): verificare
+Investimento e risparmio;40;J;costo_fondi;"Fondi interni 1,80% - 2,30%; OICR 2,50%"
+Investimento e risparmio;40;O;penali;"0,75% fino al 3° anno; dal 4° 25 € fissi"
+Investimento e risparmio;40;U;bollo;Solo alla liquidazione, esclusa la gestione separata
+Investimento e risparmio;41;O;penali;"1° anno 1,25%; 2° 1%; 3° 0,75%; dal 4° 25 € fissi"
+Investimento e risparmio;42;E;premio_minimo;75 €/mese (1.200 €/anno)
+Investimento e risparmio;42;U;bollo;Solo alla liquidazione, esclusa la gestione separata
+Investimento e risparmio;44;J;costo_fondi;"Flessibile 2,20%; Azionario 2,10%; Bilanciato 2%; Obbligazionario 1,60%; Monetario 0%"
+Investimento e risparmio;44;O;penali;Vedi KID
+Investimento e risparmio;44;T;eta;Max 85 anni
+Investimento e risparmio;45;J;costo_fondi;1,60% + 2,0% dei gestori
+Investimento e risparmio;45;P;riscattabile_da;1 mese (parziale)
+Investimento e risparmio;45;T;eta;Max 90 anni
+Investimento e risparmio;46;J;costo_fondi;Vedere KID (non pubblicato con il DIP)
+Investimento e risparmio;46;O;penali;Nessuna penale nel DIP oltre al KID
+Investimento e risparmio;47;O;penali;"1° anno 2%, poi in calo fino allo 0,40% al 5°; dal 6° nessuna"
+Investimento e risparmio;47;P;riscattabile_da;30 giorni (recesso)
+Investimento e risparmio;48;I;costo_gestione_separata;"Non indicato (minimo trattenuto 0,50%; 40% va al distributore)"
+Investimento e risparmio;48;M;periodo_raccomandato;Almeno 5
+Investimento e risparmio;48;O;penali;Vedi KID
+Investimento e risparmio;48;P;riscattabile_da;1 anno (parziale)
+Investimento e risparmio;48;T;eta;Nessun limite
+Investimento e risparmio;49;E;premio_minimo;Esempio KID 1.000 €/anno
+Investimento e risparmio;51;H;costi_fissi;10 € per ogni riscatto parziale
+Investimento e risparmio;51;O;penali;"1° anno 2%; 2° 1,70%; 3° 1,50%; 4° 1%; 5° 0,50%; poi nessuna"
+Investimento e risparmio;52;J;costo_fondi;Costi di gestione 1,2% - 5,6% annuo
+Investimento e risparmio;52;O;penali;"1° anno 2,5%; 2° 0,5%; 3° 0,25%; poi nessuna"
+Investimento e risparmio;52;P;riscattabile_da;3 mesi (parziale)
+Investimento e risparmio;53;O;penali;"Decrescenti fino al 4° anno; penali aggiuntive al 4° e 5° anno se si è ricevuto il bonus"
+Investimento e risparmio;54;E;premio_minimo;2.400 €/anno (max 24.000)
+Investimento e risparmio;54;G;costo_ingresso;"Caricamento 6% sui premi ricorrenti; 2% sugli aggiuntivi"
+Investimento e risparmio;54;H;costi_fissi;"12 €/anno (1 €/mese) per premi < 3.600 €; 12 € per aggiuntivo"
+Investimento e risparmio;54;I;costo_gestione_separata;"GS 1,40% (0,80% se rendimento basso); 0,10% garanzia complementare"
+Investimento e risparmio;54;O;penali;"1° anno non ammesso; 2° 2%; 3° 1,5%; 4° 1%; 5° 0,5%; dal 6° nessuna"
+Investimento e risparmio;55;G;costo_ingresso;0,75% (0% su alcune tariffe)
+Investimento e risparmio;55;H;costi_fissi;50 € (tariffa 273.001)
+Investimento e risparmio;55;I;costo_gestione_separata;"Più 1,30%; Equilibrio 1,35%"
+Investimento e risparmio;56;E;premio_minimo;1.200 €/anno
+Investimento e risparmio;56;I;costo_gestione_separata;"Più 1,30%; Equilibrio 1,35%"
+Investimento e risparmio;56;O;penali;"1-2 anni 1,5%; 2-4 anni 1%; 4-5 anni 0,5%; poi 0"
+Investimento e risparmio;57;K;incidenza_primo_anno;KID non pubblicato online: chiedere in filiale
+Investimento e risparmio;60;G;costo_ingresso;75 € fissi
+Investimento e risparmio;60;O;penali;"Nessuna; riscatto dal 2° anno"
+Investimento e risparmio;61;O;penali;Nessun costo di uscita al periodo raccomandato
+Investimento e risparmio;62;G;costo_ingresso;0% (ETF 0,04%, minimo 6 €)
+Investimento e risparmio;63;I;costo_gestione_separata;0,65% annuo + 0,02% transazione
+Investimento e risparmio;65;K;incidenza_primo_anno;KID non pubblicato online: chiedere in agenzia
+Investimento e risparmio;65;O;penali;Percentuale decrescente che si azzera dopo 4 anni
+Investimento e risparmio;66;H;costi_fissi;15 € per riscatto parziale
+Investimento e risparmio;66;O;penali;"Nessun riscatto il 1° anno; 2° 2,50%; 3° 2%; 4° 1,50%; 5° 1%; dal 6° nessuna"
+Investimento e risparmio;68;I;costo_gestione_separata;Dall'1,20% allo 0,80% secondo l'importo (+0,3% di performance se il rendimento supera il 3%)
+Investimento e risparmio;68;O;penali;"2° anno 2,50%; 3° 2%; 4° 1,50%; 5° 0,50%; dal 6° nessuna; + 50 € a ogni riscatto"
+Investimento e risparmio;69;I;costo_gestione_separata;Dall'1,30% all'1,10% secondo l'importo
+Investimento e risparmio;69;O;penali;"2° anno 1%; 3° 0,50%; dal 4° nessuna; + 20 € a ogni riscatto"
+Investimento e risparmio;70;E;premio_minimo;Esempio KID 1.000 €/anno
+Investimento e risparmio;70;O;penali;Dall'1% allo 0% secondo l'anno di uscita
+Investimento e risparmio;71;G;costo_ingresso;Caricamento 1,00% - 0,50% in base al versato
+Investimento e risparmio;71;L;incidenza_periodo_raccomandato;"1,75% (a 5 anni); 2,09% a 3 anni"
+Investimento e risparmio;71;O;penali;Da 1,5% a 0,5%, decrescente fino al 4° anno
+Investimento e risparmio;72;K;incidenza_primo_anno;KID non pubblicato online: chiedere in agenzia
+Investimento e risparmio;73;G;costo_ingresso;Caricamento dal 3% allo 0,25% secondo il cumulo dei premi
+Investimento e risparmio;73;H;costi_fissi;52,55 € di diritto fisso iniziale
+Investimento e risparmio;74;L;incidenza_periodo_raccomandato;3,2% - 3,3% a 10 anni (Easy Fund 1,1% a 5 anni)
+Investimento e risparmio;74;O;penali;Nessuna dopo 6 mesi
+Investimento e risparmio;75;O;penali;Nessuna dopo 6 mesi
+Investimento e risparmio;76;O;penali;Nessun riscatto parziale
+Investimento e risparmio;77;H;costi_fissi;"30 € di emissione; 10 € per aggiuntivo"
+Investimento e risparmio;78;L;incidenza_periodo_raccomandato;1,6% (2,3% a 5 anni)
+Investimento e risparmio;78;O;penali;Decrescenti fino al 5° anno, nulle dal 6°
+Investimento e risparmio;79;H;costi_fissi;10 € per riscatto parziale nella quota free
+Investimento e risparmio;79;O;penali;Sopra la quota free del 25%: 2% dopo 1 anno, 1,5% dopo 2, 1% dopo 3, nessuna dopo 4
+Investimento e risparmio;80;E;premio_minimo;Esempio KID 1.000 €/anno
+Investimento e risparmio;80;L;incidenza_periodo_raccomandato;2,01% a 10 anni (4,30% a 5 anni)
+Investimento e risparmio;80;O;penali;Costo per ogni anno mancante alla scadenza
+Investimento e risparmio;83;E;premio_minimo;Esempio KID 1.000 €/anno
+Investimento e risparmio;83;O;penali;Riscatto solo dopo 3 anni (capitale ridotto × coefficiente demografico)
+Investimento e risparmio;84;G;costo_ingresso;100 € fissi
+Investimento e risparmio;84;L;incidenza_periodo_raccomandato;1,6% (1,8% a 5 anni)
+Investimento e risparmio;84;O;penali;"2° anno 3%; 3° 2%; 4° 1%; + 50 € a ogni riscatto"
+Investimento e risparmio;85;L;incidenza_periodo_raccomandato;2,0% (2,2% a 5 anni)
+Investimento e risparmio;85;O;penali;"2° anno 2%; 3° 1%; 4° 0,5%; + 50 € a ogni riscatto"
+Investimento e risparmio;86;O;penali;"2° anno 3%; 3° 2%; 4° 1%; dal 5° nessuna; + 50 € a ogni riscatto"
+Investimento e risparmio;88;G;costo_ingresso;100 € fissi
+Investimento e risparmio;88;I;costo_gestione_separata;Rendimento ridotto di 1,25 punti (può diventare negativo)
+Investimento e risparmio;91;H;costi_fissi;75 € per premi sotto 20.000 €
+Investimento e risparmio;92;J;costo_fondi;Linee Guidate 1,95% - 2,35% + costi OICR
+Investimento e risparmio;92;O;penali;Dal 3,50% allo 0,90% fino al 5° anno
+Investimento e risparmio;93;K;incidenza_primo_anno;KID non pubblicato online: chiedere al consulente Zurich
+Investimento e risparmio;94;E;premio_minimo;Investitore tipo da 15.000 €
+Investimento e risparmio;94;O;penali;Su ogni premio per 4 anni: dal 2% a scendere fino a 0
+Investimento e risparmio;95;K;incidenza_primo_anno;KID non pubblicato online: chiedere al consulente Zurich
+Investimento e risparmio;96;E;premio_minimo;Esempio KID 1.000 €/anno
+Investimento e risparmio;96;O;penali;Dal 3% allo 0% nei primi 5 anni
+Investimento e risparmio;97;E;premio_minimo;70 €/mese
+Investimento e risparmio;97;L;incidenza_periodo_raccomandato;"2,82% (5 anni); 2,46% (10 anni)"
+Investimento e risparmio;97;M;periodo_raccomandato;Almeno 6 anni (combinazione 50/50)
+Investimento e risparmio;97;O;penali;"15% (2ª annualità), 10% (3ª), 5% (4ª); nessuna dalla 5ª"
+Investimento e risparmio;97;P;riscattabile_da;Dopo 2 annualità versate e 2 anni
+Protezione;2;F;eta_ingresso;18 - 78,5 anni (complementari fino a 68,5)
+Protezione;2;H;capitali;Premio minimo 80 €
+Protezione;2;O;imposta;"Esente (vita); 2,5% sulle complementari"
+Protezione;3;F;eta_ingresso;"Premio annuo 29,5 - 69,5 anni; premio unico fino a 74,5"
+Protezione;3;G;eta_massima;Vita intera
+Protezione;3;K;franchigie;"Nessuna; non autosufficienza da 40 punti su 60"
+Protezione;4;H;capitali;Indicati in polizza
+Protezione;4;J;carenze;Indicate in grassetto nelle condizioni
+Protezione;4;K;franchigie;Indicate in grassetto nelle condizioni
+Protezione;4;U;premio_esempio;Su preventivo
+Protezione;5;H;capitali;Indicati per modulo
+Protezione;5;J;carenze;Indicate in grassetto nelle condizioni
+Protezione;5;K;franchigie;Limiti, franchigie e scoperti per modulo
+Protezione;5;O;imposta;Varia per modulo
+Protezione;5;U;premio_esempio;Su preventivo
+Protezione;6;H;capitali;"Furto gioielli 50% della somma (max 7.500 € a oggetto); denaro 10% (max 1.000 €); fotovoltaico inverter e batterie 1.500 €/anno"
+Protezione;6;K;franchigie;"150 € fissi su fenomeni elettrici; 150 € decrescenti su altre garanzie e RC; fotovoltaico 300 €; veterinario 100 €; alluvione minimo 7.500 €; furto 30% se non dimora abituale o affittata"
+Protezione;6;O;imposta;"Altre garanzie 22,5%; tutela legale 12,5%; assistenza 10%; infortuni 2,5%"
+Protezione;6;U;premio_esempio;Su preventivo
+Protezione;7;U;premio_esempio;Su preventivo
+Protezione;8;H;capitali;Capitale predefinito
+Protezione;8;J;carenze;Vedi appendice del modulo
+Protezione;8;K;franchigie;Nessuna (indennizzo forfettario)
+Protezione;8;U;premio_esempio;Sconto 5% (2 moduli) fino a 30% (7 o più moduli)
+Protezione;9;H;capitali;Per livello scelto
+Protezione;9;J;carenze;Art. 6.1 dell'appendice
+Protezione;9;K;franchigie;Per livello scelto
+Protezione;9;U;premio_esempio;Sconto 5% (2 moduli) fino a 30% (7 o più moduli)
+Protezione;10;J;carenze;Vedi appendice
+Protezione;10;U;premio_esempio;Sconto 5% (2 moduli) fino a 30% (7 o più moduli)
+Protezione;11;H;capitali;Per livello scelto
+Protezione;11;J;carenze;Art. 6.1 dell'appendice
+Protezione;11;K;franchigie;Vedi tabella riepilogativa dei livelli
+Protezione;11;U;premio_esempio;Sconto 5% (2 moduli) fino a 30% (7 o più moduli)
+Protezione;12;K;franchigie;Franchigia sull'invalidità
+Protezione;12;P;detraibilita;Infortuni: no (salvo morte/invalidità ≥5% su polizze vita)
+Protezione;12;U;premio_esempio;Sconto 5% (2 moduli) fino a 30% (7 o più moduli)
+Protezione;13;H;capitali;Max 15 giorni di prestazioni per evento
+Protezione;13;U;premio_esempio;Sconto 5% (2 moduli) fino a 30% (7 o più moduli)
+Protezione;14;O;imposta;22,5% (assistenza 10%)
+Protezione;14;U;premio_esempio;Sconto 5% (2 moduli) fino a 30% (7 o più moduli)
+Protezione;15;F;eta_ingresso;Fino a 79 anni (invalidità fino a 64)
+Protezione;15;K;franchigie;"Scoperti: 30% visite fuori rete, 20% ricoveri fuori rete, 50% allineatori; invalidità da infortunio franchigia 3% / 10% / 30%; da malattia paga solo sopra 25% / 50% / 65%"
+Protezione;15;U;premio_esempio;Su preventivo
+Protezione;16;U;premio_esempio;Gratuita dentro Valore 360
+Protezione;17;G;eta_massima;"Invalidità da malattia 65 anni; diaria e prevenzione 75 anni"
+Protezione;17;H;capitali;"Check-up 150 €/anno; visite post-prevenzione 250 €; alta specializzazione 2.000 €; diaria max 60 giorni/anno (day hospital 50%, max 30); pre/post ricovero 1.000 €"
+Protezione;17;J;carenze;"Infortuni subito; malattia 30 giorni (invalidità 90); parto 300 giorni"
+Protezione;17;K;franchigie;"Invalidità da malattia: franchigia 25% (sotto non paga); opzione franchigia: diaria dal 6° giorno"
+Protezione;17;O;imposta;"Malattia 2,5%; assistenza 10%"
+Protezione;17;U;premio_esempio;Premio crescente ogni anno con l'età
+Protezione;18;K;franchigie;Scoperti e franchigie per garanzia
+Protezione;18;U;premio_esempio;Su preventivo
+Protezione;19;H;capitali;Massimale in polizza
+Protezione;19;U;premio_esempio;Su preventivo
+Protezione;20;U;premio_esempio;Su preventivo
+Protezione;21;U;premio_esempio;Su preventivo
+Protezione;22;H;capitali;"Piccoli interventi 10.000 €; disturbi mentali 1.500 €; pre/post ricovero fuori rete 2.500 €"
+Protezione;22;J;carenze;Previste per Plus, Premium, Top
+Protezione;22;K;franchigie;"Essential 100 € per infortunio; fuori rete 20%; visite 20 € in rete, fuori rete 20% (min 60 €); in rete nessuno scoperto"
+Protezione;23;H;capitali;In scheda tecnica
+Protezione;23;K;franchigie;In DIP aggiuntivo e scheda tecnica
+Protezione;23;U;premio_esempio;Su preventivo
+Protezione;24;U;premio_esempio;Su preventivo
+Protezione;25;K;franchigie;"Elettrico e acqua 100 €; RC cane 250 € o 20% (min 2.000 / max 5.000 secondo la razza)"
+Protezione;25;O;imposta;22,5% (assistenza 10%)
+Protezione;25;U;premio_esempio;Su preventivo
+Protezione;26;F;eta_ingresso;Nessun limite indicato
+Protezione;26;H;capitali;Indicati in polizza
+Protezione;26;J;carenze;Previste per malattia, infortunio e prevenzione (durata nelle condizioni)
+Protezione;26;K;franchigie;Previsti, importi in polizza
+Protezione;26;U;premio_esempio;Premio aggiornato ogni anno con età e indice ISTAT
+Protezione;27;U;premio_esempio;Premio annuo o mensile senza costi aggiuntivi
+Protezione;28;O;imposta;"Esente vita; 2,5% complementari"
+Protezione;28;U;premio_esempio;Su preventivo
+Protezione;29;O;imposta;12,5% + 10,5% SSN (RCA)
+Protezione;29;U;premio_esempio;Su preventivo
+Protezione;30;O;imposta;Varia per ramo
+Protezione;30;U;premio_esempio;Su preventivo
+Protezione;31;U;premio_esempio;Su preventivo
+Protezione;32;H;capitali;Da 25 € al mese
+Protezione;32;O;imposta;"Esente vita; 2,5% complementari"
+Protezione;32;U;premio_esempio;Da 25 € al mese
+Protezione;33;F;eta_ingresso;Malattie gravi 18 - 70 anni
+Protezione;33;H;capitali;"Ricovero illimitato / 500.000 / 300.000 / 100.000 €; forfait 60.000 o 30.000 €; diarie 200 €; alta diagnostica fino a 6.000 €; visite fino a 4.000 €; malattie gravi 25.000 - 100.000 € (50.000 dai 66)"
+Protezione;33;K;franchigie;"Ricovero fuori rete 10-20% (min 1.000 €, max 5.000-10.000); franchigia facoltativa 1.500 o 3.000 €; alta diagnostica 15-20% + 30-75 €; visite fuori rete 20% + 50-75 €"
+Protezione;33;U;premio_esempio;Premi indicizzati all'inflazione sanitaria ISTAT
+Protezione;34;H;capitali;Fino a 3,5 milioni
+Protezione;34;J;carenze;Senza visita: carenza
+Protezione;34;O;imposta;"Esente vita; 2,5% complementari"
+Protezione;34;U;premio_esempio;Su preventivo
+Protezione;35;U;premio_esempio;Su preventivo
+Protezione;36;P;detraibilita;Costo aziendale
+Protezione;36;U;premio_esempio;Su preventivo
+Protezione;37;O;imposta;"Esente vita; 2,5% inabilità"
+Protezione;37;P;detraibilita;Costo aziendale
+Protezione;37;U;premio_esempio;Su preventivo
+Protezione;38;O;imposta;Varia per ramo
+Protezione;38;U;premio_esempio;Su preventivo
+Protezione;39;U;premio_esempio;Su preventivo
+Protezione;40;J;carenze;Art. 8.2 delle condizioni
+Protezione;40;U;premio_esempio;Su preventivo
+Protezione;41;K;franchigie;Franchigia sull'invalidità
+Protezione;41;U;premio_esempio;Su preventivo
+Protezione;42;U;premio_esempio;Su preventivo
+Protezione;43;O;imposta;2,5% (assistenza 10%)
+Protezione;43;U;premio_esempio;Su preventivo
+Protezione;44;O;imposta;12,5% + 10,5% SSN (RCA)
+Protezione;44;U;premio_esempio;Su preventivo
+Protezione;45;O;imposta;"Esente vita; 2,5% complementare infortuni"
+Protezione;46;U;premio_esempio;Su preventivo
+Protezione;47;U;premio_esempio;Su preventivo
+Protezione;48;O;imposta;Varia per ramo
+Protezione;48;U;premio_esempio;Su preventivo
+Protezione;49;O;imposta;22,5% (assistenza 10%)
+Protezione;49;U;premio_esempio;Su preventivo
+Protezione;50;U;premio_esempio;Su preventivo
+Protezione;51;H;capitali;Pacchetti da 11 € al mese
+Protezione;51;O;imposta;2,5% (assistenza 10%)
+Protezione;51;U;premio_esempio;"Pacchetti da 11 €/mese; Assistenza Caregiver 60 €/anno"
+Protezione;52;H;capitali;Modificabile durante il contratto
+Protezione;52;J;carenze;"Suicidio 2 anni; AIDS 5 anni"
+Protezione;52;U;premio_esempio;Semestrale +2%, mensile +5%
+Protezione;53;U;premio_esempio;Su preventivo
+Protezione;54;U;premio_esempio;Su preventivo
+Protezione;55;O;imposta;Varia per ramo
+Protezione;55;U;premio_esempio;Su preventivo
+Protezione;56;O;imposta;"Esente vita; danni secondo ramo"
+Protezione;56;U;premio_esempio;Su preventivo
+Protezione;57;F;eta_ingresso;"Fino a 66 anni (nuovo mutuo); fino a 56 (mutuo già in essere)"
+Protezione;57;H;capitali;Debito residuo
+Protezione;57;U;premio_esempio;Su preventivo
+Protezione;58;O;imposta;Varia per ramo
+Protezione;58;U;premio_esempio;Su preventivo
+Protezione;59;O;imposta;Varia per ramo
+Protezione;59;U;premio_esempio;Su preventivo
+Protezione;60;U;premio_esempio;Su preventivo
+Protezione;61;O;imposta;"Esente vita; 2,5% complementari"
+Protezione;61;U;premio_esempio;Su preventivo
+Protezione;62;U;premio_esempio;Su preventivo
+Protezione;63;P;detraibilita;Costo aziendale
+Protezione;63;U;premio_esempio;Su preventivo
+Protezione;64;F;eta_ingresso;In genere 18 - 65 anni
+Protezione;64;H;capitali;Diaria scelta in polizza (spesso legata al reddito)
+Protezione;64;K;franchigie;"Franchigia in giorni: tipicamente 10 o 30 giorni (il primo periodo non è pagato); periodo di riqualificazione 30 giorni (180 se stessa causa) tra due sinistri"
+Protezione;64;U;premio_esempio;Su preventivo
+Protezione;65;H;capitali;Rata o importo mensile, per un numero massimo di mesi
+Protezione;65;K;franchigie;"Franchigia 30-60 giorni; periodo di riqualificazione 90 giorni tra due sinistri"
+Protezione;65;O;imposta;Varia (spesso 2,5% o 12,5%)
+Protezione;65;U;premio_esempio;Su preventivo
+Protezione;66;F;eta_ingresso;In genere fino a 60-65 anni
+Protezione;66;H;capitali;Capitale in polizza
+Protezione;66;K;franchigie;"Franchigia alta: es. Unipol UNICA nessun indennizzo fino al 25%; Poste paga solo sopra 25% / 50% / 65%"
+Protezione;66;P;detraibilita;No (salvo garanzia complementare di polizza vita con soglia ≥5%)
+Protezione;66;U;premio_esempio;Su preventivo
+Protezione;67;F;eta_ingresso;Ingresso spesso fino a 70-75 anni
+Protezione;67;K;franchigie;Scoperti 20-30% fuori rete
+Protezione;67;U;premio_esempio;Su preventivo
+Protezione;68;J;carenze;"Infortunio subito; malattia 30 giorni; ortodonzia spesso 6-12 mesi"
+Protezione;68;K;franchigie;Franchigie sull'invalidità da infortunio
+Protezione;68;U;premio_esempio;Su preventivo
+Protezione;69;F;eta_ingresso;Spesso 18-65 anni
+Protezione;69;H;capitali;Capitale fisso o massimale
+Protezione;69;K;franchigie;Esclusi tumori in situ e alcuni tumori della pelle
+Protezione;69;U;premio_esempio;Su preventivo
+Protezione;70;F;eta_ingresso;Spesso fino a 75-85 anni
+Protezione;70;G;eta_massima;Vita intera
+Protezione;70;U;premio_esempio;Su preventivo
+Protezione;71;H;capitali;Somma assicurata = valore di ricostruzione
+Protezione;71;K;franchigie;Franchigia e scoperto rilevanti (ridotti nella versione Plus)
+Protezione;71;P;detraibilita;No (in passato detrazione 90% / 19% per polizze catastrofali: verificare la norma vigente)
+Protezione;71;U;premio_esempio;Su preventivo
+Protezione;72;H;capitali;Valore di ricostruzione
+Protezione;72;J;carenze;In genere nessuna o pochi giorni
+Protezione;72;K;franchigie;"Franchigia assoluta in percentuale (es. Genertel minimo 7.500 € per alluvione); scoperti 10-15%"
+Protezione;72;P;detraibilita;Verificare la norma vigente
+Protezione;72;U;premio_esempio;Estensione catastrofale in media 124-138 €/anno
+Protezione;73;H;capitali;Valore dei beni
+Protezione;73;K;franchigie;Franchigia massima 15% del danno indennizzabile
+Protezione;73;P;detraibilita;Costo deducibile per l'impresa
+Protezione;73;U;premio_esempio;Premio medio circa 710 €/anno (aprile 2026)
+Protezione;74;H;capitali;Valore di ricostruzione dell'immobile
+Protezione;74;K;franchigie;Franchigia per sinistro
+Protezione;74;U;premio_esempio;Su preventivo
+Protezione;75;H;capitali;Di solito fino a 12 mensilità (alcune offerte fino a 18 o 24)
+Protezione;75;U;premio_esempio;Dal 2% al 10% del canone annuo
+Protezione;76;H;capitali;Massimali minimi di legge
+Protezione;76;K;franchigie;Franchigie su furto e incendio
+Protezione;76;O;imposta;12,5% + 10,5% SSN (RCA)
+Protezione;76;U;premio_esempio;Su preventivo
+Protezione;77;H;capitali;Massimali di legge (RC auto)
+Protezione;77;O;imposta;12,5% + 10,5% SSN (RCA)
+Protezione;77;U;premio_esempio;Su preventivo
+Protezione;78;H;capitali;Massimali bassi (spesso qualche migliaio di euro)
+Protezione;78;K;franchigie;Franchigie per sinistro
+Protezione;78;U;premio_esempio;Su preventivo
+Protezione;79;H;capitali;Valore del dispositivo, spesso deprezzato
+Protezione;79;K;franchigie;Franchigia fissa per sinistro
+Protezione;79;U;premio_esempio;Su preventivo
+Protezione;80;F;eta_ingresso;Ingresso animale spesso tra 6 mesi e 8-10 anni
+Protezione;80;H;capitali;Es. AXA Confido 1.500 € per intervento/anno
+Protezione;80;K;franchigie;"Scoperto 10-20% o franchigia (es. Genertel 100 €; AXA RC cane 250 € o 20%)"
+Protezione;80;P;detraibilita;No (spese veterinarie detraibili 19% a parte, con limiti)
+Protezione;80;U;premio_esempio;Su preventivo
+Protezione;81;H;capitali;"Es. Intesa RC Professionale fino a 3 milioni; per consulenti finanziari consigliato almeno 1 milione"
+Protezione;81;K;franchigie;Franchigia per sinistro
+Protezione;81;P;detraibilita;Deducibile come costo professionale (forfettari: no)
+Protezione;81;U;premio_esempio;"Avvocati: in media circa 200 €/anno; dipende da fatturato e massimale"
+Protezione;82;H;capitali;Somme in polizza per ciascuna sezione
+Protezione;82;K;franchigie;Franchigie e scoperti per sezione
+Protezione;82;O;imposta;22,5% (assistenza 10%)
+Protezione;82;P;detraibilita;Costo deducibile
+Protezione;82;U;premio_esempio;Su preventivo
+Protezione;83;K;franchigie;Esclusi casi sotto una soglia (es. Genertel 300 €)
+Protezione;83;U;premio_esempio;Su preventivo
+Protezione;84;H;capitali;Massimale annuo
+Protezione;84;K;franchigie;Franchigia per sinistro
+Protezione;84;P;detraibilita;Costo della società
+Protezione;84;U;premio_esempio;Su preventivo
+Protezione;85;G;eta_massima;Alcune polizze hanno limiti per over 75-80
+Protezione;85;H;capitali;Spese mediche: massimali alti per USA e Canada
+Protezione;85;J;carenze;L'annullamento va comprato entro pochi giorni dalla prenotazione
+Protezione;85;K;franchigie;"Scoperto 10-20% sull'annullamento; franchigia bagaglio"
+Protezione;85;U;premio_esempio;Su preventivo
+Protezione;86;U;premio_esempio;Su preventivo
+Protezione;87;H;capitali;Capitali spesso pari a 1-3 annualità di stipendio
+Protezione;87;P;detraibilita;Costo aziendale
+Protezione;87;U;premio_esempio;Su preventivo
+Protezione;88;K;franchigie;"RCA nessuna; danni al veicolo dimezzati in carrozzeria convenzionata; collisione autostradale 1.000 €; animali 200 €; extra UE franchigia doppia"
+Protezione;88;U;premio_esempio;"Intermediari 13,43% del premio netto; semestrale +3%"
+Protezione;89;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;89;K;franchigie;"RCA nessuna; danni al veicolo con scoperti in polizza; Zero Spese Plus 100 € (massimale 1.000 €); infortuni IP 3%"
+Protezione;90;H;capitali;Somme in polizza
+Protezione;90;K;franchigie;IP: 3% fino a 250.000 €, 10% sulla parte oltre
+Protezione;90;O;imposta;"Infortuni 2,5%; tutela 12,5%"
+Protezione;90;P;detraibilita;19% sulla parte morte e IP nei limiti di legge
+Protezione;90;U;premio_esempio;Intermediari 25,70%
+Protezione;91;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;91;K;franchigie;"Nessuna su RCA; incendio e furto in polizza; extra UE doppia"
+Protezione;91;U;premio_esempio;Intermediari 11,17% del premio imponibile
+Protezione;92;H;capitali;Non indicati sulla pagina
+Protezione;92;K;franchigie;Non indicate sulla pagina
+Protezione;92;O;imposta;"RC natanti 12,5% + 10,5% SSN; corpi con aliquota propria"
+Protezione;92;U;premio_esempio;Su preventivo
+Protezione;93;H;capitali;Non indicati sulla pagina
+Protezione;93;K;franchigie;Non indicate sulla pagina
+Protezione;93;O;imposta;"Assistenza 10%; malattia e infortuni 2,5%; altre 22,25%"
+Protezione;93;U;premio_esempio;Su preventivo
+Protezione;94;F;eta_ingresso;Figli fino a 10 anni gratis con IP da infortunio del genitore
+Protezione;94;G;eta_massima;"Dentista fino a 65; assistenza post ricovero fino a 80"
+Protezione;94;H;capitali;"Diaria fino a 350 €/giorno per 360 giorni; indennità sostitutiva 150 €/giorno (100 giorni); parto 6.000-8.000 €; dentista da infortunio 2.500 €/anno"
+Protezione;94;K;franchigie;"IP malattia 24% o 79%; pre/post ricovero e visite 20% min 50 €; alta diagnostica 25%; infortunio senza ricovero 100 €; diaria 10 giorni"
+Protezione;94;O;imposta;"Infortuni/malattia 2,5%; assistenza 10%; Pronto Avvocato 21,25%"
+Protezione;94;P;detraibilita;19% sulla parte morte e invalidità (≥5%) nei limiti di legge
+Protezione;94;U;premio_esempio;"Intermediari 20,40% del premio imponibile; trimestrale +3,5%, semestrale +2,5%"
+Protezione;95;K;franchigie;"Sociopolitici 100-500 € a scelta; atmosferici, neve, alluvione: scoperto % con min e max; furto seconda casa 20%; rapina fuori casa 10% sul denaro; gelo seconda casa 250 €"
+Protezione;95;O;imposta;"22,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;95;U;premio_esempio;Intermediari 22,30% del premio imponibile
+Protezione;96;K;franchigie;"RC 200 € (USA e Canada 1.000 €); figli minori alla guida 500 €; tutela legale: liti sotto 250 € escluse"
+Protezione;96;O;imposta;"RC 22,25%; tutela legale 12,5%; assistenza 10%"
+Protezione;96;U;premio_esempio;Intermediari 22,30%
+Protezione;97;F;eta_ingresso;Animale da 3 mesi
+Protezione;97;K;franchigie;"RC cose 100 € (cani a rischio 200 €); cani a rischio su persone 10% min 200 max 2.000 €; interventi 10% min 100 €; pre/post e viaggio 75 €"
+Protezione;97;O;imposta;"RC 22,25%; malattia animali 22,25%; tutela legale 12,5%; assistenza 10%"
+Protezione;97;U;premio_esempio;Intermediari 22,30%
+Protezione;98;H;capitali;Valore stimato dei beni
+Protezione;98;U;premio_esempio;Su preventivo
+Protezione;99;O;imposta;"Morte 0%; complementari infortuni 2,5%"
+Protezione;99;P;detraibilita;19% su morte e malattia grave nei limiti di legge
+Protezione;100;K;franchigie;"Furto 10% min 100 €; kasko franchigia (es. 700 €); urto animali 350 €; urto pedoni/monopattini 10% min 150 €"
+Protezione;100;O;imposta;"RCA 12,5% + 10,5% SSN; ARD con aliquote proprie"
+Protezione;101;H;capitali;Come riga 100
+Protezione;101;K;franchigie;Come riga 100
+Protezione;101;O;imposta;Come riga 100
+Protezione;102;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;102;K;franchigie;Nessuna indicata
+Protezione;103;F;eta_ingresso;14 anni (conducente)
+Protezione;103;H;capitali;Minimi di legge 6.450.000 / 1.300.000 €
+Protezione;103;K;franchigie;Nessuna indicata
+Protezione;104;O;imposta;"RC natanti 12,5% + 10,5% SSN (obbligatoria); 22,25% le altre"
+Protezione;105;H;capitali;Massimali nella scheda tecnica dell'ambito di rischio
+Protezione;105;K;franchigie;Scoperti e franchigie nella scheda tecnica
+Protezione;106;H;capitali;"RC 3.000.000 €; attrezzatura 3.000 €; noleggio 100 €/giorno per 5 giorni; green fee 500 €/giorno, 1.500 € totali"
+Protezione;106;K;franchigie;"RC: 250 € su cose e animali; lesioni a familiari conviventi max 50.000 €"
+Protezione;106;U;premio_esempio;"Intermediari 23%; premio annuo unico"
+Protezione;107;K;franchigie;"Furto con serrature non funzionanti: 20-25%; rapina in Europa 10% min 100 €; tutela legale: valore minimo 200 €"
+Protezione;107;O;imposta;"22,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;108;H;capitali;Vedi riga 105
+Protezione;108;K;franchigie;Vedi riga 105
+Protezione;108;U;premio_esempio;Vedi riga 105
+Protezione;109;K;franchigie;Nessuna franchigia esplicita
+Protezione;109;U;premio_esempio;Su preventivo
+Protezione;110;J;carenze;Nel set informativo
+Protezione;110;U;premio_esempio;1.250 €/anno
+Protezione;111;H;capitali;"Somme concordate; spese di cura max 30% della somma (franchigia 100 €)"
+Protezione;111;K;franchigie;"IP infortunio: franchigia 0/3/5/10% (abrogata sopra il 15%; 100% da IP ≥ 60%); IP malattia: 25% generica, 33% specifica; inabilità temporanea 4 o 11 giorni"
+Protezione;111;P;detraibilita;19% su morte e IP (infortunio e malattia) nei limiti di legge
+Protezione;111;U;premio_esempio;Su preventivo
+Protezione;112;H;capitali;Somme in scheda di polizza
+Protezione;112;K;franchigie;"IP: auto 0% o 3% a scelta; moto 3% assoluta"
+Protezione;112;P;detraibilita;19% sulla parte morte e invalidità nei limiti di legge
+Protezione;113;H;capitali;"IP 100.000 €; ricovero 10.000 €; visite e fisioterapia 1.500 €; diaria ricovero e convalescenza 50 €/giorno; gesso 25 €/giorno; tendini 3.000 €; RC 1.000.000 €; attrezzatura 500 €; costi sportivi 1.500 €"
+Protezione;113;K;franchigie;RC: 250 € su cose e animali
+Protezione;113;O;imposta;"Infortuni 2,5%; RC 22,25%"
+Protezione;113;P;detraibilita;19% sulla parte infortuni nei limiti di legge
+Protezione;113;U;premio_esempio;250 € per assicurato
+Protezione;114;H;capitali;Rendita da 6.000 a 60.000 € annui
+Protezione;114;J;carenze;"Senza visita: 1 anno malattia; 5 anni disturbi mentali organici e AIDS; nessuna per infortunio. Over 65: visita obbligatoria, nessuna carenza"
+Protezione;114;O;imposta;Nessuna imposta sui premi
+Protezione;114;P;detraibilita;Premi detraibili 19% (LTC fino a 1.291,14 €)
+Protezione;115;G;eta_massima;"Morte 69; invalidità 60; non autosufficienza 65 (alla decorrenza)"
+Protezione;115;H;capitali;Scelto in proposta
+Protezione;115;J;carenze;"6 mesi (salvo infortunio e alcune infezioni); non autosufficienza: preesistenze e insorgenze nei primi 24 mesi"
+Protezione;115;K;franchigie;Non autosufficienza: 90 giorni
+Protezione;115;O;imposta;"Caso morte 0%; complementari 2,5%"
+Protezione;116;H;capitali;Per modulo
+Protezione;116;K;franchigie;Per modulo
+Protezione;116;O;imposta;Per modulo
+Protezione;116;P;detraibilita;Per modulo
+Protezione;116;U;premio_esempio;"Danni non auto 24,50%; RCA 12%"
+Protezione;117;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;117;K;franchigie;Franchigia fissa per sinistro nell'opzione con franchigia
+Protezione;118;H;capitali;Somme scelte in polizza
+Protezione;118;K;franchigie;"Furto 10% min 250 € (dipendenze), 20% con serrature non conformi; terremoto e alluvione 10% min 10.000 € (abitazione) e 3.000 € (contenuto); allagamento 10% min 1.000 €; con riparazione diretta nessuna franchigia fino a 5.000 €"
+Protezione;119;H;capitali;Somme scelte in polizza
+Protezione;119;K;franchigie;"IP: 5% base (0% se IP ≥20%); opzioni 3%, 3-10% progressiva, 10% o 30% con sconto"
+Protezione;119;P;detraibilita;19% su morte e invalidità permanente (≥5%) nei limiti di legge
+Protezione;120;G;eta_massima;"78 all'ingresso; 80 a scadenza"
+Protezione;120;U;premio_esempio;"Emissione 30 € + costi fissi 40-80 € + 18% del premio; quota media intermediari 30,30%"
+Protezione;121;G;eta_massima;"78 all'ingresso; 80 a scadenza"
+Protezione;121;H;capitali;Premio minimo 120 € annui
+Protezione;121;U;premio_esempio;"Emissione 30 € + 30 € per premio annuo + 18% del premio; quota media intermediari 25,56%"
+Protezione;122;H;capitali;"Minimi di legge 6.450.000 / 1.300.000 €; aree aeroportuali fino a 10 mln"
+Protezione;122;K;franchigie;Nel DIP base non indicate
+Protezione;122;U;premio_esempio;"Semestrale con maggiorazione; provvigione non indicata"
+Protezione;123;H;capitali;Somme scelte in polizza (per persona/evento o anno)
+Protezione;123;K;franchigie;Varie forme di franchigia IP a scelta
+Protezione;123;P;detraibilita;19% sui premi morte e IP (≥5%) nei limiti di legge
+Protezione;124;K;franchigie;Infortuni IP con franchigia (es. 3%)
+Protezione;124;O;imposta;"Infortuni 2,5%; RC 22,25%; assistenza 10%"
+Protezione;124;P;detraibilita;19% sulla parte infortuni morte e IP nei limiti di legge
+Protezione;124;U;premio_esempio;Da circa 150 €/anno (es. infortuni 110,49 € + assistenza 10 €)
+Protezione;125;H;capitali;"Somme in polizza; acqua al fabbricato 2.600 €/anno, acqua a terzi 5.000 €/anno"
+Protezione;125;K;franchigie;"Acqua: franchigia in polizza; RC amministratore: 150 € (fabbricati sotto 10 anni), 250 o 500 €"
+Protezione;125;O;imposta;"22,5%; tutela legale 12,5%"
+Protezione;125;U;premio_esempio;Provvigioni da chiedere (DIP aggiuntivo)
+Protezione;126;H;capitali;Somme scelte in polizza
+Protezione;126;O;imposta;"RC 22,5%; tutela legale 12,5%"
+Protezione;127;H;capitali;Vedi righe 124 e 126
+Protezione;127;U;premio_esempio;Vedi righe 124 e 126
+Protezione;128;H;capitali;"Somme scelte in polizza; neve max 75% con scoperto 15% min 500 €"
+Protezione;128;K;franchigie;Scoperti e limiti terremoto/alluvione nelle condizioni (non estratti)
+Protezione;129;H;capitali;Massimali e franchigie/scoperti indicati in polizza
+Protezione;129;J;carenze;Previste per malattia, infortuni e prevenzione (durata in polizza)
+Protezione;129;K;franchigie;Previste (importi in polizza)
+Protezione;129;P;detraibilita;No (salvo spese sanitarie rimborsate)
+Protezione;129;U;premio_esempio;Su preventivo
+Protezione;130;G;eta_massima;Bambini: under 10 per infortunio dentale
+Protezione;130;H;capitali;Massimali e limiti in polizza
+Protezione;130;J;carenze;"Cure dentali: dalla fine del mese di decorrenza; infortunio bambino: subito"
+Protezione;130;O;imposta;"Malattia 2,5%; assistenza 10%"
+Protezione;130;U;premio_esempio;Su preventivo
+Protezione;131;G;eta_massima;"75 alla firma; invalidità fino a 65 alla scadenza"
+Protezione;131;H;capitali;Minimo 20.000 €
+Protezione;131;O;imposta;"Caso morte 0%; complementari 2,5%"
+Protezione;131;U;premio_esempio;"20% + 40 € (fino a 300.000 €); 10% + 30 € fino a 400.000; 10% oltre; 40% dei costi agli intermediari; mensile +3%, trimestrale +2%, semestrale +1%"
+Protezione;132;G;eta_massima;"70 anni (Tutta la Vita); Più Autonomia premi fino a 85 anni"
+Protezione;132;J;carenze;Previste, non eliminabili con visita medica
+Protezione;132;U;premio_esempio;Su preventivo
+Protezione;133;H;capitali;Debito residuo / rate
+Protezione;133;P;detraibilita;19% sulla parte decesso nei limiti di legge
+Protezione;133;U;premio_esempio;Su preventivo
+Protezione;134;H;capitali;Da 50.000 a 1.000.000 € a tagli di 10.000 (300.000 € se a distanza)
+Protezione;135;H;capitali;Massimali scelti dal contraente
+Protezione;135;K;franchigie;"Furto: 20% (casa non abituale, serrature non conformi, impalcature); truffa 20% min 100 €; rapina fuori casa 15%; pannelli 10% min 500 €; home banking 250 €; acquisti online 75 €"
+Protezione;135;O;imposta;"Casa/RC 22,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;136;F;eta_ingresso;3 mesi (animale)
+Protezione;136;U;premio_esempio;Su preventivo
+Protezione;137;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;137;K;franchigie;In polizza
+Protezione;137;U;premio_esempio;Semestrale +3,6%
+Protezione;138;G;eta_massima;"64 all'ingresso; ultima rata entro 76"
+Protezione;138;H;capitali;Legate al mutuo
+Protezione;138;J;carenze;"Suicidio 24 mesi; IP e malattia grave da malattia: 30 giorni"
+Protezione;138;K;franchigie;IP: franchigia 39%
+Protezione;138;P;detraibilita;19% su morte e invalidità totale permanente
+Protezione;139;G;eta_massima;"64 all'ingresso; cessa dopo i 70"
+Protezione;139;K;franchigie;"Diaria: franchigia 2 giorni; IP sotto il 67% non pagata"
+Protezione;139;U;premio_esempio;Su preventivo
+Protezione;140;K;franchigie;"Fenomeno elettrico: 500 € (limite 15.000 €); sgombero 10% dell'indennizzo; periti fino a 5.000 €"
+Protezione;140;O;imposta;22,25% (CGA: 21,25% + 1% antiracket)
+Protezione;140;U;premio_esempio;0,034633% del costo di ricostruzione
+Protezione;141;G;eta_massima;"74 all'ingresso; cessa a 75"
+Protezione;141;H;capitali;"Da 500.000 a 1.500.000 € (dipendenti max 1.000.000); max 5 assicurati; massimale annuo 7,5 milioni"
+Protezione;141;K;franchigie;IP: franchigia relativa 49% (sotto il 50% nulla)
+Protezione;141;P;detraibilita;19% per il contraente nei limiti di legge
+Protezione;141;U;premio_esempio;"Emissione 5 €; rate mensili senza interessi"
+Protezione;142;G;eta_massima;"70 all'ingresso (65 per prestiti > 60 mesi); fine prestito entro 75"
+Protezione;142;K;franchigie;"Perdita impiego 60 giorni; inabilità 30 giorni; IP 59%"
+Protezione;142;P;detraibilita;19% sulla parte vita nei limiti di legge
+Protezione;142;U;premio_esempio;"Vita 0,0798% × mesi × importo; danni 0,0292% × mesi × importo; emissione 10 €"
+Protezione;143;H;capitali;"Acqua condotta 10.000 €; gelo 5.000; eventi naturali 200.000 (grandine 20.000); vandalismo 10.000; RC fabbricato 1.000.000 €"
+Protezione;143;K;franchigie;"Incendio 150 €; acqua 250 €; gelo 150 €; eventi naturali 250 €; vandalismo 150 €"
+Protezione;143;O;imposta;22,5% (tutela legale 12,5%, assistenza 10%)
+Protezione;143;U;premio_esempio;Su preventivo
+Protezione;144;G;eta_massima;"69 all'ingresso; uscita a 75"
+Protezione;144;H;capitali;"Massimali per anno e persona; parto 2.000 €, neonato 50.000 €"
+Protezione;144;J;carenze;"30 giorni (linee e dentarie); 60 (visite, diaria facoltativa, gravidanza); parto 270 giorni"
+Protezione;144;O;imposta;"Malattia 2,5%; assistenza 10%"
+Protezione;144;U;premio_esempio;Su preventivo
+Protezione;145;H;capitali;"Ricovero max 90 gg; convalescenza max 30 gg"
+Protezione;145;J;carenze;Malattia: solo diaria ricovero, dal 120° giorno
+Protezione;145;K;franchigie;IP pagata solo se ≥ 60% (tabella INAIL)
+Protezione;145;U;premio_esempio;Su preventivo
+Protezione;146;G;eta_massima;"74 all'ingresso (DIP: 75), uscita 80; inabilità: ingresso 59, uscita 60"
+Protezione;146;H;capitali;"IP 200/300/500.000 € (oltre 70 anni 20/30/50.000); decesso 50/100/200.000; spese mediche 1.500/3.000/5.000; fino a 5 assicurati"
+Protezione;146;K;franchigie;"IP: franchigia 20% (dal 60% si paga tutto; opzione franchigia 5%); inabilità 7 giorni; diaria 3 giorni; spese mediche 20% min 100 €; sport agonistici e catastrofi 50%"
+Protezione;146;O;imposta;"Infortuni 2,5%; assistenza 10%; tutela legale 21,25%"
+Protezione;146;P;detraibilita;19% su morte e IP nei limiti di legge
+Protezione;146;U;premio_esempio;Su preventivo
+Protezione;147;H;capitali;"Furto: max 750 € per categoria all'anno; danno: 750 € per categoria, max 1.500 €/anno"
+Protezione;147;U;premio_esempio;Su preventivo
+Protezione;148;H;capitali;"Credito 1.000 €/giorno (3.000 per periodo); debito 500/2.000; contactless 150/300; assegni 2.000/4.000; SIM 350/700; chiavi 350; documenti max 350"
+Protezione;148;K;franchigie;Nessuna franchigia (se la banca rimborsa, copre la franchigia fino a 150 € per carta)
+Protezione;148;O;imposta;"21,25% furto (CGA: 22,25%); assistenza 10%"
+Protezione;148;U;premio_esempio;Su preventivo
+Protezione;149;G;eta_massima;"Decesso: 74 anni e 6 mesi; con invalidità: 69 anni e 6 mesi"
+Protezione;149;O;imposta;Nessuna imposta sui premi
+Protezione;149;P;detraibilita;Premi deducibili per l'azienda
+Protezione;149;U;premio_esempio;Su preventivo
+Protezione;150;H;capitali;Minimi di legge: 6.450.000 € persone, 1.300.000 € cose (aumentabili)
+Protezione;150;K;franchigie;"Collisione assistita A: 300 € (600 fuori rete se ≤26 anni); B: 0 in rete (max 3.500), 200 fuori; ungulati 350 € (max 3.000); cristalli 200 € fuori rete; dispositivi 150 €; sociopolitici 10% min 150 €"
+Protezione;150;O;imposta;"RCA 12,5% + 10,5% SSN; danni veicolo 13,5%; infortuni 2,5%; assistenza 10%"
+Protezione;150;U;premio_esempio;Su preventivo
+Protezione;151;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;151;K;franchigie;"Audiovisivi 150 €; sociopolitici 10% min 150 €; IP infortuni a franchigia; altre variabili"
+Protezione;152;H;capitali;Minimi di legge 6.450.000 / 1.300.000 €
+Protezione;152;K;franchigie;"Cristalli 150 € fuori rete; sociopolitici 10% min 150 €; infortuni IP 3%; altre in polizza"
+Protezione;153;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;153;K;franchigie;"Furto: scoperti in polizza; infortuni IP 3%; cose dei trasportati 150 €"
+Protezione;153;O;imposta;"RC natanti 12,5% + 10,5% SSN; altre garanzie con aliquote proprie"
+Protezione;154;H;capitali;"Capitale scelto in polizza; formula Trasportati: totale entro il massimale Targa"
+Protezione;154;K;franchigie;Nessuna franchigia specifica nel DIP (verificare in polizza)
+Protezione;154;U;premio_esempio;Su preventivo
+Protezione;155;H;capitali;Somme e massimali in polizza
+Protezione;155;K;franchigie;Previste per settore (tabelle in polizza)
+Protezione;155;O;imposta;"Casa 22,5%; infortuni 2,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;155;U;premio_esempio;Opzione affitto: circa 300-450 €/anno (fonte secondaria)
+Protezione;156;H;capitali;"Somme in polizza; furto infissi 7.500 €/anno (1.000 € a elemento)"
+Protezione;156;K;franchigie;"Sociopolitici 10% min 150 €; atmosferici e fenomeno elettrico 10% min 500 €; terremoto 10% min 25.000 €; alluvione 10% min 10.000 €; allagamento min 3.500 € (max 15.000 €); fotovoltaico fino a 30%"
+Protezione;156;O;imposta;"22,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;156;U;premio_esempio;"Intermediari 26%; semestrale +2%, quadrimestrale +3%"
+Protezione;157;K;franchigie;Franchigia su danni a cose
+Protezione;157;U;premio_esempio;Su preventivo
+Protezione;158;H;capitali;"In polizza; vertenze contrattuali tra 100 e 51.700 €"
+Protezione;158;K;franchigie;Previste per alcune garanzie
+Protezione;158;U;premio_esempio;"Intermediari 22,5%; rate semestrali senza costi"
+Protezione;159;H;capitali;"Somme in polizza; piani con franchigia ridotta fino a 400.000 o 800.000 €"
+Protezione;159;K;franchigie;"IP piani 5%, 10%, 20%; ictus/infarto nulla sotto il 25% (opzione Q: 60%)"
+Protezione;159;P;detraibilita;19% sulla parte morte e invalidità nei limiti di legge
+Protezione;160;H;capitali;Minimi di legge: 6.450.000 € persone, 1.300.000 € cose
+Protezione;160;K;franchigie;Nel set informativo (non letto)
+Protezione;160;U;premio_esempio;Su preventivo
+Protezione;161;H;capitali;Minimi di legge (dettaglio nel DIP)
+Protezione;161;K;franchigie;Non indicate sulla pagina
+Protezione;161;U;premio_esempio;Su preventivo
+Protezione;162;H;capitali;Minimi di legge (dettaglio nel DIP)
+Protezione;162;K;franchigie;Non indicate sulla pagina prodotto
+Protezione;162;U;premio_esempio;Su preventivo
+Protezione;163;H;capitali;Minimi di legge (dettaglio nel DIP)
+Protezione;163;K;franchigie;Eventi naturali con franchigie da contratto
+Protezione;163;U;premio_esempio;Su preventivo
+Protezione;164;H;capitali;Non indicati sulla pagina
+Protezione;164;K;franchigie;Non indicate
+Protezione;164;O;imposta;RC natanti 12,5% + 10,5% SSN
+Protezione;164;U;premio_esempio;Su preventivo
+Protezione;165;H;capitali;In polizza
+Protezione;165;O;imposta;"RCA 12,5% + 10,5% SSN; infortuni 2,5%"
+Protezione;165;U;premio_esempio;Su preventivo
+Protezione;166;H;capitali;In polizza
+Protezione;166;K;franchigie;In polizza
+Protezione;166;O;imposta;"22,5% (catastrofali 22,5%; tutela legale 12,5%; assistenza 10%)"
+Protezione;166;U;premio_esempio;Su preventivo
+Protezione;167;H;capitali;Non indicate sulla pagina
+Protezione;167;K;franchigie;Non indicate
+Protezione;167;O;imposta;"22,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;167;U;premio_esempio;Su preventivo
+Protezione;168;H;capitali;In polizza
+Protezione;168;U;premio_esempio;Su preventivo
+Protezione;169;H;capitali;Non indicati sulle pagine
+Protezione;169;K;franchigie;Non indicate
+Protezione;169;U;premio_esempio;Su preventivo
+Protezione;170;H;capitali;"Somme personalizzabili per persona; fino a 10 assicurati"
+Protezione;170;K;franchigie;Nel set informativo (non letto)
+Protezione;170;O;imposta;2,5% (tutela legale 12,5%, assistenza 10%)
+Protezione;170;P;detraibilita;19% su morte e IP nei limiti di legge
+Protezione;170;U;premio_esempio;Su preventivo
+Protezione;171;H;capitali;"Fino a 7 veicoli; somme in polizza"
+Protezione;171;K;franchigie;Nel set informativo (non letto)
+Protezione;171;P;detraibilita;19% su morte e IP nei limiti di legge
+Protezione;171;U;premio_esempio;Su preventivo
+Protezione;172;H;capitali;"Fino a 10 assicurati; massimali in polizza"
+Protezione;172;J;carenze;Nel set informativo (non letto)
+Protezione;172;K;franchigie;Nel set informativo
+Protezione;172;P;detraibilita;Spese sanitarie rimborsate non detraibili
+Protezione;172;U;premio_esempio;Su preventivo
+Protezione;173;H;capitali;Fino a 3.500.000 € (senza visita fino a 250.000 €)
+Protezione;173;J;carenze;Con solo questionario: carenza (eliminabile con visita)
+Protezione;173;U;premio_esempio;Su preventivo
+Protezione;174;H;capitali;50.000 € o 100.000 €
+Protezione;174;J;carenze;Non indicate
+Protezione;174;U;premio_esempio;Su preventivo
+Protezione;175;H;capitali;Debito residuo
+Protezione;175;U;premio_esempio;Su preventivo
+Protezione;176;H;capitali;Non indicati sulla pagina
+Protezione;176;K;franchigie;Non indicate
+Protezione;176;O;imposta;"Assistenza 10%; malattia 2,5%; altri rami 22,25%"
+Protezione;176;U;premio_esempio;Su preventivo
+Protezione;177;H;capitali;"Fabbricato 80.000-1.500.000 €; contenuto 15.000-450.000 €; RC 1-3 mln €; tutela legale 10.000 € a sinistro, 40.000 €/anno (sfratti 2.000 €); assistenza 300 €"
+Protezione;177;J;carenze;Tutela legale: 3 mesi (sfratti 120 giorni, volontaria giurisdizione 2 anni)
+Protezione;177;O;imposta;"22,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;177;U;premio_esempio;Distributore 27,5% del flusso commissionale
+Protezione;178;H;capitali;Massimali in polizza
+Protezione;178;J;carenze;Nelle condizioni
+Protezione;178;K;franchigie;Nelle condizioni
+Protezione;178;O;imposta;"2,5%; assistenza 10%"
+Protezione;179;H;capitali;Massimale mensile in base al profilo
+Protezione;179;J;carenze;"3 anni per Alzheimer e demenze; 1 anno per altre malattie; nessuna per infortunio"
+Protezione;179;K;franchigie;Franchigia (eliminabile con opzione)
+Protezione;179;O;imposta;Nessuna (ramo vita/LTC)
+Protezione;179;U;premio_esempio;Caricamenti da verificare sul DIP aggiuntivo
+Protezione;180;U;premio_esempio;Su preventivo
+Protezione;181;H;capitali;Minimi di legge (aumentabili)
+Protezione;181;K;franchigie;Nel DIP aggiuntivo
+Protezione;181;O;imposta;RCA 12,5% + 10,5% SSN (±3,5% provinciale)
+Protezione;181;U;premio_esempio;Provvigione RCA 6-9% del premio (preventivi reali)
+Protezione;182;K;franchigie;"Vento/grandine 10% min 350 €; gelo 250 €; acqua piovana 300 €; neve 10% min 200 €; furto da familiari 20%; scippo 75 €; danni da cane 50 €"
+Protezione;182;O;imposta;22,5% (tutela legale 12,5%, assistenza 10%)
+Protezione;182;U;premio_esempio;Su preventivo
+Protezione;183;H;capitali;Limite di indennizzo e franchigia calcolati in base alla spesa scelta (20, 30 o 40 € al mese) e alla zona
+Protezione;183;K;franchigie;Franchigia variabile per spesa e zona
+Protezione;183;O;imposta;Catastrofali casa: aliquota agevolata
+Protezione;183;P;detraibilita;Sì: detrazione 19% per la polizza catastrofale sulla casa (legge di bilancio 2018)
+Protezione;184;H;capitali;Non indicati sulla pagina
+Protezione;184;K;franchigie;Previste, importi non indicati
+Protezione;184;O;imposta;"22,5%; tutela legale 12,5%"
+Protezione;184;U;premio_esempio;Circa 30 €/mese (casa), 75 €/mese (capannone)
+Protezione;185;J;carenze;Va comprata entro 5 giorni dalla prenotazione e non nei 10 giorni prima della partenza
+Protezione;185;K;franchigie;Non indicate
+Protezione;185;O;imposta;"22,25%; assistenza 10%"
+Protezione;186;H;capitali;Versione Top: capitale minimo 300.000,01 €
+Protezione;186;U;premio_esempio;Su preventivo
+Protezione;187;H;capitali;Somme in polizza
+Protezione;187;K;franchigie;"Incendio: franchigie 100-10.000 €; RC 100-150 €; furto: scoperto 10-25%; RC proprietà 10%; pet 10-20%; tende 20% min 500 €"
+Protezione;187;O;imposta;"22,5%; tutela legale 12,5%; assistenza 10%"
+Protezione;187;U;premio_esempio;Intermediari 26,52%
+Protezione;188;F;eta_ingresso;Animale da 3 mesi
+Protezione;188;K;franchigie;"Senza ricovero 20% min 50 €; altre 10%; RC 100 €"
+Protezione;188;O;imposta;"Assistenza 10%; altre 22,25%"
+Protezione;188;U;premio_esempio;Intermediari 26,52% (prodotto Casa e Famiglia)
+Protezione;189;U;premio_esempio;Su preventivo
+Protezione;190;G;eta_massima;"75 alla firma; 80 a scadenza"
+Protezione;190;U;premio_esempio;5 € + 1,50 €/rata + 26 € + 14% + quota sul capitale
+Protezione;191;G;eta_massima;"75 alla firma; 80 a scadenza (infortunio 75, esonero 66)"
+Protezione;191;H;capitali;Non indicati nel DIP aggiuntivo
+Protezione;191;O;imposta;"Vita 0%; complementari 2,5%"
+Protezione;192;G;eta_massima;"60 alla firma; 75 a scadenza"
+Protezione;192;U;premio_esempio;5 € + 1,50 €/rata + 30 € + 25% + 0,035% del capitale
+Protezione;193;G;eta_massima;60 alla firma
+Protezione;193;H;capitali;Nelle condizioni
+Protezione;193;P;detraibilita;19% sulla quota di rischio morte
+Protezione;194;O;imposta;Secondo ramo
+Protezione;194;U;premio_esempio;Su preventivo
+Protezione;195;G;eta_massima;"65 all'ingresso; 70 a scadenza"
+Protezione;195;H;capitali;Capitale fisso: 50.000, 100.000 o 150.000 €
+Protezione;195;J;carenze;Non indicate nella scheda (verificare set informativo)
+Protezione;195;O;imposta;Nessuna (ramo vita)
+Protezione;195;U;premio_esempio;Su preventivo
+Protezione;196;G;eta_massima;70 all'ingresso
+Protezione;196;H;capitali;Rendita da 500 a 5.000 € al mese
+Protezione;196;J;carenze;Non indicate nella scheda
+Protezione;196;U;premio_esempio;Su preventivo
+Protezione;197;H;capitali;Minimi di legge (aumentabili)
+Protezione;197;K;franchigie;Dal set informativo dell'agenzia
+Protezione;197;U;premio_esempio;Da chiedere in agenzia
+Protezione;198;H;capitali;Minimi di legge 6.450.000 / 1.300.000 € (aumentabili)
+Protezione;198;K;franchigie;"Furto 10% min 150 €, 15% min 250 o 500 €; cristalli 250 € fuori rete (max 600 €); Blukasko 250 € (max 3.000 €); kasko 10% min 500/1.000 €; eventi naturali 10% min 500 €; -50% in carrozzeria convenzionata"
+Protezione;198;U;premio_esempio;Intermediazione 4%
+Protezione;199;H;capitali;"Pacchetti Platinum e Diamond; RC vita privata 1-2 milioni €"
+Protezione;199;K;franchigie;Previste su alcune garanzie
+Protezione;199;O;imposta;22,5% (tutela legale 12,5%, assistenza 10%)
+Protezione;199;U;premio_esempio;Su preventivo
+Protezione;200;H;capitali;Massimali modulabili e incrementabili
+Protezione;200;K;franchigie;Formula con o senza franchigia (incendio e furto)
+Protezione;200;O;imposta;22,5% (tutela legale 12,5%, assistenza 10%)
+Protezione;200;U;premio_esempio;Su preventivo
+Protezione;201;H;capitali;Somme in polizza
+Protezione;201;K;franchigie;In polizza
+Protezione;201;O;imposta;22,5% (tutela legale 12,5%)
+Protezione;201;U;premio_esempio;Su preventivo
+Protezione;202;G;eta_massima;"IPI: 70 all'ingresso, 80 a scadenza; IPM: 60 e 70"
+Protezione;202;H;capitali;Somme scelte in polizza
+Protezione;202;K;franchigie;"IPI: 3, 5, 10, 20 o 50%; IPM: 22% o 50%"
+Protezione;202;P;detraibilita;19% su morte e IP nei limiti di legge
+Protezione;202;U;premio_esempio;Su preventivo
+Protezione;203;H;capitali;"5 combinazioni di somma assicurata; premio secondo 4 classi di professione"
+Protezione;203;K;franchigie;IP: franchigia 35% (sopra paga al 100%): copre solo gli infortuni gravi
+Protezione;203;O;imposta;"Infortuni 2,5%; assistenza 10%"
+Protezione;203;P;detraibilita;19% sulla parte morte e IP nei limiti di legge
+Protezione;203;U;premio_esempio;Assistenza 20 o 35 € + premio IP per classe
+Protezione;204;G;eta_massima;"75 all'ingresso; 80 a scadenza (infortunio 75; esonero 66)"
+Protezione;204;U;premio_esempio;"Emissione 5 € + 1,50 € a rata + 15 €/anno + 16,50% del premio; infortunio 30%; esonero 15%"
+Previdenza;16;G;spese_annue;"30 € (versamenti annui 50-299 €); 50 € (da 300 €); 10 € fino a 25 anni"
+Previdenza;17;G;spese_annue;Come sopra
+Previdenza;18;G;spese_annue;Come sopra
+Previdenza;19;G;spese_annue;Come sopra
+Previdenza;20;G;spese_annue;"0 € (<50 €/anno); 30 € (50-299 €); 50 € (da 300 €)"
+Previdenza;20;I;costo_gestione;1.3% + 20% del rendimento oltre il 3,5%
+Previdenza;21;G;spese_annue;Come sopra
+Previdenza;21;I;costo_gestione;1.4% + 20% di performance
+Previdenza;22;G;spese_annue;Come sopra
+Previdenza;22;I;costo_gestione;1.7% + 20% di performance
+Previdenza;25;H;caricamento_versamenti;4% (2% fino a 26 anni)
+Previdenza;26;H;caricamento_versamenti;4% (2% fino a 26 anni)
+Previdenza;27;H;caricamento_versamenti;4% (2% fino a 26 anni)
+Previdenza;27;I;costo_gestione;1,5% - 1,8%
+Previdenza;28;P;anticipazione;50 € (la prima gratuita)
+Previdenza;29;P;anticipazione;50 € (la prima gratuita)
+Previdenza;30;P;anticipazione;50 € (la prima gratuita)
+Previdenza;31;P;anticipazione;50 € (la prima gratuita)
+Previdenza;32;P;anticipazione;50 € (la prima gratuita)
+Previdenza;33;P;anticipazione;50 € (la prima gratuita)
+Previdenza;34;P;anticipazione;50 € (la prima gratuita)
+Previdenza;36;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;37;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;38;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;39;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;40;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;41;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;42;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;43;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;44;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;45;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;46;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;47;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;48;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;49;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;50;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;51;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;52;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;53;G;spese_annue;0 (30 € con Life Cycle)
+Previdenza;54;H;caricamento_versamenti;"3,5% primi 5 anni; 2% dal 6°"
+Previdenza;55;H;caricamento_versamenti;"3,5% primi 5 anni; 2% dal 6°"
+Previdenza;56;H;caricamento_versamenti;"3,5% primi 5 anni; 2% dal 6°"
+Previdenza;57;H;caricamento_versamenti;"3,5% primi 5 anni; 2% dal 6°"
+Previdenza;60;F;spese_adesione;50 € (trattenuti solo in caso di recesso)
+Previdenza;60;I;costo_gestione;"1% se rendimento fino a 3,30%; 30% del rendimento tra 3,31% e 3,99%; 1,20% oltre"
+Previdenza;61;F;spese_adesione;Come sopra
+Previdenza;62;F;spese_adesione;Come sopra
+Previdenza;63;F;spese_adesione;Come sopra
+Previdenza;64;F;spese_adesione;Come sopra
+Previdenza;73;H;caricamento_versamenti;1% (minimo 30 € sul primo versamento)
+Previdenza;79;N;trasferimento;0,5% (min 30, max 100 €)
+Previdenza;79;O;riscatto;0,5% (min 30, max 100 €)
+Previdenza;79;P;anticipazione;0,5% (min 30, max 100 €)
+Previdenza;80;I;costo_gestione;1,30% (+0,1% ogni 0,5% di rendimento oltre il 7%)
+Previdenza;85;P;anticipazione;Non prevista
+Previdenza;90;G;spese_annue;0 € oppure 1% del versato (condizioni non indicate)
+Previdenza;91;G;spese_annue;Come sopra
+Previdenza;92;G;spese_annue;Come sopra
+Previdenza;93;G;spese_annue;Come sopra
+Previdenza;94;G;spese_annue;Come sopra
+Previdenza;95;I;costo_gestione;"1,5% - 2% secondo il comparto (Bilanciato 1,74%; Obbligazionario 1,5%)"
+Previdenza;96;G;spese_annue;48 € LTC obbligatoria
+Previdenza;97;G;spese_annue;48 € LTC obbligatoria
+Previdenza;98;G;spese_annue;48 € LTC obbligatoria
+Previdenza;99;H;caricamento_versamenti;1,75% di ogni versamento (minimo 5 €)
+Previdenza;99;I;costo_gestione;1,50% trattenuto dal rendimento
+Previdenza;99;O;riscatto;Non previsto
+Previdenza;105;G;spese_annue;1,50 € per ogni versamento dopo il primo
+Previdenza;105;I;costo_gestione;1,20% (+0,10% per ogni punto di rendimento oltre il 4%)
+Previdenza;105;O;riscatto;25 € (parziale 5 €)
+Previdenza;106;G;spese_annue;Come sopra
+Previdenza;106;O;riscatto;25 € (parziale 5 €)
+Previdenza;107;P;anticipazione;Non prevista
+Previdenza;108;P;anticipazione;Non prevista
+Previdenza;109;P;anticipazione;Non prevista
+Previdenza;110;P;anticipazione;Non prevista
+Previdenza;115;P;anticipazione;Non prevista
+Previdenza;116;P;anticipazione;Non prevista
+Previdenza;117;P;anticipazione;Non prevista
+Previdenza;118;H;caricamento_versamenti;1,75% di ogni versamento (minimo 5 €)
+Previdenza;118;O;riscatto;Non previsto
+Previdenza;119;H;caricamento_versamenti;1,75% di ogni versamento (minimo 5 €)
+Previdenza;119;O;riscatto;Non previsto

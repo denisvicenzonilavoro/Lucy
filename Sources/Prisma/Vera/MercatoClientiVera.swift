@@ -389,7 +389,7 @@ enum MercatoClientiVera {
         // Una domanda su un cliente o un «e se» resta degli scenari (ScenariVera)
         guard !ipotesi(frase), let genere = tipo(t) else { return .nessuno }
         let periodo = DateItaliane.cerca(#"\b(in (?:una|un|due|tre|quattro|cinque|sei|\d+) (?:settiman[ae]|giorn[oi]|sedut[ae]|mes[ei]|ann[oi])|da inizio (?:anno|mese)|in giornata|nell'ultima settimana|nell'ultimo mese|questa settimana|oggi|ieri)\b"#, t)?.1[1]
-        let detto = "Detto a Vera"
+        let detto = "Detto a Lucy"
         switch genere {
         case .tassiBCE:
             guard let v = puntiTassi(t) else {
@@ -1131,39 +1131,39 @@ enum MercatoClientiVera {
     static func controlla(_ testo: String, toccato t: ClienteToccatoVera, esito: EsitoMercatoVera, cliente c: Cliente,
                           altri: [String], tu: Bool, oggi: Date, cal: Calendar = .current) -> String? {
         let s = testo.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !s.isEmpty else { return "la bozza di Vera era vuota" }
+        guard !s.isEmpty else { return "la bozza di Lucy era vuota" }
         if s.contains("[") || s.contains("]") || s.contains("{") || s.contains("}") || s.contains("<") || s.contains(">") {
-            return "la bozza di Vera aveva dei segnaposto da completare"
+            return "la bozza di Lucy aveva dei segnaposto da completare"
         }
         let fatti = ammessi(t, evento: esito.evento, sintesi: esito.sintesi, cliente: c, oggi: oggi, cal: cal)
         guard CommentoVera.numeriConservati(bozza: fatti, testo: s) else {
-            return "la bozza di Vera citava una cifra che Lucy non ha calcolato"
+            return "la bozza di Lucy citava una cifra che Lucy non ha calcolato"
         }
         guard numeriInParoleConservati(fatti: fatti, testo: s) else {
-            return "la bozza di Vera citava una cifra in parole che Lucy non ha calcolato"
+            return "la bozza di Lucy citava una cifra in parole che Lucy non ha calcolato"
         }
         if s.range(of: MessaggiVera.promesse, options: [.regularExpression, .caseInsensitive]) != nil {
-            return "la bozza di Vera prometteva un risultato"
+            return "la bozza di Lucy prometteva un risultato"
         }
         // Nel messaggio a un cliente niente nomi degli altri
         let minuscolo = s.lowercased()
         let mio = ModelliMessaggi.primoNome(c.nome).lowercased()
         for nome in altri.map({ ModelliMessaggi.primoNome($0).lowercased() }) where nome.count >= 3 && nome != mio {
             if DateItaliane.cerca(#"\b"# + NSRegularExpression.escapedPattern(for: nome) + #"\b"#, minuscolo) != nil {
-                return "la bozza di Vera nominava un altro cliente"
+                return "la bozza di Lucy nominava un altro cliente"
             }
         }
         // Le stesse forme del tu di StileVera.allocuzione («ciao», «hai», «vuoi», «puoi», «fammi»…), senza «sei»
         // che è anche il numero
         if !tu, DateItaliane.cerca(#"\b(?:ti|te|tuo|tua|tuoi|tue|ciao|puoi|vuoi|hai|fammi|dimmi|scrivimi|chiamami)\b"#, minuscolo) != nil {
-            return "la bozza di Vera dava del tu a chi riceve il Lei"
+            return "la bozza di Lucy dava del tu a chi riceve il Lei"
         }
         // E al contrario: a chi riceve il tu niente Lei, né forme di cortesia maiuscole a metà frase («i Suoi numeri»)
         if tu, StileVera.allocuzione(di: s) == .lei
             || s.range(of: #"(?<=[a-zà-ù,] )(?:La|Le|Lei|Sua|Suo|Sue|Suoi)\b"#, options: .regularExpression) != nil {
-            return "la bozza di Vera dava del Lei a chi riceve il tu"
+            return "la bozza di Lucy dava del Lei a chi riceve il tu"
         }
-        if s.split(whereSeparator: { $0.isWhitespace }).count > RegoleMercatoClienti.paroleBozza { return "la bozza di Vera era troppo lunga" }
+        if s.split(whereSeparator: { $0.isWhitespace }).count > RegoleMercatoClienti.paroleBozza { return "la bozza di Lucy era troppo lunga" }
         return nil
     }
 
@@ -1244,8 +1244,8 @@ enum MercatoClientiVera {
                                         avviso: TestiMercatoClienti.maiuscola(e.motivo) + ": resta il testo di Lucy, con le cifre esatte.")
             case nil:
                 return BozzaMercatoVera(clienteId: c.id, testo: fissa, canale: canale, autore: .modelloFisso,
-                                        avviso: lette == nil ? "La risposta di Vera non si leggeva: resta il testo di Lucy, con le cifre esatte."
-                                            : "Vera non ha scritto la bozza per questo cliente: resta il testo di Lucy.")
+                                        avviso: lette == nil ? "La risposta di Lucy non si leggeva: resta il testo di Lucy, con le cifre esatte."
+                                            : "Lucy non ha scritto la bozza per questo cliente: resta il testo di Lucy.")
             }
         }
     }

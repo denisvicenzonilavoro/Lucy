@@ -38,7 +38,7 @@ extension ProvaBackup {
         }
         guard stato.pulisciDocumentiOrfani() == 0 else { return "dimostrazione: la pulizia dei documenti ha tolto dei file" }
         guard stato.memoriaVera.ferma, stato.biblioteca.ferma, stato.moduli.ferma else {
-            return "dimostrazione: memoria di Vera, Biblioteca o Moduli scrivono ancora"
+            return "dimostrazione: memoria di Lucy, Biblioteca o Moduli scrivono ancora"
         }
         guard !stato.scritteProva, !stato.guidaVisibile, !stato.passiGuida.contains(where: { $0.azione == .togliProva }) else {
             return "dimostrazione: le scritte «dati di prova», la guida o «Togli i clienti di prova» compaiono ancora"

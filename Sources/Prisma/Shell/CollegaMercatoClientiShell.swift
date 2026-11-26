@@ -193,7 +193,7 @@ extension StatoShell {
             return mostraAvviso("L'elenco dei clienti non è più nella conversazione.")
         }
         guard !bozzeMercatoPronte(m) else { return mostraAvviso("Le bozze per questo evento sono già pronte nella conversazione.") }
-        guard !veraInCorso else { return mostraAvviso("Vera sta ancora rispondendo: aspetta un attimo.") }
+        guard !veraInCorso else { return mostraAvviso("Lucy sta ancora rispondendo: aspetta un attimo.") }
         let chiave = chiaveMessaggioMercatoClienti(id) ?? VeraPortafoglio.chiave
         let clienti = clientiAttivi
         let stile = stileBozzeMercatoVera(oggi: oggi)
@@ -250,12 +250,12 @@ extension StatoShell {
         let n = bozze.count
         var testo = n == 1 ? "Ho preparato la bozza" : "Ho preparato \(SchedaConfermaVera.numero(n)) bozze"
         if diVera == n {
-            testo += conProfilo ? " nel tuo stile, con le cifre di Lucy." : ", scritte da Vera con le cifre di Lucy."
+            testo += conProfilo ? " nel tuo stile, con le cifre di Lucy." : ", scritte da Lucy con le cifre di Lucy."
         } else if diVera == 0 {
             testo += conProfilo ? " con il testo di Lucy, nella forma del tuo stile: le cifre sono esatte, il tono lo puoi ritoccare tu."
                                 : " con il testo di Lucy: le cifre sono esatte, il tono lo puoi ritoccare tu."
         } else {
-            testo += ": \(diVera) " + (conProfilo ? "le ha scritte Vera nel tuo stile" : "le ha scritte Vera") + ", le altre restano con il testo di Lucy."
+            testo += ": \(diVera) " + (conProfilo ? "le ha scritte Lucy nel tuo stile" : "le ha scritte Lucy") + ", le altre restano con il testo di Lucy."
         }
         testo += " Le metto in Messaggi e segno le attività solo con «Conferma»: le apri e le spedisci tu."
         var m = MessaggioVera(autore: .vera, testo: testo, titolo: esito.etichettaBozze, motore: diVera > 0 ? motore : Self.motoreAzioni)

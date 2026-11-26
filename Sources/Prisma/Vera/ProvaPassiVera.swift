@@ -101,7 +101,7 @@ enum ProvaPassiVera {
                   && Set(r.obiettiviIds) == ["obiettivo-prova-studi", "obiettivo-prova-casa"] && r.dicitura.hasSuffix(" una tantum"),
                   "Altre richieste: 30.000 € una tantum tra «Università di Anna» e «Casa al lago», senza protezione")
         if case .domanda(let d) = PassiVera.capisci("Marco ha 30.000 € da parte: proteggere Elena o gli studi?", cliente: dati.cliente, obiettivi: dati.obiettivi) {
-            controlla(d.contains("premio"), "Altre richieste: con un capitale la protezione non si divide (si paga con un premio): Vera lo dice")
+            controlla(d.contains("premio"), "Altre richieste: con un capitale la protezione non si divide (si paga con un premio): Lucy lo dice")
         } else {
             controlla(false, "Altre richieste: capitale e protezione con un solo obiettivo diventano una domanda")
         }
@@ -150,14 +150,14 @@ enum ProvaPassiVera {
             controlla(false, "Richiesta: la frase del template si capisce")
         }
         if case .domanda(let d) = PassiVera.capisci("Marco vuole proteggere Elena e pensare agli studi. Come li divido?", cliente: dati.cliente, obiettivi: dati.obiettivi) {
-            controlla(d.contains("ogni mese"), "Richiesta: senza budget Vera lo chiede: \(d)")
+            controlla(d.contains("ogni mese"), "Richiesta: senza budget Lucy lo chiede: \(d)")
         } else {
-            controlla(false, "Richiesta: senza budget Vera chiede quanto al mese")
+            controlla(false, "Richiesta: senza budget Lucy chiede quanto al mese")
         }
         if case .domanda(let d) = PassiVera.capisci("Marco ha 400 € al mese per proteggere la famiglia e un altro progetto: come li divido?", cliente: dati.cliente, obiettivi: dati.obiettivi) {
-            controlla(d.contains("Università di Anna") && d.contains("Casa al lago"), "Richiesta: senza obiettivo riconosciuto Vera chiede quale, con l'elenco: \(d)")
+            controlla(d.contains("Università di Anna") && d.contains("Casa al lago"), "Richiesta: senza obiettivo riconosciuto Lucy chiede quale, con l'elenco: \(d)")
         } else {
-            controlla(false, "Richiesta: senza obiettivo riconosciuto Vera chiede quale")
+            controlla(false, "Richiesta: senza obiettivo riconosciuto Lucy chiede quale")
         }
         if case .richiesta(let r) = PassiVera.capisci("Marco ha 500 € al mese da dividere tra la casa e gli studi", cliente: dati.cliente, obiettivi: dati.obiettivi) {
             controlla(!r.protezione && Set(r.obiettiviIds) == ["obiettivo-prova-studi", "obiettivo-prova-casa"] && r.obiettiviIds.first == "obiettivo-prova-studi",
@@ -182,7 +182,7 @@ enum ProvaPassiVera {
             controlla(PassiVera.cliente(nel: due, clienti: clienti, attivo: nil) == nil
                       && (terzo.map { PassiVera.cliente(nel: due, clienti: clienti, attivo: $0.id) == nil } ?? true)
                       && scelto?.id == nominabili[1].id,
-                      "Richiesta: con due clienti nominati Vera non prende il primo dell'archivio né un cliente non nominato")
+                      "Richiesta: con due clienti nominati Lucy non prende il primo dell'archivio né un cliente non nominato")
         } else {
             controlla(false, "Richiesta: i clienti di prova bastano per la verifica dei due nominati")
         }
@@ -346,7 +346,7 @@ enum ProvaPassiVera {
         controlla(!p1.regge && p1.divisioni.allSatisfy { !$0.reggeObiettivi } && (p1.divisioneConsigliata?.minimo ?? -1) >= (minimi.max() ?? 0) - PassiVera.tolleranza,
                   "Scelta: con 100 € nessuna divisione regge e si consiglia quella che lascia meno indietro")
         controlla(p1.spiegazione.contains("Nessuna divisione dei 100 €") && p1.vincoli.contains { $0.tipo == .budgetCorto },
-                  "Spiegazione: con 100 € Vera dice che nessuna divisione regge e che gli studi chiederebbero di più: \(p1.spiegazione)")
+                  "Spiegazione: con 100 € Lucy dice che nessuna divisione regge e che gli studi chiederebbero di più: \(p1.spiegazione)")
 
         // Senza tariffa caso morte: il capitale non si stima e Vera lo dice
         var senza = dati
@@ -381,9 +381,9 @@ enum ProvaPassiVera {
         let piano = PassiVera.eseguiTutto(PassiVera.piano(r, dati: dati), dati: dati)
         let con = PassiVera.testoRisposta(piano, mostraRagionamento: true)
         let senza = PassiVera.testoRisposta(piano, mostraRagionamento: false)
-        controlla(con.contains("Il piano di Vera") && con.contains("1. Leggo la protezione della famiglia") && con.contains("La regola:"),
+        controlla(con.contains("Il piano di Lucy") && con.contains("1. Leggo la protezione della famiglia") && con.contains("La regola:"),
                   "Risposta: con «mostra il ragionamento» si vedono il piano e la regola")
-        controlla(!senza.contains("Il piano di Vera") && senza.contains("Equilibrio (Vera consiglia)") && senza.contains(piano.spiegazione),
+        controlla(!senza.contains("Il piano di Lucy") && senza.contains("Equilibrio (Lucy consiglia)") && senza.contains(piano.spiegazione),
                   "Risposta: senza ragionamento restano le divisioni e la spiegazione")
 
         let azioni = PassiVera.azioni(piano, cliente: dati.cliente)

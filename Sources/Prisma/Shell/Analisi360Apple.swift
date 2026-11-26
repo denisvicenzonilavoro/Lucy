@@ -804,37 +804,17 @@ private struct CardArea360Apple: View, Equatable {
                 .fixedSize(horizontal: false, vertical: true)
                 .frame(maxWidth: a.larghezzaDescrizione, alignment: .leading)
                 .padding(.top, a.descrizioneSopra)
-            // Se canali e stato non stanno su una riga, lo stato va sotto le etichette: le due etichette fisse
-            // non allargano più la card oltre la sua colonna
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: a.spazioStato) {
-                    etichetteCanali
-                    testoStato
-                }
-                VStack(alignment: .leading, spacing: a.spazioStato) {
-                    HStack(spacing: a.spazioStato) { etichetteCanali }
-                    testoStato
-                }
+            // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichette dei canali, resta lo stato delle ipotesi
+            if !statoIpotesi.isEmpty {
+                testoStatoPieno
+                    .padding(.top, a.statoSopra)
             }
-            .padding(.top, a.statoSopra)
             Text(collegamento)
                 .carattereApple(a.collegamento)
                 .foregroundColor(a.coloreCollegamento)
                 .padding(.top, a.collegamentoSopra)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
-    }
-
-    @ViewBuilder private var etichetteCanali: some View {
-        ForEach(canali) { c in
-            EtichettaCanaleApple(canale: c, compatta: true)
-        }
-    }
-
-    @ViewBuilder private var testoStato: some View {
-        if !statoIpotesi.isEmpty {
-            testoStatoPieno
-        }
     }
 
     private var testoStatoPieno: some View {

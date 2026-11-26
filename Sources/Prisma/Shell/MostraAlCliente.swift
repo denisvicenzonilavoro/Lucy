@@ -338,7 +338,7 @@ enum ProvaMostraAlCliente {
         s.apri(.posizioni)
         controlla(s.sistema.aperta(.posizioni) == posizioniAperte, "Mostra al cliente: nella vista pulita le altre app non si aprono")
         s.apriMiniVera(.scrivi)
-        controlla(!s.miniVera.visibile, "Mostra al cliente: la mini Vera non si apre")
+        controlla(!s.miniVera.visibile, "Mostra al cliente: la mini Lucy non si apre")
         s.cercaOvunque()
         controlla(!s.pannelloRicerca, "Mostra al cliente: la ricerca ⌘K non si apre")
         s.apriGuida()

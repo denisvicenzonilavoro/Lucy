@@ -269,7 +269,7 @@ struct PannelloAdeguatezza: View {
     private func opzioniSostituita(_ candidate: [Posizione], attuale: String?) -> [(String?, String)] {
         var opzioni: [(String?, String)] = [(nil, "Nessuna: nuovo investimento")]
         for p in candidate {
-            opzioni.append((p.id, "\(p.nome) · \(p.canale.nomeBreve)"))
+            opzioni.append((p.id, p.nome))
         }
         if let attuale, !candidate.contains(where: { $0.id == attuale }) {
             opzioni.append((attuale, "Posizione non più in essere"))
@@ -326,7 +326,7 @@ struct PannelloAdeguatezza: View {
                 EtichettaCanale(canale: posizione.canale, compatta: true)
             }
             if esito.documenti.isEmpty {
-                Text("Nessun documento per questo canale e questo tipo di prodotto: aggiungili in Impostazioni › Proposte.")
+                Text("Nessun documento per questo tipo di prodotto: aggiungili in Impostazioni › Proposte.")
                     .font(Tipo.kpiNota)
                     .foregroundColor(K.nota)
                     .fixedSize(horizontal: false, vertical: true)

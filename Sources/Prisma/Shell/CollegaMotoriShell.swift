@@ -22,7 +22,7 @@ enum SchedaMotoriVera: String, CaseIterable, Identifiable {
 }
 
 extension StatoShell {
-    static let titoloMotori = "I motori di Vera"
+    static let titoloMotori = "I motori di Lucy"
     /// Oltre questo tempo la risposta non è più quella della domanda (il ragionamento può durare fino a 3 minuti).
     static let attesaMassimaRichiesta: TimeInterval = 600
 
@@ -30,7 +30,7 @@ extension StatoShell {
 
     func apriPaginaMotori(_ scheda: SchedaMotoriVera = .dueVelocita) {
         guard !inModoCliente else {
-            return mostraAvviso("I motori di Vera mostrano le domande su tutti i clienti: fuori dalla modalità cliente.")
+            return mostraAvviso("I motori di Lucy mostrano le domande su tutti i clienti: fuori dalla modalità cliente.")
         }
         paginaTagliandoAperta = false
         paginaSuMisuraAperta = false
@@ -57,7 +57,7 @@ extension StatoShell {
         inizioRichiestaVera = nil
         // Una domanda rimasta senza risposta (conversazione nuova, risposta fermata) non si attacca a un messaggio di dopo
         guard Date().timeIntervalSince(inizio.quando) < Self.attesaMassimaRichiesta else { return }
-        let avviso = TestiStatoVera.eTitoloNonPronta(m.titolo) || m.titolo == "Vera non ha potuto rispondere"
+        let avviso = TestiStatoVera.eTitoloNonPronta(m.titolo) || TestiStatoVera.nonHaPotuto(m.titolo)
             || (m.motore == "Prisma" && m.titolo == Self.titoloSuMisura)
         guard !avviso else { return }
         dueVelocita.registra(inizio.testo, corsia: CorsiaVera.da(motore: m.motore), secondi: Date().timeIntervalSince(inizio.quando))
@@ -79,7 +79,7 @@ extension StatoShell {
             } catch is CancellationError {
             } catch {
                 self.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: error.localizedDescription,
-                                                    titolo: "Vera non ha potuto rispondere", motore: qwen.nome), cliente: id)
+                                                    titolo: "Lucy non ha potuto rispondere", motore: qwen.nome), cliente: id)
             }
             self.veraInCorso = false
             self.compitoVera = nil
@@ -107,8 +107,8 @@ extension StatoShell {
             apriPaginaMotori(cervello ? .cervello : .dueVelocita)
             #endif
             risposta = cervello
-                ? "Il motore esterno non è collegato: oggi Vera lavora tutta sul Mac. Quando lo collegherai riceverà solo le domande generali, mai i dati dei clienti."
-                : TestiStatoVera.inVista(mac: "Prima le regole di Lucy (comandi, agenda, routine, tagliando: senza modello), poi Vera sul Mac.",
+                ? "Il motore esterno non è collegato: oggi Lucy lavora tutta sul Mac. Quando lo collegherai riceverà solo le domande generali, mai i dati dei clienti."
+                : TestiStatoVera.inVista(mac: "Prima le regole di Lucy (comandi, agenda, routine, tagliando: senza modello), poi Lucy sul Mac.",
                             altrove: "Prima le regole di Lucy (comandi, agenda, routine, tagliando: senza modello), poi Qwen sul Mac. Il modello Apple è spento.")
         }
         aggiungiMessaggio(MessaggioVera(autore: .vera, testo: risposta, titolo: Self.titoloMotori, motore: MotoriVera.sintesi.nome), cliente: chiave)

@@ -23,7 +23,7 @@ extension StatoShell {
         aggiungiMessaggio(MessaggioVera(autore: .utente, testo: testo), cliente: chiave)
         domandaVera = ""
         guard dati.impostazioni.vera.memoriaAttiva else {
-            aggiungiMessaggio(MessaggioVera(autore: .vera, testo: "La memoria di Vera è spenta: la riaccendi in Impostazioni › Vera.",
+            aggiungiMessaggio(MessaggioVera(autore: .vera, testo: "La memoria di Lucy è spenta: la riaccendi in Impostazioni › Lucy.",
                                             motore: Self.motoreAzioni), cliente: chiave)
             return true
         }
@@ -59,7 +59,7 @@ extension StatoShell {
         var argomenti = ["testo": testo, "fonte": fonte]
         if let cliente { argomenti["cliente"] = cliente }
         return AzioneConferma(strumento: RegistroStrumenti.memoriaRicorda, app: .vera, titolo: chi.map { "Ricordo per \($0)" } ?? "Ricordo su di te",
-                              dettaglio: "«\(testo)» · nella memoria di Vera, sul Mac, cifrata", argomenti: argomenti)
+                              dettaglio: "«\(testo)» · nella memoria di Lucy, sul Mac, cifrata", argomenti: argomenti)
     }
 
     /// I ricordi che Vera propone da una tua domanda (preferenze, abitudini): una scheda «Ricorda», salvata solo dopo il sì.
@@ -91,7 +91,7 @@ extension StatoShell {
             return elenco[..<i].last(where: { $0.autore == .utente })?.testo
         } ?? ""
         memoriaVera.approva(domanda: domanda, risposta: m.testo, modalita: m.modalita)
-        mostraAvviso("Segnata come buona: Vera la usa come esempio")
+        mostraAvviso("Segnata come buona: Lucy la usa come esempio")
     }
 
     /// 👎 con la correzione: diventa una lezione, valida dalla risposta successiva. Senza testo non si impara niente.
@@ -101,7 +101,7 @@ extension StatoShell {
         let t = correzione.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !t.isEmpty else { return nil }
         guard dati.impostazioni.vera.imparaDalleCorrezioni, dati.impostazioni.vera.memoriaAttiva else {
-            mostraAvviso("Le correzioni sono spente (Impostazioni › Vera).")
+            mostraAvviso("Le correzioni sono spente (Impostazioni › Lucy).")
             return nil
         }
         if let motivo = MemoriaVera.vietato(t) {
@@ -112,7 +112,7 @@ extension StatoShell {
         if l != nil {
             mostraAvviso("Lezione salvata: vale dalla prossima risposta")
         } else if memoriaVera.bloccata {
-            mostraAvviso("La memoria non si apre su questo Mac: sbloccala da Impostazioni › Vera.")
+            mostraAvviso("La memoria non si apre su questo Mac: sbloccala da Impostazioni › Lucy.")
         }
         return l
     }

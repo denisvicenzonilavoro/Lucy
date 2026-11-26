@@ -40,7 +40,7 @@ enum EsperienzaSala: String, CaseIterable, Identifiable {
     var frase: String {
         switch self {
         case .prismaCliente: return "Il suo piano in un file protetto, da mandargli"
-        case .prismaLuce: return "Il patrimonio che si scompone in raggi"
+        case .prismaLuce: return "Il piano che si riempie di luce"
         case .lettera: return "Scritta da sé stesso a 67 anni"
         case .film: return "Venti secondi da mandare dopo l’incontro"
         case .disegna: return "Lo scarabocchio diventa un piano"

@@ -558,7 +558,7 @@ enum ProvaCalcoliTFR {
                 verifica.vero("T17 TFR: il contributo dell'azienda all'anno", TestiTFR.valoreContributoAzienda(e).hasPrefix("+ "))
                 // «Chiedi a Vera di spiegarlo»: la domanda porta le cifre di Prisma (la frase e la riga sotto), nient'altro
                 let domanda = TestiTFR.domandaVera(e, nome: "Marco")
-                verifica.vero("T17 TFR: la domanda a Vera con le sole cifre di Lucy",
+                verifica.vero("T17 TFR: la domanda a Lucy con le sole cifre di Lucy",
                               domanda == "Spiegami il TFR di Marco: in azienda o nel fondo pensione? Le cifre di Lucy: "
                                   + TestiTFR.fraseRisposta(e, nome: "Marco") + " " + sotto)
             }

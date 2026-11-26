@@ -69,7 +69,7 @@ final class ControlloMiniVera {
         tasto.premuto = { [weak self] in self?.premuto() }
         tasto.rilasciato = { [weak self] in self?.rilasciato() }
         if !tasto.registra() {
-            DiagnosticaVoce.annota("⌥ Spazio è già usato da un'altra app: Vera si chiama dalla sfera nella barra")
+            DiagnosticaVoce.annota("⌥ Spazio è già usato da un'altra app: Lucy si chiama dalla sfera nella barra")
         }
     }
 

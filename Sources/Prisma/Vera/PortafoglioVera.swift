@@ -77,7 +77,7 @@ enum VeraPortafoglio {
         let r = p.riepilogo
         switch spunto {
         case .quadro:
-            var righe = ["Segui \(p.clienti.count) clienti per \(euro(r.attivita)) di attività in essere: Alleanza \(quota(r.quota(.alleanza))), indipendente \(quota(r.quota(.indipendente)))."]
+            var righe = ["Segui \(p.clienti.count) clienti per \(euro(r.attivita)) di attività in essere."]
             righe.append("Premi e versamenti: \(euro(r.premiAnnui)) all'anno; capitale assicurato \(euro(r.capitaleAssicurato)).")
             if let primo = p.clienti.first {
                 righe.append("Il cliente più seguito è \(primo.cliente.nome), con il \(quota(primo.quota)) del portafoglio.")
@@ -151,7 +151,7 @@ enum VeraPortafoglio {
                              + attivita.prefix(5).map { "• \($0.titolo) (\(nome($0.clienteId)), \(Formati.giornoMese.string(from: $0.scadenza)))" }.joined(separator: "\n"))
             }
             if !scadono.isEmpty {
-                parti.append("In scadenza: " + scadono.map { "\($0.nome) di \(nome($0.clienteId)) (\($0.canale.nomeBreve))" }.joined(separator: "; ") + ".")
+                parti.append("In scadenza: " + scadono.map { "\($0.nome) di \(nome($0.clienteId))" }.joined(separator: "; ") + ".")
             }
             return RispostaVera(titolo: "La tua settimana", testo: parti.joined(separator: "\n\n"))
 
@@ -168,7 +168,7 @@ enum VeraPortafoglio {
             let righe = mesiScelti.map { m -> String in
                 let capitale = m.capitale > 0 ? " · \(euro(m.capitale)) da reinvestire" : ""
                 return "\(Formati.meseAnno.string(from: m.inizio).capitalized)\(capitale)\n"
-                    + m.posizioni.map { "• \(Formati.giornoMese.string(from: $0.scadenza ?? m.inizio)): \($0.nome) di \(nome($0.clienteId)) (\($0.canale.nomeBreve))\($0.area == .protezione ? ", copertura da rinnovare" : ", \(euro($0.valore))")" }.joined(separator: "\n")
+                    + m.posizioni.map { "• \(Formati.giornoMese.string(from: $0.scadenza ?? m.inizio)): \($0.nome) di \(nome($0.clienteId))\($0.area == .protezione ? ", copertura da rinnovare" : ", \(euro($0.valore))")" }.joined(separator: "\n")
             }
             return RispostaVera(titolo: titolo, testo: righe.joined(separator: "\n\n") + "\n\nI valori sono quelli di oggi, prima delle imposte: il netto di ciascuna lo trovi nel prospetto «Capitale in scadenza e liquidità» del cliente.")
 
@@ -177,7 +177,7 @@ enum VeraPortafoglio {
                 return RispostaVera(titolo: "Concentrazione per emittente", testo: "Non ci sono attività finanziarie in essere.")
             }
             var testo = "Su \(euro(p.attivitaFinanziarie)) di attività finanziarie (immobili e debiti esclusi):\n"
-                + p.emittenti.map { "• \($0.nome): \(euro($0.valore)), \(quota($0.quota))\($0.canale.map { " (\($0.nomeBreve))" } ?? "")" }.joined(separator: "\n")
+                + p.emittenti.map { "• \($0.nome): \(euro($0.valore)), \(quota($0.quota))" }.joined(separator: "\n")
             if primo.quota > 0.5, primo.nome != Portafoglio.senzaEmittente {
                 testo += "\n\n\(primo.nome) pesa più della metà: vale la pena tenerlo presente nelle prossime proposte."
             }
@@ -192,7 +192,7 @@ enum VeraPortafoglio {
             testo += "\n" + (p.tassoAccettazione.map { "Accettate il \(quota($0)) delle proposte decise." } ?? "Nessuna proposta ancora decisa.")
             if !aperte.isEmpty {
                 testo += "\n\nAperte:\n" + aperte.prefix(8).map { a in
-                    "• \(a.nome) per \(nome(a.clienteId)) (\(a.canale.nomeBreve), \((a.esito ?? .bozza).nome.lowercased()))\(a.versamentoIniziale > 0 ? ", \(euro(a.versamentoIniziale))" : "")"
+                    "• \(a.nome) per \(nome(a.clienteId)) (\((a.esito ?? .bozza).nome.lowercased()))\(a.versamentoIniziale > 0 ? ", \(euro(a.versamentoIniziale))" : "")"
                 }.joined(separator: "\n")
             }
             return RispostaVera(titolo: "Le proposte", testo: testo)

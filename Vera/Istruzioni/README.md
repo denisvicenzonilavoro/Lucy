@@ -1,12 +1,12 @@
-# Istruzioni di Vera
+# Istruzioni di Lucy
 
-L'assistente si chiama Vera (prima si chiamava Ruby, e prima ancora Eve). Le istruzioni in cui parla in prima persona (`chat.md`, `conversazione.md`, `commento.md`, `messaggi.md`, `verbale-copilota.md`) dicono anche che, se il consulente la chiama ancora Ruby o Eve, sta parlando con lei, e che non si presenta mai con il nome del modello (Qwen) né dice chi l'ha addestrata. Le altre (`copilota.md`, `documenti.md`, `estrazione.md`, `scenari.md`, `mini.md`) chiedono solo dati o una forma di risposta.
+L'assistente si chiama Lucy (prima si chiamava Ruby, e prima ancora Eve). Le istruzioni in cui parla in prima persona (`chat.md`, `conversazione.md`, `commento.md`, `messaggi.md`, `verbale-copilota.md`) dicono anche che, se il consulente la chiama ancora Ruby o Eve, sta parlando con lei, e che non si presenta mai con il nome del modello (Qwen) né dice chi l'ha addestrata. Le altre (`copilota.md`, `documenti.md`, `estrazione.md`, `scenari.md`, `mini.md`) chiedono solo dati o una forma di risposta.
 
 - `chat.md`: istruzioni di sistema della modalità lavoro (domande sul cliente). L'app le legge da `Prisma.app/Contents/Resources/Vera/Istruzioni/` (il workflow le copia lì); la scheda compatta del cliente preparata da Lucy (`ContestoVera`) arriva nell'ultimo messaggio, così le istruzioni restano fisse e Ollama le tiene in cache.
 
 - `conversazione.md`: istruzioni di sistema della modalità conversazione (uso generale: ragionare, spiegare, scrivere, riassumere), senza scheda del cliente.
 
-- `mini.md`: come rispondere nella mini finestra di Vera (⌥ Spazio): poche frasi, senza elenchi, perché le cifre nel dettaglio le mostra la scheda sotto la risposta. Si aggiunge all'ultimo messaggio solo per le domande fatte lì.
+- `mini.md`: come rispondere nella mini finestra di Lucy (⌥ Spazio): poche frasi, senza elenchi, perché le cifre nel dettaglio le mostra la scheda sotto la risposta. Si aggiunge all'ultimo messaggio solo per le domande fatte lì.
 
 - `estrazione.md`: istruzioni per leggere gli appunti degli Incontri e proporre bisogni, eventi di vita e attività in un formato a righe che l'app controlla (`EstrattoreIncontro`). Le proposte vanno sempre confermate dal consulente.
 
@@ -22,7 +22,7 @@ L'assistente si chiama Vera (prima si chiamava Ruby, e prima ancora Eve). Le ist
 
 - `verbale-copilota.md`: istruzioni per riscrivere in poche frasi il verbale dell'incontro ascoltato dal copilota, a partire dai punti fissi che Lucy compone dalle schede (`ApplicaCopilota.punto`). Se compare un numero che non è nei punti, l'app tiene il verbale di Lucy (`CommentoVera.numeriConservati`). Se Qwen non è pronto il verbale è quello di Lucy; il consulente conferma comunque voce per voce cosa entra nel dossier.
 
-- `palestra.md`: istruzioni della palestra della trattativa (Studio › Palestra): Vera recita un cliente, con la scheda che Lucy prepara (`PalestraVera.scheda`: chi è, timori, obiettivo e le cifre dei motori), un'obiezione alla volta, e risponde in JSON con lo schema fisso `Vera/Schemi/palestra.json` (giudizio, motivo, replica, convinzione, prossima obiezione, tre risposte suggerite, strumento di Lucy). La difficoltà (Facile, Realistica, Difficile) arriva nell'ultimo messaggio. Una replica o un'obiezione con una cifra che non è nella scheda si scarta e si richiede una volta; una suggerita con una cifra inventata si toglie; sul giudizio vincono le regole di Lucy (pressione, promesse di rendimento, critiche: sempre «debole»). Gli esempi in `Vera/Esempi/palestra.json` sono frasi anonime di prova, da far approvare all'utente.
+- `palestra.md`: istruzioni della palestra della trattativa (Studio › Palestra): Lucy recita un cliente, con la scheda che Lucy prepara (`PalestraVera.scheda`: chi è, timori, obiettivo e le cifre dei motori), un'obiezione alla volta, e risponde in JSON con lo schema fisso `Vera/Schemi/palestra.json` (giudizio, motivo, replica, convinzione, prossima obiezione, tre risposte suggerite, strumento di Lucy). La difficoltà (Facile, Realistica, Difficile) arriva nell'ultimo messaggio. Una replica o un'obiezione con una cifra che non è nella scheda si scarta e si richiede una volta; una suggerita con una cifra inventata si toglie; sul giudizio vincono le regole di Lucy (pressione, promesse di rendimento, critiche: sempre «debole»). Gli esempi in `Vera/Esempi/palestra.json` sono frasi anonime di prova, da far approvare all'utente.
 
 - `fallo-tu.md`: istruzioni di «Fallo tu» (Vera/BRIEF.md, funzione 1): con la chiamata di strumenti di Ollama («tools») Qwen sceglie le azioni del registro (`RegistroStrumenti`: agenda, attività, note, clienti, messaggi, posizioni, simulatore; Pratiche e i chilometri di Studio sono registrati ma «in attesa»). Lucy risolve gli argomenti e mostra la scheda di conferma: niente si esegue prima di «Conferma».
 
@@ -32,7 +32,7 @@ L'assistente si chiama Vera (prima si chiamava Ruby, e prima ancora Eve). Le ist
 
 - `trenta.md`: «Il cliente in 30 secondi» (funzione 6): Qwen rende scorrevoli le cinque sezioni preparate da Lucy (JSON, schema in `TrentaSecondiVera`); una cifra cambiata o aggiunta fa restare il testo di Lucy.
 
-- `norme.md`: «Il codice in tasca» (funzione 13): risposte solo dagli articoli trovati nella biblioteca delle norme, in JSON con gli id degli articoli; senza articolo o con una cifra che non è nell'articolo la risposta si scarta e Vera dice che la norma non risponde.
+- `norme.md`: «Il codice in tasca» (funzione 13): risposte solo dagli articoli trovati nella biblioteca delle norme, in JSON con gli id degli articoli; senza articolo o con una cifra che non è nell'articolo la risposta si scarta e Lucy dice che la norma non risponde.
 
 - `biblioteca.md`: Biblioteca · «Trova la pagina» («Luce», giro 6): risposte solo dai 6 passi che Lucy trova con BM25 nei documenti della Biblioteca (condizioni, KID, circolari, normativa), in JSON con lo schema fisso `Vera/Schemi/biblioteca.json` (trovato, passo, frase, risposta). Lucy verifica che la frase stia parola per parola nel passo e che le cifre della risposta siano nel passo: altrimenti mostra la pagina senza citazione. A Qwen non vanno mai dati dei clienti.
 
@@ -48,7 +48,7 @@ L'assistente si chiama Vera (prima si chiamava Ruby, e prima ancora Eve). Le ist
 
 - `stile-riscrivi.md`: «Scrive come te» (funzione 15): riscrivere un testo del consulente nel suo stile (solo la forma: saluto, tu o Lei, frasi, formule); fatti, numeri, date e nomi restano quelli del testo.
 
-Modificare qui il testo cambia il comportamento di Vera alla build successiva, senza toccare il codice.
+Modificare qui il testo cambia il comportamento di Lucy alla build successiva, senza toccare il codice.
 Tenere il testo ragionevolmente corto: la finestra di Qwen sul Mac è di 8.192 token per istruzioni, scheda, storia e risposta.
 
 - `lettera.md`: «La lettera dal futuro» della Sala («Luce», giro 8): il cliente, all'età della pensione, scrive a sé stesso di oggi. Qwen riscrive in streaming la lettera fissa di Lucy con le sole cifre della scheda (`MotoreLettera.fatti`: anno ed età al traguardo, obiettivo con la data di arrivo, versamento, pensione con o senza il piano). A fine flusso `LetteraVera.controlla`: una cifra fuori scheda, una promessa, un prodotto o una compagnia nominati, un segnaposto o, nella versione «senza il piano», uno scenario negativo oltre le cifre (decisione 80) fanno restare la lettera di Lucy. Saluto, firma («nome, età anni») e piede li mette Lucy; la lettera resta sul Mac.

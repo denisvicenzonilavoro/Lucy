@@ -57,7 +57,8 @@ struct PannelloAggiornaValoriMac: View {
         _dataComune = State(initialValue: sessione.dataComune)
         _bozze = State(initialValue: sessione.bozze)
         _ambito = State(initialValue: sessione.soloCliente)
-        _canale = State(initialValue: sessione.canale)
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: nessun filtro di canale
+        _canale = State(initialValue: nil)
         _scelte = State(initialValue: sessione.scelte)
         _decisioni = State(initialValue: sessione.decisioni)
         _clientiNuove = State(initialValue: sessione.clientiNuove)
@@ -545,7 +546,6 @@ struct PannelloAggiornaValoriMac: View {
 
     private func rigaDubbio(_ e: AggiornaValori.Esito) -> some View {
         let domanda = Testi.domanda(e, nomeCliente: cliente(e)?.nome, posizioni: perId, clienti: nomiClienti)
-        let canaleNuova: Canale? = AggiornaValori.dubbio(e) == .nuova ? canaliNuove[e.id] : nil
         return HStack(alignment: .center, spacing: T.spazioDubbio) {
             avatar(e)
             VStack(alignment: .leading, spacing: T.spazioTitolo) {
@@ -558,11 +558,6 @@ struct PannelloAggiornaValoriMac: View {
                     .carattereApple(T.domanda)
                     .foregroundColor(T.coloreDomanda)
                     .fixedSize(horizontal: false, vertical: true)
-                if let c = canaleNuova {
-                    Text(Testi.canaleRiconosciuto(c))
-                        .carattereApple(T.canaleDubbio)
-                        .foregroundColor(T.coloreDomanda)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             pulsantiDubbio(e)
@@ -623,7 +618,7 @@ struct PannelloAggiornaValoriMac: View {
         let nomi = nomiClienti
         return e.candidate.compactMap { id -> VoceMenuAzioni? in
             guard let p = perId[id] else { return nil }
-            let titolo = "\(p.nome) · \(nomi[p.clienteId] ?? "") · \(p.canale.nomeBreve)"
+            let titolo = "\(p.nome) · \(nomi[p.clienteId] ?? "")"
             return VoceMenuAzioni.azione(titolo, spuntata: scelte[e.id] == id) {
                 scelte[e.id] = id
                 decisioni[e.id] = nil
@@ -863,11 +858,6 @@ struct PannelloAggiornaValoriMac: View {
                     SegmentatoPillola(selezione: $ambito, voci: opzioni)
                         .fixedSize()
                 }
-                let canali: [(Canale?, String)] = [(nil, Testi.canaleTutti),
-                                                   (.alleanza, Canale.alleanza.nomeBreve),
-                                                   (.indipendente, Testi.canaleIndipendente)]
-                SegmentatoPillola(selezione: $canale, voci: canali)
-                    .fixedSize()
                 Spacer(minLength: T.spazioComandi)
                 Text(Testi.dataComune)
                     .carattereApple(T.nota)

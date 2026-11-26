@@ -172,7 +172,7 @@ enum ResocontoVera {
             case .notaVocale: return "dalla nota vocale (trascritta sul Mac, l'audio non è conservato)"
             }
         }
-        var nota = "Scritto con Vera \(fonti.joined(separator: ", ")). Rivisto e firmato"
+        var nota = "Scritto con Lucy \(fonti.joined(separator: ", ")). Rivisto e firmato"
         if let chi = r.firmatoDa { nota += " da \(chi)" }
         if let quando = r.firmatoIl { nota += " il \(Formati.dataEstesa.string(from: quando))" }
         nota += "."

@@ -30,10 +30,23 @@ import SwiftUI
 /// passaggi di cornice): la disposizione dei riquadri non si ricalcola per nessuna di queste.
 struct RiquadriScrivania: View {
     @Environment(StatoFinestre.self) var sistema
+    @Environment(StatoShell.self) var stato
 
     var body: some View {
+        #if os(macOS)
+        // Stile Carta sul Mac (25 novembre 2026): la scrivania del template (ScrivaniaCarta.swift); in modalità cliente
+        // resta quella di prima
+        if Tema.Stile.usaCarta && !stato.inModoCliente {
+            ScrivaniaCarta()
+                .allowsHitTesting(sistema.appAttiva == nil)
+        } else {
+            CorpoRiquadriScrivania(sistema: sistema, bloccato: sistema.bloccato, davanti: sistema.appAttiva != nil)
+                .equatable()
+        }
+        #else
         CorpoRiquadriScrivania(sistema: sistema, bloccato: sistema.bloccato, davanti: sistema.appAttiva != nil)
             .equatable()
+        #endif
     }
 
     /// true sull'iPad quando la scrivania è più stretta della soglia (in verticale); sul Mac mai.
@@ -930,7 +943,7 @@ private struct RigaIncontroScrivania: View {
 
 // MARK: - Portafoglio clienti
 
-private struct RiquadroPortafoglioScrivania: View {
+struct RiquadroPortafoglioScrivania: View {
     @Environment(StatoShell.self) var stato
     let pronto: Bool
     let ritardoAnelli: Double
@@ -992,9 +1005,6 @@ private struct CorpoPortafoglioScrivania: View, Equatable {
             }
             .padding(.top, p.anelliSopra)
             Spacer(minLength: 0)
-            if r.attivita > 0 {
-                canali(r)
-            }
         }
     }
 
@@ -1047,25 +1057,6 @@ private struct CorpoPortafoglioScrivania: View, Equatable {
                 .lineLimit(1)
         }
         .help(aiuto)
-    }
-
-    /// I due canali, sempre distinti: pallino del canale e quota del valore in essere.
-    private func canali(_ r: RiepilogoPosizioni) -> some View {
-        let p = Tema.Apple.Scrivania.Portafoglio.self
-        return HStack(spacing: p.spazioCanali) {
-            ForEach(Canale.allCases) { c in
-                HStack(spacing: p.spazioPallino) {
-                    Circle()
-                        .fill(c == .alleanza ? Tema.Apple.Colore.canaleAlleanza : Tema.Apple.Colore.canaleIndipendente)
-                        .frame(width: p.pallinoCanale, height: p.pallinoCanale)
-                    Text("\(c.nomeBreve) \(Formati.percentuale((r.quota(c) * 100).rounded()))")
-                        .carattereApple(p.canali)
-                        .foregroundColor(Tema.Apple.Colore.inchiostro2)
-                        .lineLimit(1)
-                }
-                .help("\(c.nomeBreve): \(Formati.euro(r.perCanale[c] ?? 0))")
-            }
-        }
     }
 }
 
@@ -1140,7 +1131,7 @@ private struct CorpoVeraScrivaniaApple: View, Equatable {
                     // Mentre Vera risponde l'acqua vibra intorno a questa sfera (OsservatoreAcqua)
                     .puntoAcqua(.sferaVera)
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Vera")
+                    Text("Lucy")
                         .carattereApple(e.nome)
                         .foregroundColor(Tema.Apple.Colore.inchiostro)
                     #if os(macOS)
@@ -1222,7 +1213,7 @@ private struct SuggerimentoVeraScrivania: View {
         .offset(y: alzato ? Tema.Apple.Scrivania.Moto.sollevamentoSuggerimento : 0)
         .animation(fermo ? nil : Tema.Apple.Scrivania.Moto.sopraSuggerimento, value: alzato)
         .modifier(PassaggioRiquadro(sopra: $sopra))
-        .help("Apre Vera sulla scrivania e le chiede: \(testo)")
+        .help("Apre Lucy sulla scrivania e le chiede: \(testo)")
     }
 }
 
@@ -1420,7 +1411,7 @@ private struct CorpoDaFareScrivaniaMac: View, Equatable {
 
 // MARK: - In scadenza entro 90 giorni
 
-private struct RiquadroScadenzeScrivania: View {
+struct RiquadroScadenzeScrivania: View {
     @Environment(StatoShell.self) var stato
     @Environment(\.prismaInVista) private var inVista
     /// Sotto una finestra ingrandita le scadenze restano le ultime calcolate (`UltimiValoriScrivania`).

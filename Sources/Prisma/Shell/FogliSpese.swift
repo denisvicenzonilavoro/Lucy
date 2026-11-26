@@ -274,11 +274,7 @@ struct ModuloSpesaStudio: View {
                             }
                         }
                     }
-                    CampoModulo(etichetta: "Canale") {
-                        MenuTendina(selezione: $bozza.canale,
-                                    opzioni: [(Canale?.none, "Non indicato")] + Canale.allCases.map { (Optional($0), $0.nomeBreve) },
-                                    larghezza: M.sceltaPresso)
-                    }
+                    // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                     CampoModulo(etichetta: "Legata al cliente") {
                         MenuTendina(selezione: $bozza.clienteId,
                                     opzioni: [(String?.none, "Nessuno")] + stato.clienti.map { (Optional($0.id), $0.nome) },
@@ -532,7 +528,7 @@ private struct FoglioCorsiStudio: View {
                         HStack(alignment: .firstTextBaseline, spacing: M.spazio) {
                             VStack(alignment: .leading, spacing: 0) {
                                 Text(c.titolo).carattereApple(M.rigaForte).foregroundColor(M.coloreRiga)
-                                Text([TestiSpese.giorno(c.data), c.ente, c.canale?.nomeBreve ?? ""].filter { !$0.isEmpty }.joined(separator: " · "))
+                                Text([TestiSpese.giorno(c.data), c.ente].filter { !$0.isEmpty }.joined(separator: " · "))
                                     .carattereApple(M.rigaSotto).foregroundColor(M.coloreRigaSotto)
                             }
                             Spacer()
@@ -573,11 +569,7 @@ private struct FoglioCorsiStudio: View {
                 CampoModulo(etichetta: "Ore") {
                     CampoCifraFacoltativa(valore: $ore, unita: "ore", larghezza: M.campoKm)
                 }
-                CampoModulo(etichetta: "Canale") {
-                    MenuTendina(selezione: $bozza.canale,
-                                opzioni: [(Canale?.none, "Non indicato")] + Canale.allCases.map { (Optional($0), $0.nomeBreve) },
-                                larghezza: M.sceltaPresso)
-                }
+                // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: la scelta del canale non si mostra (il valore salvato resta)
                 #if os(macOS)
                 CampoModulo(etichetta: "Attestato") {
                     HStack(spacing: M.spazioRighe) {

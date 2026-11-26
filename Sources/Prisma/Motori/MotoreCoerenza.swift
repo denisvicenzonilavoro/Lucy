@@ -145,7 +145,8 @@ enum MotoreCoerenza {
     /// L'emittente di una posizione; senza nome, quelle del canale Alleanza sono di Alleanza Assicurazioni.
     static func nomeEmittente(_ p: Posizione) -> String {
         let e = p.emittente.trimmingCharacters(in: .whitespacesAndNewlines)
-        if e.isEmpty && p.canale == .alleanza { return Canale.alleanza.nome }
+        // Dato di prodotto: l'emittente dei prodotti registrati con il primo valore del canale
+        if e.isEmpty && p.canale == .alleanza { return "Alleanza Assicurazioni" }
         return e
     }
 
@@ -300,8 +301,8 @@ enum MotoreCoerenza {
         }
         let alleanza = (m.perCanale[.alleanza] ?? 0) * 100
         if elenco.isEmpty, alleanza > sogliaCanale, m.investimenti >= minimoConcentrazione {
-            elenco.append(Incoerenza(tipo: .canale, titolo: prefisso + "Quasi tutto in un solo canale",
-                                     dettaglio: "Il \(CifreDoc.percento(alleanza, decimali: 0)) del patrimonio finanziario è investito nel canale Alleanza, che colloca i prodotti di una sola compagnia.",
+            elenco.append(Incoerenza(tipo: .canale, titolo: prefisso + "Quasi tutto presso una sola compagnia",
+                                     dettaglio: "Il \(CifreDoc.percento(alleanza, decimali: 0)) del patrimonio finanziario è investito in prodotti di una sola compagnia.",
                                      posizione: nil, valore: alleanza, soglia: sogliaCanale, dopoLeProposte: dopoLeProposte))
         }
         return elenco
@@ -326,7 +327,7 @@ enum MotoreCoerenza {
         [
             "Rischio rispetto al profilo: SRI medio ponderato sul valore (liquidità e capitale garantito senza SRI contano 1; per le multiramo con i dati separati l'SRI della combinazione, dal KID o stimato) entro prudente 2, moderata 3, dinamica 5; azioni entro prudente 20%, moderata 50%, dinamica 80% del patrimonio finanziario; nelle crisi vere del 2008, 2020 e 2022 la perdita peggiore non oltre un quarto sopra quella sopportabile (prudente 5%, moderata 10%, dinamica 20%, aggressiva 30%).",
             "Proposte: si segnalano quelle con un SRI oltre il profilo o un periodo raccomandato più lungo dell'orizzonte del cliente, quelle di un tipo di prodotto che il cliente dice di non conoscere o di non aver capito, quelle che nella crisi peggiore del passato perderebbero più di quanto può sostenere, e ciò che cambierebbe con le proposte aperte (contate per il versamento iniziale più un anno di premi).",
-            "Concentrazione: oltre il \(CifreDoc.percento(sogliaEmittente, decimali: 0)) del patrimonio finanziario presso un solo emittente (da \(CifreDoc.euro(minimoConcentrazione)) in su; i conti esclusi), oppure oltre l'\(CifreDoc.percento(sogliaCanale, decimali: 0)) investito nel canale Alleanza, che colloca i prodotti di una sola compagnia.",
+            "Concentrazione: oltre il \(CifreDoc.percento(sogliaEmittente, decimali: 0)) del patrimonio finanziario presso un solo emittente (da \(CifreDoc.euro(minimoConcentrazione)) in su; i conti esclusi), oppure oltre l'\(CifreDoc.percento(sogliaCanale, decimali: 0)) investito in prodotti di una sola compagnia.",
         ]
     }
 }

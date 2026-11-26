@@ -47,7 +47,7 @@ enum ProvaDueVelocitaVera {
                   "Due velocità: una risposta veloce vuota, troppo lunga o con cifre inventate non è valida")
         controlla(CorsiaVera.da(motore: StatoShell.motoreAzioni) == .regole && CorsiaVera.da(motore: "Prisma") == .regole
                   && CorsiaVera.da(motore: MotoriVera.sintesi.nome) == .regole && CorsiaVera.da(motore: "Qwen sul Mac") == .qwen
-                  && CorsiaVera.da(motore: "Vera su misura sul Mac") == .qwen && CorsiaVera.da(motore: CervelloGrandeVera.nome) == .esterno,
+                  && CorsiaVera.da(motore: "Lucy su misura sul Mac") == .qwen && CorsiaVera.da(motore: CervelloGrandeVera.nome) == .esterno,
                   "Due velocità: la corsia si legge dal motore sotto la risposta")
         controlla(!ModelloAppleVera.descrizioneDisponibilita.isEmpty, "Due velocità: la disponibilità del modello Apple è descritta (\(ModelloAppleVera.descrizioneDisponibilita))")
     }
@@ -95,11 +95,11 @@ enum ProvaDueVelocitaVera {
         let prima = s.dueVelocita.voci.count
         s.aggiungiMessaggio(MessaggioVera(autore: .vera, testo: "Buongiorno: tre cose per oggi.", titolo: "Routine", motore: MotoriVera.sintesi.nome),
                             cliente: s.chiaveConversazione, parla: false)
-        controlla(s.dueVelocita.voci.count == prima, "Due velocità nell'app: un messaggio di Vera senza domanda non registra niente")
+        controlla(s.dueVelocita.voci.count == prima, "Due velocità nell'app: un messaggio di Lucy senza domanda non registra niente")
         // La domanda libera, con le risposte preparate: nessun errore, il percorso passa dallo smistamento
         let conversazioneSenzaErrori = s.chiediVera("Come si dice grazie in inglese?")
         let ultima = s.conversazione(s.chiaveConversazione).last
-        controlla(conversazioneSenzaErrori && ultima?.autore == .vera && ultima?.titolo != "Vera non ha potuto rispondere",
+        controlla(conversazioneSenzaErrori && ultima?.autore == .vera && !TestiStatoVera.nonHaPotuto(ultima?.titolo),
                   "Due velocità nell'app: con il modello Apple spento la domanda segue il percorso di sempre, senza errori")
         let ieri = Date().addingTimeInterval(-86_400 * 1.5)
         let d = StatoDueVelocita()

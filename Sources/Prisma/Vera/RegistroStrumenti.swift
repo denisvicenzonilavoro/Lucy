@@ -201,7 +201,7 @@ enum RegistroStrumenti {
                       parametri: oggetto([:], richiesti: []),
                       disponibile: true, annullabile: true, nelDossier: true, soloPrisma: true),
         StrumentoVera(nome: RoutineVera.strumentoSalva, app: .vera,
-                      descrizione: "Salva una routine nuova di Vera, capita a parole.",
+                      descrizione: "Salva una routine nuova di Lucy, capita a parole.",
                       parametri: oggetto([:], richiesti: []),
                       disponibile: true, annullabile: true, nelDossier: false, soloPrisma: true),
         // Il tagliando dei dati (funzione 5, CollegaTagliandoShell.swift): solo Prisma le prepara dalle voci del controllo
@@ -270,9 +270,9 @@ enum RegistroStrumenti {
             var argomenti = ["testo": t, "fonte": "in chat"]
             if let cliente { argomenti["cliente"] = cliente }
             return .azione(AzioneConferma(strumento: memoriaRicorda, app: .vera, titolo: chi.map { "Ricordo per \($0)" } ?? "Ricordo su di te",
-                                          dettaglio: "«\(t)» · nella memoria di Vera, sul Mac, cifrata", argomenti: argomenti))
+                                          dettaglio: "«\(t)» · nella memoria di Lucy, sul Mac, cifrata", argomenti: argomenti))
         case documentiArchivia:
-            return .impossibile("I documenti si archiviano trascinandoli su Vera.")
+            return .impossibile("I documenti si archiviano trascinandoli su Lucy.")
         case studioChilometri:
             return .impossibile("Studio non registra ancora i chilometri: quando sarà pronto lo farò io. Per ora segnali tu in Studio.")
         case TagliandoVera.strumentoUnisci, TagliandoVera.strumentoCompleta, TagliandoVera.strumentoDocumento:
@@ -695,7 +695,7 @@ enum RegistroStrumenti {
         guard let nuova = giorno(a.testo("scadenza"), oggi: x.oggi, cal: x.calendario) else { return .domanda("Qual è la nuova scadenza?") }
         let prima = p.scadenza.map { " · prima: \(Formati.dataEstesa.string(from: $0))" } ?? " · prima non c'era"
         return .azione(AzioneConferma(strumento: posizioniScadenza, app: .posizioni, titolo: "Aggiorno la scadenza in Posizioni",
-                                      dettaglio: "«\(p.nome)» di \(c.nome) · \(p.canale.nomeBreve) · \(Formati.dataEstesa.string(from: nuova))\(prima)",
+                                      dettaglio: "«\(p.nome)» di \(c.nome) · \(Formati.dataEstesa.string(from: nuova))\(prima)",
                                       argomenti: ["posizione": p.id, "cliente": c.id, "scadenza": isoData(nuova)]))
     }
 
@@ -707,7 +707,7 @@ enum RegistroStrumenti {
         var dettaglio = "Con le ipotesi di \(c.nome)"
         if a.testo("posizione") != nil, case .trovato(let p) = posizione(a.testo("posizione"), di: c, x) {
             argomenti["posizione"] = p.id
-            dettaglio = "«\(p.nome)» di \(c.nome) · \(p.canale.nomeBreve)"
+            dettaglio = "«\(p.nome)» di \(c.nome)"
         }
         return .azione(AzioneConferma(strumento: simulatoreApri, app: .simulazioni, titolo: "Apro il simulatore", dettaglio: dettaglio, argomenti: argomenti))
     }

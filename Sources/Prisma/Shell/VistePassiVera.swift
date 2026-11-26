@@ -96,10 +96,10 @@ struct PianoPassiVeraVista: View {
     }
 
     private var origine: String {
-        var parti = [piano.conQwen ? TestiStatoVera.inVista(mac: "Piano proposto da Vera e controllato da Lucy",
+        var parti = [piano.conQwen ? TestiStatoVera.inVista(mac: "Piano proposto da Lucy e controllato da Lucy",
                                                          altrove: "Piano proposto da Qwen e controllato da Lucy") : "Piano delle regole di Lucy",
                      "cifre del simulatore di Lucy"]
-        if piano.spiegazioneConQwen { parti.append(TestiStatoVera.inVista(mac: "spiegazione di Vera con le cifre di Lucy",
+        if piano.spiegazioneConQwen { parti.append(TestiStatoVera.inVista(mac: "spiegazione di Lucy con le cifre di Lucy",
                                                                              altrove: "spiegazione di Qwen con le cifre di Lucy")) }
         return parti.joined(separator: " · ")
     }
@@ -119,7 +119,7 @@ struct SchedaPianoPassi: View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: R.spazioPiccolo) {
                 SferaVera(misura: R.sfera, viva: false)
-                Text("Il piano di Vera").carattereApple(R.titoloScheda).lineLimit(1)
+                Text("Il piano di Lucy").carattereApple(R.titoloScheda).lineLimit(1)
                 Spacer(minLength: 0)
                 PillolaFaseTre(testo: passi.count == 1 ? "1 passo" : "\(passi.count) passi", colore: F.neutro)
             }
@@ -216,7 +216,7 @@ struct ColonnaDivisionePassi: View {
                 Text(d.titolo).carattereApple(R.titoloColonna).fixedSize(horizontal: false, vertical: true)
                 Spacer(minLength: 0)
                 if consigliata {
-                    PillolaFaseTre(testo: regge ? "Vera consiglia" : "La meno scoperta", colore: Tema.Apple.passiConsiglia)
+                    PillolaFaseTre(testo: regge ? "Lucy consiglia" : "La meno scoperta", colore: Tema.Apple.passiConsiglia)
                 }
             }
             if richiesta.protezione {

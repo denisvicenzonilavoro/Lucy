@@ -22,12 +22,8 @@ struct TestiTFR {
     var piede: String { "\(Self.titolo) · \(cliente) · \(CifreDoc.data(data)) · \(TestiValutazione.consulente)" }
     static let avvertenza = "Stime con rendimenti e inflazione costanti e con le regole fiscali di oggi: non sono una previsione né un consiglio."
 
-    var ruoloConsulente: String {
-        switch e.ipotesi.canale {
-        case .alleanza: return "Consulente Alleanza Assicurazioni"
-        case .indipendente: return "Consulenza finanziaria"
-        }
-    }
+    /// Un solo canale, Lucy: la stessa firma per ogni ipotesi.
+    var ruoloConsulente: String { TestiValutazione.ruoloLucy }
 
     var canali: [Canale] { [e.ipotesi.canale] }
 

@@ -35,23 +35,19 @@ enum TestiBiblioteca {
     static let altriDocumenti = "Gli altri documenti"
     static let segnaposto = "Chiedi qualcosa ai tuoi documenti…"
     static func segnapostoDocumento(_ titoloBreve: String) -> String { "Chiedi qualcosa su «\(titoloBreve)»…" }
-    static let lettoSulMac = "Vera l’ha letto sul Mac."
+    static let lettoSulMac = "Lucy l’ha letto sul Mac."
     static let illeggibile = "Non posso leggerlo: le domande non trovano niente qui."
     static let domandeDocumento = "Domande su questo documento"
     static let chiediTu = "Chiedi tu"
-    static let chiediTuTesto = "Scrivi una domanda in alto: Vera risponde solo con il testo di questo documento, citando la pagina."
+    static let chiediTuTesto = "Scrivi una domanda in alto: Lucy risponde solo con il testo di questo documento, citando la pagina."
     static let tornaAllaRisposta = "Torna alla risposta"
     static let chiudiDocumento = "Cerca in tutti i documenti"
     static func rubrica(_ r: String) -> String { "Cosa dice «\(r)»?" }
 
     /// «38 pagine · canale Alleanza», «… · canale indipendente», «… · vale per tutti i canali».
     static func pagineECanale(pagine n: Int, canale: Canale?) -> String {
-        let pagine = n == 1 ? "1 pagina" : "\(n) pagine"
-        switch canale {
-        case .alleanza?: return "\(pagine) · canale \(Canale.alleanza.nomeInFrase)"
-        case .indipendente?: return "\(pagine) · canale \(Canale.indipendente.nomeInFrase)"
-        case nil: return "\(pagine) · vale per tutti i canali"
-        }
+        // Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: solo le pagine, niente canale
+        n == 1 ? "1 pagina" : "\(n) pagine"
     }
 }
 

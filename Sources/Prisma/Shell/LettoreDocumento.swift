@@ -373,13 +373,9 @@ struct LettoreDocumento: View {
         .disabled(stato.solaLettura)
     }
 
+    /// Dal 25 novembre 2026 (decisione dell'utente) un solo canale, quello di Lucy: niente etichetta né «Canale da indicare».
     @ViewBuilder private var canale: some View {
-        if let b = stato.collegamentoMostrato(d), let n = stato.nomeBersaglio(b) {
-            EtichettaCanaleApple(canale: n.canale, compatta: true)
-        } else if !MotoreDocumenti.delCliente(d) {
-            Pillola(testo: TestiDocumenti.canaleDaIndicare, tono: .neutro)
-                .help("Collega il documento a una posizione o a una scheda prodotto: il canale viene da lì")
-        }
+        EmptyView()
     }
 
     // MARK: Il testo letto (dal menu «⋯»)
@@ -892,7 +888,7 @@ struct LettoreDocumento: View {
         let collegati = stato.bersagli(d)
         var voci: [VoceMenuAzioni] = [
             VoceMenuAzioni.azione(TestiDocumenti.mostraIlTesto, spuntata: mostraTesto) { mostraTesto.toggle() },
-            VoceMenuAzioni.azione("Apri con Vera", attiva: !stato.veraInCorso && !inLettura) {
+            VoceMenuAzioni.azione("Apri con Lucy", attiva: !stato.veraInCorso && !inLettura) {
                 TestiRinviati.scriviOra()
                 stato.spiegaDocumentoConVera(id)
             },

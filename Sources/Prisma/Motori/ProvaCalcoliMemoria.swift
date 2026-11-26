@@ -45,10 +45,10 @@ enum ProvaCalcoliMemoria {
                                    "Obiettivo «Casa» dal 40% al 77%",
                                    "Nuovo obiettivo «Università di Sofia»: 30.000 €, raggiunto al 10%",
                                    "Obiettivo «Auto» tolto (era al 70%)",
-                                   "Patrimonio Alleanza da 42.000 a 51.500 €",
+                                   "Patrimonio da 42.000 a 51.500 €",
                                    "Debiti da 96.000 a 90.000 €",
                                    "Completezza dei dati dal 62% al 77%",
-                                   "Questionario di adeguatezza Alleanza: da scadenza superata a in regola"])
+                                   "Questionario di adeguatezza: da scadenza superata a in regola"])
 
         // MV4 versi
         verifica.vero("MV4 Memoria: semaforo della riserva in peggio", una("semaforo.riserva")?.verso == .peggio)
@@ -120,7 +120,7 @@ enum ProvaCalcoliMemoria {
                           chiavi(w) == ["protezione.ammanco", "patrimonio.alleanza", "completezza"])
             verifica.vero("MV10 Memoria: testi sulle soglie",
                           testi(w) == ["Ammanco in caso di invalidità da 1.400 a 1.350 €/mese",
-                                       "Patrimonio Alleanza da 0 a 600 €",
+                                       "Patrimonio da 0 a 600 €",
                                        "Completezza dei dati dall'88% al 90%"])
         }
 
@@ -140,8 +140,8 @@ enum ProvaCalcoliMemoria {
             var q = base
             q.patrimonioIndipendente = 20_500
             let w = MotoreMemoria.variazioni(da: base, a: q)
-            verifica.vero("MV12 Memoria: patrimonio indipendente +500 € (2,5%)",
-                          testi(w) == ["Patrimonio Indipendente da 20.000 a 20.500 €"] && w.first?.canale == .indipendente)
+            verifica.vero("MV12 Memoria: patrimonio +500 € (2,5%), senza nome del canale",
+                          testi(w) == ["Patrimonio da 20.000 a 20.500 €"] && w.first?.canale == .indipendente)
         }
 
         // MV13 fotografie uguali

@@ -765,16 +765,28 @@ struct PanoramicaCliente: View {
         }
     }
 
+    /// «5 punti da trattare, 2 con priorità alta: primo; secondo…» (fuori dal body: in un'unica espressione il
+    /// compilatore di Xcode 26.6 non riusciva a verificarne i tipi in tempo).
+    static func sintesiRiesame(_ titoli: [String], alta: Int) -> String {
+        var testo = "\(titoli.count) punti da trattare"
+        if alta > 0 { testo += ", \(alta) con priorità alta" }
+        let primi: [String] = Array(titoli.prefix(2))
+        testo += ": " + primi.joined(separator: "; ")
+        testo += titoli.count > 2 ? "…" : "."
+        return testo
+    }
+
     /// Il riesame annuale, quando è dovuto: quanti punti ci sono da trattare e il prospetto per prepararlo.
     @ViewBuilder private var riesame: some View {
         // Calcolato una volta per dati e ora (DerivatiDati): passa da tutta la fonte di Vera
         if let r = stato.riesameCliente(cliente.id) {
             if r.dovuto, r.prossimo == nil, !r.punti.isEmpty {
                 let alta = r.punti.filter { $0.priorita == .alta }.count
+                let sintesi = Self.sintesiRiesame(r.punti.map(\.titolo), alta: alta)
                 VStack(alignment: .leading, spacing: 6) {
                     OcchielloSezione(titolo: "Riesame annuale", nota: r.ultimoContatto.map { "Ultimo incontro il \(Formati.dataEstesa.string(from: $0))" } ?? "Nessun incontro registrato")
                     HStack(alignment: .center, spacing: 12) {
-                        Text("\(r.punti.count) punti da trattare" + (alta > 0 ? ", \(alta) con priorità alta" : "") + ": " + r.punti.prefix(2).map(\.titolo).joined(separator: "; ") + (r.punti.count > 2 ? "…" : "."))
+                        Text(sintesi)
                             .font(Tipo.campoValore)
                             .foregroundColor(Colori.Rubrica.testo)
                             .fixedSize(horizontal: false, vertical: true)

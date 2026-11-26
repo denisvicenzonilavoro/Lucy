@@ -673,7 +673,7 @@ enum StileVera {
     static func intestazione(_ p: ProfiloStile) -> String {
         let m = p.messaggiLetti, e = p.mailLette
         guard m + e > 0 else {
-            return "Ancora nessun messaggio aperto da Lucy: scrivi tu le regole, o Vera le impara dai primi messaggi."
+            return "Ancora nessun messaggio aperto da Lucy: scrivi tu le regole, o Lucy le impara dai primi messaggi."
         }
         let pezzi = [m > 0 ? (m == 1 ? "1 messaggio" : "\(m) messaggi") : nil, e > 0 ? (e == 1 ? "1 email" : "\(e) email") : nil].compactMap { $0 }
         return "Imparato da " + pezzi.joined(separator: " e ") + " che hai scritto. Lo correggi quando vuoi."
@@ -925,6 +925,6 @@ enum StileVera {
     /// nil se il testo segue il profilo nelle regole che contano.
     static func motivoScarto(_ violazioni: [ViolazioneStile]) -> String? {
         guard let g = violazioni.first(where: \.grave) else { return nil }
-        return "il testo di Vera non segue il tuo stile (\(g.spiegazione.trimmingCharacters(in: CharacterSet(charactersIn: "."))))"
+        return "il testo di Lucy non segue il tuo stile (\(g.spiegazione.trimmingCharacters(in: CharacterSet(charactersIn: "."))))"
     }
 }

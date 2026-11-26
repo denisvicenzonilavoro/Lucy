@@ -28,12 +28,12 @@ extension Tema.Apple {
         static let superficiePulsante = Superficie(riempimento: Colore.vetro, sfocatura: 0, saturazione: 1,
                                                    bordo: Colore.bordoVetro, spessoreBordo: 1, ombra: .vetro,
                                                    raggio: Raggio.pillola, filoInterno: true)
-        /// La luce che attraversa il pulsante: gradiente a 100°, trasparente fino al 30%, bianco al 70% di
-        /// opacità al centro, di nuovo trasparente dal 70% (uguale nei due aspetti).
+        /// La luce che attraversa il pulsante: gradiente a 100° largo quanto la casella (25 novembre 2026, richiesta
+        /// dell'utente: prima un fascio stretto al centro), trasparente ai bordi e bianco al 60% di opacità al centro.
         static let fermateLuce: [Gradient.Stop] = [
-            Gradient.Stop(color: Color(r: 255, g: 255, b: 255, a: 0), location: 0.30),
-            Gradient.Stop(color: Color(r: 255, g: 255, b: 255, a: 0.70), location: 0.50),
-            Gradient.Stop(color: Color(r: 255, g: 255, b: 255, a: 0), location: 0.70),
+            Gradient.Stop(color: Color(r: 255, g: 255, b: 255, a: 0), location: 0.10),
+            Gradient.Stop(color: Color(r: 255, g: 255, b: 255, a: 0.60), location: 0.50),
+            Gradient.Stop(color: Color(r: 255, g: 255, b: 255, a: 0), location: 0.90),
         ]
         /// I due capi del gradiente a 100° (appena inclinato rispetto all'orizzontale).
         static let inizioLuce = UnitPoint(x: 0, y: 0.41)

@@ -145,7 +145,7 @@ private struct ColonnaAppVera: View {
             VStack(spacing: 0) {
                 // La sfera segue da sola le risposte in corso: una domanda non ridisegna tutta la colonna
                 SferaColonnaVera()
-                Text("Ciao, sono Vera.")
+                Text("Ciao, sono Lucy.")
                     .carattereApple(col.saluto)
                     .foregroundColor(col.coloreSaluto)
                     .padding(.top, col.salutoSopra)
@@ -421,7 +421,7 @@ private struct ColonnaAppVera: View {
             if !stato.inModoCliente {
                 SegmentatoPillola(selezione: Bindable(stato).veraPortafoglio, voci: [(false, "Cliente"), (true, "Portafoglio")],
                                   larghezzaPiena: true)
-                    .help("Vera parla di un cliente o di tutto il tuo portafoglio")
+                    .help("Lucy parla di un cliente o di tutto il tuo portafoglio")
             }
             if stato.veraPortafoglio {
                 Text("Tutti i clienti")
@@ -669,7 +669,7 @@ extension CorpoAppVera {
     private var benvenuto: some View {
         let b = Tema.Apple.Vera.Bolla.self
         return VStack(alignment: .leading, spacing: 0) {
-            Text("Vera")
+            Text("Lucy")
                 .carattereApple(b.intestazione)
                 .foregroundColor(b.coloreIntestazione)
                 .padding(.bottom, b.sottoIntestazione)
@@ -763,7 +763,7 @@ extension CorpoAppVera {
             }
             .buttonStyle(StileTastoVera(aspetto: acceso ? .ascolto : .neutro))
             .disabled(stato.veraInCorso && !acceso)
-            .help(v.prepara ? "Annulla" : (acceso ? "Ho finito di parlare" : "Parla con Vera (⌥⌘E)"))
+            .help(v.prepara ? "Annulla" : (acceso ? "Ho finito di parlare" : "Parla con Lucy (⌥⌘E)"))
             Button { invia(stato.domandaVera) } label: {
                 Image(systemName: "arrow.up")
             }
@@ -808,7 +808,7 @@ extension CorpoAppVera {
         let ch = Tema.Apple.Vera.Chat.self
         let ascolta = v.ascolta || stato.dettaturaAttiva
         if ascolta || v.parla || v.prepara || stato.conversazioneAVoce {
-            let scritta = v.prepara ? "Vera · si prepara" : (ascolta ? "Vera · ti ascolta" : (v.parla ? "Vera · ti risponde" : "Vera · a voce"))
+            let scritta = v.prepara ? "Lucy · si prepara" : (ascolta ? "Lucy · ti ascolta" : (v.parla ? "Lucy · ti risponde" : "Lucy · a voce"))
             HStack(spacing: ch.spazioVoce) {
                 HStack(spacing: ch.spazioVoce) {
                     Circle()
@@ -825,13 +825,13 @@ extension CorpoAppVera {
                     Button { stato.fermaLetturaTrenta(); stato.voceVera.zitta() } label: { Label("Interrompi", systemImage: "speaker.slash") }
                         .buttonStyle(.apple)
                         .fixedSize()
-                        .help("Vera smette di parlare")
+                        .help("Lucy smette di parlare")
                 }
                 if stato.conversazioneAVoce {
                     Button { stato.fermaVoce() } label: { Label("Chiudi la voce", systemImage: "stop.fill") }
                         .buttonStyle(.apple)
                         .fixedSize()
-                        .help("Chiudi la conversazione a voce · oppure di' a Vera «basta così»")
+                        .help("Chiudi la conversazione a voce · oppure di' a Lucy «basta così»")
                 }
             }
         }
@@ -909,7 +909,7 @@ struct AzioniVera: View {
             SegmentatoPillola(selezione: modalita, voci: [(ModalitaVera.lavoro, "Lavoro"), (ModalitaVera.conversazione, "Conversazione")])
                 .disabled(fermo)
                 .opacity(fermo ? Tema.Apple.Vera.Campo.opacitaSpento : 1)
-                .help(stato.veraPortafoglio ? "Sul portafoglio Vera lavora sempre con le cifre di Lucy"
+                .help(stato.veraPortafoglio ? "Sul portafoglio Lucy lavora sempre con le cifre di Lucy"
                                            : "Lavoro: i numeri solo da Lucy · Conversazione: domande di ogni tipo")
             // «Le routine» (fase 4): apre la pagina delle routine
             PulsanteRoutineVera()
@@ -969,16 +969,16 @@ struct NuvolaInArrivo: View {
     var avanza: (() -> Void)? = nil
 
     private var stato: String {
-        if flusso.pensa { return "Vera ci sta pensando…" }
-        if portafoglio || flusso.modalita == .lavoro { return "Vera sta leggendo il dossier…" }
-        return "Vera sta scrivendo…"
+        if flusso.pensa { return "Lucy ci sta pensando…" }
+        if portafoglio || flusso.modalita == .lavoro { return "Lucy sta leggendo il dossier…" }
+        return "Lucy sta scrivendo…"
     }
 
     var body: some View {
         let b = Tema.Apple.Vera.Bolla.self
         let calcoli = !flusso.testo.isEmpty && (portafoglio || flusso.modalita == .lavoro)
         VStack(alignment: .leading, spacing: 0) {
-            Text(calcoli ? "Vera · Calcoli di Lucy" : "Vera")
+            Text(calcoli ? "Lucy · Calcoli di Lucy" : "Lucy")
                 .carattereApple(b.intestazione)
                 .foregroundColor(b.coloreIntestazione)
                 .lineLimit(1)
@@ -1116,7 +1116,7 @@ struct NuvolaVera: View {
         let b = Tema.Apple.Vera.Bolla.self
         let resto = !nuova || testoScritto || fermo
         return VStack(alignment: .leading, spacing: 0) {
-            Text(QuadroVera.ammessa(messaggio) ? "Vera · Calcoli di Lucy" : "Vera")
+            Text(QuadroVera.ammessa(messaggio) ? "Lucy · Calcoli di Lucy" : "Lucy")
                 .carattereApple(b.intestazione)
                 .foregroundColor(b.coloreIntestazione)
                 .lineLimit(1)
@@ -1315,7 +1315,7 @@ struct NuvolaVera: View {
                 }
             }
             // «Impara dalle correzioni»: 👍 e 👎 sotto le risposte scritte da Qwen
-            if messaggio.motore != StatoShell.motoreAzioni, messaggio.motore != MotoriVera.sintesi.nome, messaggio.motore != MotoriVera.nomeSintesiDiPrima, messaggio.titolo != "Vera non ha potuto rispondere" {
+            if messaggio.motore != StatoShell.motoreAzioni, messaggio.motore != MotoriVera.sintesi.nome, messaggio.motore != MotoriVera.nomeSintesiDiPrima, !TestiStatoVera.nonHaPotuto(messaggio.titolo) {
                 PolliciVera(messaggio: messaggio)
                     .padding(.top, b.spazioAzioni)
             }
