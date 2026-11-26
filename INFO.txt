@@ -1,0 +1,4 @@
+branch: main
+commit: 7382d0fed866cf2917e996f7047b93c3c9b85c57
+data: 2026-11-26T16:31:18Z
+ios: sì
