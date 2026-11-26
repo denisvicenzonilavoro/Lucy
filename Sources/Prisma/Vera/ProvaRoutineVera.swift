@@ -353,7 +353,7 @@ enum ProvaRoutineVera {
     private static func nuoveConQwen(_ controlla: (Bool, String) -> Void) {
         let oggi = oggiDemo
         let richiesta = "quando firmo archivia tutto e metti un controllo fra tre mesi"
-        let r = RoutineVera.leggi(#"{"titolo":"Dopo ogni firma","frase":"Vera, ho firmato","passi":[{"tipo":"archiviaContratto"},{"tipo":"cancellaCliente"},{"tipo":"fissaControllo"},{"tipo":"archiviaContratto"}]}"#,
+        let r = RoutineVera.leggi(#"{"titolo":"Dopo ogni firma","frase":"Lucy, ho firmato","passi":[{"tipo":"archiviaContratto"},{"tipo":"cancellaCliente"},{"tipo":"fissaControllo"},{"tipo":"archiviaContratto"}]}"#,
                                   richiesta: richiesta, oggi: oggi)
         controlla(r?.passi.map(\.tipo) == [.archiviaContratto, .fissaControllo] && r?.passi.last?.mesi == 3,
                   "Routine con Qwen: solo i passi del catalogo, senza doppioni; i mesi dalla frase")

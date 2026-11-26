@@ -484,7 +484,7 @@ extension StatoShell {
             && DateItaliane.cerca(richiestaScritturaStile, t) == nil
     }
     static let richiestaImparaStile = #"^(?:impara|reimpara|aggiorna|rileggi|ricalcola)\b.{0,40}\b(?:stile|modo di scrivere)\b"#
-    static let richiestaRiscriviStile = #"^\s*(?:(?:ehi|ok|senti|ciao|vera|ruby|eve|per favore)[,\s]+)*(?:mi\s+)?(?:riscrivi(?:lo|la|mi)?|scrivi(?:lo|la)?|rifai|sistema|metti)\b[^:\n]{0,80}?(?:nel mio stile|con il mio stile|come (?:lo |la )?(?:scrivo|scriverei|scriveresti) io|come (?:lo |la )?scriverei|come me)\b[^:\n]{0,60}:\s*"#
+    static let richiestaRiscriviStile = #"^\s*(?:(?:ehi|ok|senti|ciao|lucy|vera|ruby|eve|per favore)[,\s]+)*(?:mi\s+)?(?:riscrivi(?:lo|la|mi)?|scrivi(?:lo|la)?|rifai|sistema|metti)\b[^:\n]{0,80}?(?:nel mio stile|con il mio stile|come (?:lo |la )?(?:scrivo|scriverei|scriveresti) io|come (?:lo |la )?scriverei|come me)\b[^:\n]{0,60}:\s*"#
     static let prefissoDaOra = #"(?:da ora|d'ora in (?:poi|avanti)|da adesso|da oggi)(?: in poi)?[,:]?\s+"#
 
     /// Le richieste di «Scrive come te»: il profilo, imparare di nuovo, riscrivere un testo nello stile e cambiare una
@@ -652,7 +652,7 @@ extension StatoShell {
     /// Una richiesta di cambiare il profilo, già pronta per la scheda; nil se la frase non è per lo stile.
     func cambioStile(_ testo: String, chiave: String) -> PreparazioneAzione? {
         // Senza saluti e richiami davanti («Vera, da ora firma…»), con le maiuscole della frase (la firma le tiene)
-        let s = testo.replacingOccurrences(of: #"^\s*(?:(?:ehi|ok|senti|ciao|vera|ruby|eve|per favore|allora)[,\s]+)*"#, with: "",
+        let s = testo.replacingOccurrences(of: #"^\s*(?:(?:ehi|ok|senti|ciao|lucy|vera|ruby|eve|per favore|allora)[,\s]+)*"#, with: "",
                                            options: [.regularExpression, .caseInsensitive])
             .replacingOccurrences(of: "’", with: "'")
             .trimmingCharacters(in: .whitespacesAndNewlines)

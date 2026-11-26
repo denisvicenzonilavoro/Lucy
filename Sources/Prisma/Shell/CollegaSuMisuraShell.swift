@@ -418,7 +418,7 @@ extension StatoShell {
     // MARK: - Le frasi in chat
 
     /// «Vera, …» in testa la toglie già `InterpreteComandi.pulisci`: «Vera su misura» arriva come «su misura».
-    static let frasiSuMisura = #"^(?:apri |mostra(?:mi)? )?(?:(?:la )?vera )?su misura$|^(?:(?:ri)?addestra|allena) vera\b|\bprepara(?:mi)? il pacchetto(?: di addestramento)?\b|\bcom'e andato l'esame\b|\btorna alla vera di prima\b"#
+    static let frasiSuMisura = #"^(?:apri |mostra(?:mi)? )?(?:(?:la )?(?:lucy|vera) )?su misura$|^(?:(?:ri)?addestra|allena) (?:lucy|vera)\b|\bprepara(?:mi)? il pacchetto(?: di addestramento)?\b|\bcom'e andato l'esame\b|\btorna alla (?:lucy|vera) di prima\b"#
 
     /// «Vera su misura», «addestra Vera», «prepara il pacchetto di addestramento», «com'è andato l'esame?», «torna alla
     /// Vera di prima»: apre la pagina (sul Mac) e risponde con lo stato in una riga. Nessuna azione da sola.
@@ -433,7 +433,7 @@ extension StatoShell {
         } else {
             #if os(macOS)
             apriPaginaSuMisura()
-            risposta = statoSuMisuraInBreve + (t.contains("torna alla vera di prima") ? " Per tornare indietro usa il pulsante nella pagina." : "")
+            risposta = statoSuMisuraInBreve + (t.contains("torna alla vera di prima") || t.contains("torna alla lucy di prima") ? " Per tornare indietro usa il pulsante nella pagina." : "")
             #else
             risposta = "Lucy su misura si fa da Lucy sul Mac."
             #endif

@@ -227,7 +227,7 @@ extension StatoShell {
 
     /// «Rileggi: …» in chat (anche un testo scritto a mano): gli avvisi, la decisione resta tua.
     func chiediSecondaLettura(_ testo: String, chiave: String) -> Bool {
-        guard let r = testo.range(of: #"^\s*(?:(?:ehi|ok|senti|ciao|vera|ruby|eve|per favore)[,\s]+)*(?:mi )?(?:rileggi|ricontrolla|seconda lettura(?: di| su)?)(?: (?:questo|questa|il|la|lo))?(?: (?:testo|messaggio|mail|e-mail|bozza|proposta|lettera))?\s*:\s*"#,
+        guard let r = testo.range(of: #"^\s*(?:(?:ehi|ok|senti|ciao|lucy|vera|ruby|eve|per favore)[,\s]+)*(?:mi )?(?:rileggi|ricontrolla|seconda lettura(?: di| su)?)(?: (?:questo|questa|il|la|lo))?(?: (?:testo|messaggio|mail|e-mail|bozza|proposta|lettera))?\s*:\s*"#,
                                   options: [.regularExpression, .caseInsensitive]) else { return false }
         let daLeggere = String(testo[r.upperBound...]).trimmingCharacters(in: .whitespacesAndNewlines)
         guard daLeggere.count >= 10 else { return false }
