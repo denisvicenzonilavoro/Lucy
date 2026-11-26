@@ -1,11 +1,10 @@
 name: Build Prisma
 
-# Dal 20 novembre 2026 (scelta dell'utente) si lavora di nuovo su GitHub e nel cloud: la build e tutte le prove le fa
-# questo workflow su un Mac Apple Silicon (macos-26) a ogni push; sul Mac dell'utente si installa soltanto l'app
-# (Prisma.zip della release «ultima»). Una sola build per commit: il push sul branch basta anche per la pull request.
+# Dal 26 novembre 2026 (scelta dell'utente: «GitHub è troppo lento») build, prove e release si fanno sul Mac dell'utente
+# (Supporto/costruisci-mac.sh --prove e Supporto/pubblica-ultima.sh); GitHub tiene solo il codice. Questo workflow
+# non parte più a ogni push: si lancia a mano (Actions › Build Prisma › Run workflow) quando serve, per esempio per
+# Lucy.ipa di iPhone e iPad o per le istantanee di iPhone e iPad. Su main, lanciato a mano, rifà anche la release.
 on:
-  push:
-    branches: ['**', '!anteprime']
   workflow_dispatch:
     inputs:
       runner:
@@ -416,13 +415,17 @@ jobs:
           path: anteprime/
           retention-days: 7
 
+      # Il file per l'utente si chiama Lucy.zip con dentro Lucy.app (dal 26 novembre 2026, scelta dell'utente): cambia solo
+      # il nome della cartella dell'app; eseguibile Prisma e identificativo local.prisma restano (dati e Portachiavi uguali)
       - name: Crea zip
-        run: ditto -c -k --keepParent Prisma.app Prisma.zip
+        run: |
+          mkdir -p zip-lucy && ditto Prisma.app zip-lucy/Lucy.app
+          ditto -c -k --keepParent zip-lucy/Lucy.app Lucy.zip
 
       - uses: actions/upload-artifact@v6
         with:
           name: Prisma
-          path: Prisma.zip
+          path: Lucy.zip
           retention-days: 7
 
       # La tabella della prova della fluidità anche in fondo al log (il riepilogo della build non si legge dalle API):
@@ -746,13 +749,13 @@ jobs:
       - name: Assembla Prisma.ipa
         run: |
           bash Supporto/iOS/assembla.sh "$PROD" build/Payload/Prisma.app dispositivo
-          (cd build && ditto -c -k --sequesterRsrc --keepParent Payload Prisma.ipa)
-          ls -la build/Prisma.ipa
+          (cd build && ditto -c -k --sequesterRsrc --keepParent Payload Lucy.ipa)
+          ls -la build/Lucy.ipa
 
       - uses: actions/upload-artifact@v6
         with:
           name: Prisma-iOS
-          path: build/Prisma.ipa
+          path: build/Lucy.ipa
           retention-days: 30
 
   # Un solo push -f sul branch anteprime: le PNG del Mac dove sono sempre state, quelle di iOS in ios/.
@@ -804,9 +807,9 @@ jobs:
   # Il link fisso per scaricare Prisma: a ogni push su main con Mac e .ipa verdi, la release «ultima»
   # viene rifatta. Non aspetta il job ios (prove e istantanee, quasi 2 ore sui runner Intel): quelle prove
   # sono già passate sulla pull request prima dell'unione, e su main continuano per le anteprime.
-  # La release contiene Prisma.zip (Mac) e Prisma.ipa (iPhone e iPad). Link sempre uguali:
-  #   https://github.com/<repo>/releases/download/ultima/Prisma.zip
-  #   https://github.com/<repo>/releases/download/ultima/Prisma.ipa
+  # La release contiene Lucy.zip (Mac) e Lucy.ipa (iPhone e iPad). Link sempre uguali:
+  #   https://github.com/<repo>/releases/download/ultima/Lucy.zip
+  #   https://github.com/<repo>/releases/download/ultima/Lucy.ipa
   rilascio:
     needs: [build, ipa]
     if: github.ref == 'refs/heads/main'
@@ -832,12 +835,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           ls -la rilascio
-          test -f rilascio/Prisma.zip
-          test -f rilascio/Prisma.ipa
+          test -f rilascio/Lucy.zip
+          test -f rilascio/Lucy.ipa
           NOTE="Lucy (prima Prisma) al commit ${GITHUB_SHA::7} del $(date -u '+%d/%m/%Y %H:%M') UTC.
 
-          - Prisma.zip: Lucy per Mac con Apple Silicon (M1 e successivi). Il modo più semplice: bash Supporto/installa-ultima.sh, che la installa come Lucy.app; a mano si apre il zip e si trascina Prisma.app in Applicazioni (la prima volta clic destro → Apri).
-          - Prisma.ipa: Lucy per iPhone e iPad, da installare con AltStore o Sideloadly (ID Apple gratuito)."
+          - Lucy.zip: Lucy per Mac con Apple Silicon (M1 e successivi). Il modo più semplice: bash Supporto/installa-ultima.sh; a mano si apre lo zip e si trascina Lucy.app in Applicazioni (la prima volta clic destro → Apri).
+          - Lucy.ipa: Lucy per iPhone e iPad, da installare con AltStore o Sideloadly (ID Apple gratuito)."
           gh release delete ultima --yes --cleanup-tag 2>/dev/null || true
-          gh release create ultima rilascio/Prisma.zip rilascio/Prisma.ipa \
+          gh release create ultima rilascio/Lucy.zip rilascio/Lucy.ipa \
             --target "$GITHUB_SHA" --title "Lucy · ultima versione" --notes "$NOTE" --latest
