@@ -24,6 +24,12 @@ done
 
 echo "▸ Compilo (release, arm64, file per file)…"
 OPZIONI=(-c release --arch arm64 -Xswiftc -no-whole-module-optimization)
+# Il sistema di build di Swift, in release, cerca il file delle dipendenze della compilazione «tutto insieme»
+# (Prisma-primary.d), che la compilazione file per file non crea: senza, la build si ferma con «unable to open
+# dependencies file» anche con il codice giusto (26 novembre 2026, cartella nuova). Un file vuoto basta.
+OGGETTI=.build/out/Intermediates.noindex/Prisma.build/Release/Prisma-p.build/Objects-normal/arm64
+mkdir -p "$OGGETTI"
+[ -f "$OGGETTI/Prisma-primary.d" ] || touch "$OGGETTI/Prisma-primary.d"
 swift build "${OPZIONI[@]}"
 BIN_DIR="$(swift build "${OPZIONI[@]}" --show-bin-path)"
 
