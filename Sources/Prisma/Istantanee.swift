@@ -2004,7 +2004,10 @@ enum Istantanee {
 
     /// Scarta le immagini vuote (tutte dello stesso colore): vuol dire che il metodo non disegna.
     private static func pngVerificato(_ rep: NSBitmapImageRep) -> Data? {
-        let campioni = [(0.1, 0.1), (0.5, 0.5), (0.9, 0.2), (0.3, 0.8), (0.7, 0.95), (0.5, 0.02)]
+        // Una griglia di 16 × 16 punti: con pochi punti una schermata chiara con poco disegno (la tavola dei glifi della
+        // Sala su carta) poteva cadere tutta sul fondo e sembrare vuota
+        let passi = (0..<16).map { (Double($0) + 0.5) / 16 }
+        let campioni = passi.flatMap { x in passi.map { y in (x, y) } }
         let colori = campioni.compactMap { c in
             rep.colorAt(x: Int(Double(rep.pixelsWide) * c.0), y: Int(Double(rep.pixelsHigh) * c.1))?.usingColorSpace(.deviceRGB)
         }
