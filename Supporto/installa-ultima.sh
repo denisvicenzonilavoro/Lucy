@@ -1,6 +1,6 @@
 #!/bin/bash
-# Installa sul Mac l'ultima Lucy (prima Prisma) per Apple Silicon fatta da GitHub (release «ultima», build verde di main).
-# Dal 20 novembre 2026 (scelta dell'utente) build e prove si fanno solo su GitHub: sul Mac si installa e basta.
+# Installa sul Mac l'ultima Lucy (prima Prisma) per Apple Silicon dalla release «ultima» (dal 26 novembre 2026 la
+# pubblica il Mac con Supporto/pubblica-ultima.sh).
 # Dal 24 novembre 2026 l'app si chiama Lucy: si installa come /Applications/Lucy.app e la vecchia Prisma.app si toglie.
 # Dal 26 novembre 2026 la release contiene Lucy.zip con Lucy.app (prima Prisma.zip con Prisma.app, ancora accettati).
 # Dentro il pacchetto restano l'eseguibile Prisma e l'identificativo local.prisma (dati e Portachiavi non cambiano).

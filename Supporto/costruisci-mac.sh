@@ -1,6 +1,6 @@
 #!/bin/bash
 # Costruisce Lucy (pacchetto tecnico Prisma.app) sul Mac, solo per Apple Silicon. Dal 25 novembre 2026 è la via delle
-# prove veloci sul Mac dell'utente (CLAUDE.md › Regole di sviluppo); GitHub resta il riferimento per main e la release.
+# prove sul Mac dell'utente, e dal 26 novembre 2026 l'unica (CLAUDE.md › Regole di sviluppo): GitHub tiene solo il codice.
 # Si compila file per file (-no-whole-module-optimization) sugli 8 core: la prima volta circa 16 minuti, poi solo i file
 # cambiati, e se il comando viene fermato la volta dopo riparte da dove era arrivato.
 # --prove fa anche i controlli che stanno nel workflow di GitHub (Supporto/controlli-locali.sh).
