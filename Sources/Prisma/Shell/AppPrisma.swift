@@ -252,7 +252,7 @@ enum AppPrisma: String, CaseIterable, Identifiable, Codable {
         case .messaggi: return "Messaggi"
         case .mercato: return "Mercato"
         case .studio: return "Studio"
-        case .vera: return "Lucy"
+        case .vera: return "Vera"
         case .ricerca: return "Ricerca"
         case .impostazioni: return "Impostazioni"
         // Le quattro icone di «Luce» (Design/Icone/genera-icone.js, dal template della versione)
