@@ -1,10 +1,11 @@
 #if os(macOS)
 import SwiftUI
 import AppKit
+import ImageIO
 
 // Il video di presentazione di Lucy (27 novembre 2026, richiesta dell'utente). Dalla riga di comando, senza aprire Lucy:
 //   Prisma --video <file.mp4> [--riprese <cartella>]
-//       scrive <file.mp4> (1920 × 1080, 60 fps, H.264, muto, circa 80 s, 20 Mbit/s) e accanto <file>-telefono.mp4
+//       scrive <file.mp4> (1920 × 1080, 60 fps, H.264, muto, circa 80 s, 40 Mbit/s) e accanto <file>-telefono.mp4
 //       (stesso video, più leggero da mandare); le schermate sono istantanee vere con i clienti di prova
 //       (`Istantanee.genera`), fatte nella cartella `--riprese` (rifatte solo se mancano) o in una cartella temporanea;
 //   Prisma --video-fotogrammi <cartella> <t1,t2,…> [--riprese <cartella>]
@@ -32,8 +33,9 @@ enum VideoPresentazione {
 
     // MARK: - Le schermate
 
-    /// Le istantanee del video, fatte se mancano, caricate in memoria.
-    private static func schermate(_ riprese: URL?) throws -> [String: NSImage] {
+    /// Le istantanee del video, fatte se mancano, caricate in memoria e ritagliate: la finestra interna senza la barra di
+    /// Lucy (`TemaVideo.Misura.ritaglioFinestra`), tranne la scrivania e la sala, che sono tutto lo schermo.
+    private static func schermate(_ riprese: URL?) throws -> [String: CGImage] {
         let cartella = riprese ?? FileManager.default.temporaryDirectory
             .appendingPathComponent("lucy-video-riprese", isDirectory: true)
         let mancanti = ScenaVideo.istantanee.filter {
@@ -45,13 +47,25 @@ enum VideoPresentazione {
                 throw ScrittoreVideo.Errore(description: "istantanee non riuscite")
             }
         }
-        var esito: [String: NSImage] = [:]
+        var esito: [String: CGImage] = [:]
         for nome in ScenaVideo.istantanee {
             let url = cartella.appendingPathComponent("\(nome).png")
-            guard let immagine = NSImage(contentsOf: url) else {
+            guard let sorgente = CGImageSourceCreateWithURL(url as CFURL, nil),
+                  let immagine = CGImageSourceCreateImageAtIndex(sorgente, 0, nil) else {
                 throw ScrittoreVideo.Errore(description: "schermata \(nome).png non letta")
             }
-            esito[nome] = immagine
+            if ScenaVideo.intere.contains(nome) {
+                esito[nome] = immagine
+            } else {
+                // Le istantanee sono 1440 × 900 punti: il ritaglio si porta ai pixel dell'immagine
+                let k = CGFloat(immagine.width) / 1440
+                let r = TemaVideo.Misura.ritaglioFinestra
+                let pixel = CGRect(x: r.minX * k, y: r.minY * k, width: r.width * k, height: r.height * k).integral
+                guard let ritaglio = immagine.cropping(to: pixel) else {
+                    throw ScrittoreVideo.Errore(description: "schermata \(nome).png non ritagliata")
+                }
+                esito[nome] = ritaglio
+            }
         }
         return esito
     }
@@ -66,8 +80,8 @@ enum VideoPresentazione {
             let immagini = try schermate(riprese)
             try FileManager.default.createDirectory(at: url.deletingLastPathComponent(), withIntermediateDirectories: true)
             let leggero = url.deletingPathExtension().appendingPathExtension("telefono").appendingPathExtension("mp4")
-            let pieno = try ScrittoreVideo(url: url, bitrate: 20_000_000)
-            let telefono = try ScrittoreVideo(url: leggero, bitrate: 6_000_000)
+            let pieno = try ScrittoreVideo(url: url, bitrate: 40_000_000)
+            let telefono = try ScrittoreVideo(url: leggero, bitrate: 8_000_000)
             let inizio = Date()
             let tutti = copione.numeroFotogrammi
             print("▸ Disegno \(tutti) fotogrammi…")
@@ -131,7 +145,7 @@ enum VideoPresentazione {
 
     /// Il fotogramma dell'istante `t`, disegnato a scala 2 (3840 × 2160): lo scrittore lo riduce a 1920 × 1080 con
     /// l'interpolazione alta, così i movimenti lenti avanzano di frazioni di pixel senza scatti.
-    static func immagine(a t: Double, copione: CopioneVideo, schermate: [String: NSImage]) throws -> CGImage {
+    static func immagine(a t: Double, copione: CopioneVideo, schermate: [String: CGImage]) throws -> CGImage {
         let renderer = ImageRenderer(content: fotogramma(a: t, copione: copione, schermate: schermate))
         renderer.scale = 2
         var risultato: CGImage?
@@ -143,7 +157,7 @@ enum VideoPresentazione {
 
     /// Le scene che il copione chiede a `t`, una sull'altra: quella che esce sotto, intera, quella che entra sopra con la
     /// sua opacità (due strati a metà lascerebbero passare il fondo).
-    static func fotogramma(a t: Double, copione: CopioneVideo, schermate: [String: NSImage]) -> some View {
+    static func fotogramma(a t: Double, copione: CopioneVideo, schermate: [String: CGImage]) -> some View {
         let scene = copione.scena(a: t)
         return ZStack {
             Color.black

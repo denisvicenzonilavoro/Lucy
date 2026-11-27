@@ -5,7 +5,7 @@ import CoreVideo
 
 /// Scrive un MP4 H.264 (profilo alto, 60 fps, 1920 × 1080, colori BT.709) fotogramma per fotogramma, da immagini già
 /// pronte (come quello di Lucy Exchange). `aggiungi` per ogni fotogramma, in ordine, poi `chiudi()`. Il file esistente si
-/// sovrascrive. `bitrate`: 20 Mbit/s per il file pieno, meno per quello da mandare col telefono.
+/// sovrascrive. `bitrate`: 40 Mbit/s per il file pieno, meno per quello da mandare col telefono.
 final class ScrittoreVideo: @unchecked Sendable {
     static let larghezza = 1920
     static let altezza = 1080
@@ -36,7 +36,8 @@ final class ScrittoreVideo: @unchecked Sendable {
                 AVVideoAverageBitRateKey: bitrate,
                 AVVideoProfileLevelKey: AVVideoProfileLevelH264HighAutoLevel,
                 AVVideoExpectedSourceFrameRateKey: Self.fps,
-                AVVideoMaxKeyFrameIntervalKey: Self.fps,
+                // Un fotogramma chiave ogni 2 s (come Lucy Exchange): niente salto di qualità a ogni secondo
+                AVVideoMaxKeyFrameIntervalKey: Self.fps * 2,
                 AVVideoAllowFrameReorderingKey: false,
             ] as [String: Any],
         ]
