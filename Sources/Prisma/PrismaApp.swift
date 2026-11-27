@@ -70,6 +70,10 @@ struct PrismaApp: App {
             let cartella = i + 1 < argomenti.count && !argomenti[i + 1].hasPrefix("--") ? URL(fileURLWithPath: argomenti[i + 1], isDirectory: true) : nil
             exit(ProvaFilm.esegui(cartella: cartella))
         }
+        // Il video di presentazione (27 novembre 2026): --video <file.mp4> o --video-fotogrammi <cartella> <t1,t2,…>
+        if let codice = VideoPresentazione.daRigaDiComando(argomenti) {
+            exit(codice)
+        }
         if let i = argomenti.firstIndex(of: "--prova-file-cliente"), i + 1 < argomenti.count {
             // Il Prisma del cliente («Luce» giro 15): il file di prova per il lettore (Node) e le pagine del PDF
             exit(ProvaFileCliente.esegui(cartella: URL(fileURLWithPath: argomenti[i + 1], isDirectory: true)))

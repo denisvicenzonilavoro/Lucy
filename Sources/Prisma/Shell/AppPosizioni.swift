@@ -583,13 +583,29 @@ struct AppPosizioni: View {
     static func ripartizione(_ r: RiepilogoPosizioni, areaScelta: AreaPosizione? = nil,
                              scegli: ((AreaPosizione) -> Void)? = nil) -> some View {
         let aree = AreaPosizione.allCases.filter { !$0.passivo && (r.perArea[$0] ?? 0) > 0 }
-        return HStack(alignment: .center, spacing: 22) {
-            GraficoAnello(
-                fette: aree.map { .init(id: $0.rawValue, valore: r.perArea[$0] ?? 0, colore: Colori.Analisi.area($0)) },
-                etichettaCentro: "Attività",
-                valoreCentro: Formati.euroBreve(r.attivita)
-            )
-            VStack(spacing: 0) {
+        let anello = GraficoAnello(
+            fette: aree.map { .init(id: $0.rawValue, valore: r.perArea[$0] ?? 0, colore: Colori.Analisi.area($0)) },
+            etichettaCentro: "Attività",
+            valoreCentro: Formati.euroBreve(r.attivita)
+        )
+        let legenda = legendaRipartizione(r, aree: aree, areaScelta: areaScelta, scegli: scegli)
+        // Accanto all'anello se c'è posto; nella colonna stretta del quadro (392 punti) la legenda va sotto, intera:
+        // prima i nomi delle aree si riducevano a «In…», «Ris…»
+        return ViewThatFits(in: .horizontal) {
+            HStack(alignment: .center, spacing: 22) {
+                anello
+                legenda
+            }
+            VStack(alignment: .center, spacing: 14) {
+                anello
+                legenda.frame(maxWidth: .infinity)
+            }
+        }
+    }
+
+    private static func legendaRipartizione(_ r: RiepilogoPosizioni, aree: [AreaPosizione], areaScelta: AreaPosizione?,
+                                            scegli: ((AreaPosizione) -> Void)?) -> some View {
+        VStack(spacing: 0) {
                 if aree.isEmpty {
                     Text("Nessuna posizione in essere.").font(Tipo.kpiNota).foregroundColor(Colori.Analisi.kpiNota)
                 }
@@ -625,7 +641,6 @@ struct AppPosizioni: View {
                     }
                     .padding(.vertical, 6)
                 }
-            }
         }
     }
 

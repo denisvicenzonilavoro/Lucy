@@ -123,8 +123,9 @@ extension Tema.Apple {
             static let sottoTitolo: CGFloat = 14
             /// Fra i gruppi di righe (il template ha un solo gruppo per sezione).
             static let spazioGruppi: CGFloat = 22
-            /// Colonna leggibile (i rendimenti di confronto prendono tutta la larghezza).
-            static let larghezzaMassima: CGFloat = 760
+            /// Tutta la larghezza della finestra (richiesta dell'utente del 25 novembre 2026: «Impostazioni non a tutta
+            /// larghezza»; prima una colonna di 760 punti lasciava vuota la metà destra).
+            static let larghezzaMassima: CGFloat = .infinity
             /// La pagina scorre: un filo d'aria a destra per non toccare il bordo e in fondo sopra il dock.
             static let margine = EdgeInsets(top: 0, leading: 0, bottom: 24, trailing: 6)
         }

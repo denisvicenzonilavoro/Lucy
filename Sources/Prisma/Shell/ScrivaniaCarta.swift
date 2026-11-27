@@ -30,7 +30,7 @@ struct ScrivaniaCarta: View {
             HStack(alignment: .top, spacing: M.traColonne) {
                 ColonnaSinistraCarta(apriFoglio: { foglioAperto = true })
                     .frame(width: sinistra, alignment: .topLeading)
-                ColonnaDestraCarta()
+                ColonnaDestraCarta(altezzaRiga: ColonnaDestraCarta.altezzaRiga(perScrivania: geo.size.height))
                     .frame(maxWidth: .infinity, alignment: .topLeading)
             }
             .padding(.horizontal, M.lati)
@@ -53,6 +53,7 @@ struct ScrivaniaCarta: View {
 
 private struct ColonnaSinistraCarta: View {
     @Environment(StatoShell.self) private var stato
+    @Environment(\.modoIstantanea) private var istantanea
     let apriFoglio: () -> Void
 
     var body: some View {
@@ -64,7 +65,8 @@ private struct ColonnaSinistraCarta: View {
                 .tracking(2.2)
                 .foregroundColor(TemaCarta.Colore.matitaD)
             TimelineView(.everyMinute) { contesto in
-                Text(Self.saluto(contesto.date))
+                // Nelle istantanee (e nel video) l'ora ferma della barra, così saluto e orologio dicono la stessa ora
+                Text(Self.saluto(OraIstantanee.mostrata(contesto.date, istantanea: istantanea)))
                     .fontCarta(74, weight: .medium, design: .serif)
                     .tracking(-2.4)
                     .foregroundColor(TemaCarta.Colore.inchiostroD)
@@ -87,15 +89,18 @@ private struct ColonnaSinistraCarta: View {
                     .onTapGesture(perform: apriFoglio)
                     .overlay(alignment: .topTrailing) {
                         Button(action: apriFoglio) {
+                            // Un bottone tondo a cavallo dell'angolo, fuori dalla testata del giornale (prima copriva la data)
                             Label("A tutta pagina", systemImage: "arrow.up.left.and.arrow.down.right")
                                 .labelStyle(.iconOnly)
-                                .fontCarta(12, weight: .medium)
+                                .fontCarta(11, weight: .semibold)
                                 .foregroundColor(TemaCarta.Colore.inchiostro2D)
-                                .padding(8)
+                                .frame(width: 28, height: 28)
+                                .background(Circle().fill(TemaCarta.Colore.schedaD))
+                                .overlay(Circle().stroke(TemaCarta.Colore.filoD, lineWidth: 1))
                         }
                         .buttonStyle(.plain)
                         .help("Apri il Foglio di Lucy a tutta pagina")
-                        .padding(6)
+                        .offset(x: 10, y: -10)
                     }
                     .padding(.top, 26)
             }
@@ -249,7 +254,14 @@ struct MercatiCarta: View {
 private struct ColonnaDestraCarta: View {
     @Environment(StatoShell.self) private var stato
     /// L'altezza della riga di «Oggi», del portafoglio e della mossa.
-    static let altezzaRiga: CGFloat = 400
+    var altezzaRiga: CGFloat = 400
+
+    /// La riga si allunga con la scrivania, così la colonna arriva poco sopra il dock invece di lasciare una fascia vuota
+    /// (27 novembre 2026): tolti il margine in alto, «Parla con Lucy» e il posto del dock; mai sotto 380 né sopra 560.
+    static func altezzaRiga(perScrivania h: CGFloat) -> CGFloat {
+        let alto = min(78, max(24, h * 0.07))
+        return min(560, max(380, h - alto - 150 - 18 - 170))
+    }
 
     var body: some View {
         // .wgrid del template: tre colonne, 18 tra una scheda e l'altra; «Oggi» occupa la prima colonna in altezza
@@ -268,7 +280,7 @@ private struct ColonnaDestraCarta: View {
             }
             // Una riga di altezza fissa: «Oggi» e la colonna accanto finiscono alla stessa linea, con tante o poche
             // cose da fare (quelle in più restano a un tocco, in Agenda)
-            .frame(height: Self.altezzaRiga)
+            .frame(height: altezzaRiga)
             ParlaConLucyCarta()
             // La lettera da Lucy AI sta nel Foglio: sulla scrivania finiva sotto il dock
         }
@@ -539,9 +551,12 @@ private struct OggiCarta: View {
 private struct ParlaConLucyCarta: View {
     @Environment(StatoShell.self) private var stato
 
-    static let domande = ["Chi ha liquidità ferma da più di sei mesi?",
-                          "Quali polizze scadono entro Natale?",
-                          "Prepara il riepilogo per il prossimo incontro"]
+    /// Le domande pronte: la scritta corta sulla pastiglia (le lunghe venivano tagliate) e la domanda intera per Lucy.
+    static let domande: [(scritta: String, domanda: String)] = [
+        ("Liquidità ferma?", "Chi ha liquidità ferma da più di sei mesi?"),
+        ("Polizze in scadenza", "Quali polizze scadono entro Natale?"),
+        ("Prepara il prossimo incontro", "Prepara il riepilogo per il prossimo incontro"),
+    ]
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -573,12 +588,12 @@ private struct ParlaConLucyCarta: View {
             .buttonStyle(.plain)
             .accessibilityLabel("Parla con Lucy")
             HStack(spacing: 8) {
-                ForEach(Self.domande, id: \.self) { d in
+                ForEach(Self.domande, id: \.domanda) { d in
                     Button {
                         stato.apri(.vera)
-                        stato.chiediVeraPortafoglio(d)
+                        stato.chiediVeraPortafoglio(d.domanda)
                     } label: {
-                        Text("«\(d)»")
+                        Text("«\(d.scritta)»")
                             .fontCarta(12.5, design: .serif, corsivo: true)
                             .foregroundColor(TemaCarta.Colore.inchiostro2D)
                             .lineLimit(1)
@@ -587,6 +602,7 @@ private struct ParlaConLucyCarta: View {
                             .background(Capsule().fill(TemaCarta.Colore.chipD))
                     }
                     .buttonStyle(.plain)
+                    .help(d.domanda)
                 }
             }
         }

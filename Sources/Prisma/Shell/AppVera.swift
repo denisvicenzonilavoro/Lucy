@@ -44,6 +44,8 @@ private struct CorpoAppVera: View {
     /// La finestra è sotto `Tema.Misura.VeraChat.sogliaContestoStretto` (Vera a metà schermo): la colonna si stringe.
     let stretta: Bool
     @Environment(StatoShell.self) var stato
+    /// Nelle istantanee (e nel video) l'ora ferma della barra anche nel saluto.
+    @Environment(\.modoIstantanea) var istantanea
     /// Il campo della domanda in primo piano: serve alla dettatura di macOS, che scrive dove c'è il cursore.
     @FocusState private var campoAttivo: Bool
     /// Da quale messaggio in poi le bolle sono nuove (arrivate con l'app aperta): entrano e si scrivono.
@@ -686,7 +688,7 @@ extension CorpoAppVera {
 
     private var fraseBenvenuto: String {
         let s = Tema.Apple.Scrivania.Saluto.self
-        let ora = Calendar.current.component(.hour, from: Date())
+        let ora = Calendar.current.component(.hour, from: OraIstantanee.mostrata(Date(), istantanea: istantanea))
         let parola = ora < s.oraPomeriggio ? "Buongiorno" : ora < s.oraSera ? "Buon pomeriggio" : "Buonasera"
         let oggi = stato.appuntamentiDiOggi
         let conClienti = oggi.filter { stato.cliente($0.clienteId) != nil }.count
@@ -907,6 +909,8 @@ struct AzioniVera: View {
         let fermo = stato.veraPortafoglio || stato.veraInCorso
         return HStack(spacing: Tema.Apple.Vera.Testata.spazio) {
             SegmentatoPillola(selezione: modalita, voci: [(ModalitaVera.lavoro, "Lavoro"), (ModalitaVera.conversazione, "Conversazione")])
+                // Sempre intero: nella testata stretta si schiacciava fino a perdere le scritte (una pillola vuota)
+                .fixedSize()
                 .disabled(fermo)
                 .opacity(fermo ? Tema.Apple.Vera.Campo.opacitaSpento : 1)
                 .help(stato.veraPortafoglio ? "Sul portafoglio Lucy lavora sempre con le cifre di Lucy"

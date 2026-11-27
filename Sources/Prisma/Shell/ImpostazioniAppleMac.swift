@@ -100,6 +100,14 @@ extension AppImpostazioni {
                     #endif
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 18)
+            }
+            // L'elenco che continua sotto il piede sfuma invece di finire con una voce tagliata a metà
+            .mask {
+                VStack(spacing: 0) {
+                    Color.black
+                    LinearGradient(colors: [.black, .clear], startPoint: .top, endPoint: .bottom).frame(height: 28)
+                }
             }
             piedeLateraleApple
                 .padding(.top, l.sopraPiede)

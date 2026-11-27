@@ -125,7 +125,7 @@ extension Tema.Apple.Clienti {
             static let sottoRiga: CGFloat = 3
             static let testo = Tema.Apple.Carattere(dimensione: 12.5, peso: .regular, interlinea: 1.35)
             static let coloreTesto = Tema.Apple.Colore.inchiostro2
-            static let righeTesto = 2
+            static let righeTesto = 3
 
             /// La riga «Dati per l'analisi» in fondo (`#datiC`): filo sopra, 12 sopra e sotto il filo, spazio 12,
             /// barra larga al più 200, percentuale 13,5 bold che si conta.

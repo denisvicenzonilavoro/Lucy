@@ -87,7 +87,10 @@ struct TestiAnnoInsieme {
         c.append(Cifra(etichetta: "Messi da parte", valore: CifreDoc.euro(a.versamenti), nota: nota))
         if let o = a.obiettivoPrincipale {
             c.append(Cifra(etichetta: o.obiettivo.titolo, valore: Self.quota(o.quotaFine),
-                           nota: "era al \(Self.quota(o.quotaInizio))", tono: o.avvicinato ? .positivo : .neutro))
+                           // «era al 40%» sotto un 40% non dice nulla: con la quota ferma, «come a gennaio»
+                           nota: Self.quota(o.quotaInizio) == Self.quota(o.quotaFine) ? "come a gennaio"
+                                 : "era al \(Self.quota(o.quotaInizio))",
+                           tono: o.avvicinato ? .positivo : .neutro))
         } else {
             let n = a.coperture.count
             c.append(Cifra(etichetta: "Protezione", valore: n == 1 ? "1 copertura" : "\(n) coperture",
