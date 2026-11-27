@@ -211,6 +211,8 @@ private struct FinestraInMoto: View {
     let finestra: FinestraVideo
     let t: Double
     let durata: Double
+    /// La pagina scende dentro la finestra (in «Chiedi a Lucy» resta ferma: domanda e risposta insieme).
+    var scorre = true
 
     var body: some View {
         let entra = C.p(t, 0.05, 1.35, C.posa)
@@ -218,7 +220,7 @@ private struct FinestraInMoto: View {
         // La finestra resta sotto il titolo; dentro, la pagina scende fin dove la finestra esce dal fondo del video
         let corsa = max(0, M.cimaFinestra + alta - H)
         var f = finestra
-        f.scorrimento = C.da(0, corsa, C.p(t, 1.5, durata))
+        f.scorrimento = scorre ? C.da(0, corsa, C.p(t, 1.5, durata)) : 0
         return f
             .scaleEffect(C.da(0.94, 1, entra), anchor: .top)
             .spostato(y: C.da(70, 0, entra))
@@ -395,7 +397,7 @@ private struct ScenaLucy: View {
         let risposta = CopioneVideo.rispostaLucy
         ZStack {
             FondoVideo(scuro: false)
-            FinestraInMoto(finestra: finestraAPassi(.lucy, t: t, schermate: schermate), t: t, durata: durata)
+            FinestraInMoto(finestra: finestraAPassi(.lucy, t: t, schermate: schermate), t: t, durata: durata, scorre: false)
             campo(q)
             if t < risposta + TitoloVideo.durataUscita {
                 TitoloVideo(righe: TestiVideo.titolo(.lucy) ?? [], tempo: t, scuro: false, uscita: risposta)
