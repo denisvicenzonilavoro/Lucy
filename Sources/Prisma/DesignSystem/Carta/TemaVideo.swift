@@ -52,6 +52,8 @@ enum TemaVideo {
         static let marchioChiusura: CGFloat = 128
         /// La finestra interna dentro un'istantanea di 1440 × 900 punti (senza la barra di Lucy e i bordi).
         static let ritaglioFinestra = CGRect(x: 10, y: 43, width: 1420, height: 846)
+        /// La testata della finestra interna (titolo e pulsanti), che resta ferma mentre la pagina scorre: in punti.
+        static let testataFinestra: CGFloat = 54
     }
 
     enum Carattere {

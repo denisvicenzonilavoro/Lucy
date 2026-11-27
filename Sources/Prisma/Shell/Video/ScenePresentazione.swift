@@ -136,6 +136,10 @@ private struct FinestraVideo: View {
     let immagine: CGImage?
     var cambio: CambioPagina? = nil
     let scura: Bool
+    /// Quanto la pagina è scesa (in pixel del video): scorre sotto la testata, che resta ferma.
+    var scorrimento: CGFloat = 0
+    /// La testata ferma della finestra, in punti dell'istantanea (zero per le istantanee intere).
+    var testata: CGFloat = M.testataFinestra
 
     static func altezza(_ immagine: CGImage?) -> CGFloat {
         guard let immagine, immagine.width > 0 else { return M.larghezzaFinestra * 10 / 16 }
@@ -146,13 +150,14 @@ private struct FinestraVideo: View {
         let w = M.larghezzaFinestra, h = Self.altezza(immagine)
         let forma = RoundedRectangle(cornerRadius: M.raggioFinestra, style: .continuous)
         ZStack(alignment: .top) {
-            pagina(immagine)
+            pagina(immagine).spostato(y: -scorrimento)
             if let cambio, cambio.avanti > 0 {
                 if cambio.tendina {
                     // Il bordo sfumato, alto 70 punti, scende dalla cima fino a scoprire tutta la pagina nuova
                     let bordo: CGFloat = 70
                     let fondo = CGFloat(cambio.avanti) * (h + bordo)
                     pagina(cambio.immagine)
+                        .spostato(y: -scorrimento)
                         .mask(alignment: .top) {
                             VStack(spacing: 0) {
                                 Rectangle().frame(height: max(0, fondo - bordo))
@@ -162,8 +167,13 @@ private struct FinestraVideo: View {
                             .frame(width: w, height: h, alignment: .top)
                         }
                 } else {
-                    pagina(cambio.immagine).opacity(cambio.avanti)
+                    pagina(cambio.immagine).spostato(y: -scorrimento).opacity(cambio.avanti)
                 }
+            }
+            // La testata della finestra resta ferma mentre la pagina scorre sotto (anche quella della pagina che arriva)
+            if testata > 0 {
+                fascia(immagine)
+                if let cambio, cambio.avanti > 0 { fascia(cambio.immagine).opacity(cambio.avanti) }
             }
         }
         .frame(width: w, height: h, alignment: .top)
@@ -173,6 +183,16 @@ private struct FinestraVideo: View {
             forma.fill(Color.black)
                 .shadow(color: scura ? TemaVideo.Colore.ombraNotte : TemaVideo.Colore.ombraCarta, radius: 60, y: 34)
         )
+    }
+
+    /// La testata ferma: la striscia alta `testata` punti in cima all'istantanea.
+    @ViewBuilder private func fascia(_ immagine: CGImage?) -> some View {
+        let k = CGFloat(immagine?.width ?? 1) / M.ritaglioFinestra.width
+        if let immagine, let striscia = immagine.cropping(to: CGRect(x: 0, y: 0, width: CGFloat(immagine.width),
+                                                                     height: (testata * k).rounded())) {
+            Image(decorative: striscia, scale: 1).resizable().interpolation(.high)
+                .frame(width: M.larghezzaFinestra, height: M.larghezzaFinestra * CGFloat(striscia.height) / CGFloat(striscia.width))
+        }
     }
 
     @ViewBuilder private func pagina(_ immagine: CGImage?) -> some View {
@@ -195,14 +215,15 @@ private struct FinestraInMoto: View {
     var body: some View {
         let entra = C.p(t, 0.05, 1.35, C.posa)
         let alta = FinestraVideo.altezza(finestra.immagine)
-        // Quanto la finestra può salire: la parte che esce in basso, al massimo 170 punti
-        let corsa = min(170, max(0, M.cimaFinestra + alta - H + 40))
-        finestra
+        // La finestra resta sotto il titolo; dentro, la pagina scende fin dove la finestra esce dal fondo del video
+        let corsa = max(0, M.cimaFinestra + alta - H)
+        var f = finestra
+        f.scorrimento = C.da(0, corsa, C.p(t, 1.5, durata))
+        return f
             .scaleEffect(C.da(0.94, 1, entra), anchor: .top)
             .spostato(y: C.da(70, 0, entra))
             .opacity(C.p(t, 0.05, 0.85))
             .scaleEffect(C.da(1, 1.03, C.p(t, 0, durata, { $0 })), anchor: .top)
-            .spostato(y: -C.da(0, corsa, C.p(t, 1.5, durata)))
             .frame(width: W, height: H, alignment: .top)
             .spostato(y: M.cimaFinestra)
     }
@@ -219,9 +240,12 @@ private struct FinestraInMoto: View {
         return FinestraVideo(immagine: schermate[passi[i - 1].istantanea],
                              cambio: schermate[passi[i].istantanea].map { CambioPagina(immagine: $0, avanti: p,
                                                                                         tendina: passi[i].tendina) },
-                             scura: scena.scura)
+                             scura: scena.scura,
+                             testata: ScenaVideo.intere.contains(passi[i].istantanea) ? 0 : M.testataFinestra)
     }
-    return FinestraVideo(immagine: schermate[passi.isEmpty ? "" : passi[i].istantanea], scura: scena.scura)
+    let nome = passi.isEmpty ? "" : passi[i].istantanea
+    return FinestraVideo(immagine: schermate[nome], scura: scena.scura,
+                         testata: ScenaVideo.intere.contains(nome) ? 0 : M.testataFinestra)
 }
 
 // MARK: - Il marchio che si compone
@@ -462,9 +486,9 @@ private struct ScenaProspetti: View {
                 TitoloVideo(righe: TestiVideo.titolo(.prospetti) ?? [], tempo: t, scuro: false, uscita: s.inizio - 0.1)
             }
             if q > 0 {
-                FinestraVideo(immagine: schermate["461-prospetti-sala"], scura: true)
+                FinestraVideo(immagine: schermate["461-prospetti-sala"], scura: true,
+                              scorrimento: C.da(0, 150, C.p(t, s.fine + 0.4, durata)), testata: 0)
                     .scaleEffect(C.da(1, 1.03, C.p(t, s.inizio, durata, { $0 })), anchor: .top)
-                    .spostato(y: -C.da(0, 120, C.p(t, s.fine + 0.4, durata)))
                     .frame(width: W, height: H, alignment: .top)
                     .spostato(x: C.da(W, 0, q), y: M.cimaFinestra)
                 TitoloVideo(righe: TestiVideo.secondoTitolo(.prospetti) ?? [], tempo: t, scuro: true,
