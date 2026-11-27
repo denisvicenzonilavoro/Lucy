@@ -32,13 +32,13 @@ enum ScenaVideo: String, CaseIterable, Sendable {
     /// Il movimento di camera sulla schermata: il punto da avvicinare (0…1 nella schermata) e di quanto.
     var camera: (x: Double, y: Double, zoom: Double) {
         switch self {
-        case .scrivania: return (0.26, 0.47, 1.32)
+        case .scrivania: return (0.34, 0.47, 1.30)
         case .clienti: return (0.58, 0.40, 1.42)
         case .posizioni: return (0.42, 0.52, 1.28)
         case .simulatore: return (0.71, 0.52, 1.38)
         case .prospetti: return (0.60, 0.50, 1.30)
         case .lucy: return (0.48, 0.40, 1.34)
-        case .agenda: return (0.78, 0.40, 1.30)
+        case .agenda: return (0.70, 0.40, 1.28)
         case .sera, .apertura, .manifesto, .chiusura: return (0.5, 0.5, 1)
         }
     }

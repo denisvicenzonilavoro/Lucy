@@ -293,7 +293,7 @@ private struct SchermataVideo: View {
                             y: centroBase.y + (CGFloat(cam.y) - 0.5) * alta)
         let verso = CGPoint(x: W / 2 - fuoco.x, y: H * 0.52 - fuoco.y)
         // Il titolo si ritira mentre la camera entra
-        let ritiro = C.morbida(C.tratto(z, 0.08, 0.45))
+        let ritiro = C.morbida(C.tratto(z, 0.02, 0.30))
         ZStack {
             FondoCartaVideo()
             if let titolo = TestiVideo.titolo(scena) {
