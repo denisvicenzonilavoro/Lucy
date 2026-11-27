@@ -250,79 +250,17 @@ private struct FinestraInMoto: View {
                          testata: ScenaVideo.intere.contains(nome) ? 0 : M.testataFinestra)
 }
 
-// MARK: - Il marchio che si compone
-
-/// Il simbolo (asta, base, disco) con i tre avanzamenti 0…1: l'asta cresce dal basso, la base verso destra, il disco
-/// si posa.
-private struct SimboloVideo: View {
-    let asta: Double
-    let base: Double
-    let disco: Double
-
-    var body: some View {
-        GeometryReader { geo in
-            let s = min(geo.size.width, geo.size.height)
-            ZStack {
-                ElleLucy().fill(TemaVideo.Colore.inchiostro)
-                    .mask {
-                        ZStack(alignment: .bottomLeading) {
-                            Color.clear
-                            Rectangle().frame(width: s * 0.5, height: s * asta)
-                            Rectangle().frame(width: s * base, height: s * 0.5)
-                        }
-                    }
-                DiscoLucy().fill(TemaVideo.Colore.oroMarchio)
-                    .scaleEffect(0.35 + 0.65 * disco)
-                    .opacity(disco)
-            }
-            .frame(width: s, height: s)
-        }
-        .aspectRatio(1, contentMode: .fit)
-    }
-}
-
-/// Il marchio completo «Lucy by LOGIC» che si scrive: il simbolo si disegna (0–1,6 s del suo tempo), poi «Lucy»
-/// (1,4–2,4 s) e la firma (2,3–3,2 s); il cursore d'oro resta acceso.
-private struct MarchioVideo: View {
-    /// Il tempo del disegno.
-    let tempo: Double
-    /// L'altezza del simbolo.
-    let altezza: CGFloat
-
-    var body: some View {
-        let vb = CGRect(x: 30, y: 82, width: 717, height: 302.72)
-        let scala = altezza / 160
-        let nome = C.p(tempo, 1.4, 2.4, C.posa)
-        let firma = C.p(tempo, 2.3, 3.2, C.posa)
-        ZStack(alignment: .topLeading) {
-            TracciatoMarchio(dati: TracciatiMarchio.nome, viewBox: vb).fill(TemaVideo.Colore.inchiostro)
-                .opacity(nome)
-                .spostato(x: C.da(16, 0, nome))
-            Group {
-                TracciatoMarchio(dati: TracciatiMarchio.by, viewBox: vb).fill(TemaVideo.Colore.by)
-                TracciatoMarchio(dati: TracciatiMarchio.logicPiccolo, viewBox: vb).fill(TemaVideo.Colore.inchiostro)
-                RettangoloMarchio(riquadro: TracciatiMarchio.cursorePiccolo, viewBox: vb).fill(TemaVideo.Colore.oroMarchio)
-            }
-            .opacity(firma)
-            .spostato(y: C.da(10, 0, firma))
-            SimboloVideo(asta: C.p(tempo, 0.1, 0.75), base: C.p(tempo, 0.65, 1.2), disco: C.p(tempo, 1.1, 1.7, C.posa))
-                .frame(width: 160 * scala, height: 160 * scala)
-                .position(x: (120 - vb.minX) * scala, y: (172 - vb.minY) * scala)
-        }
-        .frame(width: vb.width * scala, height: vb.height * scala)
-    }
-}
-
 // MARK: - 1. Apertura
 
-/// Carta chiara: il marchio completo si scrive e resta, con un leggero avvicinamento per tutta la scena.
+/// Carta chiara: il logo si disegna (guide, L, compasso, disco, nome e firma) e resta, con un leggero avvicinamento.
 private struct ScenaApertura: View {
     let t: Double
 
     var body: some View {
         ZStack {
             FondoVideo(scuro: false)
-            MarchioVideo(tempo: t - 0.3, altezza: M.marchioApertura)
+            // Il logo si disegna come in tutti i video di Lucy (DisegnoLogoVideo.swift)
+            DisegnoLogoVideo(tempo: t - 0.2, larghezza: M.disegnoApertura)
                 .scaleEffect(C.da(1, 1.05, C.p(t, 0, 6.6, { $0 })))
         }
     }
@@ -528,7 +466,7 @@ private struct ScenaChiusura: View {
             .spostato(y: C.da(0, -190, sale))
             .scaleEffect(C.da(1, 1.03, C.p(t, 0, Self.marchio, { $0 })))
             if t >= Self.marchio {
-                MarchioVideo(tempo: t - Self.marchio, altezza: M.marchioChiusura)
+                DisegnoLogoVideo(tempo: t - Self.marchio, larghezza: M.disegnoChiusura, cursoreAcceso: true)
                     .scaleEffect(C.da(0.97, 1.0, C.p(t, Self.marchio, 9.3, C.posa)))
                     .offset(y: 150)
             }

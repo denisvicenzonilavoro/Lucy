@@ -47,11 +47,17 @@ enum TemaVideo {
         /// Il corpo delle righe grandi del perché e della chiusura.
         static let corpoGrande: CGFloat = 92
         static let corpoChiusura: CGFloat = 88
-        /// Altezza del simbolo nel marchio dell'apertura e della chiusura.
-        static let marchioApertura: CGFloat = 190
-        static let marchioChiusura: CGFloat = 128
         /// La finestra interna dentro un'istantanea di 1440 × 900 punti (senza la barra di Lucy e i bordi).
         static let ritaglioFinestra = CGRect(x: 10, y: 43, width: 1420, height: 846)
+        /// Il logo che si disegna (DisegnoLogoVideo), in unità del logo SVG come in Lucy Exchange: guide e braccio del
+        /// compasso 1,1, contorno della L e cerchio 2,2, perno di raggio 2,6; 210 unità sopra e sotto il riquadro, dove
+        /// passano le guide e il simbolo grande. Larghezza del marchio nell'apertura e nella chiusura.
+        static let trattoGuide: CGFloat = 1.1
+        static let trattoElle: CGFloat = 2.2
+        static let perno: CGFloat = 2.6
+        static let margineDisegno: CGFloat = 210
+        static let disegnoApertura: CGFloat = 980
+        static let disegnoChiusura: CGFloat = 640
         /// La testata della finestra interna (titolo e pulsanti), che resta ferma mentre la pagina scorre: in punti.
         static let testataFinestra: CGFloat = 54
     }
